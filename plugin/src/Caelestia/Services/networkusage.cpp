@@ -1,12 +1,15 @@
 #include "networkusage.hpp"
 
+#include <qbytearray.h>
 #include <qbytearrayview.h>
 #include <qfile.h>
+#include <qhash.h>
 #include <qtypes.h>
 
 #include <array>
 #include <charconv>
 #include <system_error>
+#include <utility>
 
 namespace caelestia::services {
 
@@ -48,17 +51,14 @@ CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
 }
 
-void NetworkUsage::tick() {
+bool NetworkUsage::readCounters(QHash<QByteArray, std::pair<quint64, quint64>>& counters) {
     QFile f(u"/proc/net/dev"_s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        return;
+        return false;
     }
     // Skip headers
     f.readLine();
     f.readLine();
-
-    quint64 totalRx = 0;
-    quint64 totalTx = 0;
 
     while (!f.atEnd()) {
         const QByteArray line = f.readLine();
@@ -92,22 +92,43 @@ void NetworkUsage::tick() {
         if (!valid)
             continue;
 
-        totalRx += static_cast<quint64>(fields[0]);
-        totalTx += static_cast<quint64>(fields[8]);
+        counters.insert(iface, { static_cast<quint64>(fields[0]), static_cast<quint64>(fields[8]) });
     }
     f.close();
 
+    return true;
+}
+
+void NetworkUsage::tick() {
+    QHash<QByteArray, std::pair<quint64, quint64>> current;
+    if (!readCounters(current)) {
+        return;
+    }
+
     if (!m_initialized) {
-        m_prevRx = totalRx;
-        m_prevTx = totalTx;
+        m_prev = current;
         m_timer.start();
         m_initialized = true;
         return;
     }
 
     const qreal elapsed = static_cast<qreal>(m_timer.restart()) / 1000.0;
-    const quint64 rxDelta = totalRx >= m_prevRx ? totalRx - m_prevRx : 0;
-    const quint64 txDelta = totalTx >= m_prevTx ? totalTx - m_prevTx : 0;
+
+    // Diff each interface separately so a NIC appearing or disappearing between ticks cannot spike the total
+    quint64 rxDelta = 0;
+    quint64 txDelta = 0;
+    for (auto it = current.cbegin(); it != current.cend(); ++it) {
+        const auto prev = m_prev.constFind(it.key());
+        if (prev == m_prev.cend()) {
+            continue;
+        }
+        if (it.value().first >= prev.value().first) {
+            rxDelta += it.value().first - prev.value().first;
+        }
+        if (it.value().second >= prev.value().second) {
+            txDelta += it.value().second - prev.value().second;
+        }
+    }
 
     m_downloadTotal += static_cast<qreal>(rxDelta);
     m_uploadTotal += static_cast<qreal>(txDelta);
@@ -121,8 +142,7 @@ void NetworkUsage::tick() {
         m_uploadBuffer->push(m_uploadSpeed);
     }
 
-    m_prevRx = totalRx;
-    m_prevTx = totalTx;
+    m_prev = current;
 
     emit changed();
 }
