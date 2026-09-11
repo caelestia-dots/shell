@@ -5,6 +5,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.I18n
+import Caelestia.Config
+import Caelestia.Services
 
 Singleton {
     id: root
@@ -35,6 +37,15 @@ Singleton {
     property string ethernetSpeed: ""
     readonly property list<EthernetDevice> ethernetDevices: []
     readonly property EthernetDevice activeEthernet: ethernetDevices.find(d => d.connected) ?? null
+    // Whether traffic is actually leaving over a wired link, which isn't the
+    // same question as whether a cable is plugged in - with both a cable and
+    // wifi up, either can be carrying it. NetworkManager already tracks which
+    // connection is primary, so this follows that rather than guessing.
+    //
+    // Falls back to activeEthernet until a full snapshot has been read, so the
+    // icon doesn't flicker through a wrong state on startup or if
+    // NetworkManager isn't reachable.
+    readonly property bool onEthernet: NetworkRoute.ready ? NetworkRoute.primaryTransport === NetworkTransport.Ethernet : !!activeEthernet
     // True when at least one wired device has a carrier (cable plugged in).
     // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
     // anything other than that as a usable connection.
