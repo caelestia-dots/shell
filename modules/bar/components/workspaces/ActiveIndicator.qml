@@ -14,6 +14,7 @@ StyledRect {
     required property Item mask
     required property bool fullscreen
     required property bool layoutTransitionRunning
+    required property var workspaceIndex
 
     property int currentWsId: -1
     readonly property int currentWsIdx: currentWsId < 0 ? -1 : workspaceIndex(currentWsId)
@@ -38,15 +39,6 @@ StyledRect {
     readonly property bool switchAnimating: leadingAnim.running || trailingAnim.running || currentSizeAnim.running || offsetAnim.running || sizeAnim.running
     readonly property bool switchSettled: !switchAnimating && !layoutTransitionRunning
     readonly property bool geometryAnimationEnabled: ready && (!layoutTransitionRunning || workspaceSwitchRunning)
-
-    function workspaceIndex(id: int): int {
-        let index = id - 1;
-
-        while (index < 0)
-            index += Config.bar.workspaces.shown;
-
-        return index % Config.bar.workspaces.shown;
-    }
 
     function workspaceOffset(index: int): real {
         if (index < 0 || index >= workspaces.count)

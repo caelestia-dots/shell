@@ -37,6 +37,13 @@ StyledClippingRect {
 
     property real blur: onSpecial ? 1 : 0
 
+    function workspaceIndex(id: int): int {
+        let index = id - 1;
+        while (index < 0)
+            index += Config.bar.workspaces.shown;
+        return index % Config.bar.workspaces.shown;
+    }
+
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: layout.implicitHeight + Tokens.padding.small
 
@@ -68,6 +75,7 @@ StyledClippingRect {
                 occupied: root.occupied
                 groupOffset: root.groupOffset
                 layoutTransitionRunning: root.revealTransitionRunning
+                workspaceIndex: root.workspaceIndex
             }
         }
 
@@ -105,6 +113,7 @@ StyledClippingRect {
                 mask: layout
                 fullscreen: root.fullscreen
                 layoutTransitionRunning: root.revealTransitionRunning
+                workspaceIndex: root.workspaceIndex
             }
         }
 
