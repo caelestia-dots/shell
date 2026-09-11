@@ -19,6 +19,7 @@ VerticalFadeFlickable {
     // Accept wheel events when content fits inside the viewport so the
     // event does not propagate up to Nexus / FloatingWindow and scroll the
     // whole panel (taking the search bar off-screen with it).
+
     WheelHandler {
         onWheel: event => {
             if (root.contentHeight + root.topMargin + root.bottomMargin <= root.height) {
