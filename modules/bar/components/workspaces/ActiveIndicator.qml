@@ -35,6 +35,8 @@ StyledRect {
 
     property bool ready: false
     property bool workspaceSwitchRunning: false
+    readonly property bool switchAnimating: leadingAnim.running || trailingAnim.running || currentSizeAnim.running || offsetAnim.running || sizeAnim.running
+    readonly property bool switchSettled: !switchAnimating && !layoutTransitionRunning
     readonly property bool geometryAnimationEnabled: ready && (!layoutTransitionRunning || workspaceSwitchRunning)
 
     function workspaceIndex(id: int): int {
@@ -69,19 +71,31 @@ StyledRect {
             clampTrailEnd = Config.bar.workspaces.activeTrail && !!nextWorkspace && nextWorkspace.targetY < previousOffset;
             workspaceSwitchRunning = true;
         } else {
-            workspaceSwitchRunning = false;
-            clampTrailEnd = false;
+            endWorkspaceSwitch();
         }
 
         currentWsId = activeWsId;
 
         if (withAnimation)
-            workspaceSwitchTimer.restart();
+            Qt.callLater(() => {
+                if (switchSettled)
+                    endWorkspaceSwitch();
+            });
+    }
+
+    function endWorkspaceSwitch(): void {
+        workspaceSwitchRunning = false;
+        clampTrailEnd = false;
     }
 
     onActiveWsIdChanged: {
         if (ready)
             updateCurrentWorkspace(true);
+    }
+
+    onSwitchSettledChanged: {
+        if (switchSettled)
+            endWorkspaceSwitch();
     }
 
     clip: true
@@ -109,26 +123,20 @@ StyledRect {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
-    Timer {
-        id: workspaceSwitchTimer
-
-        interval: root.Config.bar.workspaces.activeTrail ? Tokens.anim.durations.normal * 2 : Tokens.anim.durations.normal
-        onTriggered: {
-            root.workspaceSwitchRunning = false;
-            root.clampTrailEnd = false;
-        }
-    }
-
     Behavior on leading {
         enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: leadingAnim
+        }
     }
 
     Behavior on trailing {
         enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
         EAnim {
+            id: trailingAnim
+
             duration: Tokens.anim.durations.normal * 2
         }
     }
@@ -136,19 +144,25 @@ StyledRect {
     Behavior on currentSize {
         enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: currentSizeAnim
+        }
     }
 
     Behavior on offset {
         enabled: !root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: offsetAnim
+        }
     }
 
     Behavior on size {
         enabled: !root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: sizeAnim
+        }
     }
 
     component EAnim: Anim {
