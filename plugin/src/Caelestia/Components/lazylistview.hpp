@@ -21,6 +21,7 @@ class LazyListViewAttached : public QObject {
 
     Q_PROPERTY(qreal preferredHeight READ preferredHeight WRITE setPreferredHeight NOTIFY preferredHeightChanged)
     Q_PROPERTY(qreal visibleHeight READ visibleHeight WRITE setVisibleHeight NOTIFY visibleHeightChanged)
+    Q_PROPERTY(qreal layoutY READ layoutY NOTIFY layoutYChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
     Q_PROPERTY(bool adding READ adding NOTIFY addingChanged)
     Q_PROPERTY(bool removing READ removing NOTIFY removingChanged)
@@ -34,6 +35,9 @@ public:
 
     [[nodiscard]] qreal visibleHeight() const;
     void setVisibleHeight(qreal height);
+
+    [[nodiscard]] qreal layoutY() const;
+    void setLayoutY(qreal y);
 
     [[nodiscard]] bool ready() const;
     void setReady(bool ready);
@@ -50,6 +54,7 @@ public:
 signals:
     void preferredHeightChanged();
     void visibleHeightChanged();
+    void layoutYChanged();
     void readyChanged();
     void addingChanged();
     void removingChanged();
@@ -58,6 +63,7 @@ signals:
 private:
     qreal m_preferredHeight = -1;
     qreal m_visibleHeight = -1;
+    qreal m_layoutY = 0;
     bool m_ready = false;
     bool m_adding = false;
     bool m_removing = false;
@@ -147,6 +153,10 @@ public:
 
     // State
     [[nodiscard]] int count() const;
+
+    Q_INVOKABLE [[nodiscard]] QQuickItem* itemAtIndex(int index) const;
+    Q_INVOKABLE [[nodiscard]] QQuickItem* itemAt(qreal x, qreal y) const;
+
 signals:
     void modelChanged();
     void delegateChanged();
@@ -234,6 +244,7 @@ private:
     void flushPendingInserts();
     void finishDelayedInsert(QQuickItem* item);
     void positionDelegates();
+    void updateLayoutY(QQuickItem* item, int index);
     [[nodiscard]] PropertyList delegateProperties(int modelIndex) const;
     void updateDelegateData(DelegateEntry& entry);
     void remapDelegates(const std::function<int(int)>& mapIndex);

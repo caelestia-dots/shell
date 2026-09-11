@@ -53,6 +53,17 @@ void LazyListViewAttached::setVisibleHeight(qreal height) {
     emit visibleHeightChanged();
 }
 
+qreal LazyListViewAttached::layoutY() const {
+    return m_layoutY;
+}
+
+void LazyListViewAttached::setLayoutY(qreal y) {
+    if (qFuzzyCompare(m_layoutY + 1.0, y + 1.0))
+        return;
+    m_layoutY = y;
+    emit layoutYChanged();
+}
+
 bool LazyListViewAttached::ready() const {
     return m_ready;
 }
@@ -392,6 +403,38 @@ int LazyListView::count() const {
     return m_model ? m_model->rowCount() : 0;
 }
 
+// Instantiated delegate for a model index, nullptr if outside the cache
+QQuickItem* LazyListView::itemAtIndex(int index) const {
+    return m_delegates.value(index).item;
+}
+
+// Hit test in content coordinates against layout (non-animated) positions
+QQuickItem* LazyListView::itemAt(qreal x, qreal y) const {
+    if (m_layout.isEmpty() || x < 0 || x >= width() || y < 0)
+        return nullptr;
+
+    // Binary search for the first item whose layout bottom is below y
+    int lo = 0;
+    int hi = static_cast<int>(m_layout.size()) - 1;
+    int candidate = -1;
+
+    while (lo <= hi) {
+        const int mid = lo + (hi - lo) / 2;
+        if (m_layout[mid].targetY + layoutHeightAt(mid) > y) {
+            candidate = mid;
+            hi = mid - 1;
+        } else {
+            lo = mid + 1;
+        }
+    }
+
+    // y lies past the last item, or in the spacing gap above the candidate
+    if (candidate < 0 || y < m_layout[candidate].targetY)
+        return nullptr;
+
+    return m_delegates.value(candidate).item;
+}
+
 // --- QQuickItem Overrides ---
 
 void LazyListView::componentComplete() {
@@ -487,8 +530,10 @@ void LazyListView::finishDelayedInsert(QQuickItem* item) {
 
     // Re-check the bounds: revealing runs QML bindings and onReady handlers,
     // which may have mutated the model out from under us.
-    if (idx < static_cast<int>(m_layout.size()))
+    if (idx < static_cast<int>(m_layout.size())) {
         item->setProperty("y", m_layout[idx].targetY - m_contentY); // animate to layout position
+        updateLayoutY(item, idx);
+    }
 
     polish();
 }
@@ -508,7 +553,15 @@ void LazyListView::positionDelegates() {
         // Use setProperty to go through the QML property system,
         // which triggers Behaviors (setY bypasses them).
         entry.item->setProperty("y", m_layout[idx].targetY - m_contentY);
+        updateLayoutY(entry.item, idx);
     }
+}
+
+// Publishes the non-animated position so delegates can read it while y animates
+void LazyListView::updateLayoutY(QQuickItem* item, int index) {
+    auto* attached = attachedFor(item);
+    if (attached)
+        attached->setLayoutY(m_layout[index].targetY - m_contentY);
 }
 
 // --- Layout Engine ---
@@ -751,6 +804,7 @@ int LazyListView::createDelegates(const QList<int>& indices, int budget) {
         // until the delegate signals ready via readyChanged.
         entry.pendingInsert = true;
         entry.item->setY(m_layout[idx].targetY - m_contentY);
+        updateLayoutY(entry.item, idx);
         m_itemToIndex.insert(entry.item, idx);
         m_delegates.insert(idx, entry);
         ++created;
