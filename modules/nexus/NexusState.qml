@@ -65,10 +65,15 @@ QtObject {
             pendingSubPath = subPath.slice();
             currentPageIdx = pageIdx;
         } else {
-            // Same page: close back to the page root, then open the chain.
-            while (subPageIdxStack.length > 0)
+            // Same page: keep the sub-pages both chains share open, so going
+            // back up (Workspaces -> Taskbar) reveals the page already there
+            // instead of closing and rebuilding it. Then open the rest.
+            let shared = 0;
+            while (shared < subPath.length && shared < subPageIdxStack.length && subPageIdxStack[shared] === subPath[shared])
+                shared++;
+            while (subPageIdxStack.length > shared)
                 closeSubPage();
-            for (let i = 0; i < subPath.length; i++)
+            for (let i = shared; i < subPath.length; i++)
                 openSubPage(subPath[i]);
         }
     }
