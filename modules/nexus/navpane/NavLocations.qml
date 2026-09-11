@@ -15,6 +15,13 @@ VerticalFadeFlickable {
     id: root
 
     required property NexusState nState
+    // Whether the search field has focus, so the keyboard selection only shows
+    // while the keys that move it actually reach the field.
+    property bool keyboardActive
+    // Page the results are narrowed to, -1 for all of them.
+    property int pageFilter: -1
+    property list<int> collapsedPages
+    property string selectedAnchor
 
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
@@ -35,8 +42,8 @@ VerticalFadeFlickable {
     }
     // Results grouped by their top-level page, so the list can show one heading
     // per page with the matching settings joined underneath it (like the
-    // Android settings search). Each group: { page, entries: [...] }.
-    readonly property var groups: {
+    // Android settings search). Each group: { pageIdx, page, entries: [...] }.
+    readonly property var allGroups: {
         const out = [];
         const byPage = ({});
         for (const e of results) {
@@ -53,10 +60,84 @@ VerticalFadeFlickable {
         }
         return out;
     }
+    // A filter whose page no longer has matches falls back to showing all.
+    readonly property int activeFilter: allGroups.some(g => g.pageIdx === pageFilter) ? pageFilter : -1
+    readonly property var groups: activeFilter < 0 ? allGroups : allGroups.filter(g => g.pageIdx === activeFilter)
+    readonly property int resultCount: groups.reduce((n, g) => n + g.entries.length, 0)
+    // What the arrow keys move through: the results left in expanded groups.
+    readonly property var navigable: groups.filter(g => !collapsedPages.includes(g.pageIdx)).reduce((all, g) => all.concat(g.entries), [])
+    // The selection falls back to the top result, which the query ranks best.
+    readonly property string currentAnchor: navigable.some(e => e.anchor === selectedAnchor) ? selectedAnchor : navigable[0]?.anchor ?? ""
+
+    function openEntry(entry: var): void {
+        // Ethernet detail settings need a selected interface to show the right
+        // device; a search deep-link has none, so point it at the connected (or
+        // first) one.
+        if (entry.anchor.startsWith("ethernet-")) {
+            const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
+            if (active)
+                nState.selectedEthernetInterface = active.iface;
+        }
+        nState.jumpToSetting(entry.pageIdx, entry.subPath, entry.anchor);
+    }
+
+    function moveSelection(delta: int): void {
+        const i = navigable.findIndex(e => e.anchor === currentAnchor);
+        const next = navigable[Math.max(0, Math.min(navigable.length - 1, i + delta))];
+        if (next)
+            selectedAnchor = next.anchor;
+    }
+
+    function openSelection(): void {
+        const entry = navigable.find(e => e.anchor === currentAnchor);
+        if (entry)
+            openEntry(entry);
+    }
+
+    function toggleCollapsed(pageIdx: int): void {
+        collapsedPages = collapsedPages.includes(pageIdx) ? collapsedPages.filter(i => i !== pageIdx) : collapsedPages.concat([pageIdx]);
+    }
+
+    // Scrolls just far enough to bring a result out of the edge fades.
+    function ensureVisible(item: Item): void {
+        const y = item.mapToItem(contentItem, 0, 0).y;
+        const margin = height * fadeAmount / 2;
+        let target = contentY;
+        if (y < contentY + margin)
+            target = y - margin;
+        else if (y + item.height > contentY + height - margin)
+            target = y + item.height - height + margin;
+        target = Math.max(-topMargin, Math.min(target, contentHeight - height + bottomMargin));
+        if (target === contentY)
+            return;
+        scrollAnim.to = target;
+        scrollAnim.restart();
+    }
 
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large
     contentHeight: content.implicitHeight
+
+    // A new query starts from its top result
+    onSearchChanged: selectedAnchor = ""
+    onSearchingChanged: {
+        if (!searching) {
+            pageFilter = -1;
+            collapsedPages = [];
+        }
+    }
+
+    StyledScrollBar.vertical: StyledScrollBar {
+        flickable: root
+    }
+
+    Anim {
+        id: scrollAnim
+
+        target: root
+        property: "contentY"
+        type: Anim.FastSpatial
+    }
 
     TapHandler {
         onTapped: root.focus = true
@@ -207,182 +288,248 @@ VerticalFadeFlickable {
                     required property var modelData
                     required property int index
 
+                    readonly property bool collapsed: root.collapsedPages.includes(modelData.pageIdx)
+
                     width: resultList.width
                     spacing: Tokens.spacing.small
 
-                    StyledText {
+                    // Heading: collapses the group, and shows how many of the
+                    // results it holds.
+                    Item {
                         Layout.fillWidth: true
-                        Layout.leftMargin: Tokens.padding.medium
-                        text: group.modelData.page
-                        color: Colours.palette.m3secondary
-                        font: Tokens.font.label.large
-                        elide: Text.ElideRight
-                    }
+                        implicitHeight: heading.implicitHeight + Tokens.padding.small * 2
 
-                    Column {
-                        id: cardList
+                        StateLayer {
+                            anchors.fill: parent
+                            radius: Tokens.rounding.full
 
-                        Layout.fillWidth: true
-                        spacing: 0
-
-                        add: Transition {
-                            Anim {
-                                type: Anim.DefaultEffects
-                                property: "opacity"
-                                from: 0
-                                to: 1
-                            }
+                            onClicked: root.toggleCollapsed(group.modelData.pageIdx)
                         }
 
-                        move: Transition {
-                            Anim {
-                                properties: "x,y"
+                        RowLayout {
+                            id: heading
+
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: Tokens.padding.small
+                            anchors.rightMargin: Tokens.padding.small
+                            spacing: Tokens.spacing.small
+
+                            MaterialIcon {
+                                text: "expand_more"
+                                color: Colours.palette.m3secondary
+                                fontStyle: Tokens.font.icon.small
+                                rotation: group.collapsed ? -90 : 0
+
+                                Behavior on rotation {
+                                    Anim {
+                                        type: Anim.FastSpatial
+                                    }
+                                }
                             }
 
-                            Anim {
-                                type: Anim.DefaultEffects
-                                property: "opacity"
-                                to: 1
-                            }
-                        }
-
-                        Repeater {
-                            model: ScriptModel {
-                                objectProp: "anchor"
-                                values: group.modelData.entries
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: group.modelData.page
+                                color: Colours.palette.m3secondary
+                                font: Tokens.font.label.large
+                                elide: Text.ElideRight
                             }
 
                             StyledRect {
-                                id: result
-
-                                required property var modelData
-                                required property int index
-
-                                readonly property bool isFirst: index === 0
-                                readonly property bool isLast: index === group.modelData.entries.length - 1
-
-                                width: cardList.width
-                                implicitHeight: {
-                                    const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
-                                    return h % 2 === 0 ? h : h + 1;
-                                }
-                                // Joined card: round only the outer corners so the
-                                // rows read as one block (square where they meet),
-                                // matching the page tabs' corner radius.
-                                topLeftRadius: isFirst ? Tokens.rounding.extraLarge : 0
-                                topRightRadius: isFirst ? Tokens.rounding.extraLarge : 0
-                                bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : 0
-                                bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
+                                implicitWidth: Math.max(implicitHeight, count.implicitWidth + Tokens.padding.small * 2)
+                                implicitHeight: count.implicitHeight + Tokens.padding.extraSmall * 2
+                                radius: Tokens.rounding.full
                                 color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 
+                                StyledText {
+                                    id: count
+
+                                    anchors.centerIn: parent
+                                    text: group.modelData.entries.length
+                                    color: Colours.palette.m3outline
+                                    font: Tokens.font.label.small
+                                }
+                            }
+                        }
+                    }
+
+                    // Clips the cards while the group folds away
+                    Item {
+                        Layout.fillWidth: true
+                        implicitHeight: group.collapsed ? 0 : cardList.implicitHeight
+                        clip: true
+
+                        Behavior on implicitHeight {
+                            Anim {}
+                        }
+
+                        Column {
+                            id: cardList
+
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            spacing: 0
+
+                            add: Transition {
+                                Anim {
+                                    type: Anim.DefaultEffects
+                                    property: "opacity"
+                                    from: 0
+                                    to: 1
+                                }
+                            }
+
+                            move: Transition {
+                                Anim {
+                                    properties: "x,y"
+                                }
+
+                                Anim {
+                                    type: Anim.DefaultEffects
+                                    property: "opacity"
+                                    to: 1
+                                }
+                            }
+
+                            Repeater {
+                                model: ScriptModel {
+                                    objectProp: "anchor"
+                                    values: group.modelData.entries
+                                }
+
                                 StyledRect {
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.leftMargin: Tokens.padding.large
-                                    anchors.rightMargin: Tokens.padding.large
-                                    implicitHeight: 1
-                                    visible: !result.isLast
-                                    color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
-                                }
+                                    id: result
 
-                                RowLayout {
-                                    id: resultLayout
+                                    required property var modelData
+                                    required property int index
 
-                                    anchors.fill: parent
-                                    anchors.margins: Tokens.padding.large
-                                    // Leave room on the right for the toggle switch.
-                                    anchors.rightMargin: result.modelData.isToggle ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
-                                    spacing: Tokens.spacing.medium
+                                    readonly property bool isFirst: index === 0
+                                    readonly property bool isLast: index === group.modelData.entries.length - 1
+                                    readonly property bool isCurrent: root.keyboardActive && root.currentAnchor === modelData.anchor
 
-                                    // The setting's own icon, baked into the
-                                    // index per anchor.
-                                    MaterialIcon {
-                                        text: result.modelData.icon
-                                        color: Colours.palette.m3onSurfaceVariant
-                                        fontStyle: Tokens.font.icon.medium
+                                    width: cardList.width
+                                    implicitHeight: {
+                                        const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
+                                        return h % 2 === 0 ? h : h + 1;
+                                    }
+                                    // Joined card: round only the outer corners so the
+                                    // rows read as one block (square where they meet),
+                                    // matching the page tabs' corner radius.
+                                    topLeftRadius: isFirst ? Tokens.rounding.extraLarge : 0
+                                    topRightRadius: isFirst ? Tokens.rounding.extraLarge : 0
+                                    bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : 0
+                                    bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
+                                    color: {
+                                        const base = Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
+                                        return isCurrent ? Qt.tint(base, Qt.alpha(Colours.palette.m3onSurface, 0.08)) : base;
                                     }
 
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: Tokens.spacing.small / 2
+                                    onIsCurrentChanged: {
+                                        if (isCurrent)
+                                            root.ensureVisible(result);
+                                    }
 
-                                        // Location line: "Section > sub", faint.
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            text: {
-                                                const labels = result.modelData.crumbLabels.slice(1);
-                                                const section = result.modelData.section;
-                                                const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
-                                                return parts.join("  \u203a  ");
-                                            }
-                                            visible: text.length > 0
+                                    StyledRect {
+                                        anchors.bottom: parent.bottom
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.leftMargin: Tokens.padding.large
+                                        anchors.rightMargin: Tokens.padding.large
+                                        implicitHeight: 1
+                                        visible: !result.isLast
+                                        color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
+                                    }
+
+                                    RowLayout {
+                                        id: resultLayout
+
+                                        anchors.fill: parent
+                                        anchors.margins: Tokens.padding.large
+                                        // Leave room on the right for the toggle switch.
+                                        anchors.rightMargin: result.modelData.isToggle ? toggle.width + Tokens.padding.large * 2 : Tokens.padding.large
+                                        spacing: Tokens.spacing.medium
+
+                                        // The setting's own icon, baked into the
+                                        // index per anchor.
+                                        MaterialIcon {
+                                            text: result.modelData.icon
                                             color: Colours.palette.m3onSurfaceVariant
-                                            font: Tokens.font.label.small
-                                            elide: Text.ElideRight
+                                            fontStyle: Tokens.font.icon.medium
                                         }
 
-                                        // The setting itself, most prominent.
-                                        StyledText {
+                                        ColumnLayout {
                                             Layout.fillWidth: true
-                                            text: SettingsSearcher.highlight(result.modelData.title, root.search, Colours.palette.m3primary)
-                                            // Only pay for rich-text parsing when the
-                                            // string actually carries a highlight tag.
-                                            textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
-                                            color: Colours.palette.m3onSurface
-                                            font: Tokens.font.body.medium
-                                            elide: Text.ElideRight
-                                        }
+                                            spacing: Tokens.spacing.small / 2
 
-                                        // Optional description, faintest and smallest.
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            visible: result.modelData.subtext.length > 0
-                                            text: SettingsSearcher.highlight(result.modelData.subtext, root.search, Colours.palette.m3primary)
-                                            // Most subtexts have no match, so skip the
-                                            // rich-text parse unless there's a highlight.
-                                            textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
-                                            color: Colours.palette.m3outline
-                                            font: Tokens.font.label.small
-                                            elide: Text.ElideRight
+                                            // Location line: "Section > sub", faint.
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                text: {
+                                                    const labels = result.modelData.crumbLabels.slice(1);
+                                                    const section = result.modelData.section;
+                                                    const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
+                                                    return parts.join("  \u203a  ");
+                                                }
+                                                visible: text.length > 0
+                                                color: Colours.palette.m3onSurfaceVariant
+                                                font: Tokens.font.label.small
+                                                elide: Text.ElideRight
+                                            }
+
+                                            // The setting itself, most prominent.
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                text: SettingsSearcher.highlight(result.modelData.title, root.search, Colours.palette.m3primary)
+                                                // Only pay for rich-text parsing when the
+                                                // string actually carries a highlight tag.
+                                                textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
+                                                color: Colours.palette.m3onSurface
+                                                font: Tokens.font.body.medium
+                                                elide: Text.ElideRight
+                                            }
+
+                                            // Optional description, faintest and smallest.
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                visible: result.modelData.subtext.length > 0
+                                                text: SettingsSearcher.highlight(result.modelData.subtext, root.search, Colours.palette.m3primary)
+                                                // Most subtexts have no match, so skip the
+                                                // rich-text parse unless there's a highlight.
+                                                textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
+                                                color: Colours.palette.m3outline
+                                                font: Tokens.font.label.small
+                                                elide: Text.ElideRight
+                                            }
                                         }
                                     }
-                                }
 
-                                StateLayer {
-                                    anchors.fill: parent
-                                    z: 1
-                                    radius: 0
+                                    StateLayer {
+                                        anchors.fill: parent
+                                        z: 1
+                                        radius: 0
 
-                                    onClicked: {
-                                        // Ethernet detail settings need a selected interface
-                                        // to show the right device; a search deep-link has
-                                        // none, so point it at the connected (or first) one.
-                                        if (result.modelData.anchor.startsWith("ethernet-")) {
-                                            const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
-                                            if (active)
-                                                root.nState.selectedEthernetInterface = active.iface;
-                                        }
-                                        root.nState.jumpToSetting(result.modelData.pageIdx, result.modelData.subPath, result.modelData.anchor);
+                                        onClicked: root.openEntry(result.modelData)
                                     }
-                                }
 
-                                StyledSwitch {
-                                    id: toggle
+                                    StyledSwitch {
+                                        id: toggle
 
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: Tokens.padding.large
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    z: 2
-                                    visible: result.modelData.isToggle
-                                    checked: result.modelData.toggleValue
-                                    cLayer: 3
-                                    // A touch smaller than the in-page switches since
-                                    // the result rows are denser.
-                                    scale: 0.85
-                                    transformOrigin: Item.Right
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: Tokens.padding.large
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        z: 2
+                                        visible: result.modelData.isToggle
+                                        checked: result.modelData.toggleValue
+                                        cLayer: 3
+                                        // A touch smaller than the in-page switches since
+                                        // the result rows are denser.
+                                        scale: 0.85
+                                        transformOrigin: Item.Right
 
-                                    onToggled: result.modelData.setToggle(checked)
+                                        onToggled: result.modelData.setToggle(checked)
+                                    }
                                 }
                             }
                         }
