@@ -97,13 +97,17 @@ Singleton {
     // indexed token that starts with it (prefix search, so "wif" finds "wifi").
     // Returns a map of entry id -> best ranking weight for that id.
     function lookup(token: string): var {
+        // Exact and prefix matches both count, or the results would thin out
+        // whenever the typed text is itself a whole word ("icon" before "icons").
+        // A prefix-only match ranks a little below an exact one.
         const result = ({});
-        const exact = root.inverted[token] !== undefined;
-        const keys = exact ? [token] : Object.keys(root.inverted).filter(k => k.startsWith(token));
-        for (const key of keys) {
+        for (const key of Object.keys(root.inverted)) {
+            if (!key.startsWith(token))
+                continue;
+            const factor = key === token ? 1 : 0.8;
             const rank = root.ranking[key] ?? ({});
             for (const id of root.inverted[key]) {
-                const w = rank[id] ?? 0.1;
+                const w = (rank[id] ?? 0.1) * factor;
                 if (result[id] === undefined || w > result[id])
                     result[id] = w;
             }
