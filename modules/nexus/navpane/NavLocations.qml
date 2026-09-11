@@ -491,11 +491,19 @@ VerticalFadeFlickable {
                                         spacing: Tokens.spacing.medium
 
                                         // The setting's own icon, baked into the index
-                                        // per anchor.
+                                        // per anchor. The keyboard selection fills it
+                                        // and gives it the accent colour, like the title.
                                         MaterialIcon {
                                             text: result.modelData.icon
-                                            color: Colours.palette.m3onSurfaceVariant
+                                            color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                                             fontStyle: Tokens.font.icon.medium
+                                            fill: result.isCurrent ? 1 : 0
+
+                                            Behavior on fill {
+                                                Anim {
+                                                    type: Anim.DefaultEffects
+                                                }
+                                            }
                                         }
 
                                         ColumnLayout {
