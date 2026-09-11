@@ -11,7 +11,14 @@ StyledSwitch {
     property string subtext
     property alias first: bg.first
     property alias last: bg.last
+    // Identifier used by the settings search to scroll to this row.
+    property string settingAnchor
     readonly property alias bg: bg
+
+    // Briefly flash the row, used when the settings search jumps to it.
+    function flashHighlight(): void {
+        bg.flashHighlight();
+    }
 
     Layout.fillWidth: true
 

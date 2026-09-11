@@ -15,6 +15,8 @@ class CUtils : public QObject {
 
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
+    // The settings search index cache is invalidated when this changes
+    Q_PROPERTY(QString gitRevision READ gitRevision CONSTANT)
 
 public:
     Q_INVOKABLE void saveItem(
@@ -30,12 +32,17 @@ public:
 
     Q_INVOKABLE static QString enumToString(QObject* target, const QString& property, const QVariant& value = {});
 
+    Q_INVOKABLE static QString readTextFile(const QString& path);
+    Q_INVOKABLE static bool writeTextFile(const QString& path, const QString& text);
+    Q_INVOKABLE static QStringList listFiles(const QString& dir, const QString& suffix);
+
     Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildrenMatching(QQuickItem* root, const QString& pattern);
 
     [[nodiscard]] static QString version();
     [[nodiscard]] static QString qtVersion();
+    [[nodiscard]] static QString gitRevision();
 };
 
 } // namespace caelestia

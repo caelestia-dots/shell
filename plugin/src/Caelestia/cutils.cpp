@@ -1,6 +1,8 @@
 #include "cutils.hpp"
 
 #include <qdir.h>
+#include <qdirlisting.h>
+#include <qfile.h>
 #include <qfileinfo.h>
 #include <qloggingcategory.h>
 #include <qmetaobject.h>
@@ -147,6 +149,36 @@ QString CUtils::enumToString(QObject* target, const QString& property, const QVa
     return QString::fromUtf8(key);
 }
 
+QString CUtils::readTextFile(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return {};
+    return QString::fromUtf8(file.readAll());
+}
+
+bool CUtils::writeTextFile(const QString& path, const QString& text) {
+    if (!QDir().mkpath(QFileInfo(path).absolutePath())) {
+        qCWarning(lcCUtils) << "Failed to create directory for" << path;
+        return false;
+    }
+
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qCWarning(lcCUtils) << "Failed to open" << path << "for writing";
+        return false;
+    }
+    return file.write(text.toUtf8()) >= 0;
+}
+
+QStringList CUtils::listFiles(const QString& dir, const QString& suffix) {
+    QStringList out;
+    const QDirListing listing(
+        dir, { u'*' + suffix }, QDirListing::IteratorFlag::FilesOnly | QDirListing::IteratorFlag::Recursive);
+    for (const auto& entry : listing)
+        out << entry.filePath();
+    return out;
+}
+
 namespace {
 
 // DFS over the visual item tree (childItems), returning the first descendant matching the predicate. Unlike
@@ -220,6 +252,14 @@ QList<QQuickItem*> CUtils::findChildrenMatching(QQuickItem* root, const QString&
 
 QString CUtils::version() {
     return QStringLiteral(CAELESTIA_VERSION);
+}
+
+#ifndef GIT_REVISION
+#define GIT_REVISION ""
+#endif
+
+QString CUtils::gitRevision() {
+    return QStringLiteral(GIT_REVISION);
 }
 
 QString CUtils::qtVersion() {

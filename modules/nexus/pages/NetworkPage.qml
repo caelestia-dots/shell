@@ -60,6 +60,7 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Nmcli.hasAvailableEthernet ? Tokens.spacing.large : 0
             first: true
+            settingAnchor: "network-wi-fi"
             text: Tr.tr("Wi-Fi")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -86,6 +87,7 @@ PageBase {
 
             icon: "expand_content"
             // TRANSLATORS: %1 = number of networks found
+            settingAnchor: "network-all-networks"
             text: Tr.tr("Show all networks (%1)").arg(Nmcli.networks.length)
             trailingIcon: "chevron_right"
             onClicked: root.nState.openSubPage(5) // All networks sub-page
@@ -100,6 +102,7 @@ PageBase {
         // Saved networks button
         RowButton {
             icon: "bookmark"
+            settingAnchor: "network-saved-networks"
             text: Tr.tr("Saved networks")
             trailingIcon: "chevron_right"
             onClicked: root.nState.openSubPage(6) // Saved networks sub-page
@@ -108,6 +111,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
+            settingAnchor: "network-add-network"
             text: Tr.tr("Add network")
             disabled: !Nmcli.wifiEnabled
             onClicked: root.nState.openSubPage(2) // Add network sub-page
@@ -118,6 +122,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large
             Layout.fillWidth: true
             first: true
+            settingAnchor: "network-vpn"
             text: Tr.tr("VPN")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -343,6 +348,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
+            settingAnchor: "network-add-provider"
             text: Tr.tr("Add provider")
             onClicked: {
                 root.nState.editingVpnIndex = -1;
