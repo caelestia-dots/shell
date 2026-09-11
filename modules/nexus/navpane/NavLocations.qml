@@ -111,6 +111,16 @@ VerticalFadeFlickable {
             openEntry(entry);
     }
 
+    // Steps through the filter tabs, in the order they're shown: all, then the
+    // pages with matches.
+    function moveFilter(delta: int): void {
+        const pages = [-1].concat(allGroups.map(g => g.pageIdx));
+        if (pages.length < 3)
+            return;
+        const i = pages.indexOf(activeFilter);
+        pageFilter = pages[Math.max(0, Math.min(pages.length - 1, i + delta))];
+    }
+
     function toggleCollapsed(pageIdx: int): void {
         collapsedPages = collapsedPages.includes(pageIdx) ? collapsedPages.filter(i => i !== pageIdx) : collapsedPages.concat([pageIdx]);
     }
@@ -481,43 +491,11 @@ VerticalFadeFlickable {
                                         spacing: Tokens.spacing.medium
 
                                         // The setting's own icon, baked into the index
-                                        // per anchor. The keyboard selection swaps it
-                                        // for an accent bar.
-                                        Item {
-                                            Layout.fillHeight: true
-                                            implicitWidth: resultIcon.implicitWidth
-
-                                            MaterialIcon {
-                                                id: resultIcon
-
-                                                anchors.centerIn: parent
-                                                text: result.modelData.icon
-                                                color: Colours.palette.m3onSurfaceVariant
-                                                fontStyle: Tokens.font.icon.medium
-                                                opacity: result.isCurrent ? 0 : 1
-
-                                                Behavior on opacity {
-                                                    Anim {
-                                                        type: Anim.DefaultEffects
-                                                    }
-                                                }
-                                            }
-
-                                            StyledRect {
-                                                anchors.right: parent.right
-                                                anchors.top: parent.top
-                                                anchors.bottom: parent.bottom
-                                                implicitWidth: 3
-                                                radius: Tokens.rounding.full
-                                                color: Colours.palette.m3primary
-                                                opacity: result.isCurrent ? 1 : 0
-
-                                                Behavior on opacity {
-                                                    Anim {
-                                                        type: Anim.DefaultEffects
-                                                    }
-                                                }
-                                            }
+                                        // per anchor.
+                                        MaterialIcon {
+                                            text: result.modelData.icon
+                                            color: Colours.palette.m3onSurfaceVariant
+                                            fontStyle: Tokens.font.icon.medium
                                         }
 
                                         ColumnLayout {
