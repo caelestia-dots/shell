@@ -18,9 +18,10 @@ StyledRect {
 
     property int currentWsId: -1
     readonly property int currentWsIdx: currentWsId < 0 ? -1 : workspaceIndex(currentWsId)
+    property int switchWsIdx: -1
 
-    property real leading: workspaceOffset(currentWsIdx)
-    property real trailing: workspaceOffset(currentWsIdx)
+    property real leading: workspaceOffset(switchWsIdx < 0 ? currentWsIdx : switchWsIdx)
+    property real trailing: workspaceOffset(switchWsIdx < 0 ? currentWsIdx : switchWsIdx)
     property real currentSize: {
         workspaces.count;
         return (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0;
@@ -34,7 +35,12 @@ StyledRect {
         }
         return naturalSize;
     }
-    property real trailEnd: 0
+    property int trailWsIdx: -1
+    readonly property real trailEnd: {
+        workspaces.count;
+        const ws = workspaces.itemAt(trailWsIdx) as Workspace;
+        return ws ? ws.y + ws.height : 0;
+    }
     property bool clampTrailEnd: false
 
     property bool ready: false
@@ -48,7 +54,7 @@ StyledRect {
             return 0;
 
         const ws = workspaces.itemAt(index) as Workspace;
-        return ws ? (workspaceSwitchRunning ? ws.targetY : ws.y) : 0;
+        return ws ? (switchWsIdx >= 0 ? ws.targetY : ws.y) : 0;
     }
 
     function updateCurrentWorkspace(withAnimation: bool): void {
@@ -58,27 +64,25 @@ StyledRect {
         const nextIndex = workspaceIndex(activeWsId);
         const nextWorkspace = workspaces.itemAt(nextIndex) as Workspace;
 
-        const previousOffset = offset;
-        const previousEnd = previousOffset + size;
-
         if (withAnimation) {
-            trailEnd = previousEnd;
-            clampTrailEnd = Config.bar.workspaces.activeTrail && !!nextWorkspace && nextWorkspace.targetY < previousOffset;
+            trailWsIdx = currentWsIdx;
+            clampTrailEnd = !!nextWorkspace && nextWorkspace.targetY <= offset;
             workspaceSwitchRunning = true;
-        } else {
-            endWorkspaceSwitch();
-        }
+            switchWsIdx = nextIndex;
+            currentWsId = activeWsId;
 
-        currentWsId = activeWsId;
-
-        if (withAnimation)
             Qt.callLater(() => {
                 if (switchSettled)
                     endWorkspaceSwitch();
             });
+        } else {
+            endWorkspaceSwitch();
+            currentWsId = activeWsId;
+        }
     }
 
     function endWorkspaceSwitch(): void {
+        switchWsIdx = -1;
         workspaceSwitchRunning = false;
         clampTrailEnd = false;
     }
