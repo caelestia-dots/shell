@@ -39,7 +39,8 @@ ColumnLayout {
         onAccepted: locations.openSelection()
 
         // The results are navigated from here, so the keys only work while the
-        // field has focus. Ctrl+J/K too, like the launcher's vim keybinds.
+        // field has focus. Vim-style too, like the launcher: Ctrl+J/K move
+        // through the results, Ctrl+H/L through the filter tabs.
         Keys.onUpPressed: locations.moveSelection(-1)
         Keys.onDownPressed: locations.moveSelection(1)
         Keys.onPressed: event => {
@@ -51,6 +52,12 @@ ColumnLayout {
                 event.accepted = true;
             } else if (event.key === Qt.Key_K) {
                 locations.moveSelection(-1);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_H) {
+                locations.moveFilter(-1);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_L) {
+                locations.moveFilter(1);
                 event.accepted = true;
             }
         }
