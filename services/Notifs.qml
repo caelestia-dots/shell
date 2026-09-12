@@ -16,15 +16,16 @@ Singleton {
     id: root
 
     property list<NotifData> list: []
-    readonly property list<NotifData> notClosed: list.filter(n => !n.closed)
-    readonly property list<NotifData> popups: list.filter(n => n.popup)
+    readonly property list<NotifData> notClosed: list.filter(n => n && !n.closed)
+    readonly property list<NotifData> popups: list.filter(n => n && n.popup)
     property alias dnd: props.dnd
 
     property bool loaded
+    property bool loadFailed: false
 
     function hasFullscreen(): bool {
         for (const monitor of Hypr.monitors.values) {
-            if (monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1))
+            if (monitor?.activeWorkspace?.toplevels.values.some(t => (t?.lastIpcObject?.fullscreen ?? 0) > 1))
                 return true;
         }
         return false;
@@ -38,6 +39,19 @@ Singleton {
         return true;
     }
 
+    function send(summary: string, body: string, appIcon: string, appName: string): void {
+        const notifData = notifComp.createObject(root, {
+            summary: summary ?? "",
+            body: body ?? "",
+            appIcon: appIcon ?? "x-office-calendar",
+            appName: appName ?? "Calendar",
+            popup: root.shouldShowPopup(),
+            time: new Date()
+        });
+        if (notifData)
+            root.list = [notifData, ...root.list];
+    }
+
     onDndChanged: {
         if (!GlobalConfig.utilities.toasts.dndChanged)
             return;
@@ -49,7 +63,7 @@ Singleton {
     }
 
     onListChanged: {
-        if (loaded)
+        if (loaded && !loadFailed)
             saveTimer.restart();
     }
 
@@ -57,20 +71,27 @@ Singleton {
         id: saveTimer
 
         interval: 1000
-        onTriggered: storage.setText(JSON.stringify(root.notClosed.map(n => ({
-                    time: n.time,
-                    id: n.id,
-                    summary: n.summary,
-                    body: n.body,
-                    appIcon: n.appIcon,
-                    appName: n.appName,
-                    image: n.image,
-                    expireTimeout: n.expireTimeout,
-                    urgency: n.urgency,
-                    resident: n.resident,
-                    hasActionIcons: n.hasActionIcons,
-                    actions: n.actions
-                }))))
+        onTriggered: {
+            if (root.loadFailed || !root.loaded)
+                return;
+            storage.setText(JSON.stringify(root.notClosed.map(n => ({
+                        time: n.time,
+                        id: n.notificationId ?? n.id,
+                        summary: n.summary,
+                        body: n.body,
+                        appIcon: n.appIcon,
+                        appName: n.appName,
+                        image: n.image,
+                        expireTimeout: n.expireTimeout,
+                        urgency: n.urgency,
+                        resident: n.resident,
+                        hasActionIcons: n.hasActionIcons,
+                        actions: n.actions?.map(a => ({
+                                    identifier: a.identifier,
+                                    text: a.text
+                                })) ?? []
+                    }))));
+        }
     }
 
     PersistentProperties {
@@ -99,34 +120,58 @@ Singleton {
                 popup: root.shouldShowPopup(),
                 notification: notif
             });
-            root.list = [comp, ...root.list];
+            if (comp)
+                root.list = [comp, ...root.list];
         }
     }
 
     FileView {
         id: storage
 
-        printErrors: false
+        printErrors: true
         path: `${Paths.state}/notifs.json`
         onLoaded: {
-            const data = JSON.parse(text());
-            for (const notif of data) {
-                const properties = Object.assign({}, notif);
+            root.loadFailed = false;
+            try {
+                const raw = text();
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    if (Array.isArray(data)) {
+                        const loadedList = [];
+                        for (const notif of data) {
+                            if (!notif || typeof notif !== "object")
+                                continue;
+                            const properties = Object.assign({}, notif);
 
-                // Backwards compatibility for old notifications
-                if (properties.notificationId === undefined && properties.id !== undefined)
-                    properties.notificationId = properties.id;
+                            // Backwards compatibility for old notifications
+                            if (properties.notificationId === undefined && properties.id !== undefined)
+                                properties.notificationId = properties.id;
 
-                delete properties.id;
-                root.list.push(notifComp.createObject(root, properties));
+                            delete properties.id;
+                            const obj = notifComp.createObject(root, properties);
+                            if (obj)
+                                loadedList.push(obj);
+                        }
+                        loadedList.sort((a, b) => b.time - a.time);
+                        root.list = loadedList;
+                    }
+                }
+                root.loaded = true;
+            } catch (e) {
+                console.warn(`Notifs: failed to parse notifs file, preserving disk file: ${e}`);
+                root.loadFailed = true;
+                root.loaded = false;
             }
-            root.list.sort((a, b) => b.time - a.time);
-            root.loaded = true;
         }
         onLoadFailed: err => {
             if (err === FileViewError.FileNotFound) {
+                root.loadFailed = false;
                 root.loaded = true;
-                Qt.callLater(() => setText("[]"));
+                Qt.callLater(() => storage.setText("[]"));
+            } else {
+                root.loadFailed = true;
+                root.loaded = false;
+                console.warn(`Notifs: failed to load notifs file: ${err}`);
             }
         }
     }
