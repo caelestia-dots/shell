@@ -130,8 +130,8 @@ private:
 
     bool applyLrclibGetObject(const QJsonObject& obj, const QString& logTrack, const QString& logArtist);
     void retryLrclibGetSplit(
-        int reqId, const QString& title, const QString& artist, const QString& album, qreal duration);
-    void retryLrclibSearchSplit(int reqId, const QString& title, const QString& artist);
+        int reqId, const QString& title, const QString& artist, const QString& album, qreal duration, int stage = 0);
+    void retryLrclibSearchSplit(int reqId, const QString& title, const QString& artist, bool allowReverse = true);
 
     struct LrclibSearchResult {
         QList<LyricCandidate> candidates;

@@ -19,10 +19,8 @@ Item {
     property bool flag
     property list<string> lyricList: Lyrics.lyrics
 
-    // qmllint disable missing-property
-    readonly property string lyricsError: String(Lyrics?.error ?? "")
-    readonly property bool isLyricsOffline: Boolean(Lyrics?.offline ?? false)
-    // qmllint enable missing-property
+    readonly property string lyricsError: String(Lyrics.error ?? "")
+    readonly property bool isLyricsOffline: Boolean(Lyrics.offline ?? false)
     readonly property bool hasLyricsError: !isLyricsOffline && lyricsError.length > 0
 
     function syncTrack(): void {
@@ -164,6 +162,10 @@ Item {
 
     Connections {
         function onHasLyricsChanged() {
+            root.flag = !root.flag;
+        }
+
+        function onLoadingChanged() {
             root.flag = !root.flag;
         }
 
