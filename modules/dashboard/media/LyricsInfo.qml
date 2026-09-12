@@ -455,8 +455,8 @@ Item {
                                 required property int index
                                 required property var modelData
 
-                                readonly property bool isAuto: (Lyrics.autoCandidate.valid && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid))
-                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || (index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid)))
+                                readonly property bool isAuto: (Boolean(Lyrics?.autoCandidate?.valid) && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0 && (Boolean(Lyrics?.autoCandidate?.valid) || Boolean(Lyrics?.selectedCandidate?.valid)))
+                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Boolean(Lyrics?.selectedCandidate?.valid) && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Boolean(Lyrics?.selectedCandidate?.valid) && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || (index === 0 && (Boolean(Lyrics?.autoCandidate?.valid) || Boolean(Lyrics?.selectedCandidate?.valid))))
 
                                 Layout.fillWidth: true
                                 implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
@@ -586,7 +586,7 @@ Item {
         Rectangle {
             id: metadataDot
 
-            visible: Lyrics.hasMetadataSuggestion
+            visible: Boolean(Lyrics?.hasMetadataSuggestion)
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 0

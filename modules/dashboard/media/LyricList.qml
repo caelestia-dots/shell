@@ -167,6 +167,10 @@ Item {
             root.flag = !root.flag;
         }
 
+        function onLoadingChanged() {
+            root.flag = !root.flag;
+        }
+
         function onForceSearchingChanged() {
             root.flag = !root.flag;
         }
