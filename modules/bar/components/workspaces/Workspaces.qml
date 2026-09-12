@@ -20,6 +20,27 @@ StyledClippingRect {
     readonly property int activeWsId: monitor.activeWorkspace?.id ?? 1
     readonly property int activeWsIdx: workspaceIndex(activeWsId)
 
+    readonly property var wsIds: {
+        const shown = root.Config.bar.workspaces.shown;
+
+        if (root.Config.bar.workspaces.showUnoccupied)
+            return Array.from({
+                length: shown
+            }, (_, i) => i + 1);
+
+        const ids = [];
+        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0);
+        for (let i = 0; i < workspaces.length && ids.length < shown; i++) {
+            if (workspaces[i].monitor !== root.monitor)
+                continue;
+            // The only workspaces that exist are either occupied or the current one
+            ids.push(workspaces[i].id);
+        }
+
+        // Return the last `shown` workspaces
+        return ids.length > shown ? ids.slice(-shown) : ids;
+    }
+
     // Only relevant for when showUnoccupied is true
     readonly property int groupOffset: {
         if (!Config.bar.workspaces.showUnoccupied)
@@ -32,6 +53,9 @@ StyledClippingRect {
     property real blur: onSpecial ? 1 : 0
 
     function workspaceIndex(id: int): int {
+        if (!Config.bar.workspaces.showUnoccupied)
+            return wsIds.indexOf(id);
+
         let index = id - 1;
         while (index < 0)
             index += Config.bar.workspaces.shown;
@@ -86,31 +110,12 @@ StyledClippingRect {
             removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
             model: ScriptModel {
-                values: {
-                    const shown = root.Config.bar.workspaces.shown;
-
-                    if (root.Config.bar.workspaces.showUnoccupied)
-                        return Array.from({
-                            length: shown
-                        }, (_, i) => i + 1);
-
-                    const ids = [];
-                    const workspaces = Hypr.workspaces.values.filter(w => w.id > 0);
-                    for (let i = 0; i < workspaces.length && ids.length < shown; i++) {
-                        if (workspaces[i].monitor !== root.monitor)
-                            continue;
-                        // The only workspaces that exist are either occupied or the current one
-                        ids.push(workspaces[i].id);
-                    }
-
-                    // Return the last `shown` workspaces
-                    return ids.length > shown ? ids.slice(-shown) : ids;
-                }
+                values: root.wsIds
             }
 
             delegate: Workspace {
                 activeWsId: root.activeWsId
-                ws: root.groupOffset + index + 1
+                ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
             }
         }
 
