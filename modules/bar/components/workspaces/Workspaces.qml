@@ -89,13 +89,13 @@ StyledClippingRect {
                 values: {
                     const shown = root.Config.bar.workspaces.shown;
 
-                    if (!root.Config.bar.workspaces.showUnoccupied)
+                    if (root.Config.bar.workspaces.showUnoccupied)
                         return Array.from({
                             length: shown
-                        }, (_, i) => i);
+                        }, (_, i) => i + 1);
 
                     const ids = [];
-                    const workspaces = Hypr.workspaces.values;
+                    const workspaces = Hypr.workspaces.values.filter(w => w.id > 0);
                     for (let i = 0; i < workspaces.length && ids.length < shown; i++) {
                         if (workspaces[i].monitor !== root.monitor)
                             continue;
