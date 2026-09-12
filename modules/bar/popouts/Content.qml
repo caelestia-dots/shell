@@ -20,8 +20,8 @@ Item {
         return acc;
     }, {})
 
-    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.extraLargeIncreased : 0
-    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.extraLargeIncreased : 0
+    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.large * 2 : 0
+    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.large * 2 : 0
 
     Item {
         id: content
@@ -165,6 +165,7 @@ Item {
 
         required property string name
         readonly property bool shouldBeActive: root.popouts.currentName === name
+        property bool ready: true
 
         anchors.centerIn: parent
 

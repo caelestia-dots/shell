@@ -82,7 +82,6 @@ Column {
                     return Tr.tr("Time remaining: %1").arg(time);
                 return Tr.tr("Calculating remaining battery life...");
             }
-
             if (dev.timeToFull > 0)
                 return Tr.tr("Time until charged: %1").arg(root.formatSeconds(dev.timeToFull));
             if (Math.round(dev.percentage * 100) === 100)
@@ -247,13 +246,17 @@ Column {
         implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.large
+        // qmllint disable missing-property
         ToolTip.visible: batteryHover.hovered && (!cardLayout.enabled || BatteryControl.isReadOnly)
         ToolTip.text: BatteryControl.isReadOnly ? Tr.tr("Charge threshold is locked in BIOS settings") : (BatteryControl.busy ? Tr.tr("Battery control busy") : "")
+        // qmllint enable missing-property
 
         ColumnLayout {
             id: cardLayout
 
+            // qmllint disable missing-property
             enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+            // qmllint enable missing-property
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
@@ -292,7 +295,9 @@ Column {
 
                 StyledSwitch {
                     visible: BatteryControl.isSupported && BatteryControl.isBinary
+                    // qmllint disable missing-property
                     enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                    // qmllint enable missing-property
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     checked: BatteryControl.enabled
                     onToggled: BatteryControl.toggle()
@@ -315,7 +320,9 @@ Column {
                         type: TextButton.Tonal
                         text: `${modelData}%`
                         checked: BatteryControl.threshold === modelData
+                        // qmllint disable missing-property
                         enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                        // qmllint enable missing-property
                         onClicked: BatteryControl.setThreshold(modelData)
                     }
                 }
@@ -323,7 +330,9 @@ Column {
 
             StyledSlider {
                 visible: BatteryControl.isSupported && BatteryControl.isRange
+                // qmllint disable missing-property
                 enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                // qmllint enable missing-property
                 interactionOnMove: false
                 Layout.fillWidth: true
                 Layout.topMargin: Tokens.spacing.extraSmall

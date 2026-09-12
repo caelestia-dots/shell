@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.filedialog
 
@@ -20,25 +21,25 @@ Item {
             {
                 component: dashComponent,
                 iconName: "dashboard",
-                text: qsTr("Dashboard"),
+                text: Tr.tr("Dashboard"),
                 enabled: Config.dashboard.showDashboard
             },
             {
                 component: mediaComponent,
                 iconName: "queue_music",
-                text: qsTr("Media"),
+                text: Tr.tr("Media"),
                 enabled: Config.dashboard.showMedia
             },
             {
                 component: performanceComponent,
                 iconName: "speed",
-                text: qsTr("Performance"),
+                text: Tr.tr("Performance"),
                 enabled: Config.dashboard.showPerformance
             },
             {
                 component: weatherComponent,
                 iconName: "cloud",
-                text: qsTr("Weather"),
+                text: Tr.tr("Weather"),
                 enabled: Config.dashboard.showWeather
             }
         ];

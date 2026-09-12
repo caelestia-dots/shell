@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -44,7 +45,8 @@ ColumnLayout {
         visible: root.rootHeight > Tokens.sizes.lock.showWeatherDetailsHeight
         Layout.alignment: Qt.AlignHCenter
         animate: true
-        text: qsTr("Feels like %1").arg(Weather.temp)
+        // TRANSLATORS: %1 = apparent temperature, unit already included
+        text: Tr.tr("Feels like %1").arg(Weather.temp)
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.large
     }
@@ -55,7 +57,8 @@ ColumnLayout {
         animate: true
         text: {
             const today = Weather.forecast[0];
-            return qsTr("High %1 • Low %2").arg(Weather.formatTemp(today?.maxTempC)).arg(Weather.formatTemp(today?.minTempC));
+            // TRANSLATORS: %1/%2 = today's max and min temperature, units already included
+            return Tr.tr("High %1 • Low %2").arg(Weather.formatTemp(today?.maxTempC)).arg(Weather.formatTemp(today?.minTempC));
         }
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.body.medium

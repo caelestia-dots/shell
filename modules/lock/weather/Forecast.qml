@@ -3,8 +3,10 @@ import QtQuick.Layouts
 import M3Shapes
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -31,7 +33,7 @@ StyledRect {
         StyledText {
             id: title
 
-            text: qsTr("Hourly forecast")
+            text: Tr.tr("Hourly forecast")
             font: Tokens.font.title.medium
         }
     }
@@ -73,7 +75,7 @@ StyledRect {
                         id: temp
 
                         anchors.centerIn: parent
-                        text: Weather.formatTemp(hour.cond.tempC).slice(0, -1) // Remove C/F
+                        text: Weather.formatTemp(hour.cond.tempC, true)
                         color: hour.index === 0 ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
                         font: Tokens.font.title.medium
                     }
@@ -88,14 +90,14 @@ StyledRect {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: hour.cond.precipChance + "%"
+                    text: Strings.percent(hour.cond.precipChance)
                     color: Colours.palette.m3primary
                 }
 
                 StyledText {
                     Layout.topMargin: Tokens.spacing.extraSmall
                     Layout.alignment: Qt.AlignHCenter
-                    text: hour.index === 0 ? qsTr("Now") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
+                    text: hour.index === 0 ? Tr.trCtx("Now", "forecast column") : Qt.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), GlobalConfig.services.useTwelveHourClock ? "ha" : "hh:00")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                 }

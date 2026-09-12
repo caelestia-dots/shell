@@ -13,33 +13,88 @@ StyledRect {
     required property Repeater workspaces
     required property Item mask
     required property bool fullscreen
+    required property bool layoutTransitionRunning
+    required property var workspaceIndex
 
-    readonly property int currentWsIdx: {
-        let i = activeWsId - 1;
-        while (i < 0)
-            i += Config.bar.workspaces.shown;
-        return i % Config.bar.workspaces.shown;
+    property int currentWsId: -1
+    readonly property int currentWsIdx: currentWsId < 0 ? -1 : workspaceIndex(currentWsId)
+    property int switchWsIdx: -1
+
+    property real leading: workspaceOffset(switchWsIdx < 0 ? currentWsIdx : switchWsIdx)
+    property real trailing: workspaceOffset(switchWsIdx < 0 ? currentWsIdx : switchWsIdx)
+    property real currentSize: {
+        workspaces.count;
+        return (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0;
     }
-
-    property real leading: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
-    property real trailing: workspaces.count > 0 ? workspaces.itemAt(currentWsIdx)?.y ?? 0 : 0
-    property real currentSize: workspaces.count > 0 ? (workspaces.itemAt(currentWsIdx) as Workspace)?.size ?? 0 : 0
     property real offset: Math.min(leading, trailing)
     property real size: {
-        const s = Math.abs(leading - trailing) + currentSize;
-        if (Config.bar.workspaces.activeTrail && lastWs > currentWsIdx) {
-            const ws = workspaces.itemAt(lastWs) as Workspace;
-            return ws ? Math.min(ws.y + ws.size - offset, s) : 0;
+        const naturalSize = Math.abs(leading - trailing) + currentSize;
+        if (Config.bar.workspaces.activeTrail && clampTrailEnd) {
+            const clampedSize = Math.min(trailEnd - offset, naturalSize);
+            return Math.max(currentSize, clampedSize);
         }
-        return s;
+        return naturalSize;
+    }
+    property int trailWsIdx: -1
+    readonly property real trailEnd: {
+        workspaces.count;
+        const ws = workspaces.itemAt(trailWsIdx) as Workspace;
+        return ws ? ws.y + ws.height : 0;
+    }
+    property bool clampTrailEnd: false
+
+    property bool ready: false
+    property bool workspaceSwitchRunning: false
+    readonly property bool switchAnimating: leadingAnim.running || trailingAnim.running || currentSizeAnim.running || offsetAnim.running || sizeAnim.running
+    readonly property bool switchSettled: !switchAnimating && !layoutTransitionRunning
+    readonly property bool geometryAnimationEnabled: ready && (!layoutTransitionRunning || workspaceSwitchRunning)
+
+    function workspaceOffset(index: int): real {
+        if (index < 0 || index >= workspaces.count)
+            return 0;
+
+        const ws = workspaces.itemAt(index) as Workspace;
+        return ws ? (switchWsIdx >= 0 ? ws.targetY : ws.y) : 0;
     }
 
-    property int cWs
-    property int lastWs
+    function updateCurrentWorkspace(withAnimation: bool): void {
+        if (activeWsId === currentWsId)
+            return;
 
-    onCurrentWsIdxChanged: {
-        lastWs = cWs;
-        cWs = currentWsIdx;
+        const nextIndex = workspaceIndex(activeWsId);
+        const nextWorkspace = workspaces.itemAt(nextIndex) as Workspace;
+
+        if (withAnimation) {
+            trailWsIdx = currentWsIdx;
+            clampTrailEnd = !!nextWorkspace && nextWorkspace.targetY <= offset;
+            workspaceSwitchRunning = true;
+            switchWsIdx = nextIndex;
+            currentWsId = activeWsId;
+
+            Qt.callLater(() => {
+                if (switchSettled)
+                    endWorkspaceSwitch();
+            });
+        } else {
+            endWorkspaceSwitch();
+            currentWsId = activeWsId;
+        }
+    }
+
+    function endWorkspaceSwitch(): void {
+        switchWsIdx = -1;
+        workspaceSwitchRunning = false;
+        clampTrailEnd = false;
+    }
+
+    onActiveWsIdChanged: {
+        if (ready)
+            updateCurrentWorkspace(true);
+    }
+
+    onSwitchSettledChanged: {
+        if (switchSettled)
+            endWorkspaceSwitch();
     }
 
     clip: true
@@ -48,6 +103,11 @@ StyledRect {
     implicitHeight: size
     radius: Tokens.rounding.full
     color: Colours.palette.m3primary
+
+    Component.onCompleted: {
+        updateCurrentWorkspace(false);
+        ready = true;
+    }
 
     Colouriser {
         source: root.mask
@@ -63,35 +123,45 @@ StyledRect {
     }
 
     Behavior on leading {
-        enabled: root.Config.bar.workspaces.activeTrail
+        enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: leadingAnim
+        }
     }
 
     Behavior on trailing {
-        enabled: root.Config.bar.workspaces.activeTrail
+        enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
         EAnim {
+            id: trailingAnim
+
             duration: Tokens.anim.durations.normal * 2
         }
     }
 
     Behavior on currentSize {
-        enabled: root.Config.bar.workspaces.activeTrail
+        enabled: root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: currentSizeAnim
+        }
     }
 
     Behavior on offset {
-        enabled: !root.Config.bar.workspaces.activeTrail
+        enabled: !root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: offsetAnim
+        }
     }
 
     Behavior on size {
-        enabled: !root.Config.bar.workspaces.activeTrail
+        enabled: !root.Config.bar.workspaces.activeTrail && root.geometryAnimationEnabled
 
-        EAnim {}
+        EAnim {
+            id: sizeAnim
+        }
     }
 
     component EAnim: Anim {

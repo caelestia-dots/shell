@@ -1,0 +1,26 @@
+name: Check PR approvals
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - labeled
+  pull_request_review:
+    types:
+      - submitted
+      - edited
+      - dismissed
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: check-pr-approvals-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-pr-approvals:
+    uses: caelestia-dots/.github/.github/workflows/check-pr-approvals.yml@main

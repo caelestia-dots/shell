@@ -5,6 +5,7 @@
 #include <qfileinfo.h>
 #include <qhash.h>
 #include <qstorageinfo.h>
+#include <qtconcurrentrun.h>
 
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
@@ -93,7 +94,12 @@ QStringList resolveByDevt(uint major, uint minor, int depth) {
 } // namespace
 
 Storage::Storage(QObject* parent)
-    : TickingService(parent) {}
+    : TickingService(parent)
+    , m_futureWatcher(new QFutureWatcher<AccumHash>(this)) {
+    QObject::connect(m_futureWatcher, &QFutureWatcher<AccumHash>::finished, this, [this] {
+        applyDisks(m_futureWatcher->result());
+    });
+}
 
 qreal Storage::percentage() const {
     qreal totalUsed = 0.0;
@@ -225,8 +231,8 @@ QHash<QByteArray, Storage::DeviceEntry> Storage::collectDevices() {
     return byDevice;
 }
 
-QHash<QString, Storage::Accum> Storage::foldToDisks(const QHash<QByteArray, DeviceEntry>& byDevice) {
-    QHash<QString, Accum> byDisk;
+Storage::AccumHash Storage::foldToDisks(const QHash<QByteArray, DeviceEntry>& byDevice) {
+    AccumHash byDisk;
 
     for (auto it = byDevice.constBegin(); it != byDevice.constEnd(); ++it) {
         const auto& e = it.value();
@@ -268,8 +274,16 @@ QHash<QString, Storage::Accum> Storage::foldToDisks(const QHash<QByteArray, Devi
 }
 
 void Storage::tick() {
+    if (m_futureWatcher->isRunning())
+        return;
+
+    m_futureWatcher->setFuture(QtConcurrent::run([] {
+        return foldToDisks(collectDevices());
+    }));
+}
+
+void Storage::applyDisks(const AccumHash& byDisk) {
     const auto prevPercentage = percentage();
-    const auto byDisk = foldToDisks(collectDevices());
 
     QHash<QString, DiskInfo*> existing;
     existing.reserve(m_disks.size());
