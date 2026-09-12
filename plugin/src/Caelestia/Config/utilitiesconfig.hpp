@@ -3,6 +3,7 @@
 #include <qstring.h>
 #include <qvariantlist.h>
 
+#include "common.hpp"
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
@@ -42,6 +43,7 @@ class UtilitiesCards : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, keepAwake, true)
     CONFIG_PROPERTY(bool, recorder, true)
     CONFIG_PROPERTY(bool, quickToggles, true)
+    CONFIG_PROPERTY(bool, phoneShare, false)
 };
 
 class UtilitiesConfig : public settings::ObjectNode {
