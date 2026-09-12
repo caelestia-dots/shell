@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
+import Caelestia
 import Caelestia.Components
 import Caelestia.Config
 import qs.components
@@ -29,16 +30,17 @@ StyledClippingRect {
             }, (_, i) => i + 1);
 
         const ids = [];
-        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0);
-        for (let i = 0; i < workspaces.length && ids.length < shown; i++) {
-            if (workspaces[i].monitor !== root.monitor)
-                continue;
+        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor);
+        const currentIdx = workspaces.findIndex(w => w.id === root.activeWsId);
+        const lastIdx = CUtils.clamp(currentIdx, shown - 1, workspaces.length - 1);
+        for (let i = lastIdx; i >= 0 && ids.length < shown; i--) {
             // The only workspaces that exist are either occupied or the current one
-            ids.push(workspaces[i].id);
+            if (workspaces[i])
+                ids.push(workspaces[i].id);
         }
 
-        // Return the last `shown` workspaces
-        return ids.length > shown ? ids.slice(-shown) : ids;
+        ids.reverse();
+        return ids;
     }
 
     // Only relevant for when showUnoccupied is true
