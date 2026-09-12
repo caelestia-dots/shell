@@ -15,8 +15,17 @@ import qs.services
 Item {
     id: root
 
-    // Funny binding hack to make lyrics update
-    readonly property var _: {
+    readonly property real fadeAmount: 0.1
+    property bool flag
+    property list<string> lyricList: Lyrics.lyrics
+
+    // qmllint disable missing-property
+    readonly property string lyricsError: String(Lyrics?.error ?? "")
+    readonly property bool isLyricsOffline: Boolean(Lyrics?.offline ?? false)
+    // qmllint enable missing-property
+    readonly property bool hasLyricsError: !isLyricsOffline && lyricsError.length > 0
+
+    function syncTrack(): void {
         const p = Players.active;
         if (p)
             Lyrics.setTrack(p.trackArtist, p.trackTitle, p.trackAlbum, p.length);
@@ -24,9 +33,7 @@ Item {
             Lyrics.clearTrack();
     }
 
-    readonly property real fadeAmount: 0.1
-    property bool flag
-    property list<string> lyricList: Lyrics.lyrics
+    Component.onCompleted: syncTrack()
 
     layer.enabled: true
     layer.effect: Mask {
@@ -65,6 +72,8 @@ Item {
 
     state: {
         flag; // For some reason it doesn't update sometimes, so use this to force an update
+        if (Lyrics.forceSearching)
+            return "loading";
         if (Lyrics.hasLyrics)
             return "hasLyrics";
         if (Lyrics.loading)
@@ -158,7 +167,47 @@ Item {
             root.flag = !root.flag;
         }
 
+        function onLoadingChanged() {
+            root.flag = !root.flag;
+        }
+
+        function onForceSearchingChanged() {
+            root.flag = !root.flag;
+        }
+
         target: Lyrics
+    }
+
+    Connections {
+        function onActiveChanged(): void {
+            root.syncTrack();
+        }
+
+        target: Players
+    }
+
+    Connections {
+        function onPostTrackChanged(): void {
+            root.syncTrack();
+        }
+
+        function onTrackTitleChanged(): void {
+            root.syncTrack();
+        }
+
+        function onTrackArtistChanged(): void {
+            root.syncTrack();
+        }
+
+        function onTrackAlbumChanged(): void {
+            root.syncTrack();
+        }
+
+        function onLengthChanged(): void {
+            root.syncTrack();
+        }
+
+        target: Players.active
     }
 
     Loader {
@@ -166,7 +215,7 @@ Item {
 
         anchors.centerIn: parent
         asynchronous: true
-        active: opacity > 0
+        active: opacity > 0 || root.state === "loading"
         opacity: 0
 
         sourceComponent: ColumnLayout {
@@ -189,15 +238,9 @@ Item {
             }
 
             StyledText {
-                text: Tr.tr("Loading lyrics...")
+                text: Lyrics.forceSearching ? Tr.tr("Loading forced lyrics...") : Tr.tr("Loading lyrics...")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.title.medium
-            }
-        }
-
-        Behavior on opacity {
-            Anim {
-                type: Anim.DefaultEffects
             }
         }
     }
@@ -207,7 +250,7 @@ Item {
 
         anchors.centerIn: parent
         asynchronous: true
-        active: opacity > 0
+        active: opacity > 0 || root.state === "noLyrics"
         opacity: 0
 
         sourceComponent: ColumnLayout {
@@ -215,15 +258,45 @@ Item {
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
-                text: "sentiment_sad"
+                text: root.hasLyricsError ? "error" : root.isLyricsOffline ? "cloud_off" : "sentiment_sad"
                 fontStyle: Tokens.font.icon.builders.large.scale(2).build()
-                color: Colours.palette.m3outline
+                color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3outline
             }
 
             StyledText {
-                text: Tr.tr("No lyrics found")
-                color: Colours.palette.m3outline
+                Layout.alignment: Qt.AlignHCenter
+                horizontalAlignment: Text.AlignHCenter
+                text: root.hasLyricsError ? Tr.tr("Couldn't load lyrics") : root.isLyricsOffline ? Tr.tr("You're offline") : Tr.tr("No lyrics found")
+                color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3outline
                 font: Tokens.font.title.medium
+            }
+
+            StyledText {
+                visible: root.hasLyricsError || root.isLyricsOffline
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                text: root.hasLyricsError ? root.lyricsError : Tr.tr("Check your network connection")
+                color: Colours.palette.m3onSurfaceVariant
+                font: Tokens.font.body.small
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                elide: Text.ElideRight
+            }
+
+            TextButton {
+                visible: root.hasLyricsError || root.isLyricsOffline
+                Layout.alignment: Qt.AlignHCenter
+                type: TextButton.Text
+                text: Tr.tr("Retry")
+                onClicked: Lyrics.refresh()
+            }
+
+            TextButton {
+                visible: !root.hasLyricsError && !root.isLyricsOffline
+                Layout.alignment: Qt.AlignHCenter
+                type: TextButton.Text
+                text: Tr.tr("Force search")
+                onClicked: Lyrics.forceSearch()
             }
         }
     }
@@ -256,7 +329,7 @@ Item {
 
         spacing: Tokens.spacing.small
         opacity: 0
-        enabled: opacity > 0
+        enabled: root.state === "hasLyrics"
 
         delegate: StyledText {
             id: lyric
@@ -299,30 +372,6 @@ Item {
                     if (p)
                         p.position = Lyrics.timeForIndex(lyric.index);
                 }
-            }
-        }
-
-        Behavior on opacity {
-            Anim {
-                type: Anim.SlowEffects
-            }
-        }
-    }
-
-    Behavior on lyricList {
-        SequentialAnimation {
-            Anim {
-                target: lyrics
-                property: "opacity"
-                to: 0
-                type: Anim.DefaultEffects
-            }
-            PropertyAction {}
-            Anim {
-                target: lyrics
-                property: "opacity"
-                to: 1
-                type: Anim.SlowEffects
             }
         }
     }
