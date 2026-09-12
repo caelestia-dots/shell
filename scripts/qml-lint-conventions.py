@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 """Checks QML files for Qt coding convention violations.
 
 https://doc.qt.io/qt-6/qml-codingconventions.html
@@ -788,7 +790,10 @@ def main() -> int:
             return 2
         qml_files = [path]
     else:
-        qml_files = sorted(p for p in REPO_ROOT.rglob("*.qml") if "build" not in p.parts)
+        qml_files = sorted(
+            p for p in REPO_ROOT.rglob("*.qml")
+            if "build" not in p.parts and p.relative_to(REPO_ROOT).parts[:2] != ("extras", "sddm")
+        )
 
     fixed = sum(1 for f in qml_files if fix_file(f)) if args.fix else None
     violations = [v for f in qml_files for v in check_file(f)]

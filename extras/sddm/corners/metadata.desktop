@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=Caelestia
+Description=Caelestia lockscreen-inspired SDDM theme
+Author=Caelestia contributors
+License=MIT
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=caelestia
+Theme-API=2.0
