@@ -14,18 +14,37 @@ StyledClippingRect {
     required property ShellScreen screen
     required property bool fullscreen
 
-    readonly property bool onSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== ""
-    readonly property int activeWsId: GlobalConfig.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
+    readonly property bool onSpecial: Hypr.monitorFor(screen)?.lastIpcObject.specialWorkspace?.name !== ""
+    readonly property int activeWsId: Hypr.monitorFor(screen).activeWorkspace?.id ?? 1
 
     readonly property var occupied: {
+        // Other monitors' workspaces count as unoccupied when hiding unoccupied
+        const mon = !Config.bar.workspaces.showUnoccupied ? Hypr.monitorFor(screen) : null;
         const occ = {};
         for (const ws of Hypr.workspaces.values)
-            occ[ws.id] = ws.lastIpcObject.windows > 0;
+            occ[ws.id] = ws.lastIpcObject.windows > 0 && (!mon || ws.monitor === mon);
         return occ;
     }
     readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
+    readonly property real workspaceSpacing: Math.floor(Tokens.spacing.extraSmall)
+    readonly property bool revealTransitionRunning: {
+        for (let i = 0; i < workspaces.count; ++i) {
+            const workspace = workspaces.itemAt(i) as Workspace;
+            if (workspace?.revealTransitionRunning)
+                return true;
+        }
+
+        return false;
+    }
 
     property real blur: onSpecial ? 1 : 0
+
+    function workspaceIndex(id: int): int {
+        let index = id - 1;
+        while (index < 0)
+            index += Config.bar.workspaces.shown;
+        return index % Config.bar.workspaces.shown;
+    }
 
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: layout.implicitHeight + Tokens.padding.small
@@ -57,6 +76,8 @@ StyledClippingRect {
                 workspaces: workspaces
                 occupied: root.occupied
                 groupOffset: root.groupOffset
+                layoutTransitionRunning: root.revealTransitionRunning
+                workspaceIndex: root.workspaceIndex
             }
         }
 
@@ -64,7 +85,7 @@ StyledClippingRect {
             id: layout
 
             anchors.centerIn: parent
-            spacing: Math.floor(Tokens.spacing.extraSmall)
+            spacing: 0
 
             Repeater {
                 id: workspaces
@@ -75,6 +96,10 @@ StyledClippingRect {
                     activeWsId: root.activeWsId
                     occupied: root.occupied
                     groupOffset: root.groupOffset
+                    shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || ws === root.activeWsId
+
+                    workspaceRepeater: workspaces
+                    layoutSpacing: root.workspaceSpacing
                 }
             }
         }
@@ -89,6 +114,8 @@ StyledClippingRect {
                 workspaces: workspaces
                 mask: layout
                 fullscreen: root.fullscreen
+                layoutTransitionRunning: root.revealTransitionRunning
+                workspaceIndex: root.workspaceIndex
             }
         }
 

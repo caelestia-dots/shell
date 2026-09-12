@@ -5,6 +5,7 @@ import Quickshell
 import Caelestia
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.components.containers
@@ -42,9 +43,9 @@ Item {
             const filePath = decodeURIComponent(rawUrl.substring(7));
             const cmd = ["bash", "-c", 'ext="${1##*.}"\n' + 'tmp="$(mktemp --suffix=.$ext)"\n' + 'args=("-y" "-i" "$1" "-c" "copy" "-metadata" "artist=$2" "-metadata" "title=$3")\n' + 'if [ "${ext,,}" = "mp3" ]; then args+=("-id3v2_version" "3"); fi\n' + 'if ffmpeg "${args[@]}" "$tmp" >/dev/null 2>&1; then mv -f "$tmp" "$1"; else rm -f "$tmp"; fi', "--", filePath, sugArtist, sugTitle];
             Quickshell.execDetached(cmd);
-            Toaster.toast(qsTr("File Metadata Updated"), qsTr("Applied tags to: %1 - %2").arg(sugArtist).arg(sugTitle), "check_circle");
+            Toaster.toast(Tr.tr("File Metadata Updated"), Tr.tr("Applied tags to: %1 - %2").arg(sugArtist).arg(sugTitle), "check_circle");
         } else {
-            Toaster.toast(qsTr("Streaming Metadata Applied"), qsTr("Saved stream alias: %1 - %2").arg(sugArtist).arg(sugTitle), "check_circle");
+            Toaster.toast(Tr.tr("Streaming Metadata Applied"), Tr.tr("Saved stream alias: %1 - %2").arg(sugArtist).arg(sugTitle), "check_circle");
         }
     }
 
@@ -232,7 +233,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: Lyrics.preferredBackend === LyricsBackend.Auto ? qsTr("Source: %1 (Auto)").arg(CUtils.enumToString(Lyrics, "backend")) : qsTr("Source: %1").arg(CUtils.enumToString(Lyrics, "backend"))
+                        text: Lyrics.preferredBackend === LyricsBackend.Auto ? Tr.tr("Source: %1 (Auto)").arg(CUtils.enumToString(Lyrics, "backend")) : Tr.tr("Source: %1").arg(CUtils.enumToString(Lyrics, "backend"))
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.medium
                     }
@@ -248,7 +249,7 @@ Item {
                 StyledText {
                     visible: Lyrics.hasLyrics
                     Layout.fillWidth: true
-                    text: `${Lyrics.selectedCandidate.title || qsTr("Unknown")} • ${Lyrics.selectedCandidate.artist || qsTr("Unknown")}`
+                    text: `${Lyrics.selectedCandidate.title || Tr.tr("Unknown")} • ${Lyrics.selectedCandidate.artist || Tr.tr("Unknown")}`
                     color: Colours.palette.m3onSurface
                     font: Tokens.font.label.large
                     elide: Text.ElideRight
@@ -282,7 +283,7 @@ Item {
                         hoverEnabled: true
                         onClicked: {
                             Quickshell.clipboardText = `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`;
-                            Toaster.toast(qsTr("Copied to Clipboard"), `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`, "content_copy");
+                            Toaster.toast(Tr.tr("Copied to Clipboard"), `${Lyrics.suggestedArtist} - ${Lyrics.suggestedTitle}`, "content_copy");
                         }
                     }
 
@@ -309,7 +310,7 @@ Item {
                                 Layout.fillWidth: true
                                 color: fixMetadataCard.isHovered ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3primary
                                 font: Tokens.font.label.medium
-                                text: fixMetadataCard.isHovered ? qsTr("Suggested metadata:") : qsTr("Fix metadata!")
+                                text: fixMetadataCard.isHovered ? Tr.tr("Suggested metadata:") : Tr.tr("Fix metadata!")
                             }
                         }
 
@@ -319,7 +320,7 @@ Item {
                             Layout.leftMargin: Tokens.padding.large
                             color: Colours.palette.m3onSecondaryContainer
                             font: Tokens.font.body.small
-                            text: qsTr("Artist: %1").arg(Lyrics.suggestedArtist)
+                            text: Tr.tr("Artist: %1").arg(Lyrics.suggestedArtist)
                             elide: Text.ElideRight
                         }
 
@@ -329,7 +330,7 @@ Item {
                             Layout.leftMargin: Tokens.padding.large
                             color: Colours.palette.m3onSecondaryContainer
                             font: Tokens.font.body.small
-                            text: qsTr("Title: %1").arg(Lyrics.suggestedTitle)
+                            text: Tr.tr("Title: %1").arg(Lyrics.suggestedTitle)
                             elide: Text.ElideRight
                         }
 
@@ -345,7 +346,7 @@ Item {
                                 id: applyBtn
 
                                 type: TextButton.Filled
-                                text: qsTr("Apply")
+                                text: Tr.tr("Apply")
                                 font: Tokens.font.label.small
                                 horizontalPadding: Tokens.padding.small
                                 verticalPadding: Tokens.padding.extraSmall / 2
@@ -369,7 +370,7 @@ Item {
                     StyledText {
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Offset: %1%2 s").arg(Lyrics.offset >= 0 ? "+" : "").arg(Lyrics.offset.toFixed(1))
+                        text: Tr.tr("Offset: %1%2 s").arg(Lyrics.offset >= 0 ? "+" : "").arg(Lyrics.offset.toFixed(1))
                         color: Colours.palette.m3onSurface
                         font: Tokens.font.label.large
                     }
@@ -383,7 +384,7 @@ Item {
                     TextButton {
                         visible: Lyrics.offset !== 0
                         type: TextButton.Text
-                        text: qsTr("Reset")
+                        text: Tr.tr("Reset")
                         onClicked: Lyrics.offset = 0
                     }
                 }
@@ -394,7 +395,7 @@ Item {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: qsTr("Candidates (%1)").arg(Lyrics.lyricCandidates.length)
+                        text: Tr.tr("Candidates (%1)").arg(Lyrics.lyricCandidates.length)
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
                     }
@@ -403,7 +404,7 @@ Item {
                         Layout.preferredWidth: resetBtn.implicitWidth
                         Layout.preferredHeight: resetBtn.implicitHeight
                         ToolTip.visible: resetHover.hovered && resetBtn.disabled
-                        ToolTip.text: qsTr("Select a different candidate to enable reset")
+                        ToolTip.text: Tr.tr("Select a different candidate to enable reset")
 
                         TextButton {
                             id: resetBtn
@@ -411,7 +412,7 @@ Item {
                             anchors.centerIn: parent
                             disabled: !Lyrics.hasCandidateOverride
                             type: TextButton.Text
-                            text: qsTr("Reset to Default")
+                            text: Tr.tr("Reset to Default")
                             onClicked: Lyrics.resetToAuto()
                         }
 
@@ -490,7 +491,7 @@ Item {
 
                                     StyledText {
                                         visible: candItem.isAuto
-                                        text: qsTr("(Default)")
+                                        text: Tr.tr("(Default)")
                                         color: candItem.isSelected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                                         font: Tokens.font.label.small
                                     }
@@ -527,7 +528,7 @@ Item {
 
                     Layout.alignment: Qt.AlignHCenter
                     horizontalAlignment: Text.AlignHCenter
-                    text: Lyrics.forceSearching ? qsTr("Loading forced lyrics...") : Lyrics.loading ? qsTr("Loading...") : root.hasLyricsError ? qsTr("Couldn't load lyrics") : root.isLyricsOffline ? qsTr("You're offline") : qsTr("No lyrics found")
+                    text: Lyrics.forceSearching ? Tr.tr("Loading forced lyrics...") : Lyrics.loading ? Tr.tr("Loading...") : root.hasLyricsError ? Tr.tr("Couldn't load lyrics") : root.isLyricsOffline ? Tr.tr("You're offline") : Tr.tr("No lyrics found")
                     color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                     animate: true
@@ -538,7 +539,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: root.hasLyricsError ? root.lyricsError : qsTr("Check your network connection")
+                    text: root.hasLyricsError ? root.lyricsError : Tr.tr("Check your network connection")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.small
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -549,7 +550,7 @@ Item {
                     visible: !Lyrics.loading && !Lyrics.forceSearching && (root.hasLyricsError || root.isLyricsOffline)
                     Layout.alignment: Qt.AlignHCenter
                     type: TextButton.Text
-                    text: qsTr("Retry")
+                    text: Tr.tr("Retry")
                     onClicked: Lyrics.refresh()
                 }
 
@@ -557,7 +558,7 @@ Item {
                     visible: !Lyrics.loading && !Lyrics.forceSearching && !root.hasLyricsError && !root.isLyricsOffline && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
                     Layout.alignment: Qt.AlignHCenter
                     type: TextButton.Text
-                    text: qsTr("Force search")
+                    text: Tr.tr("Force search")
                     onClicked: Lyrics.forceSearch()
                 }
             }

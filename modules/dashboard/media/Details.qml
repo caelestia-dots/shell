@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell.Services.Mpris
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -45,7 +46,7 @@ ColumnLayout {
 
     StyledText {
         Layout.fillWidth: true
-        text: Players.active?.trackArtist || qsTr("Unknown artist")
+        text: Players.active?.trackArtist || Tr.tr("Unknown artist")
         color: Colours.palette.m3onSurfaceVariant
         font: Tokens.font.title.medium
         elide: Text.ElideRight
@@ -54,7 +55,7 @@ ColumnLayout {
 
     StyledText {
         Layout.fillWidth: true
-        text: Players.active?.trackAlbum || qsTr("Unknown album")
+        text: Players.active?.trackAlbum || Tr.tr("Unknown album")
         color: Colours.palette.m3secondary
         font: Tokens.font.title.medium
         elide: Text.ElideRight

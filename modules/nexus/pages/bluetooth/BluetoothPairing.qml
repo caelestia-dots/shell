@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -21,7 +22,7 @@ PageBase {
             adapter.discovering = on;
     }
 
-    title: qsTr("Pair new device")
+    title: Tr.tr("Pair new device")
     isSubPage: true
 
     Component.onCompleted: setScan(true)
@@ -56,7 +57,7 @@ PageBase {
                 anchors.leftMargin: Tokens.padding.large
                 anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.2)
 
-                text: qsTr("Available devices")
+                text: Tr.tr("Available devices")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
             }
@@ -70,7 +71,7 @@ PageBase {
             extraHeight: scanIndicator.implicitHeight
             last: true
             placeholderIcon: "bluetooth_searching"
-            placeholderText: qsTr("Searching for devices…")
+            placeholderText: Tr.tr("Searching for devices…")
             list.anchors.top: scanIndicator.bottom
 
             model: ScriptModel {
@@ -139,14 +140,14 @@ PageBase {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: newDevice.modelData?.name || qsTr("Unknown device")
+                            text: newDevice.modelData?.name || Tr.tr("Unknown device")
                             font: Tokens.font.body.small
                             elide: Text.ElideRight
                         }
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: newDevice.modelData?.pairing ? qsTr("Pairing...") : (newDevice.modelData?.address ?? "")
+                            text: newDevice.modelData?.pairing ? Tr.tr("Pairing...") : (newDevice.modelData?.address ?? "")
                             color: Colours.palette.m3outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight

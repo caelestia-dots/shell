@@ -2,6 +2,7 @@ import "navpane"
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -19,7 +20,7 @@ ColumnLayout {
 
         Layout.fillWidth: true
 
-        placeholderText: qsTr("Search settings")
+        placeholderText: Tr.tr("Search settings")
         font: Tokens.font.body.large
 
         bg.color: Colours.tPalette.m3surfaceContainerLowest

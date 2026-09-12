@@ -163,6 +163,10 @@ QString Gpu::name() const {
     return m_name;
 }
 
+bool Gpu::detecting() const {
+    return m_detecting;
+}
+
 qreal Gpu::percentage() const {
     return m_percentage;
 }
@@ -190,6 +194,14 @@ void Gpu::setName(QString value) {
     emit nameChanged();
 }
 
+void Gpu::setDetecting(bool value) {
+    if (value == m_detecting) {
+        return;
+    }
+    m_detecting = value;
+    emit detectingChanged();
+}
+
 void Gpu::tick() {
     if (m_type == GpuType::Generic) {
         readGenericUsage();
@@ -210,11 +222,13 @@ void Gpu::resolveGpu() {
     }
 
     if (m_userType == GpuType::None) {
-        setName(tr("None"));
+        setName({});
+        setDetecting(false);
         return;
     }
 
-    setName(tr("Detecting GPU..."));
+    setName({});
+    setDetecting(true);
     tryNameSource(m_userType == GpuType::Generic ? k_firstGenericSource : k_nvidiaSource, generation);
 }
 
@@ -243,13 +257,15 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
             setType(m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic);
 
         if (m_type == GpuType::None) {
-            setName(tr("None"));
+            setName({});
+            setDetecting(false);
             return;
         }
     }
 
     if (!name.isEmpty()) {
         setName(std::move(name));
+        setDetecting(false);
         return;
     }
 
@@ -258,7 +274,8 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
     if (next < probeEnd()) {
         tryNameSource(next, generation);
     } else {
-        setName(tr("None"));
+        setName({});
+        setDetecting(false);
     }
 }
 

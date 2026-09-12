@@ -7,6 +7,7 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components.misc
 import qs.services
 import qs.utils
@@ -42,9 +43,9 @@ Singleton {
             return;
 
         if (dnd)
-            Toaster.toast(qsTr("Do not disturb enabled"), qsTr("Popup notifications are now disabled"), "do_not_disturb_on");
+            Toaster.toast(Tr.tr("Do not disturb enabled"), Tr.tr("Popup notifications are now disabled"), "do_not_disturb_on");
         else
-            Toaster.toast(qsTr("Do not disturb disabled"), qsTr("Popup notifications are now enabled"), "do_not_disturb_off");
+            Toaster.toast(Tr.tr("Do not disturb disabled"), Tr.tr("Popup notifications are now enabled"), "do_not_disturb_off");
     }
 
     onListChanged: {

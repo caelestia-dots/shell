@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.components.containers
@@ -233,7 +234,7 @@ Item {
             }
 
             StyledText {
-                text: Lyrics.forceSearching ? qsTr("Loading forced lyrics...") : qsTr("Loading lyrics...")
+                text: Lyrics.forceSearching ? Tr.tr("Loading forced lyrics...") : Tr.tr("Loading lyrics...")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.title.medium
             }
@@ -261,7 +262,7 @@ Item {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
-                text: root.hasLyricsError ? qsTr("Couldn't load lyrics") : root.isLyricsOffline ? qsTr("You're offline") : qsTr("No lyrics found")
+                text: root.hasLyricsError ? Tr.tr("Couldn't load lyrics") : root.isLyricsOffline ? Tr.tr("You're offline") : Tr.tr("No lyrics found")
                 color: root.hasLyricsError ? Colours.palette.m3error : Colours.palette.m3outline
                 font: Tokens.font.title.medium
             }
@@ -271,7 +272,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                text: root.hasLyricsError ? root.lyricsError : qsTr("Check your network connection")
+                text: root.hasLyricsError ? root.lyricsError : Tr.tr("Check your network connection")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -282,7 +283,7 @@ Item {
                 visible: root.hasLyricsError || root.isLyricsOffline
                 Layout.alignment: Qt.AlignHCenter
                 type: TextButton.Text
-                text: qsTr("Retry")
+                text: Tr.tr("Retry")
                 onClicked: Lyrics.refresh()
             }
 
@@ -290,7 +291,7 @@ Item {
                 visible: !root.hasLyricsError && !root.isLyricsOffline
                 Layout.alignment: Qt.AlignHCenter
                 type: TextButton.Text
-                text: qsTr("Force search")
+                text: Tr.tr("Force search")
                 onClicked: Lyrics.forceSearch()
             }
         }

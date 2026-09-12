@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -50,7 +51,7 @@ ColumnLayout {
 
             StyledText {
                 Layout.fillWidth: true
-                text: qsTr("Ethernet")
+                text: Tr.tr("Ethernet")
                 font: Tokens.font.body.medium
             }
 
@@ -60,7 +61,7 @@ ColumnLayout {
 
                 StyledText {
                     Layout.alignment: Qt.AlignRight
-                    text: Nmcli.activeEthernet ? qsTr("Connected") : qsTr("Not connected")
+                    text: Nmcli.activeEthernet ? Tr.trCtx("Connected", "ethernet link state") : Tr.trCtx("Not connected", "ethernet link state")
                     color: Nmcli.activeEthernet ? Colours.palette.m3primary : Colours.palette.m3outline
                     font: Tokens.font.label.small
                 }
@@ -68,7 +69,8 @@ ColumnLayout {
                 StyledText {
                     Layout.alignment: Qt.AlignRight
                     visible: Nmcli.activeEthernet && Nmcli.ethernetDataUsage.length > 0
-                    text: qsTr("Data usage: %1").arg(Nmcli.ethernetDataUsage)
+                    // TRANSLATORS: %1 = data transferred, already formatted with a unit
+                    text: Tr.tr("Data usage: %1").arg(Nmcli.ethernetDataUsage)
                     color: Colours.palette.m3outline
                     font: Tokens.font.label.small
                 }
@@ -140,7 +142,7 @@ ColumnLayout {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: ethRow.modelData.connection || ethRow.modelData.iface || qsTr("Wired connection")
+                        text: ethRow.modelData.connection || ethRow.modelData.iface || Tr.tr("Wired connection")
                         font: Tokens.font.body.medium
                         elide: Text.ElideRight
                         animate: true
@@ -148,7 +150,7 @@ ColumnLayout {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: ethRow.isConnected ? ethRow.modelData.iface : qsTr("Not connected • %1").arg(ethRow.modelData.iface)
+                        text: ethRow.isConnected ? ethRow.modelData.iface : Tr.trCtx("Not connected • %1", "ethernet link state with interface name").arg(ethRow.modelData.iface)
                         color: ethRow.isConnected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
                         elide: Text.ElideRight
@@ -192,13 +194,13 @@ ColumnLayout {
                         EthDetail {
                             id: ethIpAddr
 
-                            label: qsTr("Local IP Address")
+                            label: Tr.tr("Local IP Address")
                         }
 
                         EthDetail {
                             id: ethDns
 
-                            label: qsTr("Primary DNS")
+                            label: Tr.tr("Primary DNS")
                         }
                     }
                 }
