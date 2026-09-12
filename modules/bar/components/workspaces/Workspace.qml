@@ -40,13 +40,23 @@ Item {
     }
 
     anchors.horizontalCenter: parent.horizontalCenter
-    LazyListView.preferredHeight: layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
+    LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
+
+    opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
 
     onFocusedChanged: updateShape()
     Component.onCompleted: updateShape()
 
     Behavior on y {
+        enabled: root.LazyListView.ready
+
         Anim {}
+    }
+
+    Behavior on opacity {
+        Anim {
+            type: Anim.DefaultEffects
+        }
     }
 
     Component {

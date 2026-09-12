@@ -83,6 +83,7 @@ StyledClippingRect {
             implicitHeight: contentHeight
 
             spacing: Tokens.spacing.extraSmall
+            removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
             model: ScriptModel {
                 values: {

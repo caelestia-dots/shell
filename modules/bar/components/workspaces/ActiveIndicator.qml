@@ -62,7 +62,6 @@ StyledRect {
 
         target: root.activeWs.LazyListView
     }
-    // TODO: add/remove/move for workspaces animation
 
     Colouriser {
         source: root.mask
