@@ -28,7 +28,7 @@ Item {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {
             const item = repeater.itemAt(i) as ToastWrapper;
-            if (!item.modelData.closed && !item.previewHidden)
+            if (item && !item.modelData?.closed && !item.previewHidden)
                 h += item.implicitHeight + spacing;
         }
         return h;
@@ -68,7 +68,7 @@ Item {
         readonly property bool previewHidden: {
             let extraHidden = 0;
             for (let i = 0; i < index; i++)
-                if (Toaster.toasts[i].closed)
+                if (Toaster.toasts[i]?.closed)
                     extraHidden++;
             return index >= Config.utilities.maxToasts + extraHidden;
         }
@@ -86,7 +86,7 @@ Item {
             let y = 0;
             for (let i = 0; i < index; i++) {
                 const item = repeater.itemAt(i) as ToastWrapper;
-                if (item && !item.modelData.closed && !item.previewHidden)
+                if (item && !item.modelData?.closed && !item.previewHidden)
                     y += item.implicitHeight + root.spacing;
             }
             return y;

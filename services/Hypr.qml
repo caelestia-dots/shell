@@ -18,7 +18,9 @@ Singleton {
 
     readonly property HyprlandToplevel activeToplevel: {
         const t = Hyprland.activeToplevel;
-        return t?.workspace?.name.startsWith("special:") || Hyprland.focusedWorkspace?.toplevels.values.length > 0 ? t : null;
+        const isSpecial = Boolean(t && t.workspace && t.workspace.name && t.workspace.name.startsWith("special:"));
+        const hasToplevels = Boolean(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.toplevels.values.length > 0);
+        return isSpecial || hasToplevels ? t : null;
     }
     readonly property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
     readonly property HyprlandMonitor focusedMonitor: Hyprland.focusedMonitor
@@ -53,17 +55,17 @@ Singleton {
     }
 
     function cycleSpecialWorkspace(direction: string): void {
-        const openSpecials = workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0);
+        const openSpecials = workspaces.values.filter(w => w?.name?.startsWith("special:") && (w?.lastIpcObject?.windows ?? 0) > 0);
 
         if (openSpecials.length === 0)
             return;
 
-        const activeSpecial = focusedMonitor.lastIpcObject.specialWorkspace.name ?? "";
+        const activeSpecial = focusedMonitor?.lastIpcObject.specialWorkspace?.name ?? "";
 
         if (!activeSpecial) {
             if (lastSpecialWorkspace) {
-                const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
-                if (workspace && workspace.lastIpcObject.windows > 0) {
+                const workspace = workspaces.values.find(w => w?.name === lastSpecialWorkspace);
+                if (workspace && (workspace?.lastIpcObject?.windows ?? 0) > 0) {
                     focusWorkspace(lastSpecialWorkspace);
                     return;
                 }
@@ -149,7 +151,7 @@ Singleton {
 
     Connections {
         function onLastIpcObjectChanged(): void {
-            const specialName = root.focusedMonitor.lastIpcObject.specialWorkspace.name;
+            const specialName = root.focusedMonitor?.lastIpcObject.specialWorkspace?.name;
 
             if (specialName && specialName.startsWith("special:")) {
                 root.lastSpecialWorkspace = specialName;

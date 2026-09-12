@@ -102,7 +102,8 @@ Singleton {
         [["battery"], "power"],
         [["screenshot"], "screenshot_monitor"],
         [["welcome"], "waving_hand"],
-        [["time", "a break"], "schedule"],
+        [["event", "calendar"], "calendar_month"],
+        [["time", "a break", "reminder", "upcoming"], "schedule"],
         [["installed"], "download"],
         [["update"], "update"],
         [["unable to"], "deployed_code_alert"],
@@ -115,14 +116,41 @@ Singleton {
      * Checks if a name matches an icon rule. See the IconRule type in the config module.
      */
     function matchIconRule(name: string, iconRule: var): bool {
-        if (!iconRule.icon)
+        if (!iconRule || !iconRule.icon)
+            return false;
+        if (!name || typeof name !== "string")
             return false;
 
         if (iconRule.regex) {
-            const re = new RegExp(iconRule.regex, iconRule.flags ?? "");
-            if (re.test(name))
-                return true;
+            try {
+                const re = new RegExp(iconRule.regex, iconRule.flags ?? "");
+                if (re.test(name))
+                    return true;
+            } catch (e) {
+                return false;
+            }
         } else if (iconRule.name === name) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function matchIconConfig(name: string, iconConfig: var): bool {
+        if (!iconConfig || !iconConfig.icon)
+            return false;
+        if (!name || typeof name !== "string")
+            return false;
+
+        if (iconConfig.regex) {
+            try {
+                const re = new RegExp(iconConfig.regex, iconConfig.flags ?? "");
+                if (re.test(name))
+                    return true;
+            } catch (e) {
+                return false;
+            }
+        } else if (iconConfig.name === name) {
             return true;
         }
 
@@ -142,7 +170,7 @@ Singleton {
 
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
-        if (fallback !== "undefined")
+        if (fallback && fallback !== "undefined")
             return Quickshell.iconPath(icon, fallback);
         return Quickshell.iconPath(icon);
     }
@@ -166,9 +194,17 @@ Singleton {
      * If any of the strings are found in the text, returns the result associated with them. Otherwise returns the fallback.
      */
     function matchIcon(text: string, rules: var, fallback: string): string {
-        for (const [needles, result] of rules)
-            if (needles.some(n => text.includes(n)))
+        if (!text || typeof text !== "string" || !Array.isArray(rules))
+            return fallback;
+
+        for (const rule of rules) {
+            if (!Array.isArray(rule) || rule.length < 2)
+                continue;
+            const needles = rule[0];
+            const result = rule[1];
+            if (Array.isArray(needles) && needles.some(n => typeof n === "string" && text.includes(n)))
                 return result;
+        }
 
         return fallback;
     }
@@ -190,7 +226,7 @@ Singleton {
 
     function getNotifIcon(summary: string, urgency: int): string {
         const fallback = urgency === NotificationUrgency.Critical ? "release_alert" : "chat";
-        return matchIcon(summary.toLowerCase(), notifIconRules, fallback);
+        return matchIcon((summary ?? "").toLowerCase(), notifIconRules, fallback);
     }
 
     function getVolumeIcon(volume: real, isMuted: bool): string {
@@ -207,7 +243,37 @@ Singleton {
         return !isMuted && volume > 0 ? "mic" : "mic_off";
     }
 
+    function getSpecialWsIcon(name: string): string {
+        if (!name || typeof name !== "string")
+            return "star";
+        name = name.toLowerCase();
+        if (name.startsWith("special:"))
+            name = name.slice("special:".length);
+
+        for (const iconConfig of GlobalConfig.bar.workspaces.specialWorkspaceIcons)
+            if (matchIconConfig(name, iconConfig))
+                return iconConfig.icon;
+
+        switch (name) {
+        case "special":
+        case "":
+            return "star";
+        case "communication":
+            return "forum";
+        case "music":
+            return "music_cast";
+        case "todo":
+            return "checklist";
+        case "sysmon":
+            return "monitor_heart";
+        default:
+            return name[0] ? name[0].toUpperCase() : "star";
+        }
+    }
+
     function getTrayIcon(id: string, icon: string): string {
+        if (!icon || typeof icon !== "string")
+            return "";
         for (const sub of GlobalConfig.bar.tray.iconSubs)
             if (sub.id === id)
                 return sub.image ? Qt.resolvedUrl(sub.image) : Quickshell.iconPath(sub.icon);
