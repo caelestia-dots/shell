@@ -40,7 +40,7 @@ StyledRect {
     property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
     property color disabledOnColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
 
-    property bool internalChecked
+    property bool internalChecked: checked
     property real shapeMorphExpansion: shapeMorph && pressed ? 24 : 0 // Apparently it's always 24px no matter the width of the button
     readonly property color onColour: disabled ? disabledOnColour : internalChecked ? activeOnColour : inactiveOnColour
 
@@ -49,6 +49,21 @@ StyledRect {
     property real defaultRadius: Tokens.rounding.large
 
     signal clicked
+
+    activeFocusOnTab: !disabled
+    Accessible.role: Accessible.Button
+    Accessible.name: ""
+
+    Keys.onPressed: event => {
+        if (!disabled && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)) {
+            event.accepted = true;
+            if (isToggle) {
+                checked = !checked;
+                internalChecked = checked;
+            }
+            clicked();
+        }
+    }
 
     onCheckedChanged: internalChecked = checked
 
@@ -73,8 +88,10 @@ StyledRect {
         color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
         disabled: root.disabled
         onClicked: {
-            if (root.isToggle)
-                root.internalChecked = !root.internalChecked;
+            if (root.isToggle) {
+                root.checked = !root.checked;
+                root.internalChecked = root.checked;
+            }
             root.clicked();
         }
     }
