@@ -2,8 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
-import QtQuick.Layouts
 import Quickshell
+import Quickshell.Hyprland
+import Caelestia.Components
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -14,28 +15,19 @@ StyledClippingRect {
     required property ShellScreen screen
     required property bool fullscreen
 
-    readonly property bool onSpecial: Hypr.monitorFor(screen)?.lastIpcObject.specialWorkspace?.name !== ""
-    readonly property int activeWsId: Hypr.monitorFor(screen).activeWorkspace?.id ?? 1
+    readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
+    readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
+    readonly property int activeWsId: monitor.activeWorkspace?.id ?? 1
+    readonly property int activeWsIdx: workspaceIndex(activeWsId)
 
-    readonly property var occupied: {
-        // Other monitors' workspaces count as unoccupied when hiding unoccupied
-        const mon = !Config.bar.workspaces.showUnoccupied ? Hypr.monitorFor(screen) : null;
-        const occ = {};
-        for (const ws of Hypr.workspaces.values)
-            occ[ws.id] = ws.lastIpcObject.windows > 0 && (!mon || ws.monitor === mon);
-        return occ;
+    // Only relevant for when showUnoccupied is true
+    readonly property int groupOffset: {
+        if (!Config.bar.workspaces.showUnoccupied)
+            return 0;
+        return Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown;
     }
-    readonly property int groupOffset: Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown
+
     readonly property real workspaceSpacing: Math.floor(Tokens.spacing.extraSmall)
-    readonly property bool revealTransitionRunning: {
-        for (let i = 0; i < workspaces.count; ++i) {
-            const workspace = workspaces.itemAt(i) as Workspace;
-            if (workspace?.revealTransitionRunning)
-                return true;
-        }
-
-        return false;
-    }
 
     property real blur: onSpecial ? 1 : 0
 
@@ -47,7 +39,7 @@ StyledClippingRect {
     }
 
     implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: layout.implicitHeight + Tokens.padding.small
+    implicitHeight: workspaces.implicitHeight + Tokens.padding.small
 
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
@@ -81,26 +73,42 @@ StyledClippingRect {
             }
         }
 
-        ColumnLayout {
-            id: layout
+        LazyListView {
+            id: workspaces
 
-            anchors.centerIn: parent
-            spacing: 0
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            implicitHeight: contentHeight
 
-            Repeater {
-                id: workspaces
+            spacing: Tokens.spacing.extraSmall
 
-                model: Config.bar.workspaces.shown
+            model: ScriptModel {
+                values: {
+                    const shown = root.Config.bar.workspaces.shown;
 
-                Workspace {
-                    activeWsId: root.activeWsId
-                    occupied: root.occupied
-                    groupOffset: root.groupOffset
-                    shouldShow: Config.bar.workspaces.showUnoccupied || isOccupied || ws === root.activeWsId
+                    if (!root.Config.bar.workspaces.showUnoccupied)
+                        return Array.from({
+                            length: shown
+                        }, (_, i) => i);
 
-                    workspaceRepeater: workspaces
-                    layoutSpacing: root.workspaceSpacing
+                    const ids = [];
+                    const workspaces = Hypr.workspaces.values;
+                    for (let i = 0; i < workspaces.length && ids.length < shown; i++) {
+                        if (workspaces[i].monitor !== root.monitor)
+                            continue;
+                        // The only workspaces that exist are either occupied or the current one
+                        ids.push(workspaces[i].id);
+                    }
+
+                    // Return the last `shown` workspaces
+                    return ids.length > shown ? ids.slice(-shown) : ids;
                 }
+            }
+
+            delegate: Workspace {
+                activeWsId: root.activeWsId
+                ws: root.groupOffset + index + 1
             }
         }
 
@@ -110,19 +118,17 @@ StyledClippingRect {
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
-                activeWsId: root.activeWsId
-                workspaces: workspaces
-                mask: layout
-                fullscreen: root.fullscreen
-                layoutTransitionRunning: root.revealTransitionRunning
+                activeWs: workspaces.itemAtIndex(root.activeWsIdx)
+                view: workspaces
+                mask: workspaces
                 workspaceIndex: root.workspaceIndex
             }
         }
 
         MouseArea {
-            anchors.fill: layout
+            anchors.fill: workspaces
             onClicked: event => {
-                const ws = (layout.childAt(event.x, event.y) as Workspace)?.ws;
+                const ws = (workspaces.itemAt(event.x, event.y) as Workspace)?.ws;
                 if (!ws)
                     return;
                 if (Hypr.activeWsId !== ws)
