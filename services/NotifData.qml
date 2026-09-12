@@ -43,7 +43,9 @@ QtObject {
     property string notificationId
     property string summary
     property string body
-    property string appIcon
+    property string rawAppIcon
+    // Some senders (e.g. Chrome) pass a file path here instead of a themed icon name
+    readonly property string appIcon: (rawAppIcon.startsWith("/") || rawAppIcon.startsWith("file://")) ? (hints?.["desktop-entry"] ?? rawAppIcon) : rawAppIcon
     property string appName
     property string image
     property var hints // Hints are not persisted across restarts
@@ -137,7 +139,7 @@ QtObject {
         }
 
         function onAppIconChanged(): void {
-            notif.appIcon = notif.notification.appIcon;
+            notif.rawAppIcon = notif.notification.appIcon;
         }
 
         function onAppNameChanged(): void {
@@ -233,7 +235,7 @@ QtObject {
         notificationId = notification.id;
         summary = notification.summary;
         body = notification.body;
-        appIcon = notification.appIcon;
+        rawAppIcon = notification.appIcon;
         appName = notification.appName;
         image = notification.image;
         maybeTriggerDummyImageLoader();
