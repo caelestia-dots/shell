@@ -40,10 +40,14 @@ Item {
     }
 
     anchors.horizontalCenter: parent.horizontalCenter
-    LazyListView.preferredHeight: layout.implicitHeight
+    LazyListView.preferredHeight: layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
 
     onFocusedChanged: updateShape()
     Component.onCompleted: updateShape()
+
+    Behavior on y {
+        Anim {}
+    }
 
     Component {
         id: shapeComponent

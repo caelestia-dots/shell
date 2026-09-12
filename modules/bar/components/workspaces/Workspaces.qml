@@ -39,7 +39,7 @@ StyledClippingRect {
     }
 
     implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: workspaces.implicitHeight + Tokens.padding.small
+    implicitHeight: workspaces.implicitHeight + workspaces.anchors.margins * 2
 
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
@@ -78,7 +78,8 @@ StyledClippingRect {
 
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.extraSmall
             implicitHeight: contentHeight
 
             spacing: Tokens.spacing.extraSmall
@@ -114,7 +115,8 @@ StyledClippingRect {
 
         Loader {
             asynchronous: true
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: workspaces.left
+            anchors.right: workspaces.right
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
@@ -181,5 +183,9 @@ StyledClippingRect {
         Anim {
             type: Anim.StandardSmall
         }
+    }
+
+    Behavior on implicitHeight {
+        Anim {}
     }
 }

@@ -48,7 +48,7 @@ StyledRect {
         offsetAnim.stop();
         heightAnim.stop();
         offsetAnim.to = activeWs.LazyListView.layoutY;
-        heightAnim.to = activeWs.LazyListView.preferredHeight + (activeWs.hasWindows ? Tokens.padding.extraSmall : 0);
+        heightAnim.to = activeWs.LazyListView.preferredHeight;
         offsetAnim.start();
         heightAnim.start();
     }
@@ -58,7 +58,6 @@ StyledRect {
 
     clip: true
     y: offset + mask.y
-    implicitWidth: Tokens.sizes.bar.innerWidth - Tokens.padding.small
     radius: Tokens.rounding.full
     color: Colours.palette.m3primary
 
