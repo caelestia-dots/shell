@@ -80,6 +80,8 @@ struct ArtistTitleSplit {
     bool valid = false;
 };
 
+[[nodiscard]] QString stripArtistFromTitle(const QString& title, const QString& artist);
+
 // Multi-dash policy: First-separator split (A | B - C) is preferred over last-separator (A - B | C).
 // Example: "Billie Eilish - Ocean Eyes - Acoustic Version" -> artist: "Billie Eilish", title: "Ocean Eyes - Acoustic
 // Version"
@@ -102,8 +104,11 @@ struct ArtistTitleSplit {
     if (prefix.isEmpty() || stripped.isEmpty() || stripped == trimmed) {
         return {};
     }
+    const QString cleanedPrefix = Lyrics::cleanTrackTitle(prefix);
     const QString cleanedTitle = Lyrics::cleanTrackTitle(stripped);
-    return { .artist = prefix, .title = cleanedTitle.isEmpty() ? stripped : cleanedTitle, .valid = true };
+    return { .artist = cleanedPrefix.isEmpty() ? prefix : cleanedPrefix,
+        .title = cleanedTitle.isEmpty() ? stripped : cleanedTitle,
+        .valid = true };
 }
 
 [[nodiscard]] QUrl buildLrclibGetUrl(
@@ -190,9 +195,48 @@ struct ArtistTitleSplit {
     if (na == nb) {
         return true;
     }
-    const QString pa = normalizeForComp(Lyrics::extractPrimaryArtist(cleanArtist(a)));
-    const QString pb = normalizeForComp(Lyrics::extractPrimaryArtist(cleanArtist(b)));
-    return !pa.isEmpty() && !pb.isEmpty() && pa == pb;
+    static const QRegularExpression k_splitRegex(
+        u"\\s*(?:,|;|/|&|\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith|\\bx\\b|\\b\\x{00D7}\\b)\\s*"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    const QStringList partsA = a.split(k_splitRegex, Qt::SkipEmptyParts);
+    const QStringList partsB = b.split(k_splitRegex, Qt::SkipEmptyParts);
+    for (const auto& paRaw : partsA) {
+        const QString pa = normalizeForComp(cleanArtist(paRaw));
+        if (pa.isEmpty()) {
+            continue;
+        }
+        for (const auto& pbRaw : partsB) {
+            const QString pb = normalizeForComp(cleanArtist(pbRaw));
+            if (pb.isEmpty()) {
+                continue;
+            }
+            if (pa == pb || pa.contains(pb) || pb.contains(pa)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+[[nodiscard]] QString stripArtistFromTitle(const QString& title, const QString& artist) {
+    if (title.isEmpty() || artist.isEmpty()) {
+        return title;
+    }
+    const QString t = title.trimmed();
+    static const QRegularExpression k_sepRegex(u"^\\s*(.*?)\\s*(?:\\s+-\\s+|\\s*[\\x{2013}\\x{2014}:]\\s*)\\s*(.*)$"_s);
+    const auto match = k_sepRegex.match(t);
+    if (!match.hasMatch()) {
+        return t;
+    }
+    const QString prefix = match.captured(1).trimmed();
+    const QString rest = match.captured(2).trimmed();
+    if (matchesArtist(prefix, artist) && !rest.isEmpty()) {
+        return rest;
+    }
+    if (matchesArtist(rest, artist) && !prefix.isEmpty()) {
+        return prefix;
+    }
+    return t;
 }
 
 [[nodiscard]] QString sanitizeSuggestedTitle(const QString& rawTitle, QString& sugArtist) {
@@ -201,6 +245,13 @@ struct ArtistTitleSplit {
     }
     const QString cleaned = Lyrics::cleanTrackTitle(rawTitle);
     QString target = cleaned.isEmpty() ? rawTitle : cleaned;
+
+    static const QRegularExpression k_bracketedExtraRegex(
+        u"\\s*[\\(\\[\\{\\x{FF08}\\x{FF3B}\\x{3010}][^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]*?(?:\\b(?:19|20)\\d{2}\\b|\\bbonus\\s*track\\b|\\bdeluxe(?:\\s*edition)?\\b|\\bsingle\\s*ver(?:sion)?\\b)[^\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]*[\\)\\]\\}\\x{FF09}\\x{FF3D}\\x{3011}]"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    target.remove(k_bracketedExtraRegex);
+    target = target.trimmed();
+
     const ArtistTitleSplit split = splitArtistTitle(target);
     if (split.valid) {
         if (sugArtist.isEmpty() || matchesArtist(split.artist, sugArtist)) {
@@ -214,13 +265,40 @@ struct ArtistTitleSplit {
         }
     }
     sugArtist = cleanArtist(sugArtist);
-    return target;
+    return stripArtistFromTitle(target, sugArtist);
 }
 
-[[nodiscard]] std::pair<QString, QString> findCandidateMetadata(const QList<LyricCandidate>& candidates) {
+[[nodiscard]] bool isMetadataDirty(const QString& artist, const QString& title) {
+    const QString t = title.trimmed();
+    const QString a = artist.trimmed();
+    if (t.isEmpty()) {
+        return false;
+    }
+    if (a.isEmpty()) {
+        return true;
+    }
+    if (cleanArtist(a) != a) {
+        return true;
+    }
+    if (Lyrics::cleanTrackTitle(t) != t) {
+        return true;
+    }
+    if (splitArtistTitle(t).valid) {
+        return true;
+    }
+    if (stripArtistFromTitle(t, a) != t) {
+        return true;
+    }
+    return false;
+}
+
+[[nodiscard]] std::pair<QString, QString> findCandidateMetadata(
+    const QList<LyricCandidate>& candidates, const QString& currentArtist) {
     for (const auto& cand : candidates) {
         if (cand.isValid() && !cand.title().isEmpty() && !cand.artist().isEmpty()) {
-            return { cand.artist(), cand.title() };
+            if (currentArtist.isEmpty() || matchesArtist(cand.artist(), currentArtist)) {
+                return { cand.artist(), cand.title() };
+            }
         }
     }
     return {};
@@ -359,7 +437,20 @@ QString Lyrics::cleanTrackTitle(const QString& title) {
         u"\\s*(?:\\bft\\.?|\\bfeat\\.?|\\bfeaturing)\\s+.*$"_s, QRegularExpression::CaseInsensitiveOption);
     s.remove(k_trailingFeatRegex);
 
+    // 5. Strip trailing unbracketed boilerplate: " - Official Video", " | Visualizer", " Official Music Video"
+    static const QRegularExpression k_trailingBoilerplateRegex(
+        u"(?:\\s*[-–—|/]+\\s*|\\s+)(?:official\\s*(?:music\\s*video|video|audio|lyrics?(?:\\s*video)?|visualizer)|music\\s*video|lyrics?(?:\\s*video)?|visualizer|audio)\\s*$"_s,
+        QRegularExpression::CaseInsensitiveOption);
+    s.remove(k_trailingBoilerplateRegex);
+
     s = s.trimmed();
+    if ((s.startsWith(u'"') && s.endsWith(u'"') && s.size() >= 2) ||
+        (s.startsWith(u'\'') && s.endsWith(u'\'') && s.size() >= 2) ||
+        (s.startsWith(u'“') && s.endsWith(u'”') && s.size() >= 2) ||
+        (s.startsWith(u'‘') && s.endsWith(u'’') && s.size() >= 2)) {
+        s = s.mid(1, s.size() - 2).trimmed();
+    }
+
     return s.isEmpty() ? title.trimmed() : s;
 }
 
@@ -367,11 +458,12 @@ QString Lyrics::extractPrimaryArtist(const QString& artist) {
     if (artist.isEmpty()) {
         return {};
     }
+    const QString cleaned = cleanArtist(artist);
     static const QRegularExpression k_splitRegex(
         u"\\s*(?:,|;|/|&|\\bft\\.?|\\bfeat\\.?|\\bfeaturing|\\bwith|\\bx\\b|\\b\\x{00D7}\\b)\\s*"_s,
         QRegularExpression::CaseInsensitiveOption);
-    const QStringList parts = artist.split(k_splitRegex, Qt::SkipEmptyParts);
-    return parts.isEmpty() ? artist.trimmed() : parts.first().trimmed();
+    const QStringList parts = cleaned.split(k_splitRegex, Qt::SkipEmptyParts);
+    return parts.isEmpty() ? cleaned : parts.first().trimmed();
 }
 
 class ResettingCookieJar : public QNetworkCookieJar {
@@ -885,12 +977,13 @@ void Lyrics::setLines(QVector<LyricLine> lines, LyricsBackend source) {
     }
     m_lyrics = std::move(list);
 
+    const auto hasLyrics = !m_lines.isEmpty();
+    const bool hasLyricsChangedFlag = (hasLyrics != m_hasLyrics);
+    m_hasLyrics = hasLyrics;
+
     setBackend(source);
     emit lyricsChanged();
-
-    const auto hasLyrics = !m_lines.isEmpty();
-    if (hasLyrics != m_hasLyrics) {
-        m_hasLyrics = hasLyrics;
+    if (hasLyricsChangedFlag) {
         emit hasLyricsChanged();
     }
 
@@ -1207,37 +1300,89 @@ bool Lyrics::applyLrclibGetObject(const QJsonObject& obj, const QString& logTrac
 }
 
 void Lyrics::retryLrclibGetSplit(
-    int reqId, const QString& title, const QString& artist, const QString& album, qreal duration) {
-    qCDebug(lcLyrics) << "lrclib /get retry split:" << artist << "-" << title;
+    int reqId, const QString& title, const QString& artist, const QString& album, qreal duration, int stage) {
+    qCDebug(lcLyrics) << "lrclib /get stage" << stage << ":" << artist << "-" << title << "album:" << album
+                      << "dur:" << duration;
     const QUrl retryUrl = buildLrclibGetUrl(title, artist, album, duration);
     auto* retry = getJson(retryUrl, lrclibHeaders());
     trackReply(reqId, retry);
-    QObject::connect(retry, &QNetworkReply::finished, this, [this, retry, reqId, title, artist, album, duration] {
-        retry->deleteLater();
-        if (reqId != m_currentRequestId) {
-            return;
-        }
-        if (retry->error() != QNetworkReply::NoError) {
-            if (duration > 0.0 && isLrclibNotFound(retry)) {
-                retryLrclibGetSplit(reqId, title, artist, album, 0.0);
+    QObject::connect(
+        retry, &QNetworkReply::finished, this, [this, retry, reqId, title, artist, album, duration, stage] {
+            retry->deleteLater();
+            if (reqId != m_currentRequestId) {
                 return;
             }
-            if (isLrclibNotFound(retry)) {
+            if (retry->error() == QNetworkReply::NoError) {
+                const QJsonObject retryObj = QJsonDocument::fromJson(retry->readAll()).object();
+                if (applyLrclibGetObject(retryObj, title, artist)) {
+                    return;
+                }
+            } else if (!isLrclibNotFound(retry)) {
+                qCDebug(lcLyrics) << "lrclib /get retry error:" << retry->errorString();
+                if (!m_hasLyrics) {
+                    noteReplyError(retry);
+                }
                 chainNext(LyricsBackend::LRCLIB, reqId);
                 return;
             }
-            qCDebug(lcLyrics) << "lrclib /get retry error:" << retry->errorString();
-            if (!m_hasLyrics) {
-                noteReplyError(retry);
+
+            if (stage == 0) {
+                if (!album.isEmpty()) {
+                    retryLrclibGetSplit(reqId, title, artist, QString(), duration, 1);
+                    return;
+                }
+                if (duration > 0.0) {
+                    retryLrclibGetSplit(reqId, title, artist, QString(), 0.0, 2);
+                    return;
+                }
             }
+            if (stage == 1) {
+                if (duration > 0.0) {
+                    retryLrclibGetSplit(reqId, title, artist, QString(), 0.0, 2);
+                    return;
+                }
+            }
+            if (stage <= 2) {
+                ArtistTitleSplit split = splitArtistTitle(cleanTrackTitle(m_title));
+                if (!split.valid) {
+                    split = splitArtistTitle(m_title);
+                }
+                if (split.valid) {
+                    if (split.title != title || split.artist != artist) {
+                        retryLrclibGetSplit(reqId, split.title, split.artist, QString(), m_duration, 3);
+                        return;
+                    }
+                    retryLrclibGetSplit(reqId, split.artist, split.title, QString(), 0.0, 5);
+                    return;
+                }
+            }
+            if (stage == 3) {
+                if (duration > 0.0) {
+                    retryLrclibGetSplit(reqId, title, artist, QString(), 0.0, 4);
+                    return;
+                }
+                ArtistTitleSplit split = splitArtistTitle(cleanTrackTitle(m_title));
+                if (!split.valid) {
+                    split = splitArtistTitle(m_title);
+                }
+                if (split.valid) {
+                    retryLrclibGetSplit(reqId, split.artist, split.title, QString(), 0.0, 5);
+                    return;
+                }
+            }
+            if (stage == 4) {
+                ArtistTitleSplit split = splitArtistTitle(cleanTrackTitle(m_title));
+                if (!split.valid) {
+                    split = splitArtistTitle(m_title);
+                }
+                if (split.valid) {
+                    retryLrclibGetSplit(reqId, split.artist, split.title, QString(), 0.0, 5);
+                    return;
+                }
+            }
+
             chainNext(LyricsBackend::LRCLIB, reqId);
-            return;
-        }
-        const QJsonObject retryObj = QJsonDocument::fromJson(retry->readAll()).object();
-        if (!applyLrclibGetObject(retryObj, title, artist)) {
-            chainNext(LyricsBackend::LRCLIB, reqId);
-        }
-    });
+        });
 }
 
 void Lyrics::tryLrclib(int reqId) {
@@ -1247,46 +1392,21 @@ void Lyrics::tryLrclib(int reqId) {
 
     setBackend(LyricsBackend::LRCLIB);
 
-    const QString cleanTitle = cleanTrackTitle(m_title);
-    const QString primaryArtist = extractPrimaryArtist(m_artist);
+    QString cleanTitle = cleanTrackTitle(m_title);
+    QString primaryArtist = extractPrimaryArtist(m_artist);
+    if (!primaryArtist.isEmpty()) {
+        cleanTitle = stripArtistFromTitle(cleanTitle, primaryArtist);
+    } else {
+        const ArtistTitleSplit split = splitArtistTitle(cleanTitle);
+        if (split.valid) {
+            cleanTitle = split.title;
+            primaryArtist = split.artist;
+        }
+    }
     const QString album = m_album;
     const qreal duration = m_duration;
 
-    const QUrl url = buildLrclibGetUrl(cleanTitle, primaryArtist, album, duration);
-    auto* reply = getJson(url, lrclibHeaders());
-    trackReply(reqId, reply);
-
-    QObject::connect(
-        reply, &QNetworkReply::finished, this, [this, reply, reqId, cleanTitle, primaryArtist, album, duration] {
-            reply->deleteLater();
-            if (reqId != m_currentRequestId) {
-                return;
-            }
-            if (reply->error() != QNetworkReply::NoError) {
-                if (isLrclibNotFound(reply)) {
-                    ArtistTitleSplit split = splitArtistTitle(cleanTitle);
-                    if (!split.valid) {
-                        split = splitArtistTitle(m_title);
-                    }
-                    if (split.valid && (split.title != cleanTitle || split.artist != primaryArtist)) {
-                        retryLrclibGetSplit(reqId, split.title, split.artist, QString(), duration);
-                        return;
-                    }
-                    chainNext(LyricsBackend::LRCLIB, reqId);
-                    return;
-                }
-                qCDebug(lcLyrics) << "lrclib /get error:" << reply->errorString();
-                if (!m_hasLyrics) {
-                    noteReplyError(reply);
-                }
-                chainNext(LyricsBackend::LRCLIB, reqId);
-                return;
-            }
-            const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-            if (!applyLrclibGetObject(doc.object(), cleanTitle, primaryArtist)) {
-                chainNext(LyricsBackend::LRCLIB, reqId);
-            }
-        });
+    retryLrclibGetSplit(reqId, cleanTitle, primaryArtist, album, duration, 0);
 }
 
 void Lyrics::tryNetEase(int reqId) {
@@ -1301,10 +1421,19 @@ void Lyrics::tryNetEase(int reqId) {
         m_cookieJar->clear();
     }
 
-    const QString cleanTitle = cleanTrackTitle(m_title);
-    const QString primaryArtist = extractPrimaryArtist(m_artist);
+    QString cleanTitle = cleanTrackTitle(m_title);
+    QString primaryArtist = extractPrimaryArtist(m_artist);
+    if (!primaryArtist.isEmpty()) {
+        cleanTitle = stripArtistFromTitle(cleanTitle, primaryArtist);
+    } else {
+        const ArtistTitleSplit split = splitArtistTitle(cleanTitle);
+        if (split.valid) {
+            cleanTitle = split.title;
+            primaryArtist = split.artist;
+        }
+    }
 
-    const QUrl url = buildNetEaseSearchUrl(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist);
+    const QUrl url = buildNetEaseSearchUrl(cleanTitle, primaryArtist);
 
     auto* reply = getJson(url, netEaseHeaders());
     trackReply(reqId, reply);
@@ -1403,6 +1532,8 @@ void Lyrics::applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const Q
 
     const bool shouldUpgrade =
         !m_hasLyrics || (!m_selected.isValid()) ||
+        (m_selected.backend() == LyricsBackend::NetEase &&
+            (m_preferredBackend == LyricsBackend::LRCLIB || m_preferredBackend == LyricsBackend::Auto)) ||
         (m_duration > 10.0 && m_selected.duration() > 0.0 && std::abs(m_selected.duration() - m_duration) > 10.0 &&
             std::abs(bestCand.duration() - m_duration) < 5.0);
 
@@ -1427,12 +1558,12 @@ void Lyrics::applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const Q
     setLoading(false);
 }
 
-void Lyrics::retryLrclibSearchSplit(int reqId, const QString& title, const QString& artist) {
-    qCDebug(lcLyrics) << "lrclib /search retry split:" << artist << "-" << title;
+void Lyrics::retryLrclibSearchSplit(int reqId, const QString& title, const QString& artist, bool allowReverse) {
+    qCDebug(lcLyrics) << "lrclib /search retry split:" << artist << "-" << title << "(reverse:" << allowReverse << ")";
     const QUrl retryUrl = buildLrclibSearchUrl(title, artist);
     auto* retry = getJson(retryUrl, lrclibHeaders());
     trackReply(reqId, retry);
-    QObject::connect(retry, &QNetworkReply::finished, this, [this, retry, reqId] {
+    QObject::connect(retry, &QNetworkReply::finished, this, [this, retry, reqId, title, artist, allowReverse] {
         retry->deleteLater();
         if (reqId != m_currentRequestId) {
             return;
@@ -1444,10 +1575,17 @@ void Lyrics::retryLrclibSearchSplit(int reqId, const QString& title, const QStri
                     noteReplyError(retry);
                 }
             }
+            if (allowReverse) {
+                retryLrclibSearchSplit(reqId, artist, title, false);
+            }
             return;
         }
         const QJsonDocument retryDoc = QJsonDocument::fromJson(retry->readAll());
         const auto retryResult = parseLrclibSearchResult(retryDoc.array());
+        if (retryResult.candidates.isEmpty() && allowReverse) {
+            retryLrclibSearchSplit(reqId, artist, title, false);
+            return;
+        }
         if (!m_autoCandidate.isValid() && retryResult.bestCandidate.isValid()) {
             m_autoCandidate = retryResult.bestCandidate;
             emit autoCandidateChanged();
@@ -1459,8 +1597,17 @@ void Lyrics::retryLrclibSearchSplit(int reqId, const QString& title, const QStri
 }
 
 void Lyrics::searchLrclibCandidates(int reqId) {
-    const QString cleanTitle = cleanTrackTitle(m_title);
-    const QString primaryArtist = extractPrimaryArtist(m_artist);
+    QString cleanTitle = cleanTrackTitle(m_title);
+    QString primaryArtist = extractPrimaryArtist(m_artist);
+    if (!primaryArtist.isEmpty()) {
+        cleanTitle = stripArtistFromTitle(cleanTitle, primaryArtist);
+    } else {
+        const ArtistTitleSplit split = splitArtistTitle(cleanTitle);
+        if (split.valid) {
+            cleanTitle = split.title;
+            primaryArtist = split.artist;
+        }
+    }
 
     const QUrl url = buildLrclibSearchUrl(cleanTitle, primaryArtist);
     auto* reply = getJson(url, lrclibHeaders());
@@ -1488,7 +1635,7 @@ void Lyrics::searchLrclibCandidates(int reqId) {
                 split = splitArtistTitle(m_title);
             }
             if (split.valid && (split.title != cleanTitle || split.artist != primaryArtist)) {
-                retryLrclibSearchSplit(reqId, split.title, split.artist);
+                retryLrclibSearchSplit(reqId, split.title, split.artist, true);
                 return;
             }
         }
@@ -1507,10 +1654,19 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
         m_cookieJar->clear();
     }
 
-    const QString cleanTitle = cleanTrackTitle(m_title);
-    const QString primaryArtist = extractPrimaryArtist(m_artist);
+    QString cleanTitle = cleanTrackTitle(m_title);
+    QString primaryArtist = extractPrimaryArtist(m_artist);
+    if (!primaryArtist.isEmpty()) {
+        cleanTitle = stripArtistFromTitle(cleanTitle, primaryArtist);
+    } else {
+        const ArtistTitleSplit split = splitArtistTitle(cleanTitle);
+        if (split.valid) {
+            cleanTitle = split.title;
+            primaryArtist = split.artist;
+        }
+    }
 
-    const QUrl url = buildNetEaseSearchUrl(cleanTitle, m_artist.isEmpty() ? primaryArtist : m_artist);
+    const QUrl url = buildNetEaseSearchUrl(cleanTitle, primaryArtist);
 
     auto* reply = getJson(url, netEaseHeaders());
     trackReply(reqId, reply);
@@ -1557,12 +1713,28 @@ void Lyrics::fetchLrclibById(const QString& id, int reqId) {
         }
         if (reply->error() != QNetworkReply::NoError) {
             qCWarning(lcLyrics) << "lrclib /get/{id} error:" << reply->errorString();
+            if (m_hasCandidateOverride) {
+                qCWarning(lcLyrics) << "Saved LRCLIB override for id" << id
+                                    << "failed, clearing override and retrying auto-load";
+                m_hasCandidateOverride = false;
+                emit hasCandidateOverrideChanged();
+                persistTrackPrefs();
+                doLoad();
+                return;
+            }
             noteGuardedReplyError(reply);
             setLoading(false);
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         if (doc.isNull() || !doc.isObject()) {
+            if (m_hasCandidateOverride) {
+                m_hasCandidateOverride = false;
+                emit hasCandidateOverrideChanged();
+                persistTrackPrefs();
+                doLoad();
+                return;
+            }
             setGuardedError(QStringLiteral("malformed JSON from LRCLIB"));
             setLoading(false);
             return;
@@ -1570,6 +1742,13 @@ void Lyrics::fetchLrclibById(const QString& id, int reqId) {
         const QString synced = doc.object().value(u"syncedLyrics"_s).toString();
         if (synced.isEmpty()) {
             qCDebug(lcLyrics) << "lrclib /get/{id}: no syncedLyrics";
+            if (m_hasCandidateOverride) {
+                m_hasCandidateOverride = false;
+                emit hasCandidateOverrideChanged();
+                persistTrackPrefs();
+                doLoad();
+                return;
+            }
             setGuardedError(QStringLiteral("no synced lyrics for id %1").arg(id));
             setLoading(false);
             return;
@@ -1577,6 +1756,13 @@ void Lyrics::fetchLrclibById(const QString& id, int reqId) {
         const auto lines = parseLrc(synced);
         if (lines.isEmpty()) {
             qCDebug(lcLyrics) << "lrclib /get/{id}: unparseable or untimed lyrics";
+            if (m_hasCandidateOverride) {
+                m_hasCandidateOverride = false;
+                emit hasCandidateOverrideChanged();
+                persistTrackPrefs();
+                doLoad();
+                return;
+            }
             setGuardedError(QStringLiteral("unparseable or untimed lyrics from LRCLIB (id %1)").arg(id));
             setLoading(false);
             return;
@@ -1594,17 +1780,40 @@ void Lyrics::handleNetEaseLyricsReply(QNetworkReply* reply, const QString& id, i
     }
     if (reply->error() != QNetworkReply::NoError) {
         qCWarning(lcLyrics) << "netease /lyric error:" << reply->errorString();
+        if (m_hasCandidateOverride) {
+            qCWarning(lcLyrics) << "Saved NetEase override for id" << id
+                                << "failed, clearing override and retrying auto-load";
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+            persistTrackPrefs();
+            doLoad();
+            return;
+        }
         noteGuardedReplyError(reply);
         setLoading(false);
         return;
     }
     const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     if (doc.isNull() || !doc.isObject()) {
+        if (m_hasCandidateOverride) {
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+            persistTrackPrefs();
+            doLoad();
+            return;
+        }
         setGuardedError(QStringLiteral("malformed JSON from NetEase"));
         setLoading(false);
         return;
     }
     if (doc.object().value(u"code"_s).toInt(200) == 404) {
+        if (m_hasCandidateOverride) {
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+            persistTrackPrefs();
+            doLoad();
+            return;
+        }
         setGuardedError(QStringLiteral("NetEase: lyric not found (404) for id %1").arg(id));
         setLoading(false);
         return;
@@ -1612,6 +1821,13 @@ void Lyrics::handleNetEaseLyricsReply(QNetworkReply* reply, const QString& id, i
     const QString lrc = doc.object().value(u"lrc"_s).toObject().value(u"lyric"_s).toString();
     if (lrc.isEmpty()) {
         qCDebug(lcLyrics) << "netease /lyric: empty for id" << id;
+        if (m_hasCandidateOverride) {
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+            persistTrackPrefs();
+            doLoad();
+            return;
+        }
         setGuardedError(QStringLiteral("empty lyric for id %1").arg(id));
         setLoading(false);
         return;
@@ -1619,12 +1835,34 @@ void Lyrics::handleNetEaseLyricsReply(QNetworkReply* reply, const QString& id, i
     const auto lines = parseLrc(lrc);
     if (lines.isEmpty()) {
         qCDebug(lcLyrics) << "netease /lyric: unparseable or untimed lyrics for id" << id;
+        if (m_hasCandidateOverride) {
+            m_hasCandidateOverride = false;
+            emit hasCandidateOverrideChanged();
+            persistTrackPrefs();
+            doLoad();
+            return;
+        }
         setGuardedError(QStringLiteral("unparseable or untimed lyrics from NetEase (id %1)").arg(id));
         setLoading(false);
         return;
     }
     writeCachedLrc(LyricsBackend::NetEase, id, lrc);
-    const LyricCandidate cand(LyricsBackend::NetEase, id, m_title, m_artist, m_album, m_duration);
+
+    QString candTitle = m_title;
+    QString candArtist = m_artist;
+    for (const auto& c : std::as_const(m_candidates)) {
+        if (c.backend() == LyricsBackend::NetEase && c.id() == id) {
+            if (!c.title().isEmpty()) {
+                candTitle = c.title();
+            }
+            if (!c.artist().isEmpty()) {
+                candArtist = c.artist();
+            }
+            break;
+        }
+    }
+
+    const LyricCandidate cand(LyricsBackend::NetEase, id, candTitle, candArtist, m_album, m_duration);
     if (!m_autoCandidate.isValid()) {
         m_autoCandidate = cand;
         emit autoCandidateChanged();
@@ -1659,17 +1897,30 @@ void Lyrics::updateMetadataSuggestion() {
     QString sugArtist;
     QString sugTitle;
 
-    if (m_selected.isValid() && !m_selected.title().isEmpty() && !m_selected.artist().isEmpty()) {
+    const QString effectiveCurrentArtist = extractPrimaryArtist(m_artist);
+    const QString cleaned = cleanTrackTitle(m_title);
+    const ArtistTitleSplit split = splitArtistTitle(cleaned.isEmpty() ? m_title : cleaned);
+
+    if (split.valid && (effectiveCurrentArtist.isEmpty() || matchesArtist(split.artist, effectiveCurrentArtist) ||
+                           matchesArtist(split.title, effectiveCurrentArtist))) {
+        if (!effectiveCurrentArtist.isEmpty() && matchesArtist(split.title, effectiveCurrentArtist)) {
+            sugArtist = split.title;
+            sugTitle = split.artist;
+        } else {
+            sugArtist = split.artist;
+            sugTitle = split.title;
+        }
+    } else if (m_selected.isValid() && !m_selected.title().isEmpty() && !m_selected.artist().isEmpty() &&
+               (effectiveCurrentArtist.isEmpty() || matchesArtist(m_selected.artist(), effectiveCurrentArtist))) {
         sugArtist = m_selected.artist();
         sugTitle = m_selected.title();
-    } else if (m_autoCandidate.isValid() && !m_autoCandidate.title().isEmpty() && !m_autoCandidate.artist().isEmpty()) {
+    } else if (m_autoCandidate.isValid() && !m_autoCandidate.title().isEmpty() && !m_autoCandidate.artist().isEmpty() &&
+               (effectiveCurrentArtist.isEmpty() || matchesArtist(m_autoCandidate.artist(), effectiveCurrentArtist))) {
         sugArtist = m_autoCandidate.artist();
         sugTitle = m_autoCandidate.title();
     } else {
-        std::tie(sugArtist, sugTitle) = findCandidateMetadata(m_candidates);
+        std::tie(sugArtist, sugTitle) = findCandidateMetadata(m_candidates, effectiveCurrentArtist);
         if (sugArtist.isEmpty() || sugTitle.isEmpty()) {
-            const QString cleaned = cleanTrackTitle(m_title);
-            const ArtistTitleSplit split = splitArtistTitle(cleaned.isEmpty() ? m_title : cleaned);
             if (split.valid) {
                 sugArtist = split.artist;
                 sugTitle = split.title;
@@ -1681,11 +1932,12 @@ void Lyrics::updateMetadataSuggestion() {
     }
 
     sugTitle = sanitizeSuggestedTitle(sugTitle, sugArtist);
+    sugArtist = cleanArtist(sugArtist);
 
-    const bool hasSuggestion = !sugArtist.isEmpty() && !sugTitle.isEmpty() &&
-                               (!m_title.trimmed().isEmpty() || !m_artist.trimmed().isEmpty()) &&
-                               (normalizeForComp(sugArtist) != normalizeForComp(m_artist) ||
-                                   normalizeForComp(sugTitle) != normalizeForComp(m_title));
+    const bool isDirty = isMetadataDirty(m_artist, m_title);
+    const bool isDifferent = (normalizeForComp(sugArtist) != normalizeForComp(m_artist) ||
+                              normalizeForComp(sugTitle) != normalizeForComp(m_title));
+    const bool hasSuggestion = isDirty && isDifferent && !sugArtist.isEmpty() && !sugTitle.isEmpty();
 
     if (hasSuggestion != m_hasMetadataSuggestion || sugArtist != m_suggestedArtist || sugTitle != m_suggestedTitle) {
         m_hasMetadataSuggestion = hasSuggestion;
