@@ -39,7 +39,7 @@ Item {
             shape.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
     }
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.horizontalCenter: parent?.horizontalCenter
     LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
 
     opacity: LazyListView.removing || LazyListView.adding ? 0 : 1

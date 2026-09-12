@@ -403,6 +403,11 @@ int LazyListView::count() const {
     return m_model ? m_model->rowCount() : 0;
 }
 
+// Always false; bind through it to re-run itemAtIndex/itemAt on mapping changes
+bool LazyListView::itemsDirty() const {
+    return false;
+}
+
 // Instantiated delegate for a model index, nullptr if outside the cache
 QQuickItem* LazyListView::itemAtIndex(int index) const {
     return m_delegates.value(index).item;
@@ -729,6 +734,9 @@ void LazyListView::syncDelegates() {
                                                    created < static_cast<int>(toCreate.size()));
     if (created > 0 || workRemains)
         polish();
+
+    if (created > 0 || destroyed > 0)
+        emit itemsDirtyChanged();
 }
 
 // Delegates safe to destroy - outside the range to keep and no longer visually
@@ -1008,6 +1016,7 @@ void LazyListView::remapDelegates(const std::function<int(int)>& mapIndex) {
     }
 
     m_delegates = std::move(remapped);
+    emit itemsDirtyChanged();
 }
 
 // --- Model Connection ---
@@ -1066,6 +1075,7 @@ void LazyListView::resetContent() {
         emit countChanged();
     }
 
+    emit itemsDirtyChanged();
     polish();
 }
 

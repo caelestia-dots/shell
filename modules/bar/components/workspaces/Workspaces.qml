@@ -121,7 +121,10 @@ StyledClippingRect {
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
-                activeWs: workspaces.itemAtIndex(root.activeWsIdx)
+                activeWs: {
+                    workspaces.itemsDirty;
+                    return workspaces.itemAtIndex(root.activeWsIdx);
+                }
                 view: workspaces
                 mask: workspaces
                 workspaceIndex: root.workspaceIndex

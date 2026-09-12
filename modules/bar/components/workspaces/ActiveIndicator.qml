@@ -19,6 +19,9 @@ StyledRect {
     property real end
 
     function runAnim(): void {
+        if (!activeWs)
+            return;
+
         const newStart = activeWs.LazyListView.layoutY;
         const goingUp = newStart < start;
         const leadingDuration = Tokens.anim.durations.expressiveDefaultSpatial;
@@ -60,7 +63,7 @@ StyledRect {
             root.runAnim();
         }
 
-        target: root.activeWs.LazyListView
+        target: root.activeWs?.LazyListView ?? null
     }
 
     Colouriser {

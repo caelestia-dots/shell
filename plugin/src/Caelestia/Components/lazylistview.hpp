@@ -102,6 +102,8 @@ class LazyListView : public QQuickItem {
 
     // State
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    // Always false; its notify fires when the index to item mapping changes
+    Q_PROPERTY(bool itemsDirty READ itemsDirty NOTIFY itemsDirtyChanged)
 
 public:
     explicit LazyListView(QQuickItem* parent = nullptr);
@@ -153,6 +155,7 @@ public:
 
     // State
     [[nodiscard]] int count() const;
+    [[nodiscard]] bool itemsDirty() const;
 
     Q_INVOKABLE [[nodiscard]] QQuickItem* itemAtIndex(int index) const;
     Q_INVOKABLE [[nodiscard]] QQuickItem* itemAt(qreal x, qreal y) const;
@@ -172,6 +175,7 @@ signals:
     void removeDurationChanged();
     void readyDelayChanged();
     void countChanged();
+    void itemsDirtyChanged();
     void viewportAdjustNeeded(qreal delta);
 
 protected:
