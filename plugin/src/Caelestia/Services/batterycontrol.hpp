@@ -26,13 +26,14 @@ public:
 
     Q_PROPERTY(bool isSupported READ isSupported NOTIFY isSupportedChanged)
     Q_PROPERTY(ControlType controlType READ controlType NOTIFY controlTypeChanged)
-    Q_PROPERTY(bool isBinary READ isBinary CONSTANT)
-    Q_PROPERTY(bool isTiers READ isTiers CONSTANT)
-    Q_PROPERTY(bool isRange READ isRange CONSTANT)
+    Q_PROPERTY(bool isBinary READ isBinary NOTIFY controlTypeChanged)
+    Q_PROPERTY(bool isTiers READ isTiers NOTIFY controlTypeChanged)
+    Q_PROPERTY(bool isRange READ isRange NOTIFY controlTypeChanged)
+    Q_PROPERTY(bool isReadOnly READ isReadOnly NOTIFY isReadOnlyChanged)
     Q_PROPERTY(bool enabled READ enabled NOTIFY enabledChanged)
     Q_PROPERTY(int threshold READ threshold NOTIFY thresholdChanged)
-    Q_PROPERTY(int minThreshold READ minThreshold CONSTANT)
-    Q_PROPERTY(int maxThreshold READ maxThreshold CONSTANT)
+    Q_PROPERTY(int minThreshold READ minThreshold NOTIFY controlTypeChanged)
+    Q_PROPERTY(int maxThreshold READ maxThreshold NOTIFY controlTypeChanged)
     Q_PROPERTY(int stepSize READ stepSize NOTIFY stepSizeChanged)
     Q_PROPERTY(QList<int> supportedTiers READ supportedTiers NOTIFY supportedTiersChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
@@ -49,6 +50,7 @@ public:
     [[nodiscard]] bool isBinary() const;
     [[nodiscard]] bool isTiers() const;
     [[nodiscard]] bool isRange() const;
+    [[nodiscard]] bool isReadOnly() const;
     [[nodiscard]] bool enabled() const;
     [[nodiscard]] int threshold() const;
     [[nodiscard]] int minThreshold() const;
@@ -71,6 +73,7 @@ public:
 signals:
     void isSupportedChanged();
     void controlTypeChanged();
+    void isReadOnlyChanged();
     void enabledChanged();
     void thresholdChanged();
     void stepSizeChanged();
@@ -97,6 +100,7 @@ private:
     QString m_path;
     ControlType m_controlType = ControlType::Unsupported;
     bool m_isSupported = false;
+    bool m_isReadOnly = false;
     bool m_enabled = false;
     int m_threshold = 100;
     int m_minThreshold = 50;

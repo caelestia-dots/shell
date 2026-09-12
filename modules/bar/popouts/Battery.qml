@@ -163,8 +163,10 @@ Column {
         }
 
         anchors.horizontalCenter: parent.horizontalCenter
+
         implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
         implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
+
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.full
 
@@ -210,6 +212,7 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: Tokens.padding.extraSmall
+
             profile: PowerProfile.PowerSaver
             icon: "energy_savings_leaf"
         }
@@ -218,6 +221,7 @@ Column {
             id: balance
 
             anchors.centerIn: parent
+
             profile: PowerProfile.Balanced
             icon: "balance"
         }
@@ -228,6 +232,7 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: Tokens.padding.extraSmall
+
             profile: PowerProfile.Performance
             icon: "rocket_launch"
         }
@@ -242,13 +247,13 @@ Column {
         implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.large
-        ToolTip.visible: batteryHover.hovered && !cardLayout.enabled
-        ToolTip.text: qsTr("Battery control busy")
+        ToolTip.visible: batteryHover.hovered && (!cardLayout.enabled || BatteryControl.isReadOnly)
+        ToolTip.text: BatteryControl.isReadOnly ? Tr.tr("Charge threshold is locked in BIOS settings") : (BatteryControl.busy ? Tr.tr("Battery control busy") : "")
 
         ColumnLayout {
             id: cardLayout
 
-            enabled: !BatteryControl.busy
+            enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
@@ -287,7 +292,7 @@ Column {
 
                 StyledSwitch {
                     visible: BatteryControl.isSupported && BatteryControl.isBinary
-                    enabled: !BatteryControl.busy
+                    enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                     checked: BatteryControl.enabled
                     onToggled: BatteryControl.toggle()
@@ -310,7 +315,7 @@ Column {
                         type: TextButton.Tonal
                         text: `${modelData}%`
                         checked: BatteryControl.threshold === modelData
-                        enabled: !BatteryControl.busy
+                        enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
                         onClicked: BatteryControl.setThreshold(modelData)
                     }
                 }
@@ -318,7 +323,8 @@ Column {
 
             StyledSlider {
                 visible: BatteryControl.isSupported && BatteryControl.isRange
-                enabled: !BatteryControl.busy
+                enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                interactionOnMove: false
                 Layout.fillWidth: true
                 Layout.topMargin: Tokens.spacing.extraSmall
                 from: BatteryControl.minThreshold
@@ -371,7 +377,7 @@ Column {
                 StyledText {
                     Layout.fillWidth: true
                     elide: Text.ElideRight
-                    text: qsTr("Battery error")
+                    text: Tr.tr("Battery error")
                     font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
                     color: Colours.palette.m3onErrorContainer
                 }
@@ -385,67 +391,26 @@ Column {
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
 
-            TextButton {
-                Layout.alignment: Qt.AlignHCenter
-                type: TextButton.Text
-                text: qsTr("Retry")
-                // qmllint disable missing-property
-                onClicked: BatteryControl.retry()
-                // qmllint enable missing-property
-            }
-        }
-    }
-
-    StyledRect {
-        id: unsupportedCard
-
-        visible: !BatteryControl.isSupported
-        anchors.horizontalCenter: parent.horizontalCenter
-        implicitWidth: parent.width
-        implicitHeight: unsupportedLayout.implicitHeight + Tokens.padding.medium * 2
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.large
-        ToolTip.visible: unsupportedHover.hovered
-        ToolTip.text: qsTr("Charge control needs a supported battery driver")
-
-        ColumnLayout {
-            id: unsupportedLayout
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: Tokens.padding.medium
-            spacing: Tokens.spacing.small
-
             RowLayout {
-                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
                 spacing: Tokens.spacing.small
 
-                MaterialIcon {
-                    text: "battery_unknown"
-                    fontStyle: Tokens.font.icon.medium
-                    color: Colours.palette.m3onSurfaceVariant
+                TextButton {
+                    type: TextButton.Text
+                    text: Tr.tr("Dismiss")
+                    // qmllint disable missing-property
+                    onClicked: BatteryControl.refresh()
+                    // qmllint enable missing-property
                 }
 
-                StyledText {
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                    text: qsTr("Battery control unsupported")
-                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                TextButton {
+                    type: TextButton.Text
+                    text: Tr.tr("Retry")
+                    // qmllint disable missing-property
+                    onClicked: BatteryControl.retry()
+                    // qmllint enable missing-property
                 }
             }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: qsTr("Charge limits are not available on this device.")
-                color: Colours.palette.m3onSurfaceVariant
-                font: Tokens.font.body.builders.small.build()
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            }
-        }
-
-        HoverHandler {
-            id: unsupportedHover
         }
     }
 
