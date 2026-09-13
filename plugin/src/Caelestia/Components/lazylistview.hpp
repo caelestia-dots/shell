@@ -155,7 +155,7 @@ public:
 
     // State
     [[nodiscard]] int count() const;
-    [[nodiscard]] bool itemsDirty() const;
+    [[nodiscard]] static bool itemsDirty();
 
     Q_INVOKABLE [[nodiscard]] QQuickItem* itemAtIndex(int index) const;
     Q_INVOKABLE [[nodiscard]] QQuickItem* itemAt(qreal x, qreal y) const;

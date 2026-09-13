@@ -404,7 +404,7 @@ int LazyListView::count() const {
 }
 
 // Always false; bind through it to re-run itemAtIndex/itemAt on mapping changes
-bool LazyListView::itemsDirty() const {
+bool LazyListView::itemsDirty() {
     return false;
 }
 
