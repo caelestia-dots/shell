@@ -28,8 +28,8 @@ Singleton {
     readonly property string feelsLike: formatTemp(cc?.feelsLikeC)
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0
-    readonly property string sunrise: cc ? Qt.formatDateTime(new Date(cc.sunrise), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
-    readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
+    readonly property string sunrise: (cc && cc.sunrise) ? Qt.formatDateTime(new Date(cc.sunrise), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
+    readonly property string sunset: (cc && cc.sunset) ? Qt.formatDateTime(new Date(cc.sunset), GlobalConfig.services.useTwelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
     readonly property var cachedCities: new Map()
 
@@ -43,9 +43,12 @@ Singleton {
         const configLocation = GlobalConfig.services.weatherLocation;
 
         if (configLocation) {
-            if (configLocation.indexOf(",") !== -1 && !isNaN(parseFloat(configLocation.split(",")[0]))) {
-                loc = configLocation;
-                fetchCityFromCoords(configLocation);
+            const coordParts = configLocation.split(",");
+            const isNumericLat = /^-?\d+(\.\d+)?$/.test((coordParts[0] ?? "").trim());
+            const isNumericLon = coordParts.length > 1 && /^-?\d+(\.\d+)?$/.test((coordParts[1] ?? "").trim());
+            if (isNumericLat && isNumericLon) {
+                loc = `${parseFloat(coordParts[0])},${parseFloat(coordParts[1])}`;
+                fetchCityFromCoords(loc);
             } else {
                 fetchCoordsFromCity(configLocation);
             }
