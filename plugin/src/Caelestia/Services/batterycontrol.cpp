@@ -46,6 +46,9 @@ struct ComputedState {
     bool enabled = false;
     int threshold = 100;
     QString subtitle;
+    caelestia::services::BatteryControl::SubtitleState subtitleState =
+        caelestia::services::BatteryControl::SubtitleState::None;
+    int subtitleArg = 0;
 };
 
 ComputedState computeBatteryState(int val, caelestia::services::BatteryControl::ControlType controlType,
@@ -62,14 +65,23 @@ ComputedState computeBatteryState(int val, caelestia::services::BatteryControl::
             state.enabled = (val > 0 && val < 100);
         }
         state.subtitle = QStringLiteral("Locked in BIOS (%1%)").arg(state.threshold);
+        state.subtitleState = caelestia::services::BatteryControl::SubtitleState::LockedBios;
+        state.subtitleArg = state.threshold;
         return state;
     }
 
     if (controlType == caelestia::services::BatteryControl::ControlType::BinaryConservation) {
         state.enabled = (val == 1);
         state.threshold = state.enabled ? cappedPct : 100;
-        state.subtitle =
-            state.enabled ? QStringLiteral("Capped at ~%1%").arg(cappedPct) : QStringLiteral("Charges to 100%");
+        if (state.enabled) {
+            state.subtitle = QStringLiteral("Capped at ~%1%").arg(cappedPct);
+            state.subtitleState = caelestia::services::BatteryControl::SubtitleState::CappedTilde;
+            state.subtitleArg = cappedPct;
+        } else {
+            state.subtitle = QStringLiteral("Charges to 100%");
+            state.subtitleState = caelestia::services::BatteryControl::SubtitleState::ChargesFull;
+            state.subtitleArg = 0;
+        }
         return state;
     }
 
@@ -77,10 +89,16 @@ ComputedState computeBatteryState(int val, caelestia::services::BatteryControl::
     state.enabled = (val > 0 && val < 100);
     if (state.enabled) {
         state.subtitle = QStringLiteral("Capped at %1%").arg(state.threshold);
+        state.subtitleState = caelestia::services::BatteryControl::SubtitleState::Capped;
+        state.subtitleArg = state.threshold;
     } else if (val <= 0) {
         state.subtitle = QStringLiteral("Limit disabled");
+        state.subtitleState = caelestia::services::BatteryControl::SubtitleState::LimitDisabled;
+        state.subtitleArg = 0;
     } else {
         state.subtitle = QStringLiteral("Charges to 100%");
+        state.subtitleState = caelestia::services::BatteryControl::SubtitleState::ChargesFull;
+        state.subtitleArg = 0;
     }
     return state;
 }
@@ -153,8 +171,20 @@ QString BatteryControl::title() const {
     return m_title;
 }
 
+BatteryControl::TitleState BatteryControl::titleState() const {
+    return m_titleState;
+}
+
 QString BatteryControl::subtitle() const {
     return m_subtitle;
+}
+
+BatteryControl::SubtitleState BatteryControl::subtitleState() const {
+    return m_subtitleState;
+}
+
+int BatteryControl::subtitleArg() const {
+    return m_subtitleArg;
 }
 
 QString BatteryControl::path() const {
@@ -192,7 +222,7 @@ void BatteryControl::setBusy(bool busy) {
 }
 
 void BatteryControl::detectInterface() {
-    auto check = [this](const QString& path, ControlType type, const QString& title, const QList<int>& tiers = {},
+    auto check = [this](const QString& path, ControlType type, TitleState titleState, const QList<int>& tiers = {},
                      int minThresh = 50, int maxThresh = 100, int stepSize = 1) -> bool {
         if (!QFile::exists(path)) {
             return false;
@@ -205,7 +235,24 @@ void BatteryControl::detectInterface() {
 
         m_path = path;
         m_controlType = type;
-        m_title = title;
+        m_titleState = titleState;
+        switch (titleState) {
+        case TitleState::ConservationMode:
+            m_title = QStringLiteral("Conservation Mode");
+            break;
+        case TitleState::BatteryCareLimit:
+            m_title = QStringLiteral("Battery Care Limit");
+            break;
+        case TitleState::BatteryLifeExtender:
+            m_title = QStringLiteral("Battery Life Extender");
+            break;
+        case TitleState::ChargeLimit:
+            m_title = QStringLiteral("Charge Limit");
+            break;
+        case TitleState::None:
+            m_title = QStringLiteral("Battery Control");
+            break;
+        }
         m_supportedTiers = tiers;
         m_minThreshold = minThresh;
         m_maxThreshold = maxThresh;
@@ -230,43 +277,43 @@ void BatteryControl::detectInterface() {
         for (const QString& entry : entries) {
             const QString candidate =
                 QStringLiteral("/sys/bus/platform/drivers/ideapad_acpi/%1/conservation_mode").arg(entry);
-            if (check(candidate, ControlType::BinaryConservation, QStringLiteral("Conservation Mode"), { 60, 100 })) {
+            if (check(candidate, ControlType::BinaryConservation, TitleState::ConservationMode, { 60, 100 })) {
                 return;
             }
         }
     }
     for (const QString& vpcId : { QStringLiteral("VPC2004:00"), QStringLiteral("VPC2004:01") }) {
         const QString devPath = QStringLiteral("/sys/bus/platform/devices/%1/conservation_mode").arg(vpcId);
-        if (check(devPath, ControlType::BinaryConservation, QStringLiteral("Conservation Mode"), { 60, 100 })) {
+        if (check(devPath, ControlType::BinaryConservation, TitleState::ConservationMode, { 60, 100 })) {
             return;
         }
         const QString platPath = QStringLiteral("/sys/devices/platform/%1/conservation_mode").arg(vpcId);
-        if (check(platPath, ControlType::BinaryConservation, QStringLiteral("Conservation Mode"), { 60, 100 })) {
+        if (check(platPath, ControlType::BinaryConservation, TitleState::ConservationMode, { 60, 100 })) {
             return;
         }
     }
 
     // 2. Asus WMI discrete threshold (60%, 80%, 100%)
     if (check(QStringLiteral("/sys/devices/platform/asus-nb-wmi/charge_control_end_threshold"),
-            ControlType::DiscreteTiers, QStringLiteral("Battery Care Limit"), { 60, 80, 100 })) {
+            ControlType::DiscreteTiers, TitleState::BatteryCareLimit, { 60, 80, 100 })) {
         return;
     }
 
     // 3. LG Laptop battery care limit (80%, 100%)
     if (check(QStringLiteral("/sys/devices/platform/lg-laptop/battery_care_limit"), ControlType::DiscreteTiers,
-            QStringLiteral("Battery Care Limit"), { 80, 100 })) {
+            TitleState::BatteryCareLimit, { 80, 100 })) {
         return;
     }
 
     // 4. Samsung battery life extender (caps at 80%)
     if (check(QStringLiteral("/sys/devices/platform/samsung/battery_life_extender"), ControlType::BinaryConservation,
-            QStringLiteral("Battery Life Extender"), { 80, 100 })) {
+            TitleState::BatteryLifeExtender, { 80, 100 })) {
         return;
     }
 
     // 5. Apple Silicon (macsmc on Asahi Linux)
     if (check(QStringLiteral("/sys/class/power_supply/macsmc-battery/charge_control_end_threshold"),
-            ControlType::DiscreteTiers, QStringLiteral("Charge Limit"), { 80, 100 })) {
+            ControlType::DiscreteTiers, TitleState::ChargeLimit, { 80, 100 })) {
         return;
     }
 
@@ -277,13 +324,11 @@ void BatteryControl::detectInterface() {
         QDir::Dirs | QDir::NoDotAndDotDot);
     for (const QString& bat : std::as_const(batteries)) {
         const QString threshPath = QStringLiteral("/sys/class/power_supply/%1/charge_control_end_threshold").arg(bat);
-        if (check(threshPath, ControlType::ContinuousRange, QStringLiteral("Charge Limit"), { 60, 80, 100 }, 50, 100,
-                5)) {
+        if (check(threshPath, ControlType::ContinuousRange, TitleState::ChargeLimit, { 60, 80, 100 }, 50, 100, 5)) {
             return;
         }
         const QString legacyPath = QStringLiteral("/sys/class/power_supply/%1/charge_stop_threshold").arg(bat);
-        if (check(legacyPath, ControlType::ContinuousRange, QStringLiteral("Charge Limit"), { 60, 80, 100 }, 50, 100,
-                5)) {
+        if (check(legacyPath, ControlType::ContinuousRange, TitleState::ChargeLimit, { 60, 80, 100 }, 50, 100, 5)) {
             return;
         }
     }
@@ -327,7 +372,7 @@ void BatteryControl::refreshState() {
         return;
     }
 
-    const auto [newEnabled, newThreshold, newSubtitle] =
+    const auto [newEnabled, newThreshold, newSubtitle, newSubtitleState, newSubtitleArg] =
         computeBatteryState(val, m_controlType, m_isReadOnly, m_supportedTiers);
 
     if (m_enabled != newEnabled) {
@@ -340,8 +385,10 @@ void BatteryControl::refreshState() {
         emit thresholdChanged();
     }
 
-    if (m_subtitle != newSubtitle) {
+    if (m_subtitle != newSubtitle || m_subtitleState != newSubtitleState || m_subtitleArg != newSubtitleArg) {
         m_subtitle = newSubtitle;
+        m_subtitleState = newSubtitleState;
+        m_subtitleArg = newSubtitleArg;
         emit subtitleChanged();
     }
 
@@ -408,7 +455,7 @@ bool BatteryControl::writeValue(const QString& val) {
 
     auto* killTimer = new QTimer(proc);
     killTimer->setSingleShot(true);
-    killTimer->setInterval(30000);
+    killTimer->setInterval(15000);
     const auto timedOut = std::make_shared<bool>(false);
     connect(killTimer, &QTimer::timeout, proc, [this, proc, timedOut]() {
         *timedOut = true;

@@ -18,6 +18,13 @@ Column {
     readonly property string batteryError: String(BatteryControl?.error ?? "")
     // qmllint enable missing-property
     readonly property bool hasBatteryError: batteryError.length > 0
+    readonly property string batteryTooltipText: {
+        if (BatteryControl.isReadOnly)
+            return Tr.tr("Charge threshold is locked in BIOS settings");
+        if (BatteryControl.busy)
+            return Tr.tr("Battery control busy");
+        return "";
+    }
 
     function formatSeconds(s: int): string {
         const day = Math.floor(s / 86400);
@@ -33,6 +40,38 @@ Column {
             comps.push(Tr.trN("%n min", "%n mins", min));
 
         return comps.join(Tr.trCtx(", ", "duration component separator"));
+    }
+
+    function batteryTitleText(): string {
+        switch (BatteryControl.titleState) {
+        case BatteryControl.ConservationMode:
+            return Tr.tr("Conservation Mode");
+        case BatteryControl.BatteryCareLimit:
+            return Tr.tr("Battery Care Limit");
+        case BatteryControl.BatteryLifeExtender:
+            return Tr.tr("Battery Life Extender");
+        case BatteryControl.ChargeLimit:
+            return Tr.tr("Charge Limit");
+        default:
+            return Tr.tr("Battery Control");
+        }
+    }
+
+    function batterySubtitleText(): string {
+        switch (BatteryControl.subtitleState) {
+        case BatteryControl.LockedBios:
+            return Tr.tr("Locked in BIOS (%1%)").arg(BatteryControl.subtitleArg);
+        case BatteryControl.CappedTilde:
+            return Tr.tr("Capped at ~%1%").arg(BatteryControl.subtitleArg);
+        case BatteryControl.Capped:
+            return Tr.tr("Capped at %1%").arg(BatteryControl.subtitleArg);
+        case BatteryControl.LimitDisabled:
+            return Tr.tr("Limit disabled");
+        case BatteryControl.ChargesFull:
+            return Tr.tr("Charges to 100%");
+        default:
+            return "";
+        }
     }
 
     function powerProfileToString(p: int): string {
@@ -247,8 +286,10 @@ Column {
         implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
         color: Colours.tPalette.m3surfaceContainer
         radius: Tokens.rounding.large
-        ToolTip.visible: batteryHover.hovered && (!cardLayout.enabled || BatteryControl.isReadOnly)
-        ToolTip.text: BatteryControl.isReadOnly ? Tr.tr("Charge threshold is locked in BIOS settings") : (BatteryControl.busy ? Tr.tr("Battery control busy") : "")
+        // qmllint disable missing-property
+        ToolTip.visible: batteryHover.hovered && root.batteryTooltipText.length > 0
+        ToolTip.text: root.batteryTooltipText
+        // qmllint enable missing-property
 
         ColumnLayout {
             id: cardLayout
@@ -277,14 +318,14 @@ Column {
                     StyledText {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
-                        text: BatteryControl.title
+                        text: root.batteryTitleText()
                         font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
                     }
 
                     StyledText {
                         Layout.fillWidth: true
                         elide: Text.ElideRight
-                        text: BatteryControl.subtitle
+                        text: root.batterySubtitleText()
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.body.builders.small.build()
                     }
