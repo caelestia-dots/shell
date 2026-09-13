@@ -19,9 +19,6 @@ Item {
     required property int activeWsId
     required property int ws
 
-    // Unanimated prop for others to use as reference
-    // readonly property int size: implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
-
     readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws)
     readonly property bool isOccupied: toplevels.length > 0
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows && Config.bar.workspaces.maxWindowIcons > 0

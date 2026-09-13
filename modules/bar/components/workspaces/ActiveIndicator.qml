@@ -11,9 +11,7 @@ StyledRect {
     id: root
 
     required property Workspace activeWs
-    required property LazyListView view
     required property Item mask
-    required property var workspaceIndex
 
     property real start
     property real end

@@ -50,8 +50,6 @@ StyledClippingRect {
         return Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown;
     }
 
-    readonly property real workspaceSpacing: Math.floor(Tokens.spacing.extraSmall)
-
     property real blur: onSpecial ? 1 : 0
 
     function workspaceIndex(id: int): int {
@@ -132,9 +130,7 @@ StyledClippingRect {
                     workspaces.itemsDirty;
                     return workspaces.itemAtIndex(root.activeWsIdx) as Workspace;
                 }
-                view: workspaces
                 mask: workspaces
-                workspaceIndex: root.workspaceIndex
             }
         }
 
