@@ -42,6 +42,49 @@ bool isSafeValue(const QString& val) {
     });
 }
 
+struct ComputedState {
+    bool enabled = false;
+    int threshold = 100;
+    QString subtitle;
+};
+
+ComputedState computeBatteryState(int val, caelestia::services::BatteryControl::ControlType controlType,
+    bool isReadOnly, const QList<int>& supportedTiers) {
+    ComputedState state;
+    const int cappedPct = supportedTiers.isEmpty() ? 60 : supportedTiers.first();
+
+    if (isReadOnly) {
+        if (controlType == caelestia::services::BatteryControl::ControlType::BinaryConservation) {
+            state.enabled = (val == 1);
+            state.threshold = state.enabled ? cappedPct : 100;
+        } else {
+            state.threshold = val;
+            state.enabled = (val > 0 && val < 100);
+        }
+        state.subtitle = QStringLiteral("Locked in BIOS (%1%)").arg(state.threshold);
+        return state;
+    }
+
+    if (controlType == caelestia::services::BatteryControl::ControlType::BinaryConservation) {
+        state.enabled = (val == 1);
+        state.threshold = state.enabled ? cappedPct : 100;
+        state.subtitle =
+            state.enabled ? QStringLiteral("Capped at ~%1%").arg(cappedPct) : QStringLiteral("Charges to 100%");
+        return state;
+    }
+
+    state.threshold = val;
+    state.enabled = (val > 0 && val < 100);
+    if (state.enabled) {
+        state.subtitle = QStringLiteral("Capped at %1%").arg(state.threshold);
+    } else if (val <= 0) {
+        state.subtitle = QStringLiteral("Limit disabled");
+    } else {
+        state.subtitle = QStringLiteral("Charges to 100%");
+    }
+    return state;
+}
+
 } // namespace
 
 namespace caelestia::services {
@@ -156,9 +199,9 @@ void BatteryControl::detectInterface() {
         }
 
         const auto perms = QFileInfo(path).permissions();
-        constexpr auto writeMask =
+        constexpr auto k_writeMask =
             QFileDevice::WriteOwner | QFileDevice::WriteUser | QFileDevice::WriteGroup | QFileDevice::WriteOther;
-        const bool hasAnyWrite = (perms & writeMask) != 0;
+        const bool hasAnyWrite = (perms & k_writeMask) != 0;
 
         m_path = path;
         m_controlType = type;
@@ -284,30 +327,8 @@ void BatteryControl::refreshState() {
         return;
     }
 
-    bool newEnabled = false;
-    int newThreshold = 100;
-    QString newSubtitle;
-    const int cappedPct = m_supportedTiers.isEmpty() ? 60 : m_supportedTiers.first();
-
-    if (m_isReadOnly) {
-        if (m_controlType == ControlType::BinaryConservation) {
-            newEnabled = (val == 1);
-            newThreshold = newEnabled ? cappedPct : 100;
-        } else {
-            newThreshold = val;
-            newEnabled = (val > 0 && val < 100);
-        }
-        newSubtitle = QStringLiteral("Locked in BIOS (%1%)").arg(newThreshold);
-    } else if (m_controlType == ControlType::BinaryConservation) {
-        newEnabled = (val == 1);
-        newThreshold = newEnabled ? cappedPct : 100;
-        newSubtitle = newEnabled ? QStringLiteral("Capped at ~%1%").arg(cappedPct) : QStringLiteral("Charges to 100%");
-    } else {
-        newThreshold = val;
-        newEnabled = (val > 0 && val < 100);
-        newSubtitle = newEnabled ? QStringLiteral("Capped at %1%").arg(newThreshold)
-                                 : (val <= 0 ? QStringLiteral("Limit disabled") : QStringLiteral("Charges to 100%"));
-    }
+    const auto [newEnabled, newThreshold, newSubtitle] =
+        computeBatteryState(val, m_controlType, m_isReadOnly, m_supportedTiers);
 
     if (m_enabled != newEnabled) {
         m_enabled = newEnabled;
