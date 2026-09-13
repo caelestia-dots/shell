@@ -24,6 +24,25 @@ public:
     };
     Q_ENUM(ControlType)
 
+    enum class SubtitleState : quint8 {
+        None = 0,
+        LockedBios,
+        CappedTilde,
+        Capped,
+        LimitDisabled,
+        ChargesFull,
+    };
+    Q_ENUM(SubtitleState)
+
+    enum class TitleState : quint8 {
+        None = 0,
+        ConservationMode,
+        BatteryCareLimit,
+        BatteryLifeExtender,
+        ChargeLimit,
+    };
+    Q_ENUM(TitleState)
+
     Q_PROPERTY(bool isSupported READ isSupported NOTIFY isSupportedChanged)
     Q_PROPERTY(ControlType controlType READ controlType NOTIFY controlTypeChanged)
     Q_PROPERTY(bool isBinary READ isBinary NOTIFY controlTypeChanged)
@@ -37,7 +56,10 @@ public:
     Q_PROPERTY(int stepSize READ stepSize NOTIFY stepSizeChanged)
     Q_PROPERTY(QList<int> supportedTiers READ supportedTiers NOTIFY supportedTiersChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
+    Q_PROPERTY(TitleState titleState READ titleState NOTIFY titleChanged)
     Q_PROPERTY(QString subtitle READ subtitle NOTIFY subtitleChanged)
+    Q_PROPERTY(SubtitleState subtitleState READ subtitleState NOTIFY subtitleChanged)
+    Q_PROPERTY(int subtitleArg READ subtitleArg NOTIFY subtitleChanged)
     Q_PROPERTY(QString path READ path NOTIFY pathChanged)
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
     Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
@@ -58,7 +80,10 @@ public:
     [[nodiscard]] int stepSize() const;
     [[nodiscard]] QList<int> supportedTiers() const;
     [[nodiscard]] QString title() const;
+    [[nodiscard]] TitleState titleState() const;
     [[nodiscard]] QString subtitle() const;
+    [[nodiscard]] SubtitleState subtitleState() const;
+    [[nodiscard]] int subtitleArg() const;
     [[nodiscard]] QString path() const;
     [[nodiscard]] QString error() const;
     [[nodiscard]] QString lastError() const;
@@ -108,7 +133,10 @@ private:
     int m_stepSize = 1;
     QList<int> m_supportedTiers;
     QString m_title = QStringLiteral("Battery Control");
+    TitleState m_titleState = TitleState::None;
     QString m_subtitle;
+    SubtitleState m_subtitleState = SubtitleState::None;
+    int m_subtitleArg = 0;
     QString m_error;
     QString m_lastError;
     QString m_lastAttemptedValue;
