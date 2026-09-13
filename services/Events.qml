@@ -150,10 +150,12 @@ Singleton {
         if (typeof date === "string") {
             const match = date.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (match) {
-                const y = match[1];
-                const m = match[2].padStart(2, "0");
-                const d = match[3].padStart(2, "0");
-                return `${y}-${m}-${d}`;
+                const y = parseInt(match[1], 10);
+                const m = parseInt(match[2], 10);
+                const d = parseInt(match[3], 10);
+                if (y >= 1970 && y <= 2100 && m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+                    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                }
             }
         }
         const d = date instanceof Date ? date : new Date(date);
@@ -475,7 +477,12 @@ Singleton {
             }
             return;
         }
-        storage.setText(JSON.stringify(root.eventsData, null, 2));
+        try {
+            storage.setText(JSON.stringify(root.eventsData, null, 2));
+        } catch (e) {
+            root.dirty = true;
+            console.error("Events: failed to serialize/write events data:", e);
+        }
     }
 
     PersistentProperties {
@@ -503,6 +510,11 @@ Singleton {
         printErrors: true
         path: `${Paths.config}/events.json`
 
+        onSaveFailed: err => {
+            root.dirty = true;
+            console.error(`Events: storage save failed: ${err}`);
+        }
+
         onLoaded: {
             root.loadFailed = false;
             root.loadRetryCount = 0;
@@ -515,30 +527,38 @@ Singleton {
                         diskData = parsed;
                 }
                 if (root.dirty) {
-                    const merged = Object.assign({}, diskData);
+                    const memoryIds = new Set();
                     for (const k in root.eventsData) {
                         const inMemoryList = root.eventsData[k];
                         if (!Array.isArray(inMemoryList))
                             continue;
-                        if (!merged[k]) {
-                            merged[k] = inMemoryList;
-                        } else {
-                            const existingIds = {};
-                            for (let i = 0; i < merged[k].length; ++i) {
-                                if (merged[k][i] && merged[k][i].id)
-                                    existingIds[merged[k][i].id] = true;
-                            }
-                            const combined = [...merged[k]];
-                            for (let i = 0; i < inMemoryList.length; ++i) {
-                                const evt = inMemoryList[i];
-                                if (evt && evt.id && !existingIds[evt.id]) {
-                                    combined.push(evt);
-                                    existingIds[evt.id] = true;
-                                }
-                            }
-                            merged[k] = combined;
+                        for (let i = 0; i < inMemoryList.length; ++i) {
+                            if (inMemoryList[i]?.id)
+                                memoryIds.add(inMemoryList[i].id);
                         }
                     }
+
+                    const merged = {};
+                    for (const d in diskData) {
+                        const diskList = diskData[d];
+                        if (!Array.isArray(diskList))
+                            continue;
+                        const filtered = diskList.filter(evt => evt && evt.id && !memoryIds.has(evt.id));
+                        if (filtered.length > 0)
+                            merged[d] = filtered;
+                    }
+
+                    for (const k in root.eventsData) {
+                        const inMemoryList = root.eventsData[k];
+                        if (!Array.isArray(inMemoryList) || inMemoryList.length === 0)
+                            continue;
+                        if (merged[k]) {
+                            merged[k] = [...merged[k], ...inMemoryList];
+                        } else {
+                            merged[k] = [...inMemoryList];
+                        }
+                    }
+
                     root.eventsData = merged;
                     root.loaded = true;
                     root.dirty = false;
@@ -567,7 +587,7 @@ Singleton {
                 }
             } else {
                 root.loadFailed = true;
-                root.loaded = true;
+                root.loaded = false;
                 console.warn(`Events: failed to load events file: ${err}`);
             }
         }
