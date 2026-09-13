@@ -385,10 +385,16 @@ bool BatteryControl::writeValue(const QString& val) {
     if (file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         QTextStream out(&file);
         out << val << "\n";
+        out.flush();
+        const bool writeOk = (out.status() == QTextStream::Ok && file.error() == QFileDevice::NoError);
         file.close();
-        m_lastAttemptedValue.clear();
-        refreshState();
-        return true;
+        if (writeOk) {
+            m_lastAttemptedValue.clear();
+            refreshState();
+            return true;
+        }
+        qCWarning(lcBatteryControl) << "Direct write to" << m_path << "failed (status:" << out.status()
+                                    << "error:" << file.error() << "), falling back to pkexec";
     }
 
     // 2. Privilege escalation fallback: run via pkexec so the system polkit agent pops up a password dialog.
