@@ -37,7 +37,7 @@ Item {
 
         Lyrics.applySuggestedMetadata();
 
-        if (rawUrl.startsWith("file://")) {
+        if (rawUrl.toLowerCase().startsWith("file://")) {
             const filePath = decodeURIComponent(rawUrl.substring(7));
             const cmd = ["bash", "-c", 'ext="${1##*.}"\n' + 'tmp="$(mktemp --suffix=.$ext)"\n' + 'args=("-y" "-i" "$1" "-c" "copy" "-metadata" "artist=$2" "-metadata" "title=$3")\n' + 'if [ "${ext,,}" = "mp3" ]; then args+=("-id3v2_version" "3"); fi\n' + 'if ffmpeg "${args[@]}" "$tmp" >/dev/null 2>&1; then mv -f "$tmp" "$1"; else rm -f "$tmp"; fi', "--", filePath, sugArtist, sugTitle];
             Quickshell.execDetached(cmd);
@@ -131,7 +131,7 @@ Item {
 
         transitions: Transition {
             Anim {
-                properties: "rightMargin,implicitWidth"
+                properties: "rightMargin"
             }
             Anim {
                 properties: "topMargin,implicitHeight"
@@ -453,8 +453,8 @@ Item {
                                 required property int index
                                 required property var modelData
 
-                                readonly property bool isAuto: (Boolean(Lyrics?.autoCandidate?.valid) && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0 && (Boolean(Lyrics?.autoCandidate?.valid) || Boolean(Lyrics?.selectedCandidate?.valid)))
-                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Boolean(Lyrics?.selectedCandidate?.valid) && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Boolean(Lyrics?.selectedCandidate?.valid) && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || (index === 0 && (Boolean(Lyrics?.autoCandidate?.valid) || Boolean(Lyrics?.selectedCandidate?.valid))))
+                                readonly property bool isAuto: (Lyrics.autoCandidate.valid && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid))
+                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || (index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid)))
 
                                 Layout.fillWidth: true
                                 implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
@@ -585,7 +585,7 @@ Item {
         Rectangle {
             id: metadataDot
 
-            visible: Boolean(Lyrics?.hasMetadataSuggestion)
+            visible: Lyrics.hasMetadataSuggestion
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.topMargin: 0
