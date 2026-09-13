@@ -16,8 +16,8 @@ StyledRect {
     id: root
 
     required property NotifData modelData
-    readonly property bool hasImage: (modelData?.image?.length ?? 0) > 0
-    readonly property bool hasAppIcon: (modelData?.appIcon?.length ?? 0) > 0
+    readonly property bool hasImage: (modelData?.image.length ?? 0) > 0
+    readonly property bool hasAppIcon: (modelData?.appIcon.length ?? 0) > 0
     readonly property int bodyTextFormat: /[<*_`#\[\]]/.test(modelData?.body ?? "") ? Text.MarkdownText : Text.PlainText
     readonly property list<var> invokableActions: (modelData?.actions ?? []).filter(a => typeof a?.invoke === "function")
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
@@ -168,7 +168,7 @@ StyledRect {
                             anchors.fill: parent
                             source: root.modelData?.appIcon ? Quickshell.iconPath(root.modelData.appIcon) : ""
                             colour: root.modelData?.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData?.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                            layer.enabled: Boolean(root.modelData?.appIcon?.endsWith("symbolic"))
+                            layer.enabled: Boolean(root.modelData?.appIcon.endsWith("symbolic"))
                         }
                     }
 
