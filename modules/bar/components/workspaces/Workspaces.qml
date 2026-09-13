@@ -43,6 +43,11 @@ StyledClippingRect {
         return ids;
     }
 
+    readonly property var workspaces: {
+        workspaces.itemsDirty;
+        return wsIds.map(id => workspaces.itemAtIndex(workspaceIndex(id)));
+    }
+
     // Only relevant for when showUnoccupied is true
     readonly property int groupOffset: {
         if (!Config.bar.workspaces.showUnoccupied)
@@ -89,10 +94,8 @@ StyledClippingRect {
             anchors.margins: Tokens.padding.extraSmall
 
             sourceComponent: OccupiedBg {
-                workspaces: {
-                    workspaces.itemsDirty;
-                    return root.wsIds.map(id => workspaces.itemAtIndex(root.workspaceIndex(id)));
-                }
+                workspaces: root.workspaces
+                wsSpacing: workspaces.spacing
             }
         }
 
@@ -115,6 +118,19 @@ StyledClippingRect {
             delegate: Workspace {
                 activeWsId: root.activeWsId
                 ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
+            }
+        }
+
+        Loader {
+            asynchronous: true
+            active: !Config.bar.workspaces.showUnoccupied
+
+            anchors.fill: parent
+            anchors.margins: Tokens.padding.extraSmall
+
+            sourceComponent: GapMarkers {
+                workspaces: root.workspaces
+                wsSpacing: workspaces.spacing
             }
         }
 

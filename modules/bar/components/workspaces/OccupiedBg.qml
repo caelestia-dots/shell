@@ -11,6 +11,7 @@ Item {
     id: root
 
     required property var workspaces
+    required property int wsSpacing
 
     readonly property color colour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
     property color colourAnimated: colour
@@ -57,12 +58,12 @@ Item {
         property real topPadding: {
             if (!modelData?.isOccupied || index === 0)
                 return 0;
-            return (root.workspaces[index - 1]?.isOccupied ?? false) ? Tokens.padding.extraSmall : 0;
+            return (root.workspaces[index - 1]?.isOccupied ?? false) ? root.wsSpacing : 0;
         }
         property real bottomPadding: {
             if (!modelData?.isOccupied || index === root.workspaces.length - 1)
                 return 0;
-            return (root.workspaces[index + 1]?.isOccupied ?? false) ? Tokens.padding.extraSmall : 0;
+            return (root.workspaces[index + 1]?.isOccupied ?? false) ? root.wsSpacing : 0;
         }
 
         anchors.left: parent?.left
