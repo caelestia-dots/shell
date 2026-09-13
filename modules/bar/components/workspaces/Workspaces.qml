@@ -89,11 +89,10 @@ StyledClippingRect {
             anchors.margins: Tokens.padding.extraSmall
 
             sourceComponent: OccupiedBg {
-                workspaces: workspaces
-                occupied: root.occupied
-                groupOffset: root.groupOffset
-                layoutTransitionRunning: root.revealTransitionRunning
-                workspaceIndex: root.workspaceIndex
+                workspaces: {
+                    workspaces.itemsDirty;
+                    return root.wsIds.map(id => workspaces.itemAtIndex(root.workspaceIndex(id)));
+                }
             }
         }
 
