@@ -65,6 +65,9 @@ QtObject {
                 Component {
                     SavedNetworksPage {}
                 }
+                Component {
+                    NetworkPasswordPage {}
+                }
             }
         },
         Component {
