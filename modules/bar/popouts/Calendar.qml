@@ -312,11 +312,12 @@ CustomMouseArea {
     }
 
     function clearAllRetiringWaves(): void {
-        for (let i = 0; i < root.retiringWaves.length; ++i) {
-            if (root.retiringWaves[i])
-                root.retiringWaves[i].destroy();
-        }
+        const waves = [...root.retiringWaves];
         root.retiringWaves = [];
+        for (let i = 0; i < waves.length; ++i) {
+            if (waves[i])
+                waves[i].destroy();
+        }
     }
 
     function updateRangeSelection(newEndDate: date): void {
@@ -1926,10 +1927,13 @@ CustomMouseArea {
                 else
                     root.selectedDayItem1 = dayItem;
             } else {
-                if (dayItem.grid === grid2 && root.selectedDayItem2 === dayItem)
-                    root.selectedDayItem2 = null;
-                else if (root.selectedDayItem1 === dayItem)
-                    root.selectedDayItem1 = null;
+                if (dayItem.grid === grid2) {
+                    if (root.selectedDayItem2 === dayItem)
+                        root.selectedDayItem2 = null;
+                } else {
+                    if (root.selectedDayItem1 === dayItem)
+                        root.selectedDayItem1 = null;
+                }
             }
         }
 
@@ -1940,10 +1944,13 @@ CustomMouseArea {
                 else
                     root.todayItem1 = dayItem;
             } else {
-                if (dayItem.grid === grid2 && root.todayItem2 === dayItem)
-                    root.todayItem2 = null;
-                else if (root.todayItem1 === dayItem)
-                    root.todayItem1 = null;
+                if (dayItem.grid === grid2) {
+                    if (root.todayItem2 === dayItem)
+                        root.todayItem2 = null;
+                } else {
+                    if (root.todayItem1 === dayItem)
+                        root.todayItem1 = null;
+                }
             }
         }
 
