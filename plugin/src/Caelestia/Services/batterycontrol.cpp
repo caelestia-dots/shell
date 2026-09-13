@@ -409,7 +409,9 @@ bool BatteryControl::writeValue(const QString& val) {
     auto* killTimer = new QTimer(proc);
     killTimer->setSingleShot(true);
     killTimer->setInterval(30000);
-    connect(killTimer, &QTimer::timeout, proc, [this, proc]() {
+    const auto timedOut = std::make_shared<bool>(false);
+    connect(killTimer, &QTimer::timeout, proc, [this, proc, timedOut]() {
+        *timedOut = true;
         qCWarning(lcBatteryControl) << "pkexec write timed out after 30s";
         proc->kill();
         setError(QStringLiteral("Write timed out"));
@@ -420,7 +422,11 @@ bool BatteryControl::writeValue(const QString& val) {
     connect(proc, &QProcess::finished, killTimer, &QTimer::stop);
 
     connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
-        [this, proc](int exitCode, QProcess::ExitStatus exitStatus) {
+        [this, proc, timedOut](int exitCode, QProcess::ExitStatus exitStatus) {
+            if (*timedOut) {
+                proc->deleteLater();
+                return;
+            }
             handlePkexecFinished(proc, exitCode, exitStatus);
         });
     connect(proc, &QProcess::errorOccurred, this, [this, proc](QProcess::ProcessError err) {
