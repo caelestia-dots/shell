@@ -130,7 +130,7 @@ StyledClippingRect {
             sourceComponent: ActiveIndicator {
                 activeWs: {
                     workspaces.itemsDirty;
-                    return workspaces.itemAtIndex(root.activeWsIdx);
+                    return workspaces.itemAtIndex(root.activeWsIdx) as Workspace;
                 }
                 view: workspaces
                 mask: workspaces
