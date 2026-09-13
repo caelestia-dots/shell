@@ -204,7 +204,7 @@ Singleton {
         }
 
         function listSpecialWorkspaces(): string {
-            return root.workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0).map(w => w.name).join("\n");
+            return root.workspaces.values.filter(w => w?.name?.startsWith("special:") && (w?.lastIpcObject?.windows ?? 0) > 0).map(w => w.name).join("\n");
         }
 
         target: "hypr"

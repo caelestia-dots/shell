@@ -55,12 +55,12 @@ QtObject {
 
     readonly property bool hasFullscreen: {
         const monitor = Hypr.focusedMonitor;
-        const specialName = monitor?.lastIpcObject?.specialWorkspace?.name;
+        const specialName = monitor?.lastIpcObject.specialWorkspace?.name;
         if (specialName) {
             const specialWs = Hypr.workspaces.values.find(ws => ws.name === specialName);
-            return specialWs?.toplevels?.values?.some(t => t?.lastIpcObject?.fullscreen > 1) ?? false;
+            return specialWs?.toplevels.values.some(t => t?.lastIpcObject?.fullscreen > 1) ?? false;
         }
-        return monitor?.activeWorkspace?.toplevels?.values?.some(t => t?.lastIpcObject?.fullscreen > 1) ?? false;
+        return monitor?.activeWorkspace?.toplevels.values.some(t => t?.lastIpcObject?.fullscreen > 1) ?? false;
     }
 
     readonly property Timer timer: Timer {

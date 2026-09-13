@@ -66,11 +66,18 @@ Item {
         required property Toast modelData
 
         readonly property bool previewHidden: {
-            let extraHidden = 0;
-            for (let i = 0; i < index; i++)
-                if (Toaster.toasts[i]?.closed)
-                    extraHidden++;
-            return index >= Config.utilities.maxToasts + extraHidden;
+            // Rank among visible (shown and not closed) toasts by identity, so raw-list
+            // and filtered-model index spaces can never desync. Closed toasts stay in
+            // the model as zero-opacity placeholders, hence rank — not index.
+            let rank = 0;
+            for (const toast of Toaster.toasts) {
+                if (!root.shouldShowToast(toast) || toast?.closed)
+                    continue;
+                if (toast === modelData)
+                    return rank >= Config.utilities.maxToasts;
+                rank++;
+            }
+            return true;
         }
 
         onPreviewHiddenChanged: {

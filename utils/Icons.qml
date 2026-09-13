@@ -210,8 +210,9 @@ Singleton {
     }
 
     function getNetworkIcon(strength: int, isSecure = false): string {
-        const level = Math.max(0, Math.min(4, Math.floor(strength / 20)));
-        const icon = networkIcons[level];
+        const s = Number.isFinite(strength) ? strength : 0;
+        const level = Math.max(0, Math.min(4, Math.floor(s / 20)));
+        const icon = networkIcons[level] ?? "signal_wifi_0_bar";
 
         return isSecure && level > 0 ? `${icon}_locked` : icon;
     }

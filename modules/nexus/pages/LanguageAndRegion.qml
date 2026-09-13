@@ -39,13 +39,15 @@ PageBase {
         }
     ]
 
-    // Clock format (index 0 = 24-hour, 1 = 12-hour — matches Time.useTwelveHourClock)
+    // Clock format (false = 24-hour, true = 12-hour — matches GlobalConfig.services.useTwelveHourClock)
     readonly property list<MenuItem> clockItems: [
         MenuItem {
             text: Tr.tr("24-hour")
+            value: false
         },
         MenuItem {
             text: Tr.tr("12-hour")
+            value: true
         }
     ]
 
@@ -183,8 +185,8 @@ PageBase {
             label: Tr.tr("Clock format")
             subtext: Tr.tr("How times are shown across the shell")
             menuItems: root.clockItems
-            active: root.clockItems[GlobalConfig.services.useTwelveHourClock ? 1 : 0]
-            onSelected: item => GlobalConfig.services.useTwelveHourClock = root.clockItems.indexOf(item) === 1
+            active: root.clockItems.find(i => i.value === GlobalConfig.services.useTwelveHourClock)
+            onSelected: item => GlobalConfig.services.useTwelveHourClock = item.value
         }
     }
 }
