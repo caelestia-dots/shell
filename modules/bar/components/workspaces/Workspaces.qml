@@ -31,12 +31,12 @@ StyledClippingRect {
 
         const ids = [];
         const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor);
-        const currentIdx = workspaces.findIndex(w => w.id === root.activeWsId);
+        const currentIdx = workspaces.findIndex(w => w.id === activeWsId);
         const lastIdx = CUtils.clamp(currentIdx, shown - 1, workspaces.length - 1);
         for (let i = lastIdx; i >= 0 && ids.length < shown; i--) {
-            // The only workspaces that exist are either occupied or the current one
-            if (workspaces[i])
-                ids.push(workspaces[i].id);
+            const ws = workspaces[i];
+            if (ws && (ws.toplevels.values.length > 0 || ws.id === activeWsId))
+                ids.push(ws.id);
         }
 
         ids.reverse();
