@@ -1966,7 +1966,7 @@ void Lyrics::updateMetadataSuggestion() {
 QNetworkReply* Lyrics::getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers) {
     QNetworkRequest req(url);
     req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
-    req.setTransferTimeout(10000);
+    req.setTransferTimeout(15000);
     req.setRawHeader("Accept"_ba, "application/json"_ba);
     for (auto it = headers.constBegin(); it != headers.constEnd(); ++it) {
         req.setRawHeader(it.key(), it.value());

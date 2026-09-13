@@ -161,15 +161,15 @@ Item {
     ]
 
     Connections {
-        function onHasLyricsChanged() {
+        function onHasLyricsChanged(): void {
             root.flag = !root.flag;
         }
 
-        function onLoadingChanged() {
+        function onLoadingChanged(): void {
             root.flag = !root.flag;
         }
 
-        function onForceSearchingChanged() {
+        function onForceSearchingChanged(): void {
             root.flag = !root.flag;
         }
 
