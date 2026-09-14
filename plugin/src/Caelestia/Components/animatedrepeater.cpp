@@ -361,7 +361,7 @@ void AnimatedRepeater::restack() {
     if (!parentItem())
         return;
 
-    QQuickItem* next = this;
+    const QQuickItem* next = this;
     for (int i = static_cast<int>(m_items.size()) - 1; i >= 0; --i) {
         auto* item = m_items[i];
         if (!item || item->parentItem() != parentItem())
