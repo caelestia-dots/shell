@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.Notifications
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.services
 import qs.utils
 
@@ -16,7 +17,20 @@ QtObject {
     property var locks: new Set()
 
     property date time: new Date()
-    property string timeStr: qsTr("now")
+    property int ageMins: 0
+    readonly property string timeStr: {
+        if (ageMins < 1)
+            return Tr.tr("now");
+
+        const h = Math.floor(ageMins / 60);
+        const d = Math.floor(h / 24);
+
+        if (d > 0)
+            return Tr.trCtx("%1d", "abbreviated notification age, days").arg(d);
+        if (h > 0)
+            return Tr.trCtx("%1h", "abbreviated notification age, hours").arg(h);
+        return Tr.trCtx("%1m", "abbreviated notification age, minutes").arg(ageMins);
+    }
 
     readonly property Timer timeStrTimer: Timer {
         running: !notif.closed
@@ -26,7 +40,7 @@ QtObject {
     }
 
     property Notification notification
-    property string id
+    property string notificationId
     property string summary
     property string body
     property string appIcon
@@ -75,7 +89,7 @@ QtObject {
                     if (status !== Image.Ready || width != TokenConfig.sizes.notifs.image || height != TokenConfig.sizes.notifs.image)
                         return;
 
-                    const cacheKey = notif.appName + notif.summary + notif.id + notif.image;
+                    const cacheKey = notif.appName + notif.summary + notif.notificationId + notif.image;
                     let h1 = 0xdeadbeef, h2 = 0x41c6ce57, ch;
                     for (let i = 0; i < cacheKey.length; i++) {
                         ch = cacheKey.charCodeAt(i);
@@ -171,24 +185,20 @@ QtObject {
     function updateTimeStr(): void {
         const diff = Date.now() - time.getTime();
         const m = Math.floor(diff / 60000);
+        ageMins = m;
 
         if (m < 1) {
-            timeStr = qsTr("now");
             timeStrTimer.interval = 5000;
         } else {
             const h = Math.floor(m / 60);
             const d = Math.floor(h / 24);
 
-            if (d > 0) {
-                timeStr = `${d}d`;
+            if (d > 0)
                 timeStrTimer.interval = 3600000;
-            } else if (h > 0) {
-                timeStr = `${h}h`;
+            else if (h > 0)
                 timeStrTimer.interval = 300000;
-            } else {
-                timeStr = `${m}m`;
+            else
                 timeStrTimer.interval = m < 10 ? 30000 : 60000;
-            }
         }
     }
 
@@ -220,7 +230,7 @@ QtObject {
         if (!notification)
             return;
 
-        id = notification.id;
+        notificationId = notification.id;
         summary = notification.summary;
         body = notification.body;
         appIcon = notification.appIcon;

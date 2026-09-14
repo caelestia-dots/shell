@@ -11,9 +11,15 @@
 #include <qsavefile.h>
 #include <qthreadpool.h>
 
+namespace {
+
 Q_LOGGING_CATEGORY(lcCacher, "caelestia.images.cacher", QtInfoMsg)
 
+} // namespace
+
 namespace caelestia::images {
+
+using Qt::StringLiterals::operator""_s;
 
 namespace {
 
@@ -28,30 +34,30 @@ QString sha256sum(const QString& path) {
     hash.addData(&file);
     file.close();
 
-    return hash.result().toHex();
+    return QString::fromLatin1(hash.result().toHex());
 }
 
 QString fillSuffix(ImageCacher::FillMode fillMode) {
     switch (fillMode) {
     case ImageCacher::FillMode::Crop:
-        return QStringLiteral("crop");
+        return u"crop"_s;
     case ImageCacher::FillMode::Fit:
-        return QStringLiteral("fit");
+        return u"fit"_s;
     default:
-        return QStringLiteral("stretch");
+        return u"stretch"_s;
     }
 }
 
 } // namespace
 
 const QString& ImageCacher::cacheDir() {
-    static const QString s_dir = [] {
+    static const QString k_dir = [] {
         QString cache = qEnvironmentVariable("XDG_CACHE_HOME");
         if (cache.isEmpty())
-            cache = QDir::homePath() + QStringLiteral("/.cache");
-        return cache + QStringLiteral("/caelestia/imagecache");
+            cache = QDir::homePath() + u"/.cache"_s;
+        return cache + u"/caelestia/imagecache"_s;
     }();
-    return s_dir;
+    return k_dir;
 }
 
 QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, FillMode fillMode) {
@@ -59,11 +65,10 @@ QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, 
     if (sha.isEmpty())
         return {};
 
-    const QString filename =
-        QStringLiteral("%1@%2x%3-%4.png")
-            .arg(sha, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
+    const QString filename = u"%1@%2x%3-%4.png"_s.arg(
+        sha, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
 
-    return cacheDir() + QLatin1Char('/') + filename;
+    return cacheDir() + u'/' + filename;
 }
 
 ImageCacher* ImageCacher::instance() {
@@ -83,7 +88,7 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
         return;
 
     {
-        QMutexLocker locker(&m_mutex);
+        const QMutexLocker locker(&m_mutex);
         if (m_inflight.contains(cachePath))
             return;
         m_inflight.insert(cachePath);
@@ -91,7 +96,8 @@ void ImageCacher::schedule(const QString& sourcePath, const QString& cachePath, 
 
     QThreadPool::globalInstance()->start([this, sourcePath, cachePath, size, fillMode]() {
         runJob(sourcePath, cachePath, size, fillMode);
-        QMutexLocker locker(&m_mutex);
+        const QMutexLocker locker(&m_mutex);
+        // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage) m_inflight is a value member, not a pointer
         m_inflight.remove(cachePath);
     });
 }

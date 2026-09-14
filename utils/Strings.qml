@@ -1,9 +1,19 @@
 pragma Singleton
 
 import Quickshell
+import Caelestia.I18n
 
 Singleton {
     property var _regexCache: ({})
+
+    function percent(value: int): string {
+        // TRANSLATORS: %1 = a number
+        return Tr.tr("%1%").arg(value);
+    }
+
+    function percentOne(value: real): string {
+        return percent(Math.round(value * 100));
+    }
 
     function testRegexList(filterList: list<string>, target: string): bool {
         const regexChecker = /^\^.*\$$/;

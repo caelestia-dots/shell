@@ -4,6 +4,8 @@ import ".."
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
+import Caelestia.Services
 import qs.services
 import qs.utils
 
@@ -27,8 +29,8 @@ Searcher {
 
     component Action: QtObject {
         required property var modelData
-        readonly property string name: modelData.name ?? qsTr("Unnamed")
-        readonly property string desc: modelData.description ?? qsTr("No description")
+        readonly property string name: modelData.name ? Tr.trMarked(modelData.name) : Tr.trCtx("Unnamed", "launcher action with no name")
+        readonly property string desc: modelData.description ? Tr.trMarked(modelData.description) : Tr.trCtx("No description", "launcher action with no description")
         readonly property string icon: modelData.icon ?? "help_outline"
         readonly property list<string> command: modelData.command ?? []
         readonly property bool enabled: modelData.enabled ?? true
@@ -41,11 +43,12 @@ Searcher {
             if (command[0] === "autocomplete" && command.length > 1) {
                 list.search.text = `${GlobalConfig.launcher.actionPrefix}${command[1]} `;
             } else if (command[0] === "setMode" && command.length > 1) {
-                list.visibilities.launcher = false;
+                list.screenState.launcher = false;
                 Colours.setMode(command[1]);
             } else {
-                list.visibilities.launcher = false;
-                Quickshell.execDetached(command);
+                list.screenState.launcher = false;
+                if (!SessionManager.exec(command))
+                    Quickshell.execDetached(command);
             }
         }
     }

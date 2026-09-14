@@ -1,14 +1,37 @@
 qml_module(caelestia-services
     URI Caelestia.Services
     SOURCES
-        service.hpp service.cpp
-        serviceref.hpp serviceref.cpp
-        beattracker.hpp beattracker.cpp
-        audiocollector.hpp audiocollector.cpp
-        audioprovider.hpp audioprovider.cpp
-        cavaprovider.hpp cavaprovider.cpp
+        service.cpp
+        serviceref.cpp
+        beattracker.cpp
+        audiocollector.cpp
+        audioprovider.cpp
+        cavaprovider.cpp
+        tickingservice.cpp
+        sensorslib.cpp
+        cpu.cpp
+        gpu.cpp
+        memory.cpp
+        diskinfo.cpp
+        storage.cpp
+        lyriccandidate.cpp
+        lyrics.cpp
+        sessionmanager.cpp
+        networkusage.cpp
+        hyprdevices.cpp
+        hyprextras.cpp
     LIBRARIES
+        Qt::Concurrent
+        Qt::DBus
+        Qt::Network
         PkgConfig::Pipewire
         PkgConfig::Aubio
         PkgConfig::Cava
+        Sensors::Sensors
+        caelestia-util
+        caelestia-core
+        caelestia-config
+    DEPENDENCIES
+        Caelestia
+        Caelestia.Config
 )

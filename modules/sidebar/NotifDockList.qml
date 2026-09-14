@@ -12,7 +12,7 @@ LazyListView {
 
     required property Props props
     required property Flickable container
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     anchors.left: parent?.left
     anchors.right: parent?.right
@@ -122,31 +122,27 @@ LazyListView {
                 modelData: notif.modelData
                 props: root.props
                 container: root.container
-                visibilities: root.visibilities
+                screenState: root.screenState
             }
 
             Behavior on y {
                 enabled: notif.LazyListView.ready
 
-                Anim {
-                    type: Anim.DefaultSpatial
-                }
-            }
-
-            Behavior on opacity {
                 Anim {}
             }
 
-            Behavior on scale {
+            Behavior on opacity {
                 Anim {
-                    type: Anim.DefaultSpatial
+                    type: Anim.DefaultEffects
                 }
             }
 
+            Behavior on scale {
+                Anim {}
+            }
+
             Behavior on x {
-                Anim {
-                    type: Anim.DefaultSpatial
-                }
+                Anim {}
             }
         }
     }
@@ -156,6 +152,5 @@ LazyListView {
 
         target: root.container
         property: "contentY"
-        type: Anim.DefaultSpatial
     }
 }

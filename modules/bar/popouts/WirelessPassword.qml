@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -41,7 +42,7 @@ ColumnLayout {
                 connectButton.connecting = false;
                 connectButton.hasError = true;
                 connectButton.enabled = true;
-                connectButton.text = qsTr("Connect");
+                connectButton.text = Tr.tr("Connect");
                 passwordContainer.passwordBuffer = "";
                 // Delete the failed connection
                 if (root.network && root.network.ssid) {
@@ -60,7 +61,7 @@ ColumnLayout {
         passwordContainer.passwordBuffer = "";
         connectButton.connecting = false;
         connectButton.hasError = false;
-        connectButton.text = qsTr("Connect");
+        connectButton.text = Tr.tr("Connect");
         connectionMonitor.stop();
 
         // Return to network popout
@@ -69,9 +70,9 @@ ColumnLayout {
         }
     }
 
-    spacing: Tokens.spacing.normal
+    spacing: Tokens.spacing.medium
     implicitWidth: 400
-    implicitHeight: content.implicitHeight + Tokens.padding.large * 2
+    implicitHeight: content.implicitHeight + Tokens.padding.extraLargeIncreased
     visible: shouldBeVisible || isClosing
     enabled: shouldBeVisible && !isClosing
     focus: enabled
@@ -128,8 +129,8 @@ ColumnLayout {
     StyledRect {
         Layout.fillWidth: true
         Layout.preferredWidth: 400
-        implicitHeight: content.implicitHeight + Tokens.padding.large * 2
-        radius: Tokens.rounding.normal
+        implicitHeight: content.implicitHeight + Tokens.padding.extraLargeIncreased
+        radius: Tokens.rounding.large
         color: Colours.tPalette.m3surfaceContainer
         visible: root.shouldBeVisible || root.isClosing
         opacity: root.shouldBeVisible && !root.isClosing ? 1 : 0
@@ -137,7 +138,9 @@ ColumnLayout {
         Keys.onEscapePressed: root.closeDialog()
 
         Behavior on opacity {
-            Anim {}
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
 
         Behavior on scale {
@@ -153,6 +156,7 @@ ColumnLayout {
             }
 
             Anim {
+                type: Anim.DefaultEffects
                 target: parent
                 property: "opacity"
                 to: 0
@@ -172,19 +176,18 @@ ColumnLayout {
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: Tokens.padding.large
 
-            spacing: Tokens.spacing.normal
+            spacing: Tokens.spacing.medium
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "lock"
-                font.pointSize: Tokens.font.size.extraLarge * 2
+                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).build()
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Enter password")
-                font.pointSize: Tokens.font.size.large
-                font.weight: 500
+                text: Tr.tr("Enter password")
+                font: Tokens.font.body.builders.large.weight(Font.Medium).build()
             }
 
             StyledText {
@@ -195,13 +198,14 @@ ColumnLayout {
                     if (root.network) {
                         const ssid = root.network.ssid;
                         if (ssid && ssid.length > 0) {
-                            return qsTr("Network: %1").arg(ssid);
+                            // TRANSLATORS: %1 = the network SSID
+                            return Tr.tr("Network: %1").arg(ssid);
                         }
                     }
-                    return qsTr("Network: Unknown");
+                    return Tr.tr("Unknown network");
                 }
                 color: Colours.palette.m3outline
-                font.pointSize: Tokens.font.size.small
+                font: Tokens.font.body.small
             }
 
             Timer {
@@ -241,18 +245,17 @@ ColumnLayout {
                 visible: connectButton.connecting || connectButton.hasError
                 text: {
                     if (connectButton.hasError) {
-                        return qsTr("Connection failed. Please check your password and try again.");
+                        return Tr.tr("Connection failed. Please check your password and try again.");
                     }
                     if (connectButton.connecting) {
-                        return qsTr("Connecting...");
+                        return Tr.tr("Connecting...");
                     }
                     return "";
                 }
                 color: connectButton.hasError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-                font.pointSize: Tokens.font.size.small
-                font.weight: 400
+                font: Tokens.font.body.builders.small.weight(Font.Normal).build()
                 wrapMode: Text.WordWrap
-                Layout.maximumWidth: parent.width - Tokens.padding.large * 2
+                Layout.maximumWidth: parent.width - Tokens.padding.extraLargeIncreased
             }
 
             FocusScope {
@@ -261,9 +264,9 @@ ColumnLayout {
                 property string passwordBuffer: ""
 
                 objectName: "passwordContainer"
-                Layout.topMargin: Tokens.spacing.large
+                Layout.topMargin: Tokens.spacing.largeIncreased
                 Layout.fillWidth: true
-                implicitHeight: Math.max(48, charList.implicitHeight + Tokens.padding.normal * 2)
+                implicitHeight: Math.max(48, charList.implicitHeight + Tokens.padding.medium * 2)
                 focus: true
                 activeFocusOnTab: true
 
@@ -336,7 +339,7 @@ ColumnLayout {
 
                 StyledRect {
                     anchors.fill: parent
-                    radius: Tokens.rounding.normal
+                    radius: Tokens.rounding.large
                     color: passwordContainer.activeFocus ? Qt.lighter(Colours.tPalette.m3surfaceContainer, 1.05) : Colours.tPalette.m3surfaceContainer
                     border.width: passwordContainer.activeFocus || connectButton.hasError ? 4 : (root.shouldBeVisible ? 1 : 0)
                     border.color: {
@@ -365,7 +368,7 @@ ColumnLayout {
                 StateLayer {
                     hoverEnabled: false
                     cursorShape: Qt.IBeamCursor
-                    radius: Tokens.rounding.normal
+                    radius: Tokens.rounding.large
                     onClicked: passwordContainer.forceActiveFocus()
                 }
 
@@ -373,14 +376,15 @@ ColumnLayout {
                     id: placeholder
 
                     anchors.centerIn: parent
-                    text: qsTr("Password")
+                    text: Tr.tr("Password")
                     color: Colours.palette.m3outline
-                    font.pointSize: Tokens.font.size.normal
-                    font.family: Tokens.font.family.mono
+                    font: Tokens.font.mono.medium
                     opacity: passwordContainer.passwordBuffer ? 0 : 1
 
                     Behavior on opacity {
-                        Anim {}
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
                     }
                 }
 
@@ -391,10 +395,10 @@ ColumnLayout {
 
                     anchors.centerIn: parent
                     implicitWidth: fullWidth
-                    implicitHeight: Tokens.font.size.normal
+                    implicitHeight: Tokens.font.body.medium.pointSize
 
                     orientation: Qt.Horizontal
-                    spacing: Tokens.spacing.small / 2
+                    spacing: Tokens.spacing.extraSmall
                     interactive: false
 
                     model: ScriptModel {
@@ -408,7 +412,7 @@ ColumnLayout {
                         implicitHeight: charList.implicitHeight
 
                         color: Colours.palette.m3onSurface
-                        radius: Tokens.rounding.small / 2
+                        radius: Tokens.rounding.medium / 2
 
                         opacity: 0
                         scale: 0
@@ -428,6 +432,7 @@ ColumnLayout {
                             }
                             ParallelAnimation {
                                 Anim {
+                                    type: Anim.DefaultEffects
                                     target: ch
                                     property: "opacity"
                                     to: 0
@@ -446,7 +451,9 @@ ColumnLayout {
                         }
 
                         Behavior on opacity {
-                            Anim {}
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
                         }
 
                         Behavior on scale {
@@ -463,18 +470,18 @@ ColumnLayout {
             }
 
             RowLayout {
-                Layout.topMargin: Tokens.spacing.normal
+                Layout.topMargin: Tokens.spacing.medium
                 Layout.fillWidth: true
-                spacing: Tokens.spacing.normal
+                spacing: Tokens.spacing.medium
 
                 TextButton {
                     id: cancelButton
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: Tokens.font.size.normal + Tokens.padding.normal * 2
+                    Layout.minimumHeight: Tokens.font.body.medium.pointSize + Tokens.padding.medium * 2
                     inactiveColour: Colours.palette.m3secondaryContainer
                     inactiveOnColour: Colours.palette.m3onSecondaryContainer
-                    text: qsTr("Cancel")
+                    text: Tr.trCtx("Cancel", "button")
 
                     onClicked: root.closeDialog()
                 }
@@ -486,10 +493,10 @@ ColumnLayout {
                     property bool hasError: false
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: Tokens.font.size.normal + Tokens.padding.normal * 2
+                    Layout.minimumHeight: Tokens.font.body.medium.pointSize + Tokens.padding.medium * 2
                     inactiveColour: Colours.palette.m3primary
                     inactiveOnColour: Colours.palette.m3onPrimary
-                    text: qsTr("Connect")
+                    text: Tr.tr("Connect")
                     enabled: passwordContainer.passwordBuffer.length > 0 && !connecting
 
                     onClicked: {
@@ -508,7 +515,7 @@ ColumnLayout {
                         // Set connecting state
                         connecting = true;
                         enabled = false;
-                        text = qsTr("Connecting...");
+                        text = Tr.tr("Connecting...");
 
                         // Connect to network
                         NetworkConnection.connectWithPassword(root.network, password, result => {
@@ -520,7 +527,7 @@ ColumnLayout {
                                 connecting = false;
                                 hasError = true;
                                 enabled = true;
-                                text = qsTr("Connect");
+                                text = Tr.tr("Connect");
                                 passwordContainer.passwordBuffer = "";
                                 // Delete the failed connection
                                 if (root.network && root.network.ssid) {
@@ -532,7 +539,7 @@ ColumnLayout {
                                 connecting = false;
                                 hasError = true;
                                 enabled = true;
-                                text = qsTr("Connect");
+                                text = Tr.tr("Connect");
                                 passwordContainer.passwordBuffer = "";
                                 // Delete the failed connection
                                 if (root.network && root.network.ssid) {
@@ -581,7 +588,7 @@ ColumnLayout {
                 if (stillConnected) {
                     connectionMonitor.stop();
                     connectButton.connecting = false;
-                    connectButton.text = qsTr("Connect");
+                    connectButton.text = Tr.tr("Connect");
                     // Return to network popout on successful connection
                     if (root.popouts.currentName === "wirelesspassword") {
                         root.popouts.currentName = "network";
@@ -605,7 +612,7 @@ ColumnLayout {
                 connectButton.connecting = false;
                 connectButton.hasError = true;
                 connectButton.enabled = true;
-                connectButton.text = qsTr("Connect");
+                connectButton.text = Tr.tr("Connect");
                 passwordContainer.passwordBuffer = "";
                 // Delete the failed connection
                 Nmcli.forgetNetwork(ssid);

@@ -2,8 +2,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -13,14 +13,14 @@ StyledRect {
     required property NotifData modelData
     required property Props props
     required property bool expanded
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
-    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.normal * 2 : summaryHeightMetrics.height
+    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
 
     implicitHeight: nonAnimHeight
 
-    radius: Tokens.rounding.small
+    radius: Tokens.rounding.medium
     color: {
         const c = root.modelData?.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2);
         return expanded ? c : Qt.alpha(c, 0);
@@ -32,12 +32,12 @@ StyledRect {
         name: "expanded"
 
         PropertyChanges {
-            summary.anchors.margins: root.Tokens.padding.normal
-            dummySummary.anchors.margins: root.Tokens.padding.normal
-            compactBody.anchors.margins: root.Tokens.padding.normal
-            timeStr.anchors.margins: root.Tokens.padding.normal
-            expandedContent.anchors.margins: root.Tokens.padding.normal
-            summary.width: root.width - root.Tokens.padding.normal * 2 - timeStr.implicitWidth - root.Tokens.spacing.small
+            summary.anchors.margins: root.Tokens.padding.medium
+            dummySummary.anchors.margins: root.Tokens.padding.medium
+            compactBody.anchors.margins: root.Tokens.padding.medium
+            timeStr.anchors.margins: root.Tokens.padding.medium
+            expandedContent.anchors.margins: root.Tokens.padding.medium
+            summary.width: root.width - root.Tokens.padding.medium * 2 - timeStr.implicitWidth - root.Tokens.spacing.small
             summary.maximumLineCount: Number.MAX_SAFE_INTEGER
         }
     }
@@ -106,7 +106,7 @@ StyledRect {
             animate: true
             text: root.modelData?.timeStr ?? ""
             color: Colours.palette.m3outline
-            font.pointSize: Tokens.font.size.small
+            font: Tokens.font.body.small
         }
     }
 
@@ -117,34 +117,32 @@ StyledRect {
         anchors.top: summary.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: Tokens.spacing.small / 2
+        anchors.topMargin: Tokens.spacing.extraSmall
 
         sourceComponent: ExpandedBody {}
     }
 
     Behavior on implicitHeight {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 
     component ExpandedBody: ColumnLayout {
         readonly property alias body: bodyText
 
-        spacing: Tokens.spacing.smaller
+        spacing: Tokens.spacing.medium
 
         StyledText {
             id: bodyText
 
             Layout.fillWidth: true
             textFormat: Text.MarkdownText
-            text: String(root.modelData?.body ?? "").replace(/(.)\n(?!\n)/g, "$1\n\n") || qsTr("No body here! :/")
+            text: String(root.modelData?.body ?? "").replace(/(.)\n(?!\n)/g, "$1\n\n") || Tr.tr("No body here! :/")
             color: root.modelData?.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {
-                Quickshell.execDetached(["app2unit", "-O", "--", link]);
-                root.visibilities.sidebar = false;
+                Qt.openUrlExternally(link);
+                root.screenState.sidebar = false;
             }
         }
 
@@ -182,6 +180,7 @@ StyledRect {
                         property: "active"
                     }
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                 }
@@ -192,6 +191,7 @@ StyledRect {
 
                 SequentialAnimation {
                     Anim {
+                        type: Anim.DefaultEffects
                         property: "opacity"
                     }
                     PropertyAction {

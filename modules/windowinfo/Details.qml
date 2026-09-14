@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -14,53 +15,60 @@ ColumnLayout {
     spacing: Tokens.spacing.small
 
     Label {
-        Layout.topMargin: Tokens.padding.large * 2
+        Layout.topMargin: Tokens.padding.extraLargeIncreased
 
-        text: root.client?.title ?? qsTr("No active client")
+        text: root.client?.title ?? Tr.tr("No active client")
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
-        font.pointSize: Tokens.font.size.large
-        font.weight: 500
+        font: Tokens.font.body.builders.large.weight(Font.Medium).build()
     }
 
     Label {
-        text: root.client?.lastIpcObject.class ?? qsTr("No active client")
+        text: root.client?.lastIpcObject.class ?? Tr.tr("No active client")
         color: Colours.palette.m3tertiary
 
-        font.pointSize: Tokens.font.size.larger
+        font: Tokens.font.body.large
     }
 
     StyledRect {
         Layout.fillWidth: true
         Layout.preferredHeight: 1
-        Layout.leftMargin: Tokens.padding.large * 2
-        Layout.rightMargin: Tokens.padding.large * 2
-        Layout.topMargin: Tokens.spacing.normal
-        Layout.bottomMargin: Tokens.spacing.large
+        Layout.leftMargin: Tokens.padding.extraLargeIncreased
+        Layout.rightMargin: Tokens.padding.extraLargeIncreased
+        Layout.topMargin: Tokens.spacing.medium
+        Layout.bottomMargin: Tokens.spacing.largeIncreased
 
         color: Colours.palette.m3secondary
     }
 
     Detail {
         icon: "location_on"
-        text: qsTr("Address: %1").arg(`0x${root.client?.address}` ?? "unknown")
+        text: {
+            const addr = root.client?.address;
+            if (addr)
+                return Tr.trCtx("Address: %1", "window address").arg(`0x${addr}`);
+            return Tr.trCtx("Address: unknown", "window address");
+        }
         color: Colours.palette.m3primary
     }
 
     Detail {
         icon: "location_searching"
-        text: qsTr("Position: %1, %2").arg(root.client?.lastIpcObject.at[0] ?? -1).arg(root.client?.lastIpcObject.at[1] ?? -1)
+        // TRANSLATORS: %1/%2 = x and y position in pixels
+        text: Tr.tr("Position: %1, %2").arg(root.client?.lastIpcObject.at[0] ?? -1).arg(root.client?.lastIpcObject.at[1] ?? -1)
     }
 
     Detail {
         icon: "resize"
-        text: qsTr("Size: %1 x %2").arg(root.client?.lastIpcObject.size[0] ?? -1).arg(root.client?.lastIpcObject.size[1] ?? -1)
+        // TRANSLATORS: %1/%2 = width and height in pixels; the x is a multiplication sign
+        text: Tr.tr("Size: %1 x %2").arg(root.client?.lastIpcObject.size[0] ?? -1).arg(root.client?.lastIpcObject.size[1] ?? -1)
         color: Colours.palette.m3tertiary
     }
 
     Detail {
         icon: "workspaces"
-        text: qsTr("Workspace: %1 (%2)").arg(root.client?.workspace.name ?? -1).arg(root.client?.workspace.id ?? -1)
+        // TRANSLATORS: %1 = workspace name, %2 = workspace id
+        text: Tr.tr("Workspace: %1 (%2)").arg(root.client?.workspace.name ?? -1).arg(root.client?.workspace.id ?? -1)
         color: Colours.palette.m3secondary
     }
 
@@ -69,42 +77,54 @@ ColumnLayout {
         text: {
             const mon = root.client?.monitor;
             if (mon)
-                return qsTr("Monitor: %1 (%2) at %3, %4").arg(mon.name).arg(mon.id).arg(mon.x).arg(mon.y);
-            return qsTr("Monitor: unknown");
+                // TRANSLATORS: %1 = monitor name, %2 = monitor id, %3/%4 = x/y position in pixels
+                return Tr.tr("Monitor: %1 (%2) at %3, %4").arg(mon.name).arg(mon.id).arg(mon.x).arg(mon.y);
+            return Tr.tr("Monitor: unknown");
         }
     }
 
     Detail {
         icon: "page_header"
-        text: qsTr("Initial title: %1").arg(root.client?.lastIpcObject.initialTitle ?? "unknown")
+        text: {
+            const title = root.client?.lastIpcObject.initialTitle;
+            if (title)
+                return Tr.tr("Initial title: %1").arg(title);
+            return Tr.tr("Initial title: unknown");
+        }
         color: Colours.palette.m3tertiary
     }
 
     Detail {
         icon: "category"
-        text: qsTr("Initial class: %1").arg(root.client?.lastIpcObject.initialClass ?? "unknown")
+        text: {
+            const cls = root.client?.lastIpcObject.initialClass;
+            if (cls)
+                return Tr.tr("Initial class: %1").arg(cls);
+            return Tr.tr("Initial class: unknown");
+        }
     }
 
     Detail {
         icon: "account_tree"
-        text: qsTr("Process id: %1").arg(root.client?.lastIpcObject.pid ?? -1)
+        // TRANSLATORS: %1 = process id
+        text: Tr.tr("Process id: %1").arg(String(root.client?.lastIpcObject.pid ?? -1))
         color: Colours.palette.m3primary
     }
 
     Detail {
         icon: "picture_in_picture_center"
-        text: qsTr("Floating: %1").arg(root.client?.lastIpcObject.floating ? "yes" : "no")
+        text: root.client?.lastIpcObject.floating ? Tr.tr("Floating: yes") : Tr.tr("Floating: no")
         color: Colours.palette.m3secondary
     }
 
     Detail {
         icon: "gradient"
-        text: qsTr("Xwayland: %1").arg(root.client?.lastIpcObject.xwayland ? "yes" : "no")
+        text: root.client?.lastIpcObject.xwayland ? Tr.tr("Xwayland: yes") : Tr.tr("Xwayland: no")
     }
 
     Detail {
         icon: "keep"
-        text: qsTr("Pinned: %1").arg(root.client?.lastIpcObject.pinned ? "yes" : "no")
+        text: root.client?.lastIpcObject.pinned ? Tr.tr("Pinned: yes") : Tr.tr("Pinned: no")
         color: Colours.palette.m3secondary
     }
 
@@ -112,9 +132,13 @@ ColumnLayout {
         icon: "fullscreen"
         text: {
             const fs = root.client?.lastIpcObject.fullscreen;
-            if (fs)
-                return qsTr("Fullscreen state: %1").arg(fs == 0 ? "off" : fs == 1 ? "maximised" : "on");
-            return qsTr("Fullscreen state: unknown");
+            if (fs === 0)
+                return Tr.tr("Fullscreen state: off");
+            if (fs === 1)
+                return Tr.tr("Fullscreen state: maximised");
+            if (fs !== undefined)
+                return Tr.tr("Fullscreen state: on");
+            return Tr.tr("Fullscreen state: unknown");
         }
         color: Colours.palette.m3tertiary
     }
@@ -134,7 +158,7 @@ ColumnLayout {
         Layout.rightMargin: Tokens.padding.large
         Layout.fillWidth: true
 
-        spacing: Tokens.spacing.smaller
+        spacing: Tokens.spacing.medium
 
         MaterialIcon {
             id: icon
@@ -149,7 +173,7 @@ ColumnLayout {
 
             text: detail.text
             elide: Text.ElideRight
-            font.pointSize: Tokens.font.size.normal
+            font: Tokens.font.body.medium
         }
     }
 

@@ -18,6 +18,7 @@ jobs:
       - name: Check QML format
         shell: fish {0}
         run: |
+          /usr/lib/qt6/bin/qmlformat --version
           for file in (string match -v 'build/*' **.qml)
             /usr/lib/qt6/bin/qmlformat $file | diff -u $file - || exit 1
           end
@@ -34,5 +35,6 @@ jobs:
       - name: Check C++ format
         shell: fish {0}
         run: |
+          clang-format --version
           find plugin extras -name '*.cpp' -o -name '*.hpp' \
             | xargs clang-format --dry-run --Werror

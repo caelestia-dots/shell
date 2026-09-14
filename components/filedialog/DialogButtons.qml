@@ -1,5 +1,6 @@
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -9,7 +10,7 @@ StyledRect {
     required property var dialog
     required property FolderContents folder
 
-    implicitHeight: inner.implicitHeight + Tokens.padding.normal * 2
+    implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
     color: Colours.tPalette.m3surfaceContainer
 
@@ -17,36 +18,40 @@ StyledRect {
         id: inner
 
         anchors.fill: parent
-        anchors.margins: Tokens.padding.normal
+        anchors.margins: Tokens.padding.medium
 
         spacing: Tokens.spacing.small
 
         StyledText {
-            text: qsTr("Filter:")
+            text: Tr.trCtx("Filter:", "file filter")
         }
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.rightMargin: Tokens.spacing.normal
+            Layout.rightMargin: Tokens.spacing.medium
 
             color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.small
+            radius: Tokens.rounding.medium
 
             StyledText {
                 anchors.fill: parent
-                anchors.margins: Tokens.padding.normal
+                anchors.margins: Tokens.padding.medium
 
-                text: `${root.dialog.filterLabel} (${root.dialog.filters.map(f => `*.${f}`).join(", ")})`
+                text: {
+                    const filters = root.dialog.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
+                    // TRANSLATORS: %1 = filter label, %2 = file patterns
+                    return Tr.trCtx("%1 (%2)", "file filter label and patterns").arg(root.dialog.filterLabel).arg(filters);
+                }
             }
         }
 
         StyledRect {
             color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.small
+            radius: Tokens.rounding.medium
 
-            implicitWidth: cancelText.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: cancelText.implicitHeight + Tokens.padding.normal * 2
+            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
 
             StateLayer {
                 disabled: !root.dialog.selectionValid
@@ -57,19 +62,19 @@ StyledRect {
                 id: selectText
 
                 anchors.centerIn: parent
-                anchors.margins: Tokens.padding.normal
+                anchors.margins: Tokens.padding.medium
 
-                text: qsTr("Select")
+                text: Tr.trCtx("Select", "button")
                 color: root.dialog.selectionValid ? Colours.palette.m3onSurface : Colours.palette.m3outline
             }
         }
 
         StyledRect {
             color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.small
+            radius: Tokens.rounding.medium
 
-            implicitWidth: cancelText.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: cancelText.implicitHeight + Tokens.padding.normal * 2
+            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
 
             StateLayer {
                 onClicked: {
@@ -81,9 +86,9 @@ StyledRect {
                 id: cancelText
 
                 anchors.centerIn: parent
-                anchors.margins: Tokens.padding.normal
+                anchors.margins: Tokens.padding.medium
 
-                text: qsTr("Cancel")
+                text: Tr.trCtx("Cancel", "button")
             }
         }
     }

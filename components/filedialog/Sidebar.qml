@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.filedialog
 import qs.services
@@ -13,7 +14,7 @@ StyledRect {
     required property var dialog
 
     implicitWidth: Sizes.sidebarWidth
-    implicitHeight: inner.implicitHeight + Tokens.padding.normal * 2
+    implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
     color: Colours.tPalette.m3surfaceContainer
 
@@ -23,17 +24,16 @@ StyledRect {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: Tokens.padding.normal
-        spacing: Tokens.spacing.small / 2
+        anchors.margins: Tokens.padding.medium
+        spacing: Tokens.spacing.extraSmall
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Tokens.padding.small / 2
-            Layout.bottomMargin: Tokens.spacing.normal
-            text: qsTr("Files")
+            Layout.topMargin: Tokens.padding.extraSmall / 2
+            Layout.bottomMargin: Tokens.spacing.medium
+            text: Tr.trCtx("Files", "file dialog sidebar heading")
             color: Colours.palette.m3onSurface
-            font.pointSize: Tokens.font.size.larger
-            font.bold: true
+            font: Tokens.font.body.builders.large.weight(Font.Bold).build()
         }
 
         Repeater {
@@ -46,7 +46,7 @@ StyledRect {
                 readonly property bool selected: modelData === root.dialog.cwd[root.dialog.cwd.length - 1]
 
                 Layout.fillWidth: true
-                implicitHeight: placeInner.implicitHeight + Tokens.padding.normal * 2
+                implicitHeight: placeInner.implicitHeight + Tokens.padding.medium * 2
 
                 radius: Tokens.rounding.full
                 color: Qt.alpha(Colours.palette.m3secondaryContainer, selected ? 1 : 0)
@@ -65,11 +65,11 @@ StyledRect {
                     id: placeInner
 
                     anchors.fill: parent
-                    anchors.margins: Tokens.padding.normal
+                    anchors.margins: Tokens.padding.medium
                     anchors.leftMargin: Tokens.padding.large
                     anchors.rightMargin: Tokens.padding.large
 
-                    spacing: Tokens.spacing.normal
+                    spacing: Tokens.spacing.medium
 
                     MaterialIcon {
                         text: {
@@ -91,11 +91,13 @@ StyledRect {
                             return "folder";
                         }
                         color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                        font.pointSize: Tokens.font.size.large
+                        fontStyle: Tokens.font.icon.medium
                         fill: place.selected ? 1 : 0
 
                         Behavior on fill {
-                            Anim {}
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
                         }
                     }
 
@@ -103,7 +105,7 @@ StyledRect {
                         Layout.fillWidth: true
                         text: place.modelData
                         color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                        font.pointSize: Tokens.font.size.normal
+                        font: Tokens.font.body.small
                         elide: Text.ElideRight
                     }
                 }

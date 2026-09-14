@@ -20,7 +20,7 @@ Item {
 
     layer.enabled: true
     layer.smooth: true
-    layer.effect: OpacityMask {
+    layer.effect: Mask {
         maskSource: gradientMask
     }
 
@@ -65,7 +65,9 @@ Item {
             opacity: flickable.contentX > 0 ? 0 : 1
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
 
@@ -78,7 +80,9 @@ Item {
             opacity: flickable.contentX < flickable.contentWidth - parent.width ? 0 : 1
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
     }
@@ -114,11 +118,11 @@ Item {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    implicitWidth: actionInner.implicitWidth + Tokens.padding.normal * 2
-                    implicitHeight: actionInner.implicitHeight + Tokens.padding.small * 2
+                    implicitWidth: actionInner.implicitWidth + Tokens.padding.medium * 2
+                    implicitHeight: actionInner.implicitHeight + Tokens.padding.small
 
                     Layout.preferredWidth: implicitWidth + (actionStateLayer.pressed ? Tokens.padding.large : 0)
-                    radius: actionStateLayer.pressed ? Tokens.rounding.small / 2 : Tokens.rounding.small
+                    radius: actionStateLayer.pressed ? Tokens.rounding.medium / 2 : Tokens.rounding.medium
                     color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 4)
 
                     Timer {

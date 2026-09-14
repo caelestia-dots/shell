@@ -6,4 +6,4 @@ target_compile_definitions(version PRIVATE
     GIT_REVISION="${GIT_REVISION}"
     DISTRIBUTOR="${DISTRIBUTOR}"
 )
-install(TARGETS version DESTINATION ${INSTALL_LIBDIR})
+install(TARGETS version DESTINATION "${INSTALL_LIBDIR}")

@@ -1,16 +1,17 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia
 import Caelestia.Config
 import qs.components
 
 Item {
     id: root
 
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
     readonly property Props props: Props {}
 
-    readonly property bool shouldBeActive: visibilities.sidebar && Config.sidebar.enabled
+    readonly property bool shouldBeActive: screenState.sidebar && Config.sidebar.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
@@ -19,9 +20,7 @@ Item {
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
-        Anim {
-            type: Anim.DefaultSpatial
-        }
+        Anim {}
     }
 
     Loader {
@@ -30,15 +29,16 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.margins: Tokens.padding.large
+        anchors.leftMargin: Tokens.padding.large
+        anchors.margins: CUtils.clamp(anchors.leftMargin - Config.border.thickness, 0, anchors.leftMargin)
         anchors.bottomMargin: 0
 
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            implicitWidth: Tokens.sizes.sidebar.width - Tokens.padding.large * 2
+            implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
             props: root.props
-            visibilities: root.visibilities
+            screenState: root.screenState
         }
     }
 }

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <qjsengine.h>
 #include <qobject.h>
+#include <qqmlengine.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 #include <qset.h>
@@ -20,7 +22,7 @@ class Toast : public QObject {
     Q_PROPERTY(Type type READ type CONSTANT)
 
 public:
-    enum class Type {
+    enum class Type : quint8 {
         Info = 0,
         Success,
         Warning,
@@ -28,8 +30,7 @@ public:
     };
     Q_ENUM(Type)
 
-    explicit Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout,
-        QObject* parent = nullptr);
+    explicit Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent = nullptr);
 
     [[nodiscard]] bool closed() const;
     [[nodiscard]] QString title() const;
@@ -65,7 +66,8 @@ class Toaster : public QObject {
     Q_PROPERTY(QQmlListProperty<caelestia::Toast> toasts READ toasts NOTIFY toastsChanged)
 
 public:
-    explicit Toaster(QObject* parent = nullptr);
+    static Toaster* instance();
+    static Toaster* create(QQmlEngine* engine, QJSEngine* jsEngine);
 
     [[nodiscard]] QQmlListProperty<Toast> toasts();
 
@@ -76,6 +78,8 @@ signals:
     void toastsChanged();
 
 private:
+    explicit Toaster(QObject* parent = nullptr);
+
     QList<Toast*> m_toasts;
 };
 

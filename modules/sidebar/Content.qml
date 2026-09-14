@@ -8,24 +8,26 @@ Item {
     id: root
 
     required property Props props
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            radius: Tokens.rounding.normal
+            radius: Tokens.rounding.large
             color: Colours.tPalette.m3surfaceContainerLow
 
             NotifDock {
+                objectName: "sidebarNotifications"
+
                 props: root.props
-                visibilities: root.visibilities
+                screenState: root.screenState
             }
         }
 

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "configobject.hpp"
-
 #include <qstring.h>
-#include <qvariant.h>
+#include <qvariantlist.h>
+
+#include "settings/objectnode.hpp"
+#include "common.hpp"
 
 namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
 
-class UtilitiesToasts : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class UtilitiesToasts : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesToasts, settings::ObjectNode)
 
     CONFIG_PROPERTY(QString, fullscreen, u"off"_s)
     CONFIG_GLOBAL_PROPERTY(bool, configLoaded, true)
@@ -26,48 +26,42 @@ class UtilitiesToasts : public ConfigObject {
     CONFIG_GLOBAL_PROPERTY(bool, kbLimit, true)
     CONFIG_GLOBAL_PROPERTY(bool, vpnChanged, true)
     CONFIG_GLOBAL_PROPERTY(bool, nowPlaying, false)
-
-public:
-    explicit UtilitiesToasts(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
 };
 
-class UtilitiesVpn : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class UtilitiesVpn : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesVpn, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
-    CONFIG_GLOBAL_PROPERTY(QVariantList, provider)
-
-public:
-    explicit UtilitiesVpn(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
+    CONFIG_GLOBAL_PROPERTY(QVariantList, provider, {})
+    CONFIG_GLOBAL_PROPERTY(QString, selectedProvider, QString())
 };
 
-class UtilitiesConfig : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class UtilitiesCards : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesCards, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, keepAwake, true)
+    CONFIG_PROPERTY(bool, recorder, true)
+    CONFIG_PROPERTY(bool, quickToggles, true)
+};
+
+class UtilitiesConfig : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesConfig, settings::ObjectNode)
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(int, maxToasts, 4)
+    CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_SUBOBJECT(UtilitiesVpn, vpn)
-    CONFIG_PROPERTY(QVariantList, quickToggles,
-        {
-            vmap({ { u"id"_s, u"wifi"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"bluetooth"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"mic"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"settings"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"gameMode"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"dnd"_s }, { u"enabled"_s, true } }),
-            vmap({ { u"id"_s, u"vpn"_s }, { u"enabled"_s, false } }),
-        })
-
-public:
-    explicit UtilitiesConfig(QObject* parent = nullptr)
-        : ConfigObject(parent)
-        , m_toasts(new UtilitiesToasts(this))
-        , m_vpn(new UtilitiesVpn(this)) {}
+    CONFIG_LIST(EntryList, quickToggles,
+        DEFAULT_ARG({
+            LIST_ENTRY(wifi, true),
+            LIST_ENTRY(bluetooth, true),
+            LIST_ENTRY(mic, true),
+            LIST_ENTRY(settings, true),
+            LIST_ENTRY(gameMode, true),
+            LIST_ENTRY(dnd, true),
+            LIST_ENTRY(vpn, false),
+        }))
 };
 
 } // namespace caelestia::config

@@ -11,7 +11,7 @@ Item {
     id: root
 
     required property DesktopEntry modelData
-    required property DrawerVisibilities visibilities
+    required property ScreenState screenState
 
     implicitHeight: Tokens.sizes.launcher.itemHeight
 
@@ -19,18 +19,18 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.large
         onClicked: {
             Apps.launch(root.modelData);
-            root.visibilities.launcher = false;
+            root.screenState.launcher = false;
         }
     }
 
     Item {
         anchors.fill: parent
-        anchors.leftMargin: Tokens.padding.larger
-        anchors.rightMargin: Tokens.padding.larger
-        anchors.margins: Tokens.padding.smaller
+        anchors.leftMargin: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.medium
+        anchors.margins: Tokens.padding.small
 
         IconImage {
             id: icon
@@ -44,7 +44,7 @@ Item {
 
         Item {
             anchors.left: icon.right
-            anchors.leftMargin: Tokens.spacing.normal
+            anchors.leftMargin: Tokens.spacing.medium
             anchors.verticalCenter: icon.verticalCenter
 
             implicitWidth: parent.width - icon.width - favouriteIcon.width
@@ -54,18 +54,18 @@ Item {
                 id: name
 
                 text: root.modelData?.name ?? ""
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.body.medium
             }
 
             StyledText {
                 id: comment
 
                 text: (root.modelData?.comment || root.modelData?.genericName || root.modelData?.name) ?? ""
-                font.pointSize: Tokens.font.size.small
+                font: Tokens.font.body.small
                 color: Colours.palette.m3outline
 
                 elide: Text.ElideRight
-                width: root.width - icon.width - favouriteIcon.width - Tokens.rounding.normal * 2
+                width: root.width - icon.width - favouriteIcon.width - Tokens.rounding.extraLargeIncreased
 
                 anchors.top: name.bottom
             }

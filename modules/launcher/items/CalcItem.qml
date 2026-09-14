@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -14,7 +15,7 @@ Item {
 
     function onClicked(): void {
         Quickshell.execDetached(["wl-copy", Qalculator.rawResult]);
-        root.list.visibilities.launcher = false;
+        root.list.screenState.launcher = false;
     }
 
     onMathChanged: {
@@ -28,7 +29,7 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Tokens.rounding.normal
+        radius: Tokens.rounding.large
         onClicked: root.onClicked()
     }
 
@@ -36,13 +37,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: Tokens.padding.larger
+        anchors.margins: Tokens.padding.medium
 
-        spacing: Tokens.spacing.normal
+        spacing: Tokens.spacing.medium
 
         MaterialIcon {
             text: "function"
-            font.pointSize: Tokens.font.size.extraLarge
+            fontStyle: Tokens.font.icon.extraLarge
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -57,7 +58,7 @@ Item {
                 return Colours.palette.m3onSurface;
             }
 
-            text: root.math.length > 0 ? (Qalculator.result || qsTr("Calculating...")) : qsTr("Type an expression to calculate")
+            text: root.math.length > 0 ? (Qalculator.result ? Tr.trMarked(Qalculator.result) : Tr.tr("Calculating...")) : Tr.tr("Type an expression to calculate")
             elide: Text.ElideLeft
 
             Layout.fillWidth: true
@@ -66,11 +67,11 @@ Item {
 
         StyledRect {
             color: Colours.palette.m3tertiary
-            radius: Tokens.rounding.normal
+            radius: Tokens.rounding.large
             clip: true
 
-            implicitWidth: (stateLayer.containsMouse ? label.implicitWidth + label.anchors.rightMargin : 0) + icon.implicitWidth + Tokens.padding.normal * 2
-            implicitHeight: Math.max(label.implicitHeight, icon.implicitHeight) + Tokens.padding.small * 2
+            implicitWidth: (stateLayer.containsMouse ? label.implicitWidth + label.anchors.rightMargin : 0) + icon.implicitWidth + Tokens.padding.medium * 2
+            implicitHeight: Math.max(label.implicitHeight, icon.implicitHeight) + Tokens.padding.small
 
             Layout.alignment: Qt.AlignVCenter
 
@@ -79,9 +80,9 @@ Item {
 
                 color: Colours.palette.m3onTertiary
 
-                function onClicked(): void {
-                    Quickshell.execDetached(["app2unit", "--", ...Config.general.apps.terminal, "zsh", "-c", `qalc -i '${root.math}'`]);
-                    root.list.visibilities.launcher = false;
+                onClicked: {
+                    Quickshell.execDetached(["app2unit", "--", ...GlobalConfig.general.apps.terminal, "zsh", "-c", `qalc -i '${root.math}'`]);
+                    root.list.screenState.launcher = false;
                 }
             }
 
@@ -92,14 +93,16 @@ Item {
                 anchors.right: icon.left
                 anchors.rightMargin: Tokens.spacing.small
 
-                text: qsTr("Open in calculator")
+                text: Tr.tr("Open in calculator")
                 color: Colours.palette.m3onTertiary
-                font.pointSize: Tokens.font.size.normal
+                font: Tokens.font.label.medium
 
                 opacity: stateLayer.containsMouse ? 1 : 0
 
                 Behavior on opacity {
-                    Anim {}
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
                 }
             }
 
@@ -108,11 +111,11 @@ Item {
 
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
-                anchors.rightMargin: Tokens.padding.normal
+                anchors.rightMargin: Tokens.padding.medium
 
                 text: "open_in_new"
                 color: Colours.palette.m3onTertiary
-                font.pointSize: Tokens.font.size.large
+                fontStyle: Tokens.font.icon.large
             }
 
             Behavior on implicitWidth {

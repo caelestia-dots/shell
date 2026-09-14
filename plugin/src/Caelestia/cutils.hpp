@@ -1,8 +1,10 @@
 #pragma once
 
-#include <QtQuick/qquickitem.h>
+#include <qlist.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qquickitem.h>
+#include <qvariant.h>
 
 namespace caelestia {
 
@@ -11,19 +13,29 @@ class CUtils : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
-public:
-    // clang-format off
-    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path);
-    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect);
-    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, QJSValue onSaved);
-    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, QJSValue onSaved, QJSValue onFailed);
-    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, QJSValue onSaved);
-    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, QJSValue onSaved, QJSValue onFailed);
-    // clang-format on
+    Q_PROPERTY(QString version READ version CONSTANT)
+    Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
 
-    Q_INVOKABLE bool copyFile(const QUrl& source, const QUrl& target, bool overwrite = true) const;
-    Q_INVOKABLE bool deleteFile(const QUrl& path) const;
-    Q_INVOKABLE QString toLocalFile(const QUrl& url) const;
+public:
+    Q_INVOKABLE void saveItem(
+        QQuickItem* target, const QUrl& path, const QJSValue& onSaved = {}, const QJSValue& onFailed = {});
+    Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, const QJSValue& onSaved = {},
+        const QJSValue& onFailed = {});
+
+    Q_INVOKABLE static bool copyFile(const QUrl& source, const QUrl& target, bool overwrite = true);
+    Q_INVOKABLE static bool deleteFile(const QUrl& path);
+    Q_INVOKABLE static QString toLocalFile(const QUrl& url);
+
+    Q_INVOKABLE static qreal clamp(qreal value, qreal min, qreal max);
+
+    Q_INVOKABLE static QString enumToString(QObject* target, const QString& property, const QVariant& value = {});
+
+    Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);
+    Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);
+    Q_INVOKABLE static QList<QQuickItem*> findChildrenMatching(QQuickItem* root, const QString& pattern);
+
+    [[nodiscard]] static QString version();
+    [[nodiscard]] static QString qtVersion();
 };
 
 } // namespace caelestia

@@ -3,22 +3,53 @@ import Quickshell
 import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
+import Caelestia.I18n
+import Caelestia.Services
 
 Scope {
     id: root
 
-    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => b.level - a.level)
+    readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels].sort((a, b) => a.level - b.level)
+    property real lastPercentage: 100
+
+    function handleBatteryWarnings(): void {
+        const p = UPower.displayDevice.percentage * 100;
+
+        if (!UPower.onBattery) {
+            root.lastPercentage = p;
+            return;
+        }
+
+        if (root.lastPercentage >= 0) {
+            for (const level of root.warnLevels) {
+                if (p <= level.level && root.lastPercentage > level.level) {
+                    Toaster.toast(Tr.trMarked(level.title ?? Tr.tr("Battery warning")), Tr.trMarked(level.message ?? Tr.tr("Battery level is low")), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
+                    break;
+                }
+            }
+        }
+
+        if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
+            Toaster.toast(Tr.tr("Hibernating in 5 seconds"), Tr.tr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
+            hibernateTimer.start();
+        }
+
+        root.lastPercentage = p;
+    }
 
     Connections {
         function onOnBatteryChanged(): void {
+            if (!UPower.displayDevice.ready)
+                return;
+
             if (UPower.onBattery) {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
-                    Toaster.toast(qsTr("Charger unplugged"), qsTr("Battery is discharging"), "power_off");
+                    Toaster.toast(Tr.tr("Charger unplugged"), Tr.tr("Battery is discharging"), "power_off");
+                root.handleBatteryWarnings();
             } else {
                 if (GlobalConfig.utilities.toasts.chargingChanged)
-                    Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");
-                for (const level of root.warnLevels)
-                    level.warned = false;
+                    Toaster.toast(Tr.tr("Charger plugged in"), Tr.tr("Battery is charging"), "power");
+                root.lastPercentage = 100;
             }
         }
 
@@ -26,22 +57,20 @@ Scope {
     }
 
     Connections {
-        function onPercentageChanged(): void {
-            if (!UPower.onBattery)
+        function onReadyChanged(): void {
+            if (!UPower.displayDevice.ready)
                 return;
+            root.handleBatteryWarnings();
+        }
 
-            const p = UPower.displayDevice.percentage * 100;
-            for (const level of root.warnLevels) {
-                if (p <= level.level && !level.warned) {
-                    level.warned = true;
-                    Toaster.toast(level.title ?? qsTr("Battery warning"), level.message ?? qsTr("Battery level is low"), level.icon ?? "battery_android_alert", level.critical ? Toast.Error : Toast.Warning);
-                }
-            }
+        target: UPower.displayDevice
+    }
 
-            if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
-                Toaster.toast(qsTr("Hibernating in 5 seconds"), qsTr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
-                hibernateTimer.start();
-            }
+    Connections {
+        function onPercentageChanged(): void {
+            if (!UPower.displayDevice.ready)
+                return;
+            root.handleBatteryWarnings();
         }
 
         target: UPower.displayDevice
@@ -51,6 +80,6 @@ Scope {
         id: hibernateTimer
 
         interval: 5000
-        onTriggered: Quickshell.execDetached(["systemctl", "hibernate"])
+        onTriggered: SessionManager.hibernate()
     }
 }
