@@ -355,7 +355,6 @@ Column {
                         required property int modelData
 
                         Layout.fillWidth: true
-                        isToggle: true
                         type: TextButton.Tonal
                         text: `${modelData}%`
                         checked: BatteryControl.threshold === modelData
