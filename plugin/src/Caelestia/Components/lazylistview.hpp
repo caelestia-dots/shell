@@ -89,6 +89,7 @@ class LazyListView : public QQuickItem {
     Q_PROPERTY(QRectF viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
     Q_PROPERTY(bool useCustomViewport READ useCustomViewport WRITE setUseCustomViewport NOTIFY useCustomViewportChanged)
     Q_PROPERTY(qreal cacheBuffer READ cacheBuffer WRITE setCacheBuffer NOTIFY cacheBufferChanged)
+    Q_PROPERTY(bool cullDelegates READ cullDelegates WRITE setCullDelegates NOTIFY cullDelegatesChanged)
 
     // Sizing
     Q_PROPERTY(qreal estimatedHeight READ estimatedHeight WRITE setEstimatedHeight NOTIFY estimatedHeightChanged)
@@ -138,6 +139,9 @@ public:
     [[nodiscard]] qreal cacheBuffer() const;
     void setCacheBuffer(qreal buffer);
 
+    [[nodiscard]] bool cullDelegates() const;
+    void setCullDelegates(bool cull);
+
     // Sizing
     [[nodiscard]] qreal estimatedHeight() const;
     void setEstimatedHeight(qreal height);
@@ -170,6 +174,7 @@ signals:
     void viewportChanged();
     void useCustomViewportChanged();
     void cacheBufferChanged();
+    void cullDelegatesChanged();
     void estimatedHeightChanged();
     void asynchronousChanged();
     void removeDurationChanged();
@@ -276,6 +281,7 @@ private:
     QRectF m_viewport;
     bool m_useCustomViewport = false;
     qreal m_cacheBuffer = 0;
+    bool m_cullDelegates = true;
 
     qreal m_estimatedHeight = -1;
     qreal m_knownHeightSum = 0;
