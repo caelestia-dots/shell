@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
 
@@ -31,10 +32,12 @@ Item {
             anchors.fill: parent
             anchors.margins: 1
 
-            Repeater {
+            AnimatedRepeater {
                 model: ScriptModel {
                     values: root.workspaces
                 }
+
+                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
                 OccupiedRect {}
             }
@@ -51,7 +54,7 @@ Item {
         property real bottomPadding: ifAdjacent(root.workspaces.length - 1, 1, root.wsSpacing, 0)
 
         function ifAdjacent(exclIdx: int, adj: int, yes: real, no: real): real {
-            if (!modelData?.isOccupied || index === exclIdx)
+            if (AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData?.isOccupied || index === exclIdx)
                 return no;
             return (root.workspaces[index + adj]?.isOccupied ?? false) ? yes : no;
         }
