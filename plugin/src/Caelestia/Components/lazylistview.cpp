@@ -234,6 +234,18 @@ void LazyListView::setCacheBuffer(qreal buffer) {
     polish();
 }
 
+bool LazyListView::cullDelegates() const {
+    return m_cullDelegates;
+}
+
+void LazyListView::setCullDelegates(bool cull) {
+    if (m_cullDelegates == cull)
+        return;
+    m_cullDelegates = cull;
+    emit cullDelegatesChanged();
+    polish();
+}
+
 // --- Sizing ---
 
 qreal LazyListView::estimatedHeight() const {
@@ -661,6 +673,10 @@ QRectF LazyListView::effectiveViewport() const {
 std::pair<int, int> LazyListView::computeVisibleRange() const {
     if (m_layout.isEmpty())
         return { -1, -1 };
+
+    // Culling disabled: keep every delegate alive
+    if (!m_cullDelegates)
+        return { 0, static_cast<int>(m_layout.size()) - 1 };
 
     const auto vp = effectiveViewport();
     if (vp.isEmpty())

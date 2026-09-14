@@ -142,51 +142,48 @@ Item {
 
             asynchronous: true
 
-            Layout.alignment: Qt.AlignHCenter
-            Layout.fillHeight: true
+            Layout.fillWidth: true
             Layout.topMargin: -Tokens.spacing.extraSmall / 2
+            Layout.preferredHeight: root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
 
             visible: active
-            active: root.hasWindows
+            active: Config.bar.workspaces.showWindows && Config.bar.workspaces.maxWindowIcons > 0
 
-            sourceComponent: Column {
+            sourceComponent: LazyListView {
                 spacing: 0
+                implicitHeight: contentHeight
+                cullDelegates: false
+                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
-                add: Transition {
-                    Anim {
-                        properties: "scale"
-                        from: 0
-                        to: 1
-                        easing: Tokens.anim.standardDecel
+                model: ScriptModel {
+                    values: {
+                        const windows = root.toplevels;
+                        const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
+                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
                     }
                 }
 
-                move: Transition {
-                    Anim {
-                        properties: "scale"
-                        to: 1
-                        easing: Tokens.anim.standardDecel
-                    }
-                    Anim {
-                        properties: "x,y"
-                    }
-                }
+                delegate: MaterialIcon {
+                    id: win
 
-                Repeater {
-                    model: ScriptModel {
-                        values: {
-                            const windows = root.toplevels;
-                            const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
-                            return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                    required property var modelData
+                    required property int index // Needed, LazyListView will fail to set it if it doesn't exist
+
+                    grade: 0
+                    horizontalAlignment: Text.AlignHCenter
+                    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
+                    color: Colours.palette.m3onSurfaceVariant
+
+                    opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
                         }
                     }
 
-                    MaterialIcon {
-                        required property var modelData
-
-                        grade: 0
-                        text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                        color: Colours.palette.m3onSurfaceVariant
+                    Behavior on y {
+                        Anim {}
                     }
                 }
             }
