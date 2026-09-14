@@ -19,7 +19,8 @@ PageBase {
 
         StepperRow {
             first: true
-            label: Tr.trCtx("Shown", "number of workspaces")
+            // TRANSLATORS: the number of workspaces shown on the bar
+            label: Tr.trCtx("Shown", "bar workspaces")
             subtext: Tr.tr("Number of workspaces displayed")
             value: Config.bar.workspaces.shown
             from: 1
@@ -29,40 +30,39 @@ PageBase {
         }
 
         ToggleRow {
-            // TRANSLATORS: the three following labels name visual decorations drawn on the workspace pill
-            text: Tr.tr("Active indicator")
+            text: Tr.trCtx("Active indicator", "bar workspaces")
             checked: Config.bar.workspaces.activeIndicator
             onToggled: GlobalConfig.bar.workspaces.activeIndicator = checked
         }
 
         ToggleRow {
-            text: Tr.tr("Active trail")
+            text: Tr.trCtx("Active trail", "bar workspaces")
             checked: Config.bar.workspaces.activeTrail
             onToggled: GlobalConfig.bar.workspaces.activeTrail = checked
         }
 
         ToggleRow {
-            text: Tr.tr("Occupied background")
+            text: Tr.trCtx("Occupied background", "bar workspaces")
             checked: Config.bar.workspaces.occupiedBg
             onToggled: GlobalConfig.bar.workspaces.occupiedBg = checked
         }
 
         ToggleRow {
-            text: Tr.tr("Show windows")
+            text: Tr.trCtx("Show windows", "bar workspaces")
             subtext: Tr.tr("Show icons of open windows on each workspace")
             checked: Config.bar.workspaces.showWindows
             onToggled: GlobalConfig.bar.workspaces.showWindows = checked
         }
 
         ToggleRow {
-            text: Tr.tr("Show unoccupied")
+            text: Tr.trCtx("Show unoccupied", "bar workspaces")
             subtext: Tr.tr("Show workspaces that are inactive and empty")
             checked: Config.bar.workspaces.showUnoccupied
             onToggled: GlobalConfig.bar.workspaces.showUnoccupied = checked
         }
 
         ToggleRow {
-            text: Tr.tr("Windows on special workspaces")
+            text: Tr.trCtx("Windows on special workspaces", "bar workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
         }
@@ -70,7 +70,7 @@ PageBase {
         StepperRow {
             last: true
             // TRANSLATORS: maximum number of window icons shown per workspace
-            label: Tr.tr("Max window icons")
+            label: Tr.trCtx("Max window icons", "bar workspaces")
             value: Config.bar.workspaces.maxWindowIcons
             from: 0
             to: 20
