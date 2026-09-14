@@ -413,31 +413,25 @@ QQuickItem* LazyListView::itemAtIndex(int index) const {
     return m_delegates.value(index).item;
 }
 
-// Hit test in content coordinates against layout (non-animated) positions
+// Hit test against instantiated delegates at their current visual positions
 QQuickItem* LazyListView::itemAt(qreal x, qreal y) const {
-    if (m_layout.isEmpty() || x < 0 || x >= width() || y < 0)
+    if (x < 0 || x >= width() || y < 0)
         return nullptr;
 
-    // Binary search for the first item whose layout bottom is below y
-    int lo = 0;
-    int hi = static_cast<int>(m_layout.size()) - 1;
-    int candidate = -1;
+    for (int i = 0; i < static_cast<int>(m_layout.size()); ++i) {
+        const auto it = m_delegates.constFind(i);
+        if (it == m_delegates.constEnd() || !it->item || !it->item->isVisible())
+            continue;
 
-    while (lo <= hi) {
-        const int mid = lo + (hi - lo) / 2;
-        if (m_layout[mid].targetY + layoutHeightAt(mid) > y) {
-            candidate = mid;
-            hi = mid - 1;
-        } else {
-            lo = mid + 1;
-        }
+        auto* const item = it->item;
+        const auto top = item->y() + m_contentY;
+        const auto bottom = top + delegateVisibleHeight(item);
+
+        if (y >= top && y < bottom)
+            return item;
     }
 
-    // y lies past the last item, or in the spacing gap above the candidate
-    if (candidate < 0 || y < m_layout[candidate].targetY)
-        return nullptr;
-
-    return m_delegates.value(candidate).item;
+    return nullptr;
 }
 
 // --- QQuickItem Overrides ---
