@@ -57,10 +57,8 @@ StyledRect {
     Keys.onPressed: event => {
         if (!disabled && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)) {
             event.accepted = true;
-            if (isToggle) {
-                checked = !checked;
-                internalChecked = checked;
-            }
+            if (isToggle)
+                internalChecked = !internalChecked;
             clicked();
         }
     }
@@ -88,10 +86,8 @@ StyledRect {
         color: root.internalChecked ? root.activeOnColour : root.inactiveOnColour
         disabled: root.disabled
         onClicked: {
-            if (root.isToggle) {
-                root.checked = !root.checked;
-                root.internalChecked = root.checked;
-            }
+            if (root.isToggle)
+                root.internalChecked = !root.internalChecked;
             root.clicked();
         }
     }
