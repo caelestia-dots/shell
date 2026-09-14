@@ -20,12 +20,9 @@ StyledClippingRect {
     readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
     readonly property int activeWsId: monitor.activeWorkspace?.id ?? 1
     readonly property int activeWsIdx: workspaceIndex(activeWsId)
+    readonly property int shown: Math.max(1, Config.bar.workspaces.shown)
 
     readonly property var wsIds: {
-        const shown = root.Config.bar.workspaces.shown;
-        if (shown <= 0)
-            return [];
-
         if (root.Config.bar.workspaces.showUnoccupied)
             return Array.from({
                 length: shown
@@ -51,7 +48,7 @@ StyledClippingRect {
     readonly property int groupOffset: {
         if (!Config.bar.workspaces.showUnoccupied)
             return 0;
-        return Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown;
+        return Math.floor((activeWsId - 1) / shown) * shown;
     }
 
     property real blur: onSpecial ? 1 : 0
@@ -62,8 +59,8 @@ StyledClippingRect {
 
         let index = id - 1;
         while (index < 0)
-            index += Config.bar.workspaces.shown;
-        return index % Config.bar.workspaces.shown;
+            index += shown;
+        return index % shown;
     }
 
     implicitWidth: Tokens.sizes.bar.innerWidth
