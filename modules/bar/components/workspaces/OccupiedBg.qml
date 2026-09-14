@@ -56,7 +56,7 @@ Item {
         function ifAdjacent(exclIdx: int, adj: int, yes: real, no: real): real {
             if (AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData?.isOccupied || index === exclIdx)
                 return no;
-            return (root.workspaces[index + adj]?.isOccupied ?? false) ? yes : no;
+            return root.workspaces[index + adj]?.isOccupied ? yes : no;
         }
 
         anchors.left: parent?.left
