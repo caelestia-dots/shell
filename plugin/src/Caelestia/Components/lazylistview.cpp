@@ -418,12 +418,11 @@ QQuickItem* LazyListView::itemAt(qreal x, qreal y) const {
     if (x < 0 || x >= width() || y < 0)
         return nullptr;
 
-    for (int i = 0; i < static_cast<int>(m_layout.size()); ++i) {
-        const auto it = m_delegates.constFind(i);
-        if (it == m_delegates.constEnd() || !it->item || !it->item->isVisible())
+    const auto children = childItems();
+    for (auto* const item : children | std::views::reverse) {
+        if (!m_itemToIndex.contains(item) || !item->isVisible())
             continue;
 
-        auto* const item = it->item;
         const auto top = item->y() + m_contentY;
         const auto bottom = top + delegateVisibleHeight(item);
 
