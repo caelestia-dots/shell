@@ -23,6 +23,8 @@ StyledClippingRect {
 
     readonly property var wsIds: {
         const shown = root.Config.bar.workspaces.shown;
+        if (shown <= 0)
+            return [];
 
         if (root.Config.bar.workspaces.showUnoccupied)
             return Array.from({
@@ -30,17 +32,15 @@ StyledClippingRect {
             }, (_, i) => i + 1);
 
         const ids = [];
-        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor);
+        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor && (w.id === activeWsId || w.toplevels.values.some(t => !Hypr.isToplevelIgnored(t))));
         const currentIdx = workspaces.findIndex(w => w.id === activeWsId);
-        const lastIdx = CUtils.clamp(currentIdx, shown - 1, workspaces.length - 1);
-        for (let i = lastIdx; i >= 0 && ids.length < shown; i--) {
-            const ws = workspaces[i];
-            if (ws && (ws.toplevels.values.length > 0 || ws.id === activeWsId))
-                ids.push(ws.id);
-        }
+        if (currentIdx < 0)
+            return [];
 
-        ids.reverse();
-        return ids;
+        const end = CUtils.clamp(currentIdx + 1, Math.min(shown, workspaces.length), workspaces.length);
+        const start = Math.max(0, end - shown);
+
+        return workspaces.slice(start, end).map(w => w.id);
     }
 
     readonly property var workspaces: {
