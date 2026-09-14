@@ -20,27 +20,23 @@ StyledClippingRect {
     readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
     readonly property int activeWsId: monitor.activeWorkspace?.id ?? 1
     readonly property int activeWsIdx: workspaceIndex(activeWsId)
+    readonly property int shown: Math.max(1, Config.bar.workspaces.shown)
 
     readonly property var wsIds: {
-        const shown = root.Config.bar.workspaces.shown;
-
         if (root.Config.bar.workspaces.showUnoccupied)
             return Array.from({
                 length: shown
             }, (_, i) => i + 1);
 
-        const ids = [];
-        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor);
+        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor && (w.id === activeWsId || w.toplevels.values.some(t => !Hypr.isToplevelIgnored(t))));
         const currentIdx = workspaces.findIndex(w => w.id === activeWsId);
-        const lastIdx = CUtils.clamp(currentIdx, shown - 1, workspaces.length - 1);
-        for (let i = lastIdx; i >= 0 && ids.length < shown; i--) {
-            const ws = workspaces[i];
-            if (ws && (ws.toplevels.values.length > 0 || ws.id === activeWsId))
-                ids.push(ws.id);
-        }
+        if (currentIdx < 0)
+            return [];
 
-        ids.reverse();
-        return ids;
+        const end = CUtils.clamp(currentIdx + 1, Math.min(shown, workspaces.length), workspaces.length);
+        const start = Math.max(0, end - shown);
+
+        return workspaces.slice(start, end).map(w => w.id);
     }
 
     readonly property var workspaces: {
@@ -52,7 +48,7 @@ StyledClippingRect {
     readonly property int groupOffset: {
         if (!Config.bar.workspaces.showUnoccupied)
             return 0;
-        return Math.floor((activeWsId - 1) / Config.bar.workspaces.shown) * Config.bar.workspaces.shown;
+        return Math.floor((activeWsId - 1) / shown) * shown;
     }
 
     property real blur: onSpecial ? 1 : 0
@@ -63,8 +59,8 @@ StyledClippingRect {
 
         let index = id - 1;
         while (index < 0)
-            index += Config.bar.workspaces.shown;
-        return index % Config.bar.workspaces.shown;
+            index += shown;
+        return index % shown;
     }
 
     implicitWidth: Tokens.sizes.bar.innerWidth

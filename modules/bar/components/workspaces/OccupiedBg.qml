@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.services
 
@@ -31,10 +32,12 @@ Item {
             anchors.fill: parent
             anchors.margins: 1
 
-            Repeater {
+            AnimatedRepeater {
                 model: ScriptModel {
                     values: root.workspaces
                 }
+
+                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
                 OccupiedRect {}
             }
@@ -44,25 +47,16 @@ Item {
     component OccupiedRect: StyledRect {
         required property int index
         required property Workspace modelData
-        property real topRadius: {
-            if (!modelData?.isOccupied || index === 0)
-                return width / 2;
-            return (root.workspaces[index - 1]?.isOccupied ?? false) ? 0 : width / 2;
-        }
-        property real bottomRadius: {
-            if (!modelData?.isOccupied || index === root.workspaces.length - 1)
-                return width / 2;
-            return (root.workspaces[index + 1]?.isOccupied ?? false) ? 0 : width / 2;
-        }
-        property real topPadding: {
-            if (!modelData?.isOccupied || index === 0)
-                return 0;
-            return (root.workspaces[index - 1]?.isOccupied ?? false) ? root.wsSpacing : 0;
-        }
-        property real bottomPadding: {
-            if (!modelData?.isOccupied || index === root.workspaces.length - 1)
-                return 0;
-            return (root.workspaces[index + 1]?.isOccupied ?? false) ? root.wsSpacing : 0;
+
+        property real topRadius: ifAdjacent(0, -1, 0, width / 2)
+        property real bottomRadius: ifAdjacent(root.workspaces.length - 1, 1, 0, width / 2)
+        property real topPadding: ifAdjacent(0, -1, root.wsSpacing, 0)
+        property real bottomPadding: ifAdjacent(root.workspaces.length - 1, 1, root.wsSpacing, 0)
+
+        function ifAdjacent(exclIdx: int, adj: int, yes: real, no: real): real {
+            if (AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData?.isOccupied || index === exclIdx)
+                return no;
+            return root.workspaces[index + adj]?.isOccupied ? yes : no;
         }
 
         anchors.left: parent?.left

@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia.Components
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -12,10 +13,12 @@ Item {
     required property var workspaces
     required property int wsSpacing
 
-    Repeater {
+    AnimatedRepeater {
         model: ScriptModel {
             values: root.workspaces
         }
+
+        removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
         StyledRect {
             required property int index
@@ -37,7 +40,7 @@ Item {
             implicitHeight: 1
             color: Colours.palette.m3outline
 
-            opacity: !modelData || index === 0 || root.workspaces[index - 1]?.ws === modelData?.ws - 1 ? 0 : 1
+            opacity: AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0 || root.workspaces[index - 1]?.ws === modelData?.ws - 1 ? 0 : 1
 
             Behavior on opacity {
                 Anim {
