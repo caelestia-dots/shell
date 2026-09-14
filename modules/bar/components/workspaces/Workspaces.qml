@@ -84,7 +84,8 @@ StyledClippingRect {
 
         Loader {
             asynchronous: true
-            active: Config.bar.workspaces.occupiedBg
+            opacity: Config.bar.workspaces.occupiedBg ? 1 : 0
+            active: opacity > 0
 
             anchors.fill: parent
             anchors.margins: Tokens.padding.extraSmall
@@ -92,6 +93,12 @@ StyledClippingRect {
             sourceComponent: OccupiedBg {
                 workspaces: root.workspaces
                 wsSpacing: workspaces.spacing
+            }
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
 
@@ -119,7 +126,8 @@ StyledClippingRect {
 
         Loader {
             asynchronous: true
-            active: !Config.bar.workspaces.showUnoccupied
+            opacity: Config.bar.workspaces.showUnoccupied ? 0 : 1
+            active: opacity > 0
 
             anchors.fill: parent
             anchors.margins: Tokens.padding.extraSmall
@@ -127,6 +135,12 @@ StyledClippingRect {
             sourceComponent: GapMarkers {
                 workspaces: root.workspaces
                 wsSpacing: workspaces.spacing
+            }
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
             }
         }
 
