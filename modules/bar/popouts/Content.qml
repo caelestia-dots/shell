@@ -15,13 +15,8 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    readonly property var trayItemsToIndices: SystemTray.items.values.reduce((acc, item, i) => {
-        acc[item.id] = i;
-        return acc;
-    }, {})
-
-    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.large * 2 : 0
-    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.large * 2 : 0
+    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.extraLargeIncreased
+    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.extraLargeIncreased
 
     Item {
         id: content
@@ -124,17 +119,25 @@ Item {
             sourceComponent: LockStatus {}
         }
 
+        Popout {
+            name: "clock"
+            sourceComponent: Calendar {
+                popouts: root.popouts
+            }
+        }
+
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => i.hasMenu && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
                 id: trayMenu
 
                 required property SystemTrayItem modelData
+                required property int index
 
-                name: `traymenu${root.trayItemsToIndices[modelData.id]}`
+                name: `traymenu${index}`
                 sourceComponent: trayMenuComp
 
                 Connections {
@@ -165,7 +168,6 @@ Item {
 
         required property string name
         readonly property bool shouldBeActive: root.popouts.currentName === name
-        property bool ready: true
 
         anchors.centerIn: parent
 
