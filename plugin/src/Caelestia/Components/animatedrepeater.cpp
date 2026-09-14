@@ -132,7 +132,7 @@ void AnimatedRepeater::setDelegate(QQmlComponent* delegate) {
 }
 
 int AnimatedRepeater::count() const {
-    return static_cast<int>(m_items.size());
+    return modelCount();
 }
 
 int AnimatedRepeater::removeDuration() const {
@@ -440,7 +440,7 @@ void AnimatedRepeater::onRowsAboutToBeRemoved(const QModelIndex& parent, int fir
 
 void AnimatedRepeater::onRowsMoved(
     const QModelIndex& parent, int start, int end, const QModelIndex& destination, int row) {
-    if (parent.isValid() || destination.isValid())
+    if (parent.isValid() || destination.isValid() || !m_componentComplete)
         return;
 
     const int moveCount = end - start + 1;
