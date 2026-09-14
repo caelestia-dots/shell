@@ -9,16 +9,16 @@ import qs.utils
 Singleton {
     id: root
 
-    // Function is scalable into other applications
+    // Added desktop entry as a verification
     // Opera GX, Vivaldi and Chromium tested after (Total: 7 browsers)
-    function isChromiumNotification(appName: string): bool {
-       return appName === "Brave" 
-       || appName === "Google Chrome" 
-       || appName === "Microsoft Edge" 
-       || appName === "Opera"
-       || appName === "Opera GX"
-       || appName === "Vivaldi"
-       || appName === "Chromium";
+    function isChromiumNotification(appName: string, desktopEntry: string): bool {
+       return appName === "Brave" && desktopEntry === "brave-browser"
+       || appName === "Google Chrome" && desktopEntry === "google-chrome"
+       || appName === "Microsoft Edge" && desktopEntry === "microsoft-edge"
+       || appName === "Opera" && desktopEntry === "opera"
+       || appName === "Opera GX" && desktopEntry === "opera"
+       || appName === "Vivaldi" && desktopEntry === "vivaldi"
+       || appName === "Chromium" && desktopEntry === "chromium";
     }
     
     Process {
@@ -41,10 +41,10 @@ Singleton {
     }
     
     // checks whether it needs to redirect the cached image to caelestia/chromium path
-    function processNotifs(appName: string, imagePath: string): string {
+    function processNotifs(appName: string, imagePath: string, desktopEntry: string): string {
         const path = imagePath.replace("image://icon/", "");
 
-	    if (isChromiumNotification(appName)) {
+	    if (isChromiumNotification(appName, desktopEntry)) {
 		
             copyChromiumImage.sourcePath = path;
             copyChromiumImage.destinationPath = Paths.chromiumicons + "/" + appName + ".png";

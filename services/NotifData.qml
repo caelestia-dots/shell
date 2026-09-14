@@ -238,7 +238,7 @@ QtObject {
         rawAppIcon = notification.appIcon;
         appName = notification.appName;
         //verify appName first if Chromium
-        image = ChromiumCheck.processNotifs(notification.appName, notification.image);
+        image = ChromiumCheck.processNotifs(notification.appName, notification.image, notification.hints?.["desktop-entry"]);
         maybeTriggerDummyImageLoader();
         expireTimeout = notification.expireTimeout;
         hints = notification.hints;
