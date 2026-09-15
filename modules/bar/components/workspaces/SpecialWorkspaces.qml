@@ -26,32 +26,38 @@ Item {
         return view.itemAtIndex(activeIdx) as Workspace;
     }
 
-    function ensureVisible(): void {
+    function ensureVisible(animate = true): void {
         if (!activeWs)
             return;
 
         const top = activeWs.LazyListView.layoutY;
         const bottom = top + activeWs.LazyListView.preferredHeight;
 
-        let target;
-        if (top < -view.y)
+        let target = view.y;
+        if (top < -target)
             target = -top;
-        else if (bottom > -view.y + height)
+        else if (bottom > -target + height)
             target = -(bottom - height);
-        else
-            return;
 
         target = CUtils.clamp(target, -maxViewY, 0);
         if (target !== view.y) {
-            const type = viewYAnim.type;
-            viewYAnim.type = Anim.DefaultSpatial;
-            view.y = target;
-            viewYAnim.type = type;
+            if (animate) {
+                const type = viewYAnim.type;
+                viewYAnim.type = Anim.DefaultSpatial;
+                view.y = target;
+                viewYAnim.type = type;
+            } else {
+                viewYBehavior.enabled = false;
+                view.y = target;
+                viewYBehavior.enabled = true;
+            }
         }
     }
 
     onActiveWsChanged: ensureVisible()
-    Component.onCompleted: ensureVisible()
+    onHeightChanged: ensureVisible(false)
+    Component.onCompleted: ensureVisible(false)
+    onMaxViewYChanged: ensureVisible()
 
     layer.enabled: true
     layer.effect: Mask {
@@ -162,6 +168,8 @@ Item {
         }
 
         Behavior on y {
+            id: viewYBehavior
+
             Anim {
                 id: viewYAnim
 
