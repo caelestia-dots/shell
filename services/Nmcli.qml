@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.I18n
 
 Singleton {
     id: root
@@ -627,16 +628,16 @@ Singleton {
         switch ((keyMgmt || "").trim().toLowerCase()) {
         case "":
         case "none":
-            return qsTr("Open");
+            return Tr.trCtx("Open", "wifi security type");
         case "sae":
             return "WPA3";
         case "wpa-psk":
             return "WPA2";
         case "wpa-eap":
         case "wpa-eap-suite-b-192":
-            return qsTr("Enterprise");
+            return Tr.tr("Enterprise");
         case "owe":
-            return qsTr("Enhanced Open");
+            return Tr.tr("Enhanced Open");
         case "ieee8021x":
             return "802.1X";
         default:
@@ -1306,19 +1307,6 @@ Singleton {
         dataUsageProc.running = true;
     }
 
-    function formatBytes(bytes: var): string {
-        if (!bytes || bytes <= 0)
-            return "0 B";
-        const units = ["B", "KB", "MB", "GB", "TB"];
-        let i = 0;
-        let v = bytes;
-        while (v >= 1024 && i < units.length - 1) {
-            v /= 1024;
-            i++;
-        }
-        return `${v.toFixed(v < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
-    }
-
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
         if (!interfaceName || interfaceName.length === 0) {
             const activeInterface = root.ethernetInterfaces.find(iface => {
@@ -1674,7 +1662,7 @@ Singleton {
                         dataUsageProc.cb("");
                     return;
                 }
-                const human = root.formatBytes(nums[0] + nums[1]);
+                const human = Units.formatBytes(nums[0] + nums[1]);
                 root.ethernetDataUsage = human;
                 if (dataUsageProc.cb)
                     dataUsageProc.cb(human);
@@ -1693,9 +1681,11 @@ Singleton {
                     root.ethernetSpeed = "";
                 } else if (mbit >= 1000) {
                     const gbps = mbit / 1000;
-                    root.ethernetSpeed = `${Number.isInteger(gbps) ? gbps : gbps.toFixed(1)} Gbps`;
+                    // TRANSLATORS: %1 = a number
+                    root.ethernetSpeed = Tr.tr("%1 Gbps").arg(Number.isInteger(gbps) ? gbps : gbps.toFixed(1));
                 } else {
-                    root.ethernetSpeed = `${mbit} Mbps`;
+                    // TRANSLATORS: %1 = a number
+                    root.ethernetSpeed = Tr.tr("%1 Mbps").arg(mbit);
                 }
             }
         }

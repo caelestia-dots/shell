@@ -2,6 +2,7 @@
 
 #include <qbytearray.h>
 #include <qbytearrayview.h>
+#include <qfuturewatcher.h>
 #include <qhash.h>
 #include <qpointer.h>
 #include <qqmlintegration.h>
@@ -50,6 +51,8 @@ private:
         bool hasRoot = false;
     };
 
+    using AccumHash = QHash<QString, Accum>;
+
     // Mounts sharing a backing filesystem report identical usage, so they are deduped by source device first
     struct DeviceEntry {
         quint64 totalBytes = 0;
@@ -60,7 +63,9 @@ private:
     };
 
     [[nodiscard]] static QHash<QByteArray, DeviceEntry> collectDevices();
-    [[nodiscard]] static QHash<QString, Accum> foldToDisks(const QHash<QByteArray, DeviceEntry>& byDevice);
+    [[nodiscard]] static AccumHash foldToDisks(const QHash<QByteArray, DeviceEntry>& byDevice);
+
+    void applyDisks(const AccumHash& byDisk);
 
     [[nodiscard]] static QStringList resolveToPhysicalDisks(const QString& devicePath);
     [[nodiscard]] static bool isPseudoFs(QByteArrayView fsType);
@@ -71,6 +76,7 @@ private:
 
     QList<DiskInfo*> m_disks;
     QPointer<DiskInfo> m_manualPrimaryDisk;
+    QFutureWatcher<AccumHash>* const m_futureWatcher;
 };
 
 } // namespace caelestia::services

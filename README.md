@@ -228,7 +228,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 >
 > - `appearance`: `anim.*`, `transparency.*`
 > - `bar.tray`: `hiddenIcons`, `iconSubs`
-> - `bar.workspaces`: `ignoredTags`, `perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`
+> - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
@@ -236,7 +236,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
-> - `services`: `audioIncrement`, `brightnessIncrement`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `smartScheme`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`
+> - `services`: `audioIncrement`, `brightnessIncrement`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`, `weatherUnits`
 > - `utilities.toasts`: all except `fullscreen`
 > - `utilities.vpn`: `enabled`, `provider`, `selectedProvider`
 >
@@ -425,11 +425,11 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "shown": 5,
             "activeIndicator": true,
             "occupiedBg": false,
+            "showUnoccupied": true,
             "showWindows": true,
             "showWindowsOnSpecialWorkspaces": true,
             "maxWindowIcons": 5,
             "activeTrail": false,
-            "perMonitorWorkspaces": true,
             "displayType": "shapes",
             "label": "  ",
             "occupiedLabel": "󰮯",
@@ -723,8 +723,9 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "services": {
         "weatherLocation": "",
-        "useFahrenheit": false,
-        "useFahrenheitPerformance": false,
+        "weatherUnits": "Celsius",
+        "sensorUnits": "Celsius",
+        "dataUnits": "Binary",
         "useTwelveHourClock": false,
         "gpuType": "Auto",
         "visualiserBars": 60,

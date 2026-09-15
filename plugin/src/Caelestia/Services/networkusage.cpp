@@ -6,16 +6,7 @@
 
 #include <array>
 #include <charconv>
-#include <cmath>
 #include <system_error>
-
-namespace {
-
-constexpr qreal k_bytesPerKib = 1024.0;
-constexpr qreal k_bytesPerMib = 1024.0 * 1024.0;
-constexpr qreal k_bytesPerGib = 1024.0 * 1024.0 * 1024.0;
-
-} // namespace
 
 namespace caelestia::services {
 
@@ -55,36 +46,6 @@ CircularBuffer* NetworkUsage::downloadBuffer() const {
 
 CircularBuffer* NetworkUsage::uploadBuffer() const {
     return m_uploadBuffer;
-}
-
-NetworkFormatResult NetworkUsage::formatBytesRate(qreal bytes) {
-    NetworkFormatResult result = formatBytes(bytes);
-    result.unit = result.unit + u"/s"_s;
-    return result;
-}
-
-NetworkFormatResult NetworkUsage::formatBytes(qreal bytes) {
-    NetworkFormatResult result;
-
-    if (bytes < 0 || std::isnan(bytes) || !std::isfinite(bytes)) {
-        result.value = 0;
-        result.unit = u"B"_s;
-        return result;
-    }
-    if (bytes < k_bytesPerKib) {
-        result.value = bytes;
-        result.unit = u"B"_s;
-    } else if (bytes < k_bytesPerMib) {
-        result.value = bytes / k_bytesPerKib;
-        result.unit = u"KB"_s;
-    } else if (bytes < k_bytesPerGib) {
-        result.value = bytes / k_bytesPerMib;
-        result.unit = u"MB"_s;
-    } else {
-        result.value = bytes / k_bytesPerGib;
-        result.unit = u"GB"_s;
-    }
-    return result;
 }
 
 void NetworkUsage::tick() {

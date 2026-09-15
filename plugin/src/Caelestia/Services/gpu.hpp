@@ -18,6 +18,7 @@ class Gpu : public TickingService {
 
     Q_PROPERTY(caelestia::config::GpuType::Enum type READ type NOTIFY typeChanged)
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(bool detecting READ detecting NOTIFY detectingChanged)
     Q_PROPERTY(qreal percentage READ percentage NOTIFY percentageChanged)
     Q_PROPERTY(qreal temperature READ temperature NOTIFY temperatureChanged)
 
@@ -26,12 +27,14 @@ public:
 
     [[nodiscard]] GpuType type() const;
     [[nodiscard]] QString name() const;
+    [[nodiscard]] bool detecting() const;
     [[nodiscard]] qreal percentage() const;
     [[nodiscard]] qreal temperature() const;
 
 signals:
     void typeChanged();
     void nameChanged();
+    void detectingChanged();
     void percentageChanged();
     void temperatureChanged();
 
@@ -60,12 +63,15 @@ private:
 
     void setType(GpuType value);
     void setName(QString value);
+    void setDetecting(bool value);
 
     // The config override, Auto meaning "resolve by probing". Read only to decide
     // whether to probe and which name sources apply; never exposed.
     GpuType m_userType = GpuType::Auto;
     GpuType m_type = GpuType::None;
+    // The raw device name, empty while detecting and when there is no GPU to name
     QString m_name;
+    bool m_detecting = false;
     qreal m_percentage = 0.0;
     qreal m_temperature = 0.0;
 

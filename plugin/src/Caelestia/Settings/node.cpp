@@ -26,6 +26,10 @@ QString Node::pathFor(const QString& key) const {
     return p.isEmpty() ? key : p + u'.' + key;
 }
 
+QString Node::elementPath(const QString& path, const QString& index) {
+    return path + u'[' + index + u']';
+}
+
 Node* Node::parentNode() const {
     return qobject_cast<Node*>(parent());
 }

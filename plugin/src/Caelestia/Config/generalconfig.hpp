@@ -5,12 +5,14 @@
 #include <qvariantlist.h>
 
 #include "settings/objectnode.hpp"
+#include "util/i18n.hpp"
 #include "common.hpp"
 
 namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
 using settings::vmap;
+using util::i18n::mark;
 
 class GeneralApps : public settings::ObjectNode {
     CONFIG_NODE(GeneralApps, settings::ObjectNode)
@@ -52,20 +54,20 @@ class GeneralBattery : public settings::ObjectNode {
         DEFAULT_ARG({
             vmap({
                 { u"level"_s, 20 },
-                { u"title"_s, u"Low battery"_s },
-                { u"message"_s, u"You might want to plug in a charger"_s },
+                { u"title"_s, mark(u"Low battery"_s) },
+                { u"message"_s, mark(u"You might want to plug in a charger"_s) },
                 { u"icon"_s, u"battery_android_frame_2"_s },
             }),
             vmap({
                 { u"level"_s, 10 },
-                { u"title"_s, u"Did you see the previous message?"_s },
-                { u"message"_s, u"You should probably plug in a charger <b>now</b>"_s },
+                { u"title"_s, mark(u"Did you see the previous message?"_s) },
+                { u"message"_s, mark(u"You should probably plug in a charger <b>now</b>"_s) },
                 { u"icon"_s, u"battery_android_frame_1"_s },
             }),
             vmap({
                 { u"level"_s, 5 },
-                { u"title"_s, u"Critical battery level"_s },
-                { u"message"_s, u"PLUG THE CHARGER RIGHT NOW!!"_s },
+                { u"title"_s, mark(u"Critical battery level"_s) },
+                { u"message"_s, mark(u"PLUG THE CHARGER RIGHT NOW!!"_s) },
                 { u"icon"_s, u"battery_android_alert"_s },
                 { u"critical"_s, true },
             }),
@@ -77,6 +79,7 @@ class GeneralConfig : public settings::ObjectNode {
     CONFIG_NODE(GeneralConfig, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QString, logo, QString())
+    CONFIG_GLOBAL_PROPERTY(QString, language, QString())
     CONFIG_PROPERTY(bool, showOverFullscreen, false)
     CONFIG_PROPERTY(qreal, mediaGifSpeedAdjustment, 300)
     CONFIG_PROPERTY(qreal, sessionGifSpeed, 0.7)

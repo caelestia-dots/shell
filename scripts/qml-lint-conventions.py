@@ -11,8 +11,19 @@ Required ordering within each QML object (with blank line between sections):
   5. object properties (bindings)
   6. child objects
   7. component definitions
+
+By default every *.qml under the repo root is checked. Pass --file to check a
+single file, --file - to check an unsaved buffer piped in on stdin, and --json
+to get machine-readable output (for editors and language servers), whose
+ranges span the content of the offending line.
+
+The report always goes to stderr, in whichever format; stdout carries only the
+fixed source, and only for `--file - --fix`. Colour is dropped when stderr is
+not a terminal, and never appears in --json output.
 """
 
+import argparse
+import json
 import re
 import sys
 from enum import IntEnum
@@ -27,6 +38,17 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def disable_colour() -> None:
+    """Blank every escape code so the report is plain text.
+
+    Called when stderr isn't a terminal (a pipe or a redirect to a file) and
+    for --json, whose consumers want the strings unadorned.
+    """
+    global RED, YELLOW, CYAN, GREEN, MAGENTA, BOLD, RESET, RULE_COLOURS
+    RED = YELLOW = CYAN = GREEN = MAGENTA = BOLD = RESET = ""
+    RULE_COLOURS = dict.fromkeys(RULE_COLOURS, "")
 
 
 class Section(IntEnum):
@@ -121,7 +143,7 @@ def parse_imports(lines: list[str]) -> tuple[int | None, int | None, list[str], 
     return first_import, last_import, relative_imports, module_imports
 
 
-def check_imports(filepath: Path, lines: list[str], rel: str) -> list[Violation]:
+def check_imports(lines: list[str], rel: str) -> list[Violation]:
     """Check that module imports are in the required order."""
     violations = []
     _, _, _, module_imports = parse_imports(lines)
@@ -147,7 +169,7 @@ def check_imports(filepath: Path, lines: list[str], rel: str) -> list[Violation]
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "import-order",
                     f"'{curr_mod}' should appear before '{prev_mod}'",
                 )
@@ -156,7 +178,7 @@ def check_imports(filepath: Path, lines: list[str], rel: str) -> list[Violation]
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "import-order",
                     f"'{curr_mod}' should appear before '{prev_mod}' (less nested first)",
                 )
@@ -199,7 +221,12 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
     if pragma_indices and import_indices:
         if pragma_indices[-1] > import_indices[0]:
             violations.append(
-                Violation(rel, pragma_indices[-1] + 1, "file-structure", "pragmas should appear before imports")
+                Violation(
+                    rel,
+                    *line_span(lines, pragma_indices[-1] + 1),
+                    "file-structure",
+                    "pragmas should appear before imports",
+                )
             )
 
     # Separator between pragmas and imports
@@ -208,14 +235,17 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
         if gap == 0:
             violations.append(
                 Violation(
-                    rel, import_indices[0] + 1, "file-structure", "blank line expected between pragmas and imports"
+                    rel,
+                    *line_span(lines, import_indices[0] + 1),
+                    "file-structure",
+                    "blank line expected between pragmas and imports",
                 )
             )
         elif gap > 1:
             violations.append(
                 Violation(
                     rel,
-                    pragma_indices[-1] + 3,
+                    *line_span(lines, pragma_indices[-1] + 3),
                     "file-structure",
                     "only one blank line expected between pragmas and imports",
                 )
@@ -227,7 +257,12 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
             for gap_line in range(import_indices[j - 1] + 1, import_indices[j]):
                 if not lines[gap_line].strip():
                     violations.append(
-                        Violation(rel, gap_line + 1, "file-structure", "no blank lines expected within imports")
+                        Violation(
+                            rel,
+                            *line_span(lines, gap_line + 1),
+                            "file-structure",
+                            "no blank lines expected within imports",
+                        )
                     )
 
     # Separator between imports/pragmas and content
@@ -238,14 +273,17 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
         if gap == 0:
             violations.append(
                 Violation(
-                    rel, content_start + 1, "file-structure", f"blank line expected between {label} and content"
+                    rel,
+                    *line_span(lines, content_start + 1),
+                    "file-structure",
+                    f"blank line expected between {label} and content",
                 )
             )
         elif gap > 1:
             violations.append(
                 Violation(
                     rel,
-                    last_header + 3,
+                    *line_span(lines, last_header + 3),
                     "file-structure",
                     f"only one blank line expected between {label} and content",
                 )
@@ -374,6 +412,14 @@ def fix_section_separators(lines: list[str]) -> list[str]:
     return result
 
 
+def fix_lines(lines: list[str]) -> list[str]:
+    """Apply every auto-fix to the given lines and return the result."""
+    lines = fix_imports(lines)
+    lines = fix_file_structure(lines)
+    lines = fix_section_separators(lines)
+    return lines
+
+
 def fix_file(filepath: Path) -> bool:
     """Fix auto-fixable violations. Returns True if file was modified."""
     try:
@@ -381,10 +427,7 @@ def fix_file(filepath: Path) -> bool:
     except (OSError, UnicodeDecodeError):
         return False
 
-    lines = text.splitlines()
-    lines = fix_imports(lines)
-    lines = fix_file_structure(lines)
-    lines = fix_section_separators(lines)
+    lines = fix_lines(text.splitlines())
     new_text = "\n".join(lines)
     if text.endswith("\n"):
         new_text += "\n"
@@ -417,15 +460,35 @@ ATTACHED_HANDLER_RE = re.compile(r"^[A-Z]\w+\.on[A-Z]\w*\s*:")
 
 
 class Violation:
-    def __init__(self, file: str, line: int, rule: str, msg: str):
+    """One reported violation, spanning the source from `start` to `end`.
+
+    Both positions are 1 based line/column pairs. The end is exclusive, sitting
+    just past the last character, which is what an LSP range wants. Every rule
+    here is line shaped, so a span covers one line's content; the blank line
+    rules have nothing to cover and collapse to a caret.
+    """
+
+    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], rule: str, msg: str):
         self.file = file
-        self.line = line
+        self.line, self.col = start
+        self.end_line, self.end_col = end
         self.rule = rule
         self.msg = msg
 
     def __str__(self):
         c = RULE_COLOURS.get(self.rule, "")
-        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}: {self.msg}"
+        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "file": self.file,
+            "line": self.line,
+            "column": self.col,
+            "endLine": self.end_line,
+            "endColumn": self.end_col,
+            "rule": self.rule,
+            "message": self.msg,
+        }
 
 
 class ScopeTracker:
@@ -439,6 +502,17 @@ class ScopeTracker:
 
 def get_indent(line: str) -> str:
     return line[: len(line) - len(line.lstrip())]
+
+
+def line_span(lines: list[str], lineno: int) -> tuple[tuple[int, int], tuple[int, int]]:
+    """Start and end position covering the content of a 1 based line.
+
+    Leading indent and trailing whitespace are left out, so a blank line gives
+    an empty span at its first column.
+    """
+    line = lines[lineno - 1] if 1 <= lineno <= len(lines) else ""
+    start = len(line) - len(line.lstrip()) + 1
+    return (lineno, start), (lineno, max(len(line.rstrip()) + 1, start))
 
 
 def classify_line(stripped: str) -> Section | None:
@@ -468,17 +542,30 @@ def classify_line(stripped: str) -> Section | None:
     return None
 
 
-def check_file(filepath: Path) -> list[Violation]:
-    violations = []
-    rel = str(filepath.relative_to(REPO_ROOT))
+def rel_path(filepath: Path) -> str:
+    """Reporting path: relative to the repo root when the file lives inside it."""
+    try:
+        return str(filepath.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(filepath)
 
+
+def check_file(filepath: Path) -> list[Violation]:
+    """Check a file on disk. An unreadable file yields no violations."""
     try:
         lines = filepath.read_text().splitlines()
     except (OSError, UnicodeDecodeError):
-        return violations
+        return []
+
+    return check_lines(lines, rel_path(filepath))
+
+
+def check_lines(lines: list[str], rel: str) -> list[Violation]:
+    """Check already-loaded source. `rel` is only used to label violations."""
+    violations = []
 
     violations.extend(check_file_structure(lines, rel))
-    violations.extend(check_imports(filepath, lines, rel))
+    violations.extend(check_imports(lines, rel))
 
     scopes: dict[str, ScopeTracker] = {}  # indent -> tracker
     in_block_comment = False
@@ -506,7 +593,7 @@ def check_file(filepath: Path) -> list[Violation]:
                 violations.append(
                     Violation(
                         rel,
-                        lineno,
+                        *line_span(lines, lineno),
                         "blank-after-open-brace",
                         "no blank line expected after opening brace",
                     )
@@ -534,7 +621,7 @@ def check_file(filepath: Path) -> list[Violation]:
                 violations.append(
                     Violation(
                         rel,
-                        lineno,
+                        *line_span(lines, lineno),
                         "blank-before-close-brace",
                         "no blank line expected before closing brace",
                     )
@@ -562,7 +649,7 @@ def check_file(filepath: Path) -> list[Violation]:
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "section-order",
                     f"{SECTION_NAMES[section]} should appear before "
                     f"{SECTION_NAMES[tracker.last_section]} "
@@ -575,14 +662,14 @@ def check_file(filepath: Path) -> list[Violation]:
             violations.append(
                 Violation(
                     rel,
-                    lineno,
+                    *line_span(lines, lineno),
                     "missing-section-separator",
                     f"blank line expected between {SECTION_NAMES[tracker.last_section]} and {SECTION_NAMES[section]}",
                 )
             )
 
         # Update tracker
-        if tracker.last_section is None or section >= tracker.last_section:
+        if tracker.last_section is None or section > tracker.last_section:
             tracker.last_section = section
             tracker.last_section_line = lineno
 
@@ -613,35 +700,99 @@ def check_file(filepath: Path) -> list[Violation]:
     return violations
 
 
-def main():
-    fix_mode = "--fix" in sys.argv
-    qml_files = sorted(p for p in REPO_ROOT.rglob("*.qml") if "build" not in p.parts)
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="rewrite auto-fixable violations in place; with --file - nothing "
+        "is written, the fixed source goes to stdout instead, and the report "
+        "covers only what is left to fix by hand (its line numbers refer to "
+        "that fixed source, not to what was piped in)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="report as JSON on stderr: every violation carries a 1 based start "
+        "and end position; the end is exclusive, as an LSP range is",
+    )
+    parser.add_argument(
+        "--file",
+        metavar="PATH",
+        help="check only this file instead of every *.qml under the repo root; "
+        "pass - to read the source from stdin (for unsaved editor buffers)",
+    )
+    return parser.parse_args(argv)
 
-    if fix_mode:
-        fixed = sum(1 for f in qml_files if fix_file(f))
-        print(f"{BOLD}Fixed {fixed} file(s).{RESET}\n")
 
-    print(f"{BOLD}Checking {len(qml_files)} QML files for convention violations...{RESET}\n")
+def report(violations: list[Violation], args: argparse.Namespace, checked: int, fixed: int | None) -> int:
+    """Write the violations to stderr in the requested format.
 
-    all_violations: list[Violation] = []
-    for f in qml_files:
-        all_violations.extend(check_file(f))
+    Everything goes to stderr so stdout stays free for the fixed source of
+    `--file - --fix`. Returns the exit code.
+    """
+    err = sys.stderr
 
-    for v in all_violations:
-        print(v)
+    if args.json:
+        payload: dict[str, object] = {"violations": [v.to_dict() for v in violations]}
+        if fixed is not None:
+            payload["fixed"] = fixed
+        print(json.dumps(payload), file=err)
+        return 1 if violations else 0
 
-    print()
-    if all_violations:
+    if fixed is not None:
+        print(f"{BOLD}Fixed {fixed} file(s).{RESET}\n", file=err)
+
+    print(f"{BOLD}Checking {checked} QML file(s) for convention violations...{RESET}\n", file=err)
+
+    for v in violations:
+        print(v, file=err)
+
+    print(file=err)
+    if violations:
         by_rule: dict[str, int] = {}
-        for v in all_violations:
+        for v in violations:
             by_rule[v.rule] = by_rule.get(v.rule, 0) + 1
         for rule, count in sorted(by_rule.items()):
-            print(f"  {RULE_COLOURS.get(rule, '')}{rule}{RESET}: {count}")
-        print(f"\n{BOLD}Found {len(all_violations)} violation(s).{RESET}")
+            print(f"  {RULE_COLOURS.get(rule, '')}{rule}{RESET}: {count}", file=err)
+        print(f"\n{BOLD}Found {len(violations)} violation(s).{RESET}", file=err)
         return 1
     else:
-        print(f"{BOLD}No violations found.{RESET}")
+        print(f"{BOLD}No violations found.{RESET}", file=err)
         return 0
+
+
+def main() -> int:
+    args = parse_args()
+
+    if args.json or not sys.stderr.isatty():
+        disable_colour()
+
+    # Buffer mode: the source never touches disk, so --fix writes the fixed
+    # source to stdout and the report covers what it could not fix.
+    if args.file == "-":
+        text = sys.stdin.read()
+        lines = text.splitlines()
+        if args.fix:
+            lines = fix_lines(lines)
+            fixed_text = "\n".join(lines)
+            if text.endswith("\n"):
+                fixed_text += "\n"
+            sys.stdout.write(fixed_text)
+        return report(check_lines(lines, "<stdin>"), args, 1, None)
+
+    if args.file:
+        path = Path(args.file)
+        if not path.is_file():
+            print(f"{RED}no such file: {path}{RESET}", file=sys.stderr)
+            return 2
+        qml_files = [path]
+    else:
+        qml_files = sorted(p for p in REPO_ROOT.rglob("*.qml") if "build" not in p.parts)
+
+    fixed = sum(1 for f in qml_files if fix_file(f)) if args.fix else None
+    violations = [v for f in qml_files for v in check_file(f)]
+    return report(violations, args, len(qml_files), fixed)
 
 
 if __name__ == "__main__":

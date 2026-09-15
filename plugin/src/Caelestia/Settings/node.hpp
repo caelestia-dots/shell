@@ -20,6 +20,7 @@ public:
     [[nodiscard]] QString key() const; // The key of this in the parent node
     [[nodiscard]] QString path() const;
     [[nodiscard]] virtual QString pathFor(const QString& key) const;
+    [[nodiscard]] static QString elementPath(const QString& path, const QString& index);
     [[nodiscard]] Node* parentNode() const;
     [[nodiscard]] Node* rootNode() const;
     [[nodiscard]] Node* fallbackNode() const;
