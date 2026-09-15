@@ -28,7 +28,8 @@ StyledClippingRect {
                 length: shown
             }, (_, i) => i + 1);
 
-        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor && (w.id === activeWsId || w.toplevels.values.some(t => !Hypr.isToplevelIgnored(t))));
+        const ignoredTags = GlobalConfig.bar.workspaces.ignoredTags;
+        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor && (w.id === activeWsId || w.toplevels.values.some(t => !Hypr.isToplevelIgnored(t, ignoredTags))));
         const currentIdx = workspaces.findIndex(w => w.id === activeWsId);
         if (currentIdx < 0)
             return [];

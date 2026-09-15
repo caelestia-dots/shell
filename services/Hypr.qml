@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
-import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Services
 import qs.components.misc
@@ -98,16 +97,15 @@ Singleton {
         return name.startsWith("special:") ? name.slice("special:".length) : name;
     }
 
-    function toplevelsForWs(ws: int): list<HyprlandToplevel> {
-        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t));
+    function toplevelsForWs(ws: int, ignoredTags = []): list<HyprlandToplevel> {
+        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t, ignoredTags));
     }
 
-    function isToplevelIgnored(toplevel: HyprlandToplevel): bool {
+    function isToplevelIgnored(toplevel: HyprlandToplevel, ignoredTags = []): bool {
         const ipc = toplevel?.lastIpcObject;
         if (!ipc?.class || !ipc.mapped)
             return true;
 
-        const ignoredTags = GlobalConfig.bar.workspaces.ignoredTags;
         return ipc.tags?.some(tag => ignoredTags.includes(tag.replace(/\*$/, ""))) ?? false;
     }
 
