@@ -439,8 +439,24 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "workspaceIcons": [],
             "specialWorkspaceIcons": [
                 {
-                    "name": "steam",
-                    "icon": "sports_esports"
+                    "name": "special",
+                    "icon": "star"
+                },
+                {
+                    "name": "communication",
+                    "icon": "forum"
+                },
+                {
+                    "name": "music",
+                    "icon": "music_cast"
+                },
+                {
+                    "name": "todo",
+                    "icon": "checklist"
+                },
+                {
+                    "name": "sysmon",
+                    "icon": "monitor_heart"
                 }
             ],
             "ignoredTags": [
