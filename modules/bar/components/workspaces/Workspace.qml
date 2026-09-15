@@ -188,7 +188,7 @@ Item {
             Layout.preferredHeight: root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
 
             visible: active
-            active: Config.bar.workspaces.showWindows && Config.bar.workspaces.maxWindowIcons > 0
+            active: root.showWindows && Config.bar.workspaces.maxWindowIcons > 0
 
             sourceComponent: LazyListView {
                 spacing: 0
