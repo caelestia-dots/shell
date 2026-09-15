@@ -74,13 +74,22 @@ class BarActiveWindow : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, showOnHover, true)
 };
 
+class BarTrayIconSub : public settings::ObjectNode {
+    CONFIG_NODE(BarTrayIconSub, settings::ObjectNode)
+
+    CONFIG_PROPERTY(QString, id, QString())
+    CONFIG_PROPERTY(QString, icon, QString())
+    CONFIG_PROPERTY(QString, image, QString())
+};
+CONFIG_LIST_TYPE(BarTrayIconSub, BarTrayIconSubList)
+
 class BarTray : public settings::ObjectNode {
     CONFIG_NODE(BarTray, settings::ObjectNode)
 
     CONFIG_PROPERTY(bool, background, false)
     CONFIG_PROPERTY(bool, recolour, false)
     CONFIG_PROPERTY(bool, compact, false)
-    CONFIG_GLOBAL_PROPERTY(QVariantList, iconSubs, {})
+    CONFIG_GLOBAL_LIST(BarTrayIconSubList, iconSubs, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenIcons, {})
 };
 
