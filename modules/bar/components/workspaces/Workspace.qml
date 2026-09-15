@@ -240,13 +240,18 @@ Item {
 
         readonly property Connections conn: Connections {
             function onNameChanged(): void {
-                if (cacher.wsObj)
-                    cacher.name = cacher.wsObj.name;
+                cacher.updateName();
             }
 
             target: cacher.wsObj
         }
 
-        Component.onCompleted: cacher.name = cacher.wsObj?.name ?? ""
+        function updateName(): void {
+            if (wsObj)
+                name = wsObj.name;
+        }
+
+        onWsObjChanged: updateName()
+        Component.onCompleted: updateName()
     }
 }
