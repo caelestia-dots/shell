@@ -213,7 +213,7 @@ Item {
             if (ws) {
                 const match = Hypr.workspaces.values.find(w => w.id === ws.ws);
                 if (match)
-                    Hypr.toggleSpecial(match.name.slice("special:".length));
+                    Hypr.toggleSpecial(Hypr.trimWsName(match.name));
             } else {
                 Hypr.toggleSpecial("special");
             }
