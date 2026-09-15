@@ -95,7 +95,7 @@ Singleton {
     }
 
     function trimWsName(name: string): string {
-        return name.replace("special:", "");
+        return name.startsWith("special:") ? name.slice("special:".length) : name;
     }
 
     function toplevelsForWs(ws: int): list<HyprlandToplevel> {
