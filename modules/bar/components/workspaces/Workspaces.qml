@@ -121,6 +121,13 @@ StyledClippingRect {
             delegate: Workspace {
                 activeWsId: root.activeWsId
                 ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
+
+                displayType: Config.bar.workspaces.displayType
+                showWindows: Config.bar.workspaces.showWindows
+                iconRules: Config.bar.workspaces.workspaceIcons
+                activeLabel: Config.bar.workspaces.activeLabel
+                occupiedLabel: Config.bar.workspaces.occupiedLabel
+                label: Config.bar.workspaces.label
             }
         }
 
@@ -166,9 +173,9 @@ StyledClippingRect {
                 if (!ws)
                     return;
                 if (Hypr.activeWsId !== ws)
-                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
+                    Hypr.focusWorkspace(ws);
                 else
-                    Hypr.dispatch(Hypr.usingLua ? 'hl.dsp.workspace.toggle_special("special")' : "togglespecialworkspace special");
+                    Hypr.toggleSpecial("special");
             }
         }
 
@@ -186,22 +193,31 @@ StyledClippingRect {
     Loader {
         id: specialWs
 
-        asynchronous: true
-
         anchors.fill: parent
-        anchors.margins: Tokens.padding.extraSmall
 
+        asynchronous: true
         active: opacity > 0
-
-        scale: root.onSpecial ? 1 : 0.5
         opacity: root.onSpecial ? 1 : 0
 
-        sourceComponent: SpecialWorkspaces {
-            screen: root.screen
-        }
+        sourceComponent: Item {
+            StyledRect {
+                anchors.fill: parent
+                radius: Tokens.rounding.full
+                color: Qt.alpha(Colours.palette.m3scrim, Colours.light ? 0 : 0.2)
+            }
 
-        Behavior on scale {
-            Anim {}
+            SpecialWorkspaces {
+                anchors.fill: parent
+                anchors.margins: Tokens.padding.extraSmall
+                screen: root.screen
+
+                scale: 0.5
+                Component.onCompleted: scale = Qt.binding(() => root.onSpecial ? 1 : 0.5)
+
+                Behavior on scale {
+                    Anim {}
+                }
+            }
         }
 
         Behavior on opacity {

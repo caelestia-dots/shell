@@ -41,11 +41,20 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(int, maxWindowIcons, 5)
     CONFIG_PROPERTY(bool, activeTrail, true)
     CONFIG_ENUM_PROPERTY(BarWorkspaceDisplay, displayType, BarWorkspaceDisplay::Shapes)
+    CONFIG_ENUM_PROPERTY(BarWorkspaceDisplay, specialDisplayType, BarWorkspaceDisplay::Icons)
     CONFIG_PROPERTY(QString, label, u"  "_s)
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
     CONFIG_ENUM_PROPERTY(BarWorkspaceCapitalisation, capitalisation, BarWorkspaceCapitalisation::Preserve)
-    CONFIG_GLOBAL_PROPERTY(QVariantList, specialWorkspaceIcons, {})
+    CONFIG_LIST(IconRuleList, workspaceIcons, {})
+    CONFIG_LIST(IconRuleList, specialWorkspaceIcons,
+        DEFAULT_ARG({
+            ICON_RULE_EXACT("special", "star"),
+            ICON_RULE_EXACT("communication", "forum"),
+            ICON_RULE_EXACT("music", "music_cast"),
+            ICON_RULE_EXACT("todo", "checklist"),
+            ICON_RULE_EXACT("sysmon", "monitor_heart"),
+        }))
     CONFIG_GLOBAL_PROPERTY(QStringList, ignoredTags,
         DEFAULT_ARG({
             u"hide_in_bar"_s,
