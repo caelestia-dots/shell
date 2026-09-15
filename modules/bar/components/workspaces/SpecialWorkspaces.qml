@@ -164,7 +164,7 @@ Item {
             ws: modelData
             displayType: Config.bar.workspaces.specialDisplayType
             showWindows: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
-            iconRules: Config.bar.workspaces.specialWorkspaceIcons
+            iconRules: GlobalConfig.bar.workspaces.specialWorkspaceIcons
         }
 
         Behavior on y {
