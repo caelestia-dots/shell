@@ -129,6 +129,17 @@ Singleton {
         return false;
     }
 
+    function matchIconRuleList(name: string, rules: var): string {
+        if (!rules)
+            return "";
+
+        for (const iconRule of rules.values)
+            if (matchIconRule(name, iconRule))
+                return iconRule.icon;
+
+        return "";
+    }
+
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
         if (fallback !== "undefined")
@@ -194,29 +205,6 @@ Singleton {
 
     function getMicVolumeIcon(volume: real, isMuted: bool): string {
         return !isMuted && volume > 0 ? "mic" : "mic_off";
-    }
-
-    function getSpecialWsIcon(name: string): string {
-        name = name.toLowerCase().slice("special:".length);
-
-        for (const iconConfig of GlobalConfig.bar.workspaces.specialWorkspaceIcons)
-            if (matchIconConfig(name, iconConfig))
-                return iconConfig.icon;
-
-        switch (name) {
-        case "special":
-            return "star";
-        case "communication":
-            return "forum";
-        case "music":
-            return "music_cast";
-        case "todo":
-            return "checklist";
-        case "sysmon":
-            return "monitor_heart";
-        default:
-            return name[0].toUpperCase();
-        }
     }
 
     function getTrayIcon(id: string, icon: string): string {
