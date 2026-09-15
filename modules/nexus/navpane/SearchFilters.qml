@@ -40,7 +40,40 @@ Item {
 
     signal selected(pageIdx: int)
 
+    // Keeps the selected tab on screen when the row is too narrow to show them
+    // all, so stepping through them with the keyboard follows along.
+    function ensureCurrentVisible(): void {
+        const tab = currentTab;
+        if (!tab || flick.contentWidth <= flick.width)
+            return;
+
+        // Leave a tab's worth of margin so the neighbour it would move to next
+        // is visible too.
+        const margin = Math.min(tab.width, (flick.width - tab.width) / 2);
+        let target = flick.contentX;
+        if (tab.x < flick.contentX + margin)
+            target = tab.x - margin;
+        else if (tab.x + tab.width > flick.contentX + flick.width - margin)
+            target = tab.x + tab.width - flick.width + margin;
+        target = Math.max(0, Math.min(target, flick.contentWidth - flick.width));
+        if (target === flick.contentX)
+            return;
+
+        scrollAnim.to = target;
+        scrollAnim.restart();
+    }
+
+    onCurrentTabChanged: ensureCurrentVisible()
+
     implicitHeight: flick.implicitHeight + separator.implicitHeight
+
+    Anim {
+        id: scrollAnim
+
+        target: flick
+        property: "contentX"
+        type: Anim.FastSpatial
+    }
 
     StyledFlickable {
         id: flick
@@ -53,6 +86,9 @@ Item {
         contentWidth: tabRow.implicitWidth
         flickableDirection: Flickable.HorizontalFlick
         clip: true
+
+        onContentWidthChanged: Qt.callLater(root.ensureCurrentVisible)
+        onWidthChanged: Qt.callLater(root.ensureCurrentVisible)
 
         Row {
             id: tabRow
