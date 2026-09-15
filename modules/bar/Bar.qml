@@ -10,8 +10,10 @@ import Caelestia.Config
 import qs.components
 import qs.services
 
-ColumnLayout {
+GridLayout {
     id: root
+
+    readonly property string position: Config.bar.position
 
     required property ShellScreen screen
     required property ScreenState screenState
@@ -101,7 +103,11 @@ ColumnLayout {
         }
     }
 
-    spacing: Tokens.spacing.medium
+    rowSpacing: Tokens.spacing.medium
+    columnSpacing: Tokens.spacing.medium
+    flow: position === BarPosition.Top || position === BarPosition.Bottom ? Flow.LeftToRight : Flow.TopToBottom
+    rows: position === BarPosition.Top || position === BarPosition.Bottom ? 1 : repeater.count
+    columns: position === BarPosition.Left || position === BarPosition.Right ? repeater.count : 1
 
     Repeater {
         id: repeater
