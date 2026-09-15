@@ -60,12 +60,9 @@ class BarWorkspaces : public settings::ObjectNode {
             u"hide_in_bar"_s,
             u"xwl_popup"_s,
         }))
-    CONFIG_GLOBAL_PROPERTY(QVariantList, windowIcons,
+    CONFIG_GLOBAL_LIST(IconRuleList, windowIcons,
         DEFAULT_ARG({
-            vmap({
-                { u"regex"_s, u"steam(_app_(default|[0-9]+))?"_s },
-                { u"icon"_s, u"sports_esports"_s },
-            }),
+            ICON_RULE_REGEX("steam(_app_(default|[0-9]+))?", "", "sports_esports"),
         }))
 };
 
