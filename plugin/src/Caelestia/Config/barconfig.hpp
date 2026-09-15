@@ -46,8 +46,8 @@ class BarWorkspaces : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, occupiedLabel, u"󰮯"_s)
     CONFIG_PROPERTY(QString, activeLabel, u"󰮯"_s)
     CONFIG_ENUM_PROPERTY(BarWorkspaceCapitalisation, capitalisation, BarWorkspaceCapitalisation::Preserve)
-    CONFIG_GLOBAL_LIST(IconRuleList, workspaceIcons, {})
-    CONFIG_GLOBAL_LIST(IconRuleList, specialWorkspaceIcons,
+    CONFIG_LIST(IconRuleList, workspaceIcons, {})
+    CONFIG_LIST(IconRuleList, specialWorkspaceIcons,
         DEFAULT_ARG({
             ICON_RULE_EXACT("special", "star"),
             ICON_RULE_EXACT("communication", "forum"),
