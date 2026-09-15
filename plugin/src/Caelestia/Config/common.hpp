@@ -37,7 +37,6 @@ class ListEntry : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, id, QString())
     CONFIG_PROPERTY(bool, enabled, true)
 };
-
 CONFIG_LIST_TYPE(ListEntry, EntryList)
 
 class IconRule : public settings::ObjectNode {
@@ -48,7 +47,6 @@ class IconRule : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, flags, QString())
     CONFIG_PROPERTY(QString, icon, QString())
 };
-
 CONFIG_LIST_TYPE(IconRule, IconRuleList)
 
 } // namespace caelestia::config
