@@ -26,7 +26,7 @@ Item {
     property string occupiedLabel
     property string label
 
-    readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws)
+    readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags)
     readonly property bool isOccupied: toplevels.length > 0
     readonly property bool hasWindows: isOccupied && showWindows && Config.bar.workspaces.maxWindowIcons > 0
     readonly property bool focused: activeWsId === ws
