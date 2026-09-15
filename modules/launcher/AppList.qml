@@ -152,14 +152,9 @@ StyledListView {
             PropertyAction {
                 target: root
                 property: "delegate"
-                value: null
             }
             ScriptAction {
                 script: root.displayText = root.search.text
-            }
-            PropertyAction {
-                target: root
-                property: "delegate"
             }
             ParallelAnimation {
                 Anim {
