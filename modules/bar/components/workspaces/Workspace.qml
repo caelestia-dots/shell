@@ -138,6 +138,7 @@ Item {
 
         MaterialIcon {
             fill: 1
+            grade: 25
             text: iconCacher.icon
             color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
             verticalAlignment: Qt.AlignVCenter
