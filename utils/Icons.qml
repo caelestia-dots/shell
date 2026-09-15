@@ -112,21 +112,17 @@ Singleton {
     // qmlformat on
 
     /**
-     * Checks if a name matches an icon config. Icon configs can have the following keys:
-     * - name: The exact name of the icon
-     * - regex: A regex to match against the name (takes priority over name)
-     * - flags: The regex flags (only used if regex is set)
-     * - icon: The icon to use
+     * Checks if a name matches an icon rule. See the IconRule type in the config module.
      */
-    function matchIconConfig(name: string, iconConfig: var): bool {
-        if (!iconConfig.icon)
+    function matchIconRule(name: string, iconRule: var): bool {
+        if (!iconRule.icon)
             return false;
 
-        if (iconConfig.regex) {
-            const re = new RegExp(iconConfig.regex, iconConfig.flags ?? "");
+        if (iconRule.regex) {
+            const re = new RegExp(iconRule.regex, iconRule.flags ?? "");
             if (re.test(name))
                 return true;
-        } else if (iconConfig.name === name) {
+        } else if (iconRule.name === name) {
             return true;
         }
 
@@ -141,9 +137,9 @@ Singleton {
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
-        for (const iconConfig of GlobalConfig.bar.workspaces.windowIcons)
-            if (matchIconConfig(name, iconConfig))
-                return iconConfig.icon;
+        for (const iconRule of GlobalConfig.bar.workspaces.windowIcons)
+            if (matchIconRule(name, iconRule))
+                return iconRule.icon;
 
         const categories = DesktopEntries.heuristicLookup(name)?.categories;
 
