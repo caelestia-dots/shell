@@ -138,9 +138,13 @@ Item {
 
         MaterialIcon {
             fill: 1
-            text: root.iconForWs()
+            text: iconCacher.icon
             color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
             verticalAlignment: Qt.AlignVCenter
+
+            WsIconCacher {
+                id: iconCacher
+            }
         }
     }
 
@@ -148,7 +152,11 @@ Item {
         id: iconLoaderComponent
 
         Loader {
-            sourceComponent: root.iconForWs() ? iconComponent : textComponent
+            sourceComponent: loaderIconCacher.icon ? iconComponent : textComponent
+
+            WsIconCacher {
+                id: loaderIconCacher
+            }
         }
     }
 
@@ -225,5 +233,24 @@ Item {
                 }
             }
         }
+    }
+
+    component WsIconCacher: QtObject {
+        id: cacher
+
+        property string name
+        readonly property string icon: Icons.matchIconRuleList(Hypr.trimWsName(name), root.iconRules)
+        readonly property HyprlandWorkspace wsObj: Hypr.workspaces.values.find(w => w.id === root.ws) ?? null
+
+        readonly property Connections conn: Connections {
+            function onNameChanged(): void {
+                if (cacher.wsObj)
+                    cacher.name = cacher.wsObj.name;
+            }
+
+            target: cacher.wsObj
+        }
+
+        Component.onCompleted: cacher.name = cacher.wsObj?.name ?? ""
     }
 }
