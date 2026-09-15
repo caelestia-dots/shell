@@ -124,7 +124,7 @@ StyledClippingRect {
 
                 displayType: Config.bar.workspaces.displayType
                 showWindows: Config.bar.workspaces.showWindows
-                iconRules: Config.bar.workspaces.workspaceIcons
+                iconRules: GlobalConfig.bar.workspaces.workspaceIcons
                 activeLabel: Config.bar.workspaces.activeLabel
                 occupiedLabel: Config.bar.workspaces.occupiedLabel
                 label: Config.bar.workspaces.label
