@@ -43,11 +43,6 @@ Item {
             shape.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
     }
 
-    function iconForWs(): string {
-        const match = Hypr.workspaces.values.find(w => w.id === ws);
-        return match ? Icons.matchIconRuleList(Hypr.trimWsName(match.name), iconRules) : "";
-    }
-
     anchors.horizontalCenter: parent?.horizontalCenter
     LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
     LazyListView.visibleHeight: LazyListView.preferredHeight
