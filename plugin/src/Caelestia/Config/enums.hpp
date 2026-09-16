@@ -25,6 +25,7 @@ ENUM(GpuType, Auto, Nvidia, Generic, None)
 ENUM(NotifsFullscreen, On, Off)
 ENUM(TemperatureUnit, Celsius, Fahrenheit, Kelvin)
 ENUM(DataUnit, Binary, Decimal)
+ENUM(NetworkTransport, None, Ethernet, Wifi, Other)
 
 #undef ENUM
 
