@@ -29,6 +29,8 @@ StyledRect {
     readonly property real nonAnimHeight: browserOpen ? browserHeight : compactHeight
     // Translate is not an Item, so it cannot resolve Tokens for the screen itself
     readonly property real slideDistance: Tokens.padding.large
+    // 0 shows the device list, 1 the browser
+    property real browserProgress: browserOpen ? 1 : 0
 
     function browse(deviceId: string): void {
         const rootPath = KdeConnect.storageRoot(deviceId);
@@ -134,22 +136,18 @@ StyledRect {
     ColumnLayout {
         id: layout
 
+        // Slides with the margins, as qmllint reads a Translate on a layout as
+        // positioning an item managed by a layout
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Tokens.padding.large
+        anchors.topMargin: Tokens.padding.large
+        anchors.leftMargin: Tokens.padding.large - root.slideDistance * root.browserProgress
+        anchors.rightMargin: Tokens.padding.large + root.slideDistance * root.browserProgress
         spacing: Tokens.spacing.small
 
         enabled: !root.browserOpen
         opacity: root.browserOpen ? 0 : 1
-
-        transform: Translate {
-            x: root.browserOpen ? -root.slideDistance : 0
-
-            Behavior on x {
-                Anim {}
-            }
-        }
 
         RowLayout {
             Layout.fillWidth: true
@@ -370,15 +368,15 @@ StyledRect {
         onCloseRequested: root.browserOpen = false
 
         transform: Translate {
-            x: root.browserOpen ? 0 : root.slideDistance
-
-            Behavior on x {
-                Anim {}
-            }
+            x: root.slideDistance * (1 - root.browserProgress)
         }
 
         Behavior on opacity {
             Anim {}
         }
+    }
+
+    Behavior on browserProgress {
+        Anim {}
     }
 }
