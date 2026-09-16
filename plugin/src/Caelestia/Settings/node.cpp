@@ -241,6 +241,11 @@ void Node::onFallbackNotify(const QString& key) {
     if (m_overrides.contains(key))
         return;
 
+    // Don't mirror global options onto overlays
+    const auto* desc = schema().get(key);
+    if (desc && desc->globalOnly())
+        return;
+
     const WriteScope scope(this, WriteOrigin::Layer);
     setValue(key, m_fallbackNode->value(key));
 }

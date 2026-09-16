@@ -195,6 +195,10 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
             continue;
         }
 
+        // Skip global options on overlays
+        if ((isGlobalOnly() || desc.globalOnly()) && fallbackNode())
+            continue;
+
         setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue(this));
     }
 }
