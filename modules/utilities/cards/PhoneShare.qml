@@ -4,6 +4,7 @@ import ".." as Utilities
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -61,12 +62,17 @@ StyledRect {
     color: Colours.tPalette.m3surfaceContainer
     clip: true
 
-    // Utilities just opened, so find mounts which died while it was closed
+    // Utilities just opened, so find mounts which died while it was closed and
+    // phones plugged in over USB since
     Component.onCompleted: {
         for (const device of KdeConnect.devices)
             if (KdeConnect.isMounted(device.id))
                 KdeConnect.checkMount(device.id, KdeConnect.storageRoot(device.id));
+
+        Scrcpy.refresh();
+        Scrcpy.watch();
     }
+    Component.onDestruction: Scrcpy.unwatch()
 
     onBrowserDeviceMountedChanged: {
         if (!browserDeviceMounted)
@@ -120,6 +126,24 @@ StyledRect {
         }
 
         target: root.screenState
+    }
+
+    // The panel's window normally takes no keyboard input, so allow it while a
+    // pairing code can be typed, like the Wi-Fi password popout does
+    Binding {
+        when: Scrcpy.pairing !== null
+
+        target: root.QsWindow.window
+        property: "WlrLayershell.keyboardFocus"
+        value: WlrKeyboardFocus.OnDemand
+    }
+
+    // USB connections are not announced, so look for them while the card is shown
+    Timer {
+        running: Scrcpy.available
+        repeat: true
+        interval: 5000
+        onTriggered: Scrcpy.refresh()
     }
 
     Connections {
@@ -244,11 +268,29 @@ StyledRect {
                 readonly property bool mounted: KdeConnect.isMounted(deviceId)
                 readonly property bool mountBusy: KdeConnect.isMountBusy(deviceId)
                 readonly property bool downloadingHere: KdeConnect.downloading && KdeConnect.downloadDevice === deviceId
+                readonly property bool mirroring: Scrcpy.isRunning(deviceId)
+                readonly property bool mirrorBusy: Scrcpy.isBusy(deviceId)
+                readonly property var pairing: Scrcpy.pairing?.deviceId === deviceId ? Scrcpy.pairing : null
                 // Briefly shows the outcome of the last share: "", "sent" or "failed"
                 property string shareResult
+                // Shown under the row for a few seconds after mirroring fails
+                property string mirrorError
+                // Whether to start mirroring once pairing finishes
+                property bool pendingStart
+
+                function cancelPairing(): void {
+                    pendingStart = false;
+                    Scrcpy.cancelPairing();
+                }
+
+                function startMirroring(): void {
+                    mirrorError = "";
+                    pendingStart = true;
+                    Scrcpy.start(deviceId);
+                }
 
                 Layout.fillWidth: true
-                implicitHeight: deviceLayout.implicitHeight + Tokens.padding.small * 2
+                implicitHeight: deviceColumn.implicitHeight + Tokens.padding.small * 2
 
                 radius: Tokens.rounding.medium
                 color: dropArea.containsDrag ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
@@ -275,6 +317,37 @@ StyledRect {
                     target: KdeConnect
                 }
 
+                Connections {
+                    function onFailed(deviceId: string, error: string): void {
+                        if (deviceId !== device.deviceId || Scrcpy.pairing?.deviceId === deviceId)
+                            return;
+
+                        device.pendingStart = false;
+                        device.mirrorError = error;
+                        mirrorErrorTimer.restart();
+                    }
+
+                    function onPairingRequired(deviceId: string): void {
+                        if (deviceId !== device.deviceId)
+                            return;
+
+                        Scrcpy.startPairing(deviceId);
+                    }
+
+                    function onPairingChanged(): void {
+                        // Pairing finished and connected, so start what was asked for
+                        if (!Scrcpy.pairing && device.pendingStart && Scrcpy.hasLink(device.deviceId) && !Scrcpy.isRunning(device.deviceId))
+                            device.startMirroring();
+                    }
+
+                    function onSessionsChanged(): void {
+                        if (Scrcpy.isRunning(device.deviceId))
+                            device.pendingStart = false;
+                    }
+
+                    target: Scrcpy
+                }
+
                 Timer {
                     id: shareResultTimer
 
@@ -282,92 +355,275 @@ StyledRect {
                     onTriggered: device.shareResult = ""
                 }
 
-                RowLayout {
-                    id: deviceLayout
+                Timer {
+                    id: mirrorErrorTimer
 
-                    anchors.fill: parent
+                    interval: 5000
+                    onTriggered: device.mirrorError = ""
+                }
+
+                ColumnLayout {
+                    id: deviceColumn
+
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.topMargin: Tokens.padding.small
                     anchors.leftMargin: Tokens.padding.medium
                     anchors.rightMargin: Tokens.padding.small
                     spacing: Tokens.spacing.small
 
-                    MaterialIcon {
-                        text: {
-                            if (dropArea.containsDrag)
-                                return "file_download";
-                            if (device.shareResult === "sent")
-                                return "check";
-                            if (device.shareResult === "failed")
-                                return "error";
-                            return "smartphone";
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.small
+
+                        MaterialIcon {
+                            text: {
+                                if (dropArea.containsDrag)
+                                    return "file_download";
+                                if (device.shareResult === "sent")
+                                    return "check";
+                                if (device.shareResult === "failed")
+                                    return "error";
+                                return "smartphone";
+                            }
+                            color: {
+                                if (dropArea.containsDrag)
+                                    return Colours.palette.m3onPrimaryContainer;
+                                if (device.shareResult === "failed")
+                                    return Colours.palette.m3error;
+                                return Colours.palette.m3onSurfaceVariant;
+                            }
+                            fontStyle: Tokens.font.icon.medium
                         }
-                        color: {
-                            if (dropArea.containsDrag)
-                                return Colours.palette.m3onPrimaryContainer;
-                            if (device.shareResult === "failed")
-                                return Colours.palette.m3error;
-                            return Colours.palette.m3onSurfaceVariant;
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: device.info.name ?? ""
+                            color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
                         }
-                        fontStyle: Tokens.font.icon.medium
+
+                        RowLayout {
+                            visible: device.batteryCharge >= 0
+                            spacing: 0
+
+                            MaterialIcon {
+                                text: Icons.getBatteryIcon(device.batteryCharge / 100, device.batteryCharging)
+                                color: {
+                                    if (dropArea.containsDrag)
+                                        return Colours.palette.m3onPrimaryContainer;
+                                    if (device.batteryCharge < 20 && !device.batteryCharging)
+                                        return Colours.palette.m3error;
+                                    return Colours.palette.m3onSurfaceVariant;
+                                }
+                                fontStyle: Tokens.font.icon.small
+                            }
+
+                            StyledText {
+                                // TRANSLATORS: %1 = battery charge percentage of the phone
+                                text: Tr.tr("%1%").arg(device.batteryCharge)
+                                color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
+                                font: Tokens.font.body.small
+                            }
+                        }
+
+                        IconButton {
+                            visible: device.mounted
+                            type: IconButton.Text
+                            icon: root.pendingBrowseDevice === device.deviceId ? "hourglass_top" : "folder_open"
+                            disabled: device.mountBusy || root.pendingBrowseDevice !== ""
+                            onClicked: root.browse(device.deviceId)
+                        }
+
+                        IconButton {
+                            visible: Scrcpy.available
+                            type: IconButton.Text
+                            icon: {
+                                if (device.mirrorBusy || device.pairing)
+                                    return "hourglass_top";
+                                return device.mirroring ? "stop_screen_share" : "screen_share";
+                            }
+                            disabled: device.mirrorBusy || device.pairing !== null
+                            onClicked: {
+                                if (device.mirroring)
+                                    Scrcpy.stop(device.deviceId);
+                                else
+                                    device.startMirroring();
+                            }
+                        }
+
+                        IconButton {
+                            id: moreButton
+
+                            type: IconButton.Text
+                            icon: "more_vert"
+                            onClicked: actionsMenu.expanded = !actionsMenu.expanded
+                        }
                     }
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: device.info.name ?? ""
-                        color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
+                        visible: text !== ""
+                        text: {
+                            if (device.mirrorError)
+                                return device.mirrorError;
+                            if (device.mirroring)
+                                return Tr.tr("Mirroring the screen");
+                            if (Scrcpy.unauthorizedUsb && device.pendingStart)
+                                return Tr.tr("Allow USB debugging on the phone");
+                            return "";
+                        }
+                        color: device.mirrorError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.body.small
-                        elide: Text.ElideRight
+                        wrapMode: Text.WordWrap
                     }
 
-                    RowLayout {
-                        visible: device.batteryCharge >= 0
-                        spacing: 0
+                    // Pairing for wireless debugging, shown until the phone connects
+                    ColumnLayout {
+                        id: pairingView
 
-                        MaterialIcon {
-                            text: Icons.getBatteryIcon(device.batteryCharge / 100, device.batteryCharging)
-                            color: {
-                                if (dropArea.containsDrag)
-                                    return Colours.palette.m3onPrimaryContainer;
-                                if (device.batteryCharge < 20 && !device.batteryCharging)
-                                    return Colours.palette.m3error;
-                                return Colours.palette.m3onSurfaceVariant;
+                        // A code can only be typed once the phone's pairing screen is open
+                        readonly property bool codeEntry: device.pairing !== null && (device.pairing.status === "waiting" || device.pairing.status === "failed") && Scrcpy.pairingService !== null
+
+                        Layout.fillWidth: true
+                        visible: device.pairing !== null
+                        spacing: Tokens.spacing.small
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: {
+                                    switch (device.pairing?.status) {
+                                    case "pairing":
+                                        return Tr.tr("Pairing…");
+                                    case "connecting":
+                                        return Tr.tr("Paired, connecting…");
+                                    case "failed":
+                                        return device.pairing.error;
+                                    default:
+                                        return Scrcpy.pairingService ? Tr.tr("Enter the code shown on the phone") : Tr.tr("On the phone, open Wireless debugging and pick Pair device with pairing code");
+                                    }
+                                }
+                                color: device.pairing?.status === "failed" ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                                font: Tokens.font.body.small
+                                wrapMode: Text.WordWrap
                             }
-                            fontStyle: Tokens.font.icon.small
+
+                            // Next to the text while there is nothing to type yet
+                            TextButton {
+                                visible: !pairingView.codeEntry
+                                type: TextButton.Text
+                                text: Tr.trCtx("Cancel", "button")
+                                onClicked: device.cancelPairing()
+                            }
                         }
 
-                        StyledText {
-                            // TRANSLATORS: %1 = battery charge percentage of the phone
-                            text: Tr.tr("%1%").arg(device.batteryCharge)
-                            color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-                            font: Tokens.font.body.small
+                        StyledTextField {
+                            id: codeField
+
+                            readonly property bool canSubmit: Scrcpy.pairingService !== null && text.length === 6
+
+                            Layout.fillWidth: true
+                            visible: pairingView.codeEntry
+                            verticalPadding: Tokens.padding.medium
+                            placeholderText: Tr.tr("Pairing code")
+                            leadingIcon: "password"
+                            maximumLength: 6
+                            validate: /^\d{0,6}$/
+                            inputMethodHints: Qt.ImhDigitsOnly
+
+                            onVisibleChanged: {
+                                if (visible) {
+                                    text = "";
+                                    forceActiveFocus();
+                                }
+                            }
+                            onAccepted: {
+                                if (canSubmit)
+                                    Scrcpy.submitPairingCode(text);
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.alignment: Qt.AlignRight
+                            visible: pairingView.codeEntry
+                            spacing: Tokens.spacing.small
+
+                            TextButton {
+                                type: TextButton.Text
+                                text: Tr.trCtx("Cancel", "button")
+                                onClicked: device.cancelPairing()
+                            }
+
+                            TextButton {
+                                type: TextButton.Tonal
+                                text: Tr.tr("Pair")
+                                disabled: !codeField.canSubmit
+                                onClicked: Scrcpy.submitPairingCode(codeField.text)
+                            }
                         }
                     }
+                }
 
-                    IconButton {
-                        visible: device.mounted
-                        type: IconButton.Text
-                        icon: root.pendingBrowseDevice === device.deviceId ? "hourglass_top" : "folder_open"
-                        disabled: device.mountBusy || root.pendingBrowseDevice !== ""
-                        onClicked: root.browse(device.deviceId)
+                Menu {
+                    id: actionsMenu
+
+                    // The panel sits at the bottom of the screen, so open upwards
+                    attachTo: moreButton
+                    attachSideY: Menu.Top
+                    thisSideY: Menu.Bottom
+                    marginY: -Tokens.spacing.small
+                    active: null
+                    items: [mountItem, unpairItem]
+
+                    // Actions, not a choice, so never keep one highlighted
+                    onExpandedChanged: {
+                        if (!expanded)
+                            active = null;
+                    }
+                }
+
+                MenuItem {
+                    id: mountItem
+
+                    text: device.mounted ? Tr.tr("Unmount storage") : Tr.tr("Mount storage")
+                    icon: device.mounted ? "eject" : "hard_drive"
+
+                    onClicked: {
+                        if (device.mountBusy || device.downloadingHere)
+                            return;
+                        if (device.mounted)
+                            KdeConnect.unmount(device.deviceId);
+                        else
+                            KdeConnect.mount(device.deviceId);
+                    }
+                }
+
+                MenuItem {
+                    id: unpairItem
+
+                    text: Tr.tr("Unpair")
+                    icon: "link_off"
+
+                    onClicked: {
+                        if (!device.mountBusy)
+                            KdeConnect.unpair(device.deviceId);
+                    }
+                }
+
+                Connections {
+                    function onUtilitiesChanged(): void {
+                        // The menu lives in the window, so close it along with the panel
+                        if (!root.screenState.utilities)
+                            actionsMenu.expanded = false;
                     }
 
-                    IconButton {
-                        type: IconButton.Text
-                        icon: device.mountBusy ? "hourglass_top" : device.mounted ? "eject" : "hard_drive"
-                        disabled: device.mountBusy || device.downloadingHere
-                        onClicked: {
-                            if (device.mounted)
-                                KdeConnect.unmount(device.deviceId);
-                            else
-                                KdeConnect.mount(device.deviceId);
-                        }
-                    }
-
-                    IconButton {
-                        type: IconButton.Text
-                        icon: "link_off"
-                        disabled: device.mountBusy
-                        onClicked: KdeConnect.unpair(device.deviceId)
-                    }
+                    target: root.screenState
                 }
 
                 DropArea {

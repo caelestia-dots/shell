@@ -215,6 +215,8 @@ DeviceList readDevices() {
             { u"paired"_s, paired },
             { u"pairState"_s, values.value(u"pairState"_s).toInt() },
             { u"verificationKey"_s, values.value(u"verificationKey"_s).toString() },
+            // Network addresses of the device's links, which Bluetooth links report as MAC addresses
+            { u"addresses"_s, values.value(u"reachableAddresses"_s).toStringList() },
             // -1 until the device reports it, or when its battery plugin is not loaded
             { u"batteryCharge"_s, -1 },
             { u"batteryCharging"_s, false },
@@ -393,6 +395,8 @@ KdeConnectDaemon::KdeConnectDaemon(QObject* parent)
     // deviceListChanged.
     bus.connect(k_service, QString(), k_deviceIface, u"pairStateChanged"_s, this, SLOT(refresh()));
     bus.connect(k_service, QString(), k_deviceIface, u"nameChanged"_s, this, SLOT(refresh()));
+    // The addresses change when the device switches networks
+    bus.connect(k_service, QString(), k_deviceIface, u"linksChanged"_s, this, SLOT(refresh()));
     // Plugins such as battery load after pairing and report their own changes
     bus.connect(k_service, QString(), k_deviceIface, u"pluginsChanged"_s, this, SLOT(refresh()));
     bus.connect(k_service, QString(), k_batteryIface, u"refreshed"_s, this, SLOT(refresh()));
