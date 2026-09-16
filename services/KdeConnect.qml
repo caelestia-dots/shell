@@ -10,9 +10,11 @@ Singleton {
 
     readonly property bool available: daemon.available
     readonly property var devices: daemon.devices
-    readonly property bool receiving: daemon.downloading
-    readonly property string receivingDevice: daemon.downloadDevice
-    readonly property real progress: daemon.downloadProgress
+    readonly property bool downloading: daemon.downloading
+    readonly property string downloadDevice: daemon.downloadDevice
+    readonly property real downloadProgress: daemon.downloadProgress
+    // Kept here rather than in the UI, which is recreated whenever utilities reopens
+    property string downloadName
 
     // Keyed by device id
     property var mounts: ({})
@@ -43,10 +45,11 @@ Singleton {
             return;
         }
 
+        downloadName = sourcePath.split("/").pop();
         daemon.download(deviceId, sourcePath);
     }
 
-    function cancel(): void {
+    function cancelDownload(): void {
         daemon.cancelDownload();
     }
 

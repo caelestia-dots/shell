@@ -110,9 +110,9 @@ StyledRect {
                             return Tr.tr("KDE Connect is not running");
                         if (KdeConnect.devices.length === 0)
                             return Tr.tr("No phone connected");
-                        if (KdeConnect.receiving)
+                        if (KdeConnect.downloading)
                             // TRANSLATORS: %1 = download progress percentage
-                            return Tr.tr("Downloading… %1%").arg(Math.round(KdeConnect.progress * 100));
+                            return Tr.tr("Downloading… %1%").arg(Math.round(KdeConnect.downloadProgress * 100));
                         return Tr.tr("Drop files on a device");
                     }
                     color: Colours.palette.m3onSurfaceVariant
@@ -125,13 +125,13 @@ StyledRect {
             Loader {
                 asynchronous: true
                 visible: active
-                opacity: KdeConnect.receiving ? 1 : 0
-                scale: KdeConnect.receiving ? 1 : 0.5
+                opacity: KdeConnect.downloading ? 1 : 0
+                scale: KdeConnect.downloading ? 1 : 0.5
 
                 Component.onCompleted: active = Qt.binding(() => opacity > 0)
 
                 sourceComponent: LoadingIndicator {
-                    implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.4)
+                    implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.3)
                 }
 
                 Behavior on opacity {
@@ -156,7 +156,7 @@ StyledRect {
 
                 readonly property bool mounted: KdeConnect.isMounted(modelData.id)
                 readonly property bool mountBusy: KdeConnect.isMountBusy(modelData.id)
-                readonly property bool downloadingHere: KdeConnect.receiving && KdeConnect.receivingDevice === modelData.id
+                readonly property bool downloadingHere: KdeConnect.downloading && KdeConnect.downloadDevice === modelData.id
                 // Briefly shows the outcome of the last share: "", "sent" or "failed"
                 property string shareResult
 
