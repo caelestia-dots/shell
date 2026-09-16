@@ -11,7 +11,8 @@ using Qt::StringLiterals::operator""_s;
 
 namespace {
 
-const QHostAddress k_group(u"224.0.0.251"_s);
+// 224.0.0.251, the mDNS multicast group
+constexpr quint32 k_group = 0xE00000FB;
 constexpr quint16 k_port = 5353;
 constexpr int k_queryIntervalMs = 3000;
 // Services not seen for this long are dropped, e.g. once pairing is closed on the phone
@@ -84,7 +85,8 @@ QString kindOf(const QString& name, bool instance) {
 
 QByteArray encodeName(const QString& name) {
     QByteArray result;
-    for (const auto& label : name.split(u'.')) {
+    const auto labels = name.split(u'.');
+    for (const auto& label : labels) {
         const auto bytes = label.toUtf8();
         result.append(static_cast<char>(bytes.size()));
         result.append(bytes);
@@ -143,7 +145,7 @@ void AdbDiscovery::bind() {
     // Share the port with avahi or other responders. If that is not possible, a
     // random port still gets the direct replies the queries ask for.
     if (m_socket.bind(QHostAddress::AnyIPv4, k_port, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint))
-        m_socket.joinMulticastGroup(k_group);
+        m_socket.joinMulticastGroup(QHostAddress(k_group));
     else
         m_socket.bind(QHostAddress::AnyIPv4, 0);
 
@@ -168,7 +170,7 @@ void AdbDiscovery::query() {
         appendUint16(packet, k_classInUnicast);
     }
 
-    m_socket.writeDatagram(packet, k_group, k_port);
+    m_socket.writeDatagram(packet, QHostAddress(k_group), k_port);
     publish();
 }
 
@@ -276,12 +278,11 @@ void AdbDiscovery::publish() {
     const auto now = QDateTime::currentDateTimeUtc();
     QVariantList services;
 
-    for (auto it = m_instances.begin(); it != m_instances.end();) {
-        if (it->seen.msecsTo(now) > k_expiryMs) {
-            it = m_instances.erase(it);
-            continue;
-        }
+    m_instances.removeIf([&now](const QHash<QString, Instance>::iterator& it) {
+        return it->seen.msecsTo(now) > k_expiryMs;
+    });
 
+    for (auto it = m_instances.cbegin(); it != m_instances.cend(); ++it) {
         // The port is only known once the SRV record arrived
         if (it->port != 0) {
             // Prefer the advertised address, falling back to where the reply came from
@@ -295,8 +296,6 @@ void AdbDiscovery::publish() {
                 { u"port"_s, it->port },
             };
         }
-
-        ++it;
     }
 
     if (services != m_services) {
