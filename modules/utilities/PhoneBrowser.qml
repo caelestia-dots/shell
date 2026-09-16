@@ -103,7 +103,9 @@ Item {
         navigating = true;
         clearSelection();
         downloadStatus = "";
-        exitAnim.restart();
+
+        // Leaving starts once the folder responds, see onMountChecked
+        KdeConnect.checkMount(deviceId, path);
     }
 
     // Runs while the old folder is invisible
@@ -187,6 +189,20 @@ Item {
     }
 
     Connections {
+        function onMountChecked(device: string, path: string, reachable: bool): void {
+            if (device !== root.deviceId || path !== root.pendingPath || !root.navigating || root.currentPath === path || exitAnim.running)
+                return;
+
+            if (reachable) {
+                exitAnim.restart();
+            } else {
+                // A dead mount gets unmounted, which closes the browser. Otherwise
+                // the folder just vanished, so stay where we are.
+                root.navigating = false;
+                root.pendingPath = "";
+            }
+        }
+
         function onDownloaded(device: string, destinationPath: string): void {
             if (device === root.deviceId)
                 // TRANSLATORS: %1 = the path the file was saved to

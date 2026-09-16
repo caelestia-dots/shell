@@ -18,6 +18,8 @@ StyledRect {
     property string browserDeviceId
     property string browserDeviceName
     property string browserRootPath
+    // Device whose storage is being checked before its browser opens
+    property string pendingBrowseDevice
     // Unmounting or losing the device leaves nothing to browse
     readonly property bool browserDeviceMounted: KdeConnect.isMounted(browserDeviceId)
 
@@ -28,15 +30,24 @@ StyledRect {
     // Translate is not an Item, so it cannot resolve Tokens for the screen itself
     readonly property real slideDistance: Tokens.padding.large
 
-    function browse(deviceId: string, deviceName: string): void {
-        // The shortest directory is the storage root, the others are inside it
-        const paths = Object.keys(KdeConnect.directories(deviceId)).sort((a, b) => a.length - b.length);
-        if (paths.length === 0)
+    function browse(deviceId: string): void {
+        const rootPath = KdeConnect.storageRoot(deviceId);
+        if (!rootPath || pendingBrowseDevice)
+            return;
+
+        // The browser reads the storage on the UI thread, which would hang on a dead mount
+        pendingBrowseDevice = deviceId;
+        KdeConnect.checkMount(deviceId, rootPath);
+    }
+
+    function openBrowser(deviceId: string, rootPath: string): void {
+        const device = KdeConnect.devices.find(d => d.id === deviceId);
+        if (!device)
             return;
 
         browserDeviceId = deviceId;
-        browserDeviceName = deviceName;
-        browserRootPath = paths[0];
+        browserDeviceName = device.name;
+        browserRootPath = rootPath;
         browserOpen = true;
         browser.reset();
     }
@@ -45,6 +56,13 @@ StyledRect {
     radius: Tokens.rounding.large
     color: Colours.tPalette.m3surfaceContainer
     clip: true
+
+    // Utilities just opened, so find mounts which died while it was closed
+    Component.onCompleted: {
+        for (const device of KdeConnect.devices)
+            if (KdeConnect.isMounted(device.id))
+                KdeConnect.checkMount(device.id, KdeConnect.storageRoot(device.id));
+    }
 
     onBrowserDeviceMountedChanged: {
         if (!browserDeviceMounted)
@@ -98,6 +116,19 @@ StyledRect {
         }
 
         target: root.screenState
+    }
+
+    Connections {
+        function onMountChecked(device: string, path: string, reachable: bool): void {
+            if (device !== root.pendingBrowseDevice)
+                return;
+
+            root.pendingBrowseDevice = "";
+            if (reachable && KdeConnect.isMounted(device) && path === KdeConnect.storageRoot(device))
+                root.openBrowser(device, path);
+        }
+
+        target: KdeConnect
     }
 
     ColumnLayout {
@@ -283,9 +314,9 @@ StyledRect {
                     IconButton {
                         visible: device.mounted
                         type: IconButton.Text
-                        icon: "folder_open"
-                        disabled: device.mountBusy
-                        onClicked: root.browse(device.modelData.id, device.modelData.name)
+                        icon: root.pendingBrowseDevice === device.modelData.id ? "hourglass_top" : "folder_open"
+                        disabled: device.mountBusy || root.pendingBrowseDevice !== ""
+                        onClicked: root.browse(device.modelData.id)
                     }
 
                     IconButton {

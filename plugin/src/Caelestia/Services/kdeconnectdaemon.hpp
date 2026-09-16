@@ -4,6 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
+#include <qthreadpool.h>
 #include <qvariant.h>
 
 namespace caelestia::services {
@@ -34,6 +35,7 @@ public:
     Q_INVOKABLE void mount(const QString& deviceId);
     Q_INVOKABLE void unmount(const QString& deviceId);
     Q_INVOKABLE void refreshMount(const QString& deviceId);
+    Q_INVOKABLE void checkMount(const QString& deviceId, const QString& path);
 
 public slots:
     void refresh();
@@ -55,6 +57,7 @@ signals:
     void mountStateChanged(
         const QString& deviceId, bool mounted, const QString& mountPoint, const QVariantMap& directories);
     void mountFailed(const QString& deviceId, const QString& error);
+    void mountChecked(const QString& deviceId, const QString& path, bool reachable);
 
 private:
     bool m_available = false;
@@ -63,12 +66,18 @@ private:
     qreal m_downloadProgress = 0.0;
     QString m_downloadDevice;
     QFuture<void> m_download;
+    // Probes of a dead mount can hang until it is unmounted, so keep them off the
+    // global pool which mounting and unmounting run on
+    QThreadPool m_probePool;
 
     void setAvailable(bool available);
     void setDevices(const QVariantList& devices);
     void setDownloading(bool downloading);
     void setDownloadProgress(qreal progress);
     void setDownloadDevice(const QString& deviceId);
+
+    void startUnmount(const QString& deviceId);
+    void dropDeadMount(const QString& deviceId);
 };
 
 } // namespace caelestia::services

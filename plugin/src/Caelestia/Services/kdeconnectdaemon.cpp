@@ -19,9 +19,12 @@
 #include <qstandardpaths.h>
 #include <qtconcurrentrun.h>
 #include <qthread.h>
+#include <qtimer.h>
 #include <qurl.h>
 
 #include <algorithm>
+#include <filesystem>
+#include <system_error>
 
 namespace caelestia::services {
 
@@ -39,6 +42,8 @@ constexpr qsizetype k_chunkSize = static_cast<qsizetype>(1024) * 1024;
 constexpr int k_progressRange = 1000;
 constexpr qint64 k_mountReadyTimeoutMs = 5000;
 constexpr unsigned long k_mountReadyPollMs = 50;
+constexpr int k_mountCheckTimeoutMs = 3000;
+constexpr int k_probeThreads = 2;
 
 enum class Outcome : quint8 {
     Success,
@@ -50,6 +55,12 @@ enum class Outcome : quint8 {
 struct TransferResult {
     Outcome outcome = Outcome::Failed;
     QString detail;
+};
+
+enum class ProbeResult : quint8 {
+    Reachable,
+    Missing,
+    Dead
 };
 
 struct MountResult {
@@ -154,6 +165,24 @@ MountResult mountDevice(const QString& deviceId) {
         return mountFailure(u"Mounted filesystem did not become ready"_s);
 
     return result;
+}
+
+// Once the phone drops off the network, sshfs fails requests with connection
+// errors, or blocks them until it gives up. Only those errors mean the mount is
+// dead; anything else just means the path is not a usable folder.
+ProbeResult probePath(const QString& path) {
+    std::error_code error;
+    const auto status = std::filesystem::status(QFile::encodeName(path).toStdString(), error);
+
+    if (!error)
+        return std::filesystem::is_directory(status) ? ProbeResult::Reachable : ProbeResult::Missing;
+
+    if (error == std::errc::not_connected || error == std::errc::io_error || error == std::errc::timed_out ||
+        error == std::errc::connection_aborted || error == std::errc::connection_reset ||
+        error == std::errc::host_unreachable || error == std::errc::network_unreachable)
+        return ProbeResult::Dead;
+
+    return ProbeResult::Missing;
 }
 
 bool pathInsideDirectories(const QString& path, const QVariantMap& directories) {
@@ -279,6 +308,8 @@ void downloadFile(QPromise<TransferResult>& promise, const QString& deviceId, co
 
 KdeConnectDaemon::KdeConnectDaemon(QObject* parent)
     : QObject(parent) {
+    m_probePool.setMaxThreadCount(k_probeThreads);
+
     auto bus = QDBusConnection::sessionBus();
 
     // Refresh when the daemon starts or stops, and whenever it reports a device
@@ -463,6 +494,10 @@ void KdeConnectDaemon::unmount(const QString& deviceId) {
         return;
     }
 
+    startUnmount(deviceId);
+}
+
+void KdeConnectDaemon::startUnmount(const QString& deviceId) {
     QtConcurrent::run([deviceId] {
         const auto reply = callSftp(deviceId, u"unmount"_s);
         return reply.type() == QDBusMessage::ErrorMessage ? errorText(QDBusError(reply)) : QString();
@@ -486,6 +521,49 @@ void KdeConnectDaemon::refreshMount(const QString& deviceId) {
         else
             emit mountFailed(deviceId, result.error);
     });
+}
+
+void KdeConnectDaemon::checkMount(const QString& deviceId, const QString& path) {
+    if (deviceId.isEmpty() || path.isEmpty())
+        return;
+
+    // A hung probe is reported as dead once the timeout fires. Its worker stays
+    // blocked until the unmount stops sshfs, then finishes and cleans up.
+    auto* watcher = new QFutureWatcher<ProbeResult>(this);
+    auto* timeout = new QTimer(watcher);
+    timeout->setSingleShot(true);
+
+    connect(timeout, &QTimer::timeout, this, [this, deviceId, path] {
+        emit mountChecked(deviceId, path, false);
+        dropDeadMount(deviceId);
+    });
+
+    connect(watcher, &QFutureWatcher<ProbeResult>::finished, this, [this, watcher, timeout, deviceId, path] {
+        watcher->deleteLater();
+
+        if (!timeout->isActive())
+            return;
+
+        timeout->stop();
+        const auto result = watcher->result();
+        emit mountChecked(deviceId, path, result == ProbeResult::Reachable);
+
+        if (result == ProbeResult::Dead)
+            dropDeadMount(deviceId);
+    });
+
+    watcher->setFuture(QtConcurrent::run(&m_probePool, probePath, path));
+    timeout->start(k_mountCheckTimeoutMs);
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
+}
+
+void KdeConnectDaemon::dropDeadMount(const QString& deviceId) {
+    // A download from the dead mount cannot finish either. Cancelling lets its
+    // worker stop as soon as the unmount unblocks it.
+    if (m_downloading && m_downloadDevice == deviceId)
+        m_download.cancel();
+
+    startUnmount(deviceId);
 }
 
 void KdeConnectDaemon::setAvailable(bool available) {

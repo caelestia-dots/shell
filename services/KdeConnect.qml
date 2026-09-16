@@ -25,6 +25,7 @@ Singleton {
     signal downloaded(string device, string destinationPath)
     signal downloadFailed(string device, string error)
     signal downloadCancelled(string device)
+    signal mountChecked(string device, string path, bool reachable)
 
     function refresh(): void {
         daemon.refresh();
@@ -74,6 +75,13 @@ Singleton {
             daemon.refreshMount(deviceId);
     }
 
+    // Checks that the mounted storage still responds, without blocking the UI.
+    // A dead mount is unmounted, so check before touching the filesystem.
+    function checkMount(deviceId: string, path: string): void {
+        if (deviceId && path)
+            daemon.checkMount(deviceId, path);
+    }
+
     function isMounted(deviceId: string): bool {
         return mounts[deviceId]?.mounted === true;
     }
@@ -88,6 +96,11 @@ Singleton {
 
     function directories(deviceId: string): var {
         return mounts[deviceId]?.directories ?? {};
+    }
+
+    // The shortest directory is the storage root, the others are inside it
+    function storageRoot(deviceId: string): string {
+        return Object.keys(directories(deviceId)).sort((a, b) => a.length - b.length)[0] ?? "";
     }
 
     function setMountBusy(deviceId: string, busy: bool): void {
@@ -143,6 +156,7 @@ Singleton {
             root.setMountBusy(device, false);
             root.setMountState(device, mounted, mountPoint, directories);
         }
+        onMountChecked: (device, path, reachable) => root.mountChecked(device, path, reachable)
         onMountFailed: (device, error) => {
             root.setMountBusy(device, false);
             console.warn(lc, `Failed to change mount state for ${device}: ${error}`);
