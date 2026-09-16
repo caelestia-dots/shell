@@ -3,7 +3,6 @@
 #include <qstring.h>
 #include <qvariantlist.h>
 
-#include "common.hpp"
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
