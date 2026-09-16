@@ -2,6 +2,7 @@
 
 #include <qjsonvalue.h>
 #include <qobject.h>
+#include <qvariant.h>
 
 #include "changebatcher.hpp"
 #include "common.hpp"
@@ -51,6 +52,8 @@ protected:
     const bool m_globalOnly; // Own flag or inherited from the parent node
 
     void warnGlobalRead(const QString& key) const;
+    // Returns true if the write should be skipped afterwards, the value is not one of the allowed types
+    [[nodiscard]] bool rejectInvalidWrite(const QString& key, const QVariant& value) const;
     // Returns true if the write should be skipped afterwards, overlays cannot write global options
     bool rejectGlobalWrite(const QString& key);
     static void warnGlobalSync(QList<Diagnostic>& diagnostics, const QString& path);
