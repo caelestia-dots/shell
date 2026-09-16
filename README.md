@@ -100,6 +100,11 @@ Build dependencies:
 -   [`ninja`](https://github.com/ninja-build/ninja)
 -   `qt6-shadertools`
 
+Optional dependencies:
+
+-   [`kdeconnect`](https://invent.kde.org/network/kdeconnect-kde) - for the phone share utilities card
+-   [`sshfs`](https://github.com/libfuse/sshfs) - for browsing and downloading files from a phone in the phone share card
+
 > [!IMPORTANT]
 > The commands below (and in the "Updating" section) assume `$XDG_CONFIG_HOME` is set.
 > If it is unset, substitute it with the path to your config folder (typically `~/.config`).
