@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <memory>
 #include <system_error>
 
 namespace caelestia::services {
@@ -170,6 +169,51 @@ MountResult mountDevice(const QString& deviceId) {
     auto result = readMountState(deviceId);
     if (result.ok && !waitForMountReady(result.directories))
         return mountFailure(u"Mounted filesystem did not become ready"_s);
+
+    return result;
+}
+
+struct DeviceList {
+    bool available = false;
+    QVariantList devices;
+};
+
+// Blocking calls, only used from worker threads
+DeviceList readDevices() {
+    const auto bus = QDBusConnection::sessionBus();
+
+    // Reachable devices, paired or not, so unpaired ones can be offered for pairing
+    auto namesCall = methodCall(k_daemonPath, k_daemonIface, u"deviceNames"_s);
+    namesCall << true << false;
+
+    const auto namesReply = bus.call(namesCall);
+    if (namesReply.type() != QDBusMessage::ReplyMessage || namesReply.arguments().isEmpty())
+        return {};
+
+    QMap<QString, QString> names;
+    namesReply.arguments().constFirst().value<QDBusArgument>() >> names;
+
+    DeviceList result;
+    result.available = true;
+
+    for (auto it = names.cbegin(); it != names.cend(); ++it) {
+        auto propertiesCall = methodCall(deviceObjectPath(it.key()), k_propertiesIface, u"GetAll"_s);
+        propertiesCall << k_deviceIface;
+
+        // A device which vanished in between is left out
+        const QDBusReply<QVariantMap> properties = bus.call(propertiesCall);
+        if (!properties.isValid())
+            continue;
+
+        const auto& values = properties.value();
+        result.devices << QVariantMap{
+            { u"id"_s, it.key() },
+            { u"name"_s, it.value() },
+            { u"paired"_s, values.value(u"isPaired"_s).toBool() },
+            { u"pairState"_s, values.value(u"pairState"_s).toInt() },
+            { u"verificationKey"_s, values.value(u"verificationKey"_s).toString() },
+        };
+    }
 
     return result;
 }
@@ -358,73 +402,13 @@ QString KdeConnectDaemon::downloadDevice() const {
 void KdeConnectDaemon::refresh() {
     const auto generation = ++m_refreshGeneration;
 
-    // Reachable devices, paired or not, so unpaired ones can be offered for pairing
-    auto message = methodCall(k_daemonPath, k_daemonIface, u"deviceNames"_s);
-    message << true << false;
-
-    auto* watcher = new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(message), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, generation](QDBusPendingCallWatcher* call) {
-        call->deleteLater();
+    QtConcurrent::run(readDevices).then(this, [this, generation](const DeviceList& result) {
         if (generation != m_refreshGeneration)
             return;
 
-        const auto arguments = call->reply().arguments();
-        if (call->isError() || arguments.isEmpty()) {
-            setAvailable(false);
-            setDevices({});
-            return;
-        }
-
-        QMap<QString, QString> names;
-        arguments.constFirst().value<QDBusArgument>() >> names;
-        setAvailable(true);
-
-        if (names.isEmpty()) {
-            setDevices({});
-            return;
-        }
-
-        // Read the pairing state of every device, then publish them all at once
-        auto devices = std::make_shared<QMap<QString, QVariantMap>>();
-        auto pending = std::make_shared<qsizetype>(names.size());
-
-        for (auto it = names.cbegin(); it != names.cend(); ++it) {
-            auto propertiesCall = methodCall(deviceObjectPath(it.key()), k_propertiesIface, u"GetAll"_s);
-            propertiesCall << k_deviceIface;
-
-            auto* propertiesWatcher =
-                new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(propertiesCall), this);
-            connect(propertiesWatcher, &QDBusPendingCallWatcher::finished, this,
-                [this, generation, devices, pending, id = it.key(), name = it.value()](QDBusPendingCallWatcher* reply) {
-                    reply->deleteLater();
-                    if (generation != m_refreshGeneration)
-                        return;
-
-                    // A device which vanished in between is left out
-                    const QDBusPendingReply<QVariantMap> properties = *reply;
-                    if (!properties.isError()) {
-                        const auto values = properties.value();
-                        devices->insert(id, QVariantMap{
-                                                { u"id"_s, id },
-                                                { u"name"_s, name },
-                                                { u"paired"_s, values.value(u"isPaired"_s).toBool() },
-                                                { u"pairState"_s, values.value(u"pairState"_s).toInt() },
-                                                { u"verificationKey"_s, values.value(u"verificationKey"_s).toString() },
-                                            });
-                    }
-
-                    if (--*pending > 0)
-                        return;
-
-                    QVariantList list;
-                    for (const auto& device : std::as_const(*devices))
-                        list << device;
-                    setDevices(list);
-                });
-            // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
-        }
+        setAvailable(result.available);
+        setDevices(result.devices);
     });
-    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
 void KdeConnectDaemon::requestPairing(const QString& deviceId) {

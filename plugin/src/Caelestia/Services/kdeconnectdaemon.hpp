@@ -74,7 +74,7 @@ signals:
 private:
     bool m_available = false;
     QVariantList m_devices;
-    // Drops replies from refreshes superseded by a newer one
+    // Drops results from refreshes superseded by a newer one
     quint64 m_refreshGeneration = 0;
     bool m_downloading = false;
     qreal m_downloadProgress = 0.0;
