@@ -3,614 +3,287 @@ pragma ComponentBehavior: Bound
 import ".." as Utilities
 import QtQuick
 import QtQuick.Layouts
-import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
+import qs.components.controls
 import qs.services
 
 StyledRect {
     id: root
 
-    required property ScreenState screenState
     required property var phoneBrowser
 
-    readonly property var primaryDevice: KdeConnect.devices.length > 0 ? KdeConnect.devices[0] : null
+    readonly property bool browserOpen: phoneBrowser.browserOpen
+    // The browser keeps a fixed height and scrolls its file list inside it
+    readonly property real browserHeight: Tokens.sizes.utilities.width * 0.8
+    readonly property real compactHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
+    readonly property real nonAnimHeight: browserOpen ? browserHeight : compactHeight
+    // Translate is not an Item, so it cannot resolve Tokens for the screen itself
+    readonly property real slideDistance: Tokens.padding.large
 
-    readonly property bool primaryMounted: root.primaryDevice !== null && KdeConnect.isMounted(root.primaryDevice.id)
-
-    readonly property bool primaryMountBusy: root.primaryDevice !== null && KdeConnect.isMountBusy(root.primaryDevice.id)
-
-    readonly property bool browserOpen: root.phoneBrowser.browserOpen
-
-    readonly property real compactHeight: compactLayout.implicitHeight + Tokens.padding.extraLargeIncreased
-    readonly property real transitionDistance: Tokens.padding.large
-
-    //
-    // Keep the inline browser bounded.
-    // The file list scrolls inside this area.
-    //
-    readonly property real browserHeight: 340
-
-    readonly property real targetHeight: root.browserOpen ? root.browserHeight : root.compactHeight
-
-    readonly property real nonAnimHeight: root.targetHeight
-
-    implicitHeight: root.targetHeight
-
-    radius: Tokens.rounding.large
-
-    color: Colours.tPalette.m3surfaceContainer
-
-    clip: true
-
-    // Behavior on implicitHeight {
-    //     Anim {}
-    // }
-
-    Component.onCompleted: KdeConnect.refresh()
-
-    function browsePrimaryDevice(): void {
-        if (root.primaryDevice === null)
-            return;
-
-        if (!root.primaryMounted)
-            return;
-
-        const directories = KdeConnect.directories(root.primaryDevice.id);
-
-        const paths = Object.keys(directories);
-
-        if (paths.length === 0)
-            return;
-
-        paths.sort((a, b) => a.length - b.length);
-
-        root.phoneBrowser.openForDevice(root.primaryDevice.id, root.primaryDevice.name, paths[0]);
+    function browse(deviceId: string, deviceName: string): void {
+        // The shortest directory is the storage root, the others are inside it
+        const paths = Object.keys(KdeConnect.directories(deviceId)).sort((a, b) => a.length - b.length);
+        if (paths.length > 0)
+            phoneBrowser.openForDevice(deviceId, deviceName, paths[0]);
     }
 
-    //
-    // ==================================================
-    // Compact phone card
-    // ==================================================
-    //
+    implicitHeight: compactHeight
+    radius: Tokens.rounding.large
+    color: Colours.tPalette.m3surfaceContainer
+    clip: true
+
+    // Only animate opening and closing the browser. A Behavior would also animate
+    // the height settling when the card is created, making its contents jump.
+    states: State {
+        name: "browsing"
+        when: root.browserOpen
+
+        PropertyChanges {
+            root.implicitHeight: root.browserHeight
+        }
+    }
+
+    transitions: Transition {
+        Anim {
+            property: "implicitHeight"
+        }
+    }
+
     ColumnLayout {
-        id: compactLayout
+        id: layout
 
         anchors.top: parent.top
-
         anchors.left: parent.left
-
         anchors.right: parent.right
-
         anchors.margins: Tokens.padding.large
-
         spacing: Tokens.spacing.small
 
         enabled: !root.browserOpen
-
         opacity: root.browserOpen ? 0 : 1
 
         transform: Translate {
-            x: root.browserOpen ? -root.transitionDistance : 0
+            x: root.browserOpen ? -root.slideDistance : 0
 
             Behavior on x {
                 Anim {}
             }
         }
 
-        Behavior on opacity {
-            Anim {}
-        }
-
-        //
-        // ==========================================
-        // Header
-        // ==========================================
-        //
         RowLayout {
             Layout.fillWidth: true
-
             spacing: Tokens.spacing.medium
 
             StyledRect {
                 implicitWidth: implicitHeight
-
                 implicitHeight: icon.implicitHeight + Tokens.padding.large
 
                 radius: Tokens.rounding.full
-
                 color: Colours.palette.m3secondaryContainer
 
                 MaterialIcon {
                     id: icon
 
                     anchors.centerIn: parent
-
                     text: "send_to_mobile"
-
                     color: Colours.palette.m3onSecondaryContainer
-
                     fontStyle: Tokens.font.icon.large
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-
                 spacing: 0
 
                 StyledText {
                     Layout.fillWidth: true
-
-                    text: qsTr("Send to Phone")
-
+                    text: Tr.tr("Send to phone")
                     font: Tokens.font.body.medium
-
                     elide: Text.ElideRight
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-
                     text: {
-                        if (KdeConnect.sharing)
-                            return qsTr("Sending…");
-
-                        if (KdeConnect.devices.length === 0) {
-                            return qsTr("No phone connected");
-                        }
-
-                        return qsTr("Drop files on a device");
+                        if (!KdeConnect.available)
+                            return Tr.tr("KDE Connect is not running");
+                        if (KdeConnect.devices.length === 0)
+                            return Tr.tr("No phone connected");
+                        if (KdeConnect.receiving)
+                            // TRANSLATORS: %1 = download progress percentage
+                            return Tr.tr("Downloading… %1%").arg(Math.round(KdeConnect.progress * 100));
+                        return Tr.tr("Drop files on a device");
                     }
-
                     color: Colours.palette.m3onSurfaceVariant
-
                     font: Tokens.font.body.small
-
                     elide: Text.ElideRight
                 }
             }
 
-            //
-            // ==========================================
-            // Download progress indicator
-            // ==========================================
-            //
-            Item {
-                id: receivingIndicator
+            // Same enter/exit as the keep awake card's active chip
+            Loader {
+                asynchronous: true
+                visible: active
+                opacity: KdeConnect.receiving ? 1 : 0
+                scale: KdeConnect.receiving ? 1 : 0.5
 
-                visible: KdeConnect.receiving
+                Component.onCompleted: active = Qt.binding(() => opacity > 0)
 
-                implicitWidth: 34
-                implicitHeight: 34
+                sourceComponent: LoadingIndicator {
+                    implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.4)
+                }
 
-                Item {
-                    id: downloadIcon
-
-                    anchors.centerIn: parent
-
-                    width: 20
-                    height: 20
-
-                    //
-                    // Empty / inactive portion.
-                    //
-                    MaterialIcon {
-                        anchors.centerIn: parent
-
-                        text: "download"
-
-                        color: Colours.palette.m3onSurfaceVariant
-
-                        opacity: 0.25
-
-                        fontStyle: Tokens.font.icon.small
-                    }
-
-                    //
-                    // Filled portion.
-                    //
-                    Item {
-                        anchors.top: parent.top
-
-                        anchors.left: parent.left
-
-                        anchors.right: parent.right
-
-                        height: parent.height * KdeConnect.progress
-
-                        clip: true
-
-                        Behavior on height {
-                            NumberAnimation {
-                                duration: 100
-                            }
-                        }
-
-                        MaterialIcon {
-                            x: (downloadIcon.width - implicitWidth) / 2
-
-                            y: (downloadIcon.height - implicitHeight) / 2
-
-                            text: "download"
-
-                            color: Colours.palette.m3onSurfaceVariant
-
-                            fontStyle: Tokens.font.icon.small
-                        }
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.StandardSmall
                     }
                 }
-            }
 
-            //
-            // ==========================================
-            // Browse
-            // ==========================================
-            //
-            StyledRect {
-                id: browseButton
-
-                visible: root.primaryDevice !== null && root.primaryMounted
-
-                implicitWidth: 34
-                implicitHeight: 34
-
-                radius: Tokens.rounding.full
-
-                color: browseHover.hovered ? Colours.palette.m3secondaryContainer : "transparent"
-
-                //
-                // Downloading FROM the phone does not
-                // block Browse. This allows the user to
-                // reopen the browser while the download
-                // continues.
-                //
-                opacity: root.primaryMountBusy || (root.primaryDevice !== null && KdeConnect.sharing && KdeConnect.sharingDevice === root.primaryDevice.id) ? 0.5 : 1
-
-                MaterialIcon {
-                    anchors.centerIn: parent
-
-                    text: "folder_open"
-
-                    color: Colours.palette.m3onSurfaceVariant
-
-                    fontStyle: Tokens.font.icon.small
-                }
-
-                HoverHandler {
-                    id: browseHover
-                }
-
-                TapHandler {
-                    enabled: root.primaryDevice !== null && !root.primaryMountBusy && !(KdeConnect.sharing && KdeConnect.sharingDevice === root.primaryDevice.id)
-
-                    onTapped: root.browsePrimaryDevice()
+                Behavior on scale {
+                    Anim {}
                 }
             }
         }
 
-        //
-        // ==========================================
-        // Devices
-        // ==========================================
-        //
         Repeater {
             model: KdeConnect.devices
 
             StyledRect {
-                id: deviceCard
+                id: device
 
                 required property var modelData
 
-                property real shareProgress: 0
-
-                property bool showCancel: false
-
-                property bool cancelRequested: false
-
-                readonly property bool storageMounted: KdeConnect.isMounted(deviceCard.modelData.id)
-
-                readonly property bool storageBusy: KdeConnect.isMountBusy(deviceCard.modelData.id)
-
-                readonly property bool transferringHere: (KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id) || (KdeConnect.receiving && KdeConnect.receivingDevice === deviceCard.modelData.id)
-
-                //
-                // Keep the row height stable when the
-                // Mount action changes to Cancel.
-                //
-                readonly property real actionHeight: Math.max(mountButton.implicitHeight, cancelButton.implicitHeight)
+                readonly property bool mounted: KdeConnect.isMounted(modelData.id)
+                readonly property bool mountBusy: KdeConnect.isMountBusy(modelData.id)
+                readonly property bool downloadingHere: KdeConnect.receiving && KdeConnect.receivingDevice === modelData.id
+                // Briefly shows the outcome of the last share: "", "sent" or "failed"
+                property string shareResult
 
                 Layout.fillWidth: true
-
-                implicitHeight: Math.max(deviceLayout.implicitHeight, deviceCard.actionHeight) + Tokens.padding.medium * 2
+                implicitHeight: deviceLayout.implicitHeight + Tokens.padding.small * 2
 
                 radius: Tokens.rounding.medium
-
-                clip: true
-
                 color: dropArea.containsDrag ? Colours.palette.m3primaryContainer : Colours.tPalette.m3surfaceContainerHigh
 
-                CAnim on color {}
-
-                //
-                // ======================================
-                // Layer 0: upload progress
-                // ======================================
-                //
-                StyledRect {
-                    z: 0
-
-                    anchors.top: parent.top
-
-                    anchors.bottom: parent.bottom
-
-                    anchors.left: parent.left
-
-                    width: parent.width * deviceCard.shareProgress
-
-                    radius: deviceCard.radius
-
-                    color: Colours.palette.m3primaryContainer
-
-                    opacity: deviceCard.shareProgress > 0 ? 0.65 : 0
+                Behavior on color {
+                    CAnim {}
                 }
 
                 Connections {
+                    function onShared(deviceId: string): void {
+                        if (deviceId === device.modelData.id) {
+                            device.shareResult = "sent";
+                            shareResultTimer.restart();
+                        }
+                    }
+
+                    function onShareFailed(deviceId: string): void {
+                        if (deviceId === device.modelData.id) {
+                            device.shareResult = "failed";
+                            shareResultTimer.restart();
+                        }
+                    }
+
                     target: KdeConnect
-
-                    function onProgressChanged() {
-                        if (KdeConnect.sharingDevice === deviceCard.modelData.id) {
-                            deviceCard.shareProgress = KdeConnect.progress;
-                        }
-                    }
-
-                    function onShared(device, count) {
-                        if (device !== deviceCard.modelData.id) {
-                            return;
-                        }
-
-                        cancelTimer.stop();
-
-                        deviceCard.shareProgress = 1;
-                        deviceCard.showCancel = false;
-                        deviceCard.cancelRequested = false;
-                    }
-
-                    function onShareFailed(device, error) {
-                        if (device !== deviceCard.modelData.id) {
-                            return;
-                        }
-
-                        cancelTimer.stop();
-
-                        deviceCard.shareProgress = 0;
-                        deviceCard.showCancel = false;
-                        deviceCard.cancelRequested = false;
-                    }
-
-                    function onShareCancelled(device) {
-                        if (device !== deviceCard.modelData.id) {
-                            return;
-                        }
-
-                        cancelTimer.stop();
-
-                        deviceCard.shareProgress = 0;
-                        deviceCard.showCancel = false;
-                        deviceCard.cancelRequested = false;
-                    }
                 }
 
                 Timer {
-                    id: cancelTimer
+                    id: shareResultTimer
 
-                    interval: 1500
-
-                    repeat: false
-
-                    onTriggered: {
-                        if (KdeConnect.sharing && KdeConnect.sharingDevice === deviceCard.modelData.id && !deviceCard.cancelRequested) {
-                            deviceCard.showCancel = true;
-                        }
-                    }
+                    interval: 2000
+                    onTriggered: device.shareResult = ""
                 }
 
-                //
-                // ======================================
-                // Layer 1: normal UI
-                // ======================================
-                //
                 RowLayout {
                     id: deviceLayout
 
-                    z: 1
-
                     anchors.fill: parent
-
-                    anchors.margins: Tokens.padding.medium
-
+                    anchors.leftMargin: Tokens.padding.medium
+                    anchors.rightMargin: Tokens.padding.small
                     spacing: Tokens.spacing.small
 
                     MaterialIcon {
-                        text: dropArea.containsDrag ? "file_download" : "smartphone"
-
-                        color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
-
+                        text: {
+                            if (dropArea.containsDrag)
+                                return "file_download";
+                            if (device.shareResult === "sent")
+                                return "check";
+                            if (device.shareResult === "failed")
+                                return "error";
+                            return "smartphone";
+                        }
+                        color: {
+                            if (dropArea.containsDrag)
+                                return Colours.palette.m3onPrimaryContainer;
+                            if (device.shareResult === "failed")
+                                return Colours.palette.m3error;
+                            return Colours.palette.m3onSurfaceVariant;
+                        }
                         fontStyle: Tokens.font.icon.medium
                     }
 
                     StyledText {
                         Layout.fillWidth: true
-
-                        text: deviceCard.modelData.name
-
+                        text: device.modelData.name
                         color: dropArea.containsDrag ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
-
                         font: Tokens.font.body.small
-
                         elide: Text.ElideRight
                     }
 
-                    //
-                    // ==================================
-                    // Mount / Unmount
-                    // ==================================
-                    //
-                    StyledRect {
-                        id: mountButton
-
-                        visible: !deviceCard.transferringHere
-
-                        implicitWidth: 32
-                        implicitHeight: 32
-
-                        radius: Tokens.rounding.full
-
-                        color: mountHover.hovered ? Colours.palette.m3secondaryContainer : "transparent"
-
-                        opacity: deviceCard.storageBusy ? 0.5 : 1
-
-                        MaterialIcon {
-                            anchors.centerIn: parent
-
-                            text: {
-                                if (deviceCard.storageBusy) {
-                                    return "hourglass_top";
-                                }
-
-                                return deviceCard.storageMounted ? "eject" : "link";
-                            }
-
-                            color: Colours.palette.m3onSurfaceVariant
-
-                            fontStyle: Tokens.font.icon.medium
-                        }
-
-                        HoverHandler {
-                            id: mountHover
-                        }
-
-                        TapHandler {
-                            enabled: !deviceCard.storageBusy
-
-                            onTapped: {
-                                if (deviceCard.storageMounted) {
-                                    KdeConnect.unmount(deviceCard.modelData.id);
-                                } else {
-                                    KdeConnect.mount(deviceCard.modelData.id);
-                                }
-                            }
-                        }
+                    IconButton {
+                        visible: device.mounted
+                        type: IconButton.Text
+                        icon: "folder_open"
+                        disabled: device.mountBusy
+                        onClicked: root.browse(device.modelData.id, device.modelData.name)
                     }
 
-                    //
-                    // ==================================
-                    // Upload Cancel
-                    // ==================================
-                    //
-                    StyledRect {
-                        id: cancelButton
-
-                        visible: deviceCard.showCancel
-
-                        implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
-
-                        implicitHeight: 32
-
-                        radius: Tokens.rounding.full
-
-                        color: Colours.palette.m3secondaryContainer
-
-                        StyledText {
-                            id: cancelText
-
-                            anchors.centerIn: parent
-
-                            text: qsTr("Cancel")
-
-                            color: Colours.palette.m3onSecondaryContainer
-
-                            font: Tokens.font.body.small
-                        }
-
-                        TapHandler {
-                            enabled: !deviceCard.cancelRequested
-
-                            onTapped: {
-                                deviceCard.cancelRequested = true;
-
-                                deviceCard.showCancel = false;
-
-                                KdeConnect.cancel();
-                            }
+                    IconButton {
+                        type: IconButton.Text
+                        icon: device.mountBusy ? "hourglass_top" : device.mounted ? "eject" : "link"
+                        disabled: device.mountBusy || device.downloadingHere
+                        onClicked: {
+                            if (device.mounted)
+                                KdeConnect.unmount(device.modelData.id);
+                            else
+                                KdeConnect.mount(device.modelData.id);
                         }
                     }
                 }
 
-                //
-                // ======================================
-                // Layer 2: drag/drop
-                // ======================================
-                //
                 DropArea {
                     id: dropArea
 
-                    z: 2
-
                     anchors.fill: parent
-
                     keys: ["text/uri-list"]
-
-                    //
-                    // Interactions.qml handles closing
-                    // Utilities when the drag leaves.
-                    //
-                    // Never set utilities=false here.
-                    //
-                    onContainsDragChanged: {
-                        if (containsDrag)
-                            root.screenState.utilities = true;
-                    }
 
                     onDropped: drop => {
                         if (!drop.hasUrls)
                             return;
 
-                        deviceCard.shareProgress = 0;
-                        deviceCard.showCancel = false;
-                        deviceCard.cancelRequested = false;
-
-                        KdeConnect.share(deviceCard.modelData.id, drop.urls);
-
-                        cancelTimer.restart();
-
+                        KdeConnect.share(device.modelData.id, drop.urls);
                         drop.acceptProposedAction();
                     }
                 }
             }
         }
+
+        Behavior on opacity {
+            Anim {}
+        }
     }
 
-    //
-    // ==================================================
-    // Inline phone browser
-    // ==================================================
-    //
     Utilities.PhoneBrowser {
-        id: inlineBrowser
-
         anchors.fill: parent
-
         anchors.margins: Tokens.padding.medium
 
         wrapper: root.phoneBrowser
-
         enabled: root.browserOpen
-
         opacity: root.browserOpen ? 1 : 0
 
         transform: Translate {
-            x: root.browserOpen ? 0 : root.transitionDistance
+            x: root.browserOpen ? 0 : root.slideDistance
 
             Behavior on x {
                 Anim {}

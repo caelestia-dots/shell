@@ -16,55 +16,27 @@ Item {
     required property matrix4x4 deformMatrix
     required property var wrapper
 
-    readonly property int enabledCards:
-        (idleInhibit.active ? 1 : 0)
-        + (record.active ? 1 : 0)
-        + (toggles.active ? 1 : 0)
-        + (phoneShare.active ? 1 : 0)
+    readonly property int enabledCards: (idleInhibit.active ? 1 : 0) + (record.active ? 1 : 0) + (phoneShare.active ? 1 : 0) + (toggles.active ? 1 : 0)
+    readonly property real nonAnimHeight: ((idleInhibit.item as IdleInhibit)?.nonAnimHeight ?? 0) + ((record.item as Record)?.nonAnimHeight ?? 0) + ((phoneShare.item as PhoneShare)?.nonAnimHeight ?? 0) + ((toggles.item as Toggles)?.implicitHeight ?? 0) + layout.spacing * Math.max(0, enabledCards - 1)
 
-    readonly property real nonAnimHeight:
-        ((idleInhibit.item as IdleInhibit)?.nonAnimHeight ?? 0)
-        + ((record.item as Record)?.nonAnimHeight ?? 0)
-        + ((toggles.item as Toggles)?.implicitHeight ?? 0)
-        + ((phoneShare.item as PhoneShare)?.implicitHeight ?? 0)
-        + layout.spacing
-            * Math.max(0, enabledCards - 1)
-
-    implicitWidth:
-        layout.implicitWidth
-
-    implicitHeight:
-        nonAnimHeight
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
 
     ColumnLayout {
         id: layout
 
-        anchors.top:
-            parent.top
-
-        anchors.left:
-            parent.left
-
-        anchors.right:
-            parent.right
-
-        spacing:
-            Tokens.spacing.medium
+        anchors.fill: parent
+        spacing: Tokens.spacing.medium
 
         Loader {
             id: idleInhibit
 
             Layout.fillWidth: true
-
-            active:
-                Config.utilities.cards.keepAwake
-
-            visible:
-                active
+            active: Config.utilities.cards.keepAwake
+            visible: active
 
             sourceComponent: IdleInhibit {
-                objectName:
-                    "utilitiesKeepAwake"
+                objectName: "utilitiesKeepAwake"
             }
         }
 
@@ -72,24 +44,15 @@ Item {
             id: record
 
             Layout.fillWidth: true
-
-            active:
-                Config.utilities.cards.recorder
-
-            visible:
-                active
-
+            active: Config.utilities.cards.recorder
+            visible: active
             z: 1
 
             sourceComponent: Record {
-                objectName:
-                    "utilitiesScreenRecorder"
+                objectName: "utilitiesScreenRecorder"
 
-                props:
-                    root.props
-
-                screenState:
-                    root.screenState
+                props: root.props
+                screenState: root.screenState
             }
         }
 
@@ -97,22 +60,13 @@ Item {
             id: phoneShare
 
             Layout.fillWidth: true
-
-            active:
-                Config.utilities.cards.phoneShare
-
-            visible:
-                active
+            active: Config.utilities.cards.phoneShare
+            visible: active
 
             sourceComponent: PhoneShare {
-                objectName:
-                    "utilitiesPhoneShare"
+                objectName: "utilitiesPhoneShare"
 
-                screenState:
-                    root.screenState
-
-                phoneBrowser:
-                    root.wrapper
+                phoneBrowser: root.wrapper
             }
         }
 
@@ -120,31 +74,20 @@ Item {
             id: toggles
 
             Layout.fillWidth: true
-
-            active:
-                Config.utilities.cards.quickToggles
-
-            visible:
-                active
+            active: Config.utilities.cards.quickToggles
+            visible: active
 
             sourceComponent: Toggles {
-                objectName:
-                    "utilitiesQuickToggles"
+                objectName: "utilitiesQuickToggles"
 
-                screenState:
-                    root.screenState
-
-                popouts:
-                    root.popouts
+                screenState: root.screenState
+                popouts: root.popouts
             }
         }
     }
 
     RecordingDeleteModal {
-        props:
-            root.props
-
-        deformMatrix:
-            root.deformMatrix
+        props: root.props
+        deformMatrix: root.deformMatrix
     }
 }

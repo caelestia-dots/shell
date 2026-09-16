@@ -246,23 +246,35 @@ CustomMouseArea {
         }
     }
 
+    // Open utilities while files are dragged over it, so they can be dropped on the phone share card
     DropArea {
+        id: fileDrop
+
+        property point lastPosition
+
+        function updateUtilities(x: real, y: real): void {
+            const showUtilities = root.inBottomPanel(root.panels.utilities, x, y, true);
+
+            if (!root.utilitiesShortcutActive)
+                root.screenState.utilities = showUtilities;
+            else if (showUtilities)
+                root.utilitiesShortcutActive = false;
+        }
+
         anchors.fill: parent
+        enabled: !root.fullscreen && Config.utilities.enabled && Config.utilities.cards.phoneShare
+        keys: ["text/uri-list"]
 
         onPositionChanged: drag => {
-            if (root.fullscreen) {
-                root.screenState.utilities = false;
-                return;
-            }
-
-            root.screenState.utilities = root.inBottomPanel(root.panels.utilities, drag.x, drag.y, true);
+            fileDrop.lastPosition = Qt.point(drag.x, drag.y);
+            fileDrop.updateUtilities(drag.x, drag.y);
         }
-
-        onExited: {
-            root.screenState.utilities = false;
-        }
+        // Moving onto the card's own drop area also exits this one, so only close
+        // when the drag was last seen outside utilities
+        onExited: fileDrop.updateUtilities(fileDrop.lastPosition.x, fileDrop.lastPosition.y)
     }
 
+    // Monitor individual visibility changes
     Connections {
         function onLauncherChanged() {
             // If launcher is hidden, clear shortcut flags for dashboard and OSD
