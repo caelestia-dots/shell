@@ -49,6 +49,7 @@ protected:
     // Null means empty, otherwise it has content
     std::unique_ptr<Quarantine> m_quarantine;
 
+    void warnGlobalRead(const QString& key) const;
     // Returns true if the write should be skipped afterwards
     bool forwardGlobalWrite(const QString& key, const QVariant& value);
     // Returns true if the notify signal should be emitted
@@ -70,11 +71,13 @@ private:
 
     // For root node use only
     WriteOrigin m_writeOrigin;
+    bool m_internalRead;
     ChangeBatcher* const m_batcher;
 
     void onFallbackNotify(const QString& key);
 
     friend class WriteScope;
+    friend class InternalRead;
 };
 
 template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const {

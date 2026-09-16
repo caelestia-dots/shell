@@ -8,6 +8,7 @@ Node::Node(Node* fallback, QObject* parent, bool globalOnly)
     , m_fallbackNode(fallback)
     , m_globalOnly(globalOnly || (parentNode() && parentNode()->m_globalOnly))
     , m_writeOrigin(WriteOrigin::Qml)
+    , m_internalRead(false)
     , m_batcher(m_rootNode == this ? new ChangeBatcher(this) : nullptr) {
     if (fallback && !m_globalOnly)
         QObject::connect(fallback, &Node::optionChanged, this, &Node::onFallbackNotify);
@@ -78,6 +79,8 @@ QVariant Node::value(const QString& key) const {
         return {};
     }
 
+    // Generated getters warn on global reads, this silences them as the warning is only for QML reads
+    const InternalRead guard(m_rootNode);
     return metaObject()->property(desc->metaIndex).read(this);
 }
 
@@ -121,6 +124,16 @@ void Node::resetToDefaults() {
 
 const Quarantine* Node::quarantine() const {
     return m_quarantine.get();
+}
+
+void Node::warnGlobalRead(const QString& key) const {
+    if (!m_fallbackNode || m_rootNode->m_internalRead)
+        return;
+
+    qCWarning(lcSettings,
+        "Global option %s was read from an overlay layer. "
+        "This should not be used, read global options from the global layer instead.",
+        qUtf8Printable(pathFor(key)));
 }
 
 bool Node::forwardGlobalWrite(const QString& key, const QVariant& value) {

@@ -67,11 +67,13 @@ public:                                                                         
 private:
 
 // Defines a property on a node.
-#define SETTINGS_PROPERTY(Type, name, defaultVal, ...)                                                                 \
+#define SETTINGS_PROPERTY_IMPL(Type, name, global, defaultVal, ...)                                                    \
     Q_PROPERTY(Type name READ name WRITE set_##name NOTIFY name##Changed)                                              \
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type name() const {                                                                                  \
+        if (global || isGlobalOnly())                                                                                  \
+            warnGlobalRead(QStringLiteral(#name));                                                                     \
         return m_##name;                                                                                               \
     }                                                                                                                  \
                                                                                                                        \
@@ -94,12 +96,17 @@ private:                                                                        
     Type m_##name = fallbackValue(&Self::m_##name, caelestia::settings::DefaultSpec::resolve<Type>(this, defaultVal)); \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = caelestia::settings::DefaultSpec::create<Type>(defaultVal), __VA_ARGS__ }),             \
+             { .defaultValue = caelestia::settings::DefaultSpec::create<Type>(defaultVal),                             \
+                 .globalOnly = global,                                                                                 \
+                 __VA_ARGS__ }),                                                                                       \
             true);
+
+#define SETTINGS_PROPERTY(Type, name, defaultVal, ...)                                                                 \
+    SETTINGS_PROPERTY_IMPL(Type, name, false, DEFAULT_ARG(defaultVal), __VA_ARGS__)
 
 // Defines a global property on a node. Shorthand for .globalOnly = true.
 #define SETTINGS_GLOBAL_PROPERTY(Type, name, defaultVal, ...)                                                          \
-    SETTINGS_PROPERTY(Type, name, DEFAULT_ARG(defaultVal), .globalOnly = true, __VA_ARGS__)
+    SETTINGS_PROPERTY_IMPL(Type, name, true, DEFAULT_ARG(defaultVal), __VA_ARGS__)
 
 // Defines a subobject property on a node. Subobject properties are CONSTANT.
 #define SETTINGS_SUBOBJECT_IMPL(Type, name, global)                                                                    \
@@ -107,6 +114,8 @@ private:                                                                        
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type* name() const {                                                                                 \
+        if (global || isGlobalOnly())                                                                                  \
+            warnGlobalRead(QStringLiteral(#name));                                                                     \
         return m_##name;                                                                                               \
     }                                                                                                                  \
                                                                                                                        \
@@ -151,6 +160,8 @@ private:                                                                        
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type* name() const {                                                                                 \
+        if (global || isGlobalOnly())                                                                                  \
+            warnGlobalRead(QStringLiteral(#name));                                                                     \
         return m_##name;                                                                                               \
     }                                                                                                                  \
                                                                                                                        \

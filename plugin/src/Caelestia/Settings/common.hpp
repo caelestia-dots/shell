@@ -32,6 +32,18 @@ private:
     Q_DISABLE_COPY_MOVE(WriteScope)
 };
 
+class InternalRead {
+public:
+    explicit InternalRead(Node* node);
+    ~InternalRead();
+
+private:
+    Node* const m_root;
+    const bool m_previous;
+
+    Q_DISABLE_COPY_MOVE(InternalRead)
+};
+
 class DiagnosticType : public QObject {
     Q_OBJECT
     QML_ELEMENT
