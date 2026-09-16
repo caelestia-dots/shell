@@ -50,8 +50,8 @@ protected:
     std::unique_ptr<Quarantine> m_quarantine;
 
     void warnGlobalRead(const QString& key) const;
-    // Returns true if the write should be skipped afterwards
-    bool forwardGlobalWrite(const QString& key, const QVariant& value);
+    // Returns true if the write should be skipped afterwards, overlays cannot write global options
+    bool rejectGlobalWrite(const QString& key);
     // Returns true if the notify signal should be emitted
     virtual bool recordWrite(const QString& key, bool changed);
 

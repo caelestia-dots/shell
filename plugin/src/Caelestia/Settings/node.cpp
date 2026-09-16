@@ -136,10 +136,10 @@ void Node::warnGlobalRead(const QString& key) const {
         qUtf8Printable(pathFor(key)));
 }
 
-bool Node::forwardGlobalWrite(const QString& key, const QVariant& value) {
+bool Node::rejectGlobalWrite(const QString& key) {
     const auto* desc = schema().get(key);
     if (!desc) {
-        qCCritical(lcSettings, "Attempted to forward a write for an unknown key %s, something is seriously wrong...",
+        qCCritical(lcSettings, "Attempted to check a write for an unknown key %s, something is seriously wrong...",
             qUtf8Printable(pathFor(key)));
         return false;
     }
@@ -150,21 +150,16 @@ bool Node::forwardGlobalWrite(const QString& key, const QVariant& value) {
     if ((!m_globalOnly && !desc->globalOnly()) || !fromUser || !m_fallbackNode)
         return false;
 
-    if (origin == WriteOrigin::QmlReset) {
+    if (origin == WriteOrigin::QmlReset)
         qCWarning(lcSettings,
-            "Attempted to reset global property %s, ignoring. "
+            "Attempted to reset global property %s from an overlay layer, ignoring. "
             "This should not be used, reset global properties from the global layer instead.",
             qUtf8Printable(pathFor(key)));
-        return true;
-    }
-
-    qCWarning(lcSettings,
-        "Forwarding write of global property %s to the global layer. "
-        "This should not be used, write global properties from the global layer instead.",
-        qUtf8Printable(pathFor(key)));
-
-    const WriteScope scope(m_fallbackNode, origin);
-    m_fallbackNode->setValue(key, value);
+    else
+        qCWarning(lcSettings,
+            "Attempted to write global property %s from an overlay layer, ignoring. "
+            "This should not be used, write global properties from the global layer instead.",
+            qUtf8Printable(pathFor(key)));
 
     return true;
 }

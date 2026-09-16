@@ -81,8 +81,8 @@ public:                                                                         
         if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
                                                                                                                        \
-        if (forwardGlobalWrite(QStringLiteral(#name), QVariant::fromValue(value)))                                     \
-            return; /* Skip writes to global only keys, they are forwarded to the global layer */                      \
+        if (rejectGlobalWrite(QStringLiteral(#name)))                                                                  \
+            return; /* Skip writes to global only keys, they should be sent to the global layer */                     \
                                                                                                                        \
         const auto needsNotify = !caelestia::settings::detail::compare(value, m_##name);                               \
         m_##name = value;                                                                                              \

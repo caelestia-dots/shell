@@ -113,10 +113,8 @@ QVariantList ListNode::values() const {
 }
 
 void ListNode::remove(qsizetype index) {
-    if (auto* const global = forwardGlobalMutation()) {
-        global->remove(index);
+    if (rejectGlobalMutation())
         return;
-    }
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -136,10 +134,8 @@ void ListNode::remove(qsizetype index) {
 }
 
 void ListNode::move(qsizetype from, qsizetype to) {
-    if (auto* const global = forwardGlobalMutation()) {
-        global->move(from, to);
+    if (rejectGlobalMutation())
         return;
-    }
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -163,10 +159,8 @@ void ListNode::move(qsizetype from, qsizetype to) {
 }
 
 void ListNode::clear() {
-    if (auto* const global = forwardGlobalMutation()) {
-        global->clear();
+    if (rejectGlobalMutation())
         return;
-    }
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -338,8 +332,8 @@ Node* ListNode::elementAt(qsizetype index) const {
 }
 
 Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
-    if (auto* const global = forwardGlobalMutation())
-        return global->insertElement(props, index);
+    if (rejectGlobalMutation())
+        return nullptr;
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -366,16 +360,16 @@ bool ListNode::isNested() const {
     return qobject_cast<ListNode*>(parentNode());
 }
 
-ListNode* ListNode::forwardGlobalMutation() const {
+bool ListNode::rejectGlobalMutation() const {
     if (!isGlobalOnly() || !fallbackNode())
-        return nullptr;
+        return false;
 
     qCWarning(lcSettings,
-        "Forwarding mutation of global list %s to the global layer. "
+        "Attempted to mutate global list %s from an overlay layer, ignoring. "
         "This should not be used, mutate global lists from the global layer instead.",
         qUtf8Printable(path()));
 
-    return static_cast<ListNode*>(fallbackNode());
+    return true;
 }
 
 bool ListNode::validIndex(qsizetype index) const {
