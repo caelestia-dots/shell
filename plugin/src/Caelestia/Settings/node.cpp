@@ -156,24 +156,24 @@ bool Node::rejectGlobalWrite(const QString& key) {
 
     if (origin == WriteOrigin::QmlReset)
         qCWarning(lcSettings,
-            "Attempted to reset global property %s from an overlay layer, ignoring. "
-            "This should not be used, reset global properties from the global layer instead.",
+            "Attempted to reset global option %s from an overlay layer, ignoring. "
+            "This should not be used, reset global options from the global layer instead.",
             qUtf8Printable(pathFor(key)));
     else
         qCWarning(lcSettings,
-            "Attempted to write global property %s from an overlay layer, ignoring. "
-            "This should not be used, write global properties from the global layer instead.",
+            "Attempted to write global option %s from an overlay layer, ignoring. "
+            "This should not be used, write global options from the global layer instead.",
             qUtf8Printable(pathFor(key)));
 
     return true;
 }
 
 void Node::warnGlobalSync(QList<Diagnostic>& diagnostics, const QString& path) {
-    qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
+    qCWarning(lcSettings, "Global option definition %s found in overlay file, ignoring.", qUtf8Printable(path));
     diagnostics << Diagnostic{
         .type = DiagnosticType::GlobalOption,
         .option = path,
-        .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
+        .message = util::i18n::mark(u"Global options should not be defined in overlay files"_s),
     };
 }
 

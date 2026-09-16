@@ -20,7 +20,7 @@ void ObjectNode::resetOption(const QString& key) {
         return;
     }
 
-    // Warn and ignore if this is a global property and we are an overlay
+    // Warn and ignore if this is a global node property and we are an overlay
     if (desc->isNode && (m_globalOnly || desc->globalOnly()) && fallbackNode()) {
         qCWarning(lcSettings,
             "Attempted to reset global node %s, ignoring. "
