@@ -38,7 +38,7 @@ LazyLoader {
 
         readonly property bool selectionValid: {
             const file = folderContents.currentItem?.modelData;
-            return (file && !file.isDir && (filters.includes("*") || filters.includes(file.suffix))) ?? false;
+            return (file && !file.isDir && (filters.includes("*") || filters.some(filter => filter.toLowerCase() === file.suffix.toLowerCase()))) ?? false;
         }
 
         function accepted(path: string): void {
