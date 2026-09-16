@@ -187,7 +187,7 @@ StyledRect {
                         if (!KdeConnect.available)
                             return Tr.tr("KDE Connect is not running");
                         if (KdeConnect.devices.length === 0)
-                            return Tr.tr("No phone connected");
+                            return KdeConnect.unpairedDevices.length > 0 ? Tr.tr("Pair a device to share files") : Tr.tr("No phone connected");
                         if (KdeConnect.downloading)
                             // TRANSLATORS: %1 = download progress percentage
                             return Tr.tr("Downloading… %1%").arg(Math.round(KdeConnect.downloadProgress * 100));
@@ -319,7 +319,7 @@ StyledRect {
 
                     IconButton {
                         type: IconButton.Text
-                        icon: device.mountBusy ? "hourglass_top" : device.mounted ? "eject" : "link"
+                        icon: device.mountBusy ? "hourglass_top" : device.mounted ? "eject" : "hard_drive"
                         disabled: device.mountBusy || device.downloadingHere
                         onClicked: {
                             if (device.mounted)
@@ -327,6 +327,13 @@ StyledRect {
                             else
                                 KdeConnect.mount(device.modelData.id);
                         }
+                    }
+
+                    IconButton {
+                        type: IconButton.Text
+                        icon: "link_off"
+                        disabled: device.mountBusy
+                        onClicked: KdeConnect.unpair(device.modelData.id)
                     }
                 }
 
@@ -342,6 +349,127 @@ StyledRect {
 
                         KdeConnect.share(device.modelData.id, drop.urls);
                         drop.acceptProposedAction();
+                    }
+                }
+            }
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.spacing.small
+            Layout.leftMargin: Tokens.padding.small
+            visible: KdeConnect.unpairedDevices.length > 0
+            text: Tr.tr("Available devices")
+            color: Colours.palette.m3onSurfaceVariant
+            font: Tokens.font.body.small
+        }
+
+        Repeater {
+            model: KdeConnect.unpairedDevices
+
+            StyledRect {
+                id: unpaired
+
+                required property var modelData
+
+                readonly property int pairState: modelData.pairState
+                // Shown in place of the status for a few seconds after a failure
+                property string pairError
+
+                Layout.fillWidth: true
+                implicitHeight: unpairedLayout.implicitHeight + Tokens.padding.small * 2
+
+                radius: Tokens.rounding.medium
+                color: Colours.tPalette.m3surfaceContainerHigh
+
+                Connections {
+                    function onPairingFailed(deviceId: string, error: string): void {
+                        if (deviceId === unpaired.modelData.id) {
+                            unpaired.pairError = error;
+                            pairErrorTimer.restart();
+                        }
+                    }
+
+                    target: KdeConnect
+                }
+
+                Timer {
+                    id: pairErrorTimer
+
+                    interval: 4000
+                    onTriggered: unpaired.pairError = ""
+                }
+
+                RowLayout {
+                    id: unpairedLayout
+
+                    anchors.fill: parent
+                    anchors.leftMargin: Tokens.padding.medium
+                    anchors.rightMargin: Tokens.padding.small
+                    spacing: Tokens.spacing.small
+
+                    MaterialIcon {
+                        text: unpaired.pairError ? "error" : "phonelink"
+                        color: unpaired.pairError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                        fontStyle: Tokens.font.icon.medium
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: unpaired.modelData.name
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            visible: text !== ""
+                            text: {
+                                if (unpaired.pairError)
+                                    return unpaired.pairError;
+                                if (unpaired.pairState === KdeConnect.pairRequested)
+                                    return Tr.tr("Waiting for the device to accept");
+                                if (unpaired.pairState === KdeConnect.pairRequestedByPeer)
+                                    // TRANSLATORS: %1 = the key both devices show, which should match
+                                    return Tr.tr("Key: %1").arg(unpaired.modelData.verificationKey);
+                                return "";
+                            }
+                            color: unpaired.pairError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    TextButton {
+                        visible: unpaired.pairState === KdeConnect.pairNotPaired
+                        type: TextButton.Tonal
+                        text: Tr.tr("Pair")
+                        onClicked: KdeConnect.requestPairing(unpaired.modelData.id)
+                    }
+
+                    TextButton {
+                        visible: unpaired.pairState === KdeConnect.pairRequested
+                        type: TextButton.Text
+                        text: Tr.trCtx("Cancel", "button")
+                        onClicked: KdeConnect.cancelPairing(unpaired.modelData.id)
+                    }
+
+                    TextButton {
+                        visible: unpaired.pairState === KdeConnect.pairRequestedByPeer
+                        type: TextButton.Text
+                        text: Tr.tr("Reject")
+                        onClicked: KdeConnect.cancelPairing(unpaired.modelData.id)
+                    }
+
+                    TextButton {
+                        visible: unpaired.pairState === KdeConnect.pairRequestedByPeer
+                        type: TextButton.Tonal
+                        text: Tr.tr("Accept")
+                        onClicked: KdeConnect.acceptPairing(unpaired.modelData.id)
                     }
                 }
             }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qdbusmessage.h>
 #include <qfuture.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -37,8 +38,17 @@ public:
     Q_INVOKABLE void refreshMount(const QString& deviceId);
     Q_INVOKABLE void checkMount(const QString& deviceId, const QString& path);
 
+    Q_INVOKABLE void requestPairing(const QString& deviceId);
+    Q_INVOKABLE void acceptPairing(const QString& deviceId);
+    // Cancels a pairing request we sent, or rejects one the device sent
+    Q_INVOKABLE void cancelPairing(const QString& deviceId);
+    Q_INVOKABLE void unpair(const QString& deviceId);
+
 public slots:
     void refresh();
+
+private slots:
+    void onPairingFailed(const QString& error, const QDBusMessage& message);
 
 signals:
     void availableChanged();
@@ -59,9 +69,13 @@ signals:
     void mountFailed(const QString& deviceId, const QString& error);
     void mountChecked(const QString& deviceId, const QString& path, bool reachable);
 
+    void pairingFailed(const QString& deviceId, const QString& error);
+
 private:
     bool m_available = false;
     QVariantList m_devices;
+    // Drops replies from refreshes superseded by a newer one
+    quint64 m_refreshGeneration = 0;
     bool m_downloading = false;
     qreal m_downloadProgress = 0.0;
     QString m_downloadDevice;
@@ -77,6 +91,7 @@ private:
     void setDownloadDevice(const QString& deviceId);
 
     void startUnmount(const QString& deviceId);
+    void callDevice(const QString& deviceId, const QString& method);
     void dropDeadMount(const QString& deviceId);
 };
 

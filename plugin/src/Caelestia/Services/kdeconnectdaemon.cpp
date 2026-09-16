@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <memory>
 #include <system_error>
 
 namespace caelestia::services {
@@ -35,6 +36,8 @@ namespace {
 const QString k_service = u"org.kde.kdeconnect"_s;
 const QString k_daemonPath = u"/modules/kdeconnect"_s;
 const QString k_daemonIface = u"org.kde.kdeconnect.daemon"_s;
+const QString k_deviceIface = u"org.kde.kdeconnect.device"_s;
+const QString k_propertiesIface = u"org.freedesktop.DBus.Properties"_s;
 const QString k_sftpIface = u"org.kde.kdeconnect.device.sftp"_s;
 const QString k_shareIface = u"org.kde.kdeconnect.device.share"_s;
 
@@ -83,6 +86,10 @@ MountResult mountFailure(const QString& error) {
     MountResult result;
     result.error = error;
     return result;
+}
+
+QString deviceObjectPath(const QString& deviceId) {
+    return u"/modules/kdeconnect/devices/%1"_s.arg(deviceId);
 }
 
 QString devicePath(const QString& deviceId, const QString& plugin) {
@@ -318,6 +325,13 @@ KdeConnectDaemon::KdeConnectDaemon(QObject* parent)
     connect(serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &KdeConnectDaemon::refresh);
     bus.connect(k_service, k_daemonPath, k_daemonIface, u"deviceListChanged"_s, this, SLOT(refresh()));
 
+    // Device signals, matched on every device path. Pairing changes are not part of
+    // deviceListChanged.
+    bus.connect(k_service, QString(), k_deviceIface, u"pairStateChanged"_s, this, SLOT(refresh()));
+    bus.connect(k_service, QString(), k_deviceIface, u"nameChanged"_s, this, SLOT(refresh()));
+    bus.connect(
+        k_service, QString(), k_deviceIface, u"pairingFailed"_s, this, SLOT(onPairingFailed(QString, QDBusMessage)));
+
     refresh();
 }
 
@@ -342,13 +356,17 @@ QString KdeConnectDaemon::downloadDevice() const {
 }
 
 void KdeConnectDaemon::refresh() {
-    // Only paired devices which are currently reachable can be used
+    const auto generation = ++m_refreshGeneration;
+
+    // Reachable devices, paired or not, so unpaired ones can be offered for pairing
     auto message = methodCall(k_daemonPath, k_daemonIface, u"deviceNames"_s);
-    message << true << true;
+    message << true << false;
 
     auto* watcher = new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(message), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher* call) {
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, generation](QDBusPendingCallWatcher* call) {
         call->deleteLater();
+        if (generation != m_refreshGeneration)
+            return;
 
         const auto arguments = call->reply().arguments();
         if (call->isError() || arguments.isEmpty()) {
@@ -359,15 +377,90 @@ void KdeConnectDaemon::refresh() {
 
         QMap<QString, QString> names;
         arguments.constFirst().value<QDBusArgument>() >> names;
-
-        QVariantList devices;
-        for (auto it = names.cbegin(); it != names.cend(); ++it)
-            devices << QVariantMap{ { u"id"_s, it.key() }, { u"name"_s, it.value() } };
-
         setAvailable(true);
-        setDevices(devices);
+
+        if (names.isEmpty()) {
+            setDevices({});
+            return;
+        }
+
+        // Read the pairing state of every device, then publish them all at once
+        auto devices = std::make_shared<QMap<QString, QVariantMap>>();
+        auto pending = std::make_shared<qsizetype>(names.size());
+
+        for (auto it = names.cbegin(); it != names.cend(); ++it) {
+            auto propertiesCall = methodCall(deviceObjectPath(it.key()), k_propertiesIface, u"GetAll"_s);
+            propertiesCall << k_deviceIface;
+
+            auto* propertiesWatcher =
+                new QDBusPendingCallWatcher(QDBusConnection::sessionBus().asyncCall(propertiesCall), this);
+            connect(propertiesWatcher, &QDBusPendingCallWatcher::finished, this,
+                [this, generation, devices, pending, id = it.key(), name = it.value()](QDBusPendingCallWatcher* reply) {
+                    reply->deleteLater();
+                    if (generation != m_refreshGeneration)
+                        return;
+
+                    // A device which vanished in between is left out
+                    const QDBusPendingReply<QVariantMap> properties = *reply;
+                    if (!properties.isError()) {
+                        const auto values = properties.value();
+                        devices->insert(id, QVariantMap{
+                                                { u"id"_s, id },
+                                                { u"name"_s, name },
+                                                { u"paired"_s, values.value(u"isPaired"_s).toBool() },
+                                                { u"pairState"_s, values.value(u"pairState"_s).toInt() },
+                                                { u"verificationKey"_s, values.value(u"verificationKey"_s).toString() },
+                                            });
+                    }
+
+                    if (--*pending > 0)
+                        return;
+
+                    QVariantList list;
+                    for (const auto& device : std::as_const(*devices))
+                        list << device;
+                    setDevices(list);
+                });
+            // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
+        }
     });
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
+}
+
+void KdeConnectDaemon::requestPairing(const QString& deviceId) {
+    callDevice(deviceId, u"requestPairing"_s);
+}
+
+void KdeConnectDaemon::acceptPairing(const QString& deviceId) {
+    callDevice(deviceId, u"acceptPairing"_s);
+}
+
+void KdeConnectDaemon::cancelPairing(const QString& deviceId) {
+    callDevice(deviceId, u"cancelPairing"_s);
+}
+
+void KdeConnectDaemon::unpair(const QString& deviceId) {
+    callDevice(deviceId, u"unpair"_s);
+}
+
+void KdeConnectDaemon::callDevice(const QString& deviceId, const QString& method) {
+    if (deviceId.isEmpty())
+        return;
+
+    // The outcome arrives through pairStateChanged or pairingFailed
+    auto* watcher = new QDBusPendingCallWatcher(
+        QDBusConnection::sessionBus().asyncCall(methodCall(deviceObjectPath(deviceId), k_deviceIface, method)), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, deviceId](QDBusPendingCallWatcher* call) {
+        call->deleteLater();
+        if (call->isError())
+            emit pairingFailed(deviceId, call->error().message());
+    });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
+}
+
+void KdeConnectDaemon::onPairingFailed(const QString& error, const QDBusMessage& message) {
+    // The device id is the last element of the signal's object path
+    emit pairingFailed(message.path().section(u'/', -1), error);
 }
 
 void KdeConnectDaemon::share(const QString& deviceId, const QVariantList& urls) {

@@ -9,12 +9,21 @@ Singleton {
     id: root
 
     readonly property bool available: daemon.available
-    readonly property var devices: daemon.devices
+    // Only paired devices can share, mount and browse
+    readonly property var devices: daemon.devices.filter(d => d.paired)
+    // Reachable devices which are not paired yet, including ones with a pairing request
+    readonly property var unpairedDevices: daemon.devices.filter(d => !d.paired)
     readonly property bool downloading: daemon.downloading
     readonly property string downloadDevice: daemon.downloadDevice
     readonly property real downloadProgress: daemon.downloadProgress
     // Kept here rather than in the UI, which is recreated whenever utilities reopens
     property string downloadName
+
+    // Values of a device's pairState, matching KDE Connect's PairState
+    readonly property int pairNotPaired: 0
+    readonly property int pairRequested: 1
+    readonly property int pairRequestedByPeer: 2
+    readonly property int pairPaired: 3
 
     // Keyed by device id
     property var mounts: ({})
@@ -26,18 +35,23 @@ Singleton {
     signal downloadFailed(string device, string error)
     signal downloadCancelled(string device)
     signal mountChecked(string device, string path, bool reachable)
+    signal pairingFailed(string device, string error)
 
     function refresh(): void {
         daemon.refresh();
     }
 
+    function isPaired(deviceId: string): bool {
+        return devices.some(d => d.id === deviceId);
+    }
+
     function share(deviceId: string, urls: var): void {
-        if (deviceId && urls.length > 0)
+        if (isPaired(deviceId) && urls.length > 0)
             daemon.share(deviceId, urls);
     }
 
     function download(deviceId: string, sourcePath: string): void {
-        if (!deviceId || !sourcePath)
+        if (!isPaired(deviceId) || !sourcePath)
             return;
 
         // The storage may disappear under the copy while it is being unmounted
@@ -55,7 +69,7 @@ Singleton {
     }
 
     function mount(deviceId: string): void {
-        if (!deviceId || isMountBusy(deviceId))
+        if (!isPaired(deviceId) || isMountBusy(deviceId))
             return;
 
         setMountBusy(deviceId, true);
@@ -120,6 +134,35 @@ Singleton {
     }
 
     // Drops state for devices that went away and refreshes the rest
+    // Sends a pairing request, which the device has to accept
+    function requestPairing(deviceId: string): void {
+        if (deviceId)
+            daemon.requestPairing(deviceId);
+    }
+
+    // Accepts a pairing request the device sent
+    function acceptPairing(deviceId: string): void {
+        if (deviceId)
+            daemon.acceptPairing(deviceId);
+    }
+
+    // Rejects a pairing request the device sent, or cancels one we sent
+    function cancelPairing(deviceId: string): void {
+        if (deviceId)
+            daemon.cancelPairing(deviceId);
+    }
+
+    function unpair(deviceId: string): void {
+        if (!isPaired(deviceId))
+            return;
+
+        // Unpairing unloads the SFTP plugin, which unmounts the storage under the copy
+        if (downloading && downloadDevice === deviceId)
+            cancelDownload();
+
+        daemon.unpair(deviceId);
+    }
+
     function syncMounts(): void {
         const ids = devices.map(d => d.id);
         const keep = state => {
@@ -160,6 +203,10 @@ Singleton {
         onMountFailed: (device, error) => {
             root.setMountBusy(device, false);
             console.warn(lc, `Failed to change mount state for ${device}: ${error}`);
+        }
+        onPairingFailed: (device, error) => {
+            console.warn(lc, `Pairing with ${device} failed: ${error}`);
+            root.pairingFailed(device, error);
         }
     }
 
