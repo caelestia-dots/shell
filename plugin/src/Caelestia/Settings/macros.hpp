@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qmetatype.h>
 #include <qobject.h>
 #include <qvariant.h>
 
@@ -13,6 +14,10 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
     for (const auto& [key, value] : entries)
         map.insert(std::move(key), std::move(value));
     return map;
+}
+
+template <typename... Ts> inline QList<QMetaType> tlist() {
+    return { QMetaType::fromType<Ts>()... };
 }
 
 namespace detail {

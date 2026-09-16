@@ -33,6 +33,15 @@ template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
     return elementCodec ? new ListCodec<Container>(type, elementCodec) : nullptr;
 }
 
+// Unions are keyed by their alternatives in order, since order decides which one wins
+QString unionKey(const QList<QMetaType>& types) {
+    QStringList ids;
+    ids.reserve(types.size());
+    for (const auto& type : types)
+        ids << QString::number(type.id());
+    return ids.join(u","_s);
+}
+
 using ListFactory = ValueCodec* (*)(const QMetaType&);
 
 const QHash<int, ListFactory>& listFactories() {
@@ -47,6 +56,10 @@ const QHash<int, ListFactory>& listFactories() {
 
 ValueCodec::ValueCodec(const QMetaType& type)
     : m_type(type) {}
+
+QMetaType ValueCodec::type() const {
+    return m_type;
+}
 
 ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     // Cache for codecs, keyed by type id
@@ -87,6 +100,39 @@ ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
     // Cache codec
     if (codec)
         s_registry.insert(type.id(), codec);
+
+    return codec;
+}
+
+ValueCodec* ValueCodec::unionFor(const QList<QMetaType>& types) {
+    // Cache for union codecs, keyed by their alternatives
+    static QHash<QString, ValueCodec*> s_registry;
+
+    if (types.size() < 2) {
+        qCCritical(lcSettings, "A union needs at least two types, got %lld", types.size());
+        return nullptr;
+    }
+
+    const auto key = unionKey(types);
+
+    // Cached lookup
+    if (const auto it = s_registry.constFind(key); it != s_registry.constEnd())
+        return *it;
+
+    QList<const ValueCodec*> alternatives;
+    alternatives.reserve(types.size());
+
+    for (const auto& type : types) {
+        const auto* codec = codecFor(type);
+        if (!codec) {
+            qCCritical(lcSettings, "No codec found for type %s, cannot build union", type.name());
+            return nullptr;
+        }
+        alternatives << codec;
+    }
+
+    auto* const codec = new UnionCodec(alternatives);
+    s_registry.insert(key, codec);
 
     return codec;
 }
@@ -256,6 +302,53 @@ template <typename Container> DecodeResult ListCodec<Container>::decode(const QJ
     }
 
     return { .value = QVariant::fromValue(list), .error = std::nullopt, .indexPath = {} };
+}
+
+UnionCodec::UnionCodec(const QList<const ValueCodec*>& alternatives)
+    : ValueCodec(QMetaType::fromType<QVariant>())
+    , m_alternatives(alternatives) {
+    m_byType.reserve(alternatives.size());
+
+    for (const auto* codec : alternatives)
+        m_byType.insert(codec->type().id(), codec);
+}
+
+QJsonValue UnionCodec::encode(const QVariant& value) const {
+    // An unset union is simply absent from the file
+    if (!value.isValid())
+        return QJsonValue::Undefined;
+
+    const auto* codec = m_byType.value(value.metaType().id());
+    if (!codec) {
+        qCWarning(lcSettings, "Cannot encode value of type %s, it is not one of the allowed types", value.typeName());
+        return QJsonValue::Undefined;
+    }
+
+    return codec->encode(value);
+}
+
+DecodeResult UnionCodec::decode(const QJsonValue& value) const {
+    std::optional<DecodeResult> best;
+
+    for (const auto* codec : m_alternatives) {
+        auto result = codec->decode(value);
+
+        // The first alternative to accept the value wins
+        if (!result.error)
+            return result;
+
+        // A mismatch is just the wrong alternative, but a bad value is worth reporting, deepest first
+        if (result.error->type == DiagnosticType::TypeMismatch)
+            continue;
+        if (!best || result.indexPath.size() > best->indexPath.size())
+            best = std::move(result);
+    }
+
+    if (best)
+        return *best;
+
+    // Nothing matched the shape, so report the primary alternative
+    return m_alternatives.first()->decode(value);
 }
 
 // Instantiated for types as needed

@@ -101,9 +101,9 @@ bool Node::setValue(const QString& key, const QVariant& value) {
     }
 
     // Type mismatch, conversion should happen before this function is called
-    if (desc->type != value.metaType()) {
+    if (!desc->accepts(value.metaType())) {
         qCWarning(lcSettings, "Type mismatch for %s, expected %s got %s", qUtf8Printable(pathFor(key)),
-            desc->type.name(), value.metaType().name());
+            qUtf8Printable(desc->typeString()), value.metaType().name());
         return false;
     }
 

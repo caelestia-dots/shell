@@ -1,8 +1,12 @@
 #pragma once
 
+#include <qhash.h>
 #include <qjsonvalue.h>
+#include <qlist.h>
 #include <qmetaobject.h>
 #include <qvariant.h>
+
+#include <optional>
 
 #include "common.hpp"
 
@@ -22,6 +26,10 @@ public:
     // Returns the shared codec for a type, or nullptr if the type is unsupported
     static ValueCodec* codecFor(const QMetaType& type);
 
+    // Returns the shared codec for a union of types, or nullptr if any of them is unsupported
+    static ValueCodec* unionFor(const QList<QMetaType>& types);
+
+    [[nodiscard]] QMetaType type() const;
     [[nodiscard]] virtual QJsonValue encode(const QVariant& value) const = 0;
     [[nodiscard]] virtual DecodeResult decode(const QJsonValue& value) const = 0;
 
@@ -70,6 +78,19 @@ public:
 
 private:
     const ValueCodec* m_elementCodec;
+};
+
+// Decodes any one of several types, for options that accept more than one shape
+class UnionCodec : public ValueCodec {
+public:
+    explicit UnionCodec(const QList<const ValueCodec*>& alternatives);
+
+    [[nodiscard]] QJsonValue encode(const QVariant& value) const override;
+    [[nodiscard]] DecodeResult decode(const QJsonValue& value) const override;
+
+private:
+    const QList<const ValueCodec*> m_alternatives; // Tried in order, so the first to accept a value wins
+    QHash<int, const ValueCodec*> m_byType;        // Type id to alternative, for encoding
 };
 
 } // namespace caelestia::settings
