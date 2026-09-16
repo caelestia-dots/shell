@@ -9,7 +9,7 @@ Node::Node(Node* fallback, QObject* parent, bool globalOnly)
     , m_globalOnly(globalOnly || (parentNode() && parentNode()->m_globalOnly))
     , m_writeOrigin(WriteOrigin::Qml)
     , m_batcher(m_rootNode == this ? new ChangeBatcher(this) : nullptr) {
-    if (fallback)
+    if (fallback && !m_globalOnly)
         QObject::connect(fallback, &Node::optionChanged, this, &Node::onFallbackNotify);
 }
 

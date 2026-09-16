@@ -94,7 +94,9 @@ ListNode::ListNode(ListNode* fallback, QObject* parent, bool globalOnly)
     if (fallback) {
         // Disconnect generic fallback notify, lists use a custom one
         QObject::disconnect(fallback, &ListNode::optionChanged, this, nullptr);
-        QObject::connect(fallback, &ListNode::elementsChanged, this, &ListNode::onFallbackListNotify);
+
+        if (!isGlobalOnly())
+            QObject::connect(fallback, &ListNode::elementsChanged, this, &ListNode::onFallbackListNotify);
     }
 }
 
