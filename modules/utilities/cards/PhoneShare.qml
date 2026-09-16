@@ -12,9 +12,15 @@ import qs.services
 StyledRect {
     id: root
 
-    required property var phoneBrowser
+    required property ScreenState screenState
 
-    readonly property bool browserOpen: phoneBrowser.browserOpen
+    property bool browserOpen
+    property string browserDeviceId
+    property string browserDeviceName
+    property string browserRootPath
+    // Unmounting or losing the device leaves nothing to browse
+    readonly property bool browserDeviceMounted: KdeConnect.isMounted(browserDeviceId)
+
     // The browser keeps a fixed height and scrolls its file list inside it
     readonly property real browserHeight: Tokens.sizes.utilities.width * 0.8
     readonly property real compactHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
@@ -25,14 +31,25 @@ StyledRect {
     function browse(deviceId: string, deviceName: string): void {
         // The shortest directory is the storage root, the others are inside it
         const paths = Object.keys(KdeConnect.directories(deviceId)).sort((a, b) => a.length - b.length);
-        if (paths.length > 0)
-            phoneBrowser.openForDevice(deviceId, deviceName, paths[0]);
+        if (paths.length === 0)
+            return;
+
+        browserDeviceId = deviceId;
+        browserDeviceName = deviceName;
+        browserRootPath = paths[0];
+        browserOpen = true;
+        browser.reset();
     }
 
     implicitHeight: compactHeight
     radius: Tokens.rounding.large
     color: Colours.tPalette.m3surfaceContainer
     clip: true
+
+    onBrowserDeviceMountedChanged: {
+        if (!browserDeviceMounted)
+            browserOpen = false;
+    }
 
     // Only animate opening and closing the browser. A Behavior would also animate
     // the height settling when the card is created, making its contents jump.
@@ -49,6 +66,38 @@ StyledRect {
         Anim {
             property: "implicitHeight"
         }
+    }
+
+    // Close the browser as soon as utilities starts hiding or another panel takes
+    // over. The panel keeps its last height until the card is recreated, so a card
+    // destroyed with the browser open would reopen at the browser height.
+    Connections {
+        function onUtilitiesChanged(): void {
+            if (!root.screenState.utilities)
+                root.browserOpen = false;
+        }
+
+        function onSidebarChanged(): void {
+            if (root.screenState.sidebar)
+                root.browserOpen = false;
+        }
+
+        function onLauncherChanged(): void {
+            if (root.screenState.launcher)
+                root.browserOpen = false;
+        }
+
+        function onSessionChanged(): void {
+            if (root.screenState.session)
+                root.browserOpen = false;
+        }
+
+        function onDashboardChanged(): void {
+            if (root.screenState.dashboard)
+                root.browserOpen = false;
+        }
+
+        target: root.screenState
     }
 
     ColumnLayout {
@@ -275,12 +324,19 @@ StyledRect {
     }
 
     Utilities.PhoneBrowser {
+        id: browser
+
         anchors.fill: parent
         anchors.margins: Tokens.padding.medium
 
-        wrapper: root.phoneBrowser
+        deviceId: root.browserDeviceId
+        deviceName: root.browserDeviceName
+        rootPath: root.browserRootPath
+        open: root.browserOpen
         enabled: root.browserOpen
         opacity: root.browserOpen ? 1 : 0
+
+        onCloseRequested: root.browserOpen = false
 
         transform: Translate {
             x: root.browserOpen ? 0 : root.slideDistance

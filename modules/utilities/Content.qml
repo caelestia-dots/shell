@@ -14,7 +14,6 @@ Item {
     required property ScreenState screenState
     required property BarPopouts.Wrapper popouts
     required property matrix4x4 deformMatrix
-    required property var wrapper
 
     readonly property int enabledCards: (idleInhibit.active ? 1 : 0) + (record.active ? 1 : 0) + (phoneShare.active ? 1 : 0) + (toggles.active ? 1 : 0)
     readonly property real nonAnimHeight: ((idleInhibit.item as IdleInhibit)?.nonAnimHeight ?? 0) + ((record.item as Record)?.nonAnimHeight ?? 0) + ((phoneShare.item as PhoneShare)?.nonAnimHeight ?? 0) + ((toggles.item as Toggles)?.implicitHeight ?? 0) + layout.spacing * Math.max(0, enabledCards - 1)
@@ -66,7 +65,7 @@ Item {
             sourceComponent: PhoneShare {
                 objectName: "utilitiesPhoneShare"
 
-                phoneBrowser: root.wrapper
+                screenState: root.screenState
             }
         }
 

@@ -14,11 +14,10 @@ import qs.services
 Item {
     id: root
 
-    required property var wrapper
-
-    readonly property string deviceId: wrapper.browserDeviceId
-    readonly property string deviceName: wrapper.browserDeviceName
-    readonly property string rootPath: wrapper.browserRootPath
+    required property string deviceId
+    required property string deviceName
+    required property string rootPath
+    required property bool open
 
     // The folder being shown, and the one the model is scanning
     property string currentPath
@@ -50,6 +49,8 @@ Item {
         const relative = currentPath.slice(rootPath.length).replace(/^\/+/, "");
         return relative ? relative.split("/").join("  ›  ") : Tr.tr("Internal storage");
     }
+
+    signal closeRequested
 
     function reset(): void {
         exitAnim.stop();
@@ -115,7 +116,7 @@ Item {
         // detach the model first and attach it to the new folder on the next tick
         modelPath = "";
         Qt.callLater(() => {
-            if (!navigating || !wrapper.browserOpen)
+            if (!navigating || !open)
                 return;
 
             modelPath = currentPath;
@@ -138,7 +139,7 @@ Item {
             return;
 
         if (atRoot) {
-            wrapper.closeBrowser();
+            closeRequested();
             return;
         }
 
@@ -176,22 +177,13 @@ Item {
 
     clip: true
 
+    onOpenChanged: {
+        if (!open)
+            stop();
+    }
     onDownloadingHereChanged: {
         if (!downloadingHere)
             cancelDelayElapsed = false;
-    }
-
-    Connections {
-        function onBrowserOpened(): void {
-            root.reset();
-        }
-
-        function onBrowserOpenChanged(): void {
-            if (!root.wrapper.browserOpen)
-                root.stop();
-        }
-
-        target: root.wrapper
     }
 
     Connections {
@@ -401,7 +393,7 @@ Item {
                 }
 
                 model: FileSystemModel {
-                    path: root.wrapper.browserOpen ? root.modelPath : ""
+                    path: root.open ? root.modelPath : ""
                     onPathChanged: fileView.currentIndex = -1
                 }
 
