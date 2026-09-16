@@ -274,7 +274,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                text: root.hasLyricsError ? root.lyricsError : qsTr("Check your network connection")
+                text: root.hasLyricsError ? root.lyricsError : Tr.tr("Check your network connection")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -285,7 +285,7 @@ Item {
                 visible: root.hasLyricsError || root.isLyricsOffline
                 Layout.alignment: Qt.AlignHCenter
                 type: TextButton.Text
-                text: qsTr("Retry")
+                text: Tr.tr("Retry")
                 onClicked: Lyrics.refresh()
             }
 
@@ -293,7 +293,7 @@ Item {
                 visible: !root.hasLyricsError && !root.isLyricsOffline
                 Layout.alignment: Qt.AlignHCenter
                 type: TextButton.Text
-                text: qsTr("Force search")
+                text: Tr.tr("Force search")
                 onClicked: Lyrics.forceSearch()
             }
         }
