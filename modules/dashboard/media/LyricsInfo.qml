@@ -24,7 +24,15 @@ Item {
     readonly property real popupWidth: 320
     readonly property real maxPopupHeight: 320
     readonly property real maxListHeight: 104
-    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0 || Lyrics.hasMetadataSuggestion) && !Lyrics.loading && !Lyrics.forceSearching
+    // Note: no !Lyrics.loading here by design — during a reload (e.g. YouTube duration
+    // wobble via onLengthChanged → setTrack) old content stays up instead of strobing to
+    // the placeholder and back. First load still shows the placeholder (nothing to keep).
+    readonly property bool hasDisplayableContent: (Lyrics.hasLyrics || Lyrics.lyricCandidates.length > 0 || Lyrics.hasMetadataSuggestion) && !Lyrics.forceSearching
+    // Pattern ported from BlobPopup (modules/nexus/common): content-sized box +
+    // animDriver fade. (DefaultRow itself sizes from viewport geometry — no flickable
+    // hosts this button, so topMovement stays a flat constant by design.)
+    property real animDriver: 0
+    property int topMovement: Tokens.padding.large
 
     function applyMetadata(): void {
         if (!Lyrics.hasMetadataSuggestion)
@@ -90,16 +98,28 @@ Item {
         }
     }
 
+    Binding {
+        target: content
+        property: "opacity"
+        value: root.animDriver
+    }
+
     BlobRect {
         id: btnRect
 
         anchors.fill: parent
-        anchors.margins: !btn.pressed && btn.containsMouse ? -Tokens.padding.extraSmall : 0
+        anchors.margins: (!btn.pressed && btn.containsMouse ? -Tokens.padding.extraSmall : 0) + (root.open ? -Tokens.padding.extraSmall : 0)
         group: blobGroup
-        radius: Tokens.rounding.medium
+        radius: root.open ? Tokens.rounding.large : Tokens.rounding.medium
 
         Behavior on anchors.margins {
             Anim {}
+        }
+
+        Behavior on radius {
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 
@@ -122,10 +142,10 @@ Item {
 
             PropertyChanges {
                 rect.anchors.rightMargin: root.width - root.Tokens.spacing.small
-                rect.anchors.topMargin: -root.Tokens.padding.medium
-                rect.implicitWidth: root.hasDisplayableContent ? root.popupWidth : Math.max(140, placeholder.implicitWidth + root.padding * 3)
-                rect.implicitHeight: root.hasDisplayableContent ? Math.min(root.maxPopupHeight, layout.implicitHeight + root.padding * 2) : placeholder.implicitHeight + root.padding * 2
-                content.opacity: 1
+                rect.anchors.topMargin: -root.topMovement
+                rect.implicitWidth: Math.min(root.popupWidth, content.implicitWidth + root.padding * 2)
+                rect.implicitHeight: Math.min(root.maxPopupHeight, content.implicitHeight + root.padding * 2)
+                root.animDriver: 1
             }
         }
 
@@ -134,15 +154,17 @@ Item {
                 properties: "rightMargin"
             }
             Anim {
-                properties: "topMargin,implicitHeight"
+                properties: "topMargin"
                 easing: root.Tokens.anim.expressiveFastSpatial
             }
             Anim {
-                property: "opacity"
+                property: "animDriver"
                 type: Anim.DefaultEffects
             }
         }
 
+        // Size changes while open (candidates arriving) animate here; the state
+        // transition above owns margins/animDriver only — disjoint properties, no fight.
         Behavior on implicitWidth {
             Anim {}
         }
@@ -163,8 +185,9 @@ Item {
 
             anchors.fill: parent
             clip: true
-            opacity: 0
             state: root.hasDisplayableContent ? "hasLyrics" : ""
+            implicitWidth: state === "hasLyrics" ? layout.implicitWidth : placeholder.implicitWidth
+            implicitHeight: state === "hasLyrics" ? layout.implicitHeight : placeholder.implicitHeight
 
             states: State {
                 name: "hasLyrics"

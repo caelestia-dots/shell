@@ -972,9 +972,20 @@ void Lyrics::setTrack(const QString& artist, const QString& title, const QString
     QString effectiveTitle = t;
     resolveMetadataAlias(effectiveArtist, effectiveTitle);
 
-    if (effectiveArtist == m_artist && effectiveTitle == m_title && album == m_album &&
-        qFuzzyCompare(duration + 1.0, m_duration + 1.0)) {
-        return;
+    if (effectiveArtist == m_artist && effectiveTitle == m_title && album == m_album) {
+        if (qFuzzyCompare(duration + 1.0, m_duration + 1.0)) {
+            return;
+        }
+        // Same track, duration wobble only (YouTube/MPRIS duration settles mid-playback):
+        // sub-tolerance corrections just move the clock — no reset+reload, no popup strobe.
+        // A large jump (e.g. 0 → real duration) falls through and re-scores as before.
+        // (m_duration is scoring-only, absent from rawTrackKey(), so skipping persist here
+        // loses nothing — the stored entry would be identical.)
+        constexpr qreal kDurationWobbleToleranceSecs = 2.0;
+        if (std::abs(duration - m_duration) < kDurationWobbleToleranceSecs) {
+            m_duration = duration;
+            return;
+        }
     }
 
     if (m_saveDebounce && m_saveDebounce->isActive()) {
