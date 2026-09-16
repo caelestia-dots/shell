@@ -1,6 +1,10 @@
 #include "node.hpp"
 
+#include "util/i18n.hpp"
+
 namespace caelestia::settings {
+
+using Qt::StringLiterals::operator""_s;
 
 Node::Node(Node* fallback, QObject* parent, bool globalOnly)
     : QObject(parent)
@@ -161,6 +165,23 @@ bool Node::rejectGlobalWrite(const QString& key) {
             "This should not be used, write global properties from the global layer instead.",
             qUtf8Printable(pathFor(key)));
 
+    return true;
+}
+
+void Node::warnGlobalSync(QList<Diagnostic>& diagnostics, const QString& path) {
+    qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
+    diagnostics << Diagnostic{
+        .type = DiagnosticType::GlobalOption,
+        .option = path,
+        .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
+    };
+}
+
+bool Node::rejectGlobalSync(QList<Diagnostic>& diagnostics) const {
+    if (!m_globalOnly || !m_fallbackNode)
+        return false;
+
+    warnGlobalSync(diagnostics, path());
     return true;
 }
 

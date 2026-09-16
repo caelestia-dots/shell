@@ -87,6 +87,10 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
         return false;
     }
 
+    // Refuse syncs to global only nodes on overlays
+    if (rejectGlobalSync(diagnostics))
+        return false;
+
     const auto obj = json.toObject();
 
     qCDebug(lcSettings) << "Loading JSON into" << metaObject()->className() << "with" << obj.size()
@@ -143,14 +147,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
         }
 
         if ((m_globalOnly || desc->globalOnly()) && fallbackNode()) {
-            const auto path = pathFor(key);
-            qCWarning(
-                lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
-            diagnostics << Diagnostic{
-                .type = DiagnosticType::GlobalOption,
-                .option = path,
-                .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
-            };
+            warnGlobalSync(diagnostics, pathFor(key));
             SKIP;
         }
 
