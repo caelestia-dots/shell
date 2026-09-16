@@ -38,6 +38,7 @@ const QString k_daemonIface = u"org.kde.kdeconnect.daemon"_s;
 const QString k_deviceIface = u"org.kde.kdeconnect.device"_s;
 const QString k_propertiesIface = u"org.freedesktop.DBus.Properties"_s;
 const QString k_sftpIface = u"org.kde.kdeconnect.device.sftp"_s;
+const QString k_batteryIface = u"org.kde.kdeconnect.device.battery"_s;
 const QString k_shareIface = u"org.kde.kdeconnect.device.share"_s;
 
 constexpr qsizetype k_chunkSize = static_cast<qsizetype>(1024) * 1024;
@@ -206,13 +207,32 @@ DeviceList readDevices() {
             continue;
 
         const auto& values = properties.value();
-        result.devices << QVariantMap{
+        const auto paired = values.value(u"isPaired"_s).toBool();
+
+        QVariantMap device{
             { u"id"_s, it.key() },
             { u"name"_s, it.value() },
-            { u"paired"_s, values.value(u"isPaired"_s).toBool() },
+            { u"paired"_s, paired },
             { u"pairState"_s, values.value(u"pairState"_s).toInt() },
             { u"verificationKey"_s, values.value(u"verificationKey"_s).toString() },
+            // -1 until the device reports it, or when its battery plugin is not loaded
+            { u"batteryCharge"_s, -1 },
+            { u"batteryCharging"_s, false },
         };
+
+        // Plugins are only loaded for paired devices
+        if (paired) {
+            auto batteryCall = methodCall(devicePath(it.key(), u"battery"_s), k_propertiesIface, u"GetAll"_s);
+            batteryCall << k_batteryIface;
+
+            const QDBusReply<QVariantMap> battery = bus.call(batteryCall);
+            if (battery.isValid()) {
+                device[u"batteryCharge"_s] = battery.value().value(u"charge"_s, -1).toInt();
+                device[u"batteryCharging"_s] = battery.value().value(u"isCharging"_s).toBool();
+            }
+        }
+
+        result.devices << device;
     }
 
     return result;
@@ -373,6 +393,9 @@ KdeConnectDaemon::KdeConnectDaemon(QObject* parent)
     // deviceListChanged.
     bus.connect(k_service, QString(), k_deviceIface, u"pairStateChanged"_s, this, SLOT(refresh()));
     bus.connect(k_service, QString(), k_deviceIface, u"nameChanged"_s, this, SLOT(refresh()));
+    // Plugins such as battery load after pairing and report their own changes
+    bus.connect(k_service, QString(), k_deviceIface, u"pluginsChanged"_s, this, SLOT(refresh()));
+    bus.connect(k_service, QString(), k_batteryIface, u"refreshed"_s, this, SLOT(refresh()));
     bus.connect(
         k_service, QString(), k_deviceIface, u"pairingFailed"_s, this, SLOT(onPairingFailed(QString, QDBusMessage)));
 
