@@ -21,8 +21,8 @@ QHash<const QMetaObject*, QHash<QString, Annotation>>& annotationCache() {
 }
 
 // Union options carry their alternatives in the annotation, everything else goes by property type
-const ValueCodec* resolveCodec(const Descriptor& desc) {
-    const auto& allowed = desc.annotation.allowedTypes;
+const ValueCodec* resolveCodec(Descriptor& desc) {
+    auto& allowed = desc.annotation.allowedTypes;
 
     if (allowed.isEmpty())
         return ValueCodec::codecFor(desc.type);
@@ -30,10 +30,15 @@ const ValueCodec* resolveCodec(const Descriptor& desc) {
     if (desc.type.id() != QMetaType::QVariant) {
         qCCritical(lcSchema, "Allowed types are only valid for QVariant properties, ignoring them for %s",
             qUtf8Printable(desc.key));
+        allowed.clear();
         return ValueCodec::codecFor(desc.type);
     }
 
-    return ValueCodec::unionFor(allowed);
+    if (const auto* codec = ValueCodec::unionFor(allowed))
+        return codec;
+
+    allowed.clear();
+    return nullptr;
 }
 
 bool isNodeType(const QMetaType& type) {
