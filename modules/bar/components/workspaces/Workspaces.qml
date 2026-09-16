@@ -23,7 +23,7 @@ StyledClippingRect {
     readonly property int shown: Math.max(1, Config.bar.workspaces.shown)
 
     readonly property var wsIds: {
-        if (root.Config.bar.workspaces.showUnoccupied)
+        if (Config.bar.workspaces.showUnoccupied)
             return Array.from({
                 length: shown
             }, (_, i) => i + 1);

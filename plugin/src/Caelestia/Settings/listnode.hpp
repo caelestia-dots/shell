@@ -52,8 +52,8 @@ private:
     [[nodiscard]] QList<QVariantMap> defaultValue() const;
     [[nodiscard]] bool isNested() const;
 
-    // Returns the global list to mutate instead of this one, or nullptr to mutate this one
-    [[nodiscard]] ListNode* forwardGlobalMutation() const;
+    // Returns true if the mutation should be skipped, overlays cannot mutate global lists
+    [[nodiscard]] bool rejectGlobalMutation() const;
 
     [[nodiscard]] bool validIndex(qsizetype index) const;
     [[nodiscard]] const Descriptor* getDescriptor() const;

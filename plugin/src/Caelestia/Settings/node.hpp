@@ -48,9 +48,13 @@ signals:
 protected:
     // Null means empty, otherwise it has content
     std::unique_ptr<Quarantine> m_quarantine;
+    const bool m_globalOnly; // Own flag or inherited from the parent node
 
-    // Returns true if the write should be skipped afterwards
-    bool forwardGlobalWrite(const QString& key, const QVariant& value);
+    void warnGlobalRead(const QString& key) const;
+    // Returns true if the write should be skipped afterwards, overlays cannot write global options
+    bool rejectGlobalWrite(const QString& key);
+    static void warnGlobalSync(QList<Diagnostic>& diagnostics, const QString& path);
+    bool rejectGlobalSync(QList<Diagnostic>& diagnostics) const; // Returns true if the sync should be rejected
     // Returns true if the notify signal should be emitted
     virtual bool recordWrite(const QString& key, bool changed);
 
@@ -65,16 +69,17 @@ protected:
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
-    Node* m_fallbackNode;    // No fallback node either means global tree or inside overridden list
-    const bool m_globalOnly; // Own flag or inherited from the parent node
+    Node* m_fallbackNode; // No fallback node either means global tree or inside overridden list
 
     // For root node use only
     WriteOrigin m_writeOrigin;
+    bool m_internalRead;
     ChangeBatcher* const m_batcher;
 
     void onFallbackNotify(const QString& key);
 
     friend class WriteScope;
+    friend class InternalRead;
 };
 
 template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const {

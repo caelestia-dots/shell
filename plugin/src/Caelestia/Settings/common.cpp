@@ -20,6 +20,16 @@ WriteScope::~WriteScope() {
     m_root->m_writeOrigin = m_previous;
 }
 
+InternalRead::InternalRead(Node* node)
+    : m_root(node->rootNode())
+    , m_previous(m_root->m_internalRead) {
+    m_root->m_internalRead = true;
+}
+
+InternalRead::~InternalRead() {
+    m_root->m_internalRead = m_previous;
+}
+
 QString DiagnosticType::toString(Type t) {
     switch (t) {
     case UnknownOption:

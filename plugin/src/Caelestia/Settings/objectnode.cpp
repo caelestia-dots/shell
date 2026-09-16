@@ -20,6 +20,15 @@ void ObjectNode::resetOption(const QString& key) {
         return;
     }
 
+    // Warn and ignore if this is a global node property and we are an overlay
+    if (desc->isNode && (m_globalOnly || desc->globalOnly()) && fallbackNode()) {
+        qCWarning(lcSettings,
+            "Attempted to reset global node %s, ignoring. "
+            "This should not be used, reset global nodes from the global layer instead.",
+            qUtf8Printable(pathFor(key)));
+        return;
+    }
+
     const WriteScope scope(this, WriteOrigin::QmlReset);
     if (desc->isNode)
         value(key).value<Node*>()->resetToDefaults();
@@ -78,6 +87,10 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
         return false;
     }
 
+    // Refuse syncs to global only nodes on overlays
+    if (rejectGlobalSync(diagnostics))
+        return false;
+
     const auto obj = json.toObject();
 
     qCDebug(lcSettings) << "Loading JSON into" << metaObject()->className() << "with" << obj.size()
@@ -133,15 +146,8 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             continue;
         }
 
-        if ((isGlobalOnly() || desc->globalOnly()) && fallbackNode()) {
-            const auto path = pathFor(key);
-            qCWarning(
-                lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
-            diagnostics << Diagnostic{
-                .type = DiagnosticType::GlobalOption,
-                .option = path,
-                .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
-            };
+        if ((m_globalOnly || desc->globalOnly()) && fallbackNode()) {
+            warnGlobalSync(diagnostics, pathFor(key));
             SKIP;
         }
 
@@ -185,6 +191,10 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
             value(desc.key).value<Node*>()->resetToDefaults();
             continue;
         }
+
+        // Skip global options on overlays
+        if ((m_globalOnly || desc.globalOnly()) && fallbackNode())
+            continue;
 
         setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue(this));
     }
