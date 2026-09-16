@@ -48,6 +48,7 @@ signals:
 protected:
     // Null means empty, otherwise it has content
     std::unique_ptr<Quarantine> m_quarantine;
+    const bool m_globalOnly; // Own flag or inherited from the parent node
 
     void warnGlobalRead(const QString& key) const;
     // Returns true if the write should be skipped afterwards, overlays cannot write global options
@@ -66,8 +67,7 @@ protected:
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
-    Node* m_fallbackNode;    // No fallback node either means global tree or inside overridden list
-    const bool m_globalOnly; // Own flag or inherited from the parent node
+    Node* m_fallbackNode; // No fallback node either means global tree or inside overridden list
 
     // For root node use only
     WriteOrigin m_writeOrigin;

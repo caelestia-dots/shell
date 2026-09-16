@@ -95,7 +95,7 @@ ListNode::ListNode(ListNode* fallback, QObject* parent, bool globalOnly)
         // Disconnect generic fallback notify, lists use a custom one
         QObject::disconnect(fallback, &ListNode::optionChanged, this, nullptr);
 
-        if (!isGlobalOnly())
+        if (!m_globalOnly)
             QObject::connect(fallback, &ListNode::elementsChanged, this, &ListNode::onFallbackListNotify);
     }
 }
@@ -266,7 +266,7 @@ void ListNode::resetToDefaults() {
     }
 
     // Don't reset global only list nodes on overlays
-    if (fallbackNode() && isGlobalOnly())
+    if (fallbackNode() && m_globalOnly)
         return;
 
     const WriteScope scope(this, WriteOrigin::FileReset);
@@ -292,7 +292,7 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
     }
 
     // Refuse syncs to global only list nodes on overlays
-    if (fallbackNode() && isGlobalOnly()) {
+    if (fallbackNode() && m_globalOnly) {
         const auto p = path();
         qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
         diagnostics << Diagnostic{
@@ -361,7 +361,7 @@ bool ListNode::isNested() const {
 }
 
 bool ListNode::rejectGlobalMutation() const {
-    if (!isGlobalOnly() || !fallbackNode())
+    if (!m_globalOnly || !fallbackNode())
         return false;
 
     qCWarning(lcSettings,

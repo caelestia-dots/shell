@@ -4,9 +4,9 @@ namespace caelestia::settings {
 
 Node::Node(Node* fallback, QObject* parent, bool globalOnly)
     : QObject(parent)
+    , m_globalOnly(globalOnly || (parentNode() && parentNode()->m_globalOnly))
     , m_rootNode(parentNode() ? parentNode()->rootNode() : this)
     , m_fallbackNode(fallback)
-    , m_globalOnly(globalOnly || (parentNode() && parentNode()->m_globalOnly))
     , m_writeOrigin(WriteOrigin::Qml)
     , m_internalRead(false)
     , m_batcher(m_rootNode == this ? new ChangeBatcher(this) : nullptr) {

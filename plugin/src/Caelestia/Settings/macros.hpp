@@ -72,7 +72,7 @@ private:
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type name() const {                                                                                  \
-        if (global || isGlobalOnly())                                                                                  \
+        if (global || m_globalOnly)                                                                                    \
             warnGlobalRead(QStringLiteral(#name));                                                                     \
         return m_##name;                                                                                               \
     }                                                                                                                  \
@@ -114,7 +114,7 @@ private:                                                                        
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type* name() const {                                                                                 \
-        if (global || isGlobalOnly())                                                                                  \
+        if (global || m_globalOnly)                                                                                    \
             warnGlobalRead(QStringLiteral(#name));                                                                     \
         return m_##name;                                                                                               \
     }                                                                                                                  \
@@ -160,7 +160,7 @@ private:                                                                        
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] Type* name() const {                                                                                 \
-        if (global || isGlobalOnly())                                                                                  \
+        if (global || m_globalOnly)                                                                                    \
             warnGlobalRead(QStringLiteral(#name));                                                                     \
         return m_##name;                                                                                               \
     }                                                                                                                  \

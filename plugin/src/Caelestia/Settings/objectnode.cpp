@@ -21,7 +21,7 @@ void ObjectNode::resetOption(const QString& key) {
     }
 
     // Warn and ignore if this is a global property and we are an overlay
-    if (desc->isNode && (isGlobalOnly() || desc->globalOnly()) && fallbackNode()) {
+    if (desc->isNode && (m_globalOnly || desc->globalOnly()) && fallbackNode()) {
         qCWarning(lcSettings,
             "Attempted to reset global node %s, ignoring. "
             "This should not be used, reset global nodes from the global layer instead.",
@@ -142,7 +142,7 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             continue;
         }
 
-        if ((isGlobalOnly() || desc->globalOnly()) && fallbackNode()) {
+        if ((m_globalOnly || desc->globalOnly()) && fallbackNode()) {
             const auto path = pathFor(key);
             qCWarning(
                 lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
@@ -196,7 +196,7 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
         }
 
         // Skip global options on overlays
-        if ((isGlobalOnly() || desc.globalOnly()) && fallbackNode())
+        if ((m_globalOnly || desc.globalOnly()) && fallbackNode())
             continue;
 
         setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue(this));
