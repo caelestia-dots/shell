@@ -24,8 +24,10 @@ Singleton {
     // IPv4 addresses of adb devices by serial, so the phone is only asked once
     property var serialAddresses: ({})
     property bool refreshing
+    // Increases with every refresh, so results of a superseded refresh are dropped
+    property int refreshGeneration
     property var sessionProcesses: ({})
-    // Action to run once a device that was just connected appears in links
+    // Action to run once a refresh started after connecting has finished
     property var pendingConnect: null
 
     // Connect action waiting for the phone's service to be discovered
@@ -74,10 +76,14 @@ Singleton {
         busy = next;
     }
 
-    function run(command: list<string>, callback: var): void {
+    // Runs a command and passes { exitCode, output, error, timedOut } to the callback.
+    // A phone that drops off the network can leave adb waiting for a long time, so
+    // the command is stopped after the timeout.
+    function run(command: list<string>, callback: var, timeout = 10000): void {
         const proc = commandComp.createObject(root, {
             command,
-            callback
+            callback,
+            timeout
         });
         proc.running = true;
     }
@@ -89,7 +95,12 @@ Singleton {
             return;
 
         refreshing = true;
+        const generation = ++refreshGeneration;
+
         run(["adb", "devices"], result => {
+            if (generation !== refreshGeneration)
+                return;
+
             const ready = [];
             let unauthorized = false;
 
@@ -104,7 +115,7 @@ Singleton {
             }
 
             unauthorizedUsb = unauthorized;
-            resolveAddresses(ready, 0);
+            resolveAddresses(ready, 0, generation);
         });
     }
 
@@ -112,9 +123,12 @@ Singleton {
         return /^\d{1,3}(\.\d{1,3}){3}:\d+$/.test(serial) || serial.includes("._adb-tls-connect._tcp");
     }
 
-    function resolveAddresses(serials: list<string>, index: int): void {
+    function resolveAddresses(serials: list<string>, index: int, generation: int): void {
+        if (generation !== refreshGeneration)
+            return;
+
         if (index >= serials.length) {
-            updateLinks(serials);
+            updateLinks(serials, generation);
             return;
         }
 
@@ -124,15 +138,18 @@ Singleton {
         if (direct || serialAddresses[serial]) {
             if (direct)
                 cacheAddresses(serial, [direct[1]]);
-            resolveAddresses(serials, index + 1);
+            resolveAddresses(serials, index + 1, generation);
             return;
         }
 
         run(["adb", "-s", serial, "shell", "ip", "-4", "-o", "addr"], result => {
-            const addresses = [...result.output.matchAll(/inet (\d{1,3}(?:\.\d{1,3}){3})\//g)].map(m => m[1]).filter(a => !a.startsWith("127."));
-            cacheAddresses(serial, addresses);
-            resolveAddresses(serials, index + 1);
-        });
+            // Only remember a real answer, so a phone that did not respond is asked again
+            if (result.exitCode === 0 && !result.timedOut) {
+                const addresses = [...result.output.matchAll(/inet (\d{1,3}(?:\.\d{1,3}){3})\//g)].map(m => m[1]).filter(a => !a.startsWith("127."));
+                cacheAddresses(serial, addresses);
+            }
+            resolveAddresses(serials, index + 1, generation);
+        }, 5000);
     }
 
     function cacheAddresses(serial: string, addresses: list<string>): void {
@@ -141,7 +158,11 @@ Singleton {
         serialAddresses = next;
     }
 
-    function updateLinks(serials: list<string>): void {
+    function updateLinks(serials: list<string>, generation: int): void {
+        // A newer refresh is running and will publish its own result
+        if (generation !== refreshGeneration)
+            return;
+
         const next = {};
 
         for (const device of KdeConnect.devices) {
@@ -166,6 +187,19 @@ Singleton {
         serialAddresses = cache;
         links = next;
         refreshing = false;
+
+        // Only a refresh started after connecting can include the new device
+        const pending = pendingConnect;
+        if (!pending || generation < pending.generation)
+            return;
+
+        pendingConnect = null;
+        setBusy(pending.deviceId, false);
+
+        if (hasLink(pending.deviceId))
+            pending.onConnected?.();
+        else
+            fail(pending.deviceId, Tr.tr("Connected, but could not match the phone"));
     }
 
     function findService(deviceId: string, kind: string): var {
@@ -199,6 +233,12 @@ Singleton {
 
     function connectTo(deviceId: string, service: var, onConnected: var): void {
         run(["adb", "connect", `${service.address}:${service.port}`], result => {
+            if (result.timedOut) {
+                setBusy(deviceId, false);
+                fail(deviceId, Tr.tr("The phone did not respond"));
+                return;
+            }
+
             // adb exits with 0 even when connecting fails, so read its output
             const output = result.output.trim();
             if (!/^(already )?connected to /.test(output)) {
@@ -210,14 +250,16 @@ Singleton {
                 return;
             }
 
-            pendingConnect = {
-                deviceId,
-                onConnected
-            };
-            // Look up the new device even if a refresh is already running
+            // Look up the new device even if a refresh is already running. That one
+            // started before connecting, so its result is dropped.
             refreshing = false;
             refresh();
-        });
+            pendingConnect = {
+                deviceId,
+                onConnected,
+                generation: refreshGeneration
+            };
+        }, 20000);
     }
 
     function start(deviceId: string): void {
@@ -282,10 +324,10 @@ Singleton {
                 return;
 
             // Like connect, adb pair exits with 0 on failure
-            if (!result.output.includes("Successfully paired to")) {
+            if (result.timedOut || !result.output.includes("Successfully paired to")) {
                 setPairing({
                     status: "failed",
-                    error: (result.output.trim() || result.error.trim()).replace(/^Failed: /, "") || Tr.tr("Pairing failed")
+                    error: result.timedOut ? Tr.tr("The phone did not respond") : (result.output.trim() || result.error.trim()).replace(/^Failed: /, "") || Tr.tr("Pairing failed")
                 });
                 return;
             }
@@ -299,7 +341,7 @@ Singleton {
                 if (pairing?.deviceId === current.deviceId)
                     pairing = null;
             });
-        });
+        }, 20000);
     }
 
     function cancelPairing(): void {
@@ -354,19 +396,6 @@ Singleton {
                 error: Tr.tr("Paired, but the phone refused the connection")
             });
     }
-    onLinksChanged: {
-        const pending = pendingConnect;
-        if (!pending)
-            return;
-
-        pendingConnect = null;
-        setBusy(pending.deviceId, false);
-
-        if (hasLink(pending.deviceId))
-            pending.onConnected?.();
-        else
-            fail(pending.deviceId, Tr.tr("Connected, but could not match the phone"));
-    }
 
     Connections {
         function onDevicesChanged(): void {
@@ -415,6 +444,17 @@ Singleton {
             id: proc
 
             property var callback
+            property int timeout
+            property bool timedOut
+            // Process has no default property, so the timer is held by a property
+            property Timer timeoutTimer: Timer {
+                interval: proc.timeout
+                running: proc.running && proc.timeout > 0
+                onTriggered: {
+                    proc.timedOut = true;
+                    proc.running = false;
+                }
+            }
 
             environment: ({
                     LC_ALL: "C"
@@ -433,7 +473,8 @@ Singleton {
                     proc.callback?.({
                         exitCode: code,
                         output: output.text ?? "",
-                        error: error.text ?? ""
+                        error: error.text ?? "",
+                        timedOut: proc.timedOut
                     });
                     proc.destroy();
                 });
