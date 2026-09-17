@@ -145,7 +145,14 @@ Singleton {
         run(["adb", "-s", serial, "shell", "ip", "-4", "-o", "addr"], result => {
             // Only remember a real answer, so a phone that did not respond is asked again
             if (result.exitCode === 0 && !result.timedOut) {
-                const addresses = [...result.output.matchAll(/inet (\d{1,3}(?:\.\d{1,3}){3})\//g)].map(m => m[1]).filter(a => !a.startsWith("127."));
+                // Every IPv4 address of the phone. They are only compared with the addresses
+                // KDE Connect reports, so loopback and other interfaces never match anything.
+                // QML's JavaScript engine has no String.matchAll, so walk the matches with exec.
+                const addresses = [];
+                const pattern = /inet (\d{1,3}(?:\.\d{1,3}){3})\//g;
+                let match;
+                while ((match = pattern.exec(result.output)) !== null)
+                    addresses.push(match[1]);
                 cacheAddresses(serial, addresses);
             }
             resolveAddresses(serials, index + 1, generation);
@@ -208,9 +215,15 @@ Singleton {
     }
 
     // Connects to the phone's wireless debugging service
+    // Wireless debugging could not be used. A phone plugged in over USB and still
+    // waiting for "Allow USB debugging" is the more likely fix, so point to that.
+    function failWireless(deviceId: string, error: string): void {
+        fail(deviceId, unauthorizedUsb ? Tr.tr("Allow USB debugging on the phone, then try again") : error);
+    }
+
     function connect(deviceId: string, onConnected: var): void {
         if (ipv4Addresses(deviceId).length === 0) {
-            fail(deviceId, Tr.tr("The phone is not on the same network"));
+            failWireless(deviceId, Tr.tr("The phone is not on this network, connect it over USB instead"));
             return;
         }
 
@@ -433,7 +446,7 @@ Singleton {
 
             root.pendingService = null;
             root.setBusy(pending.deviceId, false);
-            root.fail(pending.deviceId, Tr.tr("Wireless debugging is not enabled on the phone"));
+            root.failWireless(pending.deviceId, Tr.tr("Turn on wireless debugging, or USB debugging with a cable"));
         }
     }
 
