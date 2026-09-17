@@ -54,6 +54,7 @@ protected:
     void warnGlobalRead(const QString& key) const;
     // Returns true if the write should be skipped afterwards, the value is not one of the allowed types
     [[nodiscard]] bool rejectInvalidWrite(const QString& key, const QVariant& value) const;
+    template <typename T> [[nodiscard]] bool rejectInvalidWrite(const QString& key, const T& value) const;
     // Returns true if the write should be skipped afterwards, overlays cannot write global options
     bool rejectGlobalWrite(const QString& key);
     static void warnGlobalSync(QList<Diagnostic>& diagnostics, const QString& path);
@@ -84,6 +85,12 @@ private:
     friend class WriteScope;
     friend class InternalRead;
 };
+
+template <typename T> bool Node::rejectInvalidWrite(const QString& key, const T& value) const {
+    Q_UNUSED(key)
+    Q_UNUSED(value)
+    return false; // Only QVariant unions can be given the wrong type
+}
 
 template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const {
     const auto* fallback = static_cast<const C*>(m_fallbackNode);

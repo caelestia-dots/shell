@@ -86,11 +86,8 @@ public:                                                                         
         if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
                                                                                                                        \
-        /* Only unions can be given a wrong type */                                                                    \
-        if constexpr (std::is_same_v<Type, QVariant>) {                                                                \
-            if (rejectInvalidWrite(QStringLiteral(#name), value))                                                      \
-                return;                                                                                                \
-        }                                                                                                              \
+        if (rejectInvalidWrite(QStringLiteral(#name), value))                                                          \
+            return; /* Skip writes of the wrong type */                                                                \
                                                                                                                        \
         if (rejectGlobalWrite(QStringLiteral(#name)))                                                                  \
             return; /* Skip writes to global only keys, they should be sent to the global layer */                     \
