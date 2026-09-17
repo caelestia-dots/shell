@@ -11,6 +11,7 @@
 namespace caelestia::settings {
 
 class Node;
+class ValueCodec;
 
 struct DefaultSpec {
     QVariant value = QVariant();
@@ -41,6 +42,8 @@ struct DefaultSpec {
 struct Annotation {
     DefaultSpec defaultValue;
     bool globalOnly = false;
+    // NOLINTNEXTLINE(readability-redundant-member-init) callers will get missing field init warnings without
+    QList<QMetaType> allowedTypes = {}; // For QVariant properties
 };
 
 namespace detail {
@@ -78,8 +81,10 @@ public:
     int metaIndex;
     bool isNode;
     Annotation annotation;
+    const ValueCodec* codec = nullptr; // Null for nodes and unsupported types
 
     [[nodiscard]] QString typeString() const;
+    [[nodiscard]] bool accepts(const QMetaType& valueType) const;
     [[nodiscard]] Q_INVOKABLE QVariant defaultValue(const Node* self) const;
 };
 

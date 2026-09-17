@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qmetatype.h>
 #include <qobject.h>
 #include <qvariant.h>
 
@@ -13,6 +14,15 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
     for (const auto& [key, value] : entries)
         map.insert(std::move(key), std::move(value));
     return map;
+}
+
+template <typename... Ts> inline QList<QMetaType> unionTypes() {
+    static_assert(sizeof...(Ts) >= 2, "A union needs at least two types");
+    // If the max size is changed, common.cpp `mismatchStr` must be updated
+    static_assert(sizeof...(Ts) <= 4, "A union cannot have more than 4 types");
+    static_assert((!std::is_same_v<Ts, QVariant> && ...), "A union cannot contain QVariant");
+
+    return { QMetaType::fromType<Ts>()... };
 }
 
 namespace detail {
@@ -80,6 +90,9 @@ public:                                                                         
     void set_##name(const Type& value) {                                                                               \
         if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
+                                                                                                                       \
+        if (rejectInvalidWrite(QStringLiteral(#name), value))                                                          \
+            return; /* Skip writes of the wrong type */                                                                \
                                                                                                                        \
         if (rejectGlobalWrite(QStringLiteral(#name)))                                                                  \
             return; /* Skip writes to global only keys, they should be sent to the global layer */                     \

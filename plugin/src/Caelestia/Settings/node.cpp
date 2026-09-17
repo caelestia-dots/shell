@@ -101,11 +101,8 @@ bool Node::setValue(const QString& key, const QVariant& value) {
     }
 
     // Type mismatch, conversion should happen before this function is called
-    if (desc->type != value.metaType()) {
-        qCWarning(lcSettings, "Type mismatch for %s, expected %s got %s", qUtf8Printable(pathFor(key)),
-            desc->type.name(), value.metaType().name());
+    if (rejectInvalidWrite(key, value))
         return false;
-    }
 
     return metaObject()->property(desc->metaIndex).write(this, value);
 }
@@ -128,6 +125,16 @@ void Node::resetToDefaults() {
 
 const Quarantine* Node::quarantine() const {
     return m_quarantine.get();
+}
+
+bool Node::rejectInvalidWrite(const QString& key, const QVariant& value) const {
+    const auto* desc = schema().get(key);
+    if (!desc || desc->accepts(value.metaType()))
+        return false;
+
+    qCWarning(lcSettings, "Type mismatch for %s, expected %s got %s", qUtf8Printable(pathFor(key)),
+        qUtf8Printable(desc->typeString()), value.metaType().name());
+    return true;
 }
 
 void Node::warnGlobalRead(const QString& key) const {
