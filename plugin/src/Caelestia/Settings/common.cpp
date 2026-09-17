@@ -86,6 +86,29 @@ QString receivedStr(const QJsonValue& value) {
     }
 }
 
+QString mismatchStr(const QList<ExpectedType>& expected, const QJsonValue& value) {
+    QStringList args;
+    args.reserve(expected.size() + 1);
+    for (const auto type : expected)
+        args << expectedStr(type);
+    args << receivedStr(value);
+
+    switch (expected.size()) {
+    case 2:
+        // TRANSLATORS: %1/%2 = the allowed types, %3 = the type that was found; all nouns such as "a string"
+        return mark(u"Expected %1 or %2, got %3"_s, args);
+    case 3:
+        // TRANSLATORS: %1-%3 = the allowed types, %4 = the type that was found; all nouns such as "a string"
+        return mark(u"Expected %1, %2 or %3, got %4"_s, args);
+    case 4:
+        // TRANSLATORS: %1-%4 = the allowed types, %5 = the type that was found; all nouns such as "a string"
+        return mark(u"Expected one of: %1, %2, %3, %4; got %5"_s, args);
+    default:
+        // The bounds are checked in macros.hpp `unionType<...T>`
+        Q_UNREACHABLE_RETURN(QString());
+    }
+}
+
 } // namespace
 
 Diagnostic Diagnostic::mismatch(ExpectedType expected, const QJsonValue& value, const QString& option) {
@@ -94,6 +117,14 @@ Diagnostic Diagnostic::mismatch(ExpectedType expected, const QJsonValue& value, 
         .option = option,
         // TRANSLATORS: %1 = the expected type, %2 = the type that was found; both nouns such as "a string"
         .message = mark(u"Expected %1, got %2"_s, { expectedStr(expected), receivedStr(value) }),
+    };
+}
+
+Diagnostic Diagnostic::mismatch(const QList<ExpectedType>& expected, const QJsonValue& value, const QString& option) {
+    return {
+        .type = DiagnosticType::TypeMismatch,
+        .option = option,
+        .message = mismatchStr(expected, value),
     };
 }
 

@@ -28,6 +28,10 @@ DecodeResult mismatch(ExpectedType expected, const QJsonValue& value) {
     return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value), .indexPath = {} };
 }
 
+DecodeResult mismatch(const QList<ExpectedType>& expected, const QJsonValue& value) {
+    return { .value = QVariant(), .error = Diagnostic::mismatch(expected, value), .indexPath = {} };
+}
+
 template <typename Container> ValueCodec* makeListCodec(const QMetaType& type) {
     const auto* elementCodec = ValueCodec::codecFor(QMetaType::fromType<typename Container::value_type>());
     return elementCodec ? new ListCodec<Container>(type, elementCodec) : nullptr;
@@ -42,6 +46,14 @@ QString unionKey(const QList<QMetaType>& types) {
     return ids.join(u","_s);
 }
 
+QList<ExpectedType> expectedTypesOf(const QList<const ValueCodec*>& alternatives) {
+    QList<ExpectedType> types;
+    types.reserve(alternatives.size());
+    for (const auto* codec : alternatives)
+        types << codec->expected();
+    return types;
+}
+
 using ListFactory = ValueCodec* (*)(const QMetaType&);
 
 const QHash<int, ListFactory>& listFactories() {
@@ -54,11 +66,16 @@ const QHash<int, ListFactory>& listFactories() {
 
 } // namespace
 
-ValueCodec::ValueCodec(const QMetaType& type)
-    : m_type(type) {}
+ValueCodec::ValueCodec(const QMetaType& type, ExpectedType expected)
+    : m_type(type)
+    , m_expected(expected) {}
 
 QMetaType ValueCodec::type() const {
     return m_type;
+}
+
+ExpectedType ValueCodec::expected() const {
+    return m_expected;
 }
 
 ValueCodec* ValueCodec::codecFor(const QMetaType& type) {
@@ -222,7 +239,7 @@ DecodeResult VariantMapCodec::decode(const QJsonValue& value) const {
 }
 
 EnumCodec::EnumCodec(const QMetaType& type, const QMetaEnum& metaEnum)
-    : ValueCodec(type)
+    : ValueCodec(type, ExpectedType::String)
     , m_metaEnum(metaEnum) {}
 
 QJsonValue EnumCodec::encode(const QVariant& value) const {
@@ -270,7 +287,7 @@ DecodeResult EnumCodec::decode(const QJsonValue& value) const {
 
 template <typename Container>
 ListCodec<Container>::ListCodec(const QMetaType& type, const ValueCodec* elementCodec)
-    : ValueCodec(type)
+    : ValueCodec(type, ExpectedType::Array)
     , m_elementCodec(elementCodec) {}
 
 template <typename Container> QJsonValue ListCodec<Container>::encode(const QVariant& value) const {
@@ -305,8 +322,9 @@ template <typename Container> DecodeResult ListCodec<Container>::decode(const QJ
 }
 
 UnionCodec::UnionCodec(const QList<const ValueCodec*>& alternatives)
-    : ValueCodec(QMetaType::fromType<QVariant>())
-    , m_alternatives(alternatives) {
+    : ValueCodec(QMetaType::fromType<QVariant>(), alternatives.first()->expected())
+    , m_alternatives(alternatives)
+    , m_expectedTypes(expectedTypesOf(alternatives)) {
     m_byType.reserve(alternatives.size());
 
     for (const auto* codec : alternatives)
@@ -337,9 +355,11 @@ DecodeResult UnionCodec::decode(const QJsonValue& value) const {
         if (!result.error)
             return result;
 
-        // A mismatch is just the wrong alternative, but a bad value is worth reporting, deepest first
+        // Type mismatch just means try another alternative
         if (result.error->type == DiagnosticType::TypeMismatch)
             continue;
+
+        // Report the deepest error that isn't a type mismatch
         if (!best || result.indexPath.size() > best->indexPath.size())
             best = std::move(result);
     }
@@ -347,8 +367,8 @@ DecodeResult UnionCodec::decode(const QJsonValue& value) const {
     if (best)
         return *best;
 
-    // Nothing matched the shape, so report the primary alternative
-    return m_alternatives.first()->decode(value);
+    // Nothing matched the shape, so report every alternative
+    return mismatch(m_expectedTypes, value);
 }
 
 // Instantiated for types as needed

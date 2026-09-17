@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qjsonvalue.h>
+#include <qlist.h>
 #include <qloggingcategory.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -83,7 +84,9 @@ public:
     QString option;
     QString message;
 
-    static Diagnostic mismatch(ExpectedType expected, const QJsonValue& value, const QString& option = QString());
+    static Diagnostic mismatch(ExpectedType expected, const QJsonValue& value, const QString& option = {});
+    static Diagnostic mismatch(
+        const QList<ExpectedType>& expected, const QJsonValue& value, const QString& option = {});
 
     bool operator==(const Diagnostic& other) const = default;
 };
