@@ -121,7 +121,7 @@ private:
 namespace detail {
 
 struct FontConfig {
-    QString family = QString();
+    QString family = {};
     int size;
     int weight = QFont::Normal;
     bool italic = false;

@@ -16,7 +16,7 @@ using settings::vmap;
 class ServiceConfig : public settings::ObjectNode {
     CONFIG_NODE(ServiceConfig, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(QString, weatherLocation, QString())
+    CONFIG_GLOBAL_PROPERTY(QString, weatherLocation, {})
     // Guess based on locale
     CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, weatherUnits,
         QLocale().measurementSystem() == QLocale::ImperialUSSystem ||

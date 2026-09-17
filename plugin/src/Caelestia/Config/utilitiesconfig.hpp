@@ -33,7 +33,7 @@ class UtilitiesVpn : public settings::ObjectNode {
 
     CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
     CONFIG_GLOBAL_PROPERTY(QVariantList, provider, {})
-    CONFIG_GLOBAL_PROPERTY(QString, selectedProvider, QString())
+    CONFIG_GLOBAL_PROPERTY(QString, selectedProvider, {})
 };
 
 class UtilitiesCards : public settings::ObjectNode {

@@ -77,9 +77,9 @@ class BarActiveWindow : public settings::ObjectNode {
 class BarTrayIconSub : public settings::ObjectNode {
     CONFIG_NODE(BarTrayIconSub, settings::ObjectNode)
 
-    CONFIG_PROPERTY(QString, id, QString())
-    CONFIG_PROPERTY(QString, icon, QString())
-    CONFIG_PROPERTY(QString, image, QString())
+    CONFIG_PROPERTY(QString, id, {})
+    CONFIG_PROPERTY(QString, icon, {})
+    CONFIG_PROPERTY(QString, image, {})
 };
 CONFIG_LIST_TYPE(BarTrayIconSub, BarTrayIconSubList)
 
