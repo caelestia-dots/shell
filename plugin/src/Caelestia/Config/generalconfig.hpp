@@ -23,13 +23,26 @@ class GeneralApps : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(QStringList, explorer, { u"thunar"_s })
 };
 
+class GeneralIdleTimeout : public settings::ObjectNode {
+    CONFIG_NODE(GeneralIdleTimeout, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(int, timeout, 300)
+    CONFIG_PROPERTY(QVariant, idleAction, {}, .allowedTypes = settings::unionTypes<QString, QStringList>())
+    CONFIG_PROPERTY(QVariant, returnAction, {}, .allowedTypes = settings::unionTypes<QString, QStringList>())
+    CONFIG_PROPERTY(bool, inhibitWhenAudio, false)
+    CONFIG_PROPERTY(bool, inhibitWhenCharging, false)
+    CONFIG_PROPERTY(bool, respectInhibitors, true)
+};
+CONFIG_LIST_TYPE(GeneralIdleTimeout, GeneralIdleTimeoutList)
+
 class GeneralIdle : public settings::ObjectNode {
     CONFIG_NODE(GeneralIdle, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(bool, lockBeforeSleep, true)
     CONFIG_GLOBAL_PROPERTY(bool, inhibitWhenAudio, true)
     CONFIG_GLOBAL_PROPERTY(bool, inhibitWhenCharging, false)
-    CONFIG_GLOBAL_PROPERTY(QVariantList, timeouts,
+    CONFIG_GLOBAL_LIST(GeneralIdleTimeoutList, timeouts,
         DEFAULT_ARG({
             vmap({
                 { u"timeout"_s, 180 },
