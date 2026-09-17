@@ -1,6 +1,5 @@
 #pragma once
 
-#include <qlocale.h>
 #include <qstring.h>
 #include <qvariantlist.h>
 
@@ -31,9 +30,7 @@ class ServiceConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, sensorUnits, TemperatureUnit::Celsius)
     // Binary (KiB/MiB/GiB) or decimal (KB/MB/GB) data sizes
     CONFIG_GLOBAL_ENUM_PROPERTY(DataUnit, dataUnits, DataUnit::Binary)
-    // Attempt to guess based on locale
-    CONFIG_GLOBAL_PROPERTY(
-        bool, useTwelveHourClock, QLocale().timeFormat(QLocale::ShortFormat).toLower().contains(u"a"_s))
+    CONFIG_GLOBAL_ENUM_PROPERTY(ClockFormat, clockFormat, ClockFormat::Auto)
     CONFIG_GLOBAL_ENUM_PROPERTY(GpuType, gpuType, GpuType::Auto)
     CONFIG_GLOBAL_PROPERTY(int, visualiserBars, 60)
     CONFIG_GLOBAL_PROPERTY(qreal, audioIncrement, 0.1)

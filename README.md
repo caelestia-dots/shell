@@ -236,7 +236,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
-> - `services`: `audioIncrement`, `brightnessIncrement`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`, `weatherUnits`
+> - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
 > - `utilities`: `toasts.*`, `vpn.*`
 >
 > </details>
@@ -743,7 +743,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "weatherUnits": "Auto",
         "sensorUnits": "Celsius",
         "dataUnits": "Binary",
-        "useTwelveHourClock": false,
+        "clockFormat": "Auto",
         "gpuType": "Auto",
         "visualiserBars": 60,
         "audioIncrement": 0.1,
