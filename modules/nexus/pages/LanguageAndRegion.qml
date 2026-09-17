@@ -14,6 +14,10 @@ PageBase {
     // Temperature units (there must be one for each value of the TemperatureUnit enum)
     readonly property list<MenuItem> tempItems: [
         MenuItem {
+            text: Tr.tr("Auto")
+            value: TemperatureUnit.Auto
+        },
+        MenuItem {
             text: Tr.tr("°C")
             value: TemperatureUnit.Celsius
         },

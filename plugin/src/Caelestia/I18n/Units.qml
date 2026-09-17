@@ -5,8 +5,17 @@ import Caelestia.Config
 import Caelestia.I18n
 
 QtObject {
+    // Resolves TemperatureUnit.Auto to a concrete unit based on the locale
+    function resolveTempUnit(unit: int): int {
+        if (Number(unit) !== TemperatureUnit.Auto)
+            return unit;
+        const system = Qt.locale().measurementSystem;
+        return system === Locale.ImperialUSSystem || system === Locale.ImperialUKSystem ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
+    }
+
     // Converts a temperature in Celsius to the given TemperatureUnit
-    function toTemperature(celsius: real, unit: int): real {
+    function toTemperature(celsius: real, unitIn: int): real {
+        const unit = resolveTempUnit(unitIn);
         if (Number(unit) === TemperatureUnit.Fahrenheit)
             return celsius * 9 / 5 + 32;
         if (Number(unit) === TemperatureUnit.Kelvin)
@@ -15,7 +24,8 @@ QtObject {
     }
 
     // Formats an already converted temperature with the given TemperatureUnit's suffix
-    function formatTemp(value: var, unit: int, compact = false): string {
+    function formatTemp(value: var, unitIn: int, compact = false): string {
+        const unit = resolveTempUnit(unitIn);
         if (compact)
             return Number(unit) === TemperatureUnit.Kelvin ? String(value) : Tr.trCtx("%1°", "temperature").arg(value);
 

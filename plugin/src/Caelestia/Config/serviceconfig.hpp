@@ -25,12 +25,8 @@ class ServiceConfig : public settings::ObjectNode {
     CONFIG_NODE(ServiceConfig, settings::ObjectNode)
 
     CONFIG_GLOBAL_PROPERTY(QString, weatherLocation, {})
-    // Guess based on locale
-    CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, weatherUnits,
-        QLocale().measurementSystem() == QLocale::ImperialUSSystem ||
-                QLocale().measurementSystem() == QLocale::ImperialUKSystem
-            ? TemperatureUnit::Fahrenheit
-            : TemperatureUnit::Celsius)
+    // Auto guesses based on locale
+    CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, weatherUnits, TemperatureUnit::Auto)
     // Always Celsius by default cause apparently even imperial system users don't use Fahrenheit for perf temps?
     CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, sensorUnits, TemperatureUnit::Celsius)
     // Binary (KiB/MiB/GiB) or decimal (KB/MB/GB) data sizes
