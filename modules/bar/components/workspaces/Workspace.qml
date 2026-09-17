@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import M3Shapes
@@ -19,6 +18,7 @@ Item {
     required property int activeWsId
     required property int ws
     required property HyprlandMonitor monitor
+    required property bool horizontal
 
     required property int displayType
     required property bool showWindows
@@ -47,6 +47,10 @@ Item {
             return Colours.palette.m3onSurface;
         return Colours.layer(Colours.palette.m3outlineVariant, 2);
     }
+    readonly property real indSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+    readonly property real winLen: windows.item ? (root.horizontal ? windows.item.layoutWidth : windows.item.layoutHeight) : 0
+    readonly property real winGap: hasWindows ? Tokens.padding.extraSmall : 0
+    readonly property real mainContent: indSize + winGap + winLen
 
     function updateShape(): void {
         const shape = indicator.item as MaterialShape;
@@ -59,9 +63,10 @@ Item {
             shape.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
     }
 
-    anchors.horizontalCenter: parent?.horizontalCenter
-    LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
+    LazyListView.preferredHeight: root.horizontal ? 0 : (LazyListView.removing ? 0 : mainContent)
+    LazyListView.preferredWidth: root.horizontal ? (LazyListView.removing ? 0 : mainContent) : 0
     LazyListView.visibleHeight: LazyListView.preferredHeight
+    LazyListView.visibleWidth: LazyListView.preferredWidth
 
     opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
 
@@ -72,8 +77,18 @@ Item {
         Anim {}
     }
 
+    Behavior on LazyListView.visibleWidth {
+        Anim {}
+    }
+
     Behavior on y {
-        enabled: root.LazyListView.ready
+        enabled: root.horizontal ? false : root.LazyListView.ready
+
+        Anim {}
+    }
+
+    Behavior on x {
+        enabled: root.horizontal ? root.LazyListView.ready : false
 
         Anim {}
     }
@@ -139,6 +154,7 @@ Item {
                 return wsName;
             }
             color: root.fgColour
+            horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Qt.AlignVCenter
             font.family: Tokens.font.workspaces
         }
@@ -152,6 +168,7 @@ Item {
             grade: 25
             text: iconCacher.icon
             color: root.fgColour
+            horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Qt.AlignVCenter
 
             WsIconCacher {
@@ -172,76 +189,81 @@ Item {
         }
     }
 
-    ColumnLayout {
-        id: layout
+    Loader {
+        id: indicator
 
-        anchors.fill: parent
-        spacing: 0
-
-        Loader {
-            id: indicator
-
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-            sourceComponent: {
-                if (root.displayType === BarWorkspaceDisplay.Icons)
-                    return iconLoaderComponent;
-                if (root.displayType === BarWorkspaceDisplay.Text)
-                    return textComponent;
-                return shapeComponent;
-            }
-
-            onItemChanged: root.updateShape()
+        x: root.horizontal ? 0 : (parent.width - width) / 2
+        y: root.horizontal ? (parent.height - height) / 2 : 0
+        width: root.indSize
+        height: root.indSize
+        sourceComponent: {
+            if (root.displayType === BarWorkspaceDisplay.Icons)
+                return iconLoaderComponent;
+            if (root.displayType === BarWorkspaceDisplay.Text)
+                return textComponent;
+            return shapeComponent;
         }
 
-        Loader {
-            id: windows
+        onItemChanged: root.updateShape()
+    }
 
-            asynchronous: true
+    Loader {
+        id: windows
 
-            Layout.fillWidth: true
-            Layout.topMargin: -Tokens.spacing.extraSmall / 2
-            Layout.preferredHeight: root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
+        asynchronous: true
 
-            visible: active
-            active: root.showWindows && Config.bar.workspaces.maxWindowIcons > 0
+        x: root.horizontal ? root.indSize + Tokens.spacing.extraSmall / 2 : 0
+        y: root.horizontal ? 0 : root.indSize - Tokens.spacing.extraSmall / 2
+        width: root.horizontal ? Math.max(root.winLen, 0) : parent.width
+        height: root.horizontal ? parent.height : Math.max(root.winLen, 0)
 
-            sourceComponent: LazyListView {
-                spacing: 0
-                implicitHeight: contentHeight
-                cullDelegates: false
-                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+        visible: active
+        active: root.showWindows && Config.bar.workspaces.maxWindowIcons > 0
 
-                model: ScriptModel {
-                    values: {
-                        const windows = root.toplevels;
-                        const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
-                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+        sourceComponent: LazyListView {
+            anchors.fill: parent
+            orientation: root.horizontal ? LazyListView.Horizontal : LazyListView.Vertical
+            spacing: 0
+            cullDelegates: false
+            removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+
+            model: ScriptModel {
+                values: {
+                    const windows = root.toplevels;
+                    const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
+                    return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                }
+            }
+
+            delegate: MaterialIcon {
+                id: win
+
+                required property var modelData
+                required property int index // Needed, LazyListView will fail to set it if it doesn't exist
+
+                grade: 0
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Qt.AlignVCenter
+                text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
+                color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+
+                opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.DefaultEffects
                     }
                 }
 
-                delegate: MaterialIcon {
-                    id: win
+                // Behaviors on the main-axis property let icons slide when the list reorganises
+                Behavior on x {
+                    enabled: root.horizontal
+                    Anim {}
+                }
 
-                    required property var modelData
-                    required property int index // Needed, LazyListView will fail to set it if it doesn't exist
-
-                    grade: 0
-                    horizontalAlignment: Text.AlignHCenter
-                    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
-
-                    opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
-
-                    Behavior on opacity {
-                        Anim {
-                            type: Anim.DefaultEffects
-                        }
-                    }
-
-                    Behavior on y {
-                        Anim {}
-                    }
+                Behavior on y {
+                    enabled: !root.horizontal
+                    Anim {}
                 }
             }
         }

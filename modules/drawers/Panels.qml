@@ -19,6 +19,7 @@ Item {
     required property ShellScreen screen
     required property ScreenState screenState
     required property Bar.BarWrapper bar
+    required property EdgeGeometry geometry
     required property real borderThickness
 
     readonly property alias osd: osd
@@ -36,7 +37,9 @@ Item {
 
     anchors.fill: parent
     anchors.margins: borderThickness
-    anchors.leftMargin: bar.implicitWidth
+    anchors.leftMargin: geometry.insetLeft(borderThickness)
+    anchors.topMargin: geometry.insetTop(borderThickness)
+    anchors.bottomMargin: geometry.insetBottom(borderThickness)
 
     Item {
         id: osdWrapper
@@ -111,15 +114,14 @@ Item {
         id: dashboard
 
         screenState: root.screenState
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
+        onLeft: root.geometry.dashboardOnLeft
     }
 
     BarPopouts.ClipWrapper {
         id: popoutsWrapper
 
         screen: root.screen
+        position: root.geometry.position
         borderThickness: root.borderThickness
     }
 

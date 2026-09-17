@@ -4,9 +4,25 @@ import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
 import qs.modules.nexus.common
+import qs.components.controls
 
 PageBase {
     id: root
+
+    readonly property list<MenuItem> barPositionItems: [
+        MenuItem {
+            text: Tr.tr("Top")
+            value: BarPosition.Top
+        },
+        MenuItem {
+            text: Tr.tr("Bottom")
+            value: BarPosition.Bottom
+        },
+        MenuItem {
+            text: Tr.tr("Left")
+            value: BarPosition.Left
+        }
+    ]
 
     title: Tr.tr("Taskbar")
     isSubPage: true
@@ -23,8 +39,16 @@ PageBase {
             text: Tr.tr("Behaviour")
         }
 
-        ToggleRow {
+        SelectRow {
             first: true
+            label: Tr.tr("Position")
+            subtext: Tr.tr("Where the bar is located on the screen")
+            menuItems: root.barPositionItems
+            active: root.barPositionItems.find(i => i.value === Config.bar.position)
+            onSelected: i => GlobalConfig.bar.position = i.value
+        }
+
+        ToggleRow {
             text: Tr.tr("Persistent")
             subtext: Tr.tr("Keep the bar visible at all times")
             checked: Config.bar.persistent

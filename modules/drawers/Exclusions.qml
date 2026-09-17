@@ -11,14 +11,16 @@ Scope {
 
     required property ShellScreen screen
     required property Bar.BarWrapper bar
+    required property EdgeGeometry geometry
 
     ExclusionZone {
         anchors.left: true
-        exclusiveZone: root.bar.exclusiveZone
+        hasBar: root.geometry.barOnLeft
     }
 
     ExclusionZone {
         anchors.top: true
+        hasBar: root.geometry.barOnTop
     }
 
     ExclusionZone {
@@ -27,12 +29,15 @@ Scope {
 
     ExclusionZone {
         anchors.bottom: true
+        hasBar: root.geometry.barOnBottom
     }
 
     component ExclusionZone: StyledWindow {
+        property bool hasBar
+
         screen: root.screen
         name: "border-exclusion"
-        exclusiveZone: contentItem.Config.border.thickness
+        exclusiveZone: hasBar ? root.bar.exclusiveZone : contentItem.Config.border.thickness
         mask: Region {}
         implicitWidth: 1
         implicitHeight: 1
