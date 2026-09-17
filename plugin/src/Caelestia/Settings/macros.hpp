@@ -16,7 +16,11 @@ inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entr
     return map;
 }
 
-template <typename... Ts> inline QList<QMetaType> tlist() {
+template <typename... Ts> inline QList<QMetaType> unionTypes() {
+    static_assert(sizeof...(Ts) >= 2, "A union needs at least two types");
+    static_assert(sizeof...(Ts) <= 4, "A union cannot have more than 4 types");
+    static_assert((!std::is_same_v<Ts, QVariant> && ...), "A union cannot contain QVariant");
+
     return { QMetaType::fromType<Ts>()... };
 }
 
