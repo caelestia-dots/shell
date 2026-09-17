@@ -104,6 +104,8 @@ Optional dependencies:
 
 -   [`kdeconnect`](https://invent.kde.org/network/kdeconnect-kde) - for the phone share utilities card
 -   [`sshfs`](https://github.com/libfuse/sshfs) - for browsing and downloading files from a phone in the phone share card
+-   [`adb`](https://developer.android.com/tools/adb) - for screen mirroring in the phone share card
+-   [`scrcpy`](https://github.com/Genymobile/scrcpy) 4.0 or newer - for screen mirroring in the phone share card
 
 > [!IMPORTANT]
 > The commands below (and in the "Updating" section) assume `$XDG_CONFIG_HOME` is set.
