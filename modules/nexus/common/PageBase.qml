@@ -61,6 +61,8 @@ ColumnLayout {
     VerticalFadeFlickable {
         id: flickable
 
+        acceptedButtons: Qt.NoButton
+
         Layout.fillWidth: true
         Layout.fillHeight: true
 
