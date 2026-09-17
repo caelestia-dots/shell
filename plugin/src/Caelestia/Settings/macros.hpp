@@ -106,12 +106,10 @@ public:                                                                         
     Q_SIGNAL void name##Changed();                                                                                     \
                                                                                                                        \
 private:                                                                                                               \
-    Type m_##name = fallbackValue(&Self::m_##name, caelestia::settings::DefaultSpec::resolve<Type>(this, defaultVal)); \
+    Type m_##name = fallbackValue(&Self::m_##name, defaultVal);                                                        \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = caelestia::settings::DefaultSpec::create<Type>(defaultVal),                             \
-                 .globalOnly = global,                                                                                 \
-                 __VA_ARGS__ }),                                                                                       \
+             { .defaultValue = QVariant::fromValue<Type>(defaultVal), .globalOnly = global, __VA_ARGS__ }),            \
             true);
 
 #define SETTINGS_PROPERTY(Type, name, defaultVal, ...)                                                                 \
@@ -182,7 +180,7 @@ private:                                                                        
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
         (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = caelestia::settings::DefaultSpec::create<QList<QVariantMap>>(defaultVal),               \
+             { .defaultValue = QVariant::fromValue<QList<QVariantMap>>(defaultVal),                                    \
                  .globalOnly = global,                                                                                 \
                  __VA_ARGS__ }),                                                                                       \
             true);
