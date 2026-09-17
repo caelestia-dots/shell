@@ -36,7 +36,7 @@ QStringList gpuBusyFiles() {
 QString cleanName(QString s) {
     static const QRegularExpression k_noise(u"\\(R\\)|\\(TM\\)|Graphics"_s, QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression k_spaces(u"\\s+"_s);
-    s.replace(k_noise, QString());
+    s.replace(k_noise, {});
     s.replace(k_spaces, u" "_s);
     return s.trimmed();
 }

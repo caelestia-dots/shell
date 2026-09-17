@@ -60,12 +60,9 @@ class BarWorkspaces : public settings::ObjectNode {
             u"hide_in_bar"_s,
             u"xwl_popup"_s,
         }))
-    CONFIG_GLOBAL_PROPERTY(QVariantList, windowIcons,
+    CONFIG_GLOBAL_LIST(IconRuleList, windowIcons,
         DEFAULT_ARG({
-            vmap({
-                { u"regex"_s, u"steam(_app_(default|[0-9]+))?"_s },
-                { u"icon"_s, u"sports_esports"_s },
-            }),
+            ICON_RULE_REGEX("steam(_app_(default|[0-9]+))?", "", "sports_esports"),
         }))
 };
 
@@ -77,13 +74,22 @@ class BarActiveWindow : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, showOnHover, true)
 };
 
+class BarTrayIconSub : public settings::ObjectNode {
+    CONFIG_NODE(BarTrayIconSub, settings::ObjectNode)
+
+    CONFIG_PROPERTY(QString, id, {})
+    CONFIG_PROPERTY(QString, icon, {})
+    CONFIG_PROPERTY(QString, image, {})
+};
+CONFIG_LIST_TYPE(BarTrayIconSub, BarTrayIconSubList)
+
 class BarTray : public settings::ObjectNode {
     CONFIG_NODE(BarTray, settings::ObjectNode)
 
     CONFIG_PROPERTY(bool, background, false)
     CONFIG_PROPERTY(bool, recolour, false)
     CONFIG_PROPERTY(bool, compact, false)
-    CONFIG_GLOBAL_PROPERTY(QVariantList, iconSubs, {})
+    CONFIG_GLOBAL_LIST(BarTrayIconSubList, iconSubs, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenIcons, {})
 };
 

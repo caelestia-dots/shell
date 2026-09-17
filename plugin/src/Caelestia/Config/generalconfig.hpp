@@ -17,19 +17,32 @@ using util::i18n::mark;
 class GeneralApps : public settings::ObjectNode {
     CONFIG_NODE(GeneralApps, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(QStringList, terminal, { u"foot"_s })
-    CONFIG_GLOBAL_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
-    CONFIG_GLOBAL_PROPERTY(QStringList, playback, { u"mpv"_s })
-    CONFIG_GLOBAL_PROPERTY(QStringList, explorer, { u"thunar"_s })
+    CONFIG_PROPERTY(QStringList, terminal, { u"foot"_s })
+    CONFIG_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
+    CONFIG_PROPERTY(QStringList, playback, { u"mpv"_s })
+    CONFIG_PROPERTY(QStringList, explorer, { u"thunar"_s })
 };
+
+class GeneralIdleTimeout : public settings::ObjectNode {
+    CONFIG_NODE(GeneralIdleTimeout, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(int, timeout, 300)
+    CONFIG_PROPERTY(QVariant, idleAction, {}, .allowedTypes = settings::unionTypes<QString, QStringList>())
+    CONFIG_PROPERTY(QVariant, returnAction, {}, .allowedTypes = settings::unionTypes<QString, QStringList>())
+    CONFIG_PROPERTY(bool, inhibitWhenAudio, false)
+    CONFIG_PROPERTY(bool, inhibitWhenCharging, false)
+    CONFIG_PROPERTY(bool, respectInhibitors, true)
+};
+CONFIG_LIST_TYPE(GeneralIdleTimeout, GeneralIdleTimeoutList)
 
 class GeneralIdle : public settings::ObjectNode {
     CONFIG_NODE(GeneralIdle, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(bool, lockBeforeSleep, true)
-    CONFIG_GLOBAL_PROPERTY(bool, inhibitWhenAudio, true)
-    CONFIG_GLOBAL_PROPERTY(bool, inhibitWhenCharging, false)
-    CONFIG_GLOBAL_PROPERTY(QVariantList, timeouts,
+    CONFIG_PROPERTY(bool, lockBeforeSleep, true)
+    CONFIG_PROPERTY(bool, inhibitWhenAudio, true)
+    CONFIG_PROPERTY(bool, inhibitWhenCharging, false)
+    CONFIG_LIST(GeneralIdleTimeoutList, timeouts,
         DEFAULT_ARG({
             vmap({
                 { u"timeout"_s, 180 },
@@ -47,10 +60,21 @@ class GeneralIdle : public settings::ObjectNode {
         }))
 };
 
+class GeneralBatteryWarnLevel : public settings::ObjectNode {
+    CONFIG_NODE(GeneralBatteryWarnLevel, settings::ObjectNode)
+
+    CONFIG_PROPERTY(int, level, -1)
+    CONFIG_PROPERTY(QString, title, {})
+    CONFIG_PROPERTY(QString, message, {})
+    CONFIG_PROPERTY(QString, icon, {})
+    CONFIG_PROPERTY(bool, critical, false)
+};
+CONFIG_LIST_TYPE(GeneralBatteryWarnLevel, GeneralBatteryWarnList)
+
 class GeneralBattery : public settings::ObjectNode {
     CONFIG_NODE(GeneralBattery, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(QVariantList, warnLevels,
+    CONFIG_LIST(GeneralBatteryWarnList, warnLevels,
         DEFAULT_ARG({
             vmap({
                 { u"level"_s, 20 },
@@ -72,20 +96,20 @@ class GeneralBattery : public settings::ObjectNode {
                 { u"critical"_s, true },
             }),
         }))
-    CONFIG_GLOBAL_PROPERTY(int, criticalLevel, 3)
+    CONFIG_PROPERTY(int, criticalLevel, 3)
 };
 
 class GeneralConfig : public settings::ObjectNode {
     CONFIG_NODE(GeneralConfig, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(QString, logo, QString())
-    CONFIG_GLOBAL_PROPERTY(QString, language, QString())
+    CONFIG_GLOBAL_PROPERTY(QString, logo, {})
+    CONFIG_GLOBAL_PROPERTY(QString, language, {})
     CONFIG_PROPERTY(bool, showOverFullscreen, false)
     CONFIG_PROPERTY(qreal, mediaGifSpeedAdjustment, 300)
     CONFIG_PROPERTY(qreal, sessionGifSpeed, 0.7)
-    CONFIG_SUBOBJECT(GeneralApps, apps)
-    CONFIG_SUBOBJECT(GeneralIdle, idle)
-    CONFIG_SUBOBJECT(GeneralBattery, battery)
+    CONFIG_GLOBAL_SUBOBJECT(GeneralApps, apps)
+    CONFIG_GLOBAL_SUBOBJECT(GeneralIdle, idle)
+    CONFIG_GLOBAL_SUBOBJECT(GeneralBattery, battery)
 };
 
 } // namespace caelestia::config

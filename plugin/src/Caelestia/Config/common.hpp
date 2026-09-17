@@ -34,21 +34,19 @@ QString monitorConfigDir();
 class ListEntry : public settings::ObjectNode {
     CONFIG_NODE(ListEntry, settings::ObjectNode)
 
-    CONFIG_PROPERTY(QString, id, QString())
+    CONFIG_PROPERTY(QString, id, {})
     CONFIG_PROPERTY(bool, enabled, true)
 };
-
 CONFIG_LIST_TYPE(ListEntry, EntryList)
 
 class IconRule : public settings::ObjectNode {
     CONFIG_NODE(IconRule, settings::ObjectNode)
 
-    CONFIG_PROPERTY(QString, name, QString())
-    CONFIG_PROPERTY(QString, regex, QString())
-    CONFIG_PROPERTY(QString, flags, QString())
-    CONFIG_PROPERTY(QString, icon, QString())
+    CONFIG_PROPERTY(QString, name, {})
+    CONFIG_PROPERTY(QString, regex, {})
+    CONFIG_PROPERTY(QString, flags, {})
+    CONFIG_PROPERTY(QString, icon, {})
 };
-
 CONFIG_LIST_TYPE(IconRule, IconRuleList)
 
 } // namespace caelestia::config

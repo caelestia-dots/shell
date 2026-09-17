@@ -237,8 +237,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
 > - `services`: `audioIncrement`, `brightnessIncrement`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`, `weatherUnits`
-> - `utilities.toasts`: all except `fullscreen`
-> - `utilities.vpn`: `enabled`, `provider`, `selectedProvider`
+> - `utilities`: `toasts.*`, `vpn.*`
 >
 > </details>
 
