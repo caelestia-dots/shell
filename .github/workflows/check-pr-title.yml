@@ -54,3 +54,22 @@ jobs:
             scripts
           subjectPattern: ^(?![A-Z]).+$ # No starting with uppercase
           subjectPatternError: The subject must not start with an uppercase character.
+
+  label-breaking:
+    runs-on: ubuntu-slim
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ "$TITLE" =~ ^[a-zA-Z]+(\([^\)]*\))?!: ]]; then
+            gh pr edit "$PR" --add-label breaking
+          else
+            gh pr edit "$PR" --remove-label breaking
+          fi
