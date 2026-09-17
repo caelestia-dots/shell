@@ -355,8 +355,8 @@ DecodeResult UnionCodec::decode(const QJsonValue& value) const {
         if (!result.error)
             return result;
 
-        // Type mismatch just means try another alternative
-        if (result.error->type == DiagnosticType::TypeMismatch)
+        // Non-nested type mismatch just means try another alternative
+        if (result.indexPath.isEmpty() && result.error->type == DiagnosticType::TypeMismatch)
             continue;
 
         // Report the deepest error that isn't a type mismatch
