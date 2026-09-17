@@ -119,7 +119,7 @@ void Node::resetToDefaults() {
         if (desc.isNode)
             value(desc.key).value<Node*>()->resetToDefaults();
         else if (!desc.globalOnly() || !m_fallbackNode) // Skip resetting global options on overlays
-            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue(this));
+            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue());
     }
 }
 
