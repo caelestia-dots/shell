@@ -28,11 +28,23 @@ class UtilitiesToasts : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, nowPlaying, false)
 };
 
+class UtilitiesVpnProvider : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesVpnProvider, settings::ObjectNode)
+
+    CONFIG_PROPERTY(QString, id, {})
+    CONFIG_PROPERTY(QString, name, {})
+    CONFIG_PROPERTY(QString, displayName, {})
+    CONFIG_PROPERTY(QString, interface, {})
+    CONFIG_PROPERTY(QStringList, connectCmd, {})
+    CONFIG_PROPERTY(QStringList, disconnectCmd, {})
+};
+CONFIG_LIST_TYPE(UtilitiesVpnProvider, UtilitiesVpnProviderList)
+
 class UtilitiesVpn : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesVpn, settings::ObjectNode)
 
     CONFIG_PROPERTY(bool, enabled, false)
-    CONFIG_PROPERTY(QVariantList, provider, {})
+    CONFIG_LIST(UtilitiesVpnProviderList, provider, {})
     CONFIG_PROPERTY(QString, selectedProvider, {})
 };
 
