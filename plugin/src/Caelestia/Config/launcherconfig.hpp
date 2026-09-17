@@ -18,11 +18,11 @@ using util::i18n::markCtx;
 class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_NODE(LauncherUseFuzzy, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(bool, apps, false)
-    CONFIG_GLOBAL_PROPERTY(bool, actions, false)
-    CONFIG_GLOBAL_PROPERTY(bool, schemes, false)
-    CONFIG_GLOBAL_PROPERTY(bool, variants, false)
-    CONFIG_GLOBAL_PROPERTY(bool, wallpapers, false)
+    CONFIG_PROPERTY(bool, apps, false)
+    CONFIG_PROPERTY(bool, actions, false)
+    CONFIG_PROPERTY(bool, schemes, false)
+    CONFIG_PROPERTY(bool, variants, false)
+    CONFIG_PROPERTY(bool, wallpapers, false)
 };
 
 class LauncherConfig : public settings::ObjectNode {
@@ -39,7 +39,7 @@ class LauncherConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(bool, vimKeybinds, false)
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps, {})
-    CONFIG_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
+    CONFIG_GLOBAL_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
     CONFIG_GLOBAL_PROPERTY(QVariantList, actions,
         DEFAULT_ARG({
             vmap({
