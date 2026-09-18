@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qhash.h>
+#include <qjsonarray.h>
 #include <qjsonobject.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
@@ -9,6 +10,8 @@
 #include "lyriccandidate.hpp"
 
 namespace caelestia::services {
+
+class ResettingCookieJar;
 
 struct LyricLine {
     qreal time = 0.0;
@@ -28,14 +31,23 @@ class Lyrics : public QObject {
         QList<caelestia::services::LyricCandidate> lyricCandidates READ lyricCandidates NOTIFY lyricCandidatesChanged)
     Q_PROPERTY(caelestia::services::LyricCandidate selectedCandidate READ selectedCandidate WRITE setSelectedCandidate
             NOTIFY selectedCandidateChanged)
+    Q_PROPERTY(caelestia::services::LyricCandidate autoCandidate READ autoCandidate NOTIFY autoCandidateChanged)
+    Q_PROPERTY(bool hasCandidateOverride READ hasCandidateOverride NOTIFY hasCandidateOverrideChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
-    Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY lyricsChanged)
+    Q_PROPERTY(bool forceSearching READ forceSearching NOTIFY forceSearchingChanged)
+    Q_PROPERTY(bool hasLyrics READ hasLyrics NOTIFY hasLyricsChanged)
+    Q_PROPERTY(bool hasMetadataSuggestion READ hasMetadataSuggestion NOTIFY metadataSuggestionChanged)
+    Q_PROPERTY(QString suggestedArtist READ suggestedArtist NOTIFY metadataSuggestionChanged)
+    Q_PROPERTY(QString suggestedTitle READ suggestedTitle NOTIFY metadataSuggestionChanged)
     Q_PROPERTY(qreal offset READ offset WRITE setOffset NOTIFY offsetChanged)
     Q_PROPERTY(QString trackArtist READ trackArtist NOTIFY trackChanged)
     Q_PROPERTY(QString trackTitle READ trackTitle NOTIFY trackChanged)
+    Q_PROPERTY(QString error READ error NOTIFY errorChanged)
+    Q_PROPERTY(bool offline READ offline NOTIFY offlineChanged)
 
 public:
     explicit Lyrics(QObject* parent = nullptr);
+    ~Lyrics() override;
 
     [[nodiscard]] QStringList lyrics() const;
     [[nodiscard]] LyricsBackend backend() const;
@@ -44,12 +56,20 @@ public:
     [[nodiscard]] QList<LyricCandidate> lyricCandidates() const;
     [[nodiscard]] LyricCandidate selectedCandidate() const;
     void setSelectedCandidate(const LyricCandidate& value);
+    [[nodiscard]] LyricCandidate autoCandidate() const;
+    [[nodiscard]] bool hasCandidateOverride() const;
     [[nodiscard]] bool loading() const;
+    [[nodiscard]] bool forceSearching() const;
     [[nodiscard]] bool hasLyrics() const;
+    [[nodiscard]] bool hasMetadataSuggestion() const;
+    [[nodiscard]] QString suggestedArtist() const;
+    [[nodiscard]] QString suggestedTitle() const;
     [[nodiscard]] qreal offset() const;
     void setOffset(qreal value);
     [[nodiscard]] QString trackArtist() const;
     [[nodiscard]] QString trackTitle() const;
+    [[nodiscard]] QString error() const;
+    [[nodiscard]] bool offline() const;
 
     [[nodiscard]] Q_INVOKABLE int indexForTime(qreal time) const;
     [[nodiscard]] Q_INVOKABLE qreal timeForIndex(int index) const;
@@ -57,6 +77,12 @@ public:
         const QString& artist, const QString& title, const QString& album = {}, qreal duration = 0.0);
     Q_INVOKABLE void clearTrack();
     Q_INVOKABLE void refresh();
+    Q_INVOKABLE void resetToAuto();
+    Q_INVOKABLE void forceSearch();
+    Q_INVOKABLE void applySuggestedMetadata();
+
+    [[nodiscard]] static QString cleanTrackTitle(const QString& title);
+    [[nodiscard]] static QString extractPrimaryArtist(const QString& artist);
 
 signals:
     void lyricsChanged();
@@ -64,34 +90,69 @@ signals:
     void preferredBackendChanged();
     void lyricCandidatesChanged();
     void selectedCandidateChanged();
+    void autoCandidateChanged();
+    void hasCandidateOverrideChanged();
     void loadingChanged();
+    void forceSearchingChanged();
     void hasLyricsChanged();
+    void metadataSuggestionChanged();
     void offsetChanged();
     void trackChanged();
+    void errorChanged();
+    void offlineChanged();
 
 private:
     void setBackend(LyricsBackend value);
     void setLoading(bool value);
+    void setForceSearching(bool value);
+    void setError(const QString& value);
+    void setOffline(bool value);
+    void noteReplyError(QNetworkReply* reply);
     void setLines(QVector<LyricLine> lines, LyricsBackend source);
     void clearLines();
     void appendCandidates(const QList<LyricCandidate>& add);
     void clearCandidates();
+    [[nodiscard]] bool compareCandidates(const LyricCandidate& a, const LyricCandidate& b) const;
 
     void scheduleLoad();
     void doLoad();
     void cancelInFlight();
     int newRequestId();
 
+    bool loadCachedLyrics(const LyricCandidate& value);
+    void loadLocalLyricFile(const QString& path);
+    bool tryLoadLocalFile(const QString& path);
+
     void tryLocal(int reqId);
     void tryLrclib(int reqId);
     void tryNetEase(int reqId);
     void chainNext(LyricsBackend justFailed, int reqId);
+
+    bool applyLrclibGetObject(const QJsonObject& obj, const QString& logTrack, const QString& logArtist);
+    void retryLrclibGetSplit(
+        int reqId, const QString& title, const QString& artist, const QString& album, qreal duration, int stage = 0);
+    void retryLrclibSearchSplit(int reqId, const QString& title, const QString& artist, bool allowReverse = true);
+
+    struct LrclibSearchResult {
+        QList<LyricCandidate> candidates;
+        LyricCandidate bestCandidate;
+        QString bestSynced;
+    };
+
+    [[nodiscard]] LrclibSearchResult parseLrclibSearchResult(const QJsonArray& arr) const;
+    [[nodiscard]] static QList<LyricCandidate> parseNetEaseSearchResult(const QJsonDocument& doc);
+    void applyLrclibCandidateUpgrade(const LyricCandidate& bestCand, const QString& bestSynced);
 
     void searchLrclibCandidates(int reqId);
     void searchNetEaseCandidates(int reqId);
 
     void fetchLrclibById(const QString& id, int reqId);
     void fetchNetEaseLyricsById(const QString& id, int reqId);
+    void handleLrclibForceSearchReply(QNetworkReply* reply, int reqId, const std::function<void()>& checkFinished);
+    void handleNetEaseForceSearchReply(QNetworkReply* reply, int reqId, const std::function<void()>& checkFinished);
+    void handleNetEaseLyricsReply(QNetworkReply* reply, const QString& id, int reqId);
+    void noteGuardedReplyError(QNetworkReply* reply);
+    void setGuardedError(const QString& error);
 
     QNetworkReply* getJson(const QUrl& url, const QHash<QByteArray, QByteArray>& headers = {});
     void trackReply(int reqId, QNetworkReply* reply);
@@ -102,9 +163,13 @@ private:
     void loadLyricsMap();
     void persistTrackPrefs();
 
+    void updateMetadataSuggestion();
+
     [[nodiscard]] static QString lyricsDir();
     [[nodiscard]] static QString lyricsMapPath();
     [[nodiscard]] QString trackKey() const;
+    [[nodiscard]] QString rawTrackKey() const;
+    void resolveMetadataAlias(QString& artist, QString& title);
     [[nodiscard]] static QString backendKey(LyricsBackend value);
     [[nodiscard]] static LyricsBackend backendFromKey(const QString& key);
 
@@ -119,7 +184,9 @@ private:
     [[nodiscard]] static QString findLocalLrcRecursive(const QString& dir, const QString& artist, const QString& title);
 
     QNetworkAccessManager* m_nam;
+    ResettingCookieJar* m_cookieJar = nullptr;
     QTimer* m_loadDebounce;
+    QTimer* m_saveDebounce;
 
     QVector<LyricLine> m_lines;
     QStringList m_lyrics;
@@ -127,14 +194,24 @@ private:
     LyricsBackend m_preferredBackend = LyricsBackend::Auto;
     QList<LyricCandidate> m_candidates;
     LyricCandidate m_selected;
+    LyricCandidate m_autoCandidate;
+    bool m_hasCandidateOverride = false;
     bool m_loading = false;
+    bool m_forceSearching = false;
     bool m_hasLyrics = false;
+    bool m_hasMetadataSuggestion = false;
+    QString m_suggestedArtist;
+    QString m_suggestedTitle;
     qreal m_offset = 0.0;
+    QString m_error;
+    bool m_offline = false;
 
     QString m_artist;
     QString m_title;
     QString m_album;
     qreal m_duration = 0.0;
+    QString m_rawArtist;
+    QString m_rawTitle;
 
     int m_currentRequestId = 0;
     QHash<int, QList<QPointer<QNetworkReply>>> m_pendingReplies;
