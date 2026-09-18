@@ -372,7 +372,7 @@ VerticalFadeFlickable {
                                 topRightRadius: isFirst ? Tokens.rounding.extraLarge : 0
                                 bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : 0
                                 bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
-                                color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                                color: Qt.lighter(Colours.palette.m3surfaceContainer, 1.13)
 
                                 onIsCurrentChanged: {
                                     if (isCurrent && root.followSelection)
