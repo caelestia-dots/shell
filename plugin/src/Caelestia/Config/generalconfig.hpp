@@ -75,7 +75,7 @@ CONFIG_LIST_TYPE(GeneralBatteryWarnLevel, GeneralBatteryWarnList)
 class GeneralBattery : public settings::ObjectNode {
     CONFIG_NODE(GeneralBattery, settings::ObjectNode)
 
-    CONFIG_LIST(GeneralBatteryWarnList, lowBatteryWarnLevels,
+    CONFIG_GLOBAL_LIST(GeneralBatteryWarnList, lowBatteryWarnLevels,
         DEFAULT_ARG({
             vmap({
                 { u"level"_s, 20 },
@@ -101,7 +101,7 @@ class GeneralBattery : public settings::ObjectNode {
             }),
         }))
 
-    CONFIG_LIST(GeneralBatteryWarnList, chargingWarnLevels,
+    CONFIG_GLOBAL_LIST(GeneralBatteryWarnList, chargingWarnLevels,
         DEFAULT_ARG({ vmap({
                           { u"level"_s, 80 },
                           { u"title"_s, mark(u"High battery"_s) },
