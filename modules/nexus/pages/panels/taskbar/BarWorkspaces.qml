@@ -62,6 +62,13 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.trCtx("Per monitor", "bar workspaces")
+            subtext: Tr.tr("Hide workspaces not on the current monitor")
+            checked: Config.bar.workspaces.perMonitor
+            onToggled: GlobalConfig.bar.workspaces.perMonitor = checked
+        }
+
+        ToggleRow {
             text: Tr.trCtx("Windows on special workspaces", "bar workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked

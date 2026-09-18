@@ -425,6 +425,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "activeIndicator": true,
             "occupiedBg": false,
             "showUnoccupied": true,
+            "perMonitor": true,
             "showWindows": true,
             "showWindowsOnSpecialWorkspaces": true,
             "maxWindowIcons": 5,
