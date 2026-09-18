@@ -321,7 +321,8 @@ VerticalFadeFlickable {
                         id: cardList
 
                         Layout.fillWidth: true
-                        spacing: 0
+                        // Same gap the rows inside the pages use
+                        spacing: Tokens.spacing.extraSmall / 2
 
                         add: Transition {
                             Anim {
@@ -365,29 +366,17 @@ VerticalFadeFlickable {
                                     const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
                                     return h % 2 === 0 ? h : h + 1;
                                 }
-                                // Joined card: round only the outer corners so the
-                                // rows read as one block (square where they meet),
-                                // matching the page tabs' corner radius.
-                                topLeftRadius: isFirst ? Tokens.rounding.extraLarge : 0
-                                topRightRadius: isFirst ? Tokens.rounding.extraLarge : 0
-                                bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : 0
-                                bottomRightRadius: isLast ? Tokens.rounding.extraLarge : 0
+                                // Joined like the rows inside the pages: round ends,
+                                // barely rounded where they meet.
+                                topLeftRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                topRightRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                bottomRightRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
                                 color: Qt.lighter(Colours.palette.m3surfaceContainer, 1.13)
 
                                 onIsCurrentChanged: {
                                     if (isCurrent && root.followSelection)
                                         root.ensureVisible(result);
-                                }
-
-                                StyledRect {
-                                    anchors.bottom: parent.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.leftMargin: Tokens.padding.medium
-                                    anchors.rightMargin: Tokens.padding.medium
-                                    implicitHeight: 1
-                                    visible: !result.isLast
-                                    color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
                                 }
 
                                 RowLayout {
