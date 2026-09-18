@@ -13,11 +13,13 @@ import qs.services
 Item {
     id: root
 
-    required property ShellScreen screen
+    required property HyprlandMonitor monitor
 
-    readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property int activeSpecialId: monitor?.lastIpcObject.specialWorkspace?.id ?? 0
-    readonly property var wsIds: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && w.monitor === root.monitor).map(w => w.id)
+    readonly property var wsIds: {
+        const allMonitors = !Config.bar.workspaces.perMonitor;
+        return Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (allMonitors || w.monitor === root.monitor)).map(w => w.id);
+    }
     readonly property int activeIdx: wsIds.indexOf(activeSpecialId)
     readonly property real maxViewY: Math.max(0, view.contentHeight - height)
 
@@ -162,6 +164,8 @@ Item {
         delegate: Workspace {
             activeWsId: root.activeSpecialId
             ws: modelData
+            monitor: root.monitor
+            offMonitorColour: Colours.palette.m3outline
             displayType: Config.bar.workspaces.specialDisplayType
             showWindows: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             iconRules: GlobalConfig.bar.workspaces.specialWorkspaceIcons
