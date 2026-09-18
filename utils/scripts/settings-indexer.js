@@ -15,11 +15,6 @@ const SETTING_ICONS = {
     "style-dark-theme": "dark_mode",
     "network-wi-fi": "network_wifi",
     "ethernet-status": "link",
-    "ethernet-interface": "settings_ethernet",
-    "ethernet-speed": "speed",
-    "ethernet-ip-address": "tag",
-    "ethernet-gateway": "router",
-    "ethernet-mac-address": "fingerprint",
     "ethernet-ip-assignment": "tune",
     "bluetooth-bluetooth": "bluetooth_connected",
     "bluetooth-discoverable": "visibility",
@@ -59,7 +54,8 @@ const SETTING_ICONS = {
     "bar-ws-active-indicator": "radio_button_checked",
     "bar-ws-active-trail": "gesture",
     "bar-ws-occupied-background": "layers",
-    "bar-ws-show-windows": "grid_view",
+    "bar-ws-show-icon-workspace": "grid_view",
+    "bar-ws-per-monitor": "desktop_windows",
     "bar-ws-windows-on-special-workspaces": "star",
     "bar-ws-max-window-icons": "filter_9_plus",
     "bar-ws-show-empty": "check_box_outline_blank",
@@ -633,6 +629,20 @@ function buildSearch(entries, translate) {
     };
 }
 
+// Anchors whose icon is missing, and icons whose anchor is gone.
+function iconDrift(entries) {
+    const warnings = [];
+    const anchors = entries.map(e => e.anchor);
+    const missing = anchors.filter(a => !(a in SETTING_ICONS));
+    const orphaned = Object.keys(SETTING_ICONS).filter(a => !anchors.includes(a));
+    if (missing.length > 0)
+        warnings.push(`settings without an icon: ${missing.join(", ")}`);
+    if (orphaned.length > 0)
+        warnings.push(`icons without a setting: ${orphaned.join(", ")}`);
+
+    return warnings;
+}
+
 // Builds the language independent part of the index. readFile(path) -> string ("" if unreadable); listFiles(dir, suffix)
 // -> recursive absolute paths.
 function buildIndex(nexusDir, readFile, listFiles) {
@@ -644,7 +654,12 @@ function buildIndex(nexusDir, readFile, listFiles) {
     };
     const files = discoverFiles(nexusDir, listFiles);
     const nav = buildNavMap(nexusDir, files, readFile, readLines);
+    const entries = extractSettings(files, nav, readLines);
+
     return {
-        entries: extractSettings(files, nav, readLines)
+        entries: entries,
+        // Icons are the one part of an entry that isn't in the page sources, so
+        // they're listed above by hand and drift when settings are renamed.
+        iconWarnings: iconDrift(entries)
     };
 }
