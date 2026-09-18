@@ -164,6 +164,8 @@ Singleton {
         }
         const data = SettingsIndexer.buildIndex(`${Quickshell.shellDir}/modules/nexus`, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s));
         console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${revision || "unknown"})`);
+        for (const warning of data.iconWarnings)
+            console.warn(`SettingsSearcher: ${warning}`);
         return data;
     }
 
