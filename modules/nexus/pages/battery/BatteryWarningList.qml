@@ -24,7 +24,7 @@ ItemList {
 
     model: ScriptModel {
         values: {
-            const data = root.isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
+            const data = root.isLowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels.values : GlobalConfig.general.battery.chargingWarnLevels.values;
             const values = [...data].sort((a, b) => root.isLowWarning ? b.level - a.level : a.level - b.level);
             return values;
         }
