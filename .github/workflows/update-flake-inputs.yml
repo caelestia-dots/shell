@@ -18,12 +18,12 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Checkout source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Install Nix
-        uses: nixbuild/nix-quick-install-action@v34
+        uses: nixbuild/nix-quick-install-action@v35
         with:
           nix_conf: |
             keep-env-derivations = true
@@ -85,7 +85,7 @@ jobs:
 
       - name: Commit and push lock file
         if: steps.check.outputs.modified == 'true'
-        uses: EndBug/add-and-commit@v10
+        uses: EndBug/add-and-commit@v11
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           add: flake.lock
