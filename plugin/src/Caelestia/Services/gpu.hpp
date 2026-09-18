@@ -1,44 +1,40 @@
 #pragma once
 
-#include "tickingservice.hpp"
-
 #include <qprocess.h>
 #include <qqmlintegration.h>
 #include <qstringlist.h>
 
+#include "config/enums.hpp"
+#include "tickingservice.hpp"
+
 namespace caelestia::services {
+
+using GpuType = config::GpuType::Enum;
 
 class Gpu : public TickingService {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
 
-public:
-    enum Type {
-        Auto,    // user override is empty (config "") — resolve by probing
-        None,    // no usable GPU
-        Nvidia,  // queried via nvidia-smi
-        Generic, // queried via /sys/class/drm/card*/device/gpu_busy_percent
-    };
-    Q_ENUM(Type)
-
-private:
-    Q_PROPERTY(Type type READ type NOTIFY typeChanged)
+    Q_PROPERTY(caelestia::config::GpuType::Enum type READ type NOTIFY typeChanged)
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(bool detecting READ detecting NOTIFY detectingChanged)
     Q_PROPERTY(qreal percentage READ percentage NOTIFY percentageChanged)
     Q_PROPERTY(qreal temperature READ temperature NOTIFY temperatureChanged)
 
 public:
     explicit Gpu(QObject* parent = nullptr);
 
-    [[nodiscard]] Type type() const;
+    [[nodiscard]] GpuType type() const;
     [[nodiscard]] QString name() const;
+    [[nodiscard]] bool detecting() const;
     [[nodiscard]] qreal percentage() const;
     [[nodiscard]] qreal temperature() const;
 
 signals:
     void typeChanged();
     void nameChanged();
+    void detectingChanged();
     void percentageChanged();
     void temperatureChanged();
 
@@ -65,16 +61,17 @@ private:
     // output if it fails, crashes or never starts), then tears the process down.
     void runProcess(const QString& program, const QStringList& args, std::function<void(const QByteArray&)> callback);
 
-    void setType(Type value);
+    void setType(GpuType value);
     void setName(QString value);
-
-    [[nodiscard]] static Type parseType(const QString& s);
+    void setDetecting(bool value);
 
     // The config override, Auto meaning "resolve by probing". Read only to decide
     // whether to probe and which name sources apply; never exposed.
-    Type m_userType = Auto;
-    Type m_type = None;
+    GpuType m_userType = GpuType::Auto;
+    GpuType m_type = GpuType::None;
+    // The raw device name, empty while detecting and when there is no GPU to name
     QString m_name;
+    bool m_detecting = false;
     qreal m_percentage = 0.0;
     qreal m_temperature = 0.0;
 

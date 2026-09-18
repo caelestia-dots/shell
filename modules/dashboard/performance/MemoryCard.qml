@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.utils
 
 StyledRect {
     id: root
@@ -39,7 +41,7 @@ StyledRect {
             }
 
             StyledText {
-                text: qsTr("Memory")
+                text: Tr.tr("Memory")
                 font: Tokens.font.title.medium
             }
         }
@@ -67,14 +69,14 @@ StyledRect {
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: Math.round(Memory.percentage * 100) + "%"
+                    text: Strings.percentOne(Memory.percentage)
                     font: Tokens.font.title.builders.large.width(90).build()
                     color: root.accent
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("Used")
+                    text: Tr.trCtx("Used", "memory used")
                     font: Tokens.font.body.small
                     color: Colours.palette.m3onSurfaceVariant
                 }
@@ -83,10 +85,7 @@ StyledRect {
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
-            text: {
-                const fmt = UsageFmt.formatKib(Memory.used, Memory.total);
-                return `${+fmt.value.toFixed(1)} / ${+fmt.total.toFixed(1)} ${fmt.unit}`;
-            }
+            text: Units.formatKibUsage(Memory.used, Memory.total)
             font: Tokens.font.body.medium
         }
     }

@@ -17,9 +17,27 @@ BreakConstructorInitializers: BeforeComma
 Cpp11BracedListStyle: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: Always
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<q.*\.h>'
+    Priority: 1
+    SortPriority: 1
+  - Regex: '^<[^.]*>'
+    Priority: 3
+    SortPriority: 3
+  - Regex: '^<.*>'
+    Priority: 2
+    SortPriority: 2
+  - Regex: '^".*/.*"'
+    Priority: 4
+    SortPriority: 4
+  - Regex: '^".*"'
+    Priority: 4
+    SortPriority: 5
 IndentAccessModifiers: false
 IndentCaseLabels: false
 InsertNewlineAtEOF: true
 SeparateDefinitionBlocks: Always
+SortIncludes: CaseSensitive
 WrapNamespaceBodyWithEmptyLines: Always
 ...

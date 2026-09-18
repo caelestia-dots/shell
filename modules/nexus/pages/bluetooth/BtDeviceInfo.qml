@@ -5,9 +5,11 @@ import QtQuick.Layouts
 import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -20,10 +22,12 @@ PageBase {
     readonly property string statusText: {
         if (!device)
             return "";
-        let s = connected ? qsTr("Connected") : (device.bonded ? qsTr("Paired") : qsTr("Not paired"));
         if (connected && device.batteryAvailable)
-            s += " • " + Math.round(device.battery * 100) + "%";
-        return s;
+            // TRANSLATORS: %1 = battery level, already formatted as a percentage
+            return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.battery));
+        if (connected)
+            return Tr.trCtx("Connected", "bluetooth device state");
+        return device.bonded ? Tr.trCtx("Paired", "bluetooth device state") : Tr.trCtx("Not paired", "bluetooth device state");
     }
 
     onDeviceChanged: {
@@ -32,7 +36,7 @@ PageBase {
             nState.closeSubPage();
     }
 
-    title: device?.name ?? qsTr("Device")
+    title: device?.name ?? Tr.trCtx("Device", "unnamed bluetooth device")
     isSubPage: true
 
     ColumnLayout {
@@ -81,7 +85,7 @@ PageBase {
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Forget")
+                        text: Tr.trCtx("Forget", "button")
                         color: forgetBtn.onColour
                     }
                 }
@@ -136,7 +140,7 @@ PageBase {
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: root.connected ? qsTr("Disconnect") : qsTr("Connect")
+                            text: root.connected ? Tr.trCtx("Disconnect", "button") : Tr.trCtx("Connect", "button")
                             color: connectBtn.inactiveOnColour
                             animate: true
                         }
@@ -149,8 +153,8 @@ PageBase {
         ToggleRow {
             verticalPadding: Tokens.padding.large
             first: true
-            text: qsTr("Trusted")
-            subtext: qsTr("Allow this device to connect automatically")
+            text: Tr.trCtx("Trusted", "bluetooth device state")
+            subtext: Tr.tr("Allow this device to connect automatically")
             checked: root.device?.trusted ?? false
             onToggled: {
                 if (root.device)
@@ -160,8 +164,8 @@ PageBase {
 
         ToggleRow {
             verticalPadding: Tokens.padding.large
-            text: qsTr("Blocked")
-            subtext: qsTr("Prevent this device from connecting")
+            text: Tr.trCtx("Blocked", "bluetooth device state")
+            subtext: Tr.tr("Prevent this device from connecting")
             checked: root.device?.blocked ?? false
             onToggled: {
                 if (root.device)
@@ -172,8 +176,8 @@ PageBase {
         ToggleRow {
             verticalPadding: Tokens.padding.large
             last: true
-            text: qsTr("Wake allowed")
-            subtext: qsTr("Allow this device to wake the system")
+            text: Tr.tr("Wake allowed")
+            subtext: Tr.tr("Allow this device to wake the system")
             checked: root.device?.wakeAllowed ?? false
             onToggled: {
                 if (root.device)
@@ -203,11 +207,11 @@ PageBase {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: qsTr("Battery")
+                        text: Tr.tr("Battery")
                     }
 
                     StyledText {
-                        text: root.device?.batteryAvailable ? Math.round(root.device.battery * 100) + "%" : qsTr("Unavailable")
+                        text: root.device?.batteryAvailable ? Strings.percentOne(root.device.battery) : Tr.trCtx("Unavailable", "bluetooth device state")
                         color: Colours.palette.m3outline
                         font: Tokens.font.body.small
                     }
@@ -243,7 +247,7 @@ PageBase {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: qsTr("Address")
+                    text: Tr.trCtx("Address", "bluetooth MAC address")
                 }
 
                 StyledText {

@@ -13,7 +13,7 @@ class ButtonRow : public QQuickItem {
 public:
     explicit ButtonRow(QQuickItem* parent = nullptr);
 
-    qreal spacing() const;
+    [[nodiscard]] qreal spacing() const;
     void setSpacing(qreal spacing);
 
 signals:

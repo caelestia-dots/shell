@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.services
@@ -17,7 +18,7 @@ Item {
         id: placeholder
 
         anchors.centerIn: parent
-        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== Gpu.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
         asynchronous: true
 
         sourceComponent: ColumnLayout {
@@ -33,14 +34,14 @@ Item {
             StyledText {
                 Layout.topMargin: -Tokens.spacing.small
                 Layout.alignment: Qt.AlignHCenter
-                text: qsTr("No widgets enabled")
+                text: Tr.tr("No widgets enabled")
                 font: Tokens.font.title.large
                 color: Colours.palette.m3onSurface
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: qsTr("Enable widgets in the dashboard settings")
+                text: Tr.tr("Enable widgets in the dashboard settings")
                 font: Tokens.font.body.small
                 color: Colours.palette.m3onSurfaceVariant
             }
@@ -72,7 +73,7 @@ Item {
 
                     sourceComponent: HeroCard {
                         icon: "memory"
-                        label: qsTr("CPU")
+                        label: Tr.tr("CPU")
                         subLabel: Cpu.name
                         usage: Cpu.percentage
                         temperature: Cpu.temperature
@@ -87,12 +88,12 @@ Item {
                 WrappedLoader {
                     id: gpuCard
 
-                    active: Config.dashboard.performance.showGpu && Gpu.type !== Gpu.None
+                    active: Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None
 
                     sourceComponent: HeroCard {
                         icon: "desktop_windows"
-                        label: qsTr("GPU")
-                        subLabel: Gpu.name
+                        label: Tr.tr("GPU")
+                        subLabel: Gpu.name || (Gpu.detecting ? Tr.tr("Detecting GPU...") : Tr.trCtx("None", "GPU name"))
                         usage: Gpu.percentage
                         temperature: Gpu.temperature
                         accent: Colours.palette.m3secondary
