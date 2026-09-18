@@ -10,7 +10,6 @@ on:
 
 jobs:
   validate-pr-title:
-    name: Validate PR title
     runs-on: ubuntu-slim
 
     permissions:
@@ -58,7 +57,6 @@ jobs:
           subjectPatternError: The subject must not start with an uppercase character.
 
   sync-breaking-label:
-    name: Sync breaking label
     runs-on: ubuntu-slim
 
     permissions:

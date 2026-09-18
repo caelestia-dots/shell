@@ -8,12 +8,21 @@ on:
 permissions:
   packages: write
 
+concurrency:
+  group: update-docker-ci-image
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/shell-arch-env
+
 jobs:
   build-image:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
-      - uses: docker/login-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -37,10 +46,19 @@ jobs:
               pacman -Scc --noconfirm
           EOF
 
-      - name: Build and push
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: /tmp/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
+          pull: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:run-${{ github.run_id }}-${{ github.run_attempt }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}

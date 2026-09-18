@@ -13,7 +13,8 @@ jobs:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repo
+        uses: actions/checkout@v7
 
       - name: Check QML format
         shell: fish {0}
@@ -30,7 +31,8 @@ jobs:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repo
+        uses: actions/checkout@v7
 
       - name: Check C++ format
         shell: fish {0}
