@@ -10,14 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Generate app token
+      - name: Generate GitHub app token
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v6
+      - name: Checkout source
+        uses: actions/checkout@v6
         with:
           token: ${{ steps.app-token.outputs.token }}
 
@@ -54,10 +55,10 @@ jobs:
       - name: Update flake inputs
         run: nix flake update
 
-      - name: Attempt to build flake
+      - name: Build flake
         run: nix build
 
-      - name: Test on Sway
+      - name: Smoke test on Sway
         env:
           XDG_RUNTIME_DIR: /home/runner/runtime
           WLR_BACKENDS: headless
@@ -78,11 +79,11 @@ jobs:
           result/bin/caelestia-shell kill
           killall sway  # Screw using IPC
 
-      - name: Check for changes
+      - name: Check for lock file changes
         id: check
         run: echo modified=$(git diff --exit-code flake.lock &>/dev/null && echo 'false' || echo 'true') >> $GITHUB_OUTPUT
 
-      - name: Commit and push changes
+      - name: Commit and push lock file
         if: steps.check.outputs.modified == 'true'
         uses: EndBug/add-and-commit@v10
         with:
