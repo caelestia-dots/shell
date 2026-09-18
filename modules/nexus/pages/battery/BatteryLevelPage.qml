@@ -24,16 +24,18 @@ PageBase {
 
     function setValueProperty(propName, propValue) {
         let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
-        let configCopy = Array.from(originalConfig);
-        let targetItem = configCopy.find(item => (item.level === batteryLevel.level) & (item.title === batteryLevel.title));
+        let targetIndex = -1;
+        for (let i = 0; i < originalConfig.count; i++) {
+            let item = originalConfig.at(i);
+            if (item.level === batteryLevel.level && item.title === batteryLevel.title) {
+                targetIndex = i;
+                break;
+            }
+        }
 
-        if (targetItem && !newLevelPage) {
+        if (targetIndex >= 0 && !newLevelPage) {
+            let targetItem = originalConfig.at(targetIndex);
             targetItem[propName] = propValue;
-            if (lowWarning)
-                GlobalConfig.general.battery.lowBatteryWarnLevels = configCopy;
-            else
-                GlobalConfig.general.battery.chargingWarnLevels = configCopy;
-
             nState.selectedBatteryLevel = targetItem;
         } else {
             let temporaryLevel = Object.assign({}, batteryLevel);
@@ -46,36 +48,34 @@ PageBase {
         if (newLevelPage)
             return;
         let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
-        let configCopy = Array.from(originalConfig);
-        let filteredConfig = configCopy.filter(item => !(item.level === batteryLevel.level && item.title === batteryLevel.title));
+        let itemIndex = -1;
+        for (let i = 0; i < originalConfig.count; i++) {
+            let item = originalConfig.at(i);
+            if (item.level === batteryLevel.level && item.title === batteryLevel.title) {
+                itemIndex = i;
+                break;
+            }
+        }
 
-        if (lowWarning)
-            GlobalConfig.general.battery.lowBatteryWarnLevels = filteredConfig;
-        else
-            GlobalConfig.general.battery.chargingWarnLevels = filteredConfig;
+        if (itemIndex >= 0)
+            originalConfig.remove(itemIndex);
     }
 
     function addLevel(levelToAdd) {
         let originalConfig = lowWarning ? GlobalConfig.general.battery.lowBatteryWarnLevels : GlobalConfig.general.battery.chargingWarnLevels;
-        let configCopy = Array.from(originalConfig);
 
         if (!levelToAdd) {
             return;
         }
 
-        configCopy.push({
-            level: levelToAdd.level,
+        originalConfig.insert({
+            level: levelToAdd.level | 0,
             title: levelToAdd.title,
             message: levelToAdd.message,
             icon: levelToAdd.icon,
             enabled: levelToAdd.enabled,
             critical: levelToAdd.critical
         });
-
-        if (lowWarning)
-            GlobalConfig.general.battery.lowBatteryWarnLevels = configCopy;
-        else
-            GlobalConfig.general.battery.chargingWarnLevels = configCopy;
     }
 
     title: qsTr("%1 warning").arg(lowWarning ? "Low battery" : "Overcharge battery")
@@ -164,7 +164,7 @@ PageBase {
             value: root.batteryLevel?.level / 100
             enabled: root.batteryLevel?.enabled ?? false
             onMoved: v => {
-                root.setValueProperty("level", Math.round(v * 100));
+                root.setValueProperty("level", Math.round(v * 100) | 0);
                 if (root.batteryLevel?.autopick ?? false) {
                     root.setValueProperty("icon", Icons.getBatteryHorizontalIcon(v, false, root.batteryLevel?.critical ?? false, GlobalConfig.general.battery.framedMaterialIcons));
                 }
