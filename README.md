@@ -355,28 +355,59 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             ]
         },
         "battery": {
-            "warnLevels": [
+            "chargingWarnLevels": [
                 {
-                    "level": 20,
-                    "title": "Low battery",
-                    "message": "You might want to plug in a charger",
-                    "icon": "battery_android_frame_2"
+                    "enabled": true,
+                    "icon": "battery_android_5",
+                    "level": 80,
+                    "message": "You might want to unplug the charger",
+                    "title": "High battery"
                 },
                 {
-                    "level": 10,
-                    "title": "Did you see the previous message?",
-                    "message": "You should probably plug in a charger <b>now</b>",
-                    "icon": "battery_android_frame_1"
+                    "enabled": true,
+                    "icon": "battery_android_6",
+                    "level": 90,
+                    "message": "You should probably unplug the charger <b>now</b>",
+                    "title": "Did you see the previous message?"
                 },
                 {
-                    "level": 5,
-                    "title": "Critical battery level",
-                    "message": "PLUG THE CHARGER RIGHT NOW!!",
+                    "critical": true,
+                    "enabled": true,
                     "icon": "battery_android_alert",
-                    "critical": true
+                    "level": 95,
+                    "message": "UNPLUG THE CHARGER RIGHT NOW!!",
+                    "title": "Critical battery level"
                 }
             ],
-            "criticalLevel": 3
+            "criticalLevel": 3,
+            "enableHighBatteryWarning": true,
+            "enableLowBatteryWarning": true,
+            "framedMaterialIcons": false,
+            "lowBatteryWarnLevels": [
+                {
+                    "enabled": true,
+                    "icon": "battery_android_2",
+                    "level": 20,
+                    "message": "You might want to plug in a charger",
+                    "title": "Low battery"
+                },
+                {
+                    "enabled": true,
+                    "icon": "battery_android_1",
+                    "level": 10,
+                    "message": "You should probably plug in a charger <b>now</b>",
+                    "title": "Did you see the previous message?"
+                },
+                {
+                    "critical": true,
+                    "enabled": true,
+                    "icon": "battery_android_alert",
+                    "level": 5,
+                    "message": "PLUG THE CHARGER RIGHT NOW!!",
+                    "title": "Critical battery level"
+                },
+            ],
+            "toastSound": true
         }
     },
     "background": {
