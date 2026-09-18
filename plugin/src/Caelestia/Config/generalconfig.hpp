@@ -68,13 +68,14 @@ class GeneralBatteryWarnLevel : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, message, {})
     CONFIG_PROPERTY(QString, icon, {})
     CONFIG_PROPERTY(bool, critical, false)
+    CONFIG_PROPERTY(bool, enabled, true)
 };
 CONFIG_LIST_TYPE(GeneralBatteryWarnLevel, GeneralBatteryWarnList)
 
 class GeneralBattery : public settings::ObjectNode {
     CONFIG_NODE(GeneralBattery, settings::ObjectNode)
 
-    CONFIG_LIST(GeneralBatteryWarnLevelList, lowBatteryWarnLevels,
+    CONFIG_LIST(GeneralBatteryWarnList, lowBatteryWarnLevels,
         DEFAULT_ARG({
             vmap({
                 { u"level"_s, 20 },
@@ -100,7 +101,7 @@ class GeneralBattery : public settings::ObjectNode {
             }),
         }))
 
-    CONFIG_LIST(GeneralBatteryWarnLevelList, chargingWarnLevels,
+    CONFIG_LIST(GeneralBatteryWarnList, chargingWarnLevels,
         DEFAULT_ARG({ vmap({
                           { u"level"_s, 80 },
                           { u"title"_s, mark(u"High battery"_s) },
