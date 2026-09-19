@@ -87,7 +87,7 @@ Singleton {
     Process {
         id: elapsedProc
 
-        command: ["sh", "-c", "ps -o etimes= -p \"$(pidof -s gpu-screen-recorder)\""]
+        command: ["ps", "-o", "etimes=", "-C", "gpu-screen-recorder"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const secs = parseInt(text);
