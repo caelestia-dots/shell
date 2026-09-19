@@ -63,11 +63,13 @@ Singleton {
                 props.paused = false;
                 props.elapsed = 0;
             } else if (running !== props.running && !commandProc.running) {
-                // The recording was started/stopped outside the shell (e.g. via
-                // keybind), or our command finished without reaching the optimistic state
+                // The recording was started/stopped outside the shell
                 props.running = running;
                 props.paused = false;
                 props.elapsed = 0;
+                // It may have started long before we noticed, so use the recorder's real age
+                if (running)
+                    elapsedProc.running = true;
             }
 
             root.needsStart = false;
@@ -79,13 +81,22 @@ Singleton {
     Process {
         id: commandProc
 
-        // The command owns the transition: `caelestia record` blocks on slurp for
-        // region captures, and waits for the recorder to finalise the file when
-        // stopping. Reconcile once it has actually finished.
         onExited: checkProc.running = true // qmllint disable signal-handler-parameters
     }
 
-    // Only poll while something is showing the state, i.e. the utilities drawer is open
+    Process {
+        id: elapsedProc
+
+        command: ["ps", "-o", "etimes=", "-C", "gpu-screen-recorder"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const secs = parseInt(text);
+                if (!isNaN(secs) && props.running)
+                    props.elapsed = secs;
+            }
+        }
+    }
+
     Timer {
         interval: 1000
         running: root.refCount > 0
