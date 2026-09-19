@@ -7,6 +7,13 @@
 
 namespace caelestia::blobs {
 
+namespace {
+
+// How long an imperceptible deformation takes to retire to identity.
+constexpr float k_retireMs = 120.0f;
+
+} // namespace
+
 BlobRect::BlobRect(QQuickItem* parent)
     : BlobShape(parent) {}
 
@@ -18,31 +25,60 @@ BlobRect::~BlobRect() {
 void BlobRect::updatePolish() {
     BlobShape::updatePolish();
 
-    if (m_physicsActive) {
-        // Check if deformation is visually imperceptible
-        const float totalDelta = std::abs(m_dm00 - 1.0f) + std::abs(m_dm01) + std::abs(m_dm11 - 1.0f);
-        const float totalVel = std::abs(m_dmVel00) + std::abs(m_dmVel01) + std::abs(m_dmVel11);
+    if (!m_physicsActive)
+        return;
 
-        if (totalDelta < 0.004f && totalVel < 0.05f) {
-            // Snap to rest, no visible deformation
+    if (m_retiring) {
+        const float t = std::clamp(static_cast<float>(m_retireElapsed.elapsed()) / k_retireMs, 0.0f, 1.0f);
+        const float s = t * t * (3.0f - 2.0f * t); // Smoothstep: zero velocity at both ends
+
+        if (t >= 1.0f) {
             m_dm00 = 1.0f;
             m_dm01 = 0.0f;
             m_dm11 = 1.0f;
-            m_dmVel00 = m_dmVel01 = m_dmVel11 = 0.0f;
             m_deformMatrix = QMatrix4x4();
-            emit rawDeformMatrixChanged();
-            updateCenteredDeformMatrix();
+            m_retiring = false;
             m_physicsActive = false;
         } else {
-            QMetaObject::invokeMethod(
-                this,
-                [this]() {
-                    if (m_physicsActive && m_group)
-                        m_group->markDirty();
-                },
-                Qt::QueuedConnection);
+            m_dm00 = m_retire00 + (1.0f - m_retire00) * s;
+            m_dm01 = m_retire01 - m_retire01 * s;
+            m_dm11 = m_retire11 + (1.0f - m_retire11) * s;
+            m_deformMatrix = QMatrix4x4(m_dm00, m_dm01, 0, 0, m_dm01, m_dm11, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         }
+
+        emit rawDeformMatrixChanged();
+        updateCenteredDeformMatrix();
+
+        if (!m_physicsActive)
+            return;
+    } else {
+        // Deformation is visually imperceptible, so retire it. Fade rather than
+        // assign identity: this matrix transforms the panel content as well as
+        // the blob background, so a discrete step jolts the whole widget a beat
+        // after its open animation has already finished.
+        const float totalDelta = std::abs(m_dm00 - 1.0f) + std::abs(m_dm01) + std::abs(m_dm11 - 1.0f);
+        const float totalVel = std::abs(m_dmVel00) + std::abs(m_dmVel01) + std::abs(m_dmVel11);
+
+        if (totalDelta < 0.004f && totalVel < 0.05f)
+            beginRetire();
     }
+
+    QMetaObject::invokeMethod(
+        this,
+        [this]() {
+            if (m_physicsActive && m_group)
+                m_group->markDirty();
+        },
+        Qt::QueuedConnection);
+}
+
+void BlobRect::beginRetire() {
+    m_retire00 = m_dm00;
+    m_retire01 = m_dm01;
+    m_retire11 = m_dm11;
+    m_dmVel00 = m_dmVel01 = m_dmVel11 = 0.0f;
+    m_retireElapsed.start();
+    m_retiring = true;
 }
 
 void BlobRect::updatePhysics() {
@@ -69,6 +105,15 @@ void BlobRect::updatePhysics() {
     m_prevScenePos = scenePos;
 
     const float speed = std::sqrt(velX * velX + velY * velY);
+
+    if (m_retiring) {
+        // Movement resumed mid-fade: hand control back to the spring from wherever
+        // the fade got to. Otherwise leave the matrix to updatePolish.
+        if (speed > 5.0f)
+            m_retiring = false;
+        else
+            return;
+    }
 
     if (!m_physicsActive) {
         if (speed < 5.0f)
@@ -333,23 +378,16 @@ void BlobRect::excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::checkAtRest(float speed) {
+    if (m_retiring)
+        return;
+
     constexpr float k_epsilon = 0.002f;
     const bool atRest = std::abs(m_dm00 - 1.0f) < k_epsilon && std::abs(m_dm01) < k_epsilon &&
                         std::abs(m_dm11 - 1.0f) < k_epsilon && std::abs(m_dmVel00) < k_epsilon &&
                         std::abs(m_dmVel01) < k_epsilon && std::abs(m_dmVel11) < k_epsilon && speed < 5.0f;
 
-    if (atRest) {
-        m_dm00 = 1.0f;
-        m_dm01 = 0.0f;
-        m_dm11 = 1.0f;
-        m_dmVel00 = 0.0f;
-        m_dmVel01 = 0.0f;
-        m_dmVel11 = 0.0f;
-        m_deformMatrix = QMatrix4x4(); // identity
-        emit rawDeformMatrixChanged();
-        updateCenteredDeformMatrix();
-        m_physicsActive = false;
-    }
+    if (atRest)
+        beginRetire();
 }
 
 } // namespace caelestia::blobs
