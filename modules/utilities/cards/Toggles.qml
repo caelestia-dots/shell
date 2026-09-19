@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQml
 import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
@@ -142,12 +143,55 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "vpn"
                     delegate: Toggle {
+                        id: vpnToggle
+
                         icon: "vpn_key"
                         checked: VPN.connected && VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
                         enabled: !VPN.connecting && !VPN.disconnecting
                         isToggle: VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
                         inactiveOnColour: Colours.palette.m3onSurfaceVariant
                         onClicked: VPN.toggle()
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onClicked: vpnMenu.expanded = !vpnMenu.expanded
+                        }
+
+                        Menu {
+                            id: vpnMenu
+
+                            attachTo: vpnToggle
+                            attachSideY: Menu.Top
+                            thisSideY: Menu.Bottom
+                            marginY: -Tokens.spacing.small
+
+                            Instantiator {
+                                model: VPN.providers
+                                delegate: MenuItem {
+                                    id: providerItem
+
+                                    required property var modelData
+                                    readonly property bool isActive: modelData.providerId === VPN.selectedProvider
+
+                                    text: modelData.displayName || modelData.name || ("VPN " + (modelData.index + 1))
+                                    icon: "vpn_key"
+                                    trailingIcon: isActive ? "check" : ""
+                                    onClicked: VPN.setActiveProvider(modelData.index)
+                                    onIsActiveChanged: {
+                                        if (isActive)
+                                            vpnMenu.active = providerItem;
+                                    }
+                                }
+                                onObjectAdded: (i, obj) => {
+                                    const item = obj as MenuItem;
+                                    vpnMenu.items = [...vpnMenu.items.slice(0, i), item, ...vpnMenu.items.slice(i)];
+                                    if (item.isActive) // qmllint disable missing-property
+                                        vpnMenu.active = item;
+                                }
+                                onObjectRemoved: (i, obj) => vpnMenu.items = vpnMenu.items.filter(x => x !== obj)
+                            }
+                        }
                     }
                 }
             }
