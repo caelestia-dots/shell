@@ -30,7 +30,9 @@ Scope {
         if (action === "lock")
             lock.lock.locked = true;
         else if (action === "unlock")
-            lock.lock.locked = false;
+            // Go through the unlock signal, like the IPC, logind and shortcut
+            // paths do, so the lock releases through the usual flow.
+            lock.lock.unlock();
         else if (typeof action === "string")
             Hypr.dispatch(Hypr.usingLua && ["dpms off", "dpms on"].includes(action) ? `hl.dsp.dpms({ action = "${action === "dpms off" ? "disable" : "enable"}" })` : action);
         else if (!SessionManager.exec(action))
