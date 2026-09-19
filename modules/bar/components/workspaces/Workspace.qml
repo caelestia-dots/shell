@@ -38,7 +38,11 @@ Item {
         if (Config.bar.workspaces.perMonitor)
             return false;
         const mon = Hypr.workspaces.values.find(w => w.id === ws)?.monitor;
-        return mon && mon !== monitor;
+        // Upstream (#2039) returns the monitor object when the workspace is
+        // unoccupied, which is not a bool and triggers "Unable to assign
+        // [undefined] to bool" plus missing off-monitor dimming with
+        // `bar.workspaces.perMonitor: false`. Normalise to bool.
+        return !!(mon && mon !== monitor);
     }
     readonly property color fgColour: {
         if (onOtherMonitor)
