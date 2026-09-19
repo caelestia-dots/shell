@@ -192,6 +192,7 @@ PageBase {
             last: true
             label: Tr.tr("Clock format")
             subtext: Tr.tr("How times are shown across the shell")
+            menuOnTop: true
             menuItems: root.clockItems
             active: root.clockItems.find(i => i.value === GlobalConfig.services.clockFormat)
             onSelected: item => GlobalConfig.services.clockFormat = item.value
