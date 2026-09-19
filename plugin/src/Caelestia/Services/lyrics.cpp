@@ -306,6 +306,10 @@ void Lyrics::setLines(QVector<LyricLine> lines, LyricsBackend source) {
 }
 
 void Lyrics::clearLines() {
+    if (!m_hasLyrics) {
+        return;
+    }
+
     // Doesn't actually clear lines, set a flag instead so anims can run
     m_hasLyrics = false;
     emit hasLyricsChanged();
