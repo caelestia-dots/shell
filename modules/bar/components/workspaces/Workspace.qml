@@ -38,7 +38,7 @@ Item {
         if (Config.bar.workspaces.perMonitor)
             return false;
         const mon = Hypr.workspaces.values.find(w => w.id === ws)?.monitor;
-        return mon && mon !== monitor;
+        return !!(mon && mon !== monitor);
     }
     readonly property color fgColour: {
         if (onOtherMonitor)
