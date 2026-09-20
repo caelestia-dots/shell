@@ -24,7 +24,7 @@ class WavyLine : public QQuickPaintedItem {
     Q_PROPERTY(qreal value READ value WRITE setValue NOTIFY valueChanged FINAL)
 
 public:
-    enum PathType {
+    enum class PathType : quint8 {
         Linear,
         Arc
     };

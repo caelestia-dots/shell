@@ -1,0 +1,69 @@
+---
+Checks: >
+  bugprone-*,
+  clang-analyzer-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-restrict-system-includes,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-macro-parentheses,
+  -bugprone-throwing-static-initialization,
+  -misc-include-cleaner,
+  -misc-multiple-inheritance,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  -modernize-avoid-c-arrays,
+  -modernize-use-default-member-init,
+  -modernize-use-trailing-return-type,
+  -readability-braces-around-statements,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-math-missing-parentheses,
+  -readability-redundant-access-specifiers,
+  -readability-uppercase-literal-suffix
+
+ExcludeHeaderFilterRegex: 'build/.*'
+WarningsAsErrors: ''
+FormatStyle: file
+
+CheckOptions:
+  readability-identifier-naming.NamespaceCase: lower_case
+  # Q_NAMESPACE enum scopes exposed to QML are CamelCase by design
+  readability-identifier-naming.NamespaceIgnoredRegexp: '^[A-Z][A-Za-z0-9]*$'
+  readability-identifier-naming.ClassCase: CamelCase
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.EnumCase: CamelCase
+  readability-identifier-naming.EnumConstantCase: CamelCase
+  readability-identifier-naming.FunctionCase: camelBack
+  readability-identifier-naming.MethodCase: camelBack
+  readability-identifier-naming.VariableCase: camelBack
+  readability-identifier-naming.ParameterCase: camelBack
+  readability-identifier-naming.PrivateMemberPrefix: m_
+  readability-identifier-naming.PrivateMemberCase: camelBack
+  readability-identifier-naming.ProtectedMemberPrefix: m_
+  readability-identifier-naming.ProtectedMemberCase: camelBack
+  readability-identifier-naming.ClassMemberPrefix: s_
+  readability-identifier-naming.ClassMemberCase: camelBack
+  readability-identifier-naming.GlobalVariablePrefix: g_
+  readability-identifier-naming.GlobalVariableCase: camelBack
+  readability-identifier-naming.StaticVariablePrefix: s_
+  readability-identifier-naming.StaticVariableCase: camelBack
+  readability-identifier-naming.ConstexprVariablePrefix: k_
+  readability-identifier-naming.ConstexprVariableCase: camelBack
+  readability-identifier-naming.GlobalConstantPrefix: k_
+  readability-identifier-naming.GlobalConstantCase: camelBack
+  readability-identifier-naming.ClassConstantPrefix: k_
+  readability-identifier-naming.ClassConstantCase: camelBack
+  readability-identifier-naming.StaticConstantPrefix: k_
+  readability-identifier-naming.StaticConstantCase: camelBack
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
+  readability-identifier-naming.TypeAliasCase: CamelCase
+  readability-identifier-naming.TemplateParameterCase: CamelCase
+  readability-implicit-bool-conversion.AllowPointerConditions: true
+  # Qt logging macros expand to for loops, so ignore them (we don't really use other macros)
+  readability-function-cognitive-complexity.IgnoreMacros: true
+  # Ban Q* (e.g. Qt module includes or Qt module prefixes)
+  portability-restrict-system-includes.Includes: '*,-Q*'

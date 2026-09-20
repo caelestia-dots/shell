@@ -12,8 +12,7 @@ int CircularBuffer::capacity() const {
 }
 
 void CircularBuffer::setCapacity(int capacity) {
-    if (capacity < 0)
-        capacity = 0;
+    capacity = std::max(capacity, 0);
     if (m_capacity == capacity)
         return;
 

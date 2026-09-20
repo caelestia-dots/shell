@@ -15,4 +15,8 @@ qt_standard_project_setup(REQUIRES 6.9)
 include(cmake/pch.cmake)
 include(cmake/qml-module.cmake)
 
+# Header only helpers
+add_library(caelestia-util INTERFACE)
+target_include_directories(caelestia-util INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 add_subdirectory(src/Caelestia)

@@ -14,6 +14,9 @@ settings::ObjectNode* style(settings::ObjectNode* cfg, const QString& key) {
 
 // FontStyleBase
 
+FontStyleBase::FontStyleBase(QObject* parent)
+    : QObject(parent) {}
+
 QFont FontStyleBase::large() const {
     return m_large;
 }

@@ -2,9 +2,12 @@
 
 #include <qjsonobject.h>
 
+#include "util/i18n.hpp"
 #include "codecs.hpp"
 
 namespace caelestia::settings {
+
+using Qt::StringLiterals::operator""_s;
 
 ObjectNode::ObjectNode(ObjectNode* fallback, QObject* parent, bool globalOnly)
     : Node(fallback, parent, globalOnly) {}
@@ -17,18 +20,27 @@ void ObjectNode::resetOption(const QString& key) {
         return;
     }
 
+    // Warn and ignore if this is a global node property and we are an overlay
+    if (desc->isNode && (m_globalOnly || desc->globalOnly()) && fallbackNode()) {
+        qCWarning(lcSettings,
+            "Attempted to reset global node %s, ignoring. "
+            "This should not be used, reset global nodes from the global layer instead.",
+            qUtf8Printable(pathFor(key)));
+        return;
+    }
+
     const WriteScope scope(this, WriteOrigin::QmlReset);
     if (desc->isNode)
         value(key).value<Node*>()->resetToDefaults();
     else
-        setValue(key, fallbackNode() ? fallbackNode()->value(key) : desc->defaultValue(this));
+        setValue(key, fallbackNode() ? fallbackNode()->value(key) : desc->defaultValue());
 }
 
 Descriptor ObjectNode::descriptorFor(const QString& key) const {
     const auto* desc = schema().get(key);
     if (!desc) {
         qCWarning(lcSettings) << "Attempted to get descriptor for unknown option" << pathFor(key);
-        return Descriptor();
+        return {};
     }
 
     return *desc;
@@ -49,14 +61,13 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
         if (sparse && !isOverride(desc.key))
             continue;
 
-        const auto codec = ValueCodec::codecFor(desc.type);
-        if (!codec) { // This should not happen
+        if (!desc.codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not serialising %s", desc.type.name(),
                 qUtf8Printable(pathFor(desc.key)));
             continue;
         }
 
-        json.insert(desc.key, codec->encode(val));
+        json.insert(desc.key, desc.codec->encode(val));
     }
 
     if (m_quarantine)
@@ -69,11 +80,15 @@ bool ObjectNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics
     m_quarantine.reset(); // Clear out old quarantine
 
     if (!json.isObject()) {
-        const auto d = Diagnostic::mismatch("an object", json, path());
+        const auto d = Diagnostic::mismatch(ExpectedType::Object, json, path());
         qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(d.option), qUtf8Printable(d.message));
         diagnostics << d;
         return false;
     }
+
+    // Refuse syncs to global only nodes on overlays
+    if (rejectGlobalSync(diagnostics))
+        return false;
 
     const auto obj = json.toObject();
 
@@ -111,9 +126,10 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             const auto path = pathFor(key);
             qCWarning(lcSettings) << "Unknown option" << path;
             diagnostics << Diagnostic{
-                DiagnosticType::UnknownOption,
-                path,
-                QStringLiteral("Unknown option %1").arg(key),
+                .type = DiagnosticType::UnknownOption,
+                .option = path,
+                // TRANSLATORS: %1 = a config key name
+                .message = util::i18n::mark(u"Unknown option %1"_s, { key }),
             };
             SKIP;
         }
@@ -129,30 +145,24 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             continue;
         }
 
-        if ((isGlobalOnly() || desc->globalOnly()) && fallbackNode()) {
-            const auto path = pathFor(key);
-            qCWarning(
-                lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(path));
-            diagnostics << Diagnostic{
-                DiagnosticType::GlobalOption,
-                path,
-                QStringLiteral("Global properties should not be defined in overlay files"),
-            };
+        if ((m_globalOnly || desc->globalOnly()) && fallbackNode()) {
+            warnGlobalSync(diagnostics, pathFor(key));
             SKIP;
         }
 
-        const auto codec = ValueCodec::codecFor(desc->type);
-        if (!codec) { // This should not happen
+        if (!desc->codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not loading %s", desc->type.name(),
                 qUtf8Printable(pathFor(key)));
             SKIP;
         }
 
-        auto val = codec->decode(v);
+        auto val = desc->codec->decode(v);
         if (val.error) {
-            const auto path = pathFor(key);
-            qCWarning(
-                lcSettings, "Error decoding option %s: %s", qUtf8Printable(path), qUtf8Printable(val.error->message));
+            auto path = pathFor(key);
+            for (const auto index : std::as_const(val.indexPath))
+                path = elementPath(path, QString::number(index));
+            qCWarning(lcSettings, "Error decoding option %s: %s", qUtf8Printable(path),
+                qUtf8Printable(util::i18n::unmark(val.error->message)));
             val.error->option = path;
             diagnostics << *val.error;
             SKIP;
@@ -180,7 +190,11 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
             continue;
         }
 
-        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue(this));
+        // Skip global options on overlays
+        if ((m_globalOnly || desc.globalOnly()) && fallbackNode())
+            continue;
+
+        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue());
     }
 }
 

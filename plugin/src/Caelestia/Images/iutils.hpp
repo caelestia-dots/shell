@@ -1,6 +1,8 @@
 #pragma once
 
+#include <qjsengine.h>
 #include <qobject.h>
+#include <qqmlengine.h>
 #include <qqmlintegration.h>
 #include <qurl.h>
 
@@ -17,8 +19,7 @@ public:
     Q_INVOKABLE static QUrl urlForPath(const QString& path, int fillMode);
 
 private:
-    explicit IUtils(QObject* parent = nullptr)
-        : QObject(parent) {};
+    explicit IUtils(QObject* parent = nullptr);
 };
 
 } // namespace caelestia::images

@@ -105,7 +105,7 @@ private:
     QHash<QString, AppEntry*> m_apps;
     mutable QList<AppEntry*> m_sortedApps;
 
-    QString regexifyString(const QString& original) const;
+    static QString regexifyString(const QString& original);
     QList<AppEntry*>& getSortedApps() const;
     bool isFavourite(const AppEntry* app) const;
     quint32 getFrequency(const QString& id) const;

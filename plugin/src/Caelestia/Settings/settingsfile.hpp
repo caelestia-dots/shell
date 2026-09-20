@@ -11,19 +11,19 @@ class SettingsFile : public QObject {
     Q_OBJECT
 
 public:
-    enum class LoadResult {
+    enum class LoadResult : quint8 {
         Unchanged,
         Changed,
         ParseError,
         Error
     };
 
-    explicit SettingsFile(const QString& path, QObject* parent = nullptr);
+    explicit SettingsFile(QString path, QObject* parent = nullptr);
 
     [[nodiscard]] std::optional<QJsonValue> read() const;
     void write(const QJsonValue& json);
 
-    LoadResult load(bool emitErrors = true);
+    LoadResult load(bool reportErrors = true);
 
 signals:
     void changed(); // Data changed, not file watcher event

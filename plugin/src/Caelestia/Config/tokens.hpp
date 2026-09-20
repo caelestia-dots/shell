@@ -1,10 +1,11 @@
 #pragma once
 
-#include <limits>
 #include <qlist.h>
 
-#include "common.hpp"
+#include <limits>
+
 #include "settings/objectnode.hpp"
+#include "common.hpp"
 
 namespace caelestia::config {
 
@@ -111,6 +112,7 @@ class BarTokens : public settings::ObjectNode {
     CONFIG_PROPERTY(int, trayMenuWidth, 300)
     CONFIG_PROPERTY(int, batteryWidth, 250)
     CONFIG_PROPERTY(int, networkWidth, 320)
+    CONFIG_PROPERTY(int, audioWidth, 320)
     CONFIG_PROPERTY(int, kbLayoutWidth, 320)
 };
 

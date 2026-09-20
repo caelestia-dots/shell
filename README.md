@@ -89,6 +89,7 @@ Dependencies:
 -   `qt6-base`
 -   `qt6-declarative`
 -   `qt6-imageformats`
+-   [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 -   [`swappy`](https://github.com/jtheoof/swappy)
 -   [`fish`](https://github.com/fish-shell/fish-shell)
 -   [`bash`](https://www.gnu.org/software/bash)
@@ -227,7 +228,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 >
 > - `appearance`: `anim.*`, `transparency.*`
 > - `bar.tray`: `hiddenIcons`, `iconSubs`
-> - `bar.workspaces`: `ignoredTags`, `perMonitorWorkspaces`, `specialWorkspaceIcons`, `windowIcons`
+> - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
@@ -235,9 +236,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
-> - `services`: `audioIncrement`, `brightnessIncrement`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `smartScheme`, `useFahrenheit`, `useFahrenheitPerformance`, `useTwelveHourClock`, `visualiserBars`, `weatherLocation`
-> - `utilities.toasts`: all except `fullscreen`
-> - `utilities.vpn`: `enabled`, `provider`, `selectedProvider`
+> - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
+> - `utilities`: `toasts.*`, `vpn.*`
 >
 > </details>
 
@@ -424,20 +424,39 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "shown": 5,
             "activeIndicator": true,
             "occupiedBg": false,
+            "showUnoccupied": true,
+            "perMonitor": true,
             "showWindows": true,
             "showWindowsOnSpecialWorkspaces": true,
             "maxWindowIcons": 5,
             "activeTrail": false,
-            "perMonitorWorkspaces": true,
             "displayType": "shapes",
+            "specialDisplayType": "icons",
             "label": "  ",
             "occupiedLabel": "󰮯",
             "activeLabel": "󰮯",
             "capitalisation": "preserve",
+            "workspaceIcons": [],
             "specialWorkspaceIcons": [
                 {
-                    "name": "steam",
-                    "icon": "sports_esports"
+                    "name": "special",
+                    "icon": "star"
+                },
+                {
+                    "name": "communication",
+                    "icon": "forum"
+                },
+                {
+                    "name": "music",
+                    "icon": "music_cast"
+                },
+                {
+                    "name": "todo",
+                    "icon": "checklist"
+                },
+                {
+                    "name": "sysmon",
+                    "icon": "monitor_heart"
                 }
             ],
             "ignoredTags": [
@@ -706,7 +725,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "notifs": {
         "expire": true,
-        "fullscreen": "on",
+        "fullscreen": "On",
         "defaultExpireTimeout": 5000,
         "fullscreenExpireTimeout": 2000,
         "clearThreshold": 0.3,
@@ -723,10 +742,11 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "services": {
         "weatherLocation": "",
-        "useFahrenheit": false,
-        "useFahrenheitPerformance": false,
-        "useTwelveHourClock": false,
-        "gpuType": "",
+        "weatherUnits": "Auto",
+        "sensorUnits": "Celsius",
+        "dataUnits": "Binary",
+        "clockFormat": "Auto",
+        "gpuType": "Auto",
         "visualiserBars": 60,
         "audioIncrement": 0.1,
         "brightnessIncrement": 0.1,

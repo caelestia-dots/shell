@@ -1,16 +1,19 @@
 #include "toaster.hpp"
 
-#include <qlogging.h>
 #include <qtimer.h>
+
+#include <utility>
 
 namespace caelestia {
 
-Toast::Toast(const QString& title, const QString& message, const QString& icon, Type type, int timeout, QObject* parent)
+using Qt::StringLiterals::operator""_s;
+
+Toast::Toast(QString title, QString message, QString icon, Type type, int timeout, QObject* parent)
     : QObject(parent)
     , m_closed(false)
-    , m_title(title)
-    , m_message(message)
-    , m_icon(icon)
+    , m_title(std::move(title))
+    , m_message(std::move(message))
+    , m_icon(std::move(icon))
     , m_type(type)
     , m_timeout(timeout) {
     QTimer::singleShot(timeout, this, &Toast::close);
@@ -18,16 +21,16 @@ Toast::Toast(const QString& title, const QString& message, const QString& icon, 
     if (m_icon.isEmpty()) {
         switch (m_type) {
         case Type::Success:
-            m_icon = "check_circle_unread";
+            m_icon = u"check_circle_unread"_s;
             break;
         case Type::Warning:
-            m_icon = "warning";
+            m_icon = u"warning"_s;
             break;
         case Type::Error:
-            m_icon = "error";
+            m_icon = u"error"_s;
             break;
         default:
-            m_icon = "info";
+            m_icon = u"info"_s;
             break;
         }
     }
@@ -97,17 +100,20 @@ Toaster::Toaster(QObject* parent)
     : QObject(parent) {}
 
 Toaster* Toaster::instance() {
-    static Toaster instance;
-    return &instance;
+    static Toaster s_instance;
+    return &s_instance;
 }
 
-Toaster* Toaster::create(QQmlEngine*, QJSEngine*) {
+Toaster* Toaster::create(QQmlEngine* engine, QJSEngine* jsEngine) {
+    Q_UNUSED(engine);
+    Q_UNUSED(jsEngine);
+
     QQmlEngine::setObjectOwnership(instance(), QQmlEngine::CppOwnership);
     return instance();
 }
 
 QQmlListProperty<Toast> Toaster::toasts() {
-    return QQmlListProperty<Toast>(this, &m_toasts);
+    return { this, &m_toasts };
 }
 
 void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {
