@@ -47,6 +47,7 @@ StyledRect {
             }
         }
 
+        // Date
         Loader {
             Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
             asynchronous: true
@@ -58,26 +59,54 @@ StyledRect {
                 rowSpacing: layout.rowSpacing - 4
                 columnSpacing: layout.columnSpacing - 4
 
+                // Day of the week
                 StyledText {
                     Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
                     Layout.rightMargin: root.horizontal ? 4 : 0
                     text: Time.format("ddd")
-                    font: Tokens.font.body.builders.small.scale(0.9).build()
+                    font: root.horizontal ? root.font.build() : Tokens.font.body.builders.small.scale(0.9).build()
                     color: root.colour
+                }
+
+                // Day of the month
+                StyledText {
+                    Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
+                    text: Time.format("d")
+                    font: root.font.build()
+                    color: root.colour
+                }
+
+                // Separator between day and month
+                Loader {
+                    Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
+                    // Layout.leftMargin: root.horizontal ? -Tokens.padding.extraSmall / 2 : 0
+                    // Layout.rightMargin: root.horizontal ? -Tokens.padding.extraSmall / 2 : 0
+                    // Layout.bottomMargin: root.horizontal ? 2 : 0
+                    asynchronous: true
+                    active: root.horizontal
+                    visible: active
+
+                    sourceComponent: Text {
+                        text: "/"
+                        font: root.font.build()
+                        color: root.colour
+                    }
                 }
 
                 StyledText {
                     Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
-                    text: Time.format("d")
+                    // Layout.bottomMargin: root.horizontal ? 2 : 0
+                    text: Time.format("MM")
                     font: root.font.scale(1.1).build()
                     color: root.colour
                 }
 
+                // Seperator between date and time
                 StyledRect {
                     Layout.fillWidth: !root.horizontal
                     Layout.fillHeight: root.horizontal
-                    Layout.leftMargin: root.horizontal ? 4 : -Tokens.padding.extraSmall
-                    Layout.rightMargin: root.horizontal ? Tokens.padding.extraSmall / 2 : -Tokens.padding.extraSmall
+                    Layout.leftMargin: root.horizontal ? Tokens.padding.extraSmall * 2 : -Tokens.padding.extraSmall
+                    Layout.rightMargin: root.horizontal ? Tokens.padding.extraSmall * 2 : -Tokens.padding.extraSmall
                     Layout.topMargin: root.horizontal ? -Tokens.padding.extraSmall : 4
                     Layout.bottomMargin: root.horizontal ? -Tokens.padding.extraSmall : Tokens.padding.extraSmall / 2
                     implicitWidth: root.horizontal ? 1 : 0
@@ -87,6 +116,7 @@ StyledRect {
             }
         }
 
+        // Hour
         StyledText {
             Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
             text: Time.hourStr
@@ -101,19 +131,24 @@ StyledRect {
             }
         }
 
+        // Seperator between hour and minute
         Loader {
             Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: root.horizontal ? -Tokens.padding.extraSmall / 2 : 0
+            Layout.rightMargin: root.horizontal ? -Tokens.padding.extraSmall / 2 : 0
+            Layout.bottomMargin: root.horizontal ? 2 : 0
             asynchronous: true
             active: root.horizontal
             visible: active
 
             sourceComponent: Text {
                 text: ":"
-                font: root.fontFor(text, 0)
+                font: root.font.build()
                 color: root.colour
             }
         }
 
+        // Minute
         StyledText {
             Layout.topMargin: root.horizontal ? 0 : -parent.rowSpacing - 4
             Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
@@ -129,19 +164,24 @@ StyledRect {
             }
         }
 
+        // Seperator between minute and second
         Loader {
             Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: root.horizontal ? -Tokens.padding.extraSmall / 2 : 0
+            Layout.rightMargin: root.horizontal ? -Tokens.padding.extraSmall / 2 : 0
+            Layout.bottomMargin: root.horizontal ? 2 : 0
             asynchronous: true
             active: Config.bar.clock.showSeconds && root.horizontal
             visible: active
 
             sourceComponent: Text {
                 text: ":"
-                font: root.fontFor(text, 0)
+                font: root.font.build()
                 color: root.colour
             }
         }
 
+        // Second
         Loader {
             Layout.topMargin: root.horizontal ? 0 : -parent.rowSpacing - 4
             Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
@@ -157,12 +197,13 @@ StyledRect {
                 TextMetrics {
                     id: secMetrics
 
-                    font: root.font.build()
+                    font: root.font.scale(0.9).build()
                     text: Time.format("ss")
                 }
             }
         }
 
+        // AM/PM
         Loader {
             Layout.topMargin: root.horizontal ? 0 : -parent.rowSpacing - 4
             Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
