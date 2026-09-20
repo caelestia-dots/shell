@@ -73,12 +73,22 @@ protected:
 
 private:
     void checkAtRest(float speed);
+    void beginRetire();
 
     // Physics state
     QPointF m_prevScenePos;
     QElapsedTimer m_elapsed;
     bool m_physicsActive = false;
     bool m_hasPrevPos = false;
+
+    // Smooth retirement of an imperceptible deformation. Assigning identity
+    // outright jolts the whole panel, since this matrix also transforms the
+    // panel content and not just the blob background.
+    bool m_retiring = false;
+    QElapsedTimer m_retireElapsed;
+    float m_retire00 = 1.0f;
+    float m_retire01 = 0.0f;
+    float m_retire11 = 1.0f;
 
     // Symmetric 2x2 deformation matrix components (3 independent: m00, m01,
     // m11) Rest state is identity: m00=1, m01=0, m11=1
