@@ -197,7 +197,9 @@ Item {
 
         Behavior on y {
             id: viewYBehavior
+
             enabled: !root.horizontal
+
             Anim {
                 id: viewYAnim
 
@@ -207,7 +209,9 @@ Item {
 
         Behavior on x {
             id: viewXBehavior
+
             enabled: root.horizontal
+
             Anim {
                 id: viewXAnim
 

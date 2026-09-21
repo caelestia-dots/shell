@@ -16,6 +16,7 @@ StyledClippingRect {
     required property ShellScreen screen
     required property bool fullscreen
     required property bool horizontal
+    readonly property real margin: Tokens.padding.extraSmall
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
@@ -66,7 +67,6 @@ StyledClippingRect {
         return index % shown;
     }
 
-    readonly property real margin: Tokens.padding.extraSmall
     implicitWidth: horizontal ? workspaces.layoutWidth + margin * 2 : Tokens.sizes.bar.innerWidth
     implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : workspaces.layoutHeight + margin * 2
 

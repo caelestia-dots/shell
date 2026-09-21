@@ -48,7 +48,8 @@ Item {
         return Colours.layer(Colours.palette.m3outlineVariant, 2);
     }
     readonly property real indSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-    readonly property real winLen: windows.item ? (root.horizontal ? windows.item.layoutWidth : windows.item.layoutHeight) : 0
+    readonly property LazyListView winList: windows.item as LazyListView
+    readonly property real winLen: winList ? (root.horizontal ? winList.layoutWidth : winList.layoutHeight) : 0
     readonly property real winGap: hasWindows ? Tokens.padding.extraSmall : 0
     readonly property real mainContent: indSize + winGap + winLen
 
@@ -258,11 +259,13 @@ Item {
                 // Behaviors on the main-axis property let icons slide when the list reorganises
                 Behavior on x {
                     enabled: root.horizontal
+
                     Anim {}
                 }
 
                 Behavior on y {
                     enabled: !root.horizontal
+
                     Anim {}
                 }
             }

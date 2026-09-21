@@ -205,16 +205,16 @@ void LazyListView::setDelegate(QQmlComponent* delegate) {
 
 // --- Layout ---
 
-int LazyListView::orientation() const {
+LazyListView::Orientation LazyListView::orientation() const {
     return m_orientation;
 }
 
-void LazyListView::setOrientation(int orientation) {
+void LazyListView::setOrientation(Orientation orientation) {
     if (orientation == m_orientation)
         return;
-    if (orientation != Vertical && orientation != Horizontal)
+    if (orientation != Orientation::Vertical && orientation != Orientation::Horizontal)
         return;
-    m_orientation = static_cast<Orientation>(orientation);
+    m_orientation = orientation;
     emit orientationChanged();
     resetContent();
 }
@@ -393,15 +393,15 @@ qreal LazyListView::visualMainAt(int index) const {
 }
 
 qreal LazyListView::layoutMainTotal() const {
-    return m_orientation == Horizontal ? m_layoutWidth : m_layoutHeight;
+    return m_orientation == Orientation::Horizontal ? m_layoutWidth : m_layoutHeight;
 }
 
 qreal LazyListView::contentMain() const {
-    return m_orientation == Horizontal ? m_contentX : m_contentY;
+    return m_orientation == Orientation::Horizontal ? m_contentX : m_contentY;
 }
 
 qreal LazyListView::mainCoordOf(QQuickItem* item) const {
-    return m_orientation == Horizontal ? item->x() : item->y();
+    return m_orientation == Orientation::Horizontal ? item->x() : item->y();
 }
 
 qreal LazyListView::viewportTop() const {
@@ -437,7 +437,8 @@ LazyListView::HeightUpdate LazyListView::setKnownMain(int index, qreal length) {
 
 void LazyListView::adjustViewportIfAbove(int index, QQuickItem* item, qreal delta) {
     auto* attached = attachedFor(item);
-    if (attached && attached->trackViewport() && m_layout[index].mainPos < (m_orientation == Horizontal ? viewportLeft() : viewportTop()))
+    if (attached && attached->trackViewport() &&
+        m_layout[index].mainPos < (m_orientation == Orientation::Horizontal ? viewportLeft() : viewportTop()))
         emit viewportAdjustNeeded(delta);
 }
 
@@ -486,11 +487,11 @@ qreal LazyListView::delegateVisibleWidth(QQuickItem* item) {
 }
 
 qreal LazyListView::mainLength(QQuickItem* item) const {
-    return m_orientation == Horizontal ? delegateWidth(item) : delegateHeight(item);
+    return m_orientation == Orientation::Horizontal ? delegateWidth(item) : delegateHeight(item);
 }
 
 qreal LazyListView::visibleMainLength(QQuickItem* item) const {
-    return m_orientation == Horizontal ? delegateVisibleWidth(item) : delegateVisibleHeight(item);
+    return m_orientation == Orientation::Horizontal ? delegateVisibleWidth(item) : delegateVisibleHeight(item);
 }
 
 bool LazyListView::isDelegateReady(QQuickItem* item) {
@@ -545,7 +546,7 @@ QQuickItem* LazyListView::itemAt(qreal x, qreal y) const {
     if (x < 0 || y < 0)
         return nullptr;
 
-    if (m_orientation == Horizontal) {
+    if (m_orientation == Orientation::Horizontal) {
         if (y >= height())
             return nullptr;
     } else if (x >= width()) {
@@ -557,10 +558,10 @@ QQuickItem* LazyListView::itemAt(qreal x, qreal y) const {
         if (!m_itemToIndex.contains(item) || !item->isVisible())
             continue;
 
-        const auto start = m_orientation == Horizontal ? item->x() + m_contentX : item->y() + m_contentY;
+        const auto start = m_orientation == Orientation::Horizontal ? item->x() + m_contentX : item->y() + m_contentY;
         const auto end = start + visibleMainLength(item);
 
-        if (m_orientation == Horizontal ? (x >= start && x < end) : (y >= start && y < end))
+        if (m_orientation == Orientation::Horizontal ? (x >= start && x < end) : (y >= start && y < end))
             return item;
     }
 
@@ -581,7 +582,7 @@ void LazyListView::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
     if (!m_componentComplete)
         return;
 
-    if (m_orientation == Horizontal) {
+    if (m_orientation == Orientation::Horizontal) {
         if (!qFuzzyCompare(newGeometry.height(), oldGeometry.height())) {
             for (auto& entry : m_delegates) {
                 if (entry.item)
@@ -666,7 +667,7 @@ void LazyListView::finishDelayedInsert(QQuickItem* item) {
 
     if (idx < static_cast<int>(m_layout.size())) {
         const qreal target = visualMainAt(idx) - contentMain();
-        if (m_orientation == Horizontal)
+        if (m_orientation == Orientation::Horizontal)
             item->setX(target);
         else
             item->setY(target);
@@ -678,7 +679,7 @@ void LazyListView::finishDelayedInsert(QQuickItem* item) {
     // which may have mutated the model out from under us.
     if (idx < static_cast<int>(m_layout.size())) {
         const qreal target = m_layout[idx].mainPos - contentMain();
-        const char* prop = m_orientation == Horizontal ? "x" : "y";
+        const char* prop = m_orientation == Orientation::Horizontal ? "x" : "y";
         item->setProperty(prop, target); // animate to layout position
         publishLayoutOffset(item, idx);
     }
@@ -701,7 +702,7 @@ void LazyListView::positionDelegates() {
         // Use setProperty to go through the QML property system,
         // which triggers Behaviors (setY/setX bypasses them).
         const qreal target = m_layout[idx].mainPos - contentMain();
-        const char* prop = m_orientation == Horizontal ? "x" : "y";
+        const char* prop = m_orientation == Orientation::Horizontal ? "x" : "y";
         entry.item->setProperty(prop, target);
         publishLayoutOffset(entry.item, idx);
     }
@@ -713,7 +714,7 @@ void LazyListView::publishLayoutOffset(QQuickItem* item, int index) {
     auto* attached = attachedFor(item);
     if (attached) {
         const qreal offset = m_layout[index].mainPos - contentMain();
-        if (m_orientation == Horizontal)
+        if (m_orientation == Orientation::Horizontal)
             attached->setLayoutX(offset);
         else
             attached->setLayoutY(offset);
@@ -748,7 +749,7 @@ void LazyListView::updateLayoutPositions() {
         pos += len;
     }
 
-    if (m_orientation == Horizontal) {
+    if (m_orientation == Orientation::Horizontal) {
         if (!qFuzzyCompare(m_layoutWidth + 1.0, pos + 1.0)) {
             m_layoutWidth = pos;
             emit layoutWidthChanged();
@@ -783,7 +784,7 @@ void LazyListView::updateContentHeight() {
             visPos = std::max(visPos, mainCoordOf(dying.item) + dyingLen);
     }
 
-    if (m_orientation == Horizontal) {
+    if (m_orientation == Orientation::Horizontal) {
         if (!qFuzzyCompare(m_contentWidth + 1.0, visPos + 1.0)) {
             m_contentWidth = visPos;
             emit contentWidthChanged();
@@ -821,7 +822,7 @@ QRectF LazyListView::effectiveViewport() const {
     QRectF vp;
     if (m_useCustomViewport)
         vp = m_viewport;
-    else if (m_orientation == Horizontal)
+    else if (m_orientation == Orientation::Horizontal)
         vp = QRectF(m_contentX, 0, width(), height());
     else
         vp = QRectF(0, m_contentY, width(), height());
@@ -832,7 +833,7 @@ QRectF LazyListView::effectiveViewport() const {
     // visible area and may legitimately lie entirely outside the content.
     const qreal total = layoutMainTotal();
     if (!m_useCustomViewport && total > 0) {
-        if (m_orientation == Horizontal) {
+        if (m_orientation == Orientation::Horizontal) {
             const qreal left = std::min(vp.x(), total);
             const qreal right = std::max(vp.x() + vp.width(), 0.0);
             if (right > left)
@@ -845,7 +846,7 @@ QRectF LazyListView::effectiveViewport() const {
         }
     }
 
-    if (m_orientation == Horizontal)
+    if (m_orientation == Orientation::Horizontal)
         vp = QRectF(vp.x() - m_cacheBuffer, vp.y(), vp.width() + m_cacheBuffer * 2, vp.height());
     else
         vp.adjust(0, -m_cacheBuffer, 0, m_cacheBuffer);
@@ -854,7 +855,7 @@ QRectF LazyListView::effectiveViewport() const {
     // those bounds, so extending past them wastes budget and can cause edge thrashing
     // when a large cache buffer reaches the opposite end of the content.
     if (total > 0) {
-        if (m_orientation == Horizontal)
+        if (m_orientation == Orientation::Horizontal)
             return clipHorizontal(vp, 0, total);
         return clipVertical(vp, 0, total);
     }
@@ -874,7 +875,7 @@ std::pair<int, int> LazyListView::computeVisibleRange() const {
     if (vp.isEmpty())
         return { -1, -1 };
 
-    const bool horiz = m_orientation == Horizontal;
+    const bool horiz = m_orientation == Orientation::Horizontal;
     const qreal vpStart = horiz ? vp.x() : vp.y();
     const qreal vpEnd = horiz ? vp.x() + vp.width() : vp.y() + vp.height();
 
@@ -957,8 +958,8 @@ QList<int> LazyListView::delegatesOutsideViewport(const QSet<int>& keep, const Q
 
         const qreal itemStart = mainCoordOf(it->item);
         const qreal itemEnd = itemStart + visibleMainLength(it->item);
-        const qreal vpStart = m_orientation == Horizontal ? viewport.left() : viewport.top();
-        const qreal vpEnd = m_orientation == Horizontal ? viewport.right() : viewport.bottom();
+        const qreal vpStart = m_orientation == Orientation::Horizontal ? viewport.left() : viewport.top();
+        const qreal vpEnd = m_orientation == Orientation::Horizontal ? viewport.right() : viewport.bottom();
         if (itemEnd < vpStart || itemStart > vpEnd)
             outside.append(it.key());
     }
@@ -1016,7 +1017,7 @@ int LazyListView::createDelegates(const QList<int>& indices, int budget) {
         // until the delegate signals ready via readyChanged.
         entry.pendingInsert = true;
         const qreal target = m_layout[idx].mainPos - contentMain();
-        if (m_orientation == Horizontal)
+        if (m_orientation == Orientation::Horizontal)
             entry.item->setX(target);
         else
             entry.item->setY(target);
@@ -1061,7 +1062,7 @@ LazyListView::DelegateEntry LazyListView::createDelegate(int modelIndex) {
     m_delegate->setInitialProperties(entry.item, initialProps);
 
     entry.item->setParentItem(this);
-    if (m_orientation == Horizontal)
+    if (m_orientation == Orientation::Horizontal)
         entry.item->setHeight(height());
     else
         entry.item->setWidth(width());

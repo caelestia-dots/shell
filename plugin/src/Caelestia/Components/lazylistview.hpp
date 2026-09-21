@@ -94,7 +94,10 @@ class LazyListView : public QQuickItem {
     QML_ATTACHED(LazyListViewAttached)
 
 public:
-    enum Orientation { Vertical, Horizontal };
+    enum class Orientation : quint8 {
+        Vertical,
+        Horizontal
+    };
     Q_ENUM(Orientation)
 
     // Model & Delegate
@@ -102,7 +105,7 @@ public:
     Q_PROPERTY(QQmlComponent* delegate READ delegate WRITE setDelegate NOTIFY delegateChanged)
 
     // Layout
-    Q_PROPERTY(int orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
+    Q_PROPERTY(Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY(qreal spacing READ spacing WRITE setSpacing NOTIFY spacingChanged)
     Q_PROPERTY(qreal contentHeight READ contentHeight NOTIFY contentHeightChanged)
     Q_PROPERTY(qreal layoutHeight READ layoutHeight NOTIFY layoutHeightChanged)
@@ -146,8 +149,8 @@ public:
     void setDelegate(QQmlComponent* delegate);
 
     // Layout
-    [[nodiscard]] int orientation() const;
-    void setOrientation(int orientation);
+    [[nodiscard]] Orientation orientation() const;
+    void setOrientation(Orientation orientation);
 
     [[nodiscard]] qreal spacing() const;
     void setSpacing(qreal spacing);
@@ -320,7 +323,7 @@ private:
     QAbstractItemModel* m_model = nullptr;
     QQmlComponent* m_delegate = nullptr;
 
-    Orientation m_orientation = Vertical;
+    Orientation m_orientation = Orientation::Vertical;
     qreal m_spacing = 0;
     qreal m_contentHeight = 0;
     qreal m_layoutHeight = 0;
