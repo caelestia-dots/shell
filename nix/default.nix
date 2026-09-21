@@ -35,7 +35,10 @@
 }: let
   version = "1.0.0";
 
-  qs = quickshell.withModules [qt6.qtimageformats m3shapes];
+  qs =
+    if quickshell ? withModules
+    then quickshell.withModules [qt6.qtimageformats m3shapes]
+    else quickshell;
 
   runtimeDeps =
     [
@@ -112,7 +115,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [qs extras plugin xkeyboard-config qt6.qtbase];
+    buildInputs = [qs extras plugin xkeyboard-config qt6.qtbase qt6.qtimageformats m3shapes];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeFlags =
