@@ -13,7 +13,8 @@ Item {
     id: root
 
     required property ScreenState screenState
-    required property bool onLeft
+    required property int position
+    readonly property bool onLeft: position === DashboardPosition.Left
     readonly property FileDialog facePicker: FileDialog {
         title: Tr.tr("Select a profile picture")
         filterLabel: Tr.tr("Image files")

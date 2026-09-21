@@ -10,16 +10,23 @@ QtObject {
     required property Bar.BarWrapper bar
     required property var win
     required property int configPosition
+    required property int dashboardPosition
 
     readonly property int position: normalize(configPosition)
     readonly property bool horizontal: position === BarPosition.Top || position === BarPosition.Bottom
     readonly property bool barOnLeft: position === BarPosition.Left
     readonly property bool barOnTop: position === BarPosition.Top
     readonly property bool barOnBottom: position === BarPosition.Bottom
-    // A dashboard on the bar's own edge can never be revealed: closed, its hover zone is exactly
-    // the strip the bar occupies, and hovering the bar has to open popouts instead. Use the other
-    // edge when the two would collide.
-    readonly property bool dashboardOnLeft: horizontal
+    readonly property int effectiveDashboardPosition: {
+        if (barOnTop)
+            return DashboardPosition.Left;
+        if (barOnBottom)
+            return dashboardPosition;
+        return DashboardPosition.Top;
+    }
+
+    readonly property bool dashboardOnLeft: effectiveDashboardPosition === DashboardPosition.Left
+    readonly property bool dashboardOnTop: effectiveDashboardPosition === DashboardPosition.Top
 
     readonly property real barExtent: bar.extent
     readonly property real barClamped: bar.clampedExtent

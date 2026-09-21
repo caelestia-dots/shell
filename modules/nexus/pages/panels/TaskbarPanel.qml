@@ -24,6 +24,16 @@ PageBase {
         }
     ]
 
+    // Clamped to the edges valid for the current bar position, mirroring EdgeGeometry
+    readonly property int effectiveDashboardPosition: {
+        const barPos = Config.bar.position;
+        if (barPos === BarPosition.Top)
+            return DashboardPosition.Left;
+        if (barPos === BarPosition.Bottom)
+            return Config.bar.dashboardPosition;
+        return DashboardPosition.Top;
+    }
+
     title: Tr.tr("Taskbar")
     isSubPage: true
 
@@ -46,6 +56,36 @@ PageBase {
             menuItems: root.barPositionItems
             active: root.barPositionItems.find(i => i.value === Config.bar.position)
             onSelected: i => GlobalConfig.bar.position = i.value
+        }
+
+        SelectRow {
+            label: Tr.tr("Dashboard position")
+            subtext: Tr.tr("Which screen edge the dashboard sits on")
+            disabled: menuItems.length < 2
+            menuItems: {
+                const barPos = Config.bar.position;
+                // The dashboard can only sit on edges the bar doesn't occupy
+                if (barPos === BarPosition.Bottom)
+                    return [dashboardPosTop, dashboardPosLeft];
+                if (barPos === BarPosition.Top)
+                    return [dashboardPosLeft];
+                return [dashboardPosTop];
+            }
+            active: menuItems.find(i => i.value === root.effectiveDashboardPosition) && menuItems.length > 1
+            onSelected: i => GlobalConfig.bar.dashboardPosition = i.value
+
+            MenuItem {
+                id: dashboardPosTop
+
+                text: Tr.tr("Top")
+                value: DashboardPosition.Top
+            }
+            MenuItem {
+                id: dashboardPosLeft
+
+                text: Tr.tr("Left")
+                value: DashboardPosition.Left
+            }
         }
 
         ToggleRow {

@@ -242,7 +242,7 @@ CustomMouseArea {
         }
 
         // Show/hide dashboard on drag (for touchscreen devices)
-        if (pressed && inDashboardArea(dragStart.x, dragStart.y) && (geometry.dashboardOnLeft ? withinPanelHeight(panels.dashboard, x, y) : withinPanelWidth(panels.dashboard, x, y))) {
+        if (pressed && inDashboardArea(dragStart.x, dragStart.y) && (geometry.dashboardOnTop ? withinPanelWidth(panels.dashboard, x, y) : withinPanelHeight(panels.dashboard, x, y))) {
             const dashDrag = geometry.dashboardOnLeft ? dragX : dragY;
             if (dashDrag > Config.dashboard.dragThreshold)
                 screenState.dashboard = true;

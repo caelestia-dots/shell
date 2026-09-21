@@ -114,7 +114,7 @@ Item {
         id: dashboard
 
         screenState: root.screenState
-        onLeft: root.geometry.dashboardOnLeft
+        position: root.geometry.effectiveDashboardPosition
     }
 
     BarPopouts.ClipWrapper {
