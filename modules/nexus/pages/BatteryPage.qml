@@ -53,13 +53,17 @@ PageBase {
 
     function changeToastIconVariant() {
         let framed = GlobalConfig.general.battery.framedMaterialIcons;
-        let lowWarnConfig = Array.from(GlobalConfig.general.battery.lowBatteryWarnLevels);
-        let highWarnConfig = Array.from(GlobalConfig.general.battery.chargingWarnLevels);
-        const changeIcon = level => {
-            level.icon = toggleFrame(level.icon, framed);
-        };
-        lowWarnConfig.forEach(changeIcon);
-        highWarnConfig.forEach(changeIcon);
+        let warningLists = [
+            GlobalConfig.general.battery.lowBatteryWarnLevels,
+            GlobalConfig.general.battery.chargingWarnLevels
+        ];
+
+        for (let list of warningLists) {
+            for (let i = 0; i < list.count; i++) {
+                let batteryLevel = list.at(i);
+                batteryLevel.icon = toggleFrame(batteryLevel.icon, framed);
+            }
+        }
     }
 
     title: qsTr("Power")
@@ -201,6 +205,7 @@ PageBase {
         }
 
         ToggleRow {
+            last: true
             verticalPadding: Tokens.padding.large
 
             text: qsTr("Framed Toast Icon")
