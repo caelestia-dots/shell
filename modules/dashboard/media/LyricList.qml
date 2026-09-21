@@ -25,7 +25,6 @@ Item {
     }
 
     readonly property real fadeAmount: 0.1
-    property bool flag
     property list<string> lyricList: Lyrics.lyrics
 
     layer.enabled: true
@@ -64,7 +63,6 @@ Item {
     }
 
     state: {
-        flag; // For some reason it doesn't update sometimes, so use this to force an update
         if (Lyrics.hasLyrics)
             return "hasLyrics";
         if (Lyrics.loading)
@@ -152,14 +150,6 @@ Item {
             }
         }
     ]
-
-    Connections {
-        function onHasLyricsChanged() {
-            root.flag = !root.flag;
-        }
-
-        target: Lyrics
-    }
 
     Loader {
         id: loadingIndicator

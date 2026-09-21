@@ -10,37 +10,13 @@
 
 namespace caelestia::settings {
 
-class Node;
-
-struct DefaultSpec {
-    QVariant value = QVariant();
-    std::function<QVariant(const Node*)> func = nullptr;
-
-    [[nodiscard]] QVariant resolve(const Node* self) const;
-
-    template <typename T> static DefaultSpec create(T value) {
-        return { .value = QVariant::fromValue(std::move(value)) };
-    }
-
-    template <typename T, std::invocable<const Node*> F> static DefaultSpec create(F&& func) {
-        return { .func = [f = std::forward<F>(func)](const Node* self) {
-            return QVariant::fromValue<T>(f(self));
-        } };
-    }
-
-    template <typename T> static T resolve(const Node* self, T value) {
-        Q_UNUSED(self)
-        return value;
-    }
-
-    template <typename T, std::invocable<const Node*> F> static T resolve(const Node* self, F&& func) {
-        return T(func(self));
-    }
-};
+class ValueCodec;
 
 struct Annotation {
-    DefaultSpec defaultValue;
+    QVariant defaultValue;
     bool globalOnly = false;
+    // NOLINTNEXTLINE(readability-redundant-member-init) callers will get missing field init warnings without
+    QList<QMetaType> allowedTypes = {}; // For QVariant properties
 };
 
 namespace detail {
@@ -70,6 +46,7 @@ struct Descriptor {
     Q_PROPERTY(int metaIndex MEMBER metaIndex)
     Q_PROPERTY(bool isNode MEMBER isNode)
 
+    ANNOTATION(QVariant, defaultValue)
     ANNOTATION(bool, globalOnly)
 
 public:
@@ -78,9 +55,10 @@ public:
     int metaIndex;
     bool isNode;
     Annotation annotation;
+    const ValueCodec* codec = nullptr; // Null for nodes and unsupported types
 
     [[nodiscard]] QString typeString() const;
-    [[nodiscard]] Q_INVOKABLE QVariant defaultValue(const Node* self) const;
+    [[nodiscard]] bool accepts(const QMetaType& valueType) const;
 };
 
 #undef ANNOTATION

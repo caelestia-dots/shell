@@ -94,7 +94,9 @@ ListNode::ListNode(ListNode* fallback, QObject* parent, bool globalOnly)
     if (fallback) {
         // Disconnect generic fallback notify, lists use a custom one
         QObject::disconnect(fallback, &ListNode::optionChanged, this, nullptr);
-        QObject::connect(fallback, &ListNode::elementsChanged, this, &ListNode::onFallbackListNotify);
+
+        if (!m_globalOnly)
+            QObject::connect(fallback, &ListNode::elementsChanged, this, &ListNode::onFallbackListNotify);
     }
 }
 
@@ -111,10 +113,8 @@ QVariantList ListNode::values() const {
 }
 
 void ListNode::remove(qsizetype index) {
-    if (auto* const global = forwardGlobalMutation()) {
-        global->remove(index);
+    if (rejectGlobalMutation())
         return;
-    }
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -134,10 +134,8 @@ void ListNode::remove(qsizetype index) {
 }
 
 void ListNode::move(qsizetype from, qsizetype to) {
-    if (auto* const global = forwardGlobalMutation()) {
-        global->move(from, to);
+    if (rejectGlobalMutation())
         return;
-    }
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -161,10 +159,8 @@ void ListNode::move(qsizetype from, qsizetype to) {
 }
 
 void ListNode::clear() {
-    if (auto* const global = forwardGlobalMutation()) {
-        global->clear();
+    if (rejectGlobalMutation())
         return;
-    }
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -270,7 +266,7 @@ void ListNode::resetToDefaults() {
     }
 
     // Don't reset global only list nodes on overlays
-    if (fallbackNode() && isGlobalOnly())
+    if (fallbackNode() && m_globalOnly)
         return;
 
     const WriteScope scope(this, WriteOrigin::FileReset);
@@ -296,16 +292,8 @@ bool ListNode::syncJson(const QJsonValue& json, QList<Diagnostic>& diagnostics) 
     }
 
     // Refuse syncs to global only list nodes on overlays
-    if (fallbackNode() && isGlobalOnly()) {
-        const auto p = path();
-        qCWarning(lcSettings, "Global property definition %s found in overlay file, ignoring.", qUtf8Printable(p));
-        diagnostics << Diagnostic{
-            .type = DiagnosticType::GlobalOption,
-            .option = p,
-            .message = util::i18n::mark(u"Global properties should not be defined in overlay files"_s),
-        };
+    if (rejectGlobalSync(diagnostics))
         return false;
-    }
 
     const WriteScope scope(this, WriteOrigin::File);
     setValue(valuesKey(), json.toArray(), &diagnostics);
@@ -336,8 +324,8 @@ Node* ListNode::elementAt(qsizetype index) const {
 }
 
 Node* ListNode::insertElement(const QVariantMap& props, qsizetype index) {
-    if (auto* const global = forwardGlobalMutation())
-        return global->insertElement(props, index);
+    if (rejectGlobalMutation())
+        return nullptr;
 
     const WriteScope scope(this, WriteOrigin::Qml);
 
@@ -357,23 +345,23 @@ QList<QVariantMap> ListNode::defaultValue() const {
     const auto* desc = getDescriptor();
     if (!desc)
         return {};
-    return desc->defaultValue(this).value<QList<QVariantMap>>();
+    return desc->defaultValue().value<QList<QVariantMap>>();
 }
 
 bool ListNode::isNested() const {
     return qobject_cast<ListNode*>(parentNode());
 }
 
-ListNode* ListNode::forwardGlobalMutation() const {
-    if (!isGlobalOnly() || !fallbackNode())
-        return nullptr;
+bool ListNode::rejectGlobalMutation() const {
+    if (!m_globalOnly || !fallbackNode())
+        return false;
 
     qCWarning(lcSettings,
-        "Forwarding mutation of global list %s to the global layer. "
+        "Attempted to mutate global list %s from an overlay layer, ignoring. "
         "This should not be used, mutate global lists from the global layer instead.",
         qUtf8Printable(path()));
 
-    return static_cast<ListNode*>(fallbackNode());
+    return true;
 }
 
 bool ListNode::validIndex(qsizetype index) const {

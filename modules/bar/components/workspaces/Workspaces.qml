@@ -23,12 +23,14 @@ StyledClippingRect {
     readonly property int shown: Math.max(1, Config.bar.workspaces.shown)
 
     readonly property var wsIds: {
-        if (root.Config.bar.workspaces.showUnoccupied)
+        if (Config.bar.workspaces.showUnoccupied)
             return Array.from({
                 length: shown
             }, (_, i) => i + 1);
 
-        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor && (w.id === activeWsId || w.toplevels.values.some(t => !Hypr.isToplevelIgnored(t))));
+        const allMonitors = !Config.bar.workspaces.perMonitor;
+        const ignoredTags = GlobalConfig.bar.workspaces.ignoredTags;
+        const workspaces = Hypr.workspaces.values.filter(w => w.id > 0 && (allMonitors || w.monitor === root.monitor) && (w.id === activeWsId || w.toplevels.values.some(t => !Hypr.isToplevelIgnored(t, ignoredTags))));
         const currentIdx = workspaces.findIndex(w => w.id === activeWsId);
         if (currentIdx < 0)
             return [];
@@ -121,6 +123,14 @@ StyledClippingRect {
             delegate: Workspace {
                 activeWsId: root.activeWsId
                 ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
+                monitor: root.monitor
+
+                displayType: Config.bar.workspaces.displayType
+                showWindows: Config.bar.workspaces.showWindows
+                iconRules: GlobalConfig.bar.workspaces.workspaceIcons
+                activeLabel: Config.bar.workspaces.activeLabel
+                occupiedLabel: Config.bar.workspaces.occupiedLabel
+                label: Config.bar.workspaces.label
             }
         }
 
@@ -166,9 +176,9 @@ StyledClippingRect {
                 if (!ws)
                     return;
                 if (Hypr.activeWsId !== ws)
-                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
+                    Hypr.focusWorkspace(ws);
                 else
-                    Hypr.dispatch(Hypr.usingLua ? 'hl.dsp.workspace.toggle_special("special")' : "togglespecialworkspace special");
+                    Hypr.toggleSpecial("special");
             }
         }
 
@@ -186,22 +196,31 @@ StyledClippingRect {
     Loader {
         id: specialWs
 
-        asynchronous: true
-
         anchors.fill: parent
-        anchors.margins: Tokens.padding.extraSmall
 
+        asynchronous: true
         active: opacity > 0
-
-        scale: root.onSpecial ? 1 : 0.5
         opacity: root.onSpecial ? 1 : 0
 
-        sourceComponent: SpecialWorkspaces {
-            screen: root.screen
-        }
+        sourceComponent: Item {
+            StyledRect {
+                anchors.fill: parent
+                radius: Tokens.rounding.full
+                color: Qt.alpha(Colours.palette.m3scrim, Colours.light ? 0 : 0.2)
+            }
 
-        Behavior on scale {
-            Anim {}
+            SpecialWorkspaces {
+                anchors.fill: parent
+                anchors.margins: Tokens.padding.extraSmall
+                monitor: root.monitor
+
+                scale: 0.5
+                Component.onCompleted: scale = Qt.binding(() => root.onSpecial ? 1 : 0.5)
+
+                Behavior on scale {
+                    Anim {}
+                }
+            }
         }
 
         Behavior on opacity {

@@ -46,25 +46,19 @@ Singleton {
     // For auto connect on init from config
     property bool autoConnectPending
 
-    readonly property var providerInput: {
-        const sel = root.selectedProvider;
-        if (sel.length === 0)
-            return "wireguard";
-        const match = GlobalConfig.utilities.vpn.provider.find(p => typeof p === "object" && p.id === sel);
-        return match || "wireguard";
-    }
+    // The selected provider entry, or null when nothing valid is selected.
+    readonly property var selected: root.providers.find(p => p.id === root.selectedProvider) ?? null
 
-    // The single point where every configured provider - a built-in name, a
-    // customised built-in, or a fully user-defined entry - is folded into one
-    // uniform endpoint object. Built-in knowledge lives in the adapters below;
-    // config values override adapter defaults; anything unknown falls back to
-    // generic `<name> up/down` commands with an interface-presence status
-    // check. Everything downstream runs off this object and never branches on
-    // a provider name.
+    // The single point where every configured provider - a customised built-in
+    // or a fully user-defined entry - is folded into one uniform endpoint
+    // object. Built-in knowledge lives in the adapters below; config values
+    // override adapter defaults; anything unknown falls back to generic
+    // `<name> up/down` commands with an interface-presence status check.
+    // Everything downstream runs off this object and never branches on a
+    // provider name.
     readonly property var active: {
-        const input = providerInput;
-        const custom = typeof input === "object" ? input : null;
-        const name = custom ? (custom.name || "custom") : String(input);
+        const custom = root.selected;
+        const name = custom ? (custom.name || "custom") : "wireguard";
         const adapter = adapters.find(a => a.name === name) ?? null;
         const iface = (custom ? custom.interface : "") || (adapter ? adapter.iface : "") || (adapter ? "" : name);
         const resolve = c => typeof c === "function" ? c(iface) : c;
@@ -72,8 +66,8 @@ Singleton {
             name: name,
             displayName: (custom ? custom.displayName : "") || resolve(adapter ? adapter.display : null) || name,
             interface: iface,
-            connectCmd: (custom && custom.connectCmd && custom.connectCmd.length > 0 ? custom.connectCmd : resolve(adapter ? adapter.connectCmd : null)) || [name, "up"],
-            disconnectCmd: (custom && custom.disconnectCmd && custom.disconnectCmd.length > 0 ? custom.disconnectCmd : resolve(adapter ? adapter.disconnectCmd : null)) || [name, "down"],
+            connectCmd: (custom && custom.connectCmd.length > 0 ? custom.connectCmd : resolve(adapter ? adapter.connectCmd : null)) || [name, "up"],
+            disconnectCmd: (custom && custom.disconnectCmd.length > 0 ? custom.disconnectCmd : resolve(adapter ? adapter.disconnectCmd : null)) || [name, "down"],
             statusCmd: (adapter ? adapter.statusCmd : null) || ["ip", "link", "show"],
             parse: (adapter ? adapter.parse : null) || (out => root.parseInterfaceStatus(out, iface)),
             service: adapter ? adapter.service : `${name}d`,
@@ -91,126 +85,69 @@ Singleton {
 
     readonly property var adapters: [wireguardAdapter, warpAdapter, netbirdAdapter, tailscaleAdapter]
 
-    // Live list of configured providers as QtObjects, one entry per provider
-    // with a stable index. Kept in sync with the config below and consumed by
-    // the VPN management UI (mirrors Nmcli's networks / ethernetDevices).
-    readonly property list<Provider> providers: []
+    // Live list of configured providers, straight from the typed config list.
+    // Each entry is a config node with id/name/displayName/interface and the
+    // optional connect/disconnect commands.
+    readonly property var providers: GlobalConfig.utilities.vpn.provider.values
 
-    // Normalised, plain-data view of the configured providers. Re-evaluated
-    // whenever the config changes; syncProviders() folds it into `providers`.
-    readonly property var providerConfigs: {
-        const list = GlobalConfig.utilities.vpn.provider;
-        const out = [];
-        for (let i = 0; i < list.length; i++) {
-            const p = list[i];
-            const isObject = typeof p === "object";
-            out.push({
-                index: i,
-                id: isObject ? (p.id || "") : "",
-                name: isObject ? (p.name || "custom") : String(p),
-                displayName: isObject ? (p.displayName || p.name || String(p)) : String(p),
-                interface: isObject ? (p.interface || "") : "",
-                connectCmd: isObject && p.connectCmd ? p.connectCmd : [],
-                disconnectCmd: isObject && p.disconnectCmd ? p.disconnectCmd : [],
-                isObject: isObject
-            });
-        }
-        return out;
-    }
-
-    // Sync the normalised config into the `providers` object list, reusing
-    // existing entries by index. Same create/update/destroy diff as
-    // Nmcli.syncEthernetDevices / getNetworks.
-    function syncProviders(): void {
-        const configs = root.providerConfigs;
-        const rProviders = root.providers;
-
-        const newMap = new Map();
-        for (const c of configs)
-            newMap.set(c.index, c);
-
-        for (let i = rProviders.length - 1; i >= 0; i--) {
-            if (!newMap.has(rProviders[i].index)) {
-                const removed = rProviders.splice(i, 1)[0];
-                removed.destroy();
-            }
-        }
-
-        const existingMap = new Map();
-        for (const rp of rProviders)
-            existingMap.set(rp.index, rp);
-
-        for (const [index, data] of newMap) {
-            const match = existingMap.get(index);
-            if (match)
-                match.lastIpcObject = data;
-            else
-                rProviders.push(providerComp.createObject(root, {
-                    lastIpcObject: data
-                }));
-        }
-    }
+    // Provider entry keys which are cleared when empty instead of written.
+    readonly property list<string> optionalKeys: ["displayName", "interface", "connectCmd", "disconnectCmd"]
 
     // Generate a stable, opaque internal id for a provider entry.
     function generateId(): string {
         return `vpn-${Date.now().toString(36)}-${Math.floor(Math.random() * 0x1000000).toString(36)}`;
     }
 
-    // Rebuild a provider object for persistence, preserving optional commands.
-    // `id` is the provider's stable internal id.
-    function buildProviderObject(id: string, data: var): var {
-        const obj = {
-            id: id,
-            name: data.name,
-            displayName: data.displayName,
-            interface: data.interface
-        };
-        if (data.connectCmd && data.connectCmd.length > 0)
-            obj.connectCmd = data.connectCmd;
-        if (data.disconnectCmd && data.disconnectCmd.length > 0)
-            obj.disconnectCmd = data.disconnectCmd;
-        return obj;
+    // Write a value to a provider entry, clearing the option when empty so the
+    // config stays sparse.
+    function setOrReset(provider: var, key: string, value: var): void {
+        if (value.length > 0)
+            provider[key] = value;
+        else
+            provider.resetOption(key);
     }
 
-    // Persist the whole provider list back to config (file-backed).
-    function writeProviders(providers: var): void {
-        GlobalConfig.utilities.vpn.provider = providers;
+    // Build the props for a new provider entry, omitting empty optional values.
+    // `id` is the provider's stable internal id.
+    function buildProviderProps(id: string, data: var): var {
+        const props = {
+            id: id,
+            name: data.name
+        };
+        for (const key of root.optionalKeys)
+            if (data[key].length > 0)
+                props[key] = data[key];
+        return props;
     }
 
     // Resolve the stable internal id of the provider entry at `index`.
     function providerIdAt(index: int): string {
-        const entry = GlobalConfig.utilities.vpn.provider[index];
-        return (entry && typeof entry === "object") ? (entry.id || "") : "";
+        return GlobalConfig.utilities.vpn.provider.at(index)?.id ?? "";
     }
 
     // Add a new provider. data: { name, displayName, interface, connectCmd[],
     // disconnectCmd[] }. Newly added providers are not selected by default.
     function addProvider(data: var): void {
-        const current = GlobalConfig.utilities.vpn.provider.slice();
-        current.push(buildProviderObject(root.generateId(), data));
-        writeProviders(current);
+        GlobalConfig.utilities.vpn.provider.insert(root.buildProviderProps(root.generateId(), data));
     }
 
     // Update an existing provider (by index), preserving its internal id so the
     // selection sticks even when the name changes.
     function updateProvider(index: int, data: var): void {
-        const current = GlobalConfig.utilities.vpn.provider;
-        const id = root.providerIdAt(index) || root.generateId();
-        const result = [];
-        for (let i = 0; i < current.length; i++)
-            result.push(i === index ? buildProviderObject(id, data) : current[i]);
-        writeProviders(result);
+        const provider = GlobalConfig.utilities.vpn.provider.at(index);
+        if (!provider)
+            return;
+        if (provider.id.length === 0)
+            provider.id = root.generateId();
+        provider.name = data.name;
+        for (const key of root.optionalKeys)
+            root.setOrReset(provider, key, data[key]);
     }
 
     // Delete a provider by index. ensureSelection() re-homes the selection to
     // the first remaining provider if the deleted one was selected.
     function deleteProvider(index: int): void {
-        const current = GlobalConfig.utilities.vpn.provider;
-        const result = [];
-        for (let i = 0; i < current.length; i++)
-            if (i !== index)
-                result.push(current[i]);
-        writeProviders(result);
+        GlobalConfig.utilities.vpn.provider.remove(index);
     }
 
     // Make the provider at `index` the selected one. If a VPN is currently
@@ -235,10 +172,10 @@ Singleton {
     // the stored id matches no configured provider, fall back to the first one
     // (or clear it when the list is empty).
     function ensureSelection(): void {
-        const configs = root.providerConfigs;
-        if (configs.some(p => p.id === root.selectedProvider))
+        const providers = root.providers;
+        if (providers.some(p => p.id === root.selectedProvider))
             return;
-        const next = configs.length > 0 ? configs[0].id : "";
+        const next = providers.length > 0 ? providers[0].id : "";
         if (next !== root.selectedProvider)
             GlobalConfig.utilities.vpn.selectedProvider = next;
     }
@@ -532,39 +469,12 @@ Singleton {
         }
     }
 
-    // Ensure every provider entry is an object carrying a stable internal id,
-    // and fold any legacy per-provider `enabled` flag into the single selection.
-    // Runs once at startup and rewrites the config only if something changed.
-    function migrateProviders(): void {
-        const list = GlobalConfig.utilities.vpn.provider;
-        const result = [];
-        let selectedId = root.selectedProvider;
-        let changed = false;
-
-        for (const p of list) {
-            const isObject = typeof p === "object";
-            const obj = isObject ? Object.assign({}, p) : {
-                name: String(p)
-            };
-            if (!isObject)
-                changed = true;
-            if (!obj.id) {
-                obj.id = root.generateId();
-                changed = true;
-            }
-            if (obj.enabled === true && selectedId.length === 0)
-                selectedId = obj.id;
-            if ("enabled" in obj) {
-                delete obj.enabled;
-                changed = true;
-            }
-            result.push(obj);
-        }
-
-        if (selectedId !== root.selectedProvider)
-            GlobalConfig.utilities.vpn.selectedProvider = selectedId;
-        if (changed)
-            writeProviders(result);
+    // Backfill a stable internal id for entries that lack one (hand-written
+    // config entries). Runs once at startup.
+    function ensureProviderIds(): void {
+        for (const provider of root.providers)
+            if (provider.id.length === 0)
+                provider.id = root.generateId();
     }
 
     onConnectedChanged: {
@@ -600,10 +510,7 @@ Singleton {
             registerProc.exec(active.registerCmd);
     }
 
-    onProviderConfigsChanged: {
-        root.syncProviders();
-        root.ensureSelection();
-    }
+    onProvidersChanged: root.ensureSelection()
 
     onSelectedProviderChanged: {
         status = {
@@ -624,9 +531,8 @@ Singleton {
     }
 
     Component.onCompleted: {
-        root.migrateProviders();
+        root.ensureProviderIds();
         root.ensureSelection();
-        root.syncProviders();
         if (root.selectedProvider.length > 0) {
             root.autoConnectPending = GlobalConfig.utilities.vpn.enabled;
             statusCheckTimer.start();
@@ -903,31 +809,11 @@ Singleton {
         onTriggered: root.checkStatus()
     }
 
-    Component {
-        id: providerComp
-
-        Provider {}
-    }
-
     LoggingCategory {
         id: lc
 
         name: "caelestia.qml.services.vpn"
         defaultLogLevel: LoggingCategory.Info
-    }
-
-    // A single configured provider, wrapping the normalised config data. Mirrors
-    // Nmcli's AccessPoint / EthernetDevice objects.
-    component Provider: QtObject {
-        required property var lastIpcObject
-        readonly property int index: lastIpcObject.index
-        readonly property string providerId: lastIpcObject.id
-        readonly property string name: lastIpcObject.name
-        readonly property string displayName: lastIpcObject.displayName
-        readonly property string iface: lastIpcObject.interface
-        readonly property var connectCmd: lastIpcObject.connectCmd
-        readonly property var disconnectCmd: lastIpcObject.disconnectCmd
-        readonly property bool isObject: lastIpcObject.isObject
     }
 
     // Everything a provider needs to be driven by the generic engine above.

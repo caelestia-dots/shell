@@ -2,6 +2,7 @@
 
 #include <qjsonvalue.h>
 #include <qobject.h>
+#include <qvariant.h>
 
 #include "changebatcher.hpp"
 #include "common.hpp"
@@ -48,9 +49,16 @@ signals:
 protected:
     // Null means empty, otherwise it has content
     std::unique_ptr<Quarantine> m_quarantine;
+    const bool m_globalOnly; // Own flag or inherited from the parent node
 
-    // Returns true if the write should be skipped afterwards
-    bool forwardGlobalWrite(const QString& key, const QVariant& value);
+    void warnGlobalRead(const QString& key) const;
+    // Returns true if the write should be skipped afterwards, the value is not one of the allowed types
+    [[nodiscard]] bool rejectInvalidWrite(const QString& key, const QVariant& value) const;
+    template <typename T> [[nodiscard]] bool rejectInvalidWrite(const QString& key, const T& value) const;
+    // Returns true if the write should be skipped afterwards, overlays cannot write global options
+    bool rejectGlobalWrite(const QString& key);
+    static void warnGlobalSync(QList<Diagnostic>& diagnostics, const QString& path);
+    bool rejectGlobalSync(QList<Diagnostic>& diagnostics) const; // Returns true if the sync should be rejected
     // Returns true if the notify signal should be emitted
     virtual bool recordWrite(const QString& key, bool changed);
 
@@ -65,17 +73,24 @@ protected:
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
     Node* const m_rootNode;
-    Node* m_fallbackNode;    // No fallback node either means global tree or inside overridden list
-    const bool m_globalOnly; // Own flag or inherited from the parent node
+    Node* m_fallbackNode; // No fallback node either means global tree or inside overridden list
 
     // For root node use only
     WriteOrigin m_writeOrigin;
+    bool m_internalRead;
     ChangeBatcher* const m_batcher;
 
     void onFallbackNotify(const QString& key);
 
     friend class WriteScope;
+    friend class InternalRead;
 };
+
+template <typename T> bool Node::rejectInvalidWrite(const QString& key, const T& value) const {
+    Q_UNUSED(key)
+    Q_UNUSED(value)
+    return false; // Only QVariant unions can be given the wrong type
+}
 
 template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const {
     const auto* fallback = static_cast<const C*>(m_fallbackNode);
