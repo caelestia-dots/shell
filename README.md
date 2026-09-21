@@ -207,6 +207,10 @@ hyprctl monitors -j | jq -r '.[].name'
 Options set in these files will **override** the respective options in the global config. Any options not present in
 per-monitor configs will inherit their values from the global config.
 
+The bar can be placed on any edge via `bar.position` (`"left"`, `"top"` or `"bottom"` are supported). When the bar
+is horizontal (`"top"`/`"bottom"`), the bar contents adapt automatically and the dashboard is anchored to the left
+edge.
+
 
 For example, to automatically hide the bar on the monitor named `DP-1`:
 
@@ -410,6 +414,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "persistent": true,
         "showOnHover": true,
         "dragThreshold": 20,
+        "position": "left",
         "scrollActions": {
             "workspaces": true,
             "volume": true,

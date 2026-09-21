@@ -3,34 +3,35 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
-import qs.modules.bar as Bar
 
 Region {
     id: root
 
-    required property Bar.BarWrapper bar
+    required property EdgeGeometry geometry
     required property Panels panels
     required property var win
 
     readonly property real borderThickness: win.contentItem.Config.border.thickness
     readonly property real clampedThickness: win.contentItem.Config.border.clampedThickness
 
-    x: bar.clampedWidth + win.dragMaskPadding
-    y: clampedThickness + win.dragMaskPadding
-    width: win.width - bar.clampedWidth - clampedThickness - win.dragMaskPadding * 2
-    height: win.height - clampedThickness * 2 - win.dragMaskPadding * 2
+    x: geometry.insetLeft(clampedThickness, true) + win.dragMaskPadding
+    y: geometry.insetTop(clampedThickness, true) + win.dragMaskPadding
+    width: win.width - geometry.insetLeft(clampedThickness, true) - clampedThickness - win.dragMaskPadding * 2
+    height: win.height - geometry.insetTop(clampedThickness, true) - geometry.insetBottom(clampedThickness, true) - win.dragMaskPadding * 2
     intersection: Intersection.Xor
 
     R {
         panel: root.panels.dashboard
-        y: 0
-        height: panel.height * (1 - root.panels.dashboard.offsetScale) + root.borderThickness
+        x: root.geometry.dashboardOnLeft ? 0 : panel.x + root.geometry.insetLeft(root.borderThickness)
+        y: root.geometry.dashboardOnLeft ? panel.y + root.geometry.insetTop(root.borderThickness) : 0
+        width: root.geometry.dashboardOnLeft ? panel.width * (1 - root.panels.dashboard.offsetScale) + root.geometry.insetLeft(root.borderThickness) : panel.width
+        height: root.geometry.dashboardOnLeft ? panel.height : panel.height * (1 - root.panels.dashboard.offsetScale) + root.geometry.insetTop(root.borderThickness)
     }
 
     R {
         panel: root.panels.launcher
         y: root.win.height - height
-        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
+        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.geometry.insetBottom(root.borderThickness)
     }
 
     R {
@@ -58,25 +59,26 @@ Region {
     R {
         panel: root.panels.notifications
         y: 0
-        height: panel.height + root.borderThickness
+        height: panel.height + root.geometry.insetTop(root.borderThickness)
     }
 
     R {
         panel: root.panels.utilities
         y: root.win.height - height
-        height: panel.height * (1 - root.panels.utilities.offsetScale) + root.borderThickness
+        height: panel.height * (1 - root.panels.utilities.offsetScale) + root.geometry.insetBottom(root.borderThickness)
     }
 
     R {
         panel: root.panels.popoutsWrapper
-        width: panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
+        width: root.geometry.horizontal ? panel.width : panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
+        height: root.geometry.horizontal ? panel.height * (1 - root.panels.popoutsWrapper.offsetScale) : panel.height
     }
 
     component R: Region {
         required property Item panel
 
-        x: panel.x + root.bar.implicitWidth
-        y: panel.y + root.borderThickness
+        x: panel.x + root.geometry.insetLeft(root.borderThickness)
+        y: panel.y + root.geometry.insetTop(root.borderThickness)
         width: panel.width
         height: panel.height
         intersection: Intersection.Subtract

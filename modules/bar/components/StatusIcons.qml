@@ -12,8 +12,9 @@ import qs.modules.bar.components.status
 StyledRect {
     id: root
 
+    required property bool horizontal
     property color colour: Colours.palette.m3secondary
-    readonly property alias items: iconColumn
+    readonly property alias items: iconGrid
 
     readonly property int spacing: Tokens.spacing.medium / 2
 
@@ -44,18 +45,19 @@ StyledRect {
     radius: Tokens.rounding.full
 
     clip: true
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2
+    implicitWidth: horizontal ? iconGrid.implicitWidth + Tokens.padding.medium * 2 : Tokens.sizes.bar.innerWidth
+    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : iconGrid.implicitHeight + Tokens.padding.medium * 2
 
-    ColumnLayout {
-        id: iconColumn
+    GridLayout {
+        id: iconGrid
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.padding.medium
+        x: root.horizontal ? (parent.width - width) / 2 : 0
+        y: root.horizontal ? (parent.height - height) / 2 : parent.height - height - Tokens.padding.medium
+        width: root.horizontal ? implicitWidth : parent.width
 
-        spacing: 0
+        columns: root.horizontal ? -1 : 1
+        rowSpacing: 0
+        columnSpacing: 0
 
         Repeater {
             model: ScriptModel {
@@ -73,6 +75,7 @@ StyledRect {
                         LockStatus {
                             colour: root.colour
                             parentSpacing: root.spacing
+                            horizontal: root.horizontal
                         }
                     }
                 }
@@ -131,6 +134,7 @@ StyledRect {
                     delegate: EntryWrapper {
                         BluetoothStatus {
                             colour: root.colour
+                            horizontal: root.horizontal
                         }
                     }
                 }
@@ -151,27 +155,29 @@ StyledRect {
         required property int index
         property int margin: root.spacing / 2
         readonly property bool present: !root.collapsed(modelData)
-        property real topGap: present && index !== root.firstPresent ? margin : 0
-        property real bottomGap: present && index !== root.lastPresent ? margin : 0
+        property real startGap: present && index !== root.firstPresent ? margin : 0
+        property real endGap: present && index !== root.lastPresent ? margin : 0
         default property Item item
         property string name: modelData.id.toLowerCase()
 
-        Layout.topMargin: Math.round(topGap)
-        Layout.bottomMargin: Math.round(bottomGap)
-        Layout.alignment: Qt.AlignHCenter
+        Layout.leftMargin: root.horizontal ? Math.round(startGap) : 0
+        Layout.rightMargin: root.horizontal ? Math.round(endGap) : 0
+        Layout.topMargin: root.horizontal ? 0 : Math.round(startGap)
+        Layout.bottomMargin: root.horizontal ? 0 : Math.round(endGap)
+        Layout.alignment: root.horizontal ? Qt.AlignVCenter : Qt.AlignHCenter
 
         implicitWidth: item?.implicitWidth ?? 0
         implicitHeight: item?.implicitHeight ?? 0
 
         children: item
 
-        Behavior on topGap {
+        Behavior on startGap {
             Anim {
                 type: Anim.SlowEffects
             }
         }
 
-        Behavior on bottomGap {
+        Behavior on endGap {
             Anim {
                 type: Anim.SlowEffects
             }

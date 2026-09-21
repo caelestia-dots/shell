@@ -15,6 +15,8 @@ StyledClippingRect {
 
     required property ShellScreen screen
     required property bool fullscreen
+    required property bool horizontal
+    readonly property real margin: Tokens.padding.extraSmall
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
@@ -65,8 +67,8 @@ StyledClippingRect {
         return index % shown;
     }
 
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: workspaces.layoutHeight + workspaces.anchors.margins * 2
+    implicitWidth: horizontal ? workspaces.layoutWidth + margin * 2 : Tokens.sizes.bar.innerWidth
+    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : workspaces.layoutHeight + margin * 2
 
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
@@ -93,6 +95,7 @@ StyledClippingRect {
             anchors.margins: Tokens.padding.extraSmall
 
             sourceComponent: OccupiedBg {
+                horizontal: root.horizontal
                 workspaces: root.workspaces
                 wsSpacing: workspaces.spacing
             }
@@ -107,14 +110,14 @@ StyledClippingRect {
         LazyListView {
             id: workspaces
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: Tokens.padding.extraSmall
-            implicitHeight: contentHeight
+            x: root.margin
+            y: root.margin
+            width: root.horizontal ? contentWidth : parent.width - root.margin * 2
+            height: root.horizontal ? parent.height - root.margin * 2 : contentHeight
 
             spacing: Tokens.spacing.extraSmall
             removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+            orientation: root.horizontal ? LazyListView.Horizontal : LazyListView.Vertical
 
             model: ScriptModel {
                 values: root.wsIds
@@ -124,6 +127,7 @@ StyledClippingRect {
                 activeWsId: root.activeWsId
                 ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
                 monitor: root.monitor
+                horizontal: root.horizontal
 
                 displayType: Config.bar.workspaces.displayType
                 showWindows: Config.bar.workspaces.showWindows
@@ -143,6 +147,7 @@ StyledClippingRect {
             anchors.margins: Tokens.padding.extraSmall
 
             sourceComponent: GapMarkers {
+                horizontal: root.horizontal
                 workspaces: root.workspaces
                 wsSpacing: workspaces.spacing
             }
@@ -156,11 +161,12 @@ StyledClippingRect {
 
         Loader {
             asynchronous: true
-            anchors.left: workspaces.left
-            anchors.right: workspaces.right
+            x: workspaces.x
+            y: workspaces.y
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
+                horizontal: root.horizontal
                 activeWs: {
                     workspaces.itemsDirty;
                     return workspaces.itemAtIndex(root.activeWsIdx) as Workspace;
@@ -213,6 +219,8 @@ StyledClippingRect {
                 anchors.fill: parent
                 anchors.margins: Tokens.padding.extraSmall
                 monitor: root.monitor
+                screen: root.screen
+                horizontal: root.horizontal
 
                 scale: 0.5
                 Component.onCompleted: scale = Qt.binding(() => root.onSpecial ? 1 : 0.5)
@@ -237,6 +245,10 @@ StyledClippingRect {
     }
 
     Behavior on implicitHeight {
+        Anim {}
+    }
+
+    Behavior on implicitWidth {
         Anim {}
     }
 }
