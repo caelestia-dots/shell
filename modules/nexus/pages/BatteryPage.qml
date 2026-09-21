@@ -53,10 +53,7 @@ PageBase {
 
     function changeToastIconVariant() {
         let framed = GlobalConfig.general.battery.framedMaterialIcons;
-        let warningLists = [
-            GlobalConfig.general.battery.lowBatteryWarnLevels,
-            GlobalConfig.general.battery.chargingWarnLevels
-        ];
+        let warningLists = [GlobalConfig.general.battery.lowBatteryWarnLevels, GlobalConfig.general.battery.chargingWarnLevels];
 
         for (let list of warningLists) {
             for (let i = 0; i < list.count; i++) {
