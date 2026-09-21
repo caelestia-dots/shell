@@ -222,11 +222,11 @@ Singleton {
     }
 
     function getBatteryIcon(percentage: real, charging = false): string {
-        if (percentage === 1)
-            return charging ? "battery_charging_full" : "battery_full";
-        let level = Math.floor(percentage * 7);
-        if (charging && (level === 4 || level === 1))
-            level--;
-        return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
+        if (charging)
+            return "battery_android_frame_bolt";
+        if (percentage >= 1)
+            return "battery_android_full";
+        const level = Math.max(0, Math.min(6, Math.floor((percentage || 0) * 7)));
+        return `battery_android_${level}`;
     }
 }
