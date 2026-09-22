@@ -47,7 +47,7 @@ PathView {
     model: ScriptModel {
         id: scriptModel
 
-        readonly property string search: root.search.text.split(" ").slice(1).join(" ")
+        readonly property string search: root.content.wallpaperMode ? root.search.text : root.search.text.split(" ").slice(1).join(" ")
 
         values: Wallpapers.query(search)
         onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
