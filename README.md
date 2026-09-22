@@ -743,7 +743,8 @@ When set to `false`, the Super+N shorcut only opens notification panel, always o
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "hideNotifs": false
+        "hideNotifs": false,
+        "enableSessionControls": true
     },
     "nexus": {
         "wallpapersPerRow": 4,
