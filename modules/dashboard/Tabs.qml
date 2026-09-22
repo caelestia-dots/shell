@@ -15,18 +15,20 @@ Item {
     required property real nonAnimWidth
     required property ScreenState screenState
     required property var tabs
+    
+    property bool tabsAtBottom: false
 
     readonly property alias count: bar.count
 
-    implicitHeight: bar.implicitHeight + bar.anchors.topMargin + indicator.implicitHeight + indicator.anchors.topMargin + separator.implicitHeight
+    implicitHeight: bar.implicitHeight + Tokens.sizes.dashboard.tabIndicatorSpacing + indicator.implicitHeight + 10 + separator.implicitHeight
 
     TabBar {
         id: bar
 
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.topMargin: Tokens.sizes.dashboard.tabIndicatorSpacing
+        
+        y: root.tabsAtBottom ? parent.height - height - Tokens.sizes.dashboard.tabIndicatorSpacing : Tokens.sizes.dashboard.tabIndicatorSpacing
 
         currentIndex: root.screenState.dashboardTab
         onCurrentIndexChanged: root.screenState.dashboardTab = currentIndex
@@ -58,8 +60,7 @@ Item {
     Item {
         id: indicator
 
-        anchors.top: bar.bottom
-        anchors.topMargin: 5
+        y: root.tabsAtBottom ? bar.y - height - 5 : bar.y + bar.height + 5
 
         implicitWidth: {
             const tab = bar.currentItem;
@@ -80,7 +81,7 @@ Item {
         clip: true
 
         StyledRect {
-            anchors.top: parent.top
+            y: root.tabsAtBottom ? parent.height - height : 0
             anchors.left: parent.left
             anchors.right: parent.right
             implicitHeight: parent.implicitHeight * 2
@@ -101,7 +102,7 @@ Item {
     StyledRect {
         id: separator
 
-        anchors.top: indicator.bottom
+        y: root.tabsAtBottom ? indicator.y - height : indicator.y + indicator.height
         anchors.left: parent.left
         anchors.right: parent.right
 

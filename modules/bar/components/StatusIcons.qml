@@ -13,8 +13,9 @@ StyledRect {
     id: root
 
     property color colour: Colours.palette.m3secondary
-    readonly property alias items: iconColumn
+    readonly property alias items: iconRow
 
+    readonly property bool isHorizontal: Config.bar.alignment === "top" || Config.bar.alignment === "bottom"
     readonly property int spacing: Tokens.spacing.medium / 2
 
     // Index of the first/last entry that isn't collapsed, for edge margin gating
@@ -40,22 +41,37 @@ StyledRect {
         return false;
     }
 
+    function getHoveredPopout(lx: real, ly: real): string {
+        const itemX = lx - iconRow.x;
+        const itemY = ly - iconRow.y;
+        
+        if (itemX < 0 || itemY < 0 || itemX > iconRow.width || itemY > iconRow.height) 
+            return "";
+
+        let child = iconRow.childAt(itemX, itemY);
+        
+        while (child && child !== iconRow) {
+            if (child.name !== undefined) return child.name;
+            child = child.parent;
+        }
+        return "";
+    }
+
     color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
 
     clip: true
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2
+    implicitWidth: isHorizontal ? (iconRow.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth
+    implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : (iconRow.implicitHeight + Tokens.padding.medium * 2)
 
-    ColumnLayout {
-        id: iconColumn
+    GridLayout {
+        id: iconRow
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.padding.medium
+        anchors.centerIn: parent
 
-        spacing: 0
+        flow: root.isHorizontal ? GridLayout.LeftToRight : GridLayout.TopToBottom
+        rowSpacing: 0
+        columnSpacing: 0
 
         Repeater {
             model: ScriptModel {
@@ -73,6 +89,7 @@ StyledRect {
                         LockStatus {
                             colour: root.colour
                             parentSpacing: root.spacing
+                            isHorizontal: root.isHorizontal
                         }
                     }
                 }
@@ -151,27 +168,29 @@ StyledRect {
         required property int index
         property int margin: root.spacing / 2
         readonly property bool present: !root.collapsed(modelData)
-        property real topGap: present && index !== root.firstPresent ? margin : 0
-        property real bottomGap: present && index !== root.lastPresent ? margin : 0
+        property real leadGap: present && index !== root.firstPresent ? margin : 0
+        property real trailGap: present && index !== root.lastPresent ? margin : 0
         default property Item item
         property string name: modelData.id.toLowerCase()
 
-        Layout.topMargin: Math.round(topGap)
-        Layout.bottomMargin: Math.round(bottomGap)
-        Layout.alignment: Qt.AlignHCenter
+        Layout.leftMargin: root.isHorizontal ? Math.round(leadGap) : 0
+        Layout.rightMargin: root.isHorizontal ? Math.round(trailGap) : 0
+        Layout.topMargin: !root.isHorizontal ? Math.round(leadGap) : 0
+        Layout.bottomMargin: !root.isHorizontal ? Math.round(trailGap) : 0
+        Layout.alignment: root.isHorizontal ? Qt.AlignVCenter : Qt.AlignHCenter
 
         implicitWidth: item?.implicitWidth ?? 0
         implicitHeight: item?.implicitHeight ?? 0
 
         children: item
 
-        Behavior on topGap {
+        Behavior on leadGap {
             Anim {
                 type: Anim.SlowEffects
             }
         }
 
-        Behavior on bottomGap {
+        Behavior on trailGap {
             Anim {
                 type: Anim.SlowEffects
             }

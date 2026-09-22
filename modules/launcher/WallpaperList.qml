@@ -23,7 +23,7 @@ PathView {
             return 0;
 
         // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
-        const barMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
+        const barMargins = Math.max(Config.border.thickness, Config.bar.alignment === "top" || Config.bar.alignment === "bottom" ? panels.bar.implicitHeight : panels.bar.implicitWidth);
         let outerMargins = 0;
         if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
             outerMargins = panels.popouts.nonAnimWidth;
@@ -93,16 +93,5 @@ PathView {
             x: root.width
             relativeY: 0
         }
-    }
-
-    CustomMouseArea {
-        function onWheel(event: WheelEvent): void {
-            if (event.angleDelta.y > 0)
-                root.decrementCurrentIndex();
-            else if (event.angleDelta.y < 0)
-                root.incrementCurrentIndex();
-        }
-
-        anchors.fill: parent
     }
 }

@@ -24,6 +24,13 @@ Item {
 
     property real offsetScale: shouldBeActive ? 0 : 1
 
+    readonly property string placementStr: {
+        const allowed = ["top", "center", "bottom"];
+        const val = Config.launcher.placement || "";
+        return allowed.includes(val) ? val : "bottom";
+    }
+    readonly property string edge: placementStr
+
     onShouldBeActiveChanged: {
         if (shouldBeActive)
             implicitHeight = Qt.binding(() => content.implicitHeight);
@@ -31,10 +38,12 @@ Item {
             implicitHeight = implicitHeight; // Break binding during close anim
     }
 
-    visible: offsetScale < 1
-    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+    implicitWidth: content.implicitWidth || 630
     implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth || 630 // Hard coded fallback for first open
+    width: implicitWidth
+    height: implicitHeight
+
+    visible: offsetScale < 1
     opacity: 1 - offsetScale
 
     Component.onCompleted: Qt.callLater(() => Apps) // Load apps on init
@@ -43,12 +52,20 @@ Item {
         Anim {}
     }
 
+    x: (parent.width - width) / 2
+    y: {
+        if (edge === "top")
+            return (-height - 5) * offsetScale;
+        if (edge === "center")
+            return (parent.height - height) / 2 + (20 * offsetScale);
+        return parent.height - height + ((height + 5) * offsetScale);
+    }
+
     Loader {
         id: content
-
-        anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-
+        anchors.top: parent.top
+        asynchronous: true
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {

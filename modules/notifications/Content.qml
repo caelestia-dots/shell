@@ -18,6 +18,8 @@ Item {
     required property Item osdPanel
     required property Item sessionPanel
     required property Item utilitiesPanel
+    property bool onLeft: false
+    
     readonly property int padding: Tokens.padding.large
     readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
@@ -37,7 +39,7 @@ Item {
 
         if (screenState.osd) {
             const h = osdPanel.y - clampedPadding;
-            if (height > h)
+            if (h > 0 && height > h)
                 height = h;
         }
 
@@ -58,9 +60,11 @@ Item {
 
     ClippingWrapperRectangle {
         anchors.fill: parent
-        anchors.margins: root.padding
+        
         anchors.topMargin: root.clampedPadding
-        anchors.rightMargin: root.clampedPadding
+        anchors.bottomMargin: root.padding
+        anchors.leftMargin: root.onLeft ? root.clampedPadding : root.padding
+        anchors.rightMargin: root.onLeft ? root.padding : root.clampedPadding
 
         color: "transparent"
         radius: Tokens.rounding.large

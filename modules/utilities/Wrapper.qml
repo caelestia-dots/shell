@@ -5,6 +5,7 @@ import Quickshell
 import Caelestia
 import Caelestia.Config
 import qs.components
+import qs.utils
 import qs.modules.sidebar as Sidebar
 import qs.modules.bar.popouts as BarPopouts
 
@@ -24,21 +25,45 @@ Item {
 
         reloadableId: "utilities"
     }
-    readonly property bool shouldBeActive: screenState.sidebar || (screenState.utilities && Config.utilities.enabled && !(screenState.session && Config.session.enabled))
-    readonly property real totalPadding: content.anchors.margins + CUtils.clamp(content.anchors.margins - Config.border.thickness, 0, content.anchors.margins)
+
+    readonly property bool shouldBeActive: (Config.notifs.connectedToUtilities && screenState.sidebar) || (screenState.utilities && Config.utilities.enabled && !(screenState.session && Config.session.enabled))
+
+    readonly property bool onLeft: align === "start" || align === "left"
+
+    readonly property real padding: Tokens.padding.large
+    readonly property real clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
+    readonly property real totalPadding: padding + clampedPadding
+
     readonly property real nonAnimHeight: ((content.item as Content)?.nonAnimHeight ?? 0) + totalPadding
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarLerp
 
+    readonly property var validCorners: ["top-left", "top-right", "bottom-left", "bottom-right"]
+    readonly property string configuredPlacement: root.validCorners.includes((Config.utilities.placement ?? "").toLowerCase()) ? Config.utilities.placement.toLowerCase() : "bottom-right"
+    readonly property string placement: configuredPlacement
+    readonly property string edge: Placement.edge(placement)
+    readonly property string align: Placement.align(placement)
+
+    readonly property bool flattenTop: sidebar.docked && !sidebar.dockedAbove
+    readonly property bool flattenBottom: sidebar.docked && sidebar.dockedAbove
+
+    readonly property real offsetX: Placement.offsetX(placement, implicitWidth, offsetScale)
+    readonly property real offsetY: Placement.offsetY(placement, implicitHeight, offsetScale)
+
+    readonly property real baseX: Placement.baseX(placement, parent.width, implicitWidth)
+    readonly property real baseY: Placement.baseY(placement, parent.height, implicitHeight)
+
+    x: baseX + offsetX
+    y: baseY + offsetY
+
     visible: offsetScale < 1
-    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
     implicitHeight: content.implicitHeight + totalPadding
     implicitWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Tokens.sizes.utilities.width * (1 - sidebarLerp)
     opacity: 1 - offsetScale
 
     states: State {
         name: "attachedToSidebar"
-        when: root.screenState.sidebar
+        when: GlobalConfig.notifs.connectedToUtilities && root.screenState.sidebar
 
         PropertyChanges {
             root.sidebarLerp: 1
@@ -73,9 +98,12 @@ Item {
     Loader {
         id: content
 
+        width: implicitWidth
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.margins: Tokens.padding.large
+
+        x: root.onLeft ? root.clampedPadding : root.padding
+        anchors.topMargin: root.edge === "top" ? root.clampedPadding : root.padding
+        anchors.bottomMargin: root.edge === "top" ? root.padding : root.clampedPadding
 
         asynchronous: true
         active: root.shouldBeActive || root.visible

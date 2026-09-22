@@ -1,41 +1,50 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Layouts
 import qs.components
 import qs.services
 
-ColumnLayout {
+Item {
     id: root
 
     required property color colour
     required property int parentSpacing
+    required property bool isHorizontal
 
     property real gap: Hypr.capsLock && Hypr.numLock ? parentSpacing : 0
-    property real capsHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
-    property real numHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
+ 
+    property real capsLength: Hypr.capsLock ? (isHorizontal ? capslockIcon.implicitWidth : capslockIcon.implicitHeight) : 0
+    property real numLength: Hypr.numLock ? (isHorizontal ? numlockIcon.implicitWidth : numlockIcon.implicitHeight) : 0
 
-    spacing: Math.round(gap)
-
-    Behavior on gap {
+Behavior on gap {
         Anim {
             type: Anim.SlowEffects
         }
     }
 
-    Behavior on capsHeight {
+    Behavior on capsLength {
         Anim {
             type: Anim.SlowEffects
         }
     }
 
-    Behavior on numHeight {
+    Behavior on numLength {
         Anim {
             type: Anim.SlowEffects
         }
     }
+
+    implicitWidth: isHorizontal ? capsLength + numLength + (capsLength > 0 && numLength > 0 ? gap : 0) : Math.max(capsLength, numLength)
+    implicitHeight: !isHorizontal ? capsLength + numLength + (capsLength > 0 && numLength > 0 ? gap : 0) : Math.max(capsLength, numLength)
 
     Item {
-        implicitWidth: capslockIcon.implicitWidth
-        implicitHeight: Math.round(root.capsHeight)
+        x: root.isHorizontal ? 0 : (root.implicitWidth - width) / 2
+        y: root.isHorizontal ? (root.implicitHeight - height) / 2 : 0
+
+        width: root.isHorizontal ? root.capsLength : capslockIcon.implicitWidth
+        height: !root.isHorizontal ? root.capsLength : capslockIcon.implicitHeight
+
+        clip: true
 
         MaterialIcon {
             id: capslockIcon
@@ -63,8 +72,13 @@ ColumnLayout {
     }
 
     Item {
-        implicitWidth: numlockIcon.implicitWidth
-        implicitHeight: Math.round(root.numHeight)
+        x: root.isHorizontal ? root.capsLength + root.gap : (root.implicitWidth - width) / 2
+        y: !root.isHorizontal ? root.capsLength + root.gap : (root.implicitHeight - height) / 2
+
+        width: root.isHorizontal ? root.numLength : numlockIcon.implicitWidth
+        height: !root.isHorizontal ? root.numLength : numlockIcon.implicitHeight
+
+        clip: true
 
         MaterialIcon {
             id: numlockIcon

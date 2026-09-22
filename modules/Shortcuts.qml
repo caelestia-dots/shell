@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
+import Caelestia.Config
 import qs.components.misc
 import qs.services
 import qs.modules.nexus
@@ -91,7 +92,11 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const screenState = ShellState.forActive();
-            screenState.sidebar = !screenState.sidebar;
+            const opening = !screenState.sidebar;
+            screenState.sidebar = opening;
+
+            if (GlobalConfig.notifs.connectedToUtilities)
+                screenState.utilities = opening;
         }
     }
 

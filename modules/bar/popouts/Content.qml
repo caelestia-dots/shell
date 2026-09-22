@@ -15,13 +15,21 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    readonly property var trayItemsToIndices: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id)).reduce((acc, item, i) => {
+    readonly property var trayItemsToIndices: SystemTray.items.values.reduce((acc, item, i) => {
         acc[item.id] = i;
         return acc;
     }, {})
+    property real currentPopoutWidth: currentPopout?.implicitWidth ?? 0
+    property real currentPopoutHeight: currentPopout?.implicitHeight ?? 0
+    
+    property real heldWidth: 0
+    property real heldHeight: 0
 
-    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.large * 2 : 0
-    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.large * 2 : 0
+    onCurrentPopoutWidthChanged: { if (currentPopoutWidth > 0) heldWidth = currentPopoutWidth; }
+    onCurrentPopoutHeightChanged: { if (currentPopoutHeight > 0) heldHeight = currentPopoutHeight; }
+
+    implicitWidth: heldWidth > 0 ? heldWidth + Tokens.padding.large * 2 : 0
+    implicitHeight: heldHeight > 0 ? heldHeight + Tokens.padding.large * 2 : 0
 
     Item {
         id: content
@@ -126,7 +134,7 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => i.hasMenu && i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => i.hasMenu && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
@@ -137,16 +145,6 @@ Item {
                 name: `traymenu${root.trayItemsToIndices[modelData.id]}`
                 sourceComponent: trayMenuComp
 
-                Connections {
-                    function onHasCurrentChanged(): void {
-                        if (root.popouts.hasCurrent && trayMenu.shouldBeActive) {
-                            trayMenu.sourceComponent = null;
-                            trayMenu.sourceComponent = trayMenuComp;
-                        }
-                    }
-
-                    target: root.popouts
-                }
 
                 Component {
                     id: trayMenuComp

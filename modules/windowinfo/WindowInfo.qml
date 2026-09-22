@@ -12,6 +12,20 @@ Item {
     required property ShellScreen screen
     required property HyprlandToplevel client
 
+
+    property HyprlandToplevel frozenClient
+
+ 
+    onVisibleChanged: {
+        if (visible) {
+            frozenClient = root.client;
+        }
+    }
+
+    Component.onCompleted: {
+        frozenClient = root.client;
+    }
+
     implicitWidth: child.implicitWidth
     implicitHeight: screen.height * Tokens.sizes.winfo.heightMult
 
@@ -25,7 +39,8 @@ Item {
 
         Preview {
             screen: root.screen
-            client: root.client
+
+            client: root.frozenClient || root.client
         }
 
         ColumnLayout {
@@ -43,7 +58,7 @@ Item {
                 clip: true
 
                 Details {
-                    client: root.client
+                    client: root.frozenClient || root.client
                 }
             }
 
@@ -57,7 +72,7 @@ Item {
                 Buttons {
                     id: buttons
 
-                    client: root.client
+                    client: root.frozenClient || root.client
                 }
             }
         }

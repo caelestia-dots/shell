@@ -9,12 +9,19 @@ Item {
 
     required property Props props
     required property ScreenState screenState
+    property bool docked
+    property bool dockedAbove
 
     ColumnLayout {
         id: layout
 
         anchors.fill: parent
-        spacing: Tokens.spacing.medium
+        spacing: 0
+
+        Separator {
+            visible: root.docked && root.dockedAbove
+            atTop: true
+        }
 
         StyledRect {
             Layout.fillWidth: true
@@ -31,12 +38,25 @@ Item {
             }
         }
 
-        StyledRect {
-            Layout.topMargin: Tokens.padding.large - layout.spacing
-            Layout.fillWidth: true
-            implicitHeight: 1
+        Separator {
+            visible: root.docked && !root.dockedAbove
+        }
+    }
 
-            color: Colours.tPalette.m3outlineVariant
+    component Separator: Item {
+        id: sep
+
+        property bool atTop
+
+        Layout.fillWidth: true
+        implicitHeight: Tokens.padding.large + 1
+
+        StyledRect {
+            y: sep.atTop ? 0 : sep.height - height
+            width: sep.width
+            height: 1
+
+            color: Colours.palette.m3outlineVariant
         }
     }
 }

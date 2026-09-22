@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Wayland
@@ -12,7 +14,41 @@ Item {
 
     required property PopoutState popouts
 
-    implicitWidth: Hypr.activeToplevel ? child.implicitWidth : -Tokens.padding.extraLargeIncreased
+    property string fTitle: ""
+    property string fClass: ""
+    property var fWayland: null
+    property bool hasData: false
+
+    function lockData() {
+        if (Hypr.activeToplevel) {
+            fTitle = Hypr.activeToplevel.title ?? "";
+            fClass = Hypr.activeToplevel.lastIpcObject.class ?? "";
+            fWayland = Hypr.activeToplevel.wayland ?? null;
+            hasData = true;
+        } else {
+            hasData = false;
+        }
+    }
+
+
+    Connections {
+        target: root.popouts
+        ignoreUnknownSignals: true
+        function onHasCurrentChanged() {
+            if (root.popouts.hasCurrent && root.popouts.currentName === "activewindow") {
+                root.lockData();
+            }
+        }
+        function onCurrentNameChanged() {
+            if (root.popouts.hasCurrent && root.popouts.currentName === "activewindow") {
+                root.lockData();
+            }
+        }
+    }
+
+    Component.onCompleted: lockData()
+
+    implicitWidth: hasData ? child.implicitWidth : -Tokens.padding.extraLargeIncreased
     implicitHeight: child.implicitHeight
 
     Column {

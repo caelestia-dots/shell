@@ -13,6 +13,8 @@ Item {
     required property var workspaces
     required property int wsSpacing
 
+    readonly property bool isHorizontal: Config.bar.alignment === "top" || Config.bar.alignment === "bottom"
+
     AnimatedRepeater {
         model: ScriptModel {
             values: root.workspaces
@@ -22,25 +24,31 @@ Item {
 
         StyledRect {
             required property int index
-            required property Workspace modelData
+            required property var modelData
 
             property real shift: {
                 if (!modelData || index === 0)
                     return 0;
                 if (modelData.focused)
-                    return -root.wsSpacing / 2 - implicitHeight;
-                return (root.workspaces[index - 1]?.focused ?? false) ? root.wsSpacing / 2 : 0;
+                    return -root.wsSpacing / 2 - (root.isHorizontal ? implicitWidth : implicitHeight);
+                
+                const prev = root.workspaces[index - 1];
+                return (prev && prev.focused) ? root.wsSpacing / 2 : 0;
             }
 
-            anchors.left: parent?.left
-            anchors.right: parent?.right
-            anchors.margins: Tokens.padding.extraSmall
+            x: root.isHorizontal ? (modelData ? modelData.x - root.wsSpacing / 2 + shift : 0.0) : (modelData ? modelData.x + (modelData.width - implicitWidth) / 2 : 0.0)
+            y: root.isHorizontal ? (modelData ? modelData.y + (modelData.height - implicitHeight) / 2 : 0.0) : (modelData ? modelData.y - root.wsSpacing / 2 + shift : 0.0)
 
-            y: modelData ? modelData.y - root.wsSpacing / 2 + shift : 0
-            implicitHeight: 1
+            implicitWidth: root.isHorizontal ? 1 : 4
+            implicitHeight: root.isHorizontal ? 4 : 1
             color: Colours.palette.m3outline
 
-            opacity: AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0 || root.workspaces[index - 1]?.ws === modelData?.ws - 1 ? 0 : 1
+            opacity: {
+                if (AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0) return 0;
+                const prev = root.workspaces[index - 1];
+                if (prev && prev.ws === modelData.ws - 1) return 0;
+                return 1;
+            }
 
             Behavior on opacity {
                 Anim {

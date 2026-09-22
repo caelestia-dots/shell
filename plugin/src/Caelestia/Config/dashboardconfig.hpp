@@ -1,3 +1,7 @@
+#include <qstring.h>
+using Qt::StringLiterals::operator""_s;
+#include <qstring.h>
+using Qt::StringLiterals::operator""_s;
 #pragma once
 
 #include "settings/objectnode.hpp"
@@ -18,6 +22,7 @@ class DashboardPerformance : public settings::ObjectNode {
 
 class DashboardConfig : public settings::ObjectNode {
     CONFIG_NODE(DashboardConfig, settings::ObjectNode)
+    CONFIG_PROPERTY(QString, placement, u"top"_s)
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(bool, showOnHover, true)

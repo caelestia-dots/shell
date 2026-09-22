@@ -1,8 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import Caelestia.Config
-import Caelestia.I18n
 import qs.components
 import qs.services
 import qs.utils
@@ -14,12 +15,14 @@ Item {
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
 
+    readonly property string edge: Config.bar.alignment
+    readonly property bool isHorizontal: edge === "top" || edge === "bottom"
+
     readonly property string windowTitle: {
         const title = Hypr.activeToplevel?.title;
         if (!title)
-            return Tr.trCtx("Desktop", "shown when no window is focused");
+            return qsTr("Desktop");
         if (Config.bar.activeWindow.compact) {
-            // " - " (standard hyphen), " — " (em dash), " – " (en dash)
             const parts = title.split(/\s+[\-\u2013\u2014]\s+/);
             if (parts.length > 1)
                 return parts[parts.length - 1].trim();
@@ -27,17 +30,47 @@ Item {
         return title;
     }
 
-    readonly property int maxHeight: {
-        const otherModules = bar.children.filter(c => c.entryId && c.item !== this && c.entryId !== "spacer");
-        const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
-        // Length - 2 cause repeater counts as a child
-        return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
+    readonly property int maxAllowedLength: {
+        if (!root.bar || !root.bar.children)
+            return 300;
+        
+        const otherModules = root.bar.children.filter(c => c.entryId && c.item !== root && c.entryId !== "spacer");
+        let consumedSpace = 0;
+        
+        for (let i = 0; i < otherModules.length; i++) {
+            const wrapper = otherModules[i];
+            if (!wrapper || !wrapper.item)
+                continue;
+            
+            let size = root.isHorizontal 
+                ? (wrapper.item.nonAnimWidth ?? wrapper.implicitWidth) 
+                : (wrapper.item.nonAnimHeight ?? wrapper.implicitHeight);
+                
+            if (!isNaN(size) && size > 0) {
+                consumedSpace += size;
+            }
+        }
+        
+        const spacing = root.isHorizontal ? root.bar.columnSpacing : root.bar.rowSpacing;
+        const totalSpacing = spacing * (root.bar.children.length - 1);
+        const totalSize = root.isHorizontal ? root.bar.width : root.bar.height;
+        const paddings = root.bar.edgePadding * 2;
+        
+        let space = totalSize - consumedSpace - totalSpacing - paddings - Tokens.spacing.large;
+        
+        if (isNaN(space) || space < 50)
+            return 300; 
+        return space;
     }
-    property Title current: text1
 
+    property Title current: text1
     clip: true
-    implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
-    implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
+
+    readonly property int desiredLength: icon.implicitWidth + (windowTitle !== "" ? root.current.implicitWidth + Tokens.spacing.small : 0)
+    readonly property int clampedLength: Math.min(desiredLength, maxAllowedLength)
+
+    implicitWidth: isHorizontal ? clampedLength : Tokens.sizes.bar.innerWidth
+    implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : clampedLength
 
     Loader {
         asynchronous: true
@@ -58,81 +91,90 @@ Item {
                     popouts.hasCurrent = false;
                 } else {
                     popouts.currentName = "activewindow";
-                    popouts.currentCenter = root.mapToItem(root.bar, 0, root.implicitHeight / 2).y;
+                    popouts.currentCenter = root.isHorizontal 
+                        ? root.mapToItem(root.bar, root.implicitWidth / 2, 0).x 
+                        : root.mapToItem(root.bar, 0, root.implicitHeight / 2).y;
                     popouts.hasCurrent = true;
                 }
             }
         }
     }
 
-    MaterialIcon {
-        id: icon
+    Item {
+        anchors.centerIn: parent
+        width: root.isHorizontal ? parent.width : parent.height
+        height: root.isHorizontal ? parent.height : parent.width
+        
+        rotation: root.isHorizontal ? 0 : (Config.bar.activeWindow.inverted ? 270 : 90)
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        Row {
+            id: contentRow
+            anchors.centerIn: parent
+            spacing: Tokens.spacing.small
 
-        animate: true
-        text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
-        color: root.colour
+            MaterialIcon {
+                id: icon
+                anchors.verticalCenter: parent.verticalCenter
+                animate: true
+                text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
+                color: root.colour
+                rotation: root.isHorizontal ? 0 : (Config.bar.activeWindow.inverted ? -270 : -90)
+            }
+
+            Item {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.windowTitle !== ""
+                width: root.current.implicitWidth
+                height: root.current.implicitHeight
+
+                Title {
+                    id: text1
+                }
+
+                Title {
+                    id: text2
+                }
+            }
+        }
     }
 
-    Title {
-        id: text1
-    }
-
-    Title {
-        id: text2
-    }
+    property font metricsFont: Tokens.font.body.builders.small.letterSpacing(1.4).build()
+    property real metricsElideWidth: Math.max(20, root.maxAllowedLength - icon.implicitWidth - Tokens.spacing.small)
 
     TextMetrics {
         id: metrics
-
-        text: root.windowTitle
-        font: root.Tokens.font.body.builders.small.letterSpacing(1.4).build()
+        text: root.windowTitle || ""
+        font: root.metricsFont
         elide: Qt.ElideRight
-        elideWidth: root.maxHeight - icon.height
+        elideWidth: root.metricsElideWidth
 
         onTextChanged: {
             const next = root.current === text1 ? text2 : text1;
-            next.text = elidedText;
+            next.text = elidedText || ""; 
             root.current = next;
         }
-        onElideWidthChanged: root.current.text = elidedText
+        onElideWidthChanged: root.current.text = elidedText || "" 
     }
 
     Behavior on implicitHeight {
         Anim {}
     }
+    Behavior on implicitWidth {
+        Anim {}
+    }
 
     component Title: StyledText {
-        id: text
-
-        anchors.horizontalCenter: icon.horizontalCenter
-        anchors.top: icon.bottom
-        anchors.topMargin: Tokens.spacing.small
-
-        font: metrics.font
+        id: titleText
+        property string textVal: ""
+        text: textVal || ""
+        anchors.verticalCenter: parent.verticalCenter
+        font: root.metricsFont
         color: root.colour
         opacity: root.current === this ? 1 : 0
         horizontalAlignment: Text.AlignLeft
-
-        transform: [
-            Translate {
-                x: root.Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
-            },
-            Rotation {
-                angle: root.Config.bar.activeWindow.inverted ? 270 : 90
-                origin.x: text.implicitHeight / 2
-                origin.y: text.implicitHeight / 2
-            }
-        ]
-
-        width: implicitHeight
-        height: implicitWidth
-
+        verticalAlignment: Text.AlignVCenter
         Behavior on opacity {
-            Anim {
-                type: Anim.DefaultEffects
-            }
+            Anim { type: Anim.DefaultEffects }
         }
     }
 }

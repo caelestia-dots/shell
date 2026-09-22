@@ -14,6 +14,8 @@ StyledRect {
     required property Item mask
     property alias contentColour: colouriser.colorizationColor
 
+    readonly property bool isHorizontal: Config.bar.alignment === "top" || Config.bar.alignment === "bottom"
+
     property real start
     property real end
 
@@ -21,15 +23,18 @@ StyledRect {
         if (!activeWs)
             return;
 
-        const newStart = activeWs.LazyListView.layoutY;
+        const newStart = isHorizontal ? activeWs.x : activeWs.y;
+        const newSize = isHorizontal ? activeWs.width : activeWs.height;
+
         const goingUp = newStart < start;
-        const leadingDuration = Tokens.anim.durations.expressiveDefaultSpatial;
-        const trailingDuration = leadingDuration * (Config.bar.workspaces.activeTrail ? 1.5 : 1);
+        
+        const leadingDuration = 200;
+        const trailingDuration = Config.bar.workspaces.activeTrail ? 250 : 200;
 
         startAnim.stop();
         endAnim.stop();
         startAnim.to = newStart;
-        endAnim.to = newStart + activeWs.LazyListView.preferredHeight;
+        endAnim.to = newStart + newSize;
         startAnim.duration = goingUp ? leadingDuration : trailingDuration;
         endAnim.duration = goingUp ? trailingDuration : leadingDuration;
         startAnim.start();
@@ -40,29 +45,51 @@ StyledRect {
     Component.onCompleted: runAnim()
 
     clip: true
-    y: start + mask.y
-    implicitHeight: end - start
-    radius: Tokens.rounding.full
+
+    x: isHorizontal ? start + mask.x : 0
+    y: isHorizontal ? 0 : start + mask.y
+    implicitWidth: isHorizontal ? end - start : mask.width
+    implicitHeight: isHorizontal ? mask.height : end - start
+
+    radius: Math.min(width, height) / 2
     color: Colours.palette.m3primary
 
-    Anim on start {
+    NumberAnimation on start {
         id: startAnim
+        easing.type: Easing.OutCubic
     }
 
-    Anim on end {
+    NumberAnimation on end {
         id: endAnim
+        easing.type: Easing.OutCubic
     }
 
     Connections {
-        function onLayoutYChanged(): void {
-            root.runAnim();
+        function onYChanged(): void {
+            if (!root.isHorizontal)
+                root.runAnim();
         }
 
-        function onPreferredHeightChanged(): void {
-            root.runAnim();
+        function onHeightChanged(): void {
+            if (!root.isHorizontal)
+                root.runAnim();
         }
 
-        target: root.activeWs?.LazyListView ?? null
+        target: root.activeWs ?? null
+    }
+
+    Connections {
+        function onXChanged(): void {
+            if (root.isHorizontal)
+                root.runAnim();
+        }
+
+        function onWidthChanged(): void {
+            if (root.isHorizontal)
+                root.runAnim();
+        }
+
+        target: root.activeWs ?? null
     }
 
     Colouriser {
@@ -72,11 +99,12 @@ StyledRect {
         sourceColor: Colours.palette.m3onSurface
         colorizationColor: Colours.palette.m3onPrimary
 
-        x: 0
-        y: -parent.start
+        x: root.isHorizontal ? -parent.start : 0
+        y: root.isHorizontal ? 0 : -parent.start
         implicitWidth: root.mask.width
         implicitHeight: root.mask.height
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenter: root.isHorizontal ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isHorizontal ? parent.verticalCenter : undefined
     }
 }

@@ -19,17 +19,29 @@ Item {
     readonly property int padding: Tokens.padding.large
     readonly property int rounding: Tokens.rounding.extraLarge
 
+    readonly property string placementStr: {
+        const allowed = ["top", "center", "bottom"];
+        const val = Config.launcher.placement || "";
+        return allowed.includes(val) ? val : "bottom";
+    }
+    readonly property bool isSearchTop: placementStr === "top" || placementStr === "center"
+    readonly property real clampedMargin: CUtils.clamp(root.padding - Config.border.thickness, 0, root.padding)
+
     implicitWidth: listWrapper.width + padding * 2
-    implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
+    implicitHeight: search.implicitHeight + list.height + padding * 2 + clampedMargin
 
     Item {
         id: listWrapper
 
         implicitWidth: list.width
-        implicitHeight: list.height + root.padding
+        implicitHeight: list.height
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: search.top
+        
+        anchors.top: root.isSearchTop ? search.bottom : parent.top
+        anchors.bottom: root.isSearchTop ? parent.bottom : search.top
+        
+        anchors.topMargin: root.padding
         anchors.bottomMargin: root.padding
 
         ContentList {
@@ -38,10 +50,13 @@ Item {
             content: root
             screenState: root.screenState
             panels: root.panels
-            maxHeight: root.maxHeight - search.implicitHeight - root.padding * 3
+            maxHeight: root.maxHeight - search.implicitHeight - root.padding * 2 - root.clampedMargin
             search: search
             padding: root.padding
             rounding: root.rounding
+            
+            LayoutMirroring.enabled: false
+            LayoutMirroring.childrenInherit: false
         }
     }
 
@@ -52,9 +67,14 @@ Item {
 
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: root.padding
-        anchors.bottomMargin: CUtils.clamp(root.padding - Config.border.thickness, 0, root.padding)
+        anchors.leftMargin: root.padding
+        anchors.rightMargin: root.padding
+
+        anchors.top: root.isSearchTop ? parent.top : undefined
+        anchors.bottom: root.isSearchTop ? undefined : parent.bottom
+        
+        anchors.topMargin: root.isSearchTop ? root.clampedMargin : undefined
+        anchors.bottomMargin: root.isSearchTop ? undefined : root.clampedMargin
 
         topPadding: Math.round((Tokens.padding.medium + Tokens.padding.large) / 2)
         bottomPadding: Math.round((Tokens.padding.medium + Tokens.padding.large) / 2)

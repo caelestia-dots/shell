@@ -38,15 +38,71 @@ Item {
         brightness = root.monitor?.brightness ?? 0;
     }
 
+    property real edgeOffset: 0
+
+    readonly property string placementStr: {
+        const allowed = ["top", "top-left", "top-right", "bottom", "bottom-left", "bottom-right", "left", "right"];
+        const val = Config.osd.placement || "";
+        return allowed.includes(val) ? val : "right";
+    }
+    readonly property string edge: placementStr.split("-")[0]
+    readonly property string align: placementStr.split("-")[1] || "center"
+    readonly property bool isHorizontal: edge === "top" || edge === "bottom"
+
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
-    implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
         Anim {}
     }
+
+    implicitWidth: content.implicitWidth
+    implicitHeight: content.implicitHeight
+    width: implicitWidth
+    height: implicitHeight
+
+    readonly property real baseX: {
+        if (edge === "left")
+            return sidebarOffset;
+        if (edge === "right")
+            return parent.width - width - sidebarOffset - edgeOffset;
+        if (align === "left" || align === "start")
+            return sidebarOffset;
+        if (align === "right" || align === "end")
+            return parent.width - width - sidebarOffset;
+        return (parent.width - width) / 2;
+    }
+
+    readonly property real baseY: {
+        if (edge === "top")
+            return sidebarOffset;
+        if (edge === "bottom")
+            return parent.height - height - sidebarOffset;
+        if (align === "top" || align === "start")
+            return sidebarOffset;
+        if (align === "bottom" || align === "end")
+            return parent.height - height - sidebarOffset;
+        return (parent.height - height) / 2;
+    }
+
+    readonly property real animOffsetX: {
+        if (edge === "left")
+            return (-width - 5 - sidebarOffset) * offsetScale;
+        if (edge === "right")
+            return (width + 5 + sidebarOffset + edgeOffset) * offsetScale;
+        return 0;
+    }
+
+    readonly property real animOffsetY: {
+        if (edge === "top")
+            return (-height - 5 - sidebarOffset) * offsetScale;
+        if (edge === "bottom")
+            return (height + 5 + sidebarOffset) * offsetScale;
+        return 0;
+    }
+
+    x: baseX + animOffsetX
+    y: baseY + animOffsetY
 
     Connections {
         function onMutedChanged(): void {
@@ -94,9 +150,6 @@ Item {
     Loader {
         id: content
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-
         asynchronous: true
         active: root.shouldBeActive || root.visible
 
@@ -108,6 +161,8 @@ Item {
             sourceVolume: root.sourceVolume
             sourceMuted: root.sourceMuted
             brightness: root.brightness
+            isHorizontal: root.isHorizontal
+            edge: root.edge
         }
     }
 }

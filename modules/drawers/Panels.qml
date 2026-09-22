@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Caelestia.Config
@@ -22,7 +24,7 @@ Item {
     required property real borderThickness
 
     readonly property alias osd: osd
-    readonly property alias osdWrapper: osdWrapper
+    readonly property alias osdWrapper: osd
     readonly property alias notifications: notifications
     readonly property alias session: session
     readonly property alias sessionWrapper: sessionWrapper
@@ -34,65 +36,61 @@ Item {
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
 
+    readonly property string barEdge: Config.bar.alignment
+    readonly property bool barIsHorizontal: barEdge === "top" || barEdge === "bottom"
+    readonly property real barThickness: barIsHorizontal ? bar.implicitHeight : bar.implicitWidth
+
     anchors.fill: parent
     anchors.margins: borderThickness
-    anchors.leftMargin: bar.implicitWidth
+    anchors.topMargin: barEdge === "top" ? barThickness : borderThickness
+    anchors.bottomMargin: barEdge === "bottom" ? barThickness : borderThickness
+    anchors.leftMargin: barEdge === "left" ? barThickness : borderThickness
+    anchors.rightMargin: barEdge === "right" ? barThickness : borderThickness
 
-    Item {
-        id: osdWrapper
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
-        clip: sidebar.visible || session.visible
-
-        implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
-        implicitHeight: osd.implicitHeight
-
-        Osd.Wrapper {
-            id: osd
-
-            screen: root.screen
-            screenState: root.screenState
-            sidebarOrSessionVisible: sidebar.visible || session.visible
-
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-        }
+    Osd.Wrapper {
+        id: osd
+        screen: root.screen
+        screenState: root.screenState
+        sidebarOrSessionVisible: sidebar.visible || session.visible
+       edgeOffset: edge === "right" ? session.width * (1 - session.offsetScale) : 0
     }
 
     Notifications.Wrapper {
         id: notifications
+        
+        width: implicitWidth
 
         screenState: root.screenState
         sidebarPanel: sidebar
-        osdPanel: osdWrapper
+        osdPanel: osd
         sessionPanel: sessionWrapper
         utilitiesPanel: utilities
 
         anchors.top: parent.top
-        anchors.right: parent.right
+        x: parent.width - width
     }
 
     Item {
         id: sessionWrapper
+        
+        width: implicitWidth
 
         anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: sidebar.width * (1 - sidebar.offsetScale)
-        clip: sidebar.visible
+        x: parent.width - width - (sidebar.onLeft ? 0 : sidebar.width * (1 - sidebar.offsetScale))
+        clip: sidebar.visible && !sidebar.onLeft
 
-        implicitWidth: session.implicitWidth * (1 - session.offsetScale)
+        implicitWidth: session.visible ? session.implicitWidth * (1 - session.offsetScale) : 0
         implicitHeight: session.implicitHeight
 
         Session.Wrapper {
             id: session
+            
+            width: implicitWidth
 
             screenState: root.screenState
-            sidebarVisible: sidebar.visible
+            sidebarVisible: sidebar.visible && !sidebar.onLeft
 
             anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
         }
     }
 
@@ -102,54 +100,50 @@ Item {
         screen: root.screen
         screenState: root.screenState
         panels: root
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
     }
 
     Dashboard.Wrapper {
         id: dashboard
-
         screenState: root.screenState
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
     }
 
     BarPopouts.ClipWrapper {
         id: popoutsWrapper
-
         screen: root.screen
         borderThickness: root.borderThickness
     }
 
     Utilities.Wrapper {
         id: utilities
-
         screenState: root.screenState
         sidebar: sidebar
         popouts: popoutsWrapper.content
-
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
     }
 
     Toasts.Toasts {
         id: toasts
-
-        anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
-        anchors.right: sidebar.left
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
         anchors.margins: Tokens.padding.medium
     }
 
     Sidebar.Wrapper {
         id: sidebar
+        
+        width: implicitWidth
+
+        docked: Config.notifs.connectedToUtilities
+        dockedAbove: docked && utilities.edge === "top"
 
         screenState: root.screenState
+        onLeft: docked && (utilities.align === "start" || utilities.align === "left")
 
-        anchors.top: notifications.bottom
-        anchors.bottom: utilities.top
-        anchors.right: parent.right
-        anchors.topMargin: -notifications.anchors.topMargin
+        x: onLeft ? (-width - 5) * offsetScale : parent.width - width + (width + 5) * offsetScale
+
+        anchors.top: dockedAbove ? utilities.bottom : notifications.bottom
+        anchors.bottom: (docked && !dockedAbove) ? utilities.top : parent.bottom
+        
+        anchors.topMargin: dockedAbove ? -1 : -notifications.anchors.topMargin
+        anchors.bottomMargin: (docked && !dockedAbove) ? -1 : 0
     }
 }

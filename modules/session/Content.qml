@@ -14,9 +14,11 @@ Column {
     id: root
 
     required property ScreenState screenState
+    property bool onLeft: false
 
     padding: Tokens.padding.large
-    rightPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
+    leftPadding: onLeft ? CUtils.clamp(padding - Config.border.thickness, 0, padding) : padding
+    rightPadding: onLeft ? padding : CUtils.clamp(padding - Config.border.thickness, 0, padding)
     spacing: Tokens.spacing.large
 
     SessionButton {

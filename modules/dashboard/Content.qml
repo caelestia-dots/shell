@@ -15,6 +15,7 @@ Item {
 
     required property ScreenState screenState
     required property FileDialog facePicker
+    property bool tabsAtBottom: false
 
     readonly property var dashboardTabs: {
         const allTabs = [
@@ -47,7 +48,7 @@ Item {
     }
 
     readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
-    readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
+    readonly property real nonAnimHeight: tabs.implicitHeight + (tabsAtBottom ? Tokens.padding.large : Tokens.padding.large) + view.implicitHeight + viewWrapper.anchors.margins * 2
 
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
@@ -55,24 +56,26 @@ Item {
     Tabs {
         id: tabs
 
-        anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: CUtils.clamp(anchors.margins - Config.border.thickness, 0, anchors.margins)
-        anchors.margins: Tokens.padding.large
+        
+        y: root.tabsAtBottom ? parent.height - height - CUtils.clamp(Tokens.padding.large - Config.border.thickness, 0, Tokens.padding.large) : CUtils.clamp(Tokens.padding.large - Config.border.thickness, 0, Tokens.padding.large)
 
-        nonAnimWidth: root.nonAnimWidth - anchors.margins * 2
+        nonAnimWidth: root.nonAnimWidth - Tokens.padding.large * 2
         screenState: root.screenState
         tabs: root.dashboardTabs
+        tabsAtBottom: root.tabsAtBottom
     }
 
     ClippingRectangle {
         id: viewWrapper
 
-        anchors.top: tabs.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        
+        y: root.tabsAtBottom ? Tokens.padding.large : tabs.y + tabs.height
+        height: root.tabsAtBottom ? tabs.y - Tokens.padding.large : parent.height - y - Tokens.padding.large
+        
         anchors.margins: Tokens.padding.large
 
         radius: Tokens.rounding.large

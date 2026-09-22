@@ -8,6 +8,7 @@ namespace caelestia::config {
 
 class NotifsConfig : public settings::ObjectNode {
     CONFIG_NODE(NotifsConfig, settings::ObjectNode)
+    CONFIG_PROPERTY(bool, connectedToUtilities, true)
 
     CONFIG_GLOBAL_PROPERTY(bool, expire, true)
     CONFIG_GLOBAL_ENUM_PROPERTY(NotifsFullscreen, fullscreen, NotifsFullscreen::On)

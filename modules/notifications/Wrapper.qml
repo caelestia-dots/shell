@@ -9,6 +9,8 @@ Item {
     property alias osdPanel: content.osdPanel
     property alias sessionPanel: content.sessionPanel
     property alias utilitiesPanel: content.utilitiesPanel
+    
+    property bool onLeft: sidebarPanel.onLeft
 
     visible: height > 0
     anchors.topMargin: -5
@@ -20,5 +22,6 @@ Item {
 
         anchors.topMargin: -root.anchors.topMargin
         screenState: root.screenState
+        onLeft: root.onLeft
     }
 }

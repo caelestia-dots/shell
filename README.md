@@ -220,6 +220,31 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 }
 ```
 
+
+
+### Panel placement
+
+`dashboard`, `launcher`, `osd` and `utilities` each take a `placement` string that decides
+which screen edge the panel slides out of, where it sits along that edge, and where its
+hover/drag hitbox is. A bare edge (`top`, `left`, ...) centres the panel on that edge.
+
+| Panel       | Accepted values                                                                         | Default        |
+| ----------- | -----------------------------------------------------------------------------------     | -------------- |
+| `dashboard` | `top`, `top-left`, `top-right`, `bottom`, `bottom-left`, `bottom-right`                 | `top`          |
+| `launcher`  | `top`, `center`, `bottom`                                                               | `bottom`       |
+| `osd`       | `top`, `top-left`, `top-right`, `left`, `right`, `bottom`, `bottom-left`, `bottom-right`| `right`        |
+| `utilities` | `top-left`, `top-right`, `bottom-left`, `bottom-right`                                  | `bottom-right` |
+
+The bar has its own `bar.alignment` (`top`, `bottom`, `left`, `right`), default is `left`.
+
+notifs.connectedToUtilities (default `true`) connects the notification sidebar to Utilities:
+Super+N opens and closes both together, and the sidebar docks to whichever corner Utilities is
+in - sliding out of the same side, and filling the rest of that side's height.
+When set to `false`, the Super+N shorcut only opens notification panel, always on the right side of the screen.
+
+
+
+
 > [!NOTE]
 > Not all options respect per-monitor overrides. Most notably, the following options will only read
 > from the global config, and ignore the respective option in per-monitor config files.
@@ -564,6 +589,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "dashboard": {
         "enabled": true,
+        "placement": "top",
         "showOnHover": true,
         "showDashboard": true,
         "showMedia": true,
@@ -583,6 +609,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "launcher": {
         "enabled": true,
+        "placement": "bottom",
         "showOnHover": false,
         "maxShown": 7,
         "maxWallpapers": 9,
@@ -716,8 +743,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "enableHowdy": true,
         "maxHowdyTries": 3,
         "triggerHowdyOnWake": true,
-        "hideNotifs": false,
-        "enableSessionControls": true
+        "hideNotifs": false
     },
     "nexus": {
         "wallpapersPerRow": 4,
@@ -725,6 +751,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "notifs": {
         "expire": true,
+        "connectedToUtilities": true,
         "fullscreen": "On",
         "defaultExpireTimeout": 5000,
         "fullscreenExpireTimeout": 2000,
@@ -736,6 +763,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "osd": {
         "enabled": true,
+        "placement": "bottom",
         "hideDelay": 2000,
         "enableBrightness": true,
         "enableMicrophone": false
@@ -781,6 +809,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "utilities": {
         "enabled": true,
+        "placement": "bottom-right",
         "maxToasts": 4,
         "toasts": {
             "fullscreen": "off",

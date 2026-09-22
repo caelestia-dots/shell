@@ -58,6 +58,7 @@ class UtilitiesCards : public settings::ObjectNode {
 
 class UtilitiesConfig : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesConfig, settings::ObjectNode)
+    CONFIG_PROPERTY(QString, placement, u"bottom-right"_s)
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(int, maxToasts, 4)

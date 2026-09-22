@@ -39,6 +39,7 @@ CONFIG_LIST_TYPE(LauncherAction, LauncherActionList)
 
 class LauncherConfig : public settings::ObjectNode {
     CONFIG_NODE(LauncherConfig, settings::ObjectNode)
+    CONFIG_PROPERTY(QString, placement, u"bottom"_s)
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(bool, showOnHover, false)

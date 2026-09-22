@@ -23,6 +23,16 @@ StyledWindow {
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject.specialWorkspace?.name.length ?? 0) > 0
+    readonly property string barEdge: contentItem.Config.bar.alignment
+    readonly property bool isTop: barEdge === "top"
+    readonly property bool isBottom: barEdge === "bottom"
+    readonly property bool isLeft: barEdge === "left"
+    readonly property bool isRight: barEdge === "right"
+    readonly property bool isHorizontal: isTop || isBottom
+    readonly property real barThickness: isHorizontal ? bar.implicitHeight : bar.implicitWidth
+
+    readonly property real contentOffsetX: isLeft ? barThickness : borderThickness
+    readonly property real contentOffsetY: isTop ? barThickness : borderThickness
     readonly property bool hasFullscreenOnNormalWs: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
     readonly property bool hasFullscreen: {
         if (hasSpecialWorkspace) {
@@ -87,16 +97,15 @@ StyledWindow {
 
     Region {
         id: emptyRegion
-
-        x: panels.notifications.x + bar.implicitWidth
-        y: panels.notifications.y + root.borderThickness
+        x: panels.notifications.x + root.contentOffsetX
+        y: panels.notifications.y + root.contentOffsetY
         width: panels.notifications.width
         height: panels.notifications.height
 
         Region {
-            x: root.width - width
-            y: panels.osdWrapper.y + root.borderThickness
-            width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
+            x: panels.osd.x + root.contentOffsetX
+            y: panels.osd.y + root.contentOffsetY
+            width: panels.osd.width
             height: panels.osd.height
         }
     }
@@ -115,7 +124,10 @@ StyledWindow {
         active: {
             const s = root.screenState;
             const conf = root.contentItem.Config;
-            if ((s.launcher && conf.launcher.enabled) || (s.session && conf.session.enabled) || (s.sidebar && conf.sidebar.enabled))
+            if ((s.launcher && conf.launcher.enabled) || 
+                (s.session && conf.session.enabled) || 
+                (s.sidebar && conf.sidebar.enabled) ||
+                (s.utilities && conf.utilities.enabled))
                 return true;
             if (!conf.dashboard.showOnHover && s.dashboard && conf.dashboard.enabled)
                 return true;
@@ -129,6 +141,7 @@ StyledWindow {
             root.screenState.session = false;
             root.screenState.sidebar = false;
             root.screenState.dashboard = false;
+            root.screenState.utilities = false;
             panels.popouts.hasCurrent = false;
             bar.closeTray();
         }
@@ -168,10 +181,10 @@ StyledWindow {
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
             radius: root.borderRounding
-            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
-            borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
+            borderLeft: root.contentOffsetX - anchors.margins - root.sdfBorderOffset
+            borderRight: (root.isRight ? root.barThickness : root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderTop: root.contentOffsetY - anchors.margins - root.sdfBorderOffset
+            borderBottom: (root.isBottom ? root.barThickness : root.borderThickness) - anchors.margins - root.sdfBorderOffset
         }
 
         PanelBg {
@@ -186,6 +199,11 @@ StyledWindow {
 
             panel: panels.launcher
             deformAmount: 0.1
+            opacity: 1 - panels.launcher.offsetScale
+            implicitWidth: panel.width * (panel.edge === "center" ? (1 - panel.offsetScale) : 1)
+            implicitHeight: panel.height * (panel.edge === "center" ? (1 - panel.offsetScale) : 1)
+            x: panel.x + root.contentOffsetX + (panel.width - implicitWidth) / 2
+            y: panel.y + root.contentOffsetY + (panel.height - implicitHeight) / 2
         }
 
         PanelBg {
@@ -193,8 +211,10 @@ StyledWindow {
 
             panel: panels.sessionWrapper
             deformAmount: 0.2
-            x: panels.sessionWrapper.x + panels.session.x + bar.implicitWidth
-            implicitWidth: panels.session.width
+            x: panels.sessionWrapper.x + root.contentOffsetX
+            y: panels.sessionWrapper.y + root.contentOffsetY + panels.session.y
+            implicitWidth: panels.sessionWrapper.width
+            implicitHeight: panels.session.height
         }
 
         PanelBg {
@@ -204,16 +224,18 @@ StyledWindow {
             deformAmount: 0.03
             implicitHeight: panel.height * (1 / rawDeformMatrix.m22) + 2
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
-            bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+
+            property real dynamicRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+            topLeftRadius: (panels.sidebar.docked && panels.sidebar.dockedAbove) ? dynamicRadius : radius
+            topRightRadius: (panels.sidebar.docked && panels.sidebar.dockedAbove) ? dynamicRadius : radius
+            bottomLeftRadius: (panels.sidebar.docked && !panels.sidebar.dockedAbove) ? dynamicRadius : radius
+            bottomRightRadius: (panels.sidebar.docked && !panels.sidebar.dockedAbove) ? dynamicRadius : radius
         }
 
         PanelBg {
             id: osdBg
-
-            panel: panels.osdWrapper
+            panel: panels.osd
             deformAmount: 0.25
-            x: panels.osdWrapper.x + panels.osd.x + bar.implicitWidth
-            implicitWidth: panels.osd.width
         }
 
         PanelBg {
@@ -228,21 +250,28 @@ StyledWindow {
             panel: panels.utilities
             deformAmount: panels.sidebar.visible ? 0.1 : 0.15
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
-            topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+
+            property real dynamicRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+            topLeftRadius: (panels.sidebar.docked && !panels.sidebar.dockedAbove) ? dynamicRadius : radius
+            topRightRadius: (panels.sidebar.docked && !panels.sidebar.dockedAbove) ? dynamicRadius : radius
+            bottomLeftRadius: (panels.sidebar.docked && panels.sidebar.dockedAbove) ? dynamicRadius : radius
+            bottomRightRadius: (panels.sidebar.docked && panels.sidebar.dockedAbove) ? dynamicRadius : radius
         }
 
         PanelBg {
             id: popoutBg
 
             // Extra width to prevent vertical movement deformation partially detaching panel from bar
-            property real extraWidth: panels.popouts.isDetached ? 0 : 0.2
+            property real extra: panels.popouts.isDetached ? 0 : 0.2
 
             panel: panels.popoutsWrapper
             deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
-            x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
-            implicitWidth: panels.popouts.width * (1 + extraWidth)
+            x: panels.popoutsWrapper.x + panels.popouts.x + root.contentOffsetX - (root.isLeft ? panels.popouts.width * extra : 0)
+            y: panels.popoutsWrapper.y + panels.popouts.y + root.contentOffsetY - (root.isTop ? panels.popouts.height * extra : 0)
+            implicitWidth: root.isHorizontal ? panels.popoutsWrapper.width : panels.popouts.width * (1 + extra)
+            implicitHeight: root.isHorizontal ? panels.popouts.height * (1 + extra) : panels.popoutsWrapper.height
 
-            Behavior on extraWidth {
+            Behavior on extra {
                 Anim {}
             }
         }
@@ -298,10 +327,10 @@ StyledWindow {
 
         BarWrapper {
             id: bar
-
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-
+            x: root.isRight ? parent.width - width : 0
+            y: root.isBottom ? parent.height - height : 0
+            width: isHorizontal ? parent.width : implicitWidth
+            height: isHorizontal ? implicitHeight : parent.height
             screen: root.screen
             screenState: root.screenState
             popouts: panels.popouts
@@ -339,10 +368,12 @@ StyledWindow {
         property real deformAmount: 0.15
 
         group: blobGroup
-        x: panel.x + bar.implicitWidth
-        y: panel.y + root.borderThickness
-        implicitWidth: panel.width
-        implicitHeight: panel.height
+        
+        x: panel ? (panel.x + root.contentOffsetX) : 0
+        y: panel ? (panel.y + root.contentOffsetY) : 0
+        implicitWidth: panel ? panel.width : 0
+        implicitHeight: panel ? panel.height : 0
+        
         radius: Tokens.rounding.extraLarge
         deformScale: (deformAmount * Config.appearance.deformScale) / 10000
     }

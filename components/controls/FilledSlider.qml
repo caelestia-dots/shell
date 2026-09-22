@@ -9,21 +9,22 @@ Slider {
     id: root
 
     required property string icon
+    property bool isHorizontal
     property real oldValue
     property bool initialized
 
-    orientation: Qt.Vertical
+    orientation: isHorizontal ? Qt.Horizontal : Qt.Vertical
 
     background: StyledRect {
         color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
         radius: Tokens.rounding.full
 
         StyledRect {
-            anchors.left: parent.left
-            anchors.right: parent.right
+            x: 0
+            y: root.isHorizontal ? 0 : root.handle.y
 
-            y: root.handle.y
-            implicitHeight: parent.height - y
+            implicitWidth: root.isHorizontal ? root.handle.x + root.handle.width : parent.width
+            implicitHeight: root.isHorizontal ? parent.height : parent.height - y
 
             color: Colours.palette.m3secondary
             radius: parent.radius
@@ -35,9 +36,10 @@ Slider {
 
         property alias moving: icon.moving
 
-        y: root.visualPosition * (root.availableHeight - height)
-        implicitWidth: root.width
-        implicitHeight: root.width
+        x: root.isHorizontal ? root.visualPosition * (root.availableWidth - width) : 0
+        y: root.isHorizontal ? 0 : root.visualPosition * (root.availableHeight - height)
+        implicitWidth: root.isHorizontal ? root.height : root.width
+        implicitHeight: root.isHorizontal ? root.height : root.width
 
         Elevation {
             anchors.fill: parent
