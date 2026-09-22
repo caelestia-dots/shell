@@ -12,6 +12,12 @@ WlSessionLockSurface {
     id: root
 
     required property WlSessionLock lock
+    // The card is sized against the monitor's short edge. That happens to be
+    // screen.height on a landscape monitor, which is why it was written that
+    // way, but on a rotated one it's the long edge - so the card came out
+    // taller than the screen and spilled off it.
+    readonly property bool isPortrait: (screen?.width ?? 0) < (screen?.height ?? 0)
+    readonly property real shortEdge: Math.min(screen?.width ?? 0, screen?.height ?? 0)
     required property Pam pam
 
     readonly property alias unlocking: unlockAnim.running
@@ -144,12 +150,12 @@ WlSessionLockSurface {
                 Anim {
                     target: lockContent
                     property: "implicitWidth"
-                    to: (root.screen?.height ?? 0) * lockContent.Tokens.sizes.lock.heightMult * lockContent.Tokens.sizes.lock.ratio
+                    to: root.isPortrait ? lockContent.cardShort : lockContent.cardLong
                 }
                 Anim {
                     target: lockContent
                     property: "implicitHeight"
-                    to: (root.screen?.height ?? 0) * lockContent.Tokens.sizes.lock.heightMult
+                    to: root.isPortrait ? lockContent.cardLong : lockContent.cardShort
                 }
             }
         }
@@ -195,6 +201,9 @@ WlSessionLockSurface {
     Item {
         id: lockContent
 
+        readonly property real cardLong: root.shortEdge * Tokens.sizes.lock.heightMult * Tokens.sizes.lock.ratio
+        readonly property real cardShort: root.shortEdge * Tokens.sizes.lock.heightMult
+
         readonly property int size: lockIcon.implicitHeight + Tokens.padding.large * 4
         readonly property int radius: size / 4 * Tokens.rounding.scale
 
@@ -231,16 +240,37 @@ WlSessionLockSurface {
             rotation: 180
         }
 
-        Content {
+        Loader {
             id: content
 
             anchors.centerIn: parent
-            width: (root.screen?.height ?? 0) * Tokens.sizes.lock.heightMult * Tokens.sizes.lock.ratio - Tokens.padding.extraLargeIncreased
-            height: (root.screen?.height ?? 0) * Tokens.sizes.lock.heightMult - Tokens.padding.extraLargeIncreased
+            width: (root.isPortrait ? lockContent.cardShort : lockContent.cardLong) - Tokens.padding.extraLargeIncreased
+            height: (root.isPortrait ? lockContent.cardLong : lockContent.cardShort) - Tokens.padding.extraLargeIncreased
 
-            lock: root
             opacity: 0
             scale: 0
+
+            focus: true
+
+            sourceComponent: root.isPortrait ? portraitLayout : landscapeLayout
+        }
+
+        Component {
+            id: landscapeLayout
+
+            Content {
+                lock: root
+                lockHeight: root.shortEdge
+            }
+        }
+
+        Component {
+            id: portraitLayout
+
+            PortraitContent {
+                lock: root
+                lockHeight: root.shortEdge
+            }
         }
     }
 }
