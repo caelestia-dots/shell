@@ -281,7 +281,9 @@ Item {
             cullDelegates: false
             removeDuration: Tokens.anim.durations.expressiveDefaultEffects
             model: ScriptModel {
-                values: root.toplevels.slice(0, root.shownWindowCount)
+                values: Array.from({
+                    length: root.shownWindowCount
+                }, (_, i) => root.toplevels[i])
             }
             delegate: windowDelegate
         }
@@ -301,7 +303,9 @@ Item {
 
             AnimatedRepeater {
                 model: ScriptModel {
-                    values: root.toplevels.slice(0, root.shownWindowCount)
+                    values: Array.from({
+                        length: root.shownWindowCount
+                    }, (_, i) => root.toplevels[i])
                 }
                 delegate: windowDelegate
                 removeDuration: Tokens.anim.durations.expressiveDefaultEffects

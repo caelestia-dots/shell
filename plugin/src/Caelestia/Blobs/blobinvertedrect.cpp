@@ -49,8 +49,9 @@ void setFrameIndices(quint16* idx) {
 } // namespace
 
 QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) {
-    if (!m_group || !(width() > 0 && height() > 0 && width() > m_borderLeft + m_borderRight &&
-                        height() > m_borderTop + m_borderBottom)) {
+    const bool validFrame = m_group && width() > 0 && height() > 0 && width() > m_borderLeft + m_borderRight &&
+                            height() > m_borderTop + m_borderBottom;
+    if (!validFrame) {
         delete oldNode;
         return nullptr;
     }
