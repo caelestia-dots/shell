@@ -19,6 +19,7 @@ class LyricCandidate {
     Q_PROPERTY(QString artist READ artist)
     Q_PROPERTY(QString album READ album)
     Q_PROPERTY(qreal duration READ duration)
+    Q_PROPERTY(bool valid READ isValid)
 
 public:
     LyricCandidate() = default;

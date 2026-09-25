@@ -15,6 +15,7 @@ class ServiceRef : public QObject {
 
 public:
     explicit ServiceRef(Service* service = nullptr, QObject* parent = nullptr);
+    ~ServiceRef() override;
 
     [[nodiscard]] Service* service() const;
     void setService(Service* service);

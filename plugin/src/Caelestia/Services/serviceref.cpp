@@ -12,6 +12,12 @@ ServiceRef::ServiceRef(Service* service, QObject* parent)
     }
 }
 
+ServiceRef::~ServiceRef() {
+    if (m_service) {
+        m_service->unref(this);
+    }
+}
+
 Service* ServiceRef::service() const {
     return m_service;
 }
@@ -21,16 +27,17 @@ void ServiceRef::setService(Service* service) {
         return;
     }
 
-    if (m_service) {
-        m_service->unref(this);
-    }
-
+    Service* const oldService = m_service;
     m_service = service;
-    emit serviceChanged();
 
     if (m_service) {
         m_service->ref(this);
     }
+    if (oldService) {
+        oldService->unref(this);
+    }
+
+    emit serviceChanged();
 }
 
 } // namespace caelestia::services
