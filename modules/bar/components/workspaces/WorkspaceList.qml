@@ -27,12 +27,43 @@ Item {
     readonly property real maxScrollOffset: Math.max(0, contentLength - (isHorizontal ? width : height))
     readonly property Workspace activeWs: workspaces[activeIndex] ?? null
     readonly property int maxHorizontalWindowIcons: {
-        const count = wsIds.length;
-        if (count === 0)
+        const max = Config.bar.workspaces.maxWindowIcons;
+        if (!isHorizontal || max <= 0 || !(special ? Config.bar.workspaces.showWindowsOnSpecialWorkspaces : Config.bar.workspaces.showWindows))
             return 0;
+
+        const count = wsIds.length;
         const labels = count * itemSize + Math.max(0, count - 1) * spacing;
-        const available = maxWidth - labels - count * Tokens.spacing.extraSmall / 2;
-        return Math.max(0, Math.min(Config.bar.workspaces.maxWindowIcons, Math.floor(available / (count * itemSize * 2 / 3))));
+        if (count === 0 || maxWidth <= labels)
+            return 0;
+
+        const demands = [];
+        let high = 0;
+        for (let i = 0; i < count; i++) {
+            const ws = !special && Config.bar.workspaces.showUnoccupied ? groupOffset + i + 1 : wsIds[i];
+            const item = workspaces[i];
+            const toplevels = item?.ws === ws ? item.toplevels : Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags);
+            const demand = Math.min(max, toplevels.length);
+            if (demand > 0) {
+                demands.push(demand);
+                high = Math.max(high, demand);
+            }
+        }
+
+        const available = maxWidth - labels - demands.length * Tokens.spacing.extraSmall / 2;
+        const slots = Math.max(0, Math.floor(available / (itemSize * 2 / 3)));
+        // Preserve a uniform cap: spare width does not favour earlier workspaces.
+        let low = 0;
+        while (low < high) {
+            const cap = Math.floor((low + high + 1) / 2);
+            let needed = 0;
+            for (const demand of demands)
+                needed += Math.min(demand, cap);
+            if (needed <= slots)
+                low = cap;
+            else
+                high = cap - 1;
+        }
+        return low;
     }
 
     property var workspaces: []
@@ -263,6 +294,12 @@ Item {
         spacing: root.spacing
 
         move: Transition {
+            id: moveTransition
+
+            ScriptAction {
+                script: moveTransition.ViewTransition.item.layoutX = moveTransition.ViewTransition.destination.x
+            }
+
             Anim {
                 properties: "x"
             }

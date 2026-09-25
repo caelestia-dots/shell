@@ -14,6 +14,7 @@ Item {
     required property ScreenState screenState
     required property Sidebar.Wrapper sidebar
     required property bool onTop
+    required property bool mirrored
     required property BarPopouts.Wrapper popouts
     property real horizontalStretch
     property matrix4x4 deformMatrix
@@ -78,6 +79,7 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.margins: Tokens.padding.large
+        anchors.leftMargin: root.mirrored ? root.totalPadding - anchors.margins : anchors.margins
 
         asynchronous: true
         active: root.shouldBeActive || root.visible

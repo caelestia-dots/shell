@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.modules.launcher.services
@@ -9,7 +8,6 @@ import qs.modules.launcher.services
 Item {
     id: root
 
-    required property ShellScreen screen
     required property ScreenState screenState
     required property var panels
 

@@ -29,8 +29,8 @@ CustomMouseArea {
         return y >= bounds.y - Config.border.rounding && y <= bounds.y + bounds.height + Config.border.rounding;
     }
 
-    function withinPanelWidth(panel: Item, x: real, y: real): bool {
-        const bounds = panel.visible ? panels.exposedRect(panel) : panels.panelGeometry(panel);
+    function withinPanelWidth(panel: Item, x: real, y: real, exposedBounds = null): bool {
+        const bounds = panel.visible ? (exposedBounds ?? panels.exposedRect(panel)) : panels.panelGeometry(panel);
         return x >= bounds.x - Config.border.rounding && x <= bounds.x + bounds.width + Config.border.rounding;
     }
 
@@ -53,15 +53,16 @@ CustomMouseArea {
     function inTopPanel(panel: Item, x: real, y: real): bool {
         const bounds = panels.exposedRect(panel);
         const trigger = Math.max(Config.border.minThickness, borderThickness);
-        return y >= 0 && y < Math.max(trigger, bounds.y + bounds.height) && withinPanelWidth(panel, x, y);
+        return y >= 0 && y < Math.max(trigger, bounds.y + bounds.height) && withinPanelWidth(panel, x, y, bounds);
     }
 
     function inBottomPanel(panel: Item, x: real, y: real, isCorner = false): bool {
         const bounds = panels.exposedRect(panel);
-        const bottom = bar.position === "bottom" ? panels.y + panels.height : height;
-        const trigger = Math.max(Config.border.minThickness, borderThickness);
+        const bottom = height;
+        // The bottom bar, not the desktop above it, receives the closed trigger.
+        const trigger = bar.position === "bottom" ? bar.clampedHeight : Math.max(Config.border.minThickness, borderThickness);
         const edge = bounds.height > 0 ? bounds.y : bottom;
-        return y <= bottom && y > Math.min(bottom - trigger, edge) - (isCorner ? Config.border.rounding : 0) && withinPanelWidth(panel, x, y);
+        return y <= bottom && y > Math.min(bottom - trigger, edge) - (isCorner ? Config.border.rounding : 0) && withinPanelWidth(panel, x, y, bounds);
     }
 
     function inPopouts(x: real, y: real): bool {
@@ -88,7 +89,15 @@ CustomMouseArea {
                 return false;
             return (popouts.currentName === "activewindow" && !popouts.isDetached) || !inPopouts(x, y);
         }
-        return !inPopouts(x, y) && inTopPanel(panels.dashboard, x, y) && !(bar.position === "bottom" && inTopPanel(panels.utilities, x, y));
+        return !inPopouts(x, y) && inTopPanel(panels.dashboard, x, y) && !(bar.position === "bottom" && inUtilitiesArea(x, y));
+    }
+
+    function inUtilitiesArea(x: real, y: real): bool {
+        // Standalone utilities may be disabled while attached sidebar content
+        // or a closing transition still owns its visible input area.
+        if (!Config.utilities.enabled && !screenState.sidebar && !panels.utilities.visible)
+            return false;
+        return bar.position === "bottom" ? inTopPanel(panels.utilities, x, y) : inBottomPanel(panels.utilities, x, y, true);
     }
     function inBarEdge(x: real, y: real, clamped = false): bool {
         const barWidth = clamped ? bar.clampedWidth : bar.implicitWidth;
@@ -190,7 +199,7 @@ CustomMouseArea {
             // Show sidebar on hover (top corner, bounded by notification panel height)
             if (Config.sidebar.showOnHover) {
                 const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.y + panels.notifications.y + panels.notifications.height);
-                const showSidebarHover = !inBarEdge(x, y) && !inPopouts(x, y) && !(bar.position === "bottom" && inTopPanel(panels.utilities, x, y)) && inSideEdge(panels.sidebar, x) && y <= sidebarTriggerY;
+                const showSidebarHover = !inBarEdge(x, y) && !inPopouts(x, y) && !(bar.position === "bottom" && inUtilitiesArea(x, y)) && inSideEdge(panels.sidebar, x) && y <= sidebarTriggerY;
                 if (showSidebarHover && !screenState.sidebar)
                     screenState.sidebar = true;
             }
@@ -236,11 +245,11 @@ CustomMouseArea {
             // Show/hide sidebar on hover
             if (Config.sidebar.showOnHover && !pressed) {
                 const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.y + panels.notifications.y + panels.notifications.height);
-                const showSidebarHover = !inBarEdge(x, y) && !inPopouts(x, y) && !(bar.position === "bottom" && inTopPanel(panels.utilities, x, y)) && inSideEdge(panels.sidebar, x) && y <= sidebarTriggerY;
+                const showSidebarHover = !inBarEdge(x, y) && !inPopouts(x, y) && !(bar.position === "bottom" && inUtilitiesArea(x, y)) && inSideEdge(panels.sidebar, x) && y <= sidebarTriggerY;
                 if (showSidebarHover && !screenState.sidebar) {
                     screenState.sidebar = true;
                 } else {
-                    const inSidebarArea = inSidePanel(panels.sidebar, x, y) || inSidePanel(panels.session, x, y) || (bar.position === "bottom" && inTopPanel(panels.utilities, x, y));
+                    const inSidebarArea = inSidePanel(panels.sidebar, x, y) || inSidePanel(panels.session, x, y) || (bar.position === "bottom" && inUtilitiesArea(x, y));
                     if (!inSidebarArea)
                         screenState.sidebar = false;
                 }
@@ -282,7 +291,7 @@ CustomMouseArea {
         }
 
         // Show utilities on hover
-        const showUtilities = !inPopouts(x, y) && (bar.position === "bottom" ? inTopPanel(panels.utilities, x, y) : inBottomPanel(panels.utilities, x, y, true));
+        const showUtilities = !inPopouts(x, y) && inUtilitiesArea(x, y);
 
         // Always update visibility based on hover if not in shortcut mode
         if (!utilitiesShortcutActive) {
@@ -293,7 +302,7 @@ CustomMouseArea {
         }
 
         // On a bottom bar, utilities open from the opposite (top) edge.
-        if (bar.position === "bottom" && pressed && !inPopouts(dragStart.x, dragStart.y) && inTopPanel(panels.utilities, dragStart.x, dragStart.y) && withinPanelWidth(panels.utilities, x, y)) {
+        if (bar.position === "bottom" && pressed && !inPopouts(dragStart.x, dragStart.y) && inUtilitiesArea(dragStart.x, dragStart.y) && withinPanelWidth(panels.utilities, x, y)) {
             if (dragY > Config.bar.dragThreshold)
                 screenState.utilities = true;
             else if (dragY < -Config.bar.dragThreshold)
@@ -370,8 +379,7 @@ CustomMouseArea {
         function onUtilitiesChanged() {
             if (root.screenState.utilities) {
                 // Utilities became visible, immediately check if this should be shortcut mode
-                const inUtilitiesArea = root.bar.position === "bottom" ? root.inTopPanel(root.panels.utilities, root.mouseX, root.mouseY) : root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY, true);
-                if (!inUtilitiesArea) {
+                if (!root.inUtilitiesArea(root.mouseX, root.mouseY)) {
                     root.utilitiesShortcutActive = true;
                 }
             } else {

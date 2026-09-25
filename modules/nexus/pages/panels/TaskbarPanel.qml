@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components.controls
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -49,7 +50,10 @@ PageBase {
             label: Tr.tr("Position")
             subtext: Tr.tr("Default bar position; per-screen overrides still apply")
             menuItems: root.positionItems
-            active: root.positionItems.find(i => i.value === GlobalConfig.bar.position)
+            active: {
+                const position = BarPosition.resolvedPosition(GlobalConfig.bar.position);
+                return root.positionItems.find(i => i.value === position);
+            }
             onSelected: item => GlobalConfig.bar.position = item.value
         }
 

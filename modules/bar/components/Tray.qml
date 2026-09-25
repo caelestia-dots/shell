@@ -13,8 +13,6 @@ StyledRect {
     property bool isHorizontal: false
 
     readonly property alias layout: layout
-    readonly property alias items: items
-    readonly property alias expandIcon: expandIcon
 
     readonly property int padding: Config.bar.tray.background ? Tokens.padding.medium : Tokens.padding.extraSmall
     readonly property int spacing: Config.bar.tray.background ? Tokens.spacing.medium : Tokens.spacing.extraSmall

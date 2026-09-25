@@ -89,7 +89,7 @@ StyledWindow {
     Region {
         id: emptyRegion
 
-        readonly property rect bounds: panels.exposedRect(panels.notifications)
+        readonly property rect bounds: panels.notificationsRect
 
         x: bounds.x
         y: bounds.y
@@ -97,7 +97,7 @@ StyledWindow {
         height: bounds.height
 
         Region {
-            readonly property rect bounds: panels.exposedRect(panels.osd)
+            readonly property rect bounds: panels.osdRect
 
             x: bounds.x
             y: bounds.y

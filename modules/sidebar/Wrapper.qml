@@ -9,6 +9,7 @@ Item {
     id: root
 
     required property ScreenState screenState
+    required property bool mirrored
     readonly property Props props: Props {}
 
     readonly property real slideOffset: (-implicitWidth - 5) * offsetScale
@@ -30,14 +31,15 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: Tokens.padding.large
-        anchors.margins: CUtils.clamp(anchors.leftMargin - Config.border.thickness, 0, anchors.leftMargin)
+        anchors.margins: CUtils.clamp(Tokens.padding.large - Config.border.thickness, 0, Tokens.padding.large)
+        anchors.leftMargin: root.mirrored ? anchors.margins : Tokens.padding.large
+        anchors.rightMargin: root.mirrored ? Tokens.padding.large : anchors.margins
         anchors.bottomMargin: 0
 
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
+            implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.rightMargin
             props: root.props
             screenState: root.screenState
         }

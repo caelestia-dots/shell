@@ -40,7 +40,6 @@ StyledClippingRect {
 
         return workspaces.slice(start, end).map(w => w.id);
     }
-    readonly property var workspaces: view.workspaces
     readonly property int groupOffset: Config.bar.workspaces.showUnoccupied ? Math.floor((activeWsId - 1) / shown) * shown : 0
 
     property real blur: onSpecial ? 1 : 0

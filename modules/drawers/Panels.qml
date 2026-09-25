@@ -46,6 +46,9 @@ Item {
     readonly property rect utilitiesRect: exposedRect(utilities)
     readonly property rect sidebarRect: exposedRect(sidebar)
     readonly property rect popoutsRect: exposedRect(popoutsWrapper)
+    readonly property rect osdRect: exposedRect(osd)
+    readonly property rect sessionRect: exposedRect(session)
+    readonly property rect notificationsRect: exposedRect(notifications)
 
     // One window-coordinate ownership region for the top-bar title and dashboard.
     // Keep it through the full bar depth and any currently exposed dashboard body.
@@ -231,7 +234,6 @@ Item {
     Launcher.Wrapper {
         id: launcher
 
-        screen: root.screen
         screenState: root.screenState
         panels: root
 
@@ -276,6 +278,7 @@ Item {
         screenState: root.screenState
         sidebar: sidebar
         popouts: popoutsWrapper.content
+        mirrored: root.barOnRight
 
         onShouldBeActiveChanged: {
             if (shouldBeActive) {
@@ -303,6 +306,7 @@ Item {
         id: sidebar
 
         screenState: root.screenState
+        mirrored: root.barOnRight
 
         anchors.top: notifications.bottom
         anchors.bottom: root.barOnBottom ? parent.bottom : utilities.top

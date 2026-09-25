@@ -14,10 +14,6 @@ Singleton {
         return pos === "top" || pos === "bottom";
     }
 
-    function isVertical(pos: string): bool {
-        return pos === "left" || pos === "right";
-    }
-
     function isLeft(pos: string): bool {
         return pos === "left";
     }

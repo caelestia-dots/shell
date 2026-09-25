@@ -28,40 +28,39 @@ Region {
     intersection: Intersection.Xor
 
     R {
-        panel: root.panels.dashboard
+        bounds: root.panels.dashboardRect
     }
 
     R {
-        panel: root.panels.launcher
+        bounds: root.panels.launcherRect
     }
 
     R {
-        panel: root.panels.session
+        bounds: root.panels.sessionRect
     }
 
     R {
-        panel: root.panels.sidebar
+        bounds: root.panels.sidebarRect
     }
 
     R {
-        panel: root.panels.osd
+        bounds: root.panels.osdRect
     }
 
     R {
-        panel: root.panels.notifications
+        bounds: root.panels.notificationsRect
     }
 
     R {
-        panel: root.panels.utilities
+        bounds: root.panels.utilitiesRect
     }
 
     R {
-        panel: root.panels.popoutsWrapper
+        bounds: root.panels.popoutsRect
     }
 
     component R: Region {
-        required property Item panel
-        readonly property rect bounds: root.panels.exposedRect(panel)
+        required property rect bounds
 
         x: bounds.x
         y: bounds.y

@@ -45,21 +45,26 @@ Item {
 
     Loader {
         asynchronous: true
-        width: root.bar.activeWindowInteractionWidth(root)
+        width: root.width
         height: parent.height
         active: Config.bar.popouts.activeWindow && !Config.bar.activeWindow.showOnHover
 
         sourceComponent: MouseArea {
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
+            containmentMask: QtObject {
+                function contains(point: point): bool {
+                    return root.bar.activeWindowContains(root, point.x);
+                }
+            }
             onPositionChanged: {
                 const popouts = root.bar.popouts;
                 if (popouts.hasCurrent && popouts.currentName !== "activewindow")
                     popouts.hasCurrent = false;
             }
             onClicked: event => {
-                // MouseArea can deliver an edge click; keep the title span half-open.
-                if (event.x < 0 || event.x >= width)
+                // Keep delivered edge clicks consistent with hover ownership.
+                if (!root.bar.activeWindowContains(root, event.x))
                     return;
                 const popouts = root.bar.popouts;
                 if (popouts.hasCurrent) {

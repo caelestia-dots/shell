@@ -172,7 +172,7 @@ StyledRect {
         Layout.topMargin: !root.isHorizontal ? Math.round(startGap) : 0
         Layout.bottomMargin: !root.isHorizontal ? Math.round(endGap) : 0
 
-        implicitWidth: root.isHorizontal && !present ? 0 : (item?.implicitWidth ?? 0)
+        implicitWidth: item?.implicitWidth ?? 0
         implicitHeight: item?.implicitHeight ?? 0
 
         children: item

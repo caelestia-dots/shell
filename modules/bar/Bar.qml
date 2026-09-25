@@ -21,9 +21,12 @@ GridLayout {
     required property rect dashboardHitRect
     readonly property int axisPadding: Tokens.padding.large
     readonly property int entryCount: repeater.count
-    readonly property int firstSpacerIndex: Config.bar.entries.values.filter(e => e.enabled).findIndex(e => e.id === "spacer")
+    readonly property var enabledEntries: Config.bar.entries.values.filter(e => e.enabled)
+    readonly property int firstSpacerIndex: enabledEntries.findIndex(e => e.id === "spacer")
 
     readonly property real workspaceWidth: {
+        if (!isHorizontal)
+            return 0;
         let reserved = axisPadding * 2 + columnSpacing * Math.max(0, entryCount - 1);
         for (const child of children) {
             const entry = child as EntryWrapper;
@@ -46,16 +49,26 @@ GridLayout {
         }
     }
 
-    function activeWindowInteractionWidth(item: Item): real {
+    function activeWindowContains(item: Item, x: real): bool {
+        if (x < 0 || x >= item.width)
+            return false;
         if (!isHorizontal || dashboardHitRect.width <= 0)
-            return item.width;
-        // Read the entry coordinates so layout reflows invalidate the child hit width.
-        const start = parent.mapToItem(null, root.x + item.parent.x + item.x, 0).x;
-        return Math.max(0, Math.min(item.width, dashboardHitRect.x - start));
+            return true;
+        const position = item.mapToItem(null, x, 0).x;
+        return position < dashboardHitRect.x || position >= dashboardHitRect.x + dashboardHitRect.width;
     }
 
     function activeWindowCenter(item: Item): real {
-        return isHorizontal ? item.mapToItem(root, activeWindowInteractionWidth(item) / 2, 0).x : item.mapToItem(root, 0, item.implicitHeight / 2).y;
+        if (!isHorizontal)
+            return item.mapToItem(root, 0, item.implicitHeight / 2).y;
+        if (dashboardHitRect.width <= 0)
+            return item.mapToItem(root, item.width / 2, 0).x;
+        const start = item.mapToItem(null, 0, 0).x;
+        const leftWidth = Math.max(0, Math.min(item.width, dashboardHitRect.x - start));
+        const rightWidth = Math.max(0, Math.min(item.width, start + item.width - dashboardHitRect.x - dashboardHitRect.width));
+        // Anchor to an owned interval even when the dashboard splits the title.
+        const center = leftWidth >= rightWidth ? leftWidth / 2 : item.width - rightWidth / 2;
+        return item.mapToItem(root, center, 0).x;
     }
 
     function hasNonTitleEntryAt(along: real): bool {
@@ -91,7 +104,7 @@ GridLayout {
             const tray = ch.item as Tray;
             tray.expanded = true;
             const layout = tray.layout;
-            const item = (!Config.bar.tray.compact || tray.expanded) && layout ? layout.childAt(isHorizontal ? mapToItem(layout, along, 0).x : layout.width / 2, isHorizontal ? layout.height / 2 : mapToItem(layout, 0, along).y) as TrayItem : null;
+            const item = layout ? layout.childAt(isHorizontal ? mapToItem(layout, along, 0).x : layout.width / 2, isHorizontal ? layout.height / 2 : mapToItem(layout, 0, along).y) as TrayItem : null;
 
             if (item?.modelData) {
                 popouts.currentName = `traymenu${item.index}`;
@@ -102,7 +115,7 @@ GridLayout {
             }
         } else if (id === "activeWindow") {
             const item = ch.item as Item;
-            if (item && isHorizontal && mapToItem(item, along, 0).x >= activeWindowInteractionWidth(item)) {
+            if (item && isHorizontal && !activeWindowContains(item, mapToItem(item, along, 0).x)) {
                 if (popouts.currentName === "activewindow")
                     popouts.hasCurrent = false;
                 return;
@@ -153,7 +166,7 @@ GridLayout {
         id: repeater
 
         model: ScriptModel {
-            values: root.Config.bar.entries.values.filter(e => e.enabled)
+            values: root.enabledEntries
         }
 
         DelegateChooser {

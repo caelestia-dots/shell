@@ -14,9 +14,12 @@ Column {
     id: root
 
     required property ScreenState screenState
+    required property bool mirrored
+    readonly property real clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
     padding: Tokens.padding.large
-    rightPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
+    leftPadding: mirrored ? clampedPadding : padding
+    rightPadding: mirrored ? padding : clampedPadding
     spacing: Tokens.spacing.large
 
     SessionButton {

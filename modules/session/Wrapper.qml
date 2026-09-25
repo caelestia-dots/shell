@@ -38,6 +38,7 @@ Item {
 
         sourceComponent: Content {
             screenState: root.screenState
+            mirrored: root.mirrored
         }
     }
 }

@@ -56,7 +56,9 @@ Item {
     readonly property real horizontalWindowsWidth: shownWindowCount * windowIconSize
     readonly property bool adding: isHorizontal ? AnimatedRepeater.adding : LazyListView.adding
     readonly property bool removing: isHorizontal ? AnimatedRepeater.removing : LazyListView.removing
-    readonly property real layoutStart: isHorizontal ? x : LazyListView.layoutY
+    // Row publishes its destination before animating x; initial/add positions are immediate.
+    property real layoutX: x
+    readonly property real layoutStart: isHorizontal ? layoutX : LazyListView.layoutY
     readonly property real layoutLength: isHorizontal ? implicitWidth : LazyListView.preferredHeight
     readonly property real visibleLength: isHorizontal ? width : LazyListView.visibleHeight
 
@@ -167,10 +169,6 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.family: Tokens.font.workspaces
-
-            Behavior on color {
-                CAnim {}
-            }
         }
     }
 
@@ -201,14 +199,6 @@ Item {
                 id: loaderIconCacher
             }
         }
-    }
-
-    ScriptModel {
-        id: windowModel
-
-        values: Array.from({
-            length: root.shownWindowCount
-        }, (_, i) => root.toplevels[i])
     }
 
     Component {
@@ -290,7 +280,9 @@ Item {
             implicitHeight: contentHeight
             cullDelegates: false
             removeDuration: Tokens.anim.durations.expressiveDefaultEffects
-            model: windowModel
+            model: ScriptModel {
+                values: root.toplevels.slice(0, root.shownWindowCount)
+            }
             delegate: windowDelegate
         }
     }
@@ -308,7 +300,9 @@ Item {
             }
 
             AnimatedRepeater {
-                model: windowModel
+                model: ScriptModel {
+                    values: root.toplevels.slice(0, root.shownWindowCount)
+                }
                 delegate: windowDelegate
                 removeDuration: Tokens.anim.durations.expressiveDefaultEffects
             }
