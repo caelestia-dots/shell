@@ -11,6 +11,7 @@ import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.services
+import qs.utils
 import qs.modules.bar
 
 StyledWindow {
@@ -55,7 +56,7 @@ StyledWindow {
         for (const panel of ["dashboard", "launcher", "session", "sidebar"])
             if (contentItem.Config[panel].enabled)
                 thresholds.push(contentItem.Config[panel].dragThreshold);
-        return Math.max(...thresholds);
+        return thresholds.length ? Math.max(...thresholds) : 0;
     }
 
     onHasFullscreenChanged: {
@@ -88,16 +89,20 @@ StyledWindow {
     Region {
         id: emptyRegion
 
-        x: panels.notifications.x + bar.implicitWidth
-        y: panels.notifications.y + root.borderThickness
-        width: panels.notifications.width
-        height: panels.notifications.height
+        readonly property rect bounds: panels.exposedRect(panels.notifications)
+
+        x: bounds.x
+        y: bounds.y
+        width: bounds.width
+        height: bounds.height
 
         Region {
-            x: root.width - width
-            y: panels.osdWrapper.y + root.borderThickness
-            width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
-            height: panels.osd.height
+            readonly property rect bounds: panels.exposedRect(panels.osd)
+
+            x: bounds.x
+            y: bounds.y
+            width: bounds.width
+            height: bounds.height
         }
     }
 
@@ -168,10 +173,10 @@ StyledWindow {
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
             radius: root.borderRounding
-            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
-            borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
+            borderLeft: (BarPosition.isLeft(bar.position) ? bar.implicitWidth : root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderRight: (BarPosition.isRight(bar.position) ? bar.implicitWidth : root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderTop: (BarPosition.isTop(bar.position) ? bar.implicitHeight : root.borderThickness) - anchors.margins - root.sdfBorderOffset
+            borderBottom: (BarPosition.isBottom(bar.position) ? bar.implicitHeight : root.borderThickness) - anchors.margins - root.sdfBorderOffset
         }
 
         PanelBg {
@@ -191,29 +196,30 @@ StyledWindow {
         PanelBg {
             id: sessionBg
 
-            panel: panels.sessionWrapper
+            panel: panels.session
             deformAmount: 0.2
-            x: panels.sessionWrapper.x + panels.session.x + bar.implicitWidth
-            implicitWidth: panels.session.width
         }
 
         PanelBg {
             id: sidebarBg
 
+            readonly property real joinRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+
             panel: panels.sidebar
             deformAmount: 0.03
             implicitHeight: panel.height * (1 / rawDeformMatrix.m22) + 2
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
-            bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+            topLeftRadius: !panels.barOnRight && panels.barOnBottom ? joinRadius : radius
+            bottomLeftRadius: !panels.barOnRight && !panels.barOnBottom ? joinRadius : radius
+            topRightRadius: panels.barOnRight && panels.barOnBottom ? joinRadius : radius
+            bottomRightRadius: panels.barOnRight && !panels.barOnBottom ? joinRadius : radius
         }
 
         PanelBg {
             id: osdBg
 
-            panel: panels.osdWrapper
+            panel: panels.osd
             deformAmount: 0.25
-            x: panels.osdWrapper.x + panels.osd.x + bar.implicitWidth
-            implicitWidth: panels.osd.width
         }
 
         PanelBg {
@@ -228,21 +234,31 @@ StyledWindow {
             panel: panels.utilities
             deformAmount: panels.sidebar.visible ? 0.1 : 0.15
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
-            topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
+            topLeftRadius: !panels.barOnRight && !panels.barOnBottom ? sidebarBg.joinRadius : radius
+            bottomLeftRadius: !panels.barOnRight && panels.barOnBottom ? sidebarBg.joinRadius : radius
+            topRightRadius: panels.barOnRight && !panels.barOnBottom ? sidebarBg.joinRadius : radius
+            bottomRightRadius: panels.barOnRight && panels.barOnBottom ? sidebarBg.joinRadius : radius
         }
 
         PanelBg {
             id: popoutBg
 
-            // Extra width to prevent vertical movement deformation partially detaching panel from bar
-            property real extraWidth: panels.popouts.isDetached ? 0 : 0.2
+            readonly property bool barLeft: BarPosition.isLeft(bar.position)
+            readonly property bool barRight: BarPosition.isRight(bar.position)
+            readonly property bool barTop: BarPosition.isTop(bar.position)
+            readonly property bool barBottom: BarPosition.isBottom(bar.position)
+            property real extraScale: panels.popouts.isDetached ? 0 : 0.15
 
             panel: panels.popoutsWrapper
             deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
-            x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
-            implicitWidth: panels.popouts.width * (1 + extraWidth)
 
-            Behavior on extraWidth {
+            x: geometry.x - (barLeft ? panels.popoutsWrapper.width * extraScale : 0)
+            y: geometry.y - (barTop ? panels.popoutsWrapper.height * extraScale : 0)
+
+            implicitWidth: panels.popoutsWrapper.width * (1 + (barLeft || barRight ? extraScale : 0))
+            implicitHeight: panels.popoutsWrapper.height * (1 + (barTop || barBottom ? extraScale : 0))
+
+            Behavior on extraScale {
                 Anim {}
             }
         }
@@ -267,28 +283,50 @@ StyledWindow {
             bar: bar
             borderThickness: root.borderThickness
 
+            dashboardTransform: dashTransform
+            launcherTransform: launchTransform
+            sessionTransform: sessTransform
+            sidebarTransform: sideTransform
+            osdTransform: volumeTransform
+            notificationsTransform: notifsTransform
+            utilitiesTransform: utilsTransform
+
             utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
             utilities.deformMatrix: utilsBg.rawDeformMatrix
 
             dashboard.transform: Matrix4x4 {
+                id: dashTransform
+
                 matrix: dashBg.deformMatrix
             }
             launcher.transform: Matrix4x4 {
+                id: launchTransform
+
                 matrix: launcherBg.deformMatrix
             }
             session.transform: Matrix4x4 {
+                id: sessTransform
+
                 matrix: sessionBg.deformMatrix
             }
             sidebar.transform: Matrix4x4 {
+                id: sideTransform
+
                 matrix: sidebarBg.deformMatrix
             }
             osd.transform: Matrix4x4 {
+                id: volumeTransform
+
                 matrix: osdBg.deformMatrix
             }
             notifications.transform: Matrix4x4 {
+                id: notifsTransform
+
                 matrix: notifsBg.deformMatrix
             }
             utilities.transform: Matrix4x4 {
+                id: utilsTransform
+
                 matrix: utilsBg.deformMatrix
             }
             popouts.transform: Matrix4x4 {
@@ -299,12 +337,13 @@ StyledWindow {
         BarWrapper {
             id: bar
 
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-
+            // Direct coordinates avoid opposing anchors constraining a live position switch.
+            x: BarPosition.isRight(position) ? parent.width - width : 0
+            y: BarPosition.isBottom(position) ? parent.height - height : 0
             screen: root.screen
             screenState: root.screenState
             popouts: panels.popouts
+            dashboardHitRect: panels.dashboardHitRect
 
             fullscreen: root.hasFullscreen
         }
@@ -336,11 +375,12 @@ StyledWindow {
 
     component PanelBg: BlobRect {
         required property Item panel
+        readonly property rect geometry: panels.panelGeometry(panel)
         property real deformAmount: 0.15
 
         group: blobGroup
-        x: panel.x + bar.implicitWidth
-        y: panel.y + root.borderThickness
+        x: geometry.x
+        y: geometry.y
         implicitWidth: panel.width
         implicitHeight: panel.height
         radius: Tokens.rounding.extraLarge

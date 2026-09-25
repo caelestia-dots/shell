@@ -16,12 +16,13 @@ Item {
     readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled
 
     readonly property real maxHeight: {
-        let max = screen.height - Config.border.thickness * 2 + Tokens.padding.extraLarge;
+        let max = parent.height + Tokens.padding.extraLarge;
         if (screenState.dashboard)
             max -= panels.dashboard.nonAnimHeight;
         return max;
     }
 
+    readonly property real slideOffset: (-implicitHeight - 5) * offsetScale
     property real offsetScale: shouldBeActive ? 0 : 1
 
     onShouldBeActiveChanged: {
@@ -32,7 +33,7 @@ Item {
     }
 
     visible: offsetScale < 1
-    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+    anchors.bottomMargin: slideOffset
     implicitHeight: content.implicitHeight
     implicitWidth: content.implicitWidth || 630 // Hard coded fallback for first open
     opacity: 1 - offsetScale

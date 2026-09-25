@@ -12,8 +12,9 @@ import qs.modules.bar.components.status
 StyledRect {
     id: root
 
+    property bool isHorizontal: false
     property color colour: Colours.palette.m3secondary
-    readonly property alias items: iconColumn
+    readonly property alias items: iconLayout
 
     readonly property int spacing: Tokens.spacing.medium / 2
 
@@ -44,18 +45,22 @@ StyledRect {
     radius: Tokens.rounding.full
 
     clip: true
-    implicitWidth: Tokens.sizes.bar.innerWidth
-    implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2
+    implicitWidth: isHorizontal ? (iconLayout.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth
+    implicitHeight: isHorizontal ? Tokens.sizes.bar.innerWidth : (iconLayout.implicitHeight + Tokens.padding.medium * 2)
 
-    ColumnLayout {
-        id: iconColumn
+    GridLayout {
+        id: iconLayout
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.padding.medium
+        rows: root.isHorizontal ? 1 : -1
+        columns: root.isHorizontal ? -1 : 1
+        rowSpacing: 0
+        columnSpacing: 0
 
-        spacing: 0
+        anchors.centerIn: root.isHorizontal ? parent : undefined
+        anchors.left: root.isHorizontal ? undefined : parent.left
+        anchors.right: root.isHorizontal ? undefined : parent.right
+        anchors.bottom: root.isHorizontal ? undefined : parent.bottom
+        anchors.bottomMargin: root.isHorizontal ? 0 : Tokens.padding.medium
 
         Repeater {
             model: ScriptModel {
@@ -73,6 +78,7 @@ StyledRect {
                         LockStatus {
                             colour: root.colour
                             parentSpacing: root.spacing
+                            isHorizontal: root.isHorizontal
                         }
                     }
                 }
@@ -131,6 +137,7 @@ StyledRect {
                     delegate: EntryWrapper {
                         BluetoothStatus {
                             colour: root.colour
+                            isHorizontal: root.isHorizontal
                         }
                     }
                 }
@@ -151,27 +158,32 @@ StyledRect {
         required property int index
         property int margin: root.spacing / 2
         readonly property bool present: !root.collapsed(modelData)
-        property real topGap: present && index !== root.firstPresent ? margin : 0
-        property real bottomGap: present && index !== root.lastPresent ? margin : 0
+        property real startGap: present && index !== root.firstPresent ? margin : 0
+        property real endGap: present && index !== root.lastPresent ? margin : 0
         default property Item item
         property string name: modelData.id.toLowerCase()
 
-        Layout.topMargin: Math.round(topGap)
-        Layout.bottomMargin: Math.round(bottomGap)
-        Layout.alignment: Qt.AlignHCenter
+        Layout.row: root.isHorizontal ? 0 : index
+        Layout.column: root.isHorizontal ? index : 0
+        Layout.alignment: root.isHorizontal ? Qt.AlignVCenter : Qt.AlignHCenter
 
-        implicitWidth: item?.implicitWidth ?? 0
+        Layout.leftMargin: root.isHorizontal ? Math.round(startGap) : 0
+        Layout.rightMargin: root.isHorizontal ? Math.round(endGap) : 0
+        Layout.topMargin: !root.isHorizontal ? Math.round(startGap) : 0
+        Layout.bottomMargin: !root.isHorizontal ? Math.round(endGap) : 0
+
+        implicitWidth: root.isHorizontal && !present ? 0 : (item?.implicitWidth ?? 0)
         implicitHeight: item?.implicitHeight ?? 0
 
         children: item
 
-        Behavior on topGap {
+        Behavior on startGap {
             Anim {
                 type: Anim.SlowEffects
             }
         }
 
-        Behavior on bottomGap {
+        Behavior on endGap {
             Anim {
                 type: Anim.SlowEffects
             }

@@ -13,6 +13,7 @@ Item {
 
     required property ScreenState screenState
     required property Sidebar.Wrapper sidebar
+    required property bool onTop
     required property BarPopouts.Wrapper popouts
     property real horizontalStretch
     property matrix4x4 deformMatrix
@@ -27,11 +28,12 @@ Item {
     readonly property bool shouldBeActive: screenState.sidebar || (screenState.utilities && Config.utilities.enabled && !(screenState.session && Config.session.enabled))
     readonly property real totalPadding: content.anchors.margins + CUtils.clamp(content.anchors.margins - Config.border.thickness, 0, content.anchors.margins)
     readonly property real nonAnimHeight: ((content.item as Content)?.nonAnimHeight ?? 0) + totalPadding
+    readonly property real slideOffset: (-implicitHeight - (onTop ? 0 : 5)) * offsetScale
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarLerp
 
     visible: offsetScale < 1
-    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+
     implicitHeight: content.implicitHeight + totalPadding
     implicitWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Tokens.sizes.utilities.width * (1 - sidebarLerp)
     opacity: 1 - offsetScale

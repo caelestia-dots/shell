@@ -11,11 +11,12 @@ Item {
     required property ScreenState screenState
     readonly property Props props: Props {}
 
+    readonly property real slideOffset: (-implicitWidth - 5) * offsetScale
     readonly property bool shouldBeActive: screenState.sidebar && Config.sidebar.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5) * offsetScale
+
     implicitWidth: Tokens.sizes.sidebar.width
     opacity: 1 - offsetScale
 

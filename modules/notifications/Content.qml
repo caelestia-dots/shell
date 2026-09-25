@@ -15,6 +15,9 @@ Item {
     id: root
 
     required property ScreenState screenState
+    required property real availableHeight
+    required property bool mirrored
+    required property bool utilitiesOnTop
     required property Item osdPanel
     required property Item sessionPanel
     required property Item utilitiesPanel
@@ -23,7 +26,8 @@ Item {
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
-    anchors.right: parent.right
+    anchors.left: mirrored ? parent.left : undefined
+    anchors.right: mirrored ? undefined : parent.right
 
     implicitWidth: Tokens.sizes.notifs.width
     implicitHeight: {
@@ -36,31 +40,33 @@ Item {
             height += (list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0;
 
         if (screenState.osd) {
-            const h = osdPanel.y - clampedPadding;
+            const h = osdPanel.y - (root.parent.y + root.y) - clampedPadding;
             if (height > h)
                 height = h;
         }
 
         if (screenState.session) {
-            const h = sessionPanel.y - clampedPadding;
+            const h = sessionPanel.y - (root.parent.y + root.y) - clampedPadding;
             if (height > h)
                 height = h;
         }
 
-        if (screenState.utilities) {
-            const h = ((QsWindow.window as QsWindow)?.screen.height ?? 0) - (utilitiesPanel as Utilities.Wrapper).nonAnimHeight - Config.border.thickness * 2 - padding * 2 - Tokens.spacing.extraLarge;
+        if (screenState.utilities && !utilitiesOnTop) {
+            const h = availableHeight - (utilitiesPanel as Utilities.Wrapper).nonAnimHeight - padding * 2 - Tokens.spacing.extraLarge;
             if (height > h)
                 height = h;
         }
 
-        return Math.min(((QsWindow.window as QsWindow)?.screen?.height ?? 0) + padding - clampedPadding * 2 - Config.border.thickness, height + padding + clampedPadding);
+        return Math.max(0, Math.min(utilitiesOnTop ? availableHeight : availableHeight + padding - clampedPadding * 2 + Config.border.thickness, height + padding + clampedPadding));
     }
 
     ClippingWrapperRectangle {
         anchors.fill: parent
         anchors.margins: root.padding
-        anchors.topMargin: root.clampedPadding
-        anchors.rightMargin: root.clampedPadding
+        anchors.topMargin: Math.min(root.clampedPadding, root.height)
+        anchors.bottomMargin: Math.min(root.padding, Math.max(0, root.height - anchors.topMargin))
+        anchors.leftMargin: root.mirrored ? root.clampedPadding : root.padding
+        anchors.rightMargin: root.mirrored ? root.padding : root.clampedPadding
 
         color: "transparent"
         radius: Tokens.rounding.large

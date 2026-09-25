@@ -49,9 +49,8 @@ void setFrameIndices(quint16* idx) {
 } // namespace
 
 QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) {
-    Q_UNUSED(data);
-
-    if (!m_group) {
+    if (!m_group || !(width() > 0 && height() > 0 && width() > m_borderLeft + m_borderRight &&
+                        height() > m_borderTop + m_borderBottom)) {
         delete oldNode;
         return nullptr;
     }
@@ -66,16 +65,19 @@ QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData
     const float holeRight = static_cast<float>(width() - m_borderRight) - inset;
     const float holeBot = static_cast<float>(height() - m_borderBottom) - inset;
 
-    // If the hole is too small or invalid, fall back to full quad
-    if (holeLeft >= holeRight || holeTop >= holeBot)
-        return BlobShape::updatePaintNode(oldNode, nullptr);
-
     auto* node = static_cast<QSGGeometryNode*>(oldNode);
 
-    const bool needsRebuild = !node || node->geometry()->vertexCount() != 8;
+    // A collapsed optimization hole does not invalidate the physical frame.
+    // Let the SDF mask a full quad, dropping the indexed topology before reuse.
+    if (holeLeft >= holeRight || holeTop >= holeBot) {
+        if (node && node->geometry()->vertexCount() != 4) {
+            node->geometry()->allocate(4, 0);
+            node->geometry()->setDrawingMode(QSGGeometry::DrawTriangleStrip);
+        }
+        return BlobShape::updatePaintNode(node, data);
+    }
 
-    if (needsRebuild) {
-        delete oldNode;
+    if (!node) {
         node = new QSGGeometryNode;
 
         auto* geometry =
@@ -90,6 +92,10 @@ QSGNode* BlobInvertedRect::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData
         material->setFlag(QSGMaterial::Blending);
         node->setMaterial(material);
         node->setFlag(QSGNode::OwnsMaterial);
+    } else if (node->geometry()->vertexCount() != 8) {
+        node->geometry()->allocate(8, 24);
+        node->geometry()->setDrawingMode(QSGGeometry::DrawTriangles);
+        setFrameIndices(node->geometry()->indexDataAsUShort());
     }
 
     // Outer bounds (local coords)

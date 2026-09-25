@@ -10,14 +10,30 @@ import Caelestia.Config
 import qs.components
 import qs.services
 
-ColumnLayout {
+GridLayout {
     id: root
 
     required property ShellScreen screen
     required property ScreenState screenState
     required property BarPopouts.Wrapper popouts
     required property bool fullscreen
-    readonly property int vPadding: Tokens.padding.large
+    required property bool isHorizontal
+    required property rect dashboardHitRect
+    readonly property int axisPadding: Tokens.padding.large
+    readonly property int entryCount: repeater.count
+    readonly property int firstSpacerIndex: Config.bar.entries.values.filter(e => e.enabled).findIndex(e => e.id === "spacer")
+
+    readonly property real workspaceWidth: {
+        let reserved = axisPadding * 2 + columnSpacing * Math.max(0, entryCount - 1);
+        for (const child of children) {
+            const entry = child as EntryWrapper;
+            if (!entry || entry.entryId === "workspaces")
+                continue;
+            const item = entry.item;
+            reserved += entry.entryId === "activeWindow" ? (item as ActiveWindow).minimumAlong : ((item as Tray)?.nonAnimAlong ?? item.implicitWidth);
+        }
+        return Math.max(0, width - reserved);
+    }
 
     function closeTray(): void {
         if (!Config.bar.tray.compact)
@@ -30,69 +46,96 @@ ColumnLayout {
         }
     }
 
-    function checkPopout(y: real): void {
-        const ch = childAt(width / 2, y) as EntryWrapper;
+    function activeWindowInteractionWidth(item: Item): real {
+        if (!isHorizontal || dashboardHitRect.width <= 0)
+            return item.width;
+        // Read the entry coordinates so layout reflows invalidate the child hit width.
+        const start = parent.mapToItem(null, root.x + item.parent.x + item.x, 0).x;
+        return Math.max(0, Math.min(item.width, dashboardHitRect.x - start));
+    }
+
+    function activeWindowCenter(item: Item): real {
+        return isHorizontal ? item.mapToItem(root, activeWindowInteractionWidth(item) / 2, 0).x : item.mapToItem(root, 0, item.implicitHeight / 2).y;
+    }
+
+    function hasNonTitleEntryAt(along: real): bool {
+        const entry = childAt(isHorizontal ? along : width / 2, isHorizontal ? height / 2 : along) as EntryWrapper;
+        return !!entry?.entryId && entry.entryId !== "activeWindow";
+    }
+
+    function checkPopout(along: real): void {
+        const ch = childAt(isHorizontal ? along : width / 2, isHorizontal ? height / 2 : along) as EntryWrapper;
 
         if (ch?.entryId !== "tray")
             closeTray();
 
-        if (!ch) {
+        if (!ch?.entryId) {
             popouts.hasCurrent = false;
             return;
         }
 
         const id = ch.entryId;
-        const top = ch.y;
 
-        if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
+        if (id === "statusIcons") {
             const items = (ch.item as StatusIcons).items;
-            const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
-            if (icon) {
+            const icon = items.childAt(isHorizontal ? mapToItem(items, along, 0).x : items.width / 2, isHorizontal ? items.height / 2 : mapToItem(items, 0, along).y);
+
+            if (icon?.present) {
                 popouts.currentName = icon.name;
-                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
-                popouts.hasCurrent = true;
-            }
-        } else if (id === "tray" && Config.bar.popouts.tray) {
-            const tray = ch.item as Tray;
-            if (!Config.bar.tray.compact || (tray.expanded && !tray.expandIcon.contains(mapToItem(tray.expandIcon, tray.implicitWidth / 2, y)))) {
-                const index = Math.floor(((y - top - tray.padding * 2 + tray.spacing) / tray.layout.implicitHeight) * tray.items.count);
-                const trayItem = tray.items.itemAt(index);
-                if (trayItem) {
-                    popouts.currentName = `traymenu${index}`;
-                    popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
-                    popouts.hasCurrent = true;
-                } else {
-                    popouts.hasCurrent = false;
-                }
+                popouts.currentCenter = Qt.binding(() => isHorizontal ? icon.mapToItem(root, icon.implicitWidth / 2, 0).x : icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                popouts.hasCurrent = Config.bar.popouts.statusIcons;
             } else {
                 popouts.hasCurrent = false;
-                tray.expanded = true;
             }
-        } else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {
+        } else if (id === "tray") {
+            const tray = ch.item as Tray;
+            tray.expanded = true;
+            const layout = tray.layout;
+            const item = (!Config.bar.tray.compact || tray.expanded) && layout ? layout.childAt(isHorizontal ? mapToItem(layout, along, 0).x : layout.width / 2, isHorizontal ? layout.height / 2 : mapToItem(layout, 0, along).y) as TrayItem : null;
+
+            if (item?.modelData) {
+                popouts.currentName = `traymenu${item.index}`;
+                popouts.currentCenter = Qt.binding(() => isHorizontal ? item.mapToItem(root, item.width / 2, 0).x : item.mapToItem(root, 0, item.height / 2).y);
+                popouts.hasCurrent = Config.bar.popouts.tray;
+            } else {
+                popouts.hasCurrent = false;
+            }
+        } else if (id === "activeWindow") {
+            const item = ch.item as Item;
+            if (item && isHorizontal && mapToItem(item, along, 0).x >= activeWindowInteractionWidth(item)) {
+                if (popouts.currentName === "activewindow")
+                    popouts.hasCurrent = false;
+                return;
+            }
+            const alreadyOpen = popouts.hasCurrent && popouts.currentName === "activewindow";
+            popouts.currentName = "activewindow";
+            popouts.currentCenter = item ? activeWindowCenter(item) : 0;
+            popouts.hasCurrent = Config.bar.popouts.activeWindow && (Config.bar.activeWindow.showOnHover || alreadyOpen);
+        } else {
+            const item = ch.item as Item;
             popouts.currentName = id.toLowerCase();
-            popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
-            popouts.hasCurrent = true;
+            popouts.currentCenter = isHorizontal ? (item ? item.mapToItem(root, item.implicitWidth / 2, 0).x : 0) : (item ? item.mapToItem(root, 0, item.implicitHeight / 2).y : 0);
+            popouts.hasCurrent = Config.bar.popouts[id] ?? false;
         }
     }
 
-    function handleWheel(y: real, angleDelta: point): void {
-        const ch = childAt(width / 2, y) as EntryWrapper;
+    function handleWheel(along: real, angleDelta: point): void {
+        const ch = childAt(isHorizontal ? along : width / 2, isHorizontal ? height / 2 : along) as EntryWrapper;
         if (ch?.entryId === "workspaces" && Config.bar.scrollActions.workspaces) {
-            // Workspace scroll
             const mon = Hypr.monitorFor(screen);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
             if (specialWs?.length > 0)
                 Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special("${specialWs.slice(8)}")` : `togglespecialworkspace ${specialWs.slice(8)}`);
             else if (angleDelta.y < 0 || mon.activeWorkspace?.id > 1)
                 Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "r${angleDelta.y > 0 ? "-" : "+"}1" })` : `workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
-        } else if (y < screen.height / 2 && Config.bar.scrollActions.volume) {
-            // Volume scroll on top half
+        } else if (along < (isHorizontal ? screen.width : screen.height) / 2 && Config.bar.scrollActions.volume) {
+            // Volume scroll on first half of the bar
             if (angleDelta.y > 0)
                 Audio.incrementVolume();
             else if (angleDelta.y < 0)
                 Audio.decrementVolume();
         } else if (Config.bar.scrollActions.brightness) {
-            // Brightness scroll on bottom half
+            // Brightness scroll on second half of the bar
             const monitor = Brightness.getMonitorForScreen(screen);
             if (angleDelta.y > 0)
                 monitor.setBrightness(monitor.brightness + GlobalConfig.services.brightnessIncrement);
@@ -101,7 +144,10 @@ ColumnLayout {
         }
     }
 
-    spacing: Tokens.spacing.medium
+    rows: isHorizontal ? 1 : -1
+    columns: isHorizontal ? -1 : 1
+    rowSpacing: isHorizontal ? 0 : Tokens.spacing.medium
+    columnSpacing: isHorizontal ? Tokens.spacing.medium : 0
 
     Repeater {
         id: repeater
@@ -115,8 +161,11 @@ ColumnLayout {
 
             DelegateChoice {
                 roleValue: "spacer"
-                delegate: EntryWrapper {
-                    Layout.fillHeight: true
+                delegate: Item {
+                    required property int index
+                    readonly property bool isFirstSpacer: index === root.firstSpacerIndex
+                    Layout.fillWidth: root.isHorizontal && !isFirstSpacer
+                    Layout.fillHeight: !root.isHorizontal
                 }
             }
             DelegateChoice {
@@ -134,6 +183,8 @@ ColumnLayout {
                         objectName: "taskbarWorkspaces"
                         screen: root.screen
                         fullscreen: root.fullscreen
+                        isHorizontal: root.isHorizontal
+                        maxWidth: root.workspaceWidth
                     }
                 }
             }
@@ -143,7 +194,7 @@ ColumnLayout {
                     ActiveWindow {
                         objectName: "taskbarActiveWindow"
                         bar: root
-                        monitor: Brightness.getMonitorForScreen(root.screen)
+                        isHorizontal: root.isHorizontal
                     }
                 }
             }
@@ -152,6 +203,7 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     Tray {
                         objectName: "taskbarTray"
+                        isHorizontal: root.isHorizontal
                     }
                 }
             }
@@ -160,6 +212,7 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     Clock {
                         objectName: "taskbarClock"
+                        isHorizontal: root.isHorizontal
                     }
                 }
             }
@@ -168,6 +221,7 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     StatusIcons {
                         objectName: "taskbarStatusIcons"
+                        isHorizontal: root.isHorizontal
                     }
                 }
             }
@@ -189,9 +243,11 @@ ColumnLayout {
         default property Item item
         readonly property string entryId: modelData.id
 
-        Layout.topMargin: index === 0 ? root.vPadding : 0
-        Layout.bottomMargin: index === repeater.count - 1 ? root.vPadding : 0
-        Layout.alignment: Qt.AlignHCenter
+        Layout.alignment: root.isHorizontal ? Qt.AlignVCenter : Qt.AlignHCenter
+        Layout.leftMargin: root.isHorizontal && index === 0 ? root.axisPadding : 0
+        Layout.rightMargin: root.isHorizontal && index === repeater.count - 1 ? root.axisPadding : 0
+        Layout.topMargin: !root.isHorizontal && index === 0 ? root.axisPadding : 0
+        Layout.bottomMargin: !root.isHorizontal && index === repeater.count - 1 ? root.axisPadding : 0
 
         implicitWidth: item?.implicitWidth ?? 0
         implicitHeight: item?.implicitHeight ?? 0

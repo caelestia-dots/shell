@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import qs.utils
 import qs.modules.bar as Bar
 
 Region {
@@ -12,73 +13,60 @@ Region {
     required property Panels panels
     required property var win
 
-    readonly property real borderThickness: win.contentItem.Config.border.thickness
+    readonly property string barPos: bar.position
+    readonly property bool barOnLeft: BarPosition.isLeft(barPos)
+    readonly property bool barOnRight: BarPosition.isRight(barPos)
+    readonly property bool barOnTop: BarPosition.isTop(barPos)
+    readonly property bool barOnBottom: BarPosition.isBottom(barPos)
+
     readonly property real clampedThickness: win.contentItem.Config.border.clampedThickness
 
-    x: bar.clampedWidth + win.dragMaskPadding
-    y: clampedThickness + win.dragMaskPadding
-    width: win.width - bar.clampedWidth - clampedThickness - win.dragMaskPadding * 2
-    height: win.height - clampedThickness * 2 - win.dragMaskPadding * 2
+    x: (barOnLeft ? bar.clampedWidth : clampedThickness) + win.dragMaskPadding
+    y: (barOnTop ? bar.clampedHeight : clampedThickness) + win.dragMaskPadding
+    width: win.width - (barOnLeft || barOnRight ? bar.clampedWidth : clampedThickness) - clampedThickness - win.dragMaskPadding * 2
+    height: win.height - (barOnTop || barOnBottom ? bar.clampedHeight : clampedThickness) - clampedThickness - win.dragMaskPadding * 2
     intersection: Intersection.Xor
 
     R {
         panel: root.panels.dashboard
-        y: 0
-        height: panel.height * (1 - root.panels.dashboard.offsetScale) + root.borderThickness
     }
 
     R {
         panel: root.panels.launcher
-        y: root.win.height - height
-        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
     }
 
     R {
-        id: sessionRegion
-
-        panel: root.panels.sessionWrapper
-        x: root.win.width - width
-        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
+        panel: root.panels.session
     }
 
     R {
-        id: sidebarRegion
-
         panel: root.panels.sidebar
-        x: root.win.width - width
-        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
     }
 
     R {
-        panel: root.panels.osdWrapper
-        x: root.win.width - width
-        width: panel.width * (1 - root.panels.osd.offsetScale) + root.borderThickness + sessionRegion.width
+        panel: root.panels.osd
     }
 
     R {
         panel: root.panels.notifications
-        y: 0
-        height: panel.height + root.borderThickness
     }
 
     R {
         panel: root.panels.utilities
-        y: root.win.height - height
-        height: panel.height * (1 - root.panels.utilities.offsetScale) + root.borderThickness
     }
 
     R {
         panel: root.panels.popoutsWrapper
-        width: panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
     }
 
     component R: Region {
         required property Item panel
+        readonly property rect bounds: root.panels.exposedRect(panel)
 
-        x: panel.x + root.bar.implicitWidth
-        y: panel.y + root.borderThickness
-        width: panel.width
-        height: panel.height
+        x: bounds.x
+        y: bounds.y
+        width: bounds.width
+        height: bounds.height
         intersection: Intersection.Subtract
     }
 }

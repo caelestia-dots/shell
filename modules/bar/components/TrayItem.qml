@@ -11,6 +11,7 @@ MouseArea {
     id: root
 
     required property SystemTrayItem modelData
+    required property int index
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     implicitWidth: Tokens.font.body.small.pointSize * 2

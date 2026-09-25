@@ -3,10 +3,30 @@ pragma ComponentBehavior: Bound
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import qs.components.controls
 import qs.modules.nexus.common
 
 PageBase {
     id: root
+
+    readonly property list<MenuItem> positionItems: [
+        MenuItem {
+            text: Tr.tr("Top")
+            value: "top"
+        },
+        MenuItem {
+            text: Tr.tr("Bottom")
+            value: "bottom"
+        },
+        MenuItem {
+            text: Tr.tr("Left")
+            value: "left"
+        },
+        MenuItem {
+            text: Tr.tr("Right")
+            value: "right"
+        }
+    ]
 
     title: Tr.tr("Taskbar")
     isSubPage: true
@@ -17,9 +37,24 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
-        // Behaviour
+        // Placement
         SectionHeader {
             first: true
+            text: Tr.tr("Placement")
+        }
+
+        SelectRow {
+            first: true
+            last: true
+            label: Tr.tr("Position")
+            subtext: Tr.tr("Default bar position; per-screen overrides still apply")
+            menuItems: root.positionItems
+            active: root.positionItems.find(i => i.value === GlobalConfig.bar.position)
+            onSelected: item => GlobalConfig.bar.position = item.value
+        }
+
+        // Behaviour
+        SectionHeader {
             text: Tr.tr("Behaviour")
         }
 
@@ -106,7 +141,7 @@ PageBase {
 
         ToggleRow {
             text: Tr.tr("Volume")
-            subtext: Tr.tr("Scroll on the top half of the bar to adjust volume")
+            subtext: Tr.tr("Scroll on the top or left half of the bar to adjust volume")
             checked: Config.bar.scrollActions.volume
             onToggled: GlobalConfig.bar.scrollActions.volume = checked
         }
@@ -114,7 +149,7 @@ PageBase {
         ToggleRow {
             last: true
             text: Tr.tr("Brightness")
-            subtext: Tr.tr("Scroll on the bottom half of the bar to adjust brightness")
+            subtext: Tr.tr("Scroll on the bottom or right half of the bar to adjust brightness")
             checked: Config.bar.scrollActions.brightness
             onToggled: GlobalConfig.bar.scrollActions.brightness = checked
         }

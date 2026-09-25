@@ -12,20 +12,34 @@ Item {
     id: root
 
     required property color colour
+    property bool isHorizontal: false
 
     implicitWidth: layout.implicitWidth
     implicitHeight: layout.implicitHeight
 
-    Behavior on implicitHeight {
+    Behavior on implicitWidth {
+        enabled: root.isHorizontal
+
         Anim {
             type: Anim.DefaultEffects
         }
     }
 
-    ColumnLayout {
+    Behavior on implicitHeight {
+        enabled: !root.isHorizontal
+
+        Anim {
+            type: Anim.DefaultEffects
+        }
+    }
+
+    GridLayout {
         id: layout
 
-        spacing: Tokens.spacing.medium / 2
+        rows: root.isHorizontal ? 1 : -1
+        columns: root.isHorizontal ? -1 : 1
+        rowSpacing: root.isHorizontal ? 0 : Tokens.spacing.medium / 2
+        columnSpacing: root.isHorizontal ? Tokens.spacing.medium / 2 : 0
 
         // Bluetooth icon
         MaterialIcon {
