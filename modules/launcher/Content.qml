@@ -35,7 +35,6 @@ Item {
         ContentList {
             id: list
 
-            content: root
             screenState: root.screenState
             panels: root.panels
             maxHeight: root.maxHeight - search.implicitHeight - root.padding * 3
