@@ -9,6 +9,8 @@ ButtonBase {
     property alias text: label.text
     readonly property alias label: label
 
+    Accessible.name: text
+
     horizontalPadding: Tokens.padding.medium
     verticalPadding: Tokens.padding.small
 

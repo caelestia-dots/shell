@@ -9,6 +9,8 @@ ButtonBase {
     property alias icon: label.text
     readonly property alias label: label
 
+    Accessible.name: icon
+
     font: Tokens.font.icon.medium
     padding: type === IconButton.Text ? Tokens.padding.extraSmall / 2 : Tokens.padding.small
 
