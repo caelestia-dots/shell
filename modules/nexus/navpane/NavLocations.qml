@@ -2,9 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.modules.nexus
 
@@ -12,10 +15,160 @@ VerticalFadeFlickable {
     id: root
 
     required property NexusState nState
+    // Whether the search field has focus, so the keyboard selection only shows
+    // while the keys that move it actually reach the field.
+    property bool keyboardActive
+    property string selectedAnchor
+    // Only a key press moves the view along with the selection. When a new
+    // query or filter changes it, the rows haven't been laid out again yet and
+    // still report their old positions.
+    property bool followSelection
+
+    // Design tokens for the result rows, read once here. Tokens is an attached
+    // object: every item that touches it gets its own instance, created, bound
+    // and linked up to its screen on first access. Result rows are created as the
+    // query changes, and reading these instead keeps each row from creating a
+    // dozen of them. Same window, so the same screen and the same values.
+    readonly property real rowPaddingSmall: Tokens.padding.small
+    readonly property real rowPaddingMedium: Tokens.padding.medium
+    readonly property real rowSpacingSmall: Tokens.spacing.small
+    readonly property real rowSpacingExtraSmall: Tokens.spacing.extraSmall
+    readonly property real rowRoundingFull: Tokens.rounding.full
+    readonly property real rowRoundingExtraLarge: Tokens.rounding.extraLarge
+    readonly property real rowRoundingExtraSmall: Tokens.rounding.extraSmall
+    readonly property font rowFontIconSmall: Tokens.font.icon.small
+    readonly property font rowFontLabelSmall: Tokens.font.label.small
+    readonly property font rowFontLabelLarge: Tokens.font.label.large
+    readonly property font rowFontBodyMedium: Tokens.font.body.medium
+
+    readonly property string search: nState.searchText
+    readonly property bool searching: search.length > 0
+    readonly property var results: {
+        if (!searching)
+            return [];
+        // Sections hide themselves when what they configure isn't available -
+        // the ethernet rows when no cable is plugged in, the add-network flow
+        // when Wi-Fi is off. Their settings have to drop out of the results
+        // as well, or search links to a page that can't be opened. The query
+        // applies this before it cuts the list down, so hidden rows don't use
+        // up result slots. Read here so the binding tracks both.
+        const ethernet = Nmcli.hasAvailableEthernet;
+        const wifi = Nmcli.wifiEnabled;
+        return SettingsSearcher.query(search, e => {
+            if (!ethernet && e.anchor.startsWith("ethernet-"))
+                return false;
+            if (!wifi && (e.anchor.startsWith("add-network-") || e.anchor === "network-add-network"))
+                return false;
+            return true;
+        });
+    }
+    // Results grouped by their top-level page, so the list can show one heading
+    // per page with the matching settings joined underneath it (like the
+    // Android settings search). Each group: { pageIdx, page, entries: [...] }.
+    readonly property var groups: {
+        const out = [];
+        const byPage = ({});
+        for (const e of results) {
+            const key = e.pageIdx;
+            if (byPage[key] === undefined) {
+                byPage[key] = {
+                    "pageIdx": e.pageIdx,
+                    "page": e.crumbLabels[0],
+                    "entries": []
+                };
+                out.push(byPage[key]);
+            }
+            byPage[key].entries.push(e);
+        }
+        return out;
+    }
+    readonly property int resultCount: groups.reduce((n, g) => n + g.entries.length, 0)
+    // The group delegates are keyed by page and read their data from here. A
+    // ScriptModel given the group objects themselves moves a reordered group's
+    // row without replacing its value, so it would keep showing the previous
+    // query's results.
+    readonly property var groupsByPage: {
+        const out = {};
+        for (const g of groups)
+            out[g.pageIdx] = g;
+        return out;
+    }
+    // What the arrow keys move through, in the order they're shown.
+    readonly property var navigable: groups.reduce((all, g) => all.concat(g.entries), [])
+    // The selection falls back to the top result, which the query ranks best.
+    readonly property string currentAnchor: navigable.some(e => e.anchor === selectedAnchor) ? selectedAnchor : navigable[0]?.anchor ?? ""
+
+    function openEntry(entry: var): void {
+        // Ethernet detail settings need a selected interface to show the right
+        // device; a search deep-link has none, so point it at the connected (or
+        // first) one.
+        if (entry.anchor.startsWith("ethernet-")) {
+            const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
+            if (active)
+                nState.selectedEthernetInterface = active.iface;
+        }
+        nState.jumpToSetting(entry.pageIdx, entry.subPath, entry.anchor);
+    }
+
+    function moveSelection(delta: int): void {
+        const i = navigable.findIndex(e => e.anchor === currentAnchor);
+        const next = navigable[Math.max(0, Math.min(navigable.length - 1, i + delta))];
+        if (!next)
+            return;
+        followSelection = true;
+        selectedAnchor = next.anchor;
+        followSelection = false;
+    }
+
+    function openSelection(): void {
+        const entry = navigable.find(e => e.anchor === currentAnchor);
+        if (entry)
+            openEntry(entry);
+    }
+
+    // A different set of results starts from the top, like the launcher.
+    function scrollToTop(): void {
+        scrollAnim.stop();
+        contentY = -topMargin;
+    }
+
+    // Scrolls just far enough to bring a result out of the edge fades.
+    function ensureVisible(item: Item): void {
+        const y = item.mapToItem(contentItem, 0, 0).y;
+        const margin = height * fadeAmount / 2;
+        let target = contentY;
+        if (y < contentY + margin)
+            target = y - margin;
+        else if (y + item.height > contentY + height - margin)
+            target = y + item.height - height + margin;
+        target = Math.max(-topMargin, Math.min(target, contentHeight - height + bottomMargin));
+        if (target === contentY)
+            return;
+        scrollAnim.to = target;
+        scrollAnim.restart();
+    }
 
     topMargin: Tokens.padding.large
     bottomMargin: Tokens.padding.large
     contentHeight: content.implicitHeight
+
+    // A new query starts from its top result
+    onSearchChanged: {
+        selectedAnchor = "";
+        scrollToTop();
+    }
+
+    StyledScrollBar.vertical: StyledScrollBar {
+        flickable: root
+    }
+
+    Anim {
+        id: scrollAnim
+
+        target: root
+        property: "contentY"
+        type: Anim.FastSpatial
+    }
 
     TapHandler {
         onTapped: root.focus = true
@@ -31,6 +184,9 @@ VerticalFadeFlickable {
         Repeater {
             id: list
 
+            // The page list stays alive while searching and is only hidden, so the first
+            // keystroke doesn't destroy every row and clearing the search doesn't rebuild
+            // them. Hidden items are skipped by the ColumnLayout.
             model: PageRegistry.pages
 
             StyledRect {
@@ -40,9 +196,10 @@ VerticalFadeFlickable {
                 required property int index
 
                 readonly property bool isCurrentPage: index === root.nState.currentPageIdx
-                readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1].category !== modelData.category
-                readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1].category !== modelData.category
+                readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1]?.category !== modelData.category
+                readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1]?.category !== modelData.category
 
+                visible: !root.searching
                 Layout.fillWidth: true
                 Layout.topMargin: index !== 0 && isCategoryStart ? Tokens.spacing.medium : 0
                 implicitHeight: {
@@ -123,6 +280,291 @@ VerticalFadeFlickable {
                     }
                 }
             }
+        }
+
+        Column {
+            id: resultList
+
+            Layout.fillWidth: true
+            spacing: Tokens.padding.medium
+
+            add: Transition {
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                }
+            }
+
+            move: Transition {
+                Anim {
+                    properties: "x,y"
+                }
+
+                // A move may interrupt an in-flight add; drive opacity back to 1
+                // so the interrupted fade doesn't leave the group half-visible.
+                Anim {
+                    type: Anim.DefaultEffects
+                    property: "opacity"
+                    to: 1
+                }
+            }
+
+            Repeater {
+                model: ScriptModel {
+                    values: root.groups.map(g => g.pageIdx)
+                }
+
+                ColumnLayout {
+                    id: group
+
+                    // The page index
+                    required property int modelData
+                    required property int index
+
+                    // Empty while the group is on its way out
+                    readonly property var info: root.groupsByPage[modelData] ?? ({
+                            "page": "",
+                            "entries": []
+                        })
+
+                    width: resultList.width
+                    spacing: root.rowSpacingSmall
+
+                    // The page the results underneath belong to
+                    StyledText {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: root.rowPaddingMedium
+                        text: group.info.page
+                        color: Colours.palette.m3secondary
+                        font: root.rowFontLabelLarge
+                        elide: Text.ElideRight
+                    }
+
+                    Column {
+                        id: cardList
+
+                        Layout.fillWidth: true
+                        // Same gap the rows inside the pages use
+                        spacing: root.rowSpacingExtraSmall / 2
+
+                        add: Transition {
+                            Anim {
+                                type: Anim.DefaultEffects
+                                property: "opacity"
+                                from: 0
+                                to: 1
+                            }
+                        }
+
+                        move: Transition {
+                            Anim {
+                                properties: "x,y"
+                            }
+
+                            Anim {
+                                type: Anim.DefaultEffects
+                                property: "opacity"
+                                to: 1
+                            }
+                        }
+
+                        Repeater {
+                            model: ScriptModel {
+                                objectProp: "anchor"
+                                values: group.info.entries
+                            }
+
+                            StyledRect {
+                                id: result
+
+                                required property var modelData
+                                required property int index
+
+                                readonly property bool isFirst: index === 0
+                                readonly property bool isLast: index === group.info.entries.length - 1
+                                readonly property bool isCurrent: root.keyboardActive && root.currentAnchor === modelData.anchor
+
+                                width: cardList.width
+                                implicitHeight: {
+                                    const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
+                                    return h % 2 === 0 ? h : h + 1;
+                                }
+                                // Joined like the rows inside the pages: round ends,
+                                // barely rounded where they meet.
+                                topLeftRadius: isFirst ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                topRightRadius: isFirst ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                bottomLeftRadius: isLast ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                bottomRightRadius: isLast ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                color: Qt.lighter(Colours.palette.m3surfaceContainer, 1.13)
+
+                                onIsCurrentChanged: {
+                                    if (isCurrent && root.followSelection)
+                                        root.ensureVisible(result);
+                                }
+
+                                RowLayout {
+                                    id: resultLayout
+
+                                    anchors.fill: parent
+                                    anchors.margins: root.rowPaddingMedium
+                                    // Leave room on the right for the toggle switch.
+                                    anchors.rightMargin: result.modelData.isToggle ? toggle.width + anchors.margins * 2 : anchors.margins
+                                    spacing: root.rowSpacingSmall
+
+                                    // The setting's own icon, baked into the index per
+                                    // anchor, in a round container like the page list
+                                    // above. The keyboard selection colours it in.
+                                    StyledRect {
+                                        // Sized off the icon so it follows the user's
+                                        // font settings, not a fixed pixel size.
+                                        implicitWidth: implicitHeight
+                                        implicitHeight: resultIcon.implicitHeight + root.rowPaddingSmall * 2
+                                        radius: root.rowRoundingFull
+                                        color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+
+                                        MaterialIcon {
+                                            id: resultIcon
+
+                                            anchors.centerIn: parent
+                                            text: result.modelData.icon
+                                            color: result.isCurrent ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                                            fontStyle: root.rowFontIconSmall
+                                            fill: result.isCurrent ? 1 : 0
+
+                                            Behavior on fill {
+                                                Anim {
+                                                    type: Anim.DefaultEffects
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 0
+
+                                        // Location line: "Section > sub", faint.
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            text: {
+                                                const labels = result.modelData.crumbLabels.slice(1);
+                                                const section = result.modelData.section;
+                                                const parts = section && section !== labels[labels.length - 1] ? labels.concat(section) : labels;
+                                                return parts.join("  \u203a  ");
+                                            }
+                                            visible: text.length > 0
+                                            color: Colours.palette.m3outline
+                                            font: root.rowFontLabelSmall
+                                            elide: Text.ElideRight
+                                        }
+
+                                        // The setting itself, most prominent.
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            text: SettingsSearcher.highlight(result.modelData.title, root.search, Colours.palette.m3primary)
+                                            // Only pay for rich-text parsing when the
+                                            // string actually carries a highlight tag.
+                                            textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
+                                            color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                                            font: root.rowFontBodyMedium
+                                            elide: Text.ElideRight
+                                        }
+
+                                        // Optional description, faintest and smallest.
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            visible: result.modelData.subtext.length > 0
+                                            text: SettingsSearcher.highlight(result.modelData.subtext, root.search, Colours.palette.m3primary)
+                                            // Most subtexts have no match, so skip the
+                                            // rich-text parse unless there's a highlight.
+                                            textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
+                                            color: Colours.palette.m3outline
+                                            font: root.rowFontLabelSmall
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                }
+
+                                // Hover/press feedback and clicks. A StateLayer is ~22 objects
+                                // (the ripple shape, its gradient and path, animations), so a
+                                // row only creates one once the pointer first moves over it,
+                                // then keeps it. A tap that arrives without hover (touch)
+                                // still opens the entry through the TapHandler.
+                                HoverHandler {
+                                    onHoveredChanged: {
+                                        if (hovered)
+                                            stateLoader.active = true;
+                                    }
+                                }
+
+                                TapHandler {
+                                    enabled: !stateLoader.item
+                                    onTapped: root.openEntry(result.modelData)
+                                }
+
+                                Loader {
+                                    id: stateLoader
+
+                                    anchors.fill: parent
+                                    z: 1
+                                    active: false
+
+                                    sourceComponent: StateLayer {
+                                        // The loader is the parent here, so the row's
+                                        // corners have to be passed on explicitly.
+                                        topLeftRadius: result.topLeftRadius
+                                        topRightRadius: result.topRightRadius
+                                        bottomLeftRadius: result.bottomLeftRadius
+                                        bottomRightRadius: result.bottomRightRadius
+
+                                        onClicked: root.openEntry(result.modelData)
+                                    }
+                                }
+
+                                // Only toggle rows get a switch. A StyledSwitch is ~22 objects
+                                // (behaviors, shapes, a state layer), and creating one hidden
+                                // in every result row was a large share of each keystroke.
+                                // The margin is read off resultLayout so the Loader doesn't
+                                // create its own Tokens attached object just for it.
+                                Loader {
+                                    id: toggle
+
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: resultLayout.anchors.margins
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    z: 2
+                                    active: result.modelData.isToggle
+                                    visible: active
+
+                                    sourceComponent: StyledSwitch {
+                                        checked: result.modelData.toggleValue
+                                        cLayer: 3
+                                        // A touch smaller than the in-page switches since
+                                        // the result rows are denser.
+                                        scale: 0.85
+                                        transformOrigin: Item.Right
+
+                                        onToggled: result.modelData.setToggle(checked)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: Tokens.padding.large
+            visible: root.searching && root.results.length === 0
+
+            text: Tr.tr("No matching settings")
+            color: Colours.palette.m3onSurfaceVariant
+            font: Tokens.font.body.medium
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 
