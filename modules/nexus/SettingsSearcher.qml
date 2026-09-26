@@ -12,10 +12,11 @@ import qs.utils
 // Search service over the settings index. The index is built by the shell
 // itself on first use - the page QML sources are parsed at runtime (see
 // utils/scripts/settings-indexer.js) and the result is cached on disk, keyed
-// by the plugin's git revision so an update rebuilds it. No build step, no
+// by the plugin's git revision and a fingerprint of the sources (see cacheKey)
+// so an update or a local edit rebuilds it. No build step, no
 // hand-maintained entries, no user-editable data file.
 //
-// Entries hold marked strings, so they only depend on the revision. The search
+// Entries hold marked strings, so they only depend on the sources. The search
 // tokens come from the translated labels, so they're cached with the language
 // they were built in and rebuilt when it differs or changes.
 Singleton {
@@ -36,13 +37,20 @@ Singleton {
     // the launcher uses, so typo and mid-word matching behave consistently.
     property var fzfFinder: null
     // Bump when the cached data's shape changes
-    readonly property int cacheVersion: 5
+    readonly property int cacheVersion: 6
     // Declared here rather than inlined in loadIndex(): qmllint doesn't see
     // identifiers used inside template literals in a function body, so
     // referencing Paths only there had it report qs.utils as unused.
     readonly property string cachePath: Paths.cache + "/settings-index.json"
+    // What the cache was built from: the plugin's git revision plus a fingerprint
+    // (path, size, mtime) of the page sources and the indexer itself. The
+    // fingerprint catches QML edited or installed without a plugin rebuild, and
+    // keeps the cache usable when the build has no revision. Set by loadIndex().
+    property string cacheKey
 
-    function query(search: string): list<QtObject> {
+    // accept(entry) -> bool filters out entries that can't be shown right now.
+    // It runs before the result limit, so filtered entries don't take up slots.
+    function query(search: string, accept: var): list<QtObject> {
         const tokens = SettingsIndexer.splitWords(search);
         if (tokens.length === 0)
             return [];
@@ -62,15 +70,23 @@ Singleton {
 
         // Sort by score, breaking ties by id so the order is stable (otherwise
         // entries with equal scores can be dropped arbitrarily by the limit).
-        const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a] || (parseInt(a) - parseInt(b))).slice(0, 25);
+        const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a] || (parseInt(a) - parseInt(b)));
 
         const all = entries.instances;
-        const out = ranked.map(id => all[parseInt(id)]).filter(e => e !== undefined);
+        const usable = e => e !== undefined && (!accept || accept(e));
+        const out = [];
+        for (const id of ranked) {
+            const entry = all[parseInt(id)];
+            if (usable(entry))
+                out.push(entry);
+            if (out.length >= 25)
+                break;
+        }
 
         // The inverted index only does exact/prefix matches. When it finds little
         // or nothing - a typo ("trasparency") or a mid-word query ("paper") - fall
         // back to fzf over the same entries. fzf hits that the index already
-        // returned are skipped, and the rest are appended after the (stronger)
+        // matched are skipped, and the rest are appended after the (stronger)
         // index results, so precise matches always lead.
         if (out.length < 5 && root.fzfFinder) {
             const seen = ({});
@@ -83,7 +99,7 @@ Singleton {
                     continue;
                 seen[idx] = true;
                 const entry = all[idx];
-                if (entry !== undefined)
+                if (usable(entry))
                     out.push(entry);
                 if (out.length >= 25)
                     break;
@@ -153,17 +169,19 @@ Singleton {
     }
 
     function loadIndex(): var {
-        const revision = CUtils.gitRevision;
+        const nexusDir = `${Quickshell.shellDir}/modules/nexus`;
+        const sources = CUtils.listFiles(nexusDir, ".qml").concat([`${Quickshell.shellDir}/utils/scripts/settings-indexer.js`]);
+        root.cacheKey = `${CUtils.gitRevision}:${CUtils.fileFingerprint(sources)}`;
         const cached = CUtils.readTextFile(root.cachePath);
         if (cached) {
             try {
                 const parsed = JSON.parse(cached);
-                if (parsed.version === root.cacheVersion && revision && parsed.revision === revision)
+                if (parsed.version === root.cacheVersion && parsed.key === root.cacheKey)
                     return parsed;
             } catch (e) {}
         }
-        const data = SettingsIndexer.buildIndex(`${Quickshell.shellDir}/modules/nexus`, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s));
-        console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${revision || "unknown"})`);
+        const data = SettingsIndexer.buildIndex(nexusDir, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s));
+        console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${CUtils.gitRevision || "unknown"})`);
         for (const warning of data.iconWarnings)
             console.warn(`SettingsSearcher: ${warning}`);
         return data;
@@ -176,7 +194,7 @@ Singleton {
         root.ranking = search.ranking;
         CUtils.writeTextFile(root.cachePath, JSON.stringify({
             version: root.cacheVersion,
-            revision: CUtils.gitRevision,
+            key: root.cacheKey,
             language: Tr.language,
             entries: root.indexEntries,
             inverted: search.inverted,

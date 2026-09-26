@@ -24,6 +24,23 @@ VerticalFadeFlickable {
     // still report their old positions.
     property bool followSelection
 
+    // Design tokens for the result rows, read once here. Tokens is an attached
+    // object: every item that touches it gets its own instance, created, bound
+    // and linked up to its screen on first access. Result rows are created as the
+    // query changes, and reading these instead keeps each row from creating a
+    // dozen of them. Same window, so the same screen and the same values.
+    readonly property real rowPaddingSmall: Tokens.padding.small
+    readonly property real rowPaddingMedium: Tokens.padding.medium
+    readonly property real rowSpacingSmall: Tokens.spacing.small
+    readonly property real rowSpacingExtraSmall: Tokens.spacing.extraSmall
+    readonly property real rowRoundingFull: Tokens.rounding.full
+    readonly property real rowRoundingExtraLarge: Tokens.rounding.extraLarge
+    readonly property real rowRoundingExtraSmall: Tokens.rounding.extraSmall
+    readonly property font rowFontIconSmall: Tokens.font.icon.small
+    readonly property font rowFontLabelSmall: Tokens.font.label.small
+    readonly property font rowFontLabelLarge: Tokens.font.label.large
+    readonly property font rowFontBodyMedium: Tokens.font.body.medium
+
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
     readonly property var results: {
@@ -32,11 +49,15 @@ VerticalFadeFlickable {
         // Sections hide themselves when what they configure isn't available -
         // the ethernet rows when no cable is plugged in, the add-network flow
         // when Wi-Fi is off. Their settings have to drop out of the results
-        // as well, or search links to a page that can't be opened.
-        return SettingsSearcher.query(search).filter(e => {
-            if (!Nmcli.hasAvailableEthernet && e.anchor.startsWith("ethernet-"))
+        // as well, or search links to a page that can't be opened. The query
+        // applies this before it cuts the list down, so hidden rows don't use
+        // up result slots. Read here so the binding tracks both.
+        const ethernet = Nmcli.hasAvailableEthernet;
+        const wifi = Nmcli.wifiEnabled;
+        return SettingsSearcher.query(search, e => {
+            if (!ethernet && e.anchor.startsWith("ethernet-"))
                 return false;
-            if (!Nmcli.wifiEnabled && (e.anchor.startsWith("add-network-") || e.anchor === "network-add-network"))
+            if (!wifi && (e.anchor.startsWith("add-network-") || e.anchor === "network-add-network"))
                 return false;
             return true;
         });
@@ -163,7 +184,10 @@ VerticalFadeFlickable {
         Repeater {
             id: list
 
-            model: root.searching ? [] : PageRegistry.pages
+            // The page list stays alive while searching and is only hidden, so the first
+            // keystroke doesn't destroy every row and clearing the search doesn't rebuild
+            // them. Hidden items are skipped by the ColumnLayout.
+            model: PageRegistry.pages
 
             StyledRect {
                 id: item
@@ -175,6 +199,7 @@ VerticalFadeFlickable {
                 readonly property bool isCategoryStart: index === 0 || PageRegistry.pages[index - 1]?.category !== modelData.category
                 readonly property bool isCategoryEnd: index === list.model.length - 1 || PageRegistry.pages[index + 1]?.category !== modelData.category
 
+                visible: !root.searching
                 Layout.fillWidth: true
                 Layout.topMargin: index !== 0 && isCategoryStart ? Tokens.spacing.medium : 0
                 implicitHeight: {
@@ -305,15 +330,15 @@ VerticalFadeFlickable {
                         })
 
                     width: resultList.width
-                    spacing: Tokens.spacing.small
+                    spacing: root.rowSpacingSmall
 
                     // The page the results underneath belong to
                     StyledText {
                         Layout.fillWidth: true
-                        Layout.leftMargin: Tokens.padding.medium
+                        Layout.leftMargin: root.rowPaddingMedium
                         text: group.info.page
                         color: Colours.palette.m3secondary
-                        font: Tokens.font.label.large
+                        font: root.rowFontLabelLarge
                         elide: Text.ElideRight
                     }
 
@@ -322,7 +347,7 @@ VerticalFadeFlickable {
 
                         Layout.fillWidth: true
                         // Same gap the rows inside the pages use
-                        spacing: Tokens.spacing.extraSmall / 2
+                        spacing: root.rowSpacingExtraSmall / 2
 
                         add: Transition {
                             Anim {
@@ -368,10 +393,10 @@ VerticalFadeFlickable {
                                 }
                                 // Joined like the rows inside the pages: round ends,
                                 // barely rounded where they meet.
-                                topLeftRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
-                                topRightRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
-                                bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
-                                bottomRightRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                topLeftRadius: isFirst ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                topRightRadius: isFirst ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                bottomLeftRadius: isLast ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                bottomRightRadius: isLast ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
                                 color: Qt.lighter(Colours.palette.m3surfaceContainer, 1.13)
 
                                 onIsCurrentChanged: {
@@ -383,10 +408,10 @@ VerticalFadeFlickable {
                                     id: resultLayout
 
                                     anchors.fill: parent
-                                    anchors.margins: Tokens.padding.medium
+                                    anchors.margins: root.rowPaddingMedium
                                     // Leave room on the right for the toggle switch.
-                                    anchors.rightMargin: result.modelData.isToggle ? toggle.width + Tokens.padding.medium * 2 : Tokens.padding.medium
-                                    spacing: Tokens.spacing.small
+                                    anchors.rightMargin: result.modelData.isToggle ? toggle.width + anchors.margins * 2 : anchors.margins
+                                    spacing: root.rowSpacingSmall
 
                                     // The setting's own icon, baked into the index per
                                     // anchor, in a round container like the page list
@@ -395,8 +420,8 @@ VerticalFadeFlickable {
                                         // Sized off the icon so it follows the user's
                                         // font settings, not a fixed pixel size.
                                         implicitWidth: implicitHeight
-                                        implicitHeight: resultIcon.implicitHeight + Tokens.padding.small * 2
-                                        radius: Tokens.rounding.full
+                                        implicitHeight: resultIcon.implicitHeight + root.rowPaddingSmall * 2
+                                        radius: root.rowRoundingFull
                                         color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
 
                                         MaterialIcon {
@@ -405,7 +430,7 @@ VerticalFadeFlickable {
                                             anchors.centerIn: parent
                                             text: result.modelData.icon
                                             color: result.isCurrent ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-                                            fontStyle: Tokens.font.icon.small
+                                            fontStyle: root.rowFontIconSmall
                                             fill: result.isCurrent ? 1 : 0
 
                                             Behavior on fill {
@@ -431,7 +456,7 @@ VerticalFadeFlickable {
                                             }
                                             visible: text.length > 0
                                             color: Colours.palette.m3outline
-                                            font: Tokens.font.label.small
+                                            font: root.rowFontLabelSmall
                                             elide: Text.ElideRight
                                         }
 
@@ -443,7 +468,7 @@ VerticalFadeFlickable {
                                             // string actually carries a highlight tag.
                                             textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
                                             color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                            font: Tokens.font.body.medium
+                                            font: root.rowFontBodyMedium
                                             elide: Text.ElideRight
                                         }
 
@@ -456,36 +481,73 @@ VerticalFadeFlickable {
                                             // rich-text parse unless there's a highlight.
                                             textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
                                             color: Colours.palette.m3outline
-                                            font: Tokens.font.label.small
+                                            font: root.rowFontLabelSmall
                                             elide: Text.ElideRight
                                         }
                                     }
                                 }
 
-                                StateLayer {
-                                    anchors.fill: parent
-                                    z: 1
-                                    radius: 0
-
-                                    onClicked: root.openEntry(result.modelData)
+                                // Hover/press feedback and clicks. A StateLayer is ~22 objects
+                                // (the ripple shape, its gradient and path, animations), so a
+                                // row only creates one once the pointer first moves over it,
+                                // then keeps it. A tap that arrives without hover (touch)
+                                // still opens the entry through the TapHandler.
+                                HoverHandler {
+                                    onHoveredChanged: {
+                                        if (hovered)
+                                            stateLoader.active = true;
+                                    }
                                 }
 
-                                StyledSwitch {
+                                TapHandler {
+                                    enabled: !stateLoader.item
+                                    onTapped: root.openEntry(result.modelData)
+                                }
+
+                                Loader {
+                                    id: stateLoader
+
+                                    anchors.fill: parent
+                                    z: 1
+                                    active: false
+
+                                    sourceComponent: StateLayer {
+                                        // The loader is the parent here, so the row's
+                                        // corners have to be passed on explicitly.
+                                        topLeftRadius: result.topLeftRadius
+                                        topRightRadius: result.topRightRadius
+                                        bottomLeftRadius: result.bottomLeftRadius
+                                        bottomRightRadius: result.bottomRightRadius
+
+                                        onClicked: root.openEntry(result.modelData)
+                                    }
+                                }
+
+                                // Only toggle rows get a switch. A StyledSwitch is ~22 objects
+                                // (behaviors, shapes, a state layer), and creating one hidden
+                                // in every result row was a large share of each keystroke.
+                                // The margin is read off resultLayout so the Loader doesn't
+                                // create its own Tokens attached object just for it.
+                                Loader {
                                     id: toggle
 
                                     anchors.right: parent.right
-                                    anchors.rightMargin: Tokens.padding.medium
+                                    anchors.rightMargin: resultLayout.anchors.margins
                                     anchors.verticalCenter: parent.verticalCenter
                                     z: 2
-                                    visible: result.modelData.isToggle
-                                    checked: result.modelData.toggleValue
-                                    cLayer: 3
-                                    // A touch smaller than the in-page switches since
-                                    // the result rows are denser.
-                                    scale: 0.85
-                                    transformOrigin: Item.Right
+                                    active: result.modelData.isToggle
+                                    visible: active
 
-                                    onToggled: result.modelData.setToggle(checked)
+                                    sourceComponent: StyledSwitch {
+                                        checked: result.modelData.toggleValue
+                                        cLayer: 3
+                                        // A touch smaller than the in-page switches since
+                                        // the result rows are denser.
+                                        scale: 0.85
+                                        transformOrigin: Item.Right
+
+                                        onToggled: result.modelData.setToggle(checked)
+                                    }
                                 }
                             }
                         }
