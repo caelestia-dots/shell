@@ -1,5 +1,6 @@
 #include "cutils.hpp"
 
+#include <qcryptographichash.h>
 #include <qdir.h>
 #include <qdirlisting.h>
 #include <qfile.h>
@@ -177,6 +178,21 @@ QStringList CUtils::listFiles(const QString& dir, const QString& suffix) {
     for (const auto& entry : listing)
         out << entry.filePath();
     return out;
+}
+
+QString CUtils::fileFingerprint(const QStringList& paths) {
+    // Sorted so the result doesn't depend on directory listing order
+    auto sorted = paths;
+    sorted.sort();
+
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+    for (const auto& path : std::as_const(sorted)) {
+        const QFileInfo info(path);
+        hash.addData(path.toUtf8());
+        hash.addData(QByteArray::number(info.exists() ? info.size() : -1));
+        hash.addData(QByteArray::number(info.exists() ? info.lastModified().toMSecsSinceEpoch() : 0));
+    }
+    return QString::fromLatin1(hash.result().toHex());
 }
 
 namespace {

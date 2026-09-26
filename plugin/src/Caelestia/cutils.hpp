@@ -35,6 +35,8 @@ public:
     Q_INVOKABLE static QString readTextFile(const QString& path);
     Q_INVOKABLE static bool writeTextFile(const QString& path, const QString& text);
     Q_INVOKABLE static QStringList listFiles(const QString& dir, const QString& suffix);
+    // Hash of each file's path, size and modification time; changes when any of them is edited
+    Q_INVOKABLE static QString fileFingerprint(const QStringList& paths);
 
     Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);
     Q_INVOKABLE static QList<QQuickItem*> findChildren(QQuickItem* root, const QString& name);
