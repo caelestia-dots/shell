@@ -168,18 +168,21 @@ PageBase {
         InfoRow {
             first: true
             icon: "link"
+            settingAnchor: "ethernet-status"
             label: Tr.tr("Status")
             value: root.device?.connected ? Tr.trCtx("Connected", "ethernet link state") : Tr.trCtx("Not connected", "ethernet link state")
         }
 
         InfoRow {
             icon: "settings_ethernet"
+            settingAnchor: "ethernet-interface"
             label: Tr.trCtx("Interface", "network interface")
             value: root.ifaceName || "—"
         }
 
         InfoRow {
             icon: "speed"
+            settingAnchor: "ethernet-speed"
             label: Tr.tr("Speed")
             visible: Nmcli.ethernetSpeed.length > 0
             value: Nmcli.ethernetSpeed
@@ -187,12 +190,14 @@ PageBase {
 
         InfoRow {
             icon: "lan"
+            settingAnchor: "ethernet-ip-address"
             label: Tr.tr("IP address")
             value: root.details?.ipAddress || "—"
         }
 
         InfoRow {
             icon: "router"
+            settingAnchor: "ethernet-gateway"
             label: Tr.tr("Gateway")
             value: root.details?.gateway || "—"
         }
@@ -200,6 +205,7 @@ PageBase {
         InfoRow {
             last: true
             icon: "memory"
+            settingAnchor: "ethernet-mac-address"
             label: Tr.tr("MAC address")
             value: root.details?.macAddress || "—"
         }
@@ -215,6 +221,7 @@ PageBase {
             Layout.fillWidth: true
             first: true
             last: root.ipMethod === "auto"
+            settingAnchor: "ethernet-ip-assignment"
             label: Tr.tr("IP assignment")
             fallbackText: Tr.tr("Automatic (DHCP)")
             fallbackIcon: "lan"
