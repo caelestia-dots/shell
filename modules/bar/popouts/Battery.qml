@@ -1,14 +1,30 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Services
 import qs.components
+import qs.components.controls
 import qs.services
 
 Column {
     id: root
+
+    // qmllint disable missing-property
+    readonly property string batteryError: String(BatteryControl?.error ?? "")
+    // qmllint enable missing-property
+    readonly property bool hasBatteryError: batteryError.length > 0
+    readonly property string batteryTooltipText: {
+        if (BatteryControl.isReadOnly)
+            return Tr.tr("Charge threshold is locked in BIOS settings");
+        if (BatteryControl.busy)
+            return Tr.tr("Battery control busy");
+        return "";
+    }
 
     function formatSeconds(s: int): string {
         const day = Math.floor(s / 86400);
@@ -24,6 +40,38 @@ Column {
             comps.push(Tr.trN("%n min", "%n mins", min));
 
         return comps.join(Tr.trCtx(", ", "duration component separator"));
+    }
+
+    function batteryTitleText(): string {
+        switch (BatteryControl.titleState) {
+        case BatteryControl.ConservationMode:
+            return Tr.tr("Conservation Mode");
+        case BatteryControl.BatteryCareLimit:
+            return Tr.tr("Battery Care Limit");
+        case BatteryControl.BatteryLifeExtender:
+            return Tr.tr("Battery Life Extender");
+        case BatteryControl.ChargeLimit:
+            return Tr.tr("Charge Limit");
+        default:
+            return Tr.tr("Battery Control");
+        }
+    }
+
+    function batterySubtitleText(): string {
+        switch (BatteryControl.subtitleState) {
+        case BatteryControl.LockedBios:
+            return Tr.tr("Locked in BIOS (%1%)").arg(BatteryControl.subtitleArg);
+        case BatteryControl.CappedTilde:
+            return Tr.tr("Capped at ~%1%").arg(BatteryControl.subtitleArg);
+        case BatteryControl.Capped:
+            return Tr.tr("Capped at %1%").arg(BatteryControl.subtitleArg);
+        case BatteryControl.LimitDisabled:
+            return Tr.tr("Limit disabled");
+        case BatteryControl.ChargesFull:
+            return Tr.tr("Charges to 100%");
+        default:
+            return "";
+        }
     }
 
     function powerProfileToString(p: int): string {
@@ -52,6 +100,10 @@ Column {
 
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
+
+    ServiceRef {
+        service: BatteryControl
+    }
 
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
@@ -222,6 +274,183 @@ Column {
 
             profile: PowerProfile.Performance
             icon: "rocket_launch"
+        }
+    }
+
+    StyledRect {
+        id: batteryCard
+
+        visible: BatteryControl.isSupported && !root.hasBatteryError
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: cardLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.tPalette.m3surfaceContainer
+        radius: Tokens.rounding.large
+        // qmllint disable missing-property
+        ToolTip.visible: batteryHover.hovered && root.batteryTooltipText.length > 0
+        ToolTip.text: root.batteryTooltipText
+        // qmllint enable missing-property
+
+        ColumnLayout {
+            id: cardLayout
+
+            enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "battery_saver"
+                    fontStyle: Tokens.font.icon.medium
+                    color: BatteryControl.enabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: root.batteryTitleText()
+                        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                        text: root.batterySubtitleText()
+                        color: Colours.palette.m3onSurfaceVariant
+                        font: Tokens.font.body.builders.small.build()
+                    }
+                }
+
+                StyledSwitch {
+                    visible: BatteryControl.isSupported && BatteryControl.isBinary
+                    enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                    checked: BatteryControl.enabled
+                    onToggled: BatteryControl.toggle()
+                }
+            }
+
+            RowLayout {
+                visible: BatteryControl.isSupported && BatteryControl.isTiers
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.extraSmall
+
+                Repeater {
+                    model: BatteryControl.supportedTiers
+
+                    TextButton {
+                        required property int modelData
+
+                        Layout.fillWidth: true
+                        type: TextButton.Tonal
+                        text: `${modelData}%`
+                        checked: BatteryControl.threshold === modelData
+                        enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                        onClicked: BatteryControl.setThreshold(modelData)
+                    }
+                }
+            }
+
+            StyledSlider {
+                visible: BatteryControl.isSupported && BatteryControl.isRange
+                enabled: !BatteryControl.busy && !BatteryControl.isReadOnly
+                interactionOnMove: false
+                Layout.fillWidth: true
+                Layout.topMargin: Tokens.spacing.extraSmall
+                from: BatteryControl.minThreshold
+                to: BatteryControl.maxThreshold
+                stepSize: BatteryControl.stepSize
+                value: BatteryControl.threshold
+                onInteraction: v => {
+                    const raw = v * (to - from) + from;
+                    const step = Math.max(1, BatteryControl.stepSize);
+                    const snapped = Math.round(raw / step) * step;
+                    BatteryControl.setThreshold(Math.max(from, Math.min(to, snapped)));
+                }
+            }
+        }
+
+        HoverHandler {
+            id: batteryHover
+        }
+    }
+
+    StyledRect {
+        id: batteryErrorCard
+
+        visible: BatteryControl.isSupported && root.hasBatteryError
+        anchors.horizontalCenter: parent.horizontalCenter
+        implicitWidth: parent.width
+        implicitHeight: errorLayout.implicitHeight + Tokens.padding.medium * 2
+        color: Colours.palette.m3errorContainer
+        radius: Tokens.rounding.large
+
+        ColumnLayout {
+            id: errorLayout
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Tokens.padding.medium
+            spacing: Tokens.spacing.small
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.small
+
+                MaterialIcon {
+                    text: "error"
+                    fontStyle: Tokens.font.icon.medium
+                    color: Colours.palette.m3onErrorContainer
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: Tr.tr("Battery error")
+                    font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                    color: Colours.palette.m3onErrorContainer
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: root.batteryError
+                color: Colours.palette.m3onErrorContainer
+                font: Tokens.font.body.builders.small.build()
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            }
+
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Tokens.spacing.small
+
+                TextButton {
+                    type: TextButton.Text
+                    text: Tr.tr("Dismiss")
+                    // qmllint disable missing-property
+                    onClicked: BatteryControl.refresh()
+                    // qmllint enable missing-property
+                }
+
+                TextButton {
+                    type: TextButton.Text
+                    text: Tr.tr("Retry")
+                    // qmllint disable missing-property
+                    onClicked: BatteryControl.retry()
+                    // qmllint enable missing-property
+                }
+            }
         }
     }
 
