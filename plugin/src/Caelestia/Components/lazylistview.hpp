@@ -21,7 +21,10 @@ class LazyListViewAttached : public QObject {
 
     Q_PROPERTY(qreal preferredHeight READ preferredHeight WRITE setPreferredHeight NOTIFY preferredHeightChanged)
     Q_PROPERTY(qreal visibleHeight READ visibleHeight WRITE setVisibleHeight NOTIFY visibleHeightChanged)
+    Q_PROPERTY(qreal preferredWidth READ preferredWidth WRITE setPreferredWidth NOTIFY preferredWidthChanged)
+    Q_PROPERTY(qreal visibleWidth READ visibleWidth WRITE setVisibleWidth NOTIFY visibleWidthChanged)
     Q_PROPERTY(qreal layoutY READ layoutY NOTIFY layoutYChanged)
+    Q_PROPERTY(qreal layoutX READ layoutX NOTIFY layoutXChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
     Q_PROPERTY(bool adding READ adding NOTIFY addingChanged)
     Q_PROPERTY(bool removing READ removing NOTIFY removingChanged)
@@ -36,8 +39,17 @@ public:
     [[nodiscard]] qreal visibleHeight() const;
     void setVisibleHeight(qreal height);
 
+    [[nodiscard]] qreal preferredWidth() const;
+    void setPreferredWidth(qreal width);
+
+    [[nodiscard]] qreal visibleWidth() const;
+    void setVisibleWidth(qreal width);
+
     [[nodiscard]] qreal layoutY() const;
     void setLayoutY(qreal y);
+
+    [[nodiscard]] qreal layoutX() const;
+    void setLayoutX(qreal x);
 
     [[nodiscard]] bool ready() const;
     void setReady(bool ready);
@@ -54,7 +66,10 @@ public:
 signals:
     void preferredHeightChanged();
     void visibleHeightChanged();
+    void preferredWidthChanged();
+    void visibleWidthChanged();
     void layoutYChanged();
+    void layoutXChanged();
     void readyChanged();
     void addingChanged();
     void removingChanged();
@@ -63,7 +78,10 @@ signals:
 private:
     qreal m_preferredHeight = -1;
     qreal m_visibleHeight = -1;
+    qreal m_preferredWidth = -1;
+    qreal m_visibleWidth = -1;
     qreal m_layoutY = 0;
+    qreal m_layoutX = 0;
     bool m_ready = false;
     bool m_adding = false;
     bool m_removing = false;
@@ -75,15 +93,26 @@ class LazyListView : public QQuickItem {
     QML_ELEMENT
     QML_ATTACHED(LazyListViewAttached)
 
+public:
+    enum class Orientation : quint8 {
+        Vertical,
+        Horizontal
+    };
+    Q_ENUM(Orientation)
+
     // Model & Delegate
     Q_PROPERTY(QAbstractItemModel* model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(QQmlComponent* delegate READ delegate WRITE setDelegate NOTIFY delegateChanged)
 
     // Layout
+    Q_PROPERTY(Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY(qreal spacing READ spacing WRITE setSpacing NOTIFY spacingChanged)
     Q_PROPERTY(qreal contentHeight READ contentHeight NOTIFY contentHeightChanged)
     Q_PROPERTY(qreal layoutHeight READ layoutHeight NOTIFY layoutHeightChanged)
+    Q_PROPERTY(qreal contentWidth READ contentWidth NOTIFY contentWidthChanged)
+    Q_PROPERTY(qreal layoutWidth READ layoutWidth NOTIFY layoutWidthChanged)
     Q_PROPERTY(qreal contentY READ contentY WRITE setContentY NOTIFY contentYChanged)
+    Q_PROPERTY(qreal contentX READ contentX WRITE setContentX NOTIFY contentXChanged)
 
     // Viewport & Lazy Loading
     Q_PROPERTY(QRectF viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
@@ -120,14 +149,23 @@ public:
     void setDelegate(QQmlComponent* delegate);
 
     // Layout
+    [[nodiscard]] Orientation orientation() const;
+    void setOrientation(Orientation orientation);
+
     [[nodiscard]] qreal spacing() const;
     void setSpacing(qreal spacing);
 
     [[nodiscard]] qreal contentHeight() const;
     [[nodiscard]] qreal layoutHeight() const;
 
+    [[nodiscard]] qreal contentWidth() const;
+    [[nodiscard]] qreal layoutWidth() const;
+
     [[nodiscard]] qreal contentY() const;
     void setContentY(qreal contentY);
+
+    [[nodiscard]] qreal contentX() const;
+    void setContentX(qreal contentX);
 
     // Viewport
     [[nodiscard]] QRectF viewport() const;
@@ -167,10 +205,14 @@ public:
 signals:
     void modelChanged();
     void delegateChanged();
+    void orientationChanged();
     void spacingChanged();
     void contentHeightChanged();
     void layoutHeightChanged();
+    void contentWidthChanged();
+    void layoutWidthChanged();
     void contentYChanged();
+    void contentXChanged();
     void viewportChanged();
     void useCustomViewportChanged();
     void cacheBufferChanged();
@@ -190,9 +232,9 @@ protected:
 
 private:
     struct ItemRecord {
-        qreal targetY = 0;
-        qreal height = 0;
-        bool heightKnown = false;
+        qreal mainPos = 0;
+        qreal mainLength = 0;
+        bool mainKnown = false;
         bool isNew = false;
     };
 
@@ -207,9 +249,9 @@ private:
     // Delegate properties in the order they must be applied
     using PropertyList = QList<std::pair<QString, QVariant>>;
 
-    // Result of recording a measured delegate height
+    // Result of recording a measured delegate main length
     struct HeightUpdate {
-        qreal previousHeight = 0;
+        qreal previousLength = 0;
         bool wasKnown = false;
     };
 
@@ -225,16 +267,24 @@ private:
     [[nodiscard]] std::pair<int, int> computeVisibleRange() const;
     [[nodiscard]] QRectF effectiveViewport() const;
     [[nodiscard]] qreal viewportTop() const;
-    [[nodiscard]] qreal effectiveEstimatedHeight() const;
-    [[nodiscard]] qreal layoutHeightAt(int index) const;
-    [[nodiscard]] qreal visibleHeightAt(int index) const;
-    [[nodiscard]] qreal visualYAt(int index) const;
+    [[nodiscard]] qreal viewportLeft() const;
+    [[nodiscard]] qreal effectiveEstimatedMain() const;
+    [[nodiscard]] qreal layoutMainAt(int index) const;
+    [[nodiscard]] qreal visibleMainAt(int index) const;
+    [[nodiscard]] qreal visualMainAt(int index) const;
+    [[nodiscard]] qreal layoutMainTotal() const;
+    [[nodiscard]] qreal contentMain() const;
+    [[nodiscard]] qreal mainCoordOf(QQuickItem* item) const;
     [[nodiscard]] static qreal delegateHeight(QQuickItem* item);
     [[nodiscard]] static qreal delegateVisibleHeight(QQuickItem* item);
+    [[nodiscard]] static qreal delegateWidth(QQuickItem* item);
+    [[nodiscard]] static qreal delegateVisibleWidth(QQuickItem* item);
+    [[nodiscard]] qreal mainLength(QQuickItem* item) const;
+    [[nodiscard]] qreal visibleMainLength(QQuickItem* item) const;
     [[nodiscard]] static bool isDelegateReady(QQuickItem* item);
-    void trackHeight(qreal height);
-    void untrackHeight(qreal height);
-    HeightUpdate setKnownHeight(int index, qreal height);
+    void trackMain(qreal length);
+    void untrackMain(qreal length);
+    HeightUpdate setKnownMain(int index, qreal length);
     void adjustViewportIfAbove(int index, QQuickItem* item, qreal delta);
 
     // Delegate lifecycle
@@ -246,14 +296,14 @@ private:
     DelegateEntry createDelegate(int modelIndex);
     void connectDelegate(const DelegateEntry& entry);
     [[nodiscard]] int indexOfDelegate(QQuickItem* item) const;
-    void onDelegateHeightChanged(QQuickItem* item);
+    void onDelegateMainChanged(QQuickItem* item);
     void onDelegateReady(QQuickItem* item);
     static void destroyDelegate(DelegateEntry& entry);
     static void revealDelegate(QQuickItem* item);
     void flushPendingInserts();
     void finishDelayedInsert(QQuickItem* item);
     void positionDelegates();
-    void updateLayoutY(QQuickItem* item, int index);
+    void publishLayoutOffset(QQuickItem* item, int index);
     [[nodiscard]] PropertyList delegateProperties(int modelIndex) const;
     void updateDelegateData(DelegateEntry& entry);
     void remapDelegates(const std::function<int(int)>& mapIndex);
@@ -273,10 +323,14 @@ private:
     QAbstractItemModel* m_model = nullptr;
     QQmlComponent* m_delegate = nullptr;
 
+    Orientation m_orientation = Orientation::Vertical;
     qreal m_spacing = 0;
     qreal m_contentHeight = 0;
     qreal m_layoutHeight = 0;
+    qreal m_contentWidth = 0;
+    qreal m_layoutWidth = 0;
     qreal m_contentY = 0;
+    qreal m_contentX = 0;
 
     QRectF m_viewport;
     bool m_useCustomViewport = false;
@@ -284,8 +338,8 @@ private:
     bool m_cullDelegates = true;
 
     qreal m_estimatedHeight = -1;
-    qreal m_knownHeightSum = 0;
-    int m_knownHeightCount = 0;
+    qreal m_knownMainSum = 0;
+    int m_knownMainCount = 0;
     bool m_asynchronous = false;
 
     int m_removeDuration = 300;

@@ -12,6 +12,7 @@ Item {
 
     required property var bar
     required property Brightness.Monitor monitor
+    required property bool horizontal
     property color colour: Colours.palette.m3primary
 
     readonly property string windowTitle: {
@@ -27,17 +28,18 @@ Item {
         return title;
     }
 
-    readonly property int maxHeight: {
+    readonly property int maxSize: {
         const otherModules = bar.children.filter(c => c.entryId && c.item !== this && c.entryId !== "spacer");
-        const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
+        const otherSize = otherModules.reduce((acc, curr) => acc + (horizontal ? (curr.item.nonAnimWidth ?? curr.width) : (curr.item.nonAnimHeight ?? curr.height)), 0);
         // Length - 2 cause repeater counts as a child
-        return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
+        return horizontal ? bar.width - otherSize - bar.columnSpacing * (bar.children.length - 1) - bar.vPadding * 2 : bar.height - otherSize - bar.rowSpacing * (bar.children.length - 1) - bar.vPadding * 2;
     }
     property Title current: text1
+    readonly property real titleGap: Tokens.spacing.small
 
     clip: true
-    implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
-    implicitHeight: icon.implicitHeight + current.implicitWidth + current.anchors.topMargin
+    implicitWidth: horizontal ? icon.implicitWidth + current.implicitWidth + titleGap : Math.max(icon.implicitWidth, current.implicitHeight)
+    implicitHeight: horizontal ? Math.max(icon.implicitHeight, current.implicitHeight) : icon.implicitHeight + current.implicitWidth + titleGap
 
     Loader {
         asynchronous: true
@@ -58,7 +60,7 @@ Item {
                     popouts.hasCurrent = false;
                 } else {
                     popouts.currentName = "activewindow";
-                    popouts.currentCenter = root.mapToItem(root.bar, 0, root.implicitHeight / 2).y;
+                    popouts.currentCenter = root.bar.axisCenterOf(root);
                     popouts.hasCurrent = true;
                 }
             }
@@ -68,7 +70,8 @@ Item {
     MaterialIcon {
         id: icon
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        x: root.horizontal ? 0 : (parent.width - width) / 2
+        y: root.horizontal ? (parent.height - height) / 2 : 0
 
         animate: true
         text: Icons.getAppCategoryIcon(Hypr.activeToplevel?.lastIpcObject.class, "desktop_windows")
@@ -89,7 +92,7 @@ Item {
         text: root.windowTitle
         font: root.Tokens.font.body.builders.small.letterSpacing(1.4).build()
         elide: Qt.ElideRight
-        elideWidth: root.maxHeight - icon.height
+        elideWidth: root.maxSize - (root.horizontal ? icon.width + root.titleGap : icon.height)
 
         onTextChanged: {
             const next = root.current === text1 ? text2 : text1;
@@ -103,12 +106,17 @@ Item {
         Anim {}
     }
 
+    Behavior on implicitWidth {
+        enabled: root.horizontal
+
+        Anim {}
+    }
+
     component Title: StyledText {
         id: text
 
-        anchors.horizontalCenter: icon.horizontalCenter
-        anchors.top: icon.bottom
-        anchors.topMargin: Tokens.spacing.small
+        x: root.horizontal ? icon.x + icon.width + root.titleGap : icon.x + (icon.width - width) / 2
+        y: root.horizontal ? icon.y + (icon.height - height) / 2 : icon.y + icon.height + root.titleGap
 
         font: metrics.font
         color: root.colour
@@ -117,17 +125,17 @@ Item {
 
         transform: [
             Translate {
-                x: root.Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
+                x: !root.horizontal && root.Config.bar.activeWindow.inverted ? -text.implicitWidth + text.implicitHeight : 0
             },
             Rotation {
-                angle: root.Config.bar.activeWindow.inverted ? 270 : 90
+                angle: root.horizontal ? 0 : root.Config.bar.activeWindow.inverted ? 270 : 90
                 origin.x: text.implicitHeight / 2
                 origin.y: text.implicitHeight / 2
             }
         ]
 
-        width: implicitHeight
-        height: implicitWidth
+        width: root.horizontal ? implicitWidth : implicitHeight
+        height: root.horizontal ? implicitHeight : implicitWidth
 
         Behavior on opacity {
             Anim {

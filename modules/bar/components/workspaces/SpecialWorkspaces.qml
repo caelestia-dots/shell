@@ -14,6 +14,8 @@ Item {
     id: root
 
     required property HyprlandMonitor monitor
+    required property ShellScreen screen
+    required property bool horizontal
 
     readonly property int activeSpecialId: monitor?.lastIpcObject.specialWorkspace?.id ?? 0
     readonly property var wsIds: {
@@ -22,6 +24,7 @@ Item {
     }
     readonly property int activeIdx: wsIds.indexOf(activeSpecialId)
     readonly property real maxViewY: Math.max(0, view.contentHeight - height)
+    readonly property real maxViewX: Math.max(0, view.contentWidth - width)
 
     readonly property Workspace activeWs: {
         view.itemsDirty;
@@ -32,34 +35,47 @@ Item {
         if (!activeWs)
             return;
 
-        const top = activeWs.LazyListView.layoutY;
-        const bottom = top + activeWs.LazyListView.preferredHeight;
+        const start = horizontal ? activeWs.LazyListView.layoutX : activeWs.LazyListView.layoutY;
+        const size = horizontal ? activeWs.LazyListView.preferredWidth : activeWs.LazyListView.preferredHeight;
+        const viewLen = horizontal ? width : height;
+        const maxScroll = horizontal ? maxViewX : maxViewY;
 
-        let target = view.y;
-        if (top < -target)
-            target = -top;
-        else if (bottom > -target + height)
-            target = -(bottom - height);
+        let target = horizontal ? view.x : view.y;
+        if (start < -target)
+            target = -start;
+        else if (start + size > -target + viewLen)
+            target = -(start + size - viewLen);
 
-        target = CUtils.clamp(target, -maxViewY, 0);
-        if (target !== view.y) {
-            if (animate) {
-                const type = viewYAnim.type;
-                viewYAnim.type = Anim.DefaultSpatial;
+        target = CUtils.clamp(target, -maxScroll, 0);
+        if (target === (horizontal ? view.x : view.y))
+            return;
+
+        if (animate) {
+            const anim = horizontal ? viewXAnim : viewYAnim;
+            const type = anim.type;
+            anim.type = Anim.DefaultSpatial;
+            if (horizontal)
+                view.x = target;
+            else
                 view.y = target;
-                viewYAnim.type = type;
-            } else {
-                viewYBehavior.enabled = false;
+            anim.type = type;
+        } else {
+            const bh = horizontal ? viewXBehavior : viewYBehavior;
+            bh.enabled = false;
+            if (horizontal)
+                view.x = target;
+            else
                 view.y = target;
-                viewYBehavior.enabled = true;
-            }
+            bh.enabled = true;
         }
     }
 
     onActiveWsChanged: ensureVisible()
     onHeightChanged: ensureVisible(false)
+    onWidthChanged: ensureVisible(false)
     Component.onCompleted: ensureVisible(false)
     onMaxViewYChanged: ensureVisible()
+    onMaxViewXChanged: ensureVisible()
 
     layer.enabled: true
     layer.effect: Mask {
@@ -67,7 +83,15 @@ Item {
     }
 
     Connections {
+        function onLayoutXChanged(): void {
+            root.ensureVisible();
+        }
+
         function onLayoutYChanged(): void {
+            root.ensureVisible();
+        }
+
+        function onPreferredWidthChanged(): void {
             root.ensureVisible();
         }
 
@@ -90,7 +114,7 @@ Item {
             radius: Tokens.rounding.full
 
             gradient: Gradient {
-                orientation: Gradient.Vertical
+                orientation: root.horizontal ? Gradient.Horizontal : Gradient.Vertical
 
                 GradientStop {
                     position: 0
@@ -112,13 +136,12 @@ Item {
         }
 
         Rectangle {
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
             radius: Tokens.rounding.full
-            implicitHeight: parent.height / 2
-            opacity: view.y < -Tokens.padding.extraSmall ? 0 : 1
+            x: 0
+            y: 0
+            width: root.horizontal ? parent.width / 2 : parent.width
+            height: root.horizontal ? parent.height : parent.height / 2
+            opacity: root.horizontal ? (view.x < -Tokens.padding.extraSmall ? 0 : 1) : (view.y < -Tokens.padding.extraSmall ? 0 : 1)
 
             Behavior on opacity {
                 Anim {
@@ -128,13 +151,12 @@ Item {
         }
 
         Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-
             radius: Tokens.rounding.full
-            implicitHeight: parent.height / 2
-            opacity: view.y > -root.maxViewY + Tokens.padding.extraSmall ? 0 : 1
+            x: root.horizontal ? parent.width / 2 : 0
+            y: root.horizontal ? 0 : parent.height / 2
+            width: root.horizontal ? parent.width / 2 : parent.width
+            height: root.horizontal ? parent.height : parent.height / 2
+            opacity: root.horizontal ? (view.x > -root.maxViewX + Tokens.padding.extraSmall ? 0 : 1) : (view.y > -root.maxViewY + Tokens.padding.extraSmall ? 0 : 1)
 
             Behavior on opacity {
                 Anim {
@@ -147,15 +169,16 @@ Item {
     LazyListView {
         id: view
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        implicitHeight: contentHeight
+        width: root.horizontal ? contentWidth : parent.width
+        height: root.horizontal ? parent.height : contentHeight
+        orientation: root.horizontal ? LazyListView.Horizontal : LazyListView.Vertical
 
         cullDelegates: false
         spacing: Tokens.spacing.small
         removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
         onContentHeightChanged: root.ensureVisible()
+        onContentWidthChanged: root.ensureVisible()
 
         model: ScriptModel {
             values: root.wsIds
@@ -166,6 +189,7 @@ Item {
             ws: modelData
             monitor: root.monitor
             offMonitorColour: Colours.palette.m3outline
+            horizontal: root.horizontal
             displayType: Config.bar.workspaces.specialDisplayType
             showWindows: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             iconRules: GlobalConfig.bar.workspaces.specialWorkspaceIcons
@@ -174,8 +198,22 @@ Item {
         Behavior on y {
             id: viewYBehavior
 
+            enabled: !root.horizontal
+
             Anim {
                 id: viewYAnim
+
+                type: Anim.FastEffects
+            }
+        }
+
+        Behavior on x {
+            id: viewXBehavior
+
+            enabled: root.horizontal
+
+            Anim {
+                id: viewXAnim
 
                 type: Anim.FastEffects
             }
@@ -184,11 +222,12 @@ Item {
 
     Loader {
         asynchronous: true
-        anchors.left: view.left
-        anchors.right: view.right
+        x: view.x
+        y: view.y
         active: Config.bar.workspaces.activeIndicator
 
         sourceComponent: ActiveIndicator {
+            horizontal: root.horizontal
             activeWs: root.activeWs
             mask: view
             color: Colours.palette.m3tertiary
@@ -197,6 +236,8 @@ Item {
     }
 
     MouseArea {
+        property real startX
+        property real startViewX
         property real startY
         property real startViewY
         property bool dragging
@@ -204,16 +245,20 @@ Item {
         anchors.fill: parent
 
         onPressed: event => {
+            startX = event.x;
+            startViewX = view.x;
             startY = event.y;
             startViewY = view.y;
             dragging = false;
         }
 
         onPositionChanged: event => {
-            if (!dragging && Math.abs(event.y - startY) > drag.threshold)
+            if (!dragging && Math.abs((root.horizontal ? event.x - startX : event.y - startY)) > drag.threshold)
                 dragging = true;
 
-            if (dragging)
+            if (dragging && root.horizontal)
+                view.x = CUtils.clamp(startViewX + (event.x - startX), -root.maxViewX, 0);
+            else if (dragging)
                 view.y = CUtils.clamp(startViewY + (event.y - startY), -root.maxViewY, 0);
         }
 
@@ -221,7 +266,7 @@ Item {
             if (dragging)
                 return;
 
-            const ws = view.itemAt(event.x, event.y - view.y) as Workspace;
+            const ws = view.itemAt(event.x - view.x, event.y - view.y) as Workspace;
             if (ws) {
                 const match = Hypr.workspaces.values.find(w => w.id === ws.ws);
                 if (match)

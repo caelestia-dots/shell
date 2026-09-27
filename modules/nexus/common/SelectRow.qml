@@ -16,6 +16,7 @@ ConnectedRect {
     property alias fallbackText: splitButton.fallbackText
     property alias fallbackIcon: splitButton.fallbackIcon
     property alias menuOnTop: splitButton.menuOnTop
+    property bool disabled
 
     signal selected(item: MenuItem)
 
@@ -36,6 +37,7 @@ ConnectedRect {
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 0
+            opacity: root.disabled ? 0.5 : 1
 
             StyledText {
                 id: label
@@ -59,6 +61,7 @@ ConnectedRect {
             id: splitButton
 
             type: SplitButton.Tonal
+            disabled: root.disabled
             stateLayer.onClicked: splitButton.expanded = !splitButton.expanded
             menu.onItemSelected: item => root.selected(item)
         }

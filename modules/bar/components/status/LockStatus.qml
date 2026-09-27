@@ -3,19 +3,36 @@ import QtQuick.Layouts
 import qs.components
 import qs.services
 
-ColumnLayout {
+GridLayout {
     id: root
 
     required property color colour
     required property int parentSpacing
+    required property bool horizontal
 
     property real gap: Hypr.capsLock && Hypr.numLock ? parentSpacing : 0
+    property real capsWidth: Hypr.capsLock ? capslockIcon.implicitWidth : 0
+    property real numWidth: Hypr.numLock ? numlockIcon.implicitWidth : 0
     property real capsHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
     property real numHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
 
-    spacing: Math.round(gap)
+    columns: root.horizontal ? -1 : 1
+    rowSpacing: Math.round(root.horizontal ? 0 : root.gap)
+    columnSpacing: Math.round(root.horizontal ? root.gap : 0)
 
     Behavior on gap {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
+
+    Behavior on capsWidth {
+        Anim {
+            type: Anim.SlowEffects
+        }
+    }
+
+    Behavior on numWidth {
         Anim {
             type: Anim.SlowEffects
         }
@@ -34,8 +51,8 @@ ColumnLayout {
     }
 
     Item {
-        implicitWidth: capslockIcon.implicitWidth
-        implicitHeight: Math.round(root.capsHeight)
+        implicitWidth: root.horizontal ? Math.round(root.capsWidth) : capslockIcon.implicitWidth
+        implicitHeight: root.horizontal ? capslockIcon.implicitHeight : Math.round(root.capsHeight)
 
         MaterialIcon {
             id: capslockIcon
@@ -63,8 +80,8 @@ ColumnLayout {
     }
 
     Item {
-        implicitWidth: numlockIcon.implicitWidth
-        implicitHeight: Math.round(root.numHeight)
+        implicitWidth: root.horizontal ? Math.round(root.numWidth) : numlockIcon.implicitWidth
+        implicitHeight: root.horizontal ? numlockIcon.implicitHeight : Math.round(root.numHeight)
 
         MaterialIcon {
             id: numlockIcon

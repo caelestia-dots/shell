@@ -12,6 +12,7 @@ Item {
 
     required property var workspaces
     required property int wsSpacing
+    required property bool horizontal
 
     AnimatedRepeater {
         model: ScriptModel {
@@ -28,16 +29,14 @@ Item {
                 if (!modelData || index === 0)
                     return 0;
                 if (modelData.focused)
-                    return -root.wsSpacing / 2 - implicitHeight;
+                    return -root.wsSpacing / 2 - (root.horizontal ? width : height);
                 return (root.workspaces[index - 1]?.focused ?? false) ? root.wsSpacing / 2 : 0;
             }
 
-            anchors.left: parent?.left
-            anchors.right: parent?.right
-            anchors.margins: Tokens.padding.extraSmall
-
-            y: modelData ? modelData.y - root.wsSpacing / 2 + shift : 0
-            implicitHeight: 1
+            x: root.horizontal ? modelData.x - root.wsSpacing / 2 + shift : Tokens.padding.extraSmall
+            y: root.horizontal ? Tokens.padding.extraSmall : modelData.y - root.wsSpacing / 2 + shift
+            width: root.horizontal ? 1 : parent.width - Tokens.padding.extraSmall * 2
+            implicitHeight: root.horizontal ? parent.height - Tokens.padding.extraSmall * 2 : 1
             color: Colours.palette.m3outline
 
             opacity: AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0 || root.workspaces[index - 1]?.ws === modelData?.ws - 1 ? 0 : 1

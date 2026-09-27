@@ -3,10 +3,36 @@ pragma ComponentBehavior: Bound
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import qs.components.controls
 import qs.modules.nexus.common
 
 PageBase {
     id: root
+
+    readonly property list<MenuItem> barPositionItems: [
+        MenuItem {
+            text: Tr.tr("Top")
+            value: BarPosition.Top
+        },
+        MenuItem {
+            text: Tr.tr("Bottom")
+            value: BarPosition.Bottom
+        },
+        MenuItem {
+            text: Tr.tr("Left")
+            value: BarPosition.Left
+        }
+    ]
+
+    // Clamped to the edges valid for the current bar position, mirroring EdgeGeometry
+    readonly property int effectiveDashboardPosition: {
+        const barPos = Config.bar.position;
+        if (barPos === BarPosition.Top)
+            return DashboardPosition.Left;
+        if (barPos === BarPosition.Bottom)
+            return Config.bar.dashboardPosition;
+        return DashboardPosition.Top;
+    }
 
     title: Tr.tr("Taskbar")
     isSubPage: true
@@ -23,8 +49,46 @@ PageBase {
             text: Tr.tr("Behaviour")
         }
 
-        ToggleRow {
+        SelectRow {
             first: true
+            label: Tr.tr("Position")
+            subtext: Tr.tr("Where the bar is located on the screen")
+            menuItems: root.barPositionItems
+            active: root.barPositionItems.find(i => i.value === Config.bar.position)
+            onSelected: i => GlobalConfig.bar.position = i.value
+        }
+
+        SelectRow {
+            label: Tr.tr("Dashboard position")
+            subtext: Tr.tr("Which screen edge the dashboard sits on")
+            disabled: menuItems.length < 2
+            menuItems: {
+                const barPos = Config.bar.position;
+                // The dashboard can only sit on edges the bar doesn't occupy
+                if (barPos === BarPosition.Bottom)
+                    return [dashboardPosTop, dashboardPosLeft];
+                if (barPos === BarPosition.Top)
+                    return [dashboardPosLeft];
+                return [dashboardPosTop];
+            }
+            active: menuItems.find(i => i.value === root.effectiveDashboardPosition) && menuItems.length > 1
+            onSelected: i => GlobalConfig.bar.dashboardPosition = i.value
+
+            MenuItem {
+                id: dashboardPosTop
+
+                text: Tr.tr("Top")
+                value: DashboardPosition.Top
+            }
+            MenuItem {
+                id: dashboardPosLeft
+
+                text: Tr.tr("Left")
+                value: DashboardPosition.Left
+            }
+        }
+
+        ToggleRow {
             text: Tr.tr("Persistent")
             subtext: Tr.tr("Keep the bar visible at all times")
             checked: Config.bar.persistent
