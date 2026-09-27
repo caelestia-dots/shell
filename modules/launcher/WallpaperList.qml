@@ -13,23 +13,23 @@ PathView {
     required property SearchBar search
     required property var screenState
     required property var panels
-    required property var content
 
     readonly property int itemWidth: Tokens.sizes.launcher.wallpaperWidth * 0.8 + Tokens.padding.medium * 2
 
     readonly property int numItems: {
-        const screen = (QsWindow.window as QsWindow)?.screen;
-        if (!screen)
-            return 0;
-
-        // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
-        const barMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
-        let outerMargins = 0;
-        if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
-            outerMargins = panels.popouts.nonAnimWidth;
-        if ((screenState.utilities || screenState.sidebar) && panels.utilities.implicitWidth > outerMargins)
-            outerMargins = panels.utilities.implicitWidth;
-        const maxWidth = screen.width - Config.border.rounding * 4 - (barMargins + outerMargins) * 2;
+        // Read only the positioned vertical span: launcher width is an output
+        // of this binding, so reading launcherRect here would create a cycle.
+        const top = panels.y + panels.launcher.y;
+        const bottom = top + panels.launcher.height;
+        const center = panels.x + panels.width / 2;
+        let halfWidth = panels.width / 2;
+        if (panels.popouts.hasCurrent)
+            halfWidth = Math.min(halfWidth, spaceBeside(panels.popoutsRect, top, bottom, center));
+        if (panels.utilities.shouldBeActive)
+            halfWidth = Math.min(halfWidth, spaceBeside(panels.utilitiesRect, top, bottom, center));
+        if (panels.sidebar.shouldBeActive)
+            halfWidth = Math.min(halfWidth, spaceBeside(panels.sidebarRect, top, bottom, center));
+        const maxWidth = halfWidth * 2 - Config.border.rounding * 4;
 
         if (maxWidth <= 0)
             return 0;
@@ -42,6 +42,14 @@ PathView {
         if (visible > 1 && visible % 2 === 0)
             return visible - 1;
         return visible;
+    }
+
+    function spaceBeside(bounds: rect, top: real, bottom: real, center: real): real {
+        // Upper Utilities and the sidebar are separate obstacles; disjoint
+        // vertical spans do not consume horizontal wallpaper capacity.
+        if (bounds.width <= 0 || bounds.height <= 0 || bottom <= top || bounds.y >= bottom || top >= bounds.y + bounds.height)
+            return Infinity;
+        return bounds.x + bounds.width / 2 < center ? center - bounds.x - bounds.width : bounds.x - center;
     }
 
     model: ScriptModel {
