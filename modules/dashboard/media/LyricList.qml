@@ -30,7 +30,16 @@ Item {
             Lyrics.clearTrack();
     }
 
-    Component.onCompleted: syncTrack()
+    function autoSelectCandidateIfNeeded(): void {
+        if (!Boolean(Lyrics?.loading ?? false) && !Boolean(Lyrics?.hasLyrics ?? false) && !Boolean(Lyrics?.selectedCandidate?.valid ?? false) && (Lyrics?.lyricCandidates?.length ?? 0) > 0) {
+            Lyrics.selectedCandidate = Lyrics.lyricCandidates[0];
+        }
+    }
+
+    Component.onCompleted: {
+        syncTrack();
+        autoSelectCandidateIfNeeded();
+    }
 
     layer.enabled: true
     layer.effect: Mask {
@@ -68,11 +77,11 @@ Item {
     }
 
     state: {
-        if (Lyrics.forceSearching)
+        if (Boolean(Lyrics?.forceSearching ?? false))
             return "loading";
-        if (Lyrics.hasLyrics)
+        if (Boolean(Lyrics?.hasLyrics ?? false))
             return "hasLyrics";
-        if (Lyrics.loading)
+        if (Boolean(Lyrics?.loading ?? false))
             return "loading";
         return "noLyrics";
     }
@@ -190,6 +199,23 @@ Item {
         target: Players.active
     }
 
+    Connections {
+        target: Lyrics
+        ignoreUnknownSignals: true
+
+        function onHasLyricsChanged(): void {
+            root.autoSelectCandidateIfNeeded();
+        }
+
+        function onLoadingChanged(): void {
+            root.autoSelectCandidateIfNeeded();
+        }
+
+        function onLyricCandidatesChanged(): void {
+            root.autoSelectCandidateIfNeeded();
+        }
+    }
+
     Loader {
         id: loadingIndicator
 
@@ -276,7 +302,13 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 type: TextButton.Text
                 text: Tr.tr("Force search")
-                onClicked: Lyrics.forceSearch()
+                onClicked: {
+                    if (typeof Lyrics?.forceSearch === "function") {
+                        Lyrics.forceSearch();
+                    } else {
+                        Lyrics.refresh();
+                    }
+                }
             }
         }
     }

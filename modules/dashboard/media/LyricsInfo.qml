@@ -55,6 +55,33 @@ Item {
         }
     }
 
+    function autoSelectCandidateIfNeeded(): void {
+        if (!Boolean(Lyrics?.loading ?? false) && !Boolean(Lyrics?.hasLyrics ?? false) && !Boolean(Lyrics?.selectedCandidate?.valid ?? false) && (Lyrics?.lyricCandidates?.length ?? 0) > 0) {
+            Lyrics.selectedCandidate = Lyrics.lyricCandidates[0];
+        }
+    }
+
+    Connections {
+        target: Lyrics
+        ignoreUnknownSignals: true
+
+        function onLyricCandidatesChanged(): void {
+            root.autoSelectCandidateIfNeeded();
+        }
+
+        function onLoadingChanged(): void {
+            root.autoSelectCandidateIfNeeded();
+        }
+
+        function onHasLyricsChanged(): void {
+            root.autoSelectCandidateIfNeeded();
+        }
+    }
+
+    Component.onCompleted: {
+        root.autoSelectCandidateIfNeeded();
+    }
+
     implicitWidth: btn.implicitWidth * 0.9
     implicitHeight: btn.implicitHeight * 0.9
 
@@ -260,17 +287,17 @@ Item {
                     }
 
                     StyledText {
-                        visible: Lyrics.selectedCandidate.duration > 0
-                        text: `${Math.floor(Lyrics.selectedCandidate.duration / 60)}:${Math.floor(Lyrics.selectedCandidate.duration % 60).toString().padStart(2, "0")}`
+                        visible: (Lyrics?.selectedCandidate?.duration ?? 0) > 0
+                        text: `${Math.floor((Lyrics?.selectedCandidate?.duration ?? 0) / 60)}:${Math.floor((Lyrics?.selectedCandidate?.duration ?? 0) % 60).toString().padStart(2, "0")}`
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
                     }
                 }
 
                 StyledText {
-                    visible: Lyrics.hasLyrics
+                    visible: Boolean(Lyrics?.hasLyrics ?? false)
                     Layout.fillWidth: true
-                    text: `${Lyrics.selectedCandidate.title || Tr.tr("Unknown")} • ${Lyrics.selectedCandidate.artist || Tr.tr("Unknown")}`
+                    text: `${Lyrics?.selectedCandidate?.title || Tr.tr("Unknown")} • ${Lyrics?.selectedCandidate?.artist || Tr.tr("Unknown")}`
                     color: Colours.palette.m3onSurface
                     font: Tokens.font.label.large
                     elide: Text.ElideRight
@@ -411,12 +438,12 @@ Item {
                 }
 
                 RowLayout {
-                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride || (!Lyrics.hasLyrics && Lyrics.lyricCandidates.length > 0)
+                    visible: (Lyrics?.lyricCandidates?.length ?? 0) > 1 || Boolean(Lyrics?.hasCandidateOverride ?? false) || (!Boolean(Lyrics?.hasLyrics ?? false) && (Lyrics?.lyricCandidates?.length ?? 0) > 0)
                     Layout.fillWidth: true
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: Tr.tr("Candidates (%1)").arg(Lyrics.lyricCandidates.length)
+                        text: Tr.tr("Candidates (%1)").arg(Lyrics?.lyricCandidates?.length ?? 0)
                         color: Colours.palette.m3onSurfaceVariant
                         font: Tokens.font.label.small
                     }
@@ -431,10 +458,16 @@ Item {
                             id: resetBtn
 
                             anchors.centerIn: parent
-                            disabled: !Lyrics.hasCandidateOverride
+                            disabled: !Boolean(Lyrics?.hasCandidateOverride ?? false)
                             type: TextButton.Text
                             text: Tr.tr("Reset to Default")
-                            onClicked: Lyrics.resetToAuto()
+                            onClicked: {
+                                if (typeof Lyrics?.resetToAuto === "function") {
+                                    Lyrics.resetToAuto();
+                                } else if ((Lyrics?.lyricCandidates?.length ?? 0) > 0) {
+                                    Lyrics.selectedCandidate = Lyrics.lyricCandidates[0];
+                                }
+                            }
                         }
 
                         HoverHandler {
@@ -446,7 +479,7 @@ Item {
                 StyledFlickable {
                     id: candFlickable
 
-                    visible: Lyrics.lyricCandidates.length > 1 || Lyrics.hasCandidateOverride || (!Lyrics.hasLyrics && Lyrics.lyricCandidates.length > 0)
+                    visible: (Lyrics?.lyricCandidates?.length ?? 0) > 1 || Boolean(Lyrics?.hasCandidateOverride ?? false) || (!Boolean(Lyrics?.hasLyrics ?? false) && (Lyrics?.lyricCandidates?.length ?? 0) > 0)
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.maximumHeight: root.maxListHeight
@@ -468,7 +501,7 @@ Item {
                         spacing: Tokens.spacing.extraSmall
 
                         Repeater {
-                            model: Lyrics.lyricCandidates
+                            model: Lyrics?.lyricCandidates
 
                             delegate: Rectangle {
                                 id: candItem
@@ -476,8 +509,19 @@ Item {
                                 required property int index
                                 required property var modelData
 
-                                readonly property bool isAuto: (Lyrics.autoCandidate.valid && Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend) || (!Lyrics.hasCandidateOverride && index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid))
-                                readonly property bool isSelected: Lyrics.hasCandidateOverride ? (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) : (candItem.isAuto || (Lyrics.selectedCandidate.valid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend) || (index === 0 && (Lyrics.autoCandidate.valid || Lyrics.selectedCandidate.valid)))
+                                readonly property bool autoValid: Boolean(Lyrics?.autoCandidate?.valid ?? false)
+                                readonly property bool selectedValid: Boolean(Lyrics?.selectedCandidate?.valid ?? false)
+                                readonly property bool hasOverride: Boolean(Lyrics?.hasCandidateOverride ?? false)
+
+                                readonly property bool isAuto: autoValid
+                                    ? (Lyrics.autoCandidate.id === modelData.id && Lyrics.autoCandidate.backend === modelData.backend)
+                                    : (!hasOverride && index === 0)
+
+                                readonly property bool isSelected: hasOverride
+                                    ? (selectedValid && Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend)
+                                    : (selectedValid
+                                        ? (Lyrics.selectedCandidate.id === modelData.id && Lyrics.selectedCandidate.backend === modelData.backend)
+                                        : candItem.isAuto)
 
                                 Layout.fillWidth: true
                                 implicitHeight: candRow.implicitHeight + Tokens.padding.extraSmall * 2
@@ -576,11 +620,17 @@ Item {
                 }
 
                 TextButton {
-                    visible: !Lyrics.loading && !Lyrics.forceSearching && !root.hasLyricsError && !root.isLyricsOffline && !Lyrics.hasLyrics && Lyrics.lyricCandidates.length === 0
+                    visible: !Lyrics.loading && !Boolean(Lyrics?.forceSearching ?? false) && !root.hasLyricsError && !root.isLyricsOffline && !Lyrics.hasLyrics && (Lyrics?.lyricCandidates?.length ?? 0) === 0
                     Layout.alignment: Qt.AlignHCenter
                     type: TextButton.Text
                     text: Tr.tr("Force search")
-                    onClicked: Lyrics.forceSearch()
+                    onClicked: {
+                        if (typeof Lyrics?.forceSearch === "function") {
+                            Lyrics.forceSearch();
+                        } else {
+                            Lyrics.refresh();
+                        }
+                    }
                 }
             }
         }
