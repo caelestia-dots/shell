@@ -69,7 +69,7 @@ StyledClippingRect {
 
         MaterialIcon {
             Layout.leftMargin: -Tokens.padding.extraSmall
-            text: "battery_full"
+            text: "battery_android_full"
             color: contents.accentColour
             fontStyle: Tokens.font.icon.large
         }
