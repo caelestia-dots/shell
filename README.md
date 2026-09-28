@@ -404,6 +404,11 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "blur": false,
             "rounding": 1,
             "spacing": 1
+        },
+        "splash": {
+            "enabled": false,
+            "scale": 1.0,
+            "command": ["hyprctl", "splash"]
         }
     },
     "bar": {
