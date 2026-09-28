@@ -55,7 +55,8 @@ void CUtils::saveItem(
     }
 
     QObject::connect(
-        grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, scaledRect, path, onSaved, onFailed, this] {
+        grabResult.data(), &QQuickItemGrabResult::ready, this,
+        [grabResult, scaledRect, path, onSaved, onFailed, this] {
             QtConcurrent::run([grabResult, scaledRect, file = path.toLocalFile()] {
                 auto image = grabResult->image();
                 if (scaledRect.isValid())
@@ -71,7 +72,8 @@ void CUtils::saveItem(
                 if (cb->isCallable())
                     cb->call({ path.toLocalFile() });
             });
-        });
+        },
+        Qt::SingleShotConnection);
 }
 
 bool CUtils::copyFile(const QUrl& source, const QUrl& target, bool overwrite) {
