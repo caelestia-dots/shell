@@ -68,9 +68,30 @@ Scope {
         onReleased: {
             if (!root.launcherInterrupted && !root.hasFullscreen) {
                 const screenState = ShellState.forActive();
+                if (!screenState.launcher)
+                    screenState.launcherWallpaperMode = false;
                 screenState.launcher = !screenState.launcher;
             }
             root.launcherInterrupted = false;
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "wallpaper"
+        description: "Toggle wallpaper picker"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+
+            const screenState = ShellState.forActive();
+            if (screenState.launcher && screenState.launcherWallpaperMode) {
+                screenState.launcher = false;
+            } else {
+                screenState.launcherWallpaperMode = true;
+                screenState.launcher = true;
+            }
         }
     }
 
