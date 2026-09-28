@@ -1,5 +1,6 @@
 set(po_files
     # All .po files should go here
+    trs/ko.po
 )
 
 set(trs_script "${CMAKE_SOURCE_DIR}/scripts/trs.fish")
