@@ -71,7 +71,7 @@ void CUtils::saveItem(
                 if (cb->isCallable())
                     cb->call({ path.toLocalFile() });
             });
-        });
+        }, Qt::SingleShotConnection);
 }
 
 bool CUtils::copyFile(const QUrl& source, const QUrl& target, bool overwrite) {
