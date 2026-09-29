@@ -27,6 +27,7 @@ Item {
         return title;
     }
 
+    property bool animateTitleChange: true
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.entryId && c.item !== this && c.entryId !== "spacer");
         const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
@@ -34,6 +35,31 @@ Item {
         return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
     }
     property Title current: text1
+
+    function levenshteinGreaterThan(first: string, second: string, threshold: int): bool {
+        let previous = [];
+        for (let j = 0; j <= second.length; j++)
+            previous.push(j);
+
+        for (let i = 1; i <= first.length; i++) {
+            const current = [i];
+            let minDistance = i;
+
+            for (let j = 1; j <= second.length; j++) {
+                const substitutionCost = first[i - 1] === second[j - 1] ? 0 : 1;
+                const distance = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + substitutionCost);
+                current.push(distance);
+                minDistance = Math.min(minDistance, distance);
+            }
+
+            if (minDistance > threshold)
+                return true;
+
+            previous = current;
+        }
+
+        return previous[second.length] > threshold;
+    }
 
     clip: true
     implicitWidth: Math.max(icon.implicitWidth, current.implicitHeight)
@@ -92,6 +118,7 @@ Item {
         elideWidth: root.maxHeight - icon.height
 
         onTextChanged: {
+            root.animateTitleChange = root.levenshteinGreaterThan(root.current.text, elidedText, 2);
             const next = root.current === text1 ? text2 : text1;
             next.text = elidedText;
             root.current = next;
@@ -130,6 +157,8 @@ Item {
         height: implicitWidth
 
         Behavior on opacity {
+            enabled: root.animateTitleChange
+
             Anim {
                 type: Anim.DefaultEffects
             }
