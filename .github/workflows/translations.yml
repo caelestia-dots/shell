@@ -1,0 +1,39 @@
+name: Translations
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "**/*.qml"
+      - "**/*.cpp"
+      - "**/*.hpp"
+      - "plugin/src/Caelestia/I18n/trs/*.po"
+      - "scripts/trs.fish"
+      - "scripts/trs-check.py"
+      - ".github/workflows/translations.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install translation tools
+        run: sudo apt-get update && sudo apt-get install --yes fish gettext
+
+      - name: Generate translation template
+        run: fish scripts/trs.fish raw
+
+      - name: Check translation calls
+        run: python3 scripts/trs-check.py --strict
+
+      - name: Check catalog coverage and formatting
+        run: |
+          for catalog in plugin/src/Caelestia/I18n/trs/*.po; do
+            msgcmp --use-fuzzy "$catalog" plugin/src/Caelestia/I18n/trs/raw.pot
+            msgfmt --check-format --check-header --statistics \
+              --output-file=/dev/null "$catalog"
+          done

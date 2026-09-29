@@ -176,7 +176,7 @@ Singleton {
         }
 
         const [lat, lon] = coords.split(",").map(s => s.trim());
-        const lang = Qt.locale().name.split("_")[0] || "en";
+        const lang = Tr.locale.name.split("_")[0] || "en";
 
         const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=geocodejson&accept-language=${lang}`;
         const nominatimHeaders = {
@@ -211,7 +211,7 @@ Singleton {
     }
 
     function fetchCoordsFromCity(cityName: string): void {
-        const lang = Qt.locale().name.split("_")[0] || "en";
+        const lang = Tr.locale.name.split("_")[0] || "en";
         const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=${lang}&format=json`;
 
         Requests.get(url, text => {
