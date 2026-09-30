@@ -38,16 +38,16 @@ Item {
     // The LayoutManager is a singleton but this object is instantiated once per
     // screen, so every registry key has to be scoped by screen name.
     readonly property var panelKeys: ({
-        dashboard: LayoutManager.panelKey(screen.name, "dashboard"),
-        launcher: LayoutManager.panelKey(screen.name, "launcher"),
-        session: LayoutManager.panelKey(screen.name, "session"),
-        osd: LayoutManager.panelKey(screen.name, "osd"),
-        notifications: LayoutManager.panelKey(screen.name, "notifications"),
-        sidebar: LayoutManager.panelKey(screen.name, "sidebar"),
-        utilities: LayoutManager.panelKey(screen.name, "utilities"),
-        popouts: LayoutManager.panelKey(screen.name, "popouts"),
-        toasts: LayoutManager.panelKey(screen.name, "toasts")
-    })
+            dashboard: LayoutManager.panelKey(screen.name, "dashboard"),
+            launcher: LayoutManager.panelKey(screen.name, "launcher"),
+            session: LayoutManager.panelKey(screen.name, "session"),
+            osd: LayoutManager.panelKey(screen.name, "osd"),
+            notifications: LayoutManager.panelKey(screen.name, "notifications"),
+            sidebar: LayoutManager.panelKey(screen.name, "sidebar"),
+            utilities: LayoutManager.panelKey(screen.name, "utilities"),
+            popouts: LayoutManager.panelKey(screen.name, "popouts"),
+            toasts: LayoutManager.panelKey(screen.name, "toasts")
+        })
 
     // Register all panels with LayoutManager on component completion.
     //
