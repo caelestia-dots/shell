@@ -18,6 +18,11 @@ Item {
     required property Item osdPanel
     required property Item sessionPanel
     required property Item utilitiesPanel
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    readonly property real naturalWidth: Tokens.sizes.notifs.width
     readonly property int padding: Tokens.padding.large
     readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
@@ -25,7 +30,7 @@ Item {
     anchors.bottom: parent.bottom
     anchors.right: parent.right
 
-    implicitWidth: Tokens.sizes.notifs.width
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     implicitHeight: {
         const count = list.count;
         if (count === 0)
