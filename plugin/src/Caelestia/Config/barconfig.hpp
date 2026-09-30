@@ -73,6 +73,7 @@ class BarActiveWindow : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, compact, false)
     CONFIG_PROPERTY(bool, inverted, false)
     CONFIG_PROPERTY(bool, showOnHover, true)
+    CONFIG_PROPERTY(bool, showTitle, true)
 };
 
 class BarTrayIconSub : public settings::ObjectNode {

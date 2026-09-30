@@ -473,7 +473,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "activeWindow": {
             "compact": false,
             "inverted": false,
-            "showOnHover": true
+            "showOnHover": true,
+            "showTitle": true
         },
         "tray": {
             "background": false,
