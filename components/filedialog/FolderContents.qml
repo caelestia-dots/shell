@@ -209,14 +209,7 @@ Item {
                         Templates: "templates",
                         Videos: "videos"
                     };
-                    const xdgLocations = [
-                        [StandardPaths.DesktopLocation, "desktop"],
-                        [StandardPaths.DocumentsLocation, "documents"],
-                        [StandardPaths.DownloadLocation, "downloads"],
-                        [StandardPaths.MusicLocation, "music"],
-                        [StandardPaths.PicturesLocation, "pictures"],
-                        [StandardPaths.MoviesLocation, "videos"]
-                    ];
+                    const xdgLocations = [[StandardPaths.DesktopLocation, "desktop"], [StandardPaths.DocumentsLocation, "documents"], [StandardPaths.DownloadLocation, "downloads"], [StandardPaths.MusicLocation, "music"], [StandardPaths.PicturesLocation, "pictures"], [StandardPaths.MoviesLocation, "videos"]];
                     for (let i = 0; i < xdgLocations.length; i++) {
                         const xdgName = Paths.toLocalFile(StandardPaths.writableLocation(xdgLocations[i][0])).split("/").pop();
                         if (xdgName && !(xdgName in folderIcons))
