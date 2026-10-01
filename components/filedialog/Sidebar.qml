@@ -15,50 +15,38 @@ StyledRect {
 
     required property var dialog
 
-    // dir: real folder under $HOME. label: static translatable string so it
-    // can be picked up for translation.
+    // dir: real folder under $HOME, resolved from the XDG user dirs so it
+    // is always correct regardless of system language (e.g. "Descargas"
+    // instead of "Downloads"). Shown as-is, so no translation needed.
+    // Falls back to the English name when the dir is outside $HOME.
     readonly property var places: [
         {
-            key: "Home",
             dir: "Home",
-            icon: "home",
-            label: Tr.trCtx("Home", "file dialog sidebar place")
+            icon: "home"
         },
         {
-            key: "Downloads",
             dir: userDirName(StandardPaths.DownloadLocation, "Downloads"),
-            icon: "file_download",
-            label: Tr.trCtx("Downloads", "file dialog sidebar place")
+            icon: "file_download"
         },
         {
-            key: "Desktop",
             dir: userDirName(StandardPaths.DesktopLocation, "Desktop"),
-            icon: "desktop_windows",
-            label: Tr.trCtx("Desktop", "file dialog sidebar place")
+            icon: "desktop_windows"
         },
         {
-            key: "Documents",
             dir: userDirName(StandardPaths.DocumentsLocation, "Documents"),
-            icon: "description",
-            label: Tr.trCtx("Documents", "file dialog sidebar place")
+            icon: "description"
         },
         {
-            key: "Music",
             dir: userDirName(StandardPaths.MusicLocation, "Music"),
-            icon: "music_note",
-            label: Tr.trCtx("Music", "file dialog sidebar place")
+            icon: "music_note"
         },
         {
-            key: "Pictures",
             dir: userDirName(StandardPaths.PicturesLocation, "Pictures"),
-            icon: "image",
-            label: Tr.trCtx("Pictures", "file dialog sidebar place")
+            icon: "image"
         },
         {
-            key: "Videos",
             dir: userDirName(StandardPaths.MoviesLocation, "Videos"),
-            icon: "video_library",
-            label: Tr.trCtx("Videos", "file dialog sidebar place")
+            icon: "video_library"
         }
     ]
 
@@ -145,7 +133,7 @@ StyledRect {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: place.modelData.label
+                        text: place.modelData.dir
                         color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                         font: Tokens.font.body.small
                         elide: Text.ElideRight
