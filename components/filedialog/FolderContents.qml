@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtCore
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
@@ -195,9 +196,37 @@ Item {
                     source = Qt.resolvedUrl(file.path);
                 else if (!file.isDir)
                     source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
-                else if (root.dialog.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
-                    source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
-                else
+                else if (root.dialog.cwd.length === 1) {
+                    // Match both the default English names and localised XDG
+                    // user dir names (e.g. Descargas) to freedesktop folder icons.
+                    const folderIcons = {
+                        Desktop: "desktop",
+                        Documents: "documents",
+                        Downloads: "downloads",
+                        Music: "music",
+                        Pictures: "pictures",
+                        Public: "public",
+                        Templates: "templates",
+                        Videos: "videos"
+                    };
+                    const xdgLocations = [
+                        [StandardPaths.DesktopLocation, "desktop"],
+                        [StandardPaths.DocumentsLocation, "documents"],
+                        [StandardPaths.DownloadLocation, "downloads"],
+                        [StandardPaths.MusicLocation, "music"],
+                        [StandardPaths.PicturesLocation, "pictures"],
+                        [StandardPaths.MoviesLocation, "videos"]
+                    ];
+                    for (let i = 0; i < xdgLocations.length; i++) {
+                        const xdgName = Paths.toLocalFile(StandardPaths.writableLocation(xdgLocations[i][0])).split("/").pop();
+                        if (xdgName && !(xdgName in folderIcons))
+                            folderIcons[xdgName] = xdgLocations[i][1];
+                    }
+                    if (file.name in folderIcons)
+                        source = Quickshell.iconPath(`folder-${folderIcons[file.name]}`);
+                    else
+                        source = Quickshell.iconPath("inode-directory");
+                } else
                     source = Quickshell.iconPath("inode-directory");
             }
         }
