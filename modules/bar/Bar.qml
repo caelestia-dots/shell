@@ -18,6 +18,12 @@ ColumnLayout {
     required property BarPopouts.Wrapper popouts
     required property bool fullscreen
     readonly property int vPadding: Tokens.padding.large
+    property EntryWrapper hoveredClock
+
+    function cancelClockHover(): void {
+        clockHoverTimer.stop();
+        hoveredClock = null;
+    }
 
     function closeTray(): void {
         if (!Config.bar.tray.compact)
@@ -33,6 +39,12 @@ ColumnLayout {
     function checkPopout(y: real): void {
         const ch = childAt(width / 2, y) as EntryWrapper;
 
+        if (ch?.entryId !== "clock") {
+            cancelClockHover();
+            if (popouts.currentName === "clock")
+                popouts.hasCurrent = false;
+        }
+
         if (ch?.entryId !== "tray")
             closeTray();
 
@@ -44,7 +56,14 @@ ColumnLayout {
         const id = ch.entryId;
         const top = ch.y;
 
-        if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
+        if (id === "clock" && Config.bar.popouts.clock && !fullscreen && !popouts.isDetached) {
+            hoveredClock = ch;
+            if (popouts.currentName !== "clock" || !popouts.hasCurrent) {
+                popouts.hasCurrent = false;
+                if (!clockHoverTimer.running)
+                    clockHoverTimer.start();
+            }
+        } else if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = (ch.item as StatusIcons).items;
             const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
             if (icon) {
@@ -102,6 +121,54 @@ ColumnLayout {
     }
 
     spacing: Tokens.spacing.medium
+
+    onFullscreenChanged: {
+        if (fullscreen) {
+            cancelClockHover();
+            if (popouts.currentName === "clock")
+                popouts.hasCurrent = false;
+        }
+    }
+    onVisibleChanged: {
+        if (!visible)
+            cancelClockHover();
+    }
+
+    Timer {
+        id: clockHoverTimer
+
+        interval: Math.max(0, root.Config.bar.clock.hoverDelay)
+        onTriggered: {
+            const entry = root.hoveredClock;
+            if (!entry?.visible || !entry.modelData.enabled || !entry.item || !root.Config.bar.popouts.clock || root.fullscreen || root.popouts.isDetached)
+                return;
+
+            root.popouts.currentName = "clock";
+            root.popouts.currentCenter = Qt.binding(() => entry.item?.mapToItem(root, 0, entry.item.implicitHeight / 2).y ?? 0);
+            root.popouts.hasCurrent = true;
+        }
+    }
+
+    Connections {
+        function onClockChanged(): void {
+            if (!root.Config.bar.popouts.clock) {
+                root.cancelClockHover();
+                if (root.popouts.currentName === "clock")
+                    root.popouts.hasCurrent = false;
+            }
+        }
+
+        target: root.Config.bar.popouts
+    }
+
+    Connections {
+        function onIsDetachedChanged(): void {
+            if (root.popouts.isDetached)
+                root.cancelClockHover();
+        }
+
+        target: root.popouts
+    }
 
     Repeater {
         id: repeater

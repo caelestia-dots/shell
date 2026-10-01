@@ -37,6 +37,11 @@ Item {
         }
 
         Popout {
+            name: "clock"
+            sourceComponent: ClockHover {}
+        }
+
+        Popout {
             id: networkPopout
 
             name: "network"
