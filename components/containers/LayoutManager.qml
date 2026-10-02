@@ -1,7 +1,6 @@
 pragma Singleton
 
 import QtQuick
-import Quickshell
 
 // Resolves overlaps between the shell's drawers.
 //
@@ -86,8 +85,7 @@ Item {
             hidden: false,
             history: []
         };
-        if (debug)
-            trace(`register ${key}  prio=${priority}  edges=${hEdge}/${vEdge}  natural=${num(panel.naturalWidth)}`);
+
         requestLayoutUpdate();
     }
 
