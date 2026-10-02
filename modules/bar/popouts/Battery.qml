@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Services
 import qs.components
 import qs.services
 
@@ -24,6 +25,12 @@ Column {
             comps.push(Tr.trN("%n min", "%n mins", min));
 
         return comps.join(Tr.trCtx(", ", "duration component separator"));
+    }
+
+    function timeUntilCharged(timeToFull: int, percentage: real): int {
+        if (!ChargeThreshold.isLimited)
+            return timeToFull;
+        return Math.round(timeToFull * (ChargeThreshold.limit - percentage) / (1 - percentage));
     }
 
     function powerProfileToString(p: int): string {
@@ -53,6 +60,10 @@ Column {
     spacing: Tokens.spacing.medium
     width: Tokens.sizes.bar.batteryWidth
 
+    ServiceRef {
+        service: ChargeThreshold
+    }
+
     StyledText {
         text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
     }
@@ -70,12 +81,19 @@ Column {
                 return Tr.tr("Calculating remaining battery life...");
             }
 
+            if (ChargeThreshold.isLimited && dev.percentage >= ChargeThreshold.limit)
+                return Tr.tr("Charge limit reached");
             if (dev.timeToFull > 0)
-                return Tr.tr("Time until charged: %1").arg(root.formatSeconds(dev.timeToFull));
+                return Tr.tr("Time until charged: %1").arg(root.formatSeconds(root.timeUntilCharged(dev.timeToFull, dev.percentage)));
             if (Math.round(dev.percentage * 100) === 100)
                 return Tr.tr("Fully charged!");
             return Tr.tr("Calculating time until charged...");
         }
+    }
+
+    StyledText {
+        visible: UPower.displayDevice.isLaptopBattery && ChargeThreshold.isLimited
+        text: Tr.tr("Charge limit: %1%").arg(ChargeThreshold.threshold)
     }
 
     Loader {
