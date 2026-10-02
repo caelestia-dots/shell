@@ -292,9 +292,13 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto filter = m_filter;
     const auto nameFilters = m_nameFilters;
 
+    const bool isRoot = dir == m_path;
+    const QString prefix = dir.endsWith(u'/') ? dir : dir + u'/';
     QSet<QString> oldPaths;
-    for (const auto& entry : std::as_const(m_entries))
-        oldPaths << entry->path();
+    for (const auto& entry : std::as_const(m_entries)) {
+        if (isRoot || entry->path().startsWith(prefix))
+            oldPaths << entry->path();
+    }
 
     auto future = QtConcurrent::run([=](QPromise<PathDiff>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
@@ -413,9 +417,13 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     }
 
     // Create new entries
+    QSet<QString> existing;
+    for (const auto& entry : std::as_const(m_entries))
+        existing << entry->path();
     QList<FileSystemEntry*> newEntries;
     for (const auto& path : addedPaths) {
-        newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
+        if (!existing.contains(path))
+            newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
     }
     std::ranges::sort(newEntries, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
         return compareEntries(a, b);
