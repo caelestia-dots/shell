@@ -38,6 +38,7 @@ CustomMouseArea {
 
     acceptedButtons: Qt.MiddleButton
     onClicked: root.screenState.dashboardDate = new Date()
+
     Anim {
         id: trOutAnim
 
