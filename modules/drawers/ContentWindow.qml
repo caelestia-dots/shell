@@ -345,5 +345,6 @@ StyledWindow {
         implicitHeight: panel.height
         radius: Tokens.rounding.extraLarge
         deformScale: (deformAmount * Config.appearance.deformScale) / 10000
+        damping: 28.3 // critical for stiffness 200 (2*sqrt(200)); default 16 rings for ~540ms
     }
 }
