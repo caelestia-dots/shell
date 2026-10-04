@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 
 if(NOT DEFINED VERSION)
-    execute_process(COMMAND git describe --tags --abbrev=0
+    execute_process(COMMAND git describe --tags --match "v*" --abbrev=0
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         OUTPUT_VARIABLE VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
