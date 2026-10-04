@@ -12,6 +12,7 @@ Item {
 
     required property var workspaces
     required property int wsSpacing
+    required property bool horizontal
 
     readonly property color colour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
     property color colourAnimated: colour
@@ -48,10 +49,13 @@ Item {
         required property int index
         required property Workspace modelData
 
-        property real topRadius: ifAdjacent(0, -1, 0, width / 2)
-        property real bottomRadius: ifAdjacent(root.workspaces.length - 1, 1, 0, width / 2)
-        property real topPadding: ifAdjacent(0, -1, root.wsSpacing, 0)
-        property real bottomPadding: ifAdjacent(root.workspaces.length - 1, 1, root.wsSpacing, 0)
+        // Leading edge is top (vertical) or left (horizontal), trailing is bottom/right.
+        // Padded edges flow into the gap to the neighbouring workspace.
+        property real leadRadius: ifAdjacent(0, -1, 0, armRadius)
+        property real trailRadius: ifAdjacent(root.workspaces.length - 1, 1, 0, armRadius)
+        property real leadPadding: ifAdjacent(0, -1, root.wsSpacing, 0)
+        property real trailPadding: ifAdjacent(root.workspaces.length - 1, 1, root.wsSpacing, 0)
+        readonly property real armRadius: root.horizontal ? height / 2 : width / 2
 
         function ifAdjacent(exclIdx: int, adj: int, yes: real, no: real): real {
             if (AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData?.isOccupied || index === exclIdx)
@@ -59,40 +63,50 @@ Item {
             return root.workspaces[index + adj]?.isOccupied ? yes : no;
         }
 
-        anchors.left: parent?.left
-        anchors.right: parent?.right
-        anchors.margins: -1
-
-        y: modelData ? modelData.y + anchors.margins - topPadding : 0
-        implicitHeight: modelData ? modelData.LazyListView.visibleHeight - anchors.margins * 2 + topPadding + bottomPadding : 0
+        x: root.horizontal ? modelData.x - 1 - leadPadding : -1
+        y: root.horizontal ? -1 : modelData.y - 1 - leadPadding
+        width: root.horizontal ? modelData.LazyListView.visibleWidth + 2 + leadPadding + trailPadding : parent.width + 2
+        implicitHeight: root.horizontal ? parent.height + 2 : modelData.LazyListView.visibleHeight + 2 + leadPadding + trailPadding
 
         color: Qt.alpha(root.colour, 1)
-        topLeftRadius: topRadius
-        topRightRadius: topRadius
-        bottomLeftRadius: bottomRadius
-        bottomRightRadius: bottomRadius
+        topLeftRadius: leadRadius
+        topRightRadius: trailRadius
+        bottomLeftRadius: leadRadius
+        bottomRightRadius: trailRadius
 
         opacity: modelData?.isOccupied ? 1 : 0
 
-        Behavior on topRadius {
+        Behavior on topLeftRadius {
             Anim {
                 type: Anim.DefaultEffects
             }
         }
 
-        Behavior on bottomRadius {
+        Behavior on topRightRadius {
             Anim {
                 type: Anim.DefaultEffects
             }
         }
 
-        Behavior on topPadding {
+        Behavior on bottomLeftRadius {
             Anim {
                 type: Anim.DefaultEffects
             }
         }
 
-        Behavior on bottomPadding {
+        Behavior on bottomRightRadius {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on leadPadding {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on trailPadding {
             Anim {
                 type: Anim.DefaultEffects
             }
