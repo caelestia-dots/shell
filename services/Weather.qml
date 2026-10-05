@@ -40,6 +40,9 @@ Singleton {
     }
 
     function reload(): void {
+        if (!GlobalConfig.services.weatherEnabled)
+            return;
+
         const configLocation = GlobalConfig.services.weatherLocation;
 
         if (configLocation) {
@@ -228,6 +231,9 @@ Singleton {
     }
 
     function fetchWeatherData(): void {
+        if (!GlobalConfig.services.weatherEnabled)
+            return;
+
         const url = getWeatherUrl();
         if (url === "")
             return;
@@ -336,6 +342,10 @@ Singleton {
     }
 
     Connections {
+        function onWeatherEnabledChanged(): void {
+            root.reload();
+        }
+
         function onWeatherLocationChanged(): void {
             root.reload();
         }
@@ -345,7 +355,7 @@ Singleton {
 
     Timer {
         interval: 3600000 // 1 hour
-        running: true
+        running: GlobalConfig.services.weatherEnabled
         repeat: true
         onTriggered: fetchWeatherData()
     }
