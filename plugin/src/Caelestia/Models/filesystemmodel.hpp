@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qabstractitemmodel.h>
+#include <qdatetime.h>
 #include <qdir.h>
 #include <qdiriterator.h>
 #include <qfilesystemwatcher.h>
@@ -25,12 +26,15 @@ class FileSystemEntry : public QObject {
     Q_PROPERTY(QString parentDir READ parentDir CONSTANT)
     Q_PROPERTY(QString suffix READ suffix CONSTANT)
     Q_PROPERTY(qint64 size READ size CONSTANT)
+    Q_PROPERTY(QDateTime lastModified READ lastModified CONSTANT)
     Q_PROPERTY(bool isDir READ isDir CONSTANT)
     Q_PROPERTY(bool isImage READ isImage CONSTANT)
     Q_PROPERTY(QString mimeType READ mimeType CONSTANT)
 
 public:
-    explicit FileSystemEntry(const QString& path, QString relativePath, QObject* parent = nullptr);
+    // The info should come stat()ed from the scan, so reading it does not touch the
+    // file system on the UI thread
+    explicit FileSystemEntry(const QFileInfo& info, QString relativePath, QObject* parent = nullptr);
 
     [[nodiscard]] QString path() const;
     [[nodiscard]] QString relativePath() const;
@@ -39,6 +43,7 @@ public:
     [[nodiscard]] QString parentDir() const;
     [[nodiscard]] QString suffix() const;
     [[nodiscard]] qint64 size() const;
+    [[nodiscard]] QDateTime lastModified() const;
     [[nodiscard]] bool isDir() const;
     [[nodiscard]] bool isImage() const;
     [[nodiscard]] QString mimeType() const;
@@ -72,6 +77,9 @@ class FileSystemModel : public QAbstractListModel {
     Q_PROPERTY(bool sortReverse READ sortReverse WRITE setSortReverse NOTIFY sortReverseChanged)
     Q_PROPERTY(Filter filter READ filter WRITE setFilter NOTIFY filterChanged)
     Q_PROPERTY(QStringList nameFilters READ nameFilters WRITE setNameFilters NOTIFY nameFiltersChanged)
+    // Whether a scan is running. A scan that finds nothing changes no entries, so
+    // this is the only way to tell an empty folder from one still being scanned.
+    Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
 
     Q_PROPERTY(QQmlListProperty<caelestia::models::FileSystemEntry> entries READ entries NOTIFY entriesChanged)
 
@@ -113,6 +121,8 @@ public:
 
     [[nodiscard]] QQmlListProperty<FileSystemEntry> entries();
 
+    [[nodiscard]] bool loading() const;
+
 signals:
     void pathChanged();
     void recursiveChanged();
@@ -122,11 +132,13 @@ signals:
     void filterChanged();
     void nameFiltersChanged();
     void entriesChanged();
+    void loadingChanged();
 
 private:
     struct PathDiff {
         QSet<QString> removed;
-        QSet<QString> added;
+        // Keyed by path
+        QHash<QString, QFileInfo> added;
     };
 
     struct ScanFilters {
@@ -139,6 +151,8 @@ private:
     QFileSystemWatcher m_watcher;
     QList<FileSystemEntry*> m_entries;
     QHash<QString, QFuture<PathDiff>> m_futures;
+    // Each scan finishes exactly once, either through then() or onCanceled()
+    int m_runningScans = 0;
 
     QString m_path;
     bool m_recursive;
@@ -153,10 +167,12 @@ private:
     void updateWatcher();
     void updateEntries();
     void updateEntriesForDir(const QString& dir);
+    void scanStarted();
+    void scanEnded();
     [[nodiscard]] static ScanFilters filtersFor(Filter filter, const QStringList& nameFilters, bool showHidden);
-    [[nodiscard]] static std::optional<QSet<QString>> scanDir(const QString& dir, const ScanFilters& filters,
-        QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise);
-    void applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths);
+    [[nodiscard]] static std::optional<QHash<QString, QFileInfo>> scanDir(const QString& dir,
+        const ScanFilters& filters, QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise);
+    void applyChanges(const QSet<QString>& removedPaths, const QHash<QString, QFileInfo>& added);
     [[nodiscard]] bool compareEntries(const FileSystemEntry* a, const FileSystemEntry* b) const;
 };
 

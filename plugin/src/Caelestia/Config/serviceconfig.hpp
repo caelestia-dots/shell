@@ -43,6 +43,8 @@ class ServiceConfig : public settings::ObjectNode {
             vmap({ { u"from"_s, u"com.github.th_ch.youtube_music"_s }, { u"to"_s, u"YT Music"_s } }),
         }))
     CONFIG_GLOBAL_ENUM_PROPERTY(LyricsBackend, lyricsBackend, LyricsBackend::Auto)
+    // Run kdeconnectd from the shell, for the phone share card
+    CONFIG_GLOBAL_PROPERTY(bool, kdeConnect, false)
 };
 
 } // namespace caelestia::config

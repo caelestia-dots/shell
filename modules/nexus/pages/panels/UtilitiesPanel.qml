@@ -73,6 +73,13 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.tr("Phone share")
+            subtext: Tr.tr("Send files to and browse a phone with KDE Connect")
+            checked: Config.utilities.cards.phoneShare
+            onToggled: GlobalConfig.utilities.cards.phoneShare = checked
+        }
+
+        ToggleRow {
             last: true
             text: Tr.tr("Quick toggles")
             subtext: Tr.tr("Show the quick toggles card")
