@@ -12,10 +12,10 @@ namespace caelestia::models {
 using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
 
-FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
+FileSystemEntry::FileSystemEntry(const QFileInfo& info, QString relativePath, QObject* parent)
     : QObject(parent)
-    , m_fileInfo(path)
-    , m_path(path)
+    , m_fileInfo(info)
+    , m_path(info.filePath())
     , m_relativePath(std::move(relativePath))
     , m_isImageInitialised(false)
     , m_mimeTypeInitialised(false) {}
@@ -47,6 +47,10 @@ QString FileSystemEntry::suffix() const {
 qint64 FileSystemEntry::size() const {
     return m_fileInfo.size();
 };
+
+QDateTime FileSystemEntry::lastModified() const {
+    return m_fileInfo.lastModified();
+}
 
 bool FileSystemEntry::isDir() const {
     return m_fileInfo.isDir();
@@ -140,6 +144,10 @@ void FileSystemModel::setRecursive(bool recursive) {
     emit recursiveChanged();
 
     update();
+}
+
+bool FileSystemModel::loading() const {
+    return m_runningScans > 0;
 }
 
 bool FileSystemModel::watchChanges() const {
@@ -269,9 +277,13 @@ void FileSystemModel::updateEntries() {
     if (m_path.isEmpty()) {
         if (!m_entries.isEmpty()) {
             beginResetModel();
-            qDeleteAll(m_entries);
-            m_entries.clear();
+            const auto oldEntries = std::exchange(m_entries, {});
             endResetModel();
+
+            // Views hold the entries until the reset is done, so deleting them right away
+            // left delegates reading deleted objects. Delete them later, like removed rows.
+            for (auto* entry : oldEntries)
+                entry->deleteLater();
             emit entriesChanged();
         }
 
@@ -298,16 +310,34 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
 
     auto future = QtConcurrent::run([=](QPromise<PathDiff>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
-        const auto newPaths = scanDir(dir, filtersFor(filter, nameFilters, showHidden), flags, promise);
-        if (!newPaths)
+        const auto found = scanDir(dir, filtersFor(filter, nameFilters, showHidden), flags, promise);
+        if (!found)
             return;
 
-        promise.addResult({ .removed = oldPaths - *newPaths, .added = *newPaths - oldPaths });
+        PathDiff diff;
+        for (auto it = found->cbegin(); it != found->cend(); ++it) {
+            if (oldPaths.contains(it.key()))
+                continue;
+
+            // Read the attributes here rather than lazily on the UI thread, where sorting
+            // asks every new entry whether it is a dir. On slow file systems such as a
+            // phone mounted over sshfs, each read is a network round trip.
+            auto info = it.value();
+            info.stat();
+            diff.added.insert(it.key(), info);
+        }
+        for (const auto& path : oldPaths) {
+            if (!found->contains(path))
+                diff.removed << path;
+        }
+
+        promise.addResult(diff);
     });
 
     if (m_futures.contains(dir))
         m_futures[dir].cancel();
     m_futures.insert(dir, future);
+    scanStarted();
 
     future
         .then(this,
@@ -315,10 +345,23 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
                 m_futures.remove(dir);
                 if (!result.removed.isEmpty() || !result.added.isEmpty())
                     applyChanges(result.removed, result.added);
+                // After applying, so the entries are complete once loading is false
+                scanEnded();
             })
         .onCanceled(this, [dir, this]() {
             m_futures.remove(dir);
+            scanEnded();
         });
+}
+
+void FileSystemModel::scanStarted() {
+    if (m_runningScans++ == 0)
+        emit loadingChanged();
+}
+
+void FileSystemModel::scanEnded() {
+    if (--m_runningScans == 0)
+        emit loadingChanged();
 }
 
 FileSystemModel::ScanFilters FileSystemModel::filtersFor(
@@ -349,7 +392,7 @@ FileSystemModel::ScanFilters FileSystemModel::filtersFor(
     return filters;
 }
 
-std::optional<QSet<QString>> FileSystemModel::scanDir(const QString& dir, const ScanFilters& filters,
+std::optional<QHash<QString, QFileInfo>> FileSystemModel::scanDir(const QString& dir, const ScanFilters& filters,
     QDirIterator::IteratorFlags flags, const QPromise<PathDiff>& promise) {
     std::optional<QDirIterator> iter;
     if (filters.nameFilters.isEmpty())
@@ -357,7 +400,7 @@ std::optional<QSet<QString>> FileSystemModel::scanDir(const QString& dir, const 
     else
         iter.emplace(dir, filters.nameFilters, filters.filters, flags);
 
-    QSet<QString> paths;
+    QHash<QString, QFileInfo> found;
     while (iter->hasNext()) {
         if (promise.isCanceled())
             return std::nullopt;
@@ -366,16 +409,16 @@ std::optional<QSet<QString>> FileSystemModel::scanDir(const QString& dir, const 
         if (filters.filterFn && !filters.filterFn(path))
             continue;
 
-        paths.insert(path);
+        found.insert(path, iter->fileInfo());
     }
 
     if (promise.isCanceled())
         return std::nullopt;
 
-    return paths;
+    return found;
 }
 
-void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet<QString>& addedPaths) {
+void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QHash<QString, QFileInfo>& added) {
     QList<int> removedIndices;
     for (int i = 0; i < m_entries.size(); ++i) {
         if (removedPaths.contains(m_entries[i]->path())) {
@@ -414,8 +457,8 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
 
     // Create new entries
     QList<FileSystemEntry*> newEntries;
-    for (const auto& path : addedPaths) {
-        newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
+    for (auto it = added.cbegin(); it != added.cend(); ++it) {
+        newEntries << new FileSystemEntry(it.value(), m_dir.relativeFilePath(it.key()), this);
     }
     std::ranges::sort(newEntries, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
         return compareEntries(a, b);

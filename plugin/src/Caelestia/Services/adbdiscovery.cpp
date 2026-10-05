@@ -2,8 +2,10 @@
 
 #include <qbytearray.h>
 #include <qnetworkdatagram.h>
+#include <qrandom.h>
 
 #include <optional>
+#include <string_view>
 
 namespace caelestia::services {
 
@@ -150,6 +152,21 @@ void AdbDiscovery::bind() {
         m_socket.bind(QHostAddress::AnyIPv4, 0);
 
     m_bound = true;
+}
+
+QString AdbDiscovery::randomToken(int length) {
+    // Letters and digits only, as ; and : separate the fields of the QR code
+    static constexpr std::string_view k_chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    if (length <= 0)
+        return {};
+
+    QString token;
+    token.reserve(length);
+    auto* generator = QRandomGenerator::system();
+    for (int i = 0; i < length; ++i)
+        token.append(QLatin1Char(k_chars[generator->bounded(static_cast<quint32>(k_chars.size()))]));
+    return token;
 }
 
 void AdbDiscovery::query() {

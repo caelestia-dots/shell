@@ -34,8 +34,12 @@ Singleton {
     property var pendingService: null
     property int watchers
 
-    // The pairing in progress: { deviceId, status, error }. status is "waiting" for
-    // the pairing screen, "pairing", "connecting" or "failed".
+    // qrencode is optional, without it pairing uses the code
+    property bool qrAvailable
+    // The pairing in progress: { deviceId, mode, status, error }. mode is "qr" or
+    // "code". status is "waiting" for the phone, "pairing", "connecting" or "failed".
+    // QR pairings also hold the name and password in the code, and its modules as
+    // rows of "1" (dark) and "0" (light) in qr.
     property var pairing: null
     // The phone's pairing service, once its pairing screen is open
     readonly property var pairingService: pairing ? findService(pairing.deviceId, "pairing") : null
@@ -303,36 +307,124 @@ Singleton {
         proc.running = true;
     }
 
+    // Clears what a failing callback may have left half done, so a refresh, connection
+    // or pairing cannot stay stuck, and the next attempt starts clean
+    function recover(): void {
+        refreshing = false;
+        pendingConnect = null;
+        pendingService = null;
+        serviceWait.stop();
+        busy = {};
+
+        if (pairing?.status === "pairing" || pairing?.status === "connecting")
+            setPairing({
+                status: "failed",
+                error: Tr.tr("Something went wrong, try again")
+            });
+    }
+
     function setPairing(changes: var): void {
         pairing = pairing ? Object.assign({}, pairing, changes) : null;
     }
 
-    // Waits for the phone's "Pair device with pairing code" screen, whose service
-    // provides the port the code is entered for
     function startPairing(deviceId: string): void {
         if (!available)
             return;
 
+        if (qrAvailable)
+            useQrCode(deviceId);
+        else
+            usePairingCode(deviceId);
+    }
+
+    // Waits for the phone's "Pair device with pairing code" screen, whose service
+    // provides the port the code is entered for
+    function usePairingCode(deviceId: string): void {
         pairing = {
             deviceId,
+            mode: "code",
             status: "waiting",
             error: ""
         };
         discovery.query();
     }
 
+    // Shows a QR code for the phone's "Pair device with QR code" screen. After scanning
+    // it, the phone advertises a pairing service under the name in the code, and
+    // pairing uses the password in it. Both are new for every code.
+    function useQrCode(deviceId: string): void {
+        const name = `caelestia-${discovery.randomToken(8)}`;
+        const password = discovery.randomToken(12);
+        pairing = {
+            deviceId,
+            mode: "qr",
+            status: "waiting",
+            error: "",
+            name,
+            password,
+            qr: []
+        };
+        discovery.query();
+
+        run(["qrencode", "-t", "ASCII", "-m", "0", `WIFI:T:ADB;S:${name};P:${password};;`], result => {
+            if (pairing?.name !== name)
+                return;
+
+            const qr = result.exitCode === 0 ? parseQr(result.output) : [];
+            if (qr.length === 0) {
+                console.warn(lc, "Could not create the pairing QR code, using the pairing code instead");
+                usePairingCode(deviceId);
+                return;
+            }
+
+            setPairing({
+                qr
+            });
+        });
+    }
+
+    // qrencode -t ASCII draws each module as two characters, "##" for dark ones
+    function parseQr(text: string): list<string> {
+        const rows = text.split("\n").filter(line => line.length > 0).map(line => {
+            let row = "";
+            for (let i = 0; i + 1 < line.length; i += 2)
+                row += line[i] === "#" ? "1" : "0";
+            return row;
+        });
+
+        // A QR code is square, anything else means the output was not understood
+        return rows.length > 0 && rows.every(row => row.length === rows.length) ? rows : [];
+    }
+
+    // Pairs once the phone advertises the service named in the QR code
+    function checkQrPairing(): void {
+        const current = pairing;
+        if (current?.mode !== "qr" || current.status !== "waiting" || current.qr.length === 0)
+            return;
+
+        const service = discovery.services.find(s => s.kind === "pairing" && s.name === current.name);
+        if (service)
+            pairWith(current, service, current.password);
+    }
+
     function submitPairingCode(code: string): void {
         const current = pairing;
         const service = pairingService;
-        if (!current || !service || !/^\d{6}$/.test(code) || current.status === "pairing" || current.status === "connecting")
+        if (current?.mode !== "code" || !service || !/^\d{6}$/.test(code) || current.status === "pairing" || current.status === "connecting")
             return;
 
+        pairWith(current, service, code);
+    }
+
+    // Pairs with the phone's pairing service using the code or the QR password, then
+    // connects
+    function pairWith(current: var, service: var, secret: string): void {
         setPairing({
             status: "pairing",
             error: ""
         });
 
-        run(["adb", "pair", `${service.address}:${service.port}`, code], result => {
+        run(["adb", "pair", `${service.address}:${service.port}`, secret], result => {
             if (pairing?.deviceId !== current.deviceId)
                 return;
 
@@ -389,10 +481,13 @@ Singleton {
         sessions = nextSessions;
     }
 
-    Component.onCompleted: run(["sh", "-c", "command -v adb && command -v scrcpy"], result => {
-        available = result.exitCode === 0;
-        refresh();
-    })
+    Component.onCompleted: {
+        run(["sh", "-c", "command -v adb && command -v scrcpy"], result => {
+            available = result.exitCode === 0;
+            refresh();
+        });
+        run(["sh", "-c", "command -v qrencode"], result => qrAvailable = result.exitCode === 0);
+    }
 
     onFailed: (device, error) => {
         // Connecting after pairing failed, so the pairing view shows why
@@ -424,6 +519,8 @@ Singleton {
         active: root.available && (root.watchers > 0 || root.pairing !== null || Object.keys(root.busy).length > 0)
 
         onServicesChanged: {
+            root.checkQrPairing();
+
             const pending = root.pendingService;
             const service = pending ? root.findService(pending.deviceId, "connect") : null;
             if (!service)
@@ -433,6 +530,15 @@ Singleton {
             root.pendingService = null;
             root.connectTo(pending.deviceId, service, pending.onConnected);
         }
+    }
+
+    // The phone advertises its pairing service only briefly after scanning, so ask
+    // more often while a QR code is shown
+    Timer {
+        running: root.pairing?.mode === "qr" && root.pairing.status === "waiting"
+        repeat: true
+        interval: 1000
+        onTriggered: discovery.query()
     }
 
     Timer {
@@ -483,13 +589,22 @@ Singleton {
 
             onExited: code => { // qmllint disable signal-handler-parameters
                 Qt.callLater(() => {
-                    proc.callback?.({
-                        exitCode: code,
-                        output: output.text ?? "",
-                        error: error.text ?? "",
-                        timedOut: proc.timedOut
-                    });
-                    proc.destroy();
+                    try {
+                        proc.callback?.({
+                            exitCode: code,
+                            output: output.text ?? "",
+                            error: error.text ?? "",
+                            timedOut: proc.timedOut
+                        });
+                    } catch (exception) {
+                        // Only the command name like "adb shell", as the arguments of adb pair
+                        // hold the pairing code
+                        const name = proc.command.filter((arg, i, args) => arg !== "-s" && args[i - 1] !== "-s").slice(0, 2).join(" ");
+                        console.warn(lc, `Handling the result of ${name} failed: ${exception}`);
+                        root.recover();
+                    } finally {
+                        proc.destroy();
+                    }
                 });
             }
         }

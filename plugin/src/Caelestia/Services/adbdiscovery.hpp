@@ -33,6 +33,10 @@ public:
     // Asks the network again right away, instead of waiting for the next interval
     Q_INVOKABLE void query();
 
+    // A random string of lowercase letters and digits from the system's secure source,
+    // for the name and password of a pairing QR code
+    Q_INVOKABLE static QString randomToken(int length);
+
 signals:
     void activeChanged();
     void servicesChanged();

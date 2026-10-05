@@ -2,6 +2,8 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
+import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Services
 
@@ -24,6 +26,19 @@ Singleton {
     readonly property int pairRequested: 1
     readonly property int pairRequestedByPeer: 2
     readonly property int pairPaired: 3
+
+    // The shell runs kdeconnectd as this systemd user unit, so the daemon outlives
+    // shell restarts and can be told apart from one started elsewhere
+    readonly property string unitName: "caelestia-kdeconnect"
+    readonly property bool runDaemon: GlobalConfig.services.kdeConnect
+    // Whether the running daemon is the shell's own unit
+    property bool managed
+    // True while the daemon is being started or stopped
+    property bool daemonBusy
+    // The setting changed while busy, so sync again afterwards
+    property bool syncPending
+    // Running, but started by something else, e.g. the compositor or a systemd service
+    readonly property bool external: available && !managed
 
     // Keyed by device id
     property var mounts: ({})
@@ -163,6 +178,67 @@ Singleton {
         daemon.unpair(deviceId);
     }
 
+    function command(args: list<string>, callback: var): void {
+        const proc = commandComp.createObject(root, {
+            command: args,
+            callback
+        });
+        proc.running = true;
+    }
+
+    function checkManaged(): void {
+        command(["systemctl", "--user", "is-active", "--quiet", unitName], code => managed = code === 0);
+    }
+
+    function finishSync(): void {
+        daemonBusy = false;
+        checkManaged();
+
+        if (syncPending) {
+            syncPending = false;
+            syncDaemon();
+        }
+    }
+
+    // Starts or stops the shell's daemon to match the setting. Only runs on shell
+    // start and when the setting changes, so a daemon that fails to start is not
+    // retried in a loop.
+    function syncDaemon(): void {
+        if (daemonBusy) {
+            syncPending = true;
+            return;
+        }
+
+        daemonBusy = true;
+        command(["systemctl", "--user", "is-active", "--quiet", unitName], unitCode => {
+            managed = unitCode === 0;
+
+            if (runDaemon && !managed) {
+                // A daemon started elsewhere is left alone instead of starting a second one
+                command(["busctl", "--user", "status", "org.kde.kdeconnect"], busCode => {
+                    if (busCode === 0) {
+                        finishSync();
+                        return;
+                    }
+
+                    command(["systemd-run", "--user", `--unit=${unitName}`, "--collect", "--quiet", "kdeconnectd"], startCode => {
+                        if (startCode !== 0)
+                            console.warn(lc, "Failed to start kdeconnectd");
+                        finishSync();
+                    });
+                });
+            } else if (!runDaemon && managed) {
+                command(["systemctl", "--user", "stop", unitName], stopCode => {
+                    if (stopCode !== 0)
+                        console.warn(lc, "Failed to stop kdeconnectd");
+                    finishSync();
+                });
+            } else {
+                finishSync();
+            }
+        });
+    }
+
     function syncMounts(): void {
         const ids = devices.map(d => d.id);
         const keep = state => {
@@ -180,9 +256,14 @@ Singleton {
             refreshMount(id);
     }
 
+    Component.onCompleted: syncDaemon()
+    onRunDaemonChanged: syncDaemon()
+
     KdeConnectDaemon {
         id: daemon
 
+        // Whoever started or stopped the daemon, find out whether it is ours
+        onAvailableChanged: root.checkManaged()
         onDevicesChanged: root.syncMounts()
         onShared: (device, count) => root.shared(device, count)
         onShareFailed: (device, error) => {
@@ -207,6 +288,23 @@ Singleton {
         onPairingFailed: (device, error) => {
             console.warn(lc, `Pairing with ${device} failed: ${error}`);
             root.pairingFailed(device, error);
+        }
+    }
+
+    Component {
+        id: commandComp
+
+        Process {
+            id: proc
+
+            property var callback
+
+            onExited: code => { // qmllint disable signal-handler-parameters
+                Qt.callLater(() => {
+                    proc.callback?.(code);
+                    proc.destroy();
+                });
+            }
         }
     }
 

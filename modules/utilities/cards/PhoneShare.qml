@@ -484,42 +484,83 @@ StyledRect {
                     ColumnLayout {
                         id: pairingView
 
+                        readonly property bool qrMode: device.pairing?.mode === "qr"
+                        readonly property bool canSwitch: device.pairing?.status === "waiting" || device.pairing?.status === "failed"
                         // A code can only be typed once the phone's pairing screen is open
-                        readonly property bool codeEntry: device.pairing !== null && (device.pairing.status === "waiting" || device.pairing.status === "failed") && Scrcpy.pairingService !== null
+                        readonly property bool codeEntry: device.pairing !== null && !qrMode && canSwitch && Scrcpy.pairingService !== null
+                        readonly property bool showQr: qrMode && device.pairing.status === "waiting" && device.pairing.qr.length > 0
 
                         Layout.fillWidth: true
                         visible: device.pairing !== null
                         spacing: Tokens.spacing.small
 
-                        RowLayout {
+                        StyledText {
                             Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: {
-                                    switch (device.pairing?.status) {
-                                    case "pairing":
-                                        return Tr.tr("Pairing…");
-                                    case "connecting":
-                                        return Tr.tr("Paired, connecting…");
-                                    case "failed":
-                                        return device.pairing.error;
-                                    default:
-                                        return Scrcpy.pairingService ? Tr.tr("Enter the code shown on the phone") : Tr.tr("On the phone, open Wireless debugging and pick Pair device with pairing code");
-                                    }
+                            text: {
+                                switch (device.pairing?.status) {
+                                case "pairing":
+                                    return Tr.tr("Pairing…");
+                                case "connecting":
+                                    return Tr.tr("Paired, connecting…");
+                                case "failed":
+                                    return device.pairing.error;
                                 }
-                                color: device.pairing?.status === "failed" ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-                                font: Tokens.font.body.small
-                                wrapMode: Text.WordWrap
+                                if (pairingView.qrMode)
+                                    return pairingView.showQr ? Tr.tr("On the phone, open Wireless debugging, pick Pair device with QR code and scan this") : Tr.tr("Creating the QR code…");
+                                return Scrcpy.pairingService ? Tr.tr("Enter the code shown on the phone") : Tr.tr("On the phone, open Wireless debugging and pick Pair device with pairing code");
+                            }
+                            color: device.pairing?.status === "failed" ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.body.small
+                            wrapMode: Text.WordWrap
+                        }
+
+                        // Dark modules on white whatever the theme, as phone cameras read
+                        // inverted QR codes unreliably
+                        StyledRect {
+                            id: qrBox
+
+                            // The standard quiet zone around a QR code, in modules
+                            readonly property int quietZone: 4
+                            readonly property int modules: device.pairing?.qr?.length ?? 0
+                            // Whole pixels per module keep the edges sharp
+                            readonly property int cell: modules > 0 ? Math.floor(Tokens.sizes.utilities.width * 0.5 / (modules + quietZone * 2)) : 0
+
+                            Layout.alignment: Qt.AlignHCenter
+                            visible: pairingView.showQr
+                            implicitWidth: cell * (modules + quietZone * 2)
+                            implicitHeight: implicitWidth
+
+                            radius: Tokens.rounding.small
+                            color: "white"
+
+                            Canvas {
+                                id: qrCanvas
+
+                                anchors.fill: parent
+                                antialiasing: false
+
+                                onPaint: {
+                                    const ctx = getContext("2d");
+                                    ctx.reset();
+                                    ctx.fillStyle = "black";
+
+                                    const rows = device.pairing?.qr ?? [];
+                                    const cell = qrBox.cell;
+                                    const offset = qrBox.quietZone * cell;
+                                    for (let y = 0; y < rows.length; y++)
+                                        for (let x = 0; x < rows[y].length; x++)
+                                            if (rows[y][x] === "1")
+                                                ctx.fillRect(offset + x * cell, offset + y * cell, cell, cell);
+                                }
+                                onWidthChanged: requestPaint()
                             }
 
-                            // Next to the text while there is nothing to type yet
-                            TextButton {
-                                visible: !pairingView.codeEntry
-                                type: TextButton.Text
-                                text: Tr.trCtx("Cancel", "button")
-                                onClicked: device.cancelPairing()
+                            Connections {
+                                function onPairingChanged(): void {
+                                    qrCanvas.requestPaint();
+                                }
+
+                                target: device
                             }
                         }
 
@@ -551,8 +592,21 @@ StyledRect {
 
                         RowLayout {
                             Layout.alignment: Qt.AlignRight
-                            visible: pairingView.codeEntry
                             spacing: Tokens.spacing.small
+
+                            TextButton {
+                                visible: pairingView.qrMode && pairingView.canSwitch
+                                type: TextButton.Text
+                                text: Tr.tr("Use pairing code")
+                                onClicked: Scrcpy.usePairingCode(device.deviceId)
+                            }
+
+                            TextButton {
+                                visible: !pairingView.qrMode && pairingView.canSwitch && Scrcpy.qrAvailable
+                                type: TextButton.Text
+                                text: Tr.tr("Use QR code")
+                                onClicked: Scrcpy.useQrCode(device.deviceId)
+                            }
 
                             TextButton {
                                 type: TextButton.Text
@@ -560,7 +614,16 @@ StyledRect {
                                 onClicked: device.cancelPairing()
                             }
 
+                            // A QR code's password works once, so trying again needs a new code
                             TextButton {
+                                visible: pairingView.qrMode && device.pairing?.status === "failed"
+                                type: TextButton.Tonal
+                                text: Tr.tr("Try again")
+                                onClicked: Scrcpy.useQrCode(device.deviceId)
+                            }
+
+                            TextButton {
+                                visible: pairingView.codeEntry
                                 type: TextButton.Tonal
                                 text: Tr.tr("Pair")
                                 disabled: !codeField.canSubmit

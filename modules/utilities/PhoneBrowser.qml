@@ -23,10 +23,19 @@ Item {
     property string currentPath
     property string modelPath
     property string pendingPath
-    // The model gives no signal when a scan finds nothing, so a folder counts as
-    // loaded once entries arrive or loadTimer runs out
+    // Whether the folder on show has been scanned, see finishLoading
     property bool loaded
     property bool navigating
+    // Leaving the old folder animates while its target is checked. Both have to be
+    // done before the new folder is shown.
+    property bool exitDone
+    // "pending", "ok" or "failed"
+    property string probeState
+    // Waiting for a folder, once the old one has left the view
+    readonly property bool loading: !loaded && (!navigating || exitDone)
+    // Where each folder left this session was scrolled to, keyed by path, so going
+    // back returns there: the first visible entry and how far into it the view was
+    property var scrollMemory: ({})
 
     property string selectedPath
     property string selectedIcon
@@ -42,12 +51,42 @@ Item {
     property real animTranslate
     property real animOpacity: 1
     readonly property real animDistance: Tokens.padding.extraLarge
+    readonly property var extensionIcons: {
+        const icons = {};
+        const groups = {
+            image: ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "avif", "bmp", "tif", "tiff", "svg", "dng", "raw"],
+            movie: ["mp4", "m4v", "mkv", "webm", "mov", "avi", "3gp", "3g2", "ts", "mpeg", "mpg", "wmv", "flv"],
+            audio_file: ["mp3", "m4a", "aac", "flac", "ogg", "oga", "opus", "wav", "amr", "mid", "midi", "wma"],
+            picture_as_pdf: ["pdf"],
+            description: ["txt", "md", "log", "csv", "json", "xml", "html", "htm", "ini", "conf", "yaml", "yml", "srt", "vtt"],
+            archive: ["zip", "rar", "7z", "tar", "gz", "tgz", "bz2", "xz", "zst", "apk", "xapk"]
+        };
+        for (const icon in groups)
+            for (const extension of groups[icon])
+                icons[extension] = icon;
+        return icons;
+    }
 
     readonly property bool atRoot: currentPath === rootPath
     readonly property bool downloadingHere: KdeConnect.downloading && KdeConnect.downloadDevice === deviceId
-    readonly property string displayPath: {
+    // Each folder from the storage root down to the current one
+    readonly property var crumbs: {
+        const result = [
+            {
+                name: Tr.tr("Internal storage"),
+                path: rootPath
+            }
+        ];
         const relative = currentPath.slice(rootPath.length).replace(/^\/+/, "");
-        return relative ? relative.split("/").join("  ›  ") : Tr.tr("Internal storage");
+        let path = rootPath;
+        for (const part of relative ? relative.split("/") : []) {
+            path += `/${part}`;
+            result.push({
+                name: part,
+                path
+            });
+        }
+        return result;
     }
 
     signal closeRequested
@@ -55,28 +94,33 @@ Item {
     function reset(): void {
         exitAnim.stop();
         enterAnim.stop();
-        loadTimer.stop();
 
         navigating = false;
+        exitDone = false;
+        probeState = "";
         animTranslate = 0;
         animOpacity = 1;
 
         clearSelection();
         downloadStatus = "";
+        scrollMemory = {};
 
         currentPath = rootPath;
-        modelPath = rootPath;
         loaded = false;
-        loadTimer.restart();
+        modelPath = rootPath;
+        // Setting the same path starts no scan, so there is nothing to wait for
+        if (!folderModel.loading)
+            finishLoading();
     }
 
     function stop(): void {
         exitAnim.stop();
         enterAnim.stop();
-        loadTimer.stop();
 
         navigating = false;
         pendingPath = "";
+        exitDone = false;
+        probeState = "";
         animTranslate = 0;
         animOpacity = 1;
 
@@ -98,14 +142,57 @@ Item {
         if (navigating || path === currentPath || !insideRoot(path))
             return;
 
+        rememberScroll();
+
         animDirection = forward ? -1 : 1;
         pendingPath = path;
         navigating = true;
+        loaded = false;
+        exitDone = false;
+        probeState = "pending";
         clearSelection();
         downloadStatus = "";
 
-        // Leaving starts once the folder responds, see onMountChecked
+        // Leave right away while the folder is checked, see continueNavigation
+        exitAnim.restart();
         KdeConnect.checkMount(deviceId, path);
+    }
+
+    function rememberScroll(): void {
+        const next = Object.assign({}, scrollMemory);
+
+        // Any scroll counts, also less than one entry, e.g. in a folder that almost
+        // fits the view
+        if (fileView.contentY > fileView.originY) {
+            // indexAt takes content coordinates, so this is the entry at the top of the view
+            const index = fileView.indexAt(fileView.width / 2, fileView.contentY + 1);
+            const item = fileView.itemAtIndex(index);
+            next[currentPath] = {
+                index,
+                offset: item ? fileView.contentY - item.y : 0
+            };
+        } else {
+            delete next[currentPath];
+        }
+
+        scrollMemory = next;
+    }
+
+    // Runs when either the exit animation or the folder check finishes
+    function continueNavigation(): void {
+        if (!navigating || !exitDone || probeState === "pending")
+            return;
+
+        if (probeState === "ok") {
+            showPendingPath();
+            return;
+        }
+
+        // The folder vanished, so bring the current one back. A dead mount gets
+        // unmounted instead, which closes the browser.
+        pendingPath = "";
+        loaded = true;
+        enterAnim.restart();
     }
 
     // Runs while the old folder is invisible
@@ -122,16 +209,35 @@ Item {
                 return;
 
             modelPath = currentPath;
-            loadTimer.restart();
+            if (!folderModel.loading)
+                finishLoading();
         });
     }
 
+    // Runs once the model has finished scanning
     function finishLoading(): void {
-        loadTimer.stop();
+        // Only a finished scan of the folder on show counts. While switching folders
+        // the model is briefly on an empty path, and the folder being left may still
+        // finish a scan during the exit animation.
+        if (folderModel.loading || folderModel.path !== currentPath || (navigating && currentPath !== pendingPath))
+            return;
+
         if (loaded)
             return;
 
         loaded = true;
+
+        // Going back, return to where the folder was scrolled to. The model's loading
+        // ends after the entries are in, so the list is complete here, and it is
+        // still hidden until the enter animation.
+        const memory = scrollMemory[currentPath];
+        if (navigating && animDirection === 1 && memory && fileView.count > 0) {
+            fileView.positionViewAtIndex(Math.min(memory.index, fileView.count - 1), ListView.Beginning);
+            // Then the part of the entry that was scrolled past, without going beyond the end
+            const end = fileView.originY + Math.max(0, fileView.contentHeight - fileView.height);
+            fileView.contentY = Math.min(fileView.contentY + memory.offset, end);
+        }
+
         if (navigating)
             enterAnim.restart();
     }
@@ -149,22 +255,35 @@ Item {
         navigateTo(insideRoot(parentPath) ? parentPath : rootPath, false);
     }
 
-    function iconFor(isDir: bool, mimeType: string): string {
+    // Size and date of a file, e.g. "2.4 MB · 12 Sep". Both come from the scan, so this
+    // reads nothing from the phone. Folders get none, as their size needs a scan.
+    function detailsFor(isDir: bool, size: real, modified: var): string {
+        if (isDir)
+            return "";
+
+        const parts = [Units.formatBytes(size)];
+        if (modified instanceof Date && !isNaN(modified.getTime())) {
+            const thisYear = modified.getFullYear() === new Date().getFullYear();
+            parts.push(modified.toLocaleDateString(Qt.locale(), thisYear ? "d MMM" : "d MMM yyyy"));
+        }
+        return parts.join(" · ");
+    }
+
+    // Picks the icon from the extension alone. Reading the mime type can open the
+    // file, which on the phone's storage is a network request on the UI thread.
+    function iconFor(isDir: bool, name: string): string {
         if (isDir)
             return "folder";
-        if (mimeType.startsWith("image/"))
-            return "image";
-        if (mimeType.startsWith("video/"))
-            return "movie";
-        if (mimeType.startsWith("audio/"))
-            return "audio_file";
-        if (mimeType === "application/pdf")
-            return "picture_as_pdf";
-        if (mimeType.startsWith("text/"))
-            return "description";
-        if (/zip|compressed|archive/.test(mimeType))
-            return "archive";
-        return "draft";
+
+        // The last dot, so IMG_2024.01.05.jpg is a jpg. A dot at the start marks a
+        // hidden file rather than an extension.
+        const dot = name.lastIndexOf(".");
+        if (dot <= 0)
+            return "draft";
+
+        const extension = name.slice(dot + 1).toLowerCase();
+        // Only own keys, so a name like "x.constructor" cannot match Object's members
+        return extensionIcons.hasOwnProperty(extension) ? extensionIcons[extension] : "draft";
     }
 
     function setDownloadStatus(status: string, icon: string): void {
@@ -190,17 +309,11 @@ Item {
 
     Connections {
         function onMountChecked(device: string, path: string, reachable: bool): void {
-            if (device !== root.deviceId || path !== root.pendingPath || !root.navigating || root.currentPath === path || exitAnim.running)
+            if (device !== root.deviceId || path !== root.pendingPath || !root.navigating || root.probeState !== "pending")
                 return;
 
-            if (reachable) {
-                exitAnim.restart();
-            } else {
-                // A dead mount gets unmounted, which closes the browser. Otherwise
-                // the folder just vanished, so stay where we are.
-                root.navigating = false;
-                root.pendingPath = "";
-            }
+            root.probeState = reachable ? "ok" : "failed";
+            root.continueNavigation();
         }
 
         function onDownloaded(device: string, destinationPath: string): void {
@@ -223,13 +336,6 @@ Item {
     }
 
     Timer {
-        id: loadTimer
-
-        interval: 500
-        onTriggered: root.finishLoading()
-    }
-
-    Timer {
         id: cancelDelay
 
         running: root.downloadingHere && !root.cancelDelayElapsed
@@ -240,7 +346,10 @@ Item {
     ParallelAnimation {
         id: exitAnim
 
-        onFinished: root.showPendingPath()
+        onFinished: {
+            root.exitDone = true;
+            root.continueNavigation();
+        }
 
         Anim {
             target: root
@@ -333,16 +442,76 @@ Item {
                         elide: Text.ElideRight
                     }
 
-                    StyledText {
+                    // Clickable path like the file dialog's. Deep paths scroll sideways and
+                    // stay scrolled to the end, so the current folder is always visible.
+                    Flickable {
+                        id: crumbsView
+
+                        function scrollToEnd(): void {
+                            contentX = Math.max(0, contentWidth - width);
+                        }
+
                         Layout.fillWidth: true
-                        text: root.displayPath
-                        color: Colours.palette.m3onSurfaceVariant
-                        font: Tokens.font.body.small
-                        elide: Text.ElideMiddle
+                        implicitHeight: crumbsRow.implicitHeight
+                        contentWidth: crumbsRow.implicitWidth
+                        boundsBehavior: Flickable.StopAtBounds
+                        interactive: contentWidth > width
+                        clip: true
                         opacity: root.animOpacity
+
+                        onContentWidthChanged: scrollToEnd()
+                        onWidthChanged: scrollToEnd()
 
                         transform: Translate {
                             x: root.animTranslate
+                        }
+
+                        RowLayout {
+                            id: crumbsRow
+
+                            spacing: 0
+
+                            Repeater {
+                                model: root.crumbs
+
+                                RowLayout {
+                                    id: crumb
+
+                                    required property var modelData
+                                    required property int index
+
+                                    readonly property bool current: index === root.crumbs.length - 1
+
+                                    spacing: 0
+
+                                    StyledText {
+                                        visible: crumb.index > 0
+                                        text: "›"
+                                        color: Colours.palette.m3onSurfaceVariant
+                                        font: Tokens.font.body.small
+                                    }
+
+                                    Item {
+                                        implicitWidth: crumbName.implicitWidth + Tokens.padding.small
+                                        implicitHeight: crumbName.implicitHeight
+
+                                        StateLayer {
+                                            radius: Tokens.rounding.small
+                                            disabled: crumb.current || root.navigating
+                                            onClicked: root.navigateTo(crumb.modelData.path, false)
+                                        }
+
+                                        StyledText {
+                                            id: crumbName
+
+                                            anchors.centerIn: parent
+                                            text: crumb.modelData.name
+                                            color: crumb.current ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
+                                            font: Tokens.font.body.small
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -356,6 +525,23 @@ Item {
             radius: Tokens.rounding.large
             color: Colours.tPalette.m3surfaceContainer
             clip: true
+
+            Loader {
+                anchors.centerIn: parent
+                asynchronous: true
+                opacity: root.loading ? 1 : 0
+                active: opacity > 0
+
+                sourceComponent: LoadingIndicator {
+                    implicitSize: Math.round(Tokens.font.icon.large.pointSize * 1.3)
+                }
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
+            }
 
             Loader {
                 anchors.centerIn: parent
@@ -395,11 +581,6 @@ Item {
                 boundsBehavior: Flickable.StopAtBounds
                 opacity: root.animOpacity
 
-                onCountChanged: {
-                    if (count > 0)
-                        root.finishLoading();
-                }
-
                 transform: Translate {
                     x: root.animTranslate
                 }
@@ -409,8 +590,17 @@ Item {
                 }
 
                 model: FileSystemModel {
+                    id: folderModel
+
+                    // sshfs never reports changes made on the phone, so watching only costs a
+                    // request on the UI thread
+                    watchChanges: false
                     path: root.open ? root.modelPath : ""
                     onPathChanged: fileView.currentIndex = -1
+                    onLoadingChanged: {
+                        if (!folderModel.loading)
+                            root.finishLoading();
+                    }
                 }
 
                 delegate: StyledRect {
@@ -419,14 +609,15 @@ Item {
                     required property int index
                     required property FileSystemEntry modelData
 
-                    // When the folder changes, the model deletes its entries before the
-                    // delegates are removed, so modelData can briefly be null
+                    // A delegate being torn down can briefly see its entry gone, so read
+                    // modelData defensively
                     readonly property bool valid: modelData !== null
                     readonly property string entryPath: modelData?.path ?? ""
                     readonly property string entryName: modelData?.name ?? ""
                     readonly property bool entryIsDir: modelData?.isDir ?? false
                     readonly property bool selected: ListView.isCurrentItem
-                    readonly property string icon: root.iconFor(entryIsDir, modelData?.mimeType ?? "")
+                    readonly property string icon: root.iconFor(entryIsDir, entryName)
+                    readonly property string details: root.detailsFor(entryIsDir, modelData?.size ?? 0, modelData?.lastModified)
 
                     width: ListView.view.width
                     implicitHeight: entryLayout.implicitHeight + Tokens.padding.small * 2
@@ -477,6 +668,14 @@ Item {
                             color: entry.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
                             font: Tokens.font.body.small
                             elide: Text.ElideMiddle
+                        }
+
+                        // The name is elided first, so these always stay readable
+                        StyledText {
+                            visible: text !== ""
+                            text: entry.details
+                            color: entry.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
+                            font: Tokens.font.body.small
                         }
 
                         MaterialIcon {

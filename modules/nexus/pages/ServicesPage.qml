@@ -81,6 +81,32 @@ PageBase {
             onClicked: root.nState.openSubPage(1)
         }
 
+        // Phone
+        SectionHeader {
+            text: Tr.tr("Phone")
+        }
+
+        ToggleRow {
+            first: true
+            last: true
+            text: "KDE Connect"
+            subtext: {
+                if (KdeConnect.daemonBusy)
+                    return GlobalConfig.services.kdeConnect ? Tr.tr("Starting…") : Tr.tr("Stopping…");
+                if (KdeConnect.external)
+                    return Tr.tr("Running, started outside the shell");
+                if (KdeConnect.managed)
+                    return Tr.tr("Running for the phone share card");
+                if (GlobalConfig.services.kdeConnect)
+                    return Tr.tr("Not running, check that kdeconnect is installed");
+                return Tr.tr("Run KDE Connect for the phone share card");
+            }
+            checked: GlobalConfig.services.kdeConnect
+            // A daemon started elsewhere is not the shell's to stop
+            disabled: KdeConnect.external || KdeConnect.daemonBusy
+            onToggled: GlobalConfig.services.kdeConnect = checked
+        }
+
         // Polling
         SectionHeader {
             text: Tr.tr("Polling")
