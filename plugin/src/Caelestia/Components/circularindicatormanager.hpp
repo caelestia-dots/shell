@@ -26,7 +26,7 @@ public:
 
     enum class IndeterminateAnimationType : quint8 {
         Advance = 0,
-        Retreat
+        Retreat,
     };
     Q_ENUM(IndeterminateAnimationType)
 
