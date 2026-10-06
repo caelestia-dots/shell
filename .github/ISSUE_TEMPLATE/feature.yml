@@ -6,7 +6,11 @@ title: "[FEATURE] "
 body:
     - type: markdown
       attributes:
-          value: "NOTE: Please write in **English**."
+          value: |
+              **NOTE**: Please write in **English**.
+
+              > [!IMPORTANT]
+              > If you're requesting a feature that pertains to the shell itself (bar, dashboard, launcher, etc) rather than the dotfiles, please create a feature request in the [shell repo](https://github.com/caelestia-dots/shell/issues) instead.
 
     - type: textarea
       attributes:
