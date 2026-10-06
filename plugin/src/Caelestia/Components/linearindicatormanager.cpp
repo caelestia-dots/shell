@@ -17,7 +17,7 @@ QEasingCurve curve(const QPointF& c1, const QPointF& c2) {
 }
 
 qreal getFractionInRange(qreal playtime, int start, int duration) {
-    const auto fraction = static_cast<qreal>(playtime - start) / duration;
+    const auto fraction = (playtime - start) / duration;
     return std::clamp(fraction, 0.0, 1.0);
 }
 
@@ -58,7 +58,7 @@ LinearIndicatorManager::LinearIndicatorManager(QObject* parent)
           new LinearIndicatorSegment(m_gap, this),
           new LinearIndicatorSegment(m_gap, this),
       }) {
-    for (auto* el : m_activeIndicators)
+    for (const auto* el : m_activeIndicators)
         QObject::connect(this, &LinearIndicatorManager::updated, el, &LinearIndicatorSegment::updated);
 }
 
