@@ -626,9 +626,6 @@ function buildSearch(entries, translate) {
             }
         }
     }
-    // sort each posting list by descending rank so runtime can stop early
-    for (const tok in inverted)
-        inverted[tok].sort((a, b) => ranking[tok][b] - ranking[tok][a]);
     return {
         inverted: inverted,
         ranking: ranking
