@@ -143,9 +143,11 @@ Singleton {
             cache.tokens = SettingsIndexer.splitWords(search);
         }
 
+        // Without a match the text is shown as PlainText, which doesn't decode
+        // entities, so it goes back as is. Only highlighted text is escaped.
         const tokens = cache.tokens;
         if (tokens.length === 0)
-            return escape(text);
+            return text;
 
         // Match against the folded text so "gorunum" lights up "Görünüm", then
         // cut the original at the same offsets. Only word starts match, like
@@ -166,7 +168,7 @@ Singleton {
 
         // Most subtexts have no match. The caller checks for a "<font" tag to
         // decide between StyledText and the cheaper PlainText.
-        return last === 0 ? escape(text) : out + escape(text.slice(last));
+        return last === 0 ? text : out + escape(text.slice(last));
     }
 
     function loadIndex(): var {
