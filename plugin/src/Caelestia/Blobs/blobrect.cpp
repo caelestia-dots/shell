@@ -295,7 +295,7 @@ void BlobRect::excludeCornersAppend(QQmlListProperty<BlobRect>* prop, BlobRect* 
 }
 
 qsizetype BlobRect::excludeCornersCount(QQmlListProperty<BlobRect>* prop) {
-    auto* const self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<const BlobRect*>(prop->object);
     return self->m_excludeCorners.size();
 }
 

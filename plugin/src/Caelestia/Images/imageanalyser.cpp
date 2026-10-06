@@ -202,10 +202,10 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
                 continue;
             }
 
-            const auto mr = static_cast<quint32>(pixel[2] & 0xF8);
-            const auto mg = static_cast<quint32>(pixel[1] & 0xF8);
-            const auto mb = static_cast<quint32>(pixel[0] & 0xF8);
-            ++colours[(mr << 16) | (mg << 8) | mb];
+            const auto mr = static_cast<quint32>(pixel[2] & 0xF8u);
+            const auto mg = static_cast<quint32>(pixel[1] & 0xF8u);
+            const auto mb = static_cast<quint32>(pixel[0] & 0xF8u);
+            ++colours[(mr << 16u) | (mg << 8u) | mb];
 
             const qreal r = pixel[2] / 255.0;
             const qreal g = pixel[1] / 255.0;
@@ -228,7 +228,7 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
         }
     }
 
-    promise.addResult(qMakePair(QColor((0xFFu << 24) | dominantColour), count == 0 ? 0.0 : totalLuminance / count));
+    promise.addResult(qMakePair(QColor((0xFFu << 24u) | dominantColour), count == 0 ? 0.0 : totalLuminance / count));
 }
 
 } // namespace caelestia::images
