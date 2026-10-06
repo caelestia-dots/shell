@@ -205,7 +205,9 @@ const ANCHOR_RE = /^\s*settingAnchor:\s*"([^"]+)"/;
 // require `onToggled:` to write the same path back (a symmetric binding), so
 // reading and writing go through one path. Toggles bound to functions or
 // multi-line handlers are left without a path and just deep-link as usual.
-const CHECKED_RE = /^\s*checked:\s*(?:GlobalConfig|Config)\.([\w.]+)\s*$/;
+// Which root `checked:` reads from is kept too: global-only options are read
+// from GlobalConfig, everything else from the screen's Config.
+const CHECKED_RE = /^\s*checked:\s*(GlobalConfig|Config)\.([\w.]+)\s*$/;
 const ONTOGGLED_RE = /^\s*onToggled:\s*(?:GlobalConfig|Config)\.([\w.]+)\s*=\s*checked\s*$/;
 const ICON_RE = /^\s*icon:\s*"([^"]+)"/;
 const SUBTEXT_RE = new RegExp(String.raw`^\s*(?:subtext|status):\s*` + TR_CALL);
@@ -500,6 +502,7 @@ function extractSettings(files, nav, readLines) {
             let label = null;
             let anchor = null;
             let subtext = null;
+            let checkedRoot = null;
             let checkedPath = null;
             let toggledPath = null;
             for (let j = i + 1; j < Math.min(i + 12, lines.length); j++) {
@@ -520,8 +523,10 @@ function extractSettings(files, nav, readLines) {
                 }
                 if (checkedPath === null) {
                     const ch = CHECKED_RE.exec(lines[j]);
-                    if (ch)
-                        checkedPath = ch[1];
+                    if (ch) {
+                        checkedRoot = ch[1];
+                        checkedPath = ch[2];
+                    }
                 }
                 if (toggledPath === null) {
                     const tg = ONTOGGLED_RE.exec(lines[j]);
@@ -548,6 +553,7 @@ function extractSettings(files, nav, readLines) {
                     // the raw markers - leave them out entirely.
                     subtext: subtext && !/%\d/.test(unmark(subtext)) ? subtext : "",
                     togglePath: togglePath,
+                    toggleGlobal: togglePath !== "" && checkedRoot === "GlobalConfig",
                     icon: SETTING_ICONS[anchor] ?? (meta.crumbIcons.length > 0 ? meta.crumbIcons[meta.crumbIcons.length - 1] : "")
                 });
             }
