@@ -20,6 +20,10 @@ Scope {
         }
     }
 
+    Recovery {
+        lock: lock
+    }
+
     Pam {
         id: pam
 
