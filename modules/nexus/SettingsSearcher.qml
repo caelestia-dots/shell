@@ -32,7 +32,7 @@ Singleton {
             "search": "",
             "tokens": []
         })
-    // fzf finder over the entries (title + keywords), used as a fuzzy fallback
+    // fzf finder over the entries' titles, used as a fuzzy fallback
     // when the exact/prefix index lookup comes up short. fzf is the same matcher
     // the launcher uses, so typo and mid-word matching behave consistently.
     property var fzfFinder: null
@@ -44,8 +44,8 @@ Singleton {
     readonly property string cachePath: Paths.cache + "/settings-index.json"
     // What the cache was built from: the plugin's git revision plus a fingerprint
     // (path, size, mtime) of the page sources and the indexer itself. The
-    // fingerprint catches QML edited or installed without a plugin rebuild, and
-    // keeps the cache usable when the build has no revision. Set by loadIndex().
+    // fingerprint catches QML edited or installed without a plugin rebuild.
+    // Set by loadIndex().
     property string cacheKey
     readonly property int maxResults: Math.max(1, GlobalConfig.nexus.maxSearchResults)
 
