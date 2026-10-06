@@ -335,7 +335,7 @@ void BlobShape::cacheInvertedRect(float pad) {
     memset(m_cachedInvertedOuter, 0, sizeof(m_cachedInvertedOuter));
     memset(m_cachedInvertedInner, 0, sizeof(m_cachedInvertedInner));
 
-    auto* inv = m_group->invertedRect();
+    const auto* inv = m_group->invertedRect();
     if (!inv)
         return;
 
