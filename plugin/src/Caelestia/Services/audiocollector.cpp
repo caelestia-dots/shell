@@ -149,7 +149,7 @@ void PipeWireWorker::processStream() {
         return;
     }
 
-    pw_buffer* buffer = pw_stream_dequeue_buffer(m_stream);
+    pw_buffer* const buffer = pw_stream_dequeue_buffer(m_stream);
     if (buffer == nullptr) {
         return;
     }
