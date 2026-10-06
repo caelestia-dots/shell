@@ -225,7 +225,7 @@ void FileSystemModel::watchDirIfRecursive(const QString& path) {
     if (m_recursive && m_watchChanges) {
         const auto currentDir = m_dir;
         const bool showHidden = m_showHidden;
-        auto future = QtConcurrent::run([showHidden, path]() {
+        auto future = QtConcurrent::run([showHidden, path] {
             QDir::Filters filters = QDir::Dirs | QDir::NoDotAndDotDot;
             if (showHidden) {
                 filters |= QDir::Hidden;
@@ -320,7 +320,7 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
                 if (!result.removed.isEmpty() || !result.added.isEmpty())
                     applyChanges(result.removed, result.added);
             })
-        .onCanceled(this, [dir, this]() {
+        .onCanceled(this, [dir, this] {
             m_futures.remove(dir);
         });
 }
