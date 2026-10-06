@@ -47,6 +47,7 @@ Singleton {
     // fingerprint catches QML edited or installed without a plugin rebuild, and
     // keeps the cache usable when the build has no revision. Set by loadIndex().
     property string cacheKey
+    readonly property int maxResults: Math.max(1, GlobalConfig.nexus.maxSearchResults)
 
     // accept(entry) -> bool filters out entries that can't be shown right now.
     // It runs before the result limit, so filtered entries don't take up slots.
@@ -79,7 +80,7 @@ Singleton {
             const entry = all[parseInt(id)];
             if (usable(entry))
                 out.push(entry);
-            if (out.length >= 25)
+            if (out.length >= root.maxResults)
                 break;
         }
 
@@ -101,7 +102,7 @@ Singleton {
                 const entry = all[idx];
                 if (usable(entry))
                     out.push(entry);
-                if (out.length >= 25)
+                if (out.length >= root.maxResults)
                     break;
             }
         }
@@ -213,10 +214,15 @@ Singleton {
                 }));
         root.fzfFinder = new Fzf.Finder(docs, {
             selector: d => d.text,
-            limit: 25
+            limit: root.maxResults
         });
     }
 
+    // The fzf finder takes its limit when it's built
+    onMaxResultsChanged: {
+        if (root.fzfFinder)
+            root.buildFinder();
+    }
     Component.onCompleted: {
         try {
             const data = root.loadIndex();
