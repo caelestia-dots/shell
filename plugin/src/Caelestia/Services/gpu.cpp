@@ -111,23 +111,25 @@ struct NameSource {
 // Name probes in priority order; the first non-empty result wins. Which of them run
 // depends on the resolved type.
 const std::array<NameSource, 3>& nameSources() {
-    static const std::array<NameSource, 3> k_sources = { {
+    static const std::array<NameSource, 3> k_sources = {
         {
-            .program = u"nvidia-smi"_s,
-            .args = { u"--query-gpu=name"_s, u"--format=csv,noheader"_s },
-            .parse = &parseNvidiaName,
+            {
+                .program = u"nvidia-smi"_s,
+                .args = { u"--query-gpu=name"_s, u"--format=csv,noheader"_s },
+                .parse = &parseNvidiaName,
+            },
+            {
+                .program = u"glxinfo"_s,
+                .args = { u"-B"_s },
+                .parse = &parseGlxinfoName,
+            },
+            {
+                .program = u"lspci"_s,
+                .args = {},
+                .parse = &parseLspciName,
+            },
         },
-        {
-            .program = u"glxinfo"_s,
-            .args = { u"-B"_s },
-            .parse = &parseGlxinfoName,
-        },
-        {
-            .program = u"lspci"_s,
-            .args = {},
-            .parse = &parseLspciName,
-        },
-    } };
+    };
     return k_sources;
 }
 
@@ -141,7 +143,7 @@ Gpu::Gpu(QObject* parent)
     : TickingService(parent) {
     m_busyFiles = gpuBusyFiles();
 
-    auto* svc = caelestia::config::ConfigSingleton::instance()->services();
+    const auto* svc = caelestia::config::ConfigSingleton::instance()->services();
     m_userType = svc->gpuType();
     QObject::connect(svc, &caelestia::config::ServiceConfig::gpuTypeChanged, this, [this, svc] {
         const GpuType value = svc->gpuType();

@@ -421,7 +421,7 @@ void AnimatedRepeater::connectModel() {
 }
 
 void AnimatedRepeater::disconnectModel() {
-    for (auto& conn : m_modelConnections)
+    for (const auto& conn : std::as_const(m_modelConnections))
         disconnect(conn);
     m_modelConnections.clear();
 }

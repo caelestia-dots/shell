@@ -25,7 +25,7 @@ void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen) {
     if (kind != ConfigKind::Shell || !screen.isEmpty())
         return;
 
-    auto* const config = static_cast<ConfigRoot*>(layer);
+    const auto* config = static_cast<ConfigRoot*>(layer);
     if (!config->utilities()->toasts()->configLoaded())
         return;
 
@@ -71,7 +71,7 @@ ConfigRoot::ConfigRoot(const QString& path, ConfigRoot* fallback, QObject* paren
 void ConfigRoot::bindTokens() {
     qCDebug(lcConfig) << "Binding appearance to token values for" << nameFor(key());
 
-    auto* const tokens = TokensSingleton::instance()->appearance();
+    const auto* tokens = TokensSingleton::instance()->appearance();
     m_appearance->rounding()->bindTokens(tokens->rounding());
     m_appearance->spacing()->bindTokens(tokens->spacing());
     m_appearance->padding()->bindTokens(tokens->padding());
