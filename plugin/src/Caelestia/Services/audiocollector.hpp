@@ -71,6 +71,9 @@ private:
     std::atomic<std::vector<float>*> m_writeBuffer;
     quint32 m_sampleCount;
 
+    [[nodiscard]] std::vector<float>* claimWriteBuffer();
+    void publishWriteBuffer(std::vector<float>* writeBuffer);
+
     void reload();
     void start() override;
     void stop() override;

@@ -66,8 +66,8 @@ void substitutePercentN(QString& text, int n) {
 Translator::Translator(QObject* parent)
     : QObject(parent)
     , m_supportedLanguages(findSupportedLangs()) {
-    auto* const general = config::ConfigSingleton::instance()->general();
-    QObject::connect(general, &config::GeneralConfig::languageChanged, this, [this, general]() {
+    const auto* general = config::ConfigSingleton::instance()->general();
+    QObject::connect(general, &config::GeneralConfig::languageChanged, this, [this, general] {
         setLanguage(resolveLanguage(general->language()));
     });
 

@@ -144,7 +144,8 @@ bool SessionManager::queryHibernateAvailable() {
     if (!bus)
         return false;
 
-    auto hibernateMsg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"CanHibernate"_s);
+    const auto hibernateMsg =
+        QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"CanHibernate"_s);
     const QDBusReply<QString> hibernateReply = bus->call(hibernateMsg);
     if (!hibernateReply.isValid()) {
         qCWarning(lcSessionManager) << "Failed to query hibernate support:" << hibernateReply.error().message();
@@ -164,7 +165,7 @@ void SessionManager::call(const QString& path, const QString& iface, const QStri
     auto msg = QDBusMessage::createMethodCall(k_loginService, path, iface, method);
     msg.setArguments(args);
 
-    auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    const auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
     connect(watcher, &QDBusPendingCallWatcher::finished, this, [method](QDBusPendingCallWatcher* self) {
         const QDBusPendingReply<> reply = *self;
         if (reply.isError())
