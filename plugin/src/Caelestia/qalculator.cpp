@@ -70,7 +70,8 @@ QPair<QString, QString> Qalculator::evaluate(const QString& expr) {
     const QMutexLocker locker(&s_calculatorMutex);
 
     const EvaluationOptions eo;
-    const PrintOptions po;
+    PrintOptions po;
+    po.interval_display = INTERVAL_DISPLAY_SIGNIFICANT_DIGITS;
 
     std::string parsed;
     const std::string result = CALCULATOR->calculateAndPrint(

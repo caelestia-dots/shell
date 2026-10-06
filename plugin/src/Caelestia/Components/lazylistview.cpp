@@ -351,7 +351,7 @@ LazyListView::HeightUpdate LazyListView::setKnownHeight(int index, qreal height)
 // A resize above the viewport shifts everything below it, so opted-in delegates
 // report the delta and let the consumer compensate its scroll position.
 void LazyListView::adjustViewportIfAbove(int index, QQuickItem* item, qreal delta) {
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (attached && attached->trackViewport() && m_layout[index].targetY < viewportTop())
         emit viewportAdjustNeeded(delta);
 }
@@ -360,7 +360,7 @@ qreal LazyListView::delegateHeight(QQuickItem* item) {
     if (!item)
         return 0;
 
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (attached && attached->preferredHeight() >= 0)
         return attached->preferredHeight();
 
@@ -371,7 +371,7 @@ qreal LazyListView::delegateVisibleHeight(QQuickItem* item) {
     if (!item)
         return 0;
 
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (attached && attached->visibleHeight() >= 0)
         return attached->visibleHeight();
 
@@ -381,7 +381,7 @@ qreal LazyListView::delegateVisibleHeight(QQuickItem* item) {
 bool LazyListView::isDelegateReady(QQuickItem* item) {
     if (!item)
         return false;
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     return !attached || attached->ready();
 }
 
@@ -460,7 +460,7 @@ void LazyListView::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
         return;
 
     if (!qFuzzyCompare(newGeometry.width(), oldGeometry.width())) {
-        for (auto& entry : m_delegates) {
+        for (const auto& entry : std::as_const(m_delegates)) {
             if (entry.item)
                 entry.item->setWidth(newGeometry.width());
         }
@@ -549,7 +549,7 @@ void LazyListView::finishDelayedInsert(QQuickItem* item) {
 }
 
 void LazyListView::positionDelegates() {
-    for (auto& entry : m_delegates) {
+    for (const auto& entry : std::as_const(m_delegates)) {
         if (!entry.item || entry.pendingRemoval || entry.pendingInsert)
             continue;
 
@@ -891,7 +891,7 @@ void LazyListView::connectDelegate(const DelegateEntry& entry) {
     });
 
     // Watch attached properties if the delegate uses them
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (!attached)
         return;
 
@@ -1057,7 +1057,7 @@ void LazyListView::connectModel() {
 }
 
 void LazyListView::disconnectModel() {
-    for (auto& conn : m_modelConnections)
+    for (const auto& conn : std::as_const(m_modelConnections))
         disconnect(conn);
     m_modelConnections.clear();
 }
@@ -1130,7 +1130,7 @@ void LazyListView::onRowsAboutToBeRemoved(const QModelIndex& parent, int first, 
                 attached->setRemoving(true);
 
             // Schedule destruction after the remove animation duration
-            auto* item = entry.item;
+            const auto* item = entry.item;
             QTimer::singleShot(m_removeDuration, this, [this, item] {
                 for (auto it = m_dyingDelegates.begin(); it != m_dyingDelegates.end(); ++it) {
                     if (it->item == item) {
