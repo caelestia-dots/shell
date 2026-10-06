@@ -37,7 +37,7 @@ Singleton {
     // the launcher uses, so typo and mid-word matching behave consistently.
     property var fzfFinder: null
     // Bump when the cached data's shape changes
-    readonly property int cacheVersion: 6
+    readonly property int cacheVersion: 7
     // Declared here rather than inlined in loadIndex(): qmllint doesn't see
     // identifiers used inside template literals in a function body, so
     // referencing Paths only there had it report qs.utils as unused.
@@ -279,24 +279,15 @@ Singleton {
 
         // A non-empty togglePath means this is a plain on/off setting that can be
         // flipped straight from the results (e.g. "background.wallpaperEnabled").
+        // Its value is read by the result row (see NavLocations.configValue()),
+        // from the same place the page's own switch reads it: GlobalConfig for
+        // global-only options, otherwise the config of the screen it's shown on.
         readonly property string togglePath: modelData.togglePath ?? ""
+        readonly property bool toggleGlobal: modelData.toggleGlobal ?? false
         readonly property bool isToggle: togglePath.length > 0
-        // Live value of the config property, read by walking the path on
-        // GlobalConfig. Re-evaluates when that property changes.
-        readonly property bool toggleValue: {
-            if (!isToggle)
-                return false;
-            let obj = GlobalConfig;
-            const parts = togglePath.split(".");
-            for (const part of parts) {
-                if (obj === undefined || obj === null)
-                    return false;
-                obj = obj[part];
-            }
-            return obj ?? false;
-        }
 
-        // Write `value` back to the config property the path points at.
+        // Write `value` back to the config property the path points at. Global,
+        // like the pages' switches write it.
         function setToggle(value: bool): void {
             if (!isToggle)
                 return;

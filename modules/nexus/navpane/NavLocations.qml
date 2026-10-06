@@ -29,6 +29,12 @@ VerticalFadeFlickable {
     // and linked up to its screen on first access. Result rows are created as the
     // query changes, and reading these instead keeps each row from creating a
     // dozen of them. Same window, so the same screen and the same values.
+    // The config as this screen sees it: the global one with this monitor's
+    // overrides on top. The pages' switches read Config, which resolves to
+    // the same thing, so a result's switch shows what the page would.
+    // Global-only options can't be read from here (see configValue()).
+    readonly property var screenConfig: Config.screen ? GlobalConfig.forScreen(Config.screen) : GlobalConfig
+
     readonly property real rowPaddingSmall: Tokens.padding.small
     readonly property real rowPaddingMedium: Tokens.padding.medium
     readonly property real rowSpacingSmall: Tokens.spacing.small
@@ -97,6 +103,21 @@ VerticalFadeFlickable {
     readonly property var navigable: groups.reduce((all, g) => all.concat(g.entries), [])
     // The selection falls back to the top result, which the query ranks best.
     readonly property string currentAnchor: navigable.some(e => e.anchor === selectedAnchor) ? selectedAnchor : navigable[0]?.anchor ?? ""
+
+    // Value of the config property at `path` (e.g. "bar.clock.showSeconds")
+    // for this screen. Global-only options have no per-screen value, and
+    // reading them from a screen's layer logs a warning, so those are read
+    // from GlobalConfig, as their pages do. Called from a binding, so it
+    // updates with the property.
+    function configValue(path: string, global: bool): bool {
+        let obj = global ? GlobalConfig : screenConfig;
+        for (const part of path.split(".")) {
+            if (obj === undefined || obj === null)
+                return false;
+            obj = obj[part];
+        }
+        return obj ?? false;
+    }
 
     function openEntry(entry: var): void {
         // Ethernet detail settings need a selected interface to show the right
@@ -539,7 +560,7 @@ VerticalFadeFlickable {
                                     visible: active
 
                                     sourceComponent: StyledSwitch {
-                                        checked: result.modelData.toggleValue
+                                        checked: root.configValue(result.modelData.togglePath, result.modelData.toggleGlobal)
                                         cLayer: 3
                                         // A touch smaller than the in-page switches since
                                         // the result rows are denser.
