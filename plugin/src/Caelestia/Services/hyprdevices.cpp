@@ -168,7 +168,7 @@ bool HyprDevices::updateLastIpcObject(const QJsonObject& object) {
         const auto obj = o.toObject();
         const auto addr = obj.value(u"address"_s).toString();
 
-        auto it = std::ranges::find_if(m_keyboards, [addr](const HyprKeyboard* kb) {
+        const auto it = std::ranges::find_if(m_keyboards, [addr](const HyprKeyboard* kb) {
             return kb->address() == addr;
         });
 
