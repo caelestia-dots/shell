@@ -57,8 +57,7 @@ void CUtils::saveItem(
     QObject::connect(
         grabResult.data(), &QQuickItemGrabResult::ready, this,
         [grabResult, scaledRect, path, onSaved, onFailed, this] {
-            QtConcurrent::run([grabResult, scaledRect, file = path.toLocalFile()] {
-                auto image = grabResult->image();
+            QtConcurrent::run([image = grabResult->image(), scaledRect, file = path.toLocalFile()]() mutable {
                 if (scaledRect.isValid())
                     image = image.copy(scaledRect);
 
