@@ -15,7 +15,7 @@ public:
         Unchanged,
         Changed,
         ParseError,
-        Error
+        Error,
     };
 
     explicit SettingsFile(QString path, QObject* parent = nullptr);

@@ -36,7 +36,7 @@ void BlobRect::updatePolish() {
         } else {
             QMetaObject::invokeMethod(
                 this,
-                [this]() {
+                [this] {
                     if (m_physicsActive && m_group)
                         m_group->markDirty();
                 },
@@ -241,7 +241,7 @@ QQmlListProperty<BlobRect> BlobRect::excludeCorners() {
 }
 
 void BlobRect::excludeAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_exclude.append(rect);
     if (self->m_group)
         self->m_group->markDirty();
@@ -249,17 +249,17 @@ void BlobRect::excludeAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
 }
 
 qsizetype BlobRect::excludeCount(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<BlobRect*>(prop->object);
     return self->m_exclude.size();
 }
 
 BlobRect* BlobRect::excludeAt(QQmlListProperty<BlobRect>* prop, qsizetype index) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<BlobRect*>(prop->object);
     return self->m_exclude.at(index);
 }
 
 void BlobRect::excludeClear(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_exclude.isEmpty())
         return;
     self->m_exclude.clear();
@@ -269,7 +269,7 @@ void BlobRect::excludeClear(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::excludeReplace(QQmlListProperty<BlobRect>* prop, qsizetype index, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_exclude[index] = rect;
     if (self->m_group)
         self->m_group->markDirty();
@@ -277,7 +277,7 @@ void BlobRect::excludeReplace(QQmlListProperty<BlobRect>* prop, qsizetype index,
 }
 
 void BlobRect::excludeRemoveLast(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_exclude.isEmpty())
         return;
     self->m_exclude.removeLast();
@@ -287,7 +287,7 @@ void BlobRect::excludeRemoveLast(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::excludeCornersAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_excludeCorners.append(rect);
     if (self->m_group)
         self->m_group->markDirty();
@@ -295,17 +295,17 @@ void BlobRect::excludeCornersAppend(QQmlListProperty<BlobRect>* prop, BlobRect* 
 }
 
 qsizetype BlobRect::excludeCornersCount(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<const BlobRect*>(prop->object);
     return self->m_excludeCorners.size();
 }
 
 BlobRect* BlobRect::excludeCornersAt(QQmlListProperty<BlobRect>* prop, qsizetype index) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<BlobRect*>(prop->object);
     return self->m_excludeCorners.at(index);
 }
 
 void BlobRect::excludeCornersClear(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_excludeCorners.isEmpty())
         return;
     self->m_excludeCorners.clear();
@@ -315,7 +315,7 @@ void BlobRect::excludeCornersClear(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::excludeCornersReplace(QQmlListProperty<BlobRect>* prop, qsizetype index, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_excludeCorners[index] = rect;
     if (self->m_group)
         self->m_group->markDirty();
@@ -323,7 +323,7 @@ void BlobRect::excludeCornersReplace(QQmlListProperty<BlobRect>* prop, qsizetype
 }
 
 void BlobRect::excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_excludeCorners.isEmpty())
         return;
     self->m_excludeCorners.removeLast();

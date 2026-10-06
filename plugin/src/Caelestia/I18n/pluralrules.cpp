@@ -34,7 +34,7 @@ QByteArrayView valueFor(QByteArrayView line, QByteArrayView key) {
     if (start < 0)
         return {};
 
-    auto value = line.sliced(start + key.size());
+    const auto value = line.sliced(start + key.size());
     const auto end = value.indexOf(';');
     return end < 0 ? value : value.first(end);
 }

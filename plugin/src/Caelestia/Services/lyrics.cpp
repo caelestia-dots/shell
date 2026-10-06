@@ -349,8 +349,9 @@ int Lyrics::newRequestId() {
 
 void Lyrics::cancelInFlight() {
     for (auto it = m_pendingReplies.begin(); it != m_pendingReplies.end(); ++it) {
-        for (auto& ptr : it.value()) {
-            if (auto* reply = ptr.data()) {
+        const auto& replies = it.value();
+        for (const auto& ptr : replies) {
+            if (auto* const reply = ptr.data()) {
                 reply->abort();
                 reply->deleteLater();
             }
