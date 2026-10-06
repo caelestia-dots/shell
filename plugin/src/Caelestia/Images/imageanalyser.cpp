@@ -22,7 +22,7 @@ ImageAnalyser::ImageAnalyser(QObject* parent)
     , m_rescaleSize(128)
     , m_dominantColour(0, 0, 0)
     , m_luminance(0) {
-    QObject::connect(m_futureWatcher, &QFutureWatcher<AnalyseResult>::finished, this, [this]() {
+    QObject::connect(m_futureWatcher, &QFutureWatcher<AnalyseResult>::finished, this, [this] {
         if (!m_futureWatcher->future().isResultReadyAt(0)) {
             return;
         }
@@ -145,7 +145,7 @@ void ImageAnalyser::update() {
                 Qt::SingleShotConnection);
             return;
         }
-        QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, this]() {
+        QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, this] {
             m_futureWatcher->setFuture(QtConcurrent::run(&ImageAnalyser::analyse, grabResult->image(), m_rescaleSize));
         });
     } else {
