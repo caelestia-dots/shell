@@ -25,7 +25,7 @@ void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen) {
     if (kind != ConfigKind::Shell || !screen.isEmpty())
         return;
 
-    auto* const config = static_cast<ConfigRoot*>(layer);
+    const auto* config = static_cast<ConfigRoot*>(layer);
     if (!config->utilities()->toasts()->configLoaded())
         return;
 

@@ -8,7 +8,7 @@ namespace caelestia::config {
 
 namespace {
 
-const AppearanceConfig* resolveAppearance(ConfigRoot* config, bool complete, const char* prop, QObject* parent) {
+const AppearanceConfig* resolveAppearance(const ConfigRoot* config, bool complete, const char* prop, QObject* parent) {
     if (config)
         return config->appearance();
     if ((complete || !qobject_cast<QQuickItem*>(parent)) && parent)
@@ -68,7 +68,7 @@ void Tokens::propagateScreen() {
 void Tokens::attachedParentChange(
     QQuickAttachedPropertyPropagator* newParent, QQuickAttachedPropertyPropagator* oldParent) {
     Q_UNUSED(oldParent);
-    auto* const tokens = qobject_cast<Tokens*>(newParent);
+    const auto* tokens = qobject_cast<Tokens*>(newParent);
     if (tokens)
         inheritScreen(tokens->screen());
 }
@@ -79,7 +79,7 @@ void Tokens::bindAnim() {
 }
 
 void Tokens::bindFont() {
-    auto* appearance = m_config ? m_config->appearance() : ConfigSingleton::instance()->appearance();
+    const auto* appearance = m_config ? m_config->appearance() : ConfigSingleton::instance()->appearance();
     m_font->bindFont(appearance->font());
 }
 
