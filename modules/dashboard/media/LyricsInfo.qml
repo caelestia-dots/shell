@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.services
@@ -148,21 +150,24 @@ Item {
                 opacity: 0
 
                 StyledText {
-                    text: qsTr("Backend: %1").arg(LyricsBackend.toString(Lyrics.backend))
+                    // TRANSLATORS: %1 = lyrics backend name, e.g. LRCLIB
+                    text: Tr.tr("Backend: %1").arg(CUtils.enumToString(Lyrics, "backend"))
                     color: Colours.palette.m3onSurfaceVariant
                     animate: true
                 }
 
                 StyledText {
                     Layout.maximumWidth: Tokens.sizes.dashboard.mediaTabWidth / 2
-                    text: qsTr("Selected candidate: %1 | %2 | %3").arg(Lyrics.selectedCandidate.title).arg(Lyrics.selectedCandidate.artist).arg(Lyrics.selectedCandidate.album)
+                    // TRANSLATORS: %1/%2/%3 = matched track title, artist and album
+                    text: Tr.tr("Selected candidate: %1 | %2 | %3").arg(Lyrics.selectedCandidate.title).arg(Lyrics.selectedCandidate.artist).arg(Lyrics.selectedCandidate.album)
                     color: Colours.palette.m3onSurfaceVariant
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     animate: true
                 }
 
                 StyledText {
-                    text: qsTr("Offset: %1 ms").arg(Lyrics.offset)
+                    // TRANSLATORS: %1 = lyric timing offset; ms is the millisecond unit, leave untranslated
+                    text: Tr.tr("Offset: %1 ms").arg(Lyrics.offset)
                     color: Colours.palette.m3onSurfaceVariant
                     animate: true
                 }
@@ -178,7 +183,7 @@ Item {
                 StyledText {
                     id: placeholderText
 
-                    text: Lyrics.loading ? qsTr("Loading...") : qsTr("No lyrics found")
+                    text: Lyrics.loading ? Tr.tr("Loading...") : Tr.tr("No lyrics found")
                     color: Colours.palette.m3onSurfaceVariant
                     font: Tokens.font.body.medium
                     animate: true

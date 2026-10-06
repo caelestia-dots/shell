@@ -1,14 +1,12 @@
 #pragma once
 
-#include "configobject.hpp"
-
-#include <algorithm>
+#include "settings/objectnode.hpp"
+#include "common.hpp"
 
 namespace caelestia::config {
 
-class BorderConfig : public ConfigObject {
-    Q_OBJECT
-    QML_ANONYMOUS
+class BorderConfig : public settings::ObjectNode {
+    CONFIG_NODE(BorderConfig, settings::ObjectNode)
 
     CONFIG_PROPERTY(int, thickness, 10)
     CONFIG_PROPERTY(int, rounding, 25)
@@ -18,12 +16,8 @@ class BorderConfig : public ConfigObject {
     Q_PROPERTY(int clampedThickness READ clampedThickness NOTIFY thicknessChanged)
 
 public:
-    explicit BorderConfig(QObject* parent = nullptr)
-        : ConfigObject(parent) {}
-
-    [[nodiscard]] static int minThickness() { return 2; }
-
-    [[nodiscard]] int clampedThickness() const { return std::max(minThickness(), m_thickness); }
+    [[nodiscard]] static int minThickness();
+    [[nodiscard]] int clampedThickness() const;
 };
 
 } // namespace caelestia::config

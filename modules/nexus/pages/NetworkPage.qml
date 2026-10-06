@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -12,7 +13,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    title: qsTr("Network")
+    title: Tr.tr("Network")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -59,7 +60,7 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Nmcli.hasAvailableEthernet ? Tokens.spacing.large : 0
             first: true
-            text: qsTr("Wi-Fi")
+            text: Tr.tr("Wi-Fi")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: Nmcli.wifiEnabled
@@ -79,121 +80,37 @@ PageBase {
         }
 
         // All networks button, only when > max networks
-        ConnectedRect {
-            Layout.fillWidth: true
-            Layout.preferredHeight: Nmcli.wifiEnabled && Nmcli.networks.length > GlobalConfig.nexus.maxNetworksShown ? showAllLayout.implicitHeight + Tokens.padding.medium * 2 : 0
+        RowButton {
+            Layout.preferredHeight: Nmcli.wifiEnabled && Nmcli.networks.length > GlobalConfig.nexus.maxNetworksShown ? implicitHeight : 0
             clip: true
+
+            icon: "expand_content"
+            // TRANSLATORS: %1 = number of networks found
+            text: Tr.tr("Show all networks (%1)").arg(Nmcli.networks.length)
+            trailingIcon: "chevron_right"
+            onClicked: root.nState.openSubPage(5) // All networks sub-page
 
             Behavior on Layout.preferredHeight {
                 Anim {
                     type: Anim.DefaultEffects
                 }
             }
-
-            StateLayer {
-                onClicked: root.nState.openSubPage(5) // All networks sub-page
-            }
-
-            RowLayout {
-                id: showAllLayout
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.margins: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-
-                MaterialIcon {
-                    text: "expand_content"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Show all networks (%1)").arg(Nmcli.networks.length)
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
-
-                MaterialIcon {
-                    text: "chevron_right"
-                    color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.medium
-                }
-            }
         }
 
         // Saved networks button
-        ConnectedRect {
-            Layout.fillWidth: true
-            implicitHeight: savedNetworksLayout.implicitHeight + savedNetworksLayout.anchors.margins * 2
-
-            StateLayer {
-                onClicked: root.nState.openSubPage(6) // Saved networks sub-page
-            }
-
-            RowLayout {
-                id: savedNetworksLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-
-                MaterialIcon {
-                    text: "bookmark"
-                    color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.medium
-                    fill: 1
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Saved networks")
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
-
-                MaterialIcon {
-                    text: "chevron_right"
-                    color: Colours.palette.m3onSurfaceVariant
-                    fontStyle: Tokens.font.icon.medium
-                }
-            }
+        RowButton {
+            icon: "bookmark"
+            text: Tr.tr("Saved networks")
+            trailingIcon: "chevron_right"
+            onClicked: root.nState.openSubPage(6) // Saved networks sub-page
         }
 
-        ConnectedRect {
-            Layout.fillWidth: true
-            implicitHeight: addNetworkLayout.implicitHeight + addNetworkLayout.anchors.margins * 2
+        RowButton {
             last: true
-
-            StateLayer {
-                onClicked: root.nState.openSubPage(2) // Add network sub-page
-            }
-
-            RowLayout {
-                id: addNetworkLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-
-                spacing: Tokens.spacing.medium
-
-                MaterialIcon {
-                    text: "add"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Add network")
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
-            }
+            icon: "add"
+            text: Tr.tr("Add network")
+            disabled: !Nmcli.wifiEnabled
+            onClicked: root.nState.openSubPage(2) // Add network sub-page
         }
 
         // ---- VPN -------------------------------------------------------------
@@ -201,7 +118,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large
             Layout.fillWidth: true
             first: true
-            text: qsTr("VPN")
+            text: Tr.tr("VPN")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: VPN.connected
@@ -227,7 +144,7 @@ PageBase {
 
             showList: true
             placeholderIcon: "add_circle"
-            placeholderText: qsTr("No VPN providers configured")
+            placeholderText: Tr.tr("No VPN providers configured")
 
             model: ScriptModel {
                 values: [...VPN.providers]
@@ -237,7 +154,8 @@ PageBase {
                 id: provider
 
                 required property var modelData // QML types are annoying (causes null errors on destruction if typed correctly)
-                readonly property bool isSelected: modelData.providerId === VPN.selectedProvider
+                required property int index
+                readonly property bool isSelected: modelData.id === VPN.selectedProvider
                 readonly property bool isConnected: isSelected && VPN.connected
 
                 anchors.left: providerList.list.contentItem.left
@@ -249,7 +167,7 @@ PageBase {
                     radius: Tokens.rounding.extraSmall
                     onClicked: {
                         if (!provider.isSelected)
-                            VPN.setActiveProvider(provider.modelData.index);
+                            VPN.setActiveProvider(provider.index);
                     }
                 }
 
@@ -286,7 +204,7 @@ PageBase {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: provider.modelData.displayName
+                            text: provider.modelData.displayName || provider.modelData.name
                             font: Tokens.font.body.medium
                             elide: Text.ElideRight
                         }
@@ -295,20 +213,20 @@ PageBase {
                             Layout.fillWidth: true
                             text: {
                                 if (!provider.isSelected)
-                                    return qsTr("Tap to select");
+                                    return Tr.tr("Tap to select");
                                 if (VPN.connecting)
-                                    return qsTr("Connecting...");
+                                    return Tr.tr("Connecting...");
                                 if (VPN.disconnecting)
-                                    return qsTr("Disconnecting...");
+                                    return Tr.tr("Disconnecting...");
                                 switch (VPN.status.state) {
                                 case "connected":
-                                    return qsTr("Connected");
+                                    return Tr.trCtx("Connected", "vpn state");
                                 case "needs-auth":
-                                    return VPN.status.reason || qsTr("Authentication required");
+                                    return VPN.status.reason ? Tr.trMarked(VPN.status.reason) : Tr.tr("Authentication required");
                                 case "error":
-                                    return VPN.status.reason || qsTr("An error occurred");
+                                    return VPN.status.reason ? Tr.trMarked(VPN.status.reason) : Tr.tr("An error occurred");
                                 default:
-                                    return qsTr("Selected");
+                                    return Tr.tr("Selected");
                                 }
                             }
                             color: {
@@ -355,7 +273,7 @@ PageBase {
 
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
-                                    text: qsTr("Interface")
+                                    text: Tr.trCtx("Interface", "network interface")
                                     color: Colours.palette.m3onSurfaceVariant
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
@@ -364,7 +282,7 @@ PageBase {
 
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
-                                    text: provider.modelData.iface
+                                    text: provider.modelData.interface
                                     color: Colours.palette.m3outline
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
@@ -377,7 +295,7 @@ PageBase {
 
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
-                                    text: qsTr("Current Ping")
+                                    text: Tr.trCtx("Current ping", "round-trip latency to the VPN endpoint")
                                     color: Colours.palette.m3onSurfaceVariant
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
@@ -397,7 +315,7 @@ PageBase {
                                     }
 
                                     StyledText {
-                                        text: qsTr("%1 ms").arg(VPN.pingMs)
+                                        text: Tr.tr("%1 ms").arg(VPN.pingMs)
                                         color: Colours.palette.m3outline
                                         font: Tokens.font.label.small
                                         elide: Text.ElideRight
@@ -414,7 +332,7 @@ PageBase {
                         isRound: true
                         icon: "edit"
                         onClicked: {
-                            root.nState.editingVpnIndex = provider.modelData.index;
+                            root.nState.editingVpnIndex = provider.index;
                             root.nState.openSubPage(4); // Add/edit provider sub-page
                         }
                     }
@@ -423,38 +341,13 @@ PageBase {
         }
 
         // Add provider
-        ConnectedRect {
-            Layout.fillWidth: true
+        RowButton {
             last: true
-            implicitHeight: manageLayout.implicitHeight + manageLayout.anchors.margins * 2
-
-            StateLayer {
-                onClicked: {
-                    root.nState.editingVpnIndex = -1;
-                    root.nState.openSubPage(4); // Add/edit provider sub-page
-                }
-            }
-
-            RowLayout {
-                id: manageLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-
-                MaterialIcon {
-                    text: "add"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Add provider")
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
+            icon: "add"
+            text: Tr.tr("Add provider")
+            onClicked: {
+                root.nState.editingVpnIndex = -1;
+                root.nState.openSubPage(4); // Add/edit provider sub-page
             }
         }
     }

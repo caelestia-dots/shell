@@ -49,6 +49,8 @@ RadioButton {
         font: root.font
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: outerCircle.right
+        anchors.right: parent.right
         anchors.leftMargin: Tokens.spacing.medium
+        elide: Text.ElideRight
     }
 }

@@ -19,7 +19,8 @@ TextFieldBase {
     property int smallFontSize: Tokens.font.label.small.pointSize
     readonly property real smallFontScale: smallFontSize / font.pointSize
 
-    readonly property int horizontalPadding: Tokens.padding.large
+    property int verticalPadding: Tokens.padding.large
+    property int horizontalPadding: Tokens.padding.large
     property int radius: Tokens.rounding.small
     readonly property int clampedRadius: Math.min(horizontalPadding, Math.min(width, height) / 2, radius)
 
@@ -41,8 +42,8 @@ TextFieldBase {
 
     leftPadding: horizontalPadding + leadingOffset
     rightPadding: horizontalPadding + trailingOffset
-    topPadding: Tokens.padding.large + filledOffset
-    bottomPadding: Tokens.padding.large + supportingTextOffset - filledOffset
+    topPadding: verticalPadding + filledOffset
+    bottomPadding: verticalPadding + supportingTextOffset - filledOffset
 
     onPressed: {
         if (!stateLayer.disabled)

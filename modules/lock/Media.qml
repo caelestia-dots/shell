@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.components.images
@@ -56,7 +57,7 @@ StyledClippingRect {
         StyledText {
             Layout.fillWidth: true
             animate: true
-            text: (Players.active?.trackTitle ?? qsTr("Nothing playing")) || qsTr("Unknown track")
+            text: (Players.active?.trackTitle ?? Tr.tr("Nothing playing")) || Tr.tr("Unknown track")
             color: Colours.palette.m3primary
             horizontalAlignment: Text.AlignHCenter
             font: Tokens.font.title.medium
@@ -66,7 +67,7 @@ StyledClippingRect {
         StyledText {
             Layout.fillWidth: true
             animate: true
-            text: (Players.active?.trackArtist ?? qsTr("Try playing some music!")) || qsTr("Unknown artist")
+            text: (Players.active?.trackArtist ?? Tr.tr("Try playing some music!")) || Tr.tr("Unknown artist")
             color: Colours.palette.m3onSurfaceVariant
             horizontalAlignment: Text.AlignHCenter
             font: Tokens.font.body.small

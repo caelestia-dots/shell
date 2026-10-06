@@ -2,12 +2,23 @@ pragma ComponentBehavior: Bound
 
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.modules.nexus.common
 
 PageBase {
     id: root
 
-    title: qsTr("Status icons")
+    readonly property var builtinIcons: ({
+            lockStatus: Tr.tr("Lock keys"),
+            kbLayout: Tr.tr("Keyboard layout"),
+            audio: Tr.tr("Speakers"),
+            microphone: Tr.tr("Microphone"),
+            network: Tr.tr("Network"),
+            bluetooth: Tr.tr("Bluetooth"),
+            battery: Tr.tr("Battery")
+        })
+
+    title: Tr.tr("Status icons")
     isSubPage: true
 
     ColumnLayout {
@@ -19,69 +30,68 @@ PageBase {
         // Visible icons
         SectionHeader {
             first: true
-            text: qsTr("Visible icons")
+            text: Tr.tr("Visible icons")
         }
 
-        ToggleRow {
+        ListEditor {
+            function labelFor(item: var): string {
+                const prettyName = root.builtinIcons[item.id];
+                if (prettyName)
+                    return prettyName;
+                const label = item.id.replace(/([A-Z])/g, " $1");
+                return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+            }
+
+            function toggledFor(item: var): bool {
+                return item.enabled;
+            }
+
+            z: 1
             first: true
-            text: qsTr("Speakers")
-            checked: Config.bar.status.showAudio
-            onToggled: GlobalConfig.bar.status.showAudio = checked
+            values: Config.bar.statusIcons.values
+            onItemMoved: (from, to) => GlobalConfig.bar.statusIcons.move(from, to)
+            onItemRemoved: index => GlobalConfig.bar.statusIcons.remove(index)
+            onItemToggled: (index, checked) => GlobalConfig.bar.statusIcons.at(index).enabled = checked
         }
 
-        ToggleRow {
-            text: qsTr("Microphone")
-            checked: Config.bar.status.showMicrophone
-            onToggled: GlobalConfig.bar.status.showMicrophone = checked
-        }
+        DialogSelectButton {
+            id: addItemContainer
 
-        ToggleRow {
-            text: qsTr("Keyboard layout")
-            checked: Config.bar.status.showKbLayout
-            onToggled: GlobalConfig.bar.status.showKbLayout = checked
-        }
+            rootParent: root.flickable
+            icon: "add"
+            label: Tr.tr("Add entry")
+            header: Tr.tr("Add new entry")
+            acceptLabel: Tr.trCtx("Add", "button")
 
-        ToggleRow {
-            text: qsTr("Network")
-            checked: Config.bar.status.showNetwork
-            onToggled: GlobalConfig.bar.status.showNetwork = checked
-        }
+            model: {
+                const builtins = Object.keys(root.builtinIcons).map(k => ({
+                            id: k,
+                            label: root.builtinIcons[k]
+                        }));
+                return builtins;
+            }
 
-        ToggleRow {
-            text: qsTr("Wi-Fi")
-            checked: Config.bar.status.showWifi
-            onToggled: GlobalConfig.bar.status.showWifi = checked
-        }
+            onAccepted: {
+                if (!selectedItem) // Should never happen but just in case
+                    return;
 
-        ToggleRow {
-            text: qsTr("Bluetooth")
-            checked: Config.bar.status.showBluetooth
-            onToggled: GlobalConfig.bar.status.showBluetooth = checked
-        }
-
-        ToggleRow {
-            text: qsTr("Battery")
-            checked: Config.bar.status.showBattery
-            onToggled: GlobalConfig.bar.status.showBattery = checked
-        }
-
-        ToggleRow {
-            last: true
-            text: qsTr("Caps lock")
-            checked: Config.bar.status.showLockStatus
-            onToggled: GlobalConfig.bar.status.showLockStatus = checked
+                GlobalConfig.bar.statusIcons.insert({
+                    id: selectedItem,
+                    enabled: true
+                });
+            }
         }
 
         // Behaviour
         SectionHeader {
-            text: qsTr("Behaviour")
+            text: Tr.tr("Behaviour")
         }
 
         ToggleRow {
             first: true
             last: true
-            text: qsTr("Popout on hover")
-            subtext: qsTr("Show a details popout when hovering the status icons")
+            text: Tr.tr("Popout on hover")
+            subtext: Tr.tr("Show a details popout when hovering the status icons")
             checked: Config.bar.popouts.statusIcons
             onToggled: GlobalConfig.bar.popouts.statusIcons = checked
         }

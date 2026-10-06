@@ -1,8 +1,11 @@
 #include "blobrect.hpp"
-#include "blobgroup.hpp"
 
 #include <algorithm>
 #include <cmath>
+
+#include "blobgroup.hpp"
+
+namespace caelestia::blobs {
 
 BlobRect::BlobRect(QQuickItem* parent)
     : BlobShape(parent) {}
@@ -17,8 +20,8 @@ void BlobRect::updatePolish() {
 
     if (m_physicsActive) {
         // Check if deformation is visually imperceptible
-        float totalDelta = std::abs(m_dm00 - 1.0f) + std::abs(m_dm01) + std::abs(m_dm11 - 1.0f);
-        float totalVel = std::abs(m_dmVel00) + std::abs(m_dmVel01) + std::abs(m_dmVel11);
+        const float totalDelta = std::abs(m_dm00 - 1.0f) + std::abs(m_dm01) + std::abs(m_dm11 - 1.0f);
+        const float totalVel = std::abs(m_dmVel00) + std::abs(m_dmVel01) + std::abs(m_dmVel11);
 
         if (totalDelta < 0.004f && totalVel < 0.05f) {
             // Snap to rest, no visible deformation
@@ -33,7 +36,7 @@ void BlobRect::updatePolish() {
         } else {
             QMetaObject::invokeMethod(
                 this,
-                [this]() {
+                [this] {
                     if (m_physicsActive && m_group)
                         m_group->markDirty();
                 },
@@ -75,15 +78,15 @@ void BlobRect::updatePhysics() {
 
     // Compute target deformation matrix from velocity
     // R(θ) * diag(stretch, compress) * R(θ)^T
-    const float kStretchFactor = static_cast<float>(m_deformScale);
-    constexpr float kMaxStretch = 0.35f;
+    const auto stretchFactor = static_cast<float>(m_deformScale);
+    constexpr float k_maxStretch = 0.35f;
 
     float target00 = 1.0f;
     float target01 = 0.0f;
     float target11 = 1.0f;
 
     if (speed > 5.0f) {
-        const float targetStretch = 1.0f + std::min(speed * kStretchFactor, kMaxStretch);
+        const float targetStretch = 1.0f + std::min(speed * stretchFactor, k_maxStretch);
         const float targetCompress = 1.0f / targetStretch;
 
         const float cosA = velX / speed;
@@ -101,17 +104,17 @@ void BlobRect::updatePhysics() {
     // (the friction term uses the new velocity, solved in closed form) so the 1/(1 + c*dt)
     // factor stays in (0, 1) for any dt; an explicit -c*v*dt term would flip sign and inject
     // energy once c*dt > 1 (here dt > ~62ms), making the deformation diverge on slow frames.
-    const float kStiffness = static_cast<float>(m_stiffness);
-    const float kDamping = static_cast<float>(m_damping);
-    const float invDamp = 1.0f / (1.0f + kDamping * dt);
+    const auto stiffness = static_cast<float>(m_stiffness);
+    const auto damping = static_cast<float>(m_damping);
+    const float invDamp = 1.0f / (1.0f + damping * dt);
 
-    m_dmVel00 = (m_dmVel00 - kStiffness * (m_dm00 - target00) * dt) * invDamp;
+    m_dmVel00 = (m_dmVel00 - stiffness * (m_dm00 - target00) * dt) * invDamp;
     m_dm00 += m_dmVel00 * dt;
 
-    m_dmVel01 = (m_dmVel01 - kStiffness * (m_dm01 - target01) * dt) * invDamp;
+    m_dmVel01 = (m_dmVel01 - stiffness * (m_dm01 - target01) * dt) * invDamp;
     m_dm01 += m_dmVel01 * dt;
 
-    m_dmVel11 = (m_dmVel11 - kStiffness * (m_dm11 - target11) * dt) * invDamp;
+    m_dmVel11 = (m_dmVel11 - stiffness * (m_dm11 - target11) * dt) * invDamp;
     m_dm11 += m_dmVel11 * dt;
 
     m_deformMatrix = QMatrix4x4(m_dm00, m_dm01, 0, 0, m_dm01, m_dm11, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -119,6 +122,43 @@ void BlobRect::updatePhysics() {
     updateCenteredDeformMatrix();
 
     checkAtRest(speed);
+}
+
+qreal BlobRect::stiffness() const {
+    return m_stiffness;
+}
+
+void BlobRect::setStiffness(qreal s) {
+    if (!qFuzzyCompare(m_stiffness, s)) {
+        m_stiffness = s;
+        emit stiffnessChanged();
+    }
+}
+
+qreal BlobRect::damping() const {
+    return m_damping;
+}
+
+void BlobRect::setDamping(qreal damping) {
+    if (!qFuzzyCompare(m_damping, damping)) {
+        m_damping = damping;
+        emit dampingChanged();
+    }
+}
+
+qreal BlobRect::deformScale() const {
+    return m_deformScale;
+}
+
+void BlobRect::setDeformScale(qreal s) {
+    if (!qFuzzyCompare(m_deformScale, s)) {
+        m_deformScale = s;
+        emit deformScaleChanged();
+    }
+}
+
+qreal BlobRect::topLeftRadius() const {
+    return m_topLeftRadius;
 }
 
 void BlobRect::setTopLeftRadius(qreal r) {
@@ -130,6 +170,10 @@ void BlobRect::setTopLeftRadius(qreal r) {
     }
 }
 
+qreal BlobRect::topRightRadius() const {
+    return m_topRightRadius;
+}
+
 void BlobRect::setTopRightRadius(qreal r) {
     if (!qFuzzyCompare(m_topRightRadius, r)) {
         m_topRightRadius = r;
@@ -139,6 +183,10 @@ void BlobRect::setTopRightRadius(qreal r) {
     }
 }
 
+qreal BlobRect::bottomLeftRadius() const {
+    return m_bottomLeftRadius;
+}
+
 void BlobRect::setBottomLeftRadius(qreal r) {
     if (!qFuzzyCompare(m_bottomLeftRadius, r)) {
         m_bottomLeftRadius = r;
@@ -146,6 +194,10 @@ void BlobRect::setBottomLeftRadius(qreal r) {
         if (m_group)
             m_group->markDirty();
     }
+}
+
+qreal BlobRect::bottomRightRadius() const {
+    return m_bottomRightRadius;
 }
 
 void BlobRect::setBottomRightRadius(qreal r) {
@@ -167,33 +219,29 @@ void BlobRect::cornerRadii(float out[4]) const {
 }
 
 bool BlobRect::isExcluded(const BlobShape* other) const {
-    for (const auto& ptr : m_exclude) {
-        if (ptr == other)
-            return true;
-    }
-    return false;
+    return std::ranges::any_of(m_exclude, [other](const auto& ptr) {
+        return ptr == other;
+    });
 }
 
 bool BlobRect::isCornerExcluded(const BlobShape* other) const {
-    for (const auto& ptr : m_excludeCorners) {
-        if (ptr == other)
-            return true;
-    }
-    return false;
+    return std::ranges::any_of(m_excludeCorners, [other](const auto& ptr) {
+        return ptr == other;
+    });
 }
 
 QQmlListProperty<BlobRect> BlobRect::exclude() {
-    return QQmlListProperty<BlobRect>(
-        this, nullptr, &excludeAppend, &excludeCount, &excludeAt, &excludeClear, &excludeReplace, &excludeRemoveLast);
+    return { this, nullptr, &excludeAppend, &excludeCount, &excludeAt, &excludeClear, &excludeReplace,
+        &excludeRemoveLast };
 }
 
 QQmlListProperty<BlobRect> BlobRect::excludeCorners() {
-    return QQmlListProperty<BlobRect>(this, nullptr, &excludeCornersAppend, &excludeCornersCount, &excludeCornersAt,
-        &excludeCornersClear, &excludeCornersReplace, &excludeCornersRemoveLast);
+    return { this, nullptr, &excludeCornersAppend, &excludeCornersCount, &excludeCornersAt, &excludeCornersClear,
+        &excludeCornersReplace, &excludeCornersRemoveLast };
 }
 
 void BlobRect::excludeAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_exclude.append(rect);
     if (self->m_group)
         self->m_group->markDirty();
@@ -201,17 +249,17 @@ void BlobRect::excludeAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
 }
 
 qsizetype BlobRect::excludeCount(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<BlobRect*>(prop->object);
     return self->m_exclude.size();
 }
 
 BlobRect* BlobRect::excludeAt(QQmlListProperty<BlobRect>* prop, qsizetype index) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<BlobRect*>(prop->object);
     return self->m_exclude.at(index);
 }
 
 void BlobRect::excludeClear(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_exclude.isEmpty())
         return;
     self->m_exclude.clear();
@@ -221,7 +269,7 @@ void BlobRect::excludeClear(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::excludeReplace(QQmlListProperty<BlobRect>* prop, qsizetype index, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_exclude[index] = rect;
     if (self->m_group)
         self->m_group->markDirty();
@@ -229,7 +277,7 @@ void BlobRect::excludeReplace(QQmlListProperty<BlobRect>* prop, qsizetype index,
 }
 
 void BlobRect::excludeRemoveLast(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_exclude.isEmpty())
         return;
     self->m_exclude.removeLast();
@@ -239,7 +287,7 @@ void BlobRect::excludeRemoveLast(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::excludeCornersAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_excludeCorners.append(rect);
     if (self->m_group)
         self->m_group->markDirty();
@@ -247,17 +295,17 @@ void BlobRect::excludeCornersAppend(QQmlListProperty<BlobRect>* prop, BlobRect* 
 }
 
 qsizetype BlobRect::excludeCornersCount(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<const BlobRect*>(prop->object);
     return self->m_excludeCorners.size();
 }
 
 BlobRect* BlobRect::excludeCornersAt(QQmlListProperty<BlobRect>* prop, qsizetype index) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    const auto* self = static_cast<BlobRect*>(prop->object);
     return self->m_excludeCorners.at(index);
 }
 
 void BlobRect::excludeCornersClear(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_excludeCorners.isEmpty())
         return;
     self->m_excludeCorners.clear();
@@ -267,7 +315,7 @@ void BlobRect::excludeCornersClear(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::excludeCornersReplace(QQmlListProperty<BlobRect>* prop, qsizetype index, BlobRect* rect) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     self->m_excludeCorners[index] = rect;
     if (self->m_group)
         self->m_group->markDirty();
@@ -275,7 +323,7 @@ void BlobRect::excludeCornersReplace(QQmlListProperty<BlobRect>* prop, qsizetype
 }
 
 void BlobRect::excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto* const self = static_cast<BlobRect*>(prop->object);
     if (self->m_excludeCorners.isEmpty())
         return;
     self->m_excludeCorners.removeLast();
@@ -285,10 +333,10 @@ void BlobRect::excludeCornersRemoveLast(QQmlListProperty<BlobRect>* prop) {
 }
 
 void BlobRect::checkAtRest(float speed) {
-    constexpr float kEpsilon = 0.002f;
-    const bool atRest = std::abs(m_dm00 - 1.0f) < kEpsilon && std::abs(m_dm01) < kEpsilon &&
-                        std::abs(m_dm11 - 1.0f) < kEpsilon && std::abs(m_dmVel00) < kEpsilon &&
-                        std::abs(m_dmVel01) < kEpsilon && std::abs(m_dmVel11) < kEpsilon && speed < 5.0f;
+    constexpr float k_epsilon = 0.002f;
+    const bool atRest = std::abs(m_dm00 - 1.0f) < k_epsilon && std::abs(m_dm01) < k_epsilon &&
+                        std::abs(m_dm11 - 1.0f) < k_epsilon && std::abs(m_dmVel00) < k_epsilon &&
+                        std::abs(m_dmVel01) < k_epsilon && std::abs(m_dmVel11) < k_epsilon && speed < 5.0f;
 
     if (atRest) {
         m_dm00 = 1.0f;
@@ -303,3 +351,5 @@ void BlobRect::checkAtRest(float speed) {
         m_physicsActive = false;
     }
 }
+
+} // namespace caelestia::blobs

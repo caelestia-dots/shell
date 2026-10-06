@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -17,7 +18,7 @@ PageBase {
     readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
     readonly property bool btEnabled: adapter?.enabled ?? false
 
-    title: qsTr("Connected devices")
+    title: Tr.tr("Connected devices")
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -27,7 +28,7 @@ PageBase {
 
         ToggleRow {
             first: true
-            text: qsTr("Bluetooth")
+            text: Tr.tr("Bluetooth")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
             checked: root.btEnabled
@@ -42,7 +43,7 @@ PageBase {
 
             showList: root.btEnabled
             placeholderIcon: root.btEnabled ? "devices_other" : "bluetooth_disabled"
-            placeholderText: root.btEnabled ? qsTr("No saved devices") : qsTr("Bluetooth disabled")
+            placeholderText: root.btEnabled ? Tr.tr("No saved devices") : Tr.tr("Bluetooth disabled")
 
             model: ScriptModel {
                 values: Bluetooth.devices.values.filter(d => d.bonded).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name)) // qmllint disable unresolved-type
@@ -115,14 +116,21 @@ PageBase {
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.modelData?.name ?? qsTr("Unknown")
+                            text: device.modelData?.name ?? Tr.trCtx("Unknown", "unknown bluetooth device")
                             font: Tokens.font.body.small
                             elide: Text.ElideRight
                         }
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: device.connected ? qsTr("Connected%1").arg(device.modelData?.batteryAvailable ? " • " + Math.round(device.modelData.battery * 100) + "%" : "") : qsTr("Saved")
+                            text: {
+                                if (!device.connected)
+                                    return Tr.trCtx("Saved", "bluetooth device state");
+                                if (device.modelData?.batteryAvailable)
+                                    // TRANSLATORS: %1 = battery level, already formatted as a percentage
+                                    return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.modelData.battery));
+                                return Tr.trCtx("Connected", "bluetooth device state");
+                            }
                             color: Colours.palette.m3outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
@@ -168,52 +176,22 @@ PageBase {
             }
         }
 
-        ConnectedRect {
-            Layout.fillWidth: true
-            implicitHeight: pairLayout.implicitHeight + pairLayout.anchors.margins * 2
+        RowButton {
             last: true
-
-            StateLayer {
-                disabled: !root.btEnabled
-                onClicked: root.nState.openSubPage(2)
-            }
-
-            RowLayout {
-                id: pairLayout
-
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
-                anchors.leftMargin: Tokens.padding.largeIncreased
-                anchors.rightMargin: Tokens.padding.largeIncreased
-                spacing: Tokens.spacing.medium
-                opacity: root.btEnabled ? 1 : 0.5
-
-                Behavior on opacity {
-                    Anim {}
-                }
-
-                MaterialIcon {
-                    text: "add"
-                    fontStyle: Tokens.font.icon.medium
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: qsTr("Pair new device")
-                    font: Tokens.font.body.small
-                    elide: Text.ElideRight
-                }
-            }
+            icon: "add"
+            text: Tr.tr("Pair new device")
+            disabled: !root.btEnabled
+            onClicked: root.nState.openSubPage(2)
         }
 
         ToggleRow {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
 
             first: true
-            text: qsTr("Discoverable")
-            subtext: qsTr("Allow nearby devices to find this one")
-            enabled: root.btEnabled
-            opacity: root.btEnabled ? 1 : 0.5
+            // TRANSLATORS: adjective: other devices can find this computer
+            text: Tr.trCtx("Discoverable", "bluetooth setting")
+            subtext: Tr.tr("Allow nearby devices to find this one")
+            disabled: !root.btEnabled
             checked: root.adapter?.discoverable ?? false
             onToggled: {
                 if (root.adapter)
@@ -227,10 +205,10 @@ PageBase {
 
         ToggleRow {
             last: true
-            text: qsTr("Pairable")
-            subtext: qsTr("Allow nearby devices to pair with this one")
-            enabled: root.btEnabled
-            opacity: root.btEnabled ? 1 : 0.5
+            // TRANSLATORS: adjective: other devices are allowed to pair with this computer
+            text: Tr.trCtx("Pairable", "bluetooth setting")
+            subtext: Tr.tr("Allow nearby devices to pair with this one")
+            disabled: !root.btEnabled
             checked: root.adapter?.pairable ?? false
             onToggled: {
                 if (root.adapter)

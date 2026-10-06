@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Caelestia.Config
 import qs.components
+import qs.services
 
 Item {
     id: root
@@ -14,8 +15,13 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    implicitWidth: (currentPopout?.implicitWidth ?? 0) + Tokens.padding.extraLargeIncreased
-    implicitHeight: (currentPopout?.implicitHeight ?? 0) + Tokens.padding.extraLargeIncreased
+    readonly property var trayItemsToIndices: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id)).reduce((acc, item, i) => {
+        acc[item.id] = i;
+        return acc;
+    }, {})
+
+    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.large * 2 : 0
+    implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.large * 2 : 0
 
     Item {
         id: content
@@ -36,15 +42,7 @@ Item {
             name: "network"
             sourceComponent: Network {
                 popouts: root.popouts
-                view: "wireless"
-            }
-        }
-
-        Popout {
-            name: "ethernet"
-            sourceComponent: Network {
-                popouts: root.popouts
-                view: "ethernet"
+                view: Nmcli.activeEthernet ? "ethernet" : "wireless"
             }
         }
 
@@ -111,7 +109,7 @@ Item {
 
         Popout {
             name: "audio"
-            sourceComponent: Audio {
+            sourceComponent: AudioPopout {
                 popouts: root.popouts
             }
         }
@@ -128,16 +126,15 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => i.hasMenu && i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
                 id: trayMenu
 
                 required property SystemTrayItem modelData
-                required property int index
 
-                name: `traymenu${index}`
+                name: `traymenu${root.trayItemsToIndices[modelData.id]}`
                 sourceComponent: trayMenuComp
 
                 Connections {
@@ -168,6 +165,7 @@ Item {
 
         required property string name
         readonly property bool shouldBeActive: root.popouts.currentName === name
+        property bool ready: true
 
         anchors.centerIn: parent
 

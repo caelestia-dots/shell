@@ -1,8 +1,10 @@
 #pragma once
 
-#include "audioprovider.hpp"
-#include <aubio/aubio.h>
 #include <qqmlintegration.h>
+
+#include <aubio/aubio.h>
+
+#include "audioprovider.hpp"
 
 namespace caelestia::services {
 
@@ -11,7 +13,7 @@ class BeatProcessor : public AudioProcessor {
 
 public:
     explicit BeatProcessor(QObject* parent = nullptr);
-    ~BeatProcessor();
+    ~BeatProcessor() override;
 
 signals:
     void beat(smpl_t bpm);

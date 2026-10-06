@@ -4,9 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
-import Caelestia
-import Caelestia.Config
-import Caelestia.Internal
+import Caelestia.I18n
+import Caelestia.Services
 import qs.components.misc
 
 Singleton {
@@ -29,7 +28,7 @@ Singleton {
     readonly property bool capsLock: keyboard?.capsLock ?? false
     readonly property bool numLock: keyboard?.numLock ?? false
     readonly property string defaultKbLayout: keyboard?.layout.split(",")[0] ?? "??"
-    readonly property string kbLayoutFull: keyboard?.activeKeymap ?? "Unknown"
+    readonly property string kbLayoutFull: keyboard?.activeKeymap ?? Tr.trCtx("Unknown", "keyboard layout")
     readonly property string kbLayout: kbMap.get(kbLayoutFull) ?? "??"
     readonly property var kbMap: new Map()
 
@@ -37,13 +36,20 @@ Singleton {
     readonly property alias options: extras.options
     readonly property alias devices: extras.devices
 
-    property bool hadKeyboard
     property string lastSpecialWorkspace: ""
 
     signal configReloaded
 
     function dispatch(request: string): void {
         Hyprland.dispatch(request);
+    }
+
+    function focusWorkspace(ws: var): void {
+        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
+    }
+
+    function toggleSpecial(name: string): void {
+        dispatch(usingLua ? `hl.dsp.workspace.toggle_special("${name}")` : `togglespecialworkspace ${name}`);
     }
 
     function cycleSpecialWorkspace(direction: string): void {
@@ -58,11 +64,11 @@ Singleton {
             if (lastSpecialWorkspace) {
                 const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
                 if (workspace && workspace.lastIpcObject.windows > 0) {
-                    dispatch(usingLua ? `hl.dsp.focus({ workspace = "${lastSpecialWorkspace}" })` : `workspace ${lastSpecialWorkspace}`);
+                    focusWorkspace(lastSpecialWorkspace);
                     return;
                 }
             }
-            dispatch(usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[0].name}" })` : `workspace ${openSpecials[0].name}`);
+            focusWorkspace(openSpecials[0].name);
             return;
         }
 
@@ -76,7 +82,7 @@ Singleton {
                 nextIndex = (currentIndex - 1 + openSpecials.length) % openSpecials.length;
         }
 
-        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[nextIndex].name}" })` : `workspace ${openSpecials[nextIndex].name}`);
+        focusWorkspace(openSpecials[nextIndex].name);
     }
 
     function monitorNames(): list<string> {
@@ -87,6 +93,22 @@ Singleton {
         return Hyprland.monitorFor(screen);
     }
 
+    function trimWsName(name: string): string {
+        return name.startsWith("special:") ? name.slice("special:".length) : name;
+    }
+
+    function toplevelsForWs(ws: int, ignoredTags = []): list<HyprlandToplevel> {
+        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t, ignoredTags));
+    }
+
+    function isToplevelIgnored(toplevel: HyprlandToplevel, ignoredTags = []): bool {
+        const ipc = toplevel?.lastIpcObject;
+        if (!ipc?.class || !ipc.mapped)
+            return true;
+
+        return ipc.tags?.some(tag => ignoredTags.includes(tag.replace(/\*$/, ""))) ?? false;
+    }
+
     function reloadDynamicConfs(): void {
         if (usingLua) {
             extras.batchMessage(['eval hl.bind("Caps_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })', 'eval hl.bind("Num_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })']);
@@ -95,34 +117,8 @@ Singleton {
         }
     }
 
+    onUsingLuaChanged: reloadDynamicConfs()
     Component.onCompleted: reloadDynamicConfs()
-
-    onCapsLockChanged: {
-        if (!GlobalConfig.utilities.toasts.capsLockChanged)
-            return;
-
-        if (capsLock)
-            Toaster.toast(qsTr("Caps lock enabled"), qsTr("Caps lock is currently enabled"), "keyboard_capslock_badge");
-        else
-            Toaster.toast(qsTr("Caps lock disabled"), qsTr("Caps lock is currently disabled"), "keyboard_capslock");
-    }
-
-    onNumLockChanged: {
-        if (!GlobalConfig.utilities.toasts.numLockChanged)
-            return;
-
-        if (numLock)
-            Toaster.toast(qsTr("Num lock enabled"), qsTr("Num lock is currently enabled"), "looks_one");
-        else
-            Toaster.toast(qsTr("Num lock disabled"), qsTr("Num lock is currently disabled"), "timer_1");
-    }
-
-    onKbLayoutFullChanged: {
-        if (hadKeyboard && GlobalConfig.utilities.toasts.kbLayoutChanged)
-            Toaster.toast(qsTr("Keyboard layout changed"), qsTr("Layout changed to: %1").arg(kbLayoutFull), "keyboard");
-
-        hadKeyboard = !!keyboard;
-    }
 
     Connections {
         function onRawEvent(event: HyprlandEvent): void {

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -104,7 +105,7 @@ Item {
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: Tokens.padding.large * 1.4 * root.clockScale
 
-                    active: GlobalConfig.services.useTwelveHourClock
+                    active: Units.twelveHourClock
                     visible: active
 
                     sourceComponent: StyledText {

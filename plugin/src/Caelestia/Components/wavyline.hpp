@@ -3,7 +3,7 @@
 #include <qqmlintegration.h>
 #include <qquickpainteditem.h>
 
-namespace caelestia::controls {
+namespace caelestia::components {
 
 class WavyLine : public QQuickPaintedItem {
     Q_OBJECT
@@ -24,9 +24,9 @@ class WavyLine : public QQuickPaintedItem {
     Q_PROPERTY(qreal value READ value WRITE setValue NOTIFY valueChanged FINAL)
 
 public:
-    enum PathType {
+    enum class PathType : quint8 {
         Linear,
-        Arc
+        Arc,
     };
     Q_ENUM(PathType)
 
@@ -104,4 +104,4 @@ private:
     qreal m_fullAngleRad;
 };
 
-} // namespace caelestia::controls
+} // namespace caelestia::components

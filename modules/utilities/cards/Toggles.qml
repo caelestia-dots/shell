@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.controls
 import qs.services
@@ -20,8 +21,8 @@ StyledRect {
     readonly property var quickToggles: {
         const seenIds = new Set();
 
-        return Config.utilities.quickToggles.filter(item => {
-            if (!(item.enabled ?? true))
+        return Config.utilities.quickToggles.values.filter(item => {
+            if (!item.enabled)
                 return false;
 
             if (seenIds.has(item.id)) {
@@ -52,7 +53,7 @@ StyledRect {
         spacing: Tokens.spacing.medium
 
         StyledText {
-            text: qsTr("Quick Toggles")
+            text: Tr.tr("Quick toggles")
             font: Tokens.font.body.medium
         }
 

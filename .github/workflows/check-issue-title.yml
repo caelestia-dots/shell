@@ -1,0 +1,24 @@
+name: Check issue title
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+      - labeled
+      - unlabeled
+
+permissions:
+  issues: write
+
+jobs:
+  check-issue-title:
+    if: github.event.action != 'edited' || github.event.changes.title != null
+    uses: caelestia-dots/.github/.github/workflows/check-issue-title.yml@main
+    concurrency:
+      group: check-issue-title-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    with:
+      prefixes: >-
+        [["crash","CRASH"],["bug","BUG"],["enhancement","FEATURE"]]
