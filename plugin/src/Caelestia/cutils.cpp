@@ -11,6 +11,7 @@
 #include <qquickitemgrabresult.h>
 #include <qquickwindow.h>
 #include <qregularexpression.h>
+#include <qsavefile.h>
 #include <qtconcurrentrun.h>
 
 #include "util/metaenum.hpp"
@@ -160,12 +161,19 @@ bool CUtils::writeTextFile(const QString& path, const QString& text) {
         return false;
     }
 
-    QFile file(path);
+    // Written to a temporary file next to the target and renamed over it on
+    // commit, so a reader only ever sees the old or the new content - never a
+    // half-written file if the shell dies or the disk fills up mid-write
+    QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qCWarning(lcCUtils) << "Failed to open" << path << "for writing";
         return false;
     }
-    return file.write(text.toUtf8()) >= 0;
+    if (file.write(text.toUtf8()) < 0 || !file.commit()) {
+        qCWarning(lcCUtils) << "Failed to write" << path;
+        return false;
+    }
+    return true;
 }
 
 QStringList CUtils::listFiles(const QString& dir, const QString& suffix) {
