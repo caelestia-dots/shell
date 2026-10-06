@@ -15,6 +15,10 @@ Searcher {
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
     readonly property string fallback: Quickshell.shellPath("assets/wallpaper.webp")
 
+    // True while thumbnails are being regenerated; consumers use it to
+    // invalidate their image caches (sourceSize bump) without touching models.
+    readonly property bool thumbsBusy: thumbProcess.running
+
     property bool showPreview: false
     readonly property string current: showPreview ? previewPath : actualCurrent
     property string previewPath
@@ -141,9 +145,5 @@ Searcher {
         id: thumbProcess
 
         command: ["caelestia", "wallpaper", "--update-thumbs"]
-        onExited: { // qmllint disable signal-handler-parameters
-            videoWallpapers.path = "";
-            videoWallpapers.path = Paths.videowallsdir;
-        }
     }
 }

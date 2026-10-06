@@ -81,8 +81,12 @@ Item {
             smooth: !root.PathView.view.moving
             sourceSize: {
                 const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
-                return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
+                // Flip while thumbs regenerate so images reload once done
+                // instead of the whole model being rebuilt.
+                const bump = root.isVideo && Wallpapers.thumbsBusy ? 1 : 0;
+                return Qt.size(image.implicitWidth * dpr + bump, image.implicitHeight * dpr + bump);
             }
+            retainWhileLoading: true
         }
 
         StyledRect {

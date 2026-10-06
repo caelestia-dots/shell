@@ -6,6 +6,7 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.components.controls
+import qs.services
 import qs.utils
 
 Item {
@@ -62,7 +63,9 @@ Item {
                 source: root.thumbnailPath
                 sourceSize: {
                     const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
-                    return Qt.size(width * dpr, height * dpr);
+                    // Same 1px bump as the launcher: reload when thumbs finish
+                    const bump = root.isVideo && Wallpapers.thumbsBusy ? 1 : 0;
+                    return Qt.size(width * dpr + bump, height * dpr + bump);
                 }
                 retainWhileLoading: true
                 opacity: status === Image.Ready ? 1 : 0
