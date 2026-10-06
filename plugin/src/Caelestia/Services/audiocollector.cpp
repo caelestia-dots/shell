@@ -156,12 +156,10 @@ void PipeWireWorker::processStream() {
 
     const spa_buffer* buf = buffer->buffer;
     const auto* samples = reinterpret_cast<const qint16*>(buf->datas[0].data);
-    if (samples == nullptr) {
-        return;
+    if (samples != nullptr) {
+        const quint32 count = buf->datas[0].chunk->size / sizeof(qint16);
+        m_collector->loadChunk(samples, count);
     }
-
-    const quint32 count = buf->datas[0].chunk->size / 2;
-    m_collector->loadChunk(samples, count);
 
     pw_stream_queue_buffer(m_stream, buffer);
 }
