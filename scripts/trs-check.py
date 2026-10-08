@@ -415,9 +415,7 @@ class FileChecker:
 
         if name == "trMarked":
             if text is not None:
-                self.report(
-                    span, WARNING, "redundant-marked", "`trMarked()` on a literal never translates, use `tr()`"
-                )
+                self.report(span, WARNING, "redundant-marked", "`trMarked()` on a literal never translates, use `tr()`")
             return
 
         plural_arg = args[spec["plural"]] if "plural" in spec else None
