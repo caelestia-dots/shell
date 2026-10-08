@@ -24,28 +24,11 @@ VerticalFadeFlickable {
     // still report their old positions.
     property bool followSelection
 
-    // Design tokens for the result rows, read once here. Tokens is an attached
-    // object: every item that touches it gets its own instance, created, bound
-    // and linked up to its screen on first access. Result rows are created as the
-    // query changes, and reading these instead keeps each row from creating a
-    // dozen of them. Same window, so the same screen and the same values.
     // The config as this screen sees it: the global one with this monitor's
     // overrides on top. The pages' switches read Config, which resolves to
     // the same thing, so a result's switch shows what the page would.
     // Global-only options can't be read from here (see configValue()).
     readonly property var screenConfig: Config.screen ? GlobalConfig.forScreen(Config.screen) : GlobalConfig
-
-    readonly property real rowPaddingSmall: Tokens.padding.small
-    readonly property real rowPaddingMedium: Tokens.padding.medium
-    readonly property real rowSpacingSmall: Tokens.spacing.small
-    readonly property real rowSpacingExtraSmall: Tokens.spacing.extraSmall
-    readonly property real rowRoundingFull: Tokens.rounding.full
-    readonly property real rowRoundingExtraLarge: Tokens.rounding.extraLarge
-    readonly property real rowRoundingExtraSmall: Tokens.rounding.extraSmall
-    readonly property font rowFontIconSmall: Tokens.font.icon.small
-    readonly property font rowFontLabelSmall: Tokens.font.label.small
-    readonly property font rowFontLabelLarge: Tokens.font.label.large
-    readonly property font rowFontBodyMedium: Tokens.font.body.medium
 
     readonly property string search: nState.searchText
     readonly property bool searching: search.length > 0
@@ -351,15 +334,15 @@ VerticalFadeFlickable {
                         })
 
                     width: resultList.width
-                    spacing: root.rowSpacingSmall
+                    spacing: Tokens.spacing.small
 
                     // The page the results underneath belong to
                     StyledText {
                         Layout.fillWidth: true
-                        Layout.leftMargin: root.rowPaddingMedium
+                        Layout.leftMargin: Tokens.padding.medium
                         text: group.info.page
                         color: Colours.palette.m3secondary
-                        font: root.rowFontLabelLarge
+                        font: Tokens.font.label.large
                         elide: Text.ElideRight
                     }
 
@@ -368,7 +351,7 @@ VerticalFadeFlickable {
 
                         Layout.fillWidth: true
                         // Same gap the rows inside the pages use
-                        spacing: root.rowSpacingExtraSmall / 2
+                        spacing: Tokens.spacing.extraSmall / 2
 
                         add: Transition {
                             Anim {
@@ -414,10 +397,10 @@ VerticalFadeFlickable {
                                 }
                                 // Joined like the rows inside the pages: round ends,
                                 // barely rounded where they meet.
-                                topLeftRadius: isFirst ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
-                                topRightRadius: isFirst ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
-                                bottomLeftRadius: isLast ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
-                                bottomRightRadius: isLast ? root.rowRoundingExtraLarge : root.rowRoundingExtraSmall
+                                topLeftRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                topRightRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+                                bottomRightRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
                                 color: Qt.lighter(Colours.palette.m3surfaceContainer, 1.13)
 
                                 onIsCurrentChanged: {
@@ -429,10 +412,10 @@ VerticalFadeFlickable {
                                     id: resultLayout
 
                                     anchors.fill: parent
-                                    anchors.margins: root.rowPaddingMedium
+                                    anchors.margins: Tokens.padding.medium
                                     // Leave room on the right for the toggle switch.
                                     anchors.rightMargin: result.modelData.isToggle ? toggle.width + anchors.margins * 2 : anchors.margins
-                                    spacing: root.rowSpacingSmall
+                                    spacing: Tokens.spacing.small
 
                                     // The setting's own icon, baked into the index per
                                     // anchor, in a round container like the page list
@@ -441,8 +424,8 @@ VerticalFadeFlickable {
                                         // Sized off the icon so it follows the user's
                                         // font settings, not a fixed pixel size.
                                         implicitWidth: implicitHeight
-                                        implicitHeight: resultIcon.implicitHeight + root.rowPaddingSmall * 2
-                                        radius: root.rowRoundingFull
+                                        implicitHeight: resultIcon.implicitHeight + Tokens.padding.small * 2
+                                        radius: Tokens.rounding.full
                                         color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
 
                                         MaterialIcon {
@@ -451,7 +434,7 @@ VerticalFadeFlickable {
                                             anchors.centerIn: parent
                                             text: result.modelData.icon
                                             color: result.isCurrent ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-                                            fontStyle: root.rowFontIconSmall
+                                            fontStyle: Tokens.font.icon.small
                                             fill: result.isCurrent ? 1 : 0
 
                                             Behavior on fill {
@@ -477,7 +460,7 @@ VerticalFadeFlickable {
                                             }
                                             visible: text.length > 0
                                             color: Colours.palette.m3outline
-                                            font: root.rowFontLabelSmall
+                                            font: Tokens.font.label.small
                                             elide: Text.ElideRight
                                         }
 
@@ -489,7 +472,7 @@ VerticalFadeFlickable {
                                             // string actually carries a highlight tag.
                                             textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
                                             color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                            font: root.rowFontBodyMedium
+                                            font: Tokens.font.body.medium
                                             elide: Text.ElideRight
                                         }
 
@@ -502,7 +485,7 @@ VerticalFadeFlickable {
                                             // rich-text parse unless there's a highlight.
                                             textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
                                             color: Colours.palette.m3outline
-                                            font: root.rowFontLabelSmall
+                                            font: Tokens.font.label.small
                                             elide: Text.ElideRight
                                         }
                                     }
@@ -514,6 +497,7 @@ VerticalFadeFlickable {
                                 // then keeps it. A tap that arrives without hover (touch)
                                 // still opens the entry through the TapHandler.
                                 HoverHandler {
+                                    cursorShape: Qt.PointingHandCursor
                                     onHoveredChanged: {
                                         if (hovered)
                                             stateLoader.active = true;
@@ -547,13 +531,11 @@ VerticalFadeFlickable {
                                 // Only toggle rows get a switch. A StyledSwitch is ~22 objects
                                 // (behaviors, shapes, a state layer), and creating one hidden
                                 // in every result row was a large share of each keystroke.
-                                // The margin is read off resultLayout so the Loader doesn't
-                                // create its own Tokens attached object just for it.
                                 Loader {
                                     id: toggle
 
                                     anchors.right: parent.right
-                                    anchors.rightMargin: resultLayout.anchors.margins
+                                    anchors.rightMargin: Tokens.padding.medium
                                     anchors.verticalCenter: parent.verticalCenter
                                     z: 2
                                     active: result.modelData.isToggle
