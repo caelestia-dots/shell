@@ -567,7 +567,9 @@ function extractSettings(files, nav, readLines) {
 // settings under rows nothing can be done to, so a section's info rows collapse
 // into one entry named after the section, keeping every label as a keyword so
 // searching "gateway" or "mac address" still finds it. Applies to any info
-// section, including ones added later.
+// section, including ones added later. Only rows with a settingAnchor are
+// indexed, so each row whose label should be a keyword needs one; the merged
+// entry jumps to the first row's anchor.
 function mergeInfoRows(entries) {
     const out = [];
     const merged = {};
