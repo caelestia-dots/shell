@@ -1,15 +1,17 @@
 name: Issue
-description: Report an issue with the dots
+description: Report an issue with the shell
 labels: ["bug"]
 type: "Bug"
 title: "[BUG] "
 body:
   - type: markdown
     attributes:
-      value: "**Welcome to submit a new issue!**\n- It takes only 3 steps, so please be patient :)\n- Tip: If your issue is not a feature request and is not an issue with the dots (e.g. \"how do I use X feature\"), please use [Discussions](https://github.com/caelestia-dots/shell/discussions) instead."
+      value: |
+        **Welcome to submit a new issue!**
+        - It takes only 3 steps, so please be patient :)
   - type: checkboxes
     attributes:
-      label: "Step 1. Before you submit"
+      label: "1. Before you submit"
       description: "Hint: The 2nd and 3rd checkbox is **not** forcely required as you may have failed to do so."
       options:
         - label: I have read the above instructions and am sure that this is supposed to be posted here.
@@ -23,7 +25,7 @@ body:
 
   - type: textarea
     attributes:
-      label: "Step 2. Version info"
+      label: "2. Version info"
       description: "Run `caelestia -v` and paste the result below."
       placeholder: "Paste the output of `caelestia -v` here!"
       render: text
@@ -44,7 +46,7 @@ body:
 
   - type: textarea
     attributes:
-      label: "Step 3. Describe the issue"
+      label: "3. Describe the issue"
       value: "\n<!-- Firstly describe your issue here! -->\n\n<details><summary>Logs</summary>\n\n```\n<!-- Put your log content here!-->\n```\n\n</details>"
     validations:
       required: true
