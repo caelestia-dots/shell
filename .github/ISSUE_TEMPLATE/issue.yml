@@ -25,7 +25,8 @@ body:
     attributes:
       label: "Step 2. Version info"
       description: "Run `caelestia -v` and paste the result below."
-      value: "<details><summary>Version info</summary>\n\n```\n<!-- Run `caelestia -v` and paste the result here! -->\n```\n\n</details>"
+      placeholder: "Paste the output of `caelestia -v` here!"
+      render: text
     validations:
       required: true
 
