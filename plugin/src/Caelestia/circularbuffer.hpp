@@ -35,6 +35,8 @@ signals:
     void valuesChanged();
 
 private:
+    [[nodiscard]] qreal computeMaximum() const;
+
     util::RingBuffer<qreal> m_data;
     qreal m_max = 0.0;
 };

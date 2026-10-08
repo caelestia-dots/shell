@@ -41,8 +41,9 @@ void CircularBuffer::push(qreal value) {
     if (m_data.count() != oldCount)
         emit countChanged();
 
-    if (value > m_max) {
-        m_max = value;
+    const auto newMax = computeMaximum();
+    if (!qFuzzyCompare(m_max + 1.0, newMax + 1.0)) {
+        m_max = newMax;
         emit maximumChanged();
     }
 
@@ -62,6 +63,16 @@ void CircularBuffer::clear() {
     }
 
     emit valuesChanged();
+}
+
+qreal CircularBuffer::computeMaximum() const {
+    if (m_data.count() == 0)
+        return 0.0;
+
+    qreal maxVal = m_data.at(0);
+    for (qsizetype i = 1; i < m_data.count(); ++i)
+        maxVal = std::max(maxVal, m_data.at(i));
+    return maxVal;
 }
 
 qreal CircularBuffer::at(int index) const {
