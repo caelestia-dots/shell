@@ -17,6 +17,7 @@ void CircularBuffer::setCapacity(int capacity) {
         return;
 
     m_data = util::RingBuffer<qreal>(capacity);
+    m_max = 0.0;
 
     emit capacityChanged();
     emit countChanged();
