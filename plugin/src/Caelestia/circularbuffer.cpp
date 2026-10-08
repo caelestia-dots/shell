@@ -8,86 +8,79 @@ CircularBuffer::CircularBuffer(QObject* parent)
     : QObject(parent) {}
 
 int CircularBuffer::capacity() const {
-    return m_capacity;
+    return static_cast<int>(m_data.capacity());
 }
 
 void CircularBuffer::setCapacity(int capacity) {
     capacity = std::max(capacity, 0);
-    if (m_capacity == capacity)
+    if (this->capacity() == capacity)
         return;
 
-    const auto old = values();
-
-    m_capacity = capacity;
-    m_data.resize(capacity);
-    m_data.fill(0.0);
-    m_head = 0;
-    m_count = 0;
-
-    // Re-push old values, keeping the most recent ones
-    const auto start = old.size() > capacity ? old.size() - capacity : 0;
-    for (auto i = start; i < old.size(); ++i) {
-        m_data[m_head] = old[i];
-        m_head = (m_head + 1) % m_capacity;
-        m_count++;
-    }
+    m_data = util::RingBuffer<qreal>(capacity);
+    m_max = 0.0;
 
     emit capacityChanged();
     emit countChanged();
+    emit maximumChanged();
     emit valuesChanged();
 }
 
 int CircularBuffer::count() const {
-    return m_count;
-}
-
-QList<qreal> CircularBuffer::values() const {
-    QList<qreal> result;
-    result.reserve(m_count);
-    for (int i = 0; i < m_count; ++i)
-        result.append(at(i));
-    return result;
+    return static_cast<int>(m_data.count());
 }
 
 qreal CircularBuffer::maximum() const {
-    if (m_count == 0)
-        return 0.0;
-
-    qreal maxVal = at(0);
-    for (int i = 1; i < m_count; ++i)
-        maxVal = std::max(maxVal, at(i));
-    return maxVal;
+    return m_max;
 }
 
 void CircularBuffer::push(qreal value) {
-    if (m_capacity <= 0)
+    if (m_data.capacity() <= 0)
         return;
 
-    m_data[m_head] = value;
-    m_head = (m_head + 1) % m_capacity;
-    if (m_count < m_capacity) {
-        m_count++;
+    const auto oldCount = m_data.count();
+    m_data.push(value);
+    if (m_data.count() != oldCount)
         emit countChanged();
+
+    const auto newMax = computeMaximum();
+    if (!qFuzzyCompare(m_max + 1.0, newMax + 1.0)) {
+        m_max = newMax;
+        emit maximumChanged();
     }
+
     emit valuesChanged();
 }
 
 void CircularBuffer::clear() {
-    if (m_count == 0)
+    if (m_data.count() == 0)
         return;
 
-    m_head = 0;
-    m_count = 0;
+    m_data.clear();
     emit countChanged();
+
+    if (m_max > 0.0) {
+        m_max = 0.0;
+        emit maximumChanged();
+    }
+
     emit valuesChanged();
 }
 
-qreal CircularBuffer::at(int index) const {
-    if (index < 0 || index >= m_count)
+qreal CircularBuffer::computeMaximum() const {
+    if (m_data.count() == 0)
         return 0.0;
 
-    const int actualIndex = (m_head - m_count + index + m_capacity) % m_capacity;
-    return m_data[actualIndex];
+    qreal maxVal = m_data.at(0);
+    for (qsizetype i = 1; i < m_data.count(); ++i)
+        maxVal = std::max(maxVal, m_data.at(i));
+    return maxVal;
+}
+
+qreal CircularBuffer::at(int index) const {
+    if (index < 0 || index >= m_data.count())
+        return 0.0;
+
+    return m_data.at(index);
 }
 
 } // namespace caelestia

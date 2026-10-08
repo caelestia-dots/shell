@@ -2,7 +2,8 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
-#include <qvector.h>
+
+#include "util/ringbuffer.hpp"
 
 namespace caelestia {
 
@@ -12,8 +13,7 @@ class CircularBuffer : public QObject {
 
     Q_PROPERTY(int capacity READ capacity WRITE setCapacity NOTIFY capacityChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
-    Q_PROPERTY(QList<qreal> values READ values NOTIFY valuesChanged)
-    Q_PROPERTY(qreal maximum READ maximum NOTIFY valuesChanged)
+    Q_PROPERTY(qreal maximum READ maximum NOTIFY maximumChanged)
 
 public:
     explicit CircularBuffer(QObject* parent = nullptr);
@@ -22,7 +22,6 @@ public:
     void setCapacity(int capacity);
 
     [[nodiscard]] int count() const;
-    [[nodiscard]] QList<qreal> values() const;
     [[nodiscard]] qreal maximum() const;
 
     Q_INVOKABLE void push(qreal value);
@@ -32,13 +31,14 @@ public:
 signals:
     void capacityChanged();
     void countChanged();
+    void maximumChanged();
     void valuesChanged();
 
 private:
-    QVector<qreal> m_data;
-    int m_head = 0;
-    int m_count = 0;
-    int m_capacity = 0;
+    [[nodiscard]] qreal computeMaximum() const;
+
+    util::RingBuffer<qreal> m_data;
+    qreal m_max = 0.0;
 };
 
 } // namespace caelestia
