@@ -44,8 +44,9 @@ Singleton {
     readonly property string cachePath: Paths.cache + "/settings-index.json"
     // What the cache was built from: the plugin's git revision plus a fingerprint
     // (path, size, mtime) of the page sources and the indexer itself. The
-    // fingerprint catches QML edited or installed without a plugin rebuild.
-    // Set by loadIndex().
+    // fingerprint catches QML edited or installed without a plugin rebuild, and
+    // keeps the cache usable when the build has no revision (CI passes an empty
+    // one). Set by loadIndex().
     property string cacheKey
     readonly property int maxResults: Math.max(1, GlobalConfig.nexus.maxSearchResults)
 
@@ -184,7 +185,10 @@ Singleton {
             } catch (e) {}
         }
         const data = SettingsIndexer.buildIndex(nexusDir, p => CUtils.readTextFile(p), (d, s) => CUtils.listFiles(d, s));
-        console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${CUtils.gitRevision || "unknown"})`);
+        if (data.entries.length === 0)
+            console.warn(`SettingsSearcher: no settings found in ${nexusDir}`);
+        else
+            console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${CUtils.gitRevision || "unknown"})`);
         for (const warning of data.iconWarnings)
             console.warn(`SettingsSearcher: ${warning}`);
         return data;
@@ -195,14 +199,17 @@ Singleton {
         const search = SettingsIndexer.buildSearch(root.indexEntries, text => Tr.trMarked(text));
         root.inverted = search.inverted;
         root.ranking = search.ranking;
-        CUtils.writeTextFile(root.cachePath, JSON.stringify({
-            version: root.cacheVersion,
-            key: root.cacheKey,
-            language: Tr.language,
-            entries: root.indexEntries,
-            inverted: search.inverted,
-            ranking: search.ranking
-        }));
+        // An empty index means the sources couldn't be read. Caching it would
+        // keep search empty until the sources change, so it's rebuilt next time.
+        if (root.indexEntries.length > 0)
+            CUtils.writeTextFile(root.cachePath, JSON.stringify({
+                version: root.cacheVersion,
+                key: root.cacheKey,
+                language: Tr.language,
+                entries: root.indexEntries,
+                inverted: search.inverted,
+                ranking: search.ranking
+            }));
         root.buildFinder();
     }
 
