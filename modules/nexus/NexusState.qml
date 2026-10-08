@@ -46,7 +46,8 @@ QtObject {
         const samePage = currentPageIdx === pageIdx;
         const sameSub = subPageIdxStack.length === subPath.length && subPath.every((v, i) => subPageIdxStack[i] === v);
         if (samePage && sameSub && anchor === lastAnchor) {
-            // Re-clicking the exact same setting: flash it again, don't scroll.
+            // Re-clicking the exact same setting: flash it again, scrolling only
+            // if it has been scrolled out of view since.
             highlightSetting(anchor);
             return;
         }
