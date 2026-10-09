@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.components
+import qs.components.containers
 import qs.modules.bar as Bar
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
@@ -34,9 +35,146 @@ Item {
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
 
+    // The LayoutManager is a singleton but this object is instantiated once per
+    // screen, so every registry key has to be scoped by screen name.
+    readonly property var panelKeys: ({
+            dashboard: LayoutManager.panelKey(screen.name, "dashboard"),
+            launcher: LayoutManager.panelKey(screen.name, "launcher"),
+            session: LayoutManager.panelKey(screen.name, "session"),
+            osd: LayoutManager.panelKey(screen.name, "osd"),
+            notifications: LayoutManager.panelKey(screen.name, "notifications"),
+            sidebar: LayoutManager.panelKey(screen.name, "sidebar"),
+            utilities: LayoutManager.panelKey(screen.name, "utilities"),
+            popouts: LayoutManager.panelKey(screen.name, "popouts"),
+            toasts: LayoutManager.panelKey(screen.name, "toasts")
+        })
+
+    // Register all panels with LayoutManager on component completion.
+    //
+    // The edges tell the manager which way each panel is allowed to be nudged, and
+    // have to match the anchors each panel actually declares. Panels that are
+    // positioned relative to another panel rather than to a screen edge (toasts
+    // follow the sidebar, popouts float) are registered as "none" and take part as
+    // blockers only. The bar is left out on purpose: it owns an exclusive zone
+    // derived from its own width, which a cap would invalidate.
+    Component.onCompleted: {
+        LayoutManager.registerPanel(panelKeys.dashboard, dashboard, LayoutManager.priorityHigh, "none", "top");
+        LayoutManager.registerPanel(panelKeys.launcher, launcher, LayoutManager.priorityHigh, "none", "bottom");
+        LayoutManager.registerPanel(panelKeys.osd, osd, LayoutManager.priorityHigh, "right", "none");
+        LayoutManager.registerPanel(panelKeys.session, session, LayoutManager.priorityHigh, "right", "none");
+        LayoutManager.registerPanel(panelKeys.notifications, notifications, LayoutManager.priorityMedium, "right", "top");
+        LayoutManager.registerPanel(panelKeys.sidebar, sidebar, LayoutManager.priorityMedium, "right", "none");
+        LayoutManager.registerPanel(panelKeys.utilities, utilities, LayoutManager.priorityMedium, "none", "bottom");
+        LayoutManager.registerPanel(panelKeys.popouts, popoutsWrapper, LayoutManager.priorityLow, "none", "none");
+        LayoutManager.registerPanel(panelKeys.toasts, toasts, LayoutManager.priorityMedium, "none", "none");
+
+        LayoutManager.requestLayoutUpdate();
+    }
+
+    // Trigger layout recalculation when panel visibility/size changes
     anchors.fill: parent
     anchors.margins: borderThickness
     anchors.leftMargin: bar.implicitWidth
+
+    // Cleanup on destruction
+    Component.onDestruction: {
+        for (const key in panelKeys)
+            LayoutManager.unregisterPanel(panelKeys[key]);
+    }
+
+    // Trigger layout recalculation when panel visibility/size changes
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        // Cycling tabs resizes the dashboard: every tab has its own width and
+        // height, and both are animated. Watching the geometry rather than the tab
+        // itself means a pass runs for each frame of the transition, so panels
+        // measured against the dashboard follow it the whole way instead of
+        // settling on the old size.
+        function onWidthChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        function onHeightChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: dashboard
+    }
+
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: launcher
+    }
+
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: session
+    }
+
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: osd
+    }
+
+    Connections {
+        function onVisibleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        // The sidebar is anchored to the bottom of the notifications panel, so a
+        // notification arriving or expiring moves the sidebar without changing
+        // anything the manager would otherwise be notified about. That is enough
+        // to start a new overlap on its own.
+        function onHeightChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: notifications
+    }
+
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: sidebar
+    }
+
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: utilities
+    }
+
+    Connections {
+        function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: popoutsWrapper
+    }
+
+    Connections {
+        function onGeometryChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        target: root.screen
+    }
 
     Item {
         id: osdWrapper
