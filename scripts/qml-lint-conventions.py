@@ -360,8 +360,7 @@ def fix_section_separators(lines: list[str]) -> list[str]:
 
         if func_skip_depth > 0:
             func_skip_depth += stripped.count("{") - stripped.count("}")
-            if func_skip_depth <= 0:
-                func_skip_depth = 0
+            func_skip_depth = max(0, func_skip_depth)
             continue
 
         if stripped == "}":
@@ -608,8 +607,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
         # Skip inside function bodies (JS code, not QML structure)
         if func_skip_depth > 0:
             func_skip_depth += stripped.count("{") - stripped.count("}")
-            if func_skip_depth <= 0:
-                func_skip_depth = 0
+            func_skip_depth = max(0, func_skip_depth)
             continue
 
         # Closing brace: pop all scopes deeper than this indent
