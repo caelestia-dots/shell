@@ -7,7 +7,40 @@ on:
   pull_request:
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      format-cpp: >-
+        ${{ github.event_name == 'push'
+           || steps.filter.outputs.source-cpp == 'true'
+           || steps.filter.outputs.workflow == 'true' }}
+      format-qml: >-
+        ${{ github.event_name == 'push'
+           || steps.filter.outputs.source-qml == 'true'
+           || steps.filter.outputs.workflow == 'true' }}
+    steps:
+      - uses: dorny/paths-filter@v4
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          predicate-quantifier: some
+          filters: |
+            source-qml:
+              - "**/*.qml"
+              - "**/.qmlformat.ini"
+              - "scripts/qml-lint-conventions.py"
+            source-cpp:                
+              - "{plugin,extras}/**/*.{cpp,hpp}"
+              - "**/[_.]clang-format"
+              - "**/.clang-format-ignore"
+            workflow:
+              - ".github/workflows/check-format.yml"
+
   check-qml:
+    needs: changes
+    if: needs.changes.outputs.format-qml == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
@@ -26,6 +59,8 @@ jobs:
           python3 scripts/qml-lint-conventions.py
 
   check-cpp:
+    needs: changes
+    if: needs.changes.outputs.format-cpp == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
@@ -40,3 +75,45 @@ jobs:
           clang-format --version
           find plugin extras -name '*.cpp' -o -name '*.hpp' \
             | xargs clang-format --dry-run --Werror
+
+  format-check:
+    if: always()
+    needs:
+      - changes
+      - check-qml
+      - check-cpp
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Verify formatting results
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          QML_REQUIRED: ${{ needs.changes.outputs.format-qml }}
+          CPP_REQUIRED: ${{ needs.changes.outputs.format-cpp }}
+          QML_RESULT: ${{ needs.check-qml.result }}
+          CPP_RESULT: ${{ needs.check-cpp.result }}
+        run: |
+          if [[ "$CHANGES_RESULT" != "success" ]]; then
+            echo "::error::Change detection did not succeed."
+            exit 1
+          fi
+
+          verify_result() {
+            local name="$1" required="$2" result="$3"
+
+            case "$required:$result" in
+              true:success)
+                echo "$name formatting passed."
+                ;;
+              false:skipped)
+                echo "$name formatting was not required."
+                ;;
+              *)
+                echo "::error::$name formatting: required=$required, result=$result."
+                return 1
+                ;;
+            esac
+          }
+
+          verify_result QML "$QML_REQUIRED" "$QML_RESULT" || exit 1
+          verify_result CPP "$CPP_REQUIRED" "$CPP_RESULT" || exit 1
