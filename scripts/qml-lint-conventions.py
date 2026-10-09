@@ -150,8 +150,8 @@ def check_imports(lines: list[str], rel: str) -> list[Violation]:
     imports = [(i, *entry) for i, entry in enumerate(module_imports)]
 
     for j in range(1, len(imports)):
-        _, prev_line, prev_group, prev_depth, prev_mod = imports[j - 1]
-        _, curr_line, curr_group, curr_depth, curr_mod = imports[j]
+        _, _, prev_group, prev_depth, prev_mod = imports[j - 1]
+        _, _, curr_group, curr_depth, curr_mod = imports[j]
 
         # Find actual line number for the current import
         lineno = 0
