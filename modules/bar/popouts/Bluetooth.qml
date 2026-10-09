@@ -19,6 +19,11 @@ ColumnLayout {
     width: 300
     spacing: Tokens.spacing.small
 
+    // Devices that do not advertise a name are shown as their bare MAC address. In public places the list fills up
+    // with those (other people's phones, earbuds and trackers), pushing the user's own devices out of the popout.
+    // Keep them out unless they are connected or paired.
+    readonly property var visibleDevices: [...Bluetooth.devices.values].filter(d => d.connected || d.paired || !/^([0-9A-Fa-f]{2}[-:]){5}[0-9A-Fa-f]{2}$/.test(d.name ?? "")) // qmllint disable unresolved-type
+
     StyledText {
         Layout.topMargin: Tokens.padding.medium
         Layout.rightMargin: Tokens.padding.extraSmall
@@ -50,7 +55,7 @@ ColumnLayout {
         Layout.topMargin: Tokens.spacing.small
         Layout.rightMargin: Tokens.padding.extraSmall
         text: {
-            const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
+            const devices = root.visibleDevices;
             const connected = devices.filter(d => d.connected).length;
             if (connected > 0)
                 // TRANSLATORS: %n = total paired devices, %1 = how many of them are connected
@@ -63,7 +68,7 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5) // qmllint disable unresolved-type
+            values: [...root.visibleDevices].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5) // qmllint disable unresolved-type
         }
 
         RowLayout {
