@@ -13,6 +13,8 @@ class NotifsConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_ENUM_PROPERTY(NotifsFullscreen, fullscreen, NotifsFullscreen::On)
     CONFIG_GLOBAL_PROPERTY(int, defaultExpireTimeout, 5000)
     CONFIG_GLOBAL_PROPERTY(int, fullscreenExpireTimeout, 2000)
+    CONFIG_GLOBAL_PROPERTY(bool, timeoutBar, false)
+    CONFIG_GLOBAL_PROPERTY(bool, timeoutCircle, false)
     CONFIG_PROPERTY(qreal, clearThreshold, 0.3)
     CONFIG_PROPERTY(int, expandThreshold, 20)
     CONFIG_GLOBAL_PROPERTY(bool, actionOnClick, false)
