@@ -31,7 +31,7 @@ jobs:
               - "**/*.qml"
               - "**/.qmlformat.ini"
               - "scripts/qml-lint-conventions.py"
-            source-cpp:                
+            source-cpp:
               - "{plugin,extras}/**/*.{cpp,hpp}"
               - "**/[_.]clang-format"
               - "**/.clang-format-ignore"
