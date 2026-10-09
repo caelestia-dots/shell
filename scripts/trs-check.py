@@ -79,14 +79,14 @@ SPEC: dict[str, dict[str, int]] = {
 CALL_RE = re.compile(r"((?:\w+[.:]{1,2})*)(" + "|".join(ARITY) + r")\s*\(")
 FOREIGN_RE = re.compile(r"(?<![\w.])(qsTr|qsTranslate|qsTrId|QT_TR_NOOP|QT_TRANSLATE_NOOP)\s*\(")
 USES_TR_RE = re.compile(r"(?<![\w.])Tr\.\w")
-IMPORT_RE = re.compile(r"^\s*import\s+Caelestia\.I18n\b", re.M)
-TRANSLATORS_RE = re.compile(r"^([^\n]*?)(?://|/\*)\s*TRANSLATORS:[^\n]*\n(\s*\n)?", re.M)
+IMPORT_RE = re.compile(r"^\s*import\s+Caelestia\.I18n\b", re.MULTILINE)
+TRANSLATORS_RE = re.compile(r"^([^\n]*?)(?://|/\*)\s*TRANSLATORS:[^\n]*\n(\s*\n)?", re.MULTILINE)
 ARG_CALL_RE = re.compile(r"\s*(\.arg\s*\()")
 PLACEHOLDER_RE = re.compile(r"%L?(\d{1,2})")
 ESCAPE_RE = re.compile(r"\\(.)")
 
 WRAPPER_RE = re.compile(
-    r"^(?:QStringLiteral|QString::fromUtf8|QLatin1StringView|QLatin1String)\s*\(\s*(.*?)\s*\)$", re.S
+    r"^(?:QStringLiteral|QString::fromUtf8|QLatin1StringView|QLatin1String)\s*\(\s*(.*?)\s*\)$", re.DOTALL
 )
 CPP_PIECE_RE = re.compile(r'(?:u8?|U|L)?"((?:\\.|[^"\\])*)"(?:_s|_ba|_L1|_qs)?\s*')
 JS_PIECES_RE = [
@@ -425,7 +425,7 @@ class FileChecker:
         self.check_context(name, args, spec)
 
         for what, arg, value in (("source string", text_arg, text), ("plural string", plural_arg, plural)):
-            if value is not None:
+            if arg is not None and value is not None:
                 self.check_forms(arg.span, name, what, value, "plural" in spec)
 
         self.check_args(span, name, args, spec, text)
@@ -497,10 +497,10 @@ class FileChecker:
         if name.startswith("mark"):
             index = spec.get("args")
             arg = args[index] if index is not None and index < len(args) else None
-            given = arg is not None and arg.text.strip()
-            if given and literal(arg.text, self.cpp) is not None:
-                self.report(arg.span, ERROR, "mark-args", f"the args of `{name}()` must be a list of strings")
-            elif expected and not given:
+            if arg is not None and arg.text.strip():
+                if literal(arg.text, self.cpp) is not None:
+                    self.report(arg.span, ERROR, "mark-args", f"the args of `{name}()` must be a list of strings")
+            elif expected:
                 self.report(
                     span, WARNING, "arg-count", f"`{name}()` has placeholders but no args, they will not be filled in"
                 )
