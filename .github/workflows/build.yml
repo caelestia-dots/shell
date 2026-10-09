@@ -5,17 +5,38 @@ on:
     branches:
       - main
   pull_request:
-    paths:
-      - "**"
-      - "!**/*.md"
-      - "!.github/**"
-      - ".github/workflows/build.yml"
-      - "!.vscode/**"
-      - "!assets/**"
-      - "!.gitignore"
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      build: >-
+        ${{ github.event_name == 'push'
+            || steps.filter.outputs.source == 'true'
+            || steps.filter.outputs.workflow == 'true' }}
+    steps:
+      - uses: dorny/paths-filter@v4
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          predicate-quantifier: every
+          filters: |
+            source:
+              - "**"
+              - "!**/*.md"
+              - "!.github/**"
+              - "!scripts/qml-lint-conventions.py"
+              - "!.vscode/**"
+              - "!assets/**"
+              - "!.gitignore"
+            workflow:
+              - ".github/workflows/build.yml"
+
   build-nix:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -56,6 +77,8 @@ jobs:
         run: nix build
 
   build-cpp:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     name: build-arch-${{ matrix.name }}
     runs-on: ubuntu-latest
     container:
@@ -80,3 +103,44 @@ jobs:
           cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_FLAGS=-Werror \
             -DVERSION= -DGIT_REVISION=
           cmake --build build
+
+  build-check:
+    if: always()
+    needs:
+      - changes
+      - build-nix
+      - build-cpp
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Verify build results
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          BUILD_REQUIRED: ${{ needs.changes.outputs.build }}
+          NIX_RESULT: ${{ needs.build-nix.result }}
+          CPP_RESULT: ${{ needs.build-cpp.result }}
+        run: |
+          if [[ "$CHANGES_RESULT" != "success" ]]; then
+            echo "::error::Change detection did not succeed."
+            exit 1
+          fi
+
+          case "$BUILD_REQUIRED" in
+            true)
+              if [[ "$NIX_RESULT" != "success" || "$CPP_RESULT" != "success" ]]; then
+                echo "::error::Required builds did not all succeed."
+                exit 1
+              fi
+              ;;
+            false)
+              if [[ "$NIX_RESULT" != "skipped" || "$CPP_RESULT" != "skipped" ]]; then
+                echo "::error::Unexpected build results."
+                exit 1
+              fi
+              echo "No build-relevant files changed."
+              ;;
+            *)
+              echo "::error::Missing or invalid build decision."
+              exit 1
+              ;;
+          esac
