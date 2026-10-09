@@ -9,7 +9,7 @@ on:
       - "**"
       - "!**/*.md"
       - "!.github/**"
-      - ".github/workflows/build.yml"
+      - ".github/workflows/lint.yml"
       - "!.vscode/**"
       - "!assets/**"
       - "!.gitignore"
