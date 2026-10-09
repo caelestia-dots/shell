@@ -190,7 +190,7 @@ def check_imports(lines: list[str], rel: str) -> list[Violation]:
 def fix_imports(lines: list[str]) -> list[str]:
     """Sort imports and return the modified lines."""
     first, last, relative, module = parse_imports(lines)
-    if first is None:
+    if first is None or last is None:
         return lines
 
     module.sort(key=lambda x: (x[1], x[2], x[3]))
