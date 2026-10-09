@@ -23,6 +23,7 @@ CONFIG_LIST_TYPE(PlayerAlias, PlayerAliasList)
 class ServiceConfig : public settings::ObjectNode {
     CONFIG_NODE(ServiceConfig, settings::ObjectNode)
 
+    CONFIG_GLOBAL_PROPERTY(bool, weatherEnabled, true)
     CONFIG_GLOBAL_PROPERTY(QString, weatherLocation, {})
     // Auto guesses based on locale
     CONFIG_GLOBAL_ENUM_PROPERTY(TemperatureUnit, weatherUnits, TemperatureUnit::Auto)
