@@ -51,6 +51,38 @@ def disable_colour() -> None:
     RULE_COLOURS = dict.fromkeys(RULE_COLOURS, "")
 
 
+class Violation:
+    """One reported violation, spanning the source from `start` to `end`.
+
+    Both positions are 1 based line/column pairs. The end is exclusive, sitting
+    just past the last character, which is what an LSP range wants. Every rule
+    here is line shaped, so a span covers one line's content; the blank line
+    rules have nothing to cover and collapse to a caret.
+    """
+
+    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], rule: str, msg: str):
+        self.file = file
+        self.line, self.col = start
+        self.end_line, self.end_col = end
+        self.rule = rule
+        self.msg = msg
+
+    def __str__(self):
+        c = RULE_COLOURS.get(self.rule, "")
+        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "file": self.file,
+            "line": self.line,
+            "column": self.col,
+            "endLine": self.end_line,
+            "endColumn": self.end_col,
+            "rule": self.rule,
+            "message": self.msg,
+        }
+
+
 class Section(IntEnum):
     ID = 0
     PROPERTY = 1
@@ -455,38 +487,6 @@ INLINE_COMPONENT_RE = re.compile(r"^Component\s*\{")
 BEHAVIOR_ON_RE = re.compile(r"^[A-Z]\w+\s+on\s+\w[\w.]*\s*\{")
 # Attached signal handler: Component.onCompleted:, Drag.onDragStarted:, etc.
 ATTACHED_HANDLER_RE = re.compile(r"^[A-Z]\w+\.on[A-Z]\w*\s*:")
-
-
-class Violation:
-    """One reported violation, spanning the source from `start` to `end`.
-
-    Both positions are 1 based line/column pairs. The end is exclusive, sitting
-    just past the last character, which is what an LSP range wants. Every rule
-    here is line shaped, so a span covers one line's content; the blank line
-    rules have nothing to cover and collapse to a caret.
-    """
-
-    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], rule: str, msg: str):
-        self.file = file
-        self.line, self.col = start
-        self.end_line, self.end_col = end
-        self.rule = rule
-        self.msg = msg
-
-    def __str__(self):
-        c = RULE_COLOURS.get(self.rule, "")
-        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "file": self.file,
-            "line": self.line,
-            "column": self.col,
-            "endLine": self.end_line,
-            "endColumn": self.end_col,
-            "rule": self.rule,
-            "message": self.msg,
-        }
 
 
 class ScopeTracker:
