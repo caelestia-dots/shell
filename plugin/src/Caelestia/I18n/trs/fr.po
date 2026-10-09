@@ -1,0 +1,5256 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-13 14:35+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: fr\n"
+"X-Language: fr_FR\n"
+"X-Qt-Contexts: true\n"
+
+#. TRANSLATORS: %1 = name of the selected file
+#: components/filedialog/CurrentItem.qml
+#, qt-format
+msgctxt "selected file"
+msgid "\"%1\" selected"
+msgstr "\"%1\" sélectionné"
+
+#: components/filedialog/DialogButtons.qml
+msgctxt "file filter"
+msgid "Filter:"
+msgstr "Filtrer :"
+
+#: components/filedialog/DialogButtons.qml
+msgctxt "file filter separator"
+msgid ", "
+msgstr ", "
+
+#. TRANSLATORS: %1 = filter label, %2 = file patterns
+#: components/filedialog/DialogButtons.qml
+#, qt-format
+msgctxt "file filter label and patterns"
+msgid "%1 (%2)"
+msgstr "%1 (%2)"
+
+#: components/filedialog/DialogButtons.qml
+msgctxt "button"
+msgid "Select"
+msgstr "Sélectionner"
+
+#: components/filedialog/DialogButtons.qml
+#: modules/bar/popouts/WirelessPassword.qml
+#: modules/nexus/common/DialogRowButton.qml
+#: modules/nexus/pages/network/AddNetworkPage.qml
+#: modules/nexus/pages/network/AddVpnPage.qml
+#: modules/utilities/RecordingDeleteModal.qml
+msgctxt "button"
+msgid "Cancel"
+msgstr "Annuler"
+
+#: components/filedialog/FileDialog.qml
+msgid "All files"
+msgstr "Tous les fichiers"
+
+#: components/filedialog/FileDialog.qml
+msgid "Select a file"
+msgstr "Sélectionner un fichier"
+
+#: components/filedialog/FolderContents.qml
+msgid "This folder is empty"
+msgstr "Ce dossier est vide"
+
+#: components/filedialog/Sidebar.qml
+msgctxt "file dialog sidebar heading"
+msgid "Files"
+msgstr "Fichiers"
+
+#: modules/areapicker/Picker.qml
+msgid "Screenshot taken"
+msgstr "Capture d'écran prise"
+
+#: modules/areapicker/Picker.qml
+msgid "Screenshot copied to clipboard"
+msgstr "Capture d'écran copiée dans le presse-papiers"
+
+#: modules/background/Wallpaper.qml
+msgid "Wallpaper missing?"
+msgstr "Fond d'écran manquant ?"
+
+#: modules/background/Wallpaper.qml
+msgid "Select a wallpaper"
+msgstr "Sélectionner un fond d'écran"
+
+#: modules/background/Wallpaper.qml modules/dashboard/Wrapper.qml
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "Image files"
+msgstr "Fichiers image"
+
+#: modules/background/Wallpaper.qml
+msgid "Set it now!"
+msgstr "Définir maintenant !"
+
+#: modules/bar/components/ActiveWindow.qml
+msgctxt "shown when no window is focused"
+msgid "Desktop"
+msgstr "Bureau"
+
+#: modules/bar/popouts/AudioPopout.qml
+msgctxt "audio output device"
+msgid "Output device"
+msgstr "Périphérique de sortie"
+
+#: modules/bar/popouts/AudioPopout.qml
+msgctxt "audio input device"
+msgid "Input device"
+msgstr "Périphérique d'entrée"
+
+#: modules/bar/popouts/AudioPopout.qml
+msgid "Volume (muted)"
+msgstr "Volume (%1)"
+
+#: modules/bar/popouts/AudioPopout.qml
+#, qt-format
+msgid "Volume (%1%)"
+msgstr "Volume (%1)"
+
+#: modules/bar/popouts/AudioPopout.qml modules/bar/popouts/Bluetooth.qml
+msgid "Open settings"
+msgstr "Ouvrir les paramètres"
+
+#: modules/bar/popouts/Battery.qml utils/SysInfo.qml
+#, qt-plural-format
+msgid "%n day"
+msgid_plural "%n days"
+msgstr[0] "%n jour"
+msgstr[1] "%n jours"
+
+#: modules/bar/popouts/Battery.qml utils/SysInfo.qml
+#, qt-plural-format
+msgid "%n hour"
+msgid_plural "%n hours"
+msgstr[0] "%n heure"
+msgstr[1] "%n heures"
+
+#: modules/bar/popouts/Battery.qml
+#, qt-plural-format
+msgid "%n min"
+msgid_plural "%n mins"
+msgstr[0] "%n min"
+msgstr[1] "%n min"
+
+#: modules/bar/popouts/Battery.qml
+msgctxt "duration component separator"
+msgid ", "
+msgstr ", "
+
+#: modules/bar/popouts/Battery.qml
+msgctxt "power profile"
+msgid "Balanced"
+msgstr "Équilibré"
+
+#: modules/bar/popouts/Battery.qml
+msgctxt "power profile"
+msgid "Performance"
+msgstr "Performances"
+
+#: modules/bar/popouts/Battery.qml
+msgctxt "power profile"
+msgid "Power saver"
+msgstr "Économie d'énergie"
+
+#: modules/bar/popouts/Battery.qml
+msgctxt "power profile"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: modules/bar/popouts/Battery.qml
+msgid "The device is too hot"
+msgstr "L'appareil est trop chaud"
+
+#: modules/bar/popouts/Battery.qml
+msgid "The device is on a lap"
+msgstr "L'appareil est sur les genoux"
+
+#: modules/bar/popouts/Battery.qml
+msgid "Unknown reason"
+msgstr "Piste inconnue"
+
+#: modules/bar/popouts/Battery.qml
+#, qt-format
+msgctxt "battery remaining"
+msgid "Remaining: %1%"
+msgstr "Restant : %1 %"
+
+#: modules/bar/popouts/Battery.qml
+msgid "No battery detected"
+msgstr "Aucune batterie détectée"
+
+#: modules/bar/popouts/Battery.qml
+#, qt-format
+msgid "Power profile: %1"
+msgstr "Profil d'alimentation : %1"
+
+#: modules/bar/popouts/Battery.qml
+#, qt-format
+msgid "Time remaining: %1"
+msgstr "Restant : %1 %"
+
+#: modules/bar/popouts/Battery.qml
+msgid "Calculating remaining battery life..."
+msgstr "Calcul de l'autonomie restante..."
+
+#: modules/bar/popouts/Battery.qml
+#, qt-format
+msgid "Time until charged: %1"
+msgstr "Temps avant charge complète : %1"
+
+#: modules/bar/popouts/Battery.qml
+msgid "Fully charged!"
+msgstr "Charge complète !"
+
+#: modules/bar/popouts/Battery.qml
+msgid "Calculating time until charged..."
+msgstr "Calcul du temps avant charge complète..."
+
+#. TRANSLATORS: charger or thermal warning: the battery cannot draw full power
+#: modules/bar/popouts/Battery.qml
+msgid "Performance degraded"
+msgstr "Performances dégradées"
+
+#: modules/bar/popouts/Bluetooth.qml modules/nexus/pages/BluetoothPage.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: modules/bar/popouts/Bluetooth.qml modules/bar/popouts/Network.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/SidebarPanel.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgctxt "toggle label"
+msgid "Enabled"
+msgstr "Activé"
+
+#: modules/bar/popouts/Bluetooth.qml
+msgctxt "bluetooth adapter state"
+msgid "Discovering"
+msgstr "Découverte"
+
+#. TRANSLATORS: %n = total paired devices, %1 = how many of them are connected
+#: modules/bar/popouts/Bluetooth.qml
+#, qt-format, qt-plural-format
+msgid "%n device available (%1 connected)"
+msgid_plural "%n devices available (%1 connected)"
+msgstr[0] "%1 appareil%1 disponible"
+msgstr[1] "%1 appareil%1 disponible"
+
+#: modules/bar/popouts/Bluetooth.qml modules/bar/popouts/Network.qml
+#, qt-plural-format
+msgid "%n device available"
+msgid_plural "%n devices available"
+msgstr[0] "%1 appareil%1 disponible"
+msgstr[1] "%1 appareil%1 disponible"
+
+#: modules/bar/popouts/kblayout/KbLayout.qml
+msgid "Keyboard layouts"
+msgstr "Disposition du clavier"
+
+#: modules/bar/popouts/kblayout/KbLayout.qml
+msgid "XKB limitation: maximum 4 layouts allowed"
+msgstr "Limitation XKB : 4 dispositions maximum autorisées"
+
+#. TRANSLATORS: %1 = language, %2 = layout code
+#: modules/bar/popouts/kblayout/KbLayoutModel.qml
+#, qt-format
+msgctxt "keyboard layout language and code"
+msgid "%1 (%2)"
+msgstr "%1 (%2)"
+
+#: modules/bar/popouts/kblayout/KbLayoutModel.qml
+msgid "Keyboard layout limit"
+msgstr "Limite de disposition du clavier"
+
+#: modules/bar/popouts/kblayout/KbLayoutModel.qml
+msgid "XKB supports only 4 layouts at a time"
+msgstr "XKB ne supporte que 4 dispositions à la fois"
+
+#. TRANSLATORS: %1 = layout code, %2 = layout name
+#: modules/bar/popouts/kblayout/KbLayoutModel.qml
+#, qt-format
+msgctxt "keyboard layout code and name"
+msgid "%1 - %2"
+msgstr "%1 - %2"
+
+#: modules/bar/popouts/LockStatus.qml
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Caps lock enabled"
+msgstr "Verr. Maj activé"
+
+#: modules/bar/popouts/LockStatus.qml
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Caps lock disabled"
+msgstr "Verr. Maj désactivé"
+
+#: modules/bar/popouts/LockStatus.qml
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Num lock enabled"
+msgstr "Verr. Num activé"
+
+#: modules/bar/popouts/LockStatus.qml
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Num lock disabled"
+msgstr "Verr. Num désactivé"
+
+#: modules/bar/popouts/Network.qml
+msgid "Wireless"
+msgstr "Sans fil"
+
+#: modules/bar/popouts/Network.qml
+#, qt-plural-format
+msgid "%n network available"
+msgid_plural "%n networks available"
+msgstr[0] "%1 réseau%1 disponible"
+msgstr[1] "%1 réseau%1 disponible"
+
+#: modules/bar/popouts/Network.qml
+msgid "Rescan networks"
+msgstr "Rescanner les réseaux"
+
+#: modules/bar/popouts/Network.qml modules/nexus/common/EthernetSection.qml
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+msgid "Ethernet"
+msgstr "Ethernet"
+
+#: modules/bar/popouts/Network.qml
+msgctxt "unknown network interface"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: modules/bar/popouts/TrayMenu.qml
+msgctxt "button"
+msgid "Back"
+msgstr "Retour"
+
+#: modules/bar/popouts/WirelessPassword.qml
+#: modules/nexus/pages/network/AddNetworkPage.qml
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+msgid "Connect"
+msgstr "Connecter"
+
+#: modules/bar/popouts/WirelessPassword.qml
+msgid "Enter password"
+msgstr "Entrez le mot de passe"
+
+#. TRANSLATORS: %1 = the network SSID
+#: modules/bar/popouts/WirelessPassword.qml
+#, qt-format
+msgid "Network: %1"
+msgstr "Réseau : %1"
+
+#: modules/bar/popouts/WirelessPassword.qml
+msgid "Unknown network"
+msgstr "Piste inconnue"
+
+#: modules/bar/popouts/WirelessPassword.qml
+msgid "Connection failed. Please check your password and try again."
+msgstr "Connexion échouée. Veuillez vérifier votre mot de passe et réessayer."
+
+#: modules/bar/popouts/WirelessPassword.qml modules/nexus/pages/NetworkPage.qml
+msgid "Connecting..."
+msgstr "Connexion en cours..."
+
+#: modules/bar/popouts/WirelessPassword.qml
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Password"
+msgstr "Mot de passe"
+
+#: modules/BatteryMonitor.qml
+msgid "Battery warning"
+msgstr "Avertissement batterie"
+
+#: modules/BatteryMonitor.qml
+msgid "Battery level is low"
+msgstr "Le niveau de batterie est faible"
+
+#: modules/BatteryMonitor.qml
+msgid "Hibernating in 5 seconds"
+msgstr "Hibernation dans 5 secondes"
+
+#: modules/BatteryMonitor.qml
+msgid "Hibernating to prevent data loss"
+msgstr "Hibernation pour éviter la perte de données"
+
+#: modules/BatteryMonitor.qml
+msgid "Charger unplugged"
+msgstr "Chargeur débranché"
+
+#: modules/BatteryMonitor.qml
+msgid "Battery is discharging"
+msgstr "La batterie se décharge"
+
+#: modules/BatteryMonitor.qml
+msgid "Charger plugged in"
+msgstr "Chargeur branché"
+
+#: modules/BatteryMonitor.qml
+msgid "Battery is charging"
+msgstr "La batterie charge"
+
+#: modules/dashboard/Content.qml modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#: modules/dashboard/Content.qml modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Media"
+msgstr "Média"
+
+#: modules/dashboard/Content.qml modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Performance"
+msgstr "Performances"
+
+#: modules/dashboard/Content.qml modules/nexus/pages/LanguageAndRegion.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Weather"
+msgstr "Météo"
+
+#: modules/dashboard/dash/Media.qml
+msgid "No media"
+msgstr "Aucun média"
+
+#: modules/dashboard/dash/Media.qml
+msgid "Unknown title"
+msgstr "Titre inconnu"
+
+#: modules/dashboard/dash/Media.qml modules/dashboard/media/Details.qml
+msgid "Unknown album"
+msgstr "Album inconnu"
+
+#: modules/dashboard/dash/Media.qml modules/dashboard/media/Details.qml
+#: modules/lock/Media.qml
+msgid "Unknown artist"
+msgstr "Artiste inconnu"
+
+#. TRANSLATORS: %1 = system uptime, e.g. "2 days, 3 hours"
+#: modules/dashboard/dash/User.qml
+#, qt-format
+msgctxt "system uptime"
+msgid "up %1"
+msgstr "allumé depuis %1"
+
+#: modules/dashboard/Media.qml modules/lock/Media.qml
+msgid "Nothing playing"
+msgstr "Rien en cours de lecture"
+
+#: modules/dashboard/Media.qml
+msgid "Play something for it to show up here!"
+msgstr "Lancez un morceau pour l'afficher ici !"
+
+#: modules/dashboard/media/LyricList.qml
+msgid "Loading lyrics..."
+msgstr "Chargement des paroles..."
+
+#: modules/dashboard/media/LyricList.qml modules/dashboard/media/LyricsInfo.qml
+msgid "No lyrics found"
+msgstr "Aucune parole trouvée"
+
+#: modules/dashboard/media/LyricsAndSelector.qml
+msgid "Lyrics"
+msgstr "Paroles"
+
+#: modules/dashboard/media/LyricsAndSelector.qml
+msgctxt "no media players active"
+msgid "No players"
+msgstr "Aucun lecteur"
+
+#. TRANSLATORS: %1 = lyrics backend name, e.g. LRCLIB
+#: modules/dashboard/media/LyricsInfo.qml
+#, qt-format
+msgid "Backend: %1"
+msgstr "Moteur : %1"
+
+#. TRANSLATORS: %1/%2/%3 = matched track title, artist and album
+#: modules/dashboard/media/LyricsInfo.qml
+#, qt-format
+msgid "Selected candidate: %1 | %2 | %3"
+msgstr "Candidat sélectionné : %1 | %2 | %3"
+
+#. TRANSLATORS: %1 = lyric timing offset; ms is the millisecond unit, leave untranslated
+#: modules/dashboard/media/LyricsInfo.qml
+#, qt-format
+msgid "Offset: %1 ms"
+msgstr "Décalage : %1 ms"
+
+#: modules/dashboard/media/LyricsInfo.qml modules/dashboard/WeatherTab.qml
+#: modules/lock/center/InputField.qml
+msgid "Loading..."
+msgstr "Chargement..."
+
+#: modules/dashboard/Performance.qml
+msgid "No widgets enabled"
+msgstr "Aucun widget activé"
+
+#: modules/dashboard/Performance.qml
+msgid "Enable widgets in the dashboard settings"
+msgstr "Activez des widgets dans les paramètres du tableau de bord"
+
+#: modules/dashboard/Performance.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "CPU"
+msgstr "CPU"
+
+#: modules/dashboard/Performance.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/ServicesPage.qml
+msgid "GPU"
+msgstr "GPU"
+
+#: modules/dashboard/Performance.qml
+msgid "Detecting GPU..."
+msgstr "Détection du GPU..."
+
+#: modules/dashboard/Performance.qml
+msgctxt "GPU name"
+msgid "None"
+msgstr "Aucun"
+
+#: modules/dashboard/performance/BatteryTank.qml
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Battery"
+msgstr "Batterie"
+
+#: modules/dashboard/performance/BatteryTank.qml
+msgctxt "battery state"
+msgid "Full"
+msgstr "Pleine"
+
+#: modules/dashboard/performance/BatteryTank.qml
+msgctxt "battery state"
+msgid "Charging"
+msgstr "En charge"
+
+#. TRANSLATORS: %1 = hours, %2 = minutes
+#: modules/dashboard/performance/BatteryTank.qml
+#, qt-format
+msgctxt "battery time remaining"
+msgid "%1h %2m"
+msgstr "%1h %2m"
+
+#. TRANSLATORS: %1 = minutes
+#: modules/dashboard/performance/BatteryTank.qml
+#, qt-format
+msgctxt "battery time remaining"
+msgid "%1m"
+msgstr "%1 ms"
+
+#. TRANSLATORS: labels the CPU or GPU utilisation percentage shown below it
+#: modules/dashboard/performance/HeroCard.qml
+msgctxt "resource usage"
+msgid "Usage"
+msgstr "Utilisation"
+
+#: modules/dashboard/performance/MemoryCard.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Memory"
+msgstr "Mémoire"
+
+#: modules/dashboard/performance/MemoryCard.qml
+msgctxt "memory used"
+msgid "Used"
+msgstr "Utilisé"
+
+#: modules/dashboard/performance/NetworkCard.qml modules/nexus/PageRegistry.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+#: modules/nexus/pages/NetworkPage.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Network"
+msgstr "Réseau"
+
+#: modules/dashboard/performance/NetworkCard.qml
+msgid "Collecting data..."
+msgstr "Collecte des données..."
+
+#: modules/dashboard/performance/NetworkCard.qml
+msgctxt "network throughput"
+msgid "Download"
+msgstr "Téléchargement"
+
+#: modules/dashboard/performance/NetworkCard.qml
+msgctxt "network throughput"
+msgid "Upload"
+msgstr "Envoi"
+
+#: modules/dashboard/performance/NetworkCard.qml
+msgctxt "total network data transferred"
+msgid "Total"
+msgstr "Total"
+
+#. TRANSLATORS: %1 = downloaded total, %2 = uploaded total
+#: modules/dashboard/performance/NetworkCard.qml
+#, qt-format
+msgid "↓%1 ↑%2"
+msgstr "↓%1 ↑%2"
+
+#: modules/dashboard/performance/StorageCard.qml
+msgctxt "storage used"
+msgid "Used"
+msgstr "Utilisé"
+
+#: modules/dashboard/performance/StorageCard.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Storage"
+msgstr "Stockage"
+
+#: modules/dashboard/performance/StorageCard.qml
+msgid "No disks detected"
+msgstr "Aucun disque détecté"
+
+#: modules/dashboard/performance/StorageCard.qml
+msgid "No disks"
+msgstr "Aucun disque"
+
+#: modules/dashboard/WeatherTab.qml
+msgid "Sunrise"
+msgstr "Lever du soleil"
+
+#: modules/dashboard/WeatherTab.qml
+msgid "Sunset"
+msgstr "Coucher du soleil"
+
+#: modules/dashboard/WeatherTab.qml
+msgid "Humidity"
+msgstr "Humidité"
+
+#: modules/dashboard/WeatherTab.qml
+msgctxt "apparent temperature"
+msgid "Feels like"
+msgstr "Ressenti"
+
+#: modules/dashboard/WeatherTab.qml
+msgid "Wind"
+msgstr "Vent"
+
+#: modules/dashboard/WeatherTab.qml
+#, qt-format
+msgid "%1 km/h"
+msgstr "%1 km/h"
+
+#: modules/dashboard/WeatherTab.qml
+msgid "7-day forecast"
+msgstr "Prévisions sur 7 jours"
+
+#: modules/dashboard/WeatherTab.qml
+msgctxt "forecast column"
+msgid "Today"
+msgstr "Aujourd'hui"
+
+#: modules/dashboard/WeatherTab.qml
+#, qt-format
+msgctxt "min/max temperature"
+msgid "%1 / %2"
+msgstr "%1 / %2"
+
+#: modules/dashboard/Wrapper.qml
+msgid "Select a profile picture"
+msgstr "Sélectionner une photo de profil"
+
+#. TRANSLATORS: %1 = a file path
+#: modules/dashboard/Wrapper.qml
+#, qt-format
+msgid "Profile picture changed"
+msgstr "Photo de profil modifiée"
+
+#: modules/dashboard/Wrapper.qml
+#, qt-format
+msgid "Profile picture changed to %1"
+msgstr "Disposition modifiée en : %1"
+
+#. TRANSLATORS: %1 = a file path
+#: modules/dashboard/Wrapper.qml
+#, qt-format
+msgid "Unable to change profile picture"
+msgstr "Sélectionner une photo de profil"
+
+#: modules/dashboard/Wrapper.qml
+#, qt-format
+msgid "Failed to change profile picture to %1"
+msgstr "Échec du changement de photo de profil vers %1"
+
+#: modules/launcher/Content.qml
+#, qt-format
+msgid "Type \"%1\" for commands"
+msgstr "Tapez « %1 » pour les commandes"
+
+#: modules/launcher/ContentList.qml
+msgid "No wallpapers found"
+msgstr "Aucun fond d'écran trouvé"
+
+#: modules/launcher/ContentList.qml
+msgid "No results"
+msgstr "Aucun résultat"
+
+#: modules/launcher/ContentList.qml
+#, qt-format
+msgid "Try putting some wallpapers in %1"
+msgstr "Essayez de placer des fonds d'écran dans %1"
+
+#: modules/launcher/ContentList.qml
+msgid "Try searching for something else"
+msgstr "Essayez de rechercher autre chose"
+
+#: modules/launcher/items/CalcItem.qml
+msgid "Calculating..."
+msgstr "Calcul en cours..."
+
+#: modules/launcher/items/CalcItem.qml
+msgid "Type an expression to calculate"
+msgstr "Tapez une expression à calculer"
+
+#: modules/launcher/items/CalcItem.qml
+msgid "Open in calculator"
+msgstr "Ouvrir dans la calculatrice"
+
+#: modules/launcher/services/Actions.qml
+msgctxt "launcher action with no name"
+msgid "Unnamed"
+msgstr "Sans nom"
+
+#: modules/launcher/services/Actions.qml
+msgctxt "launcher action with no description"
+msgid "No description"
+msgstr "Aucune description"
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Vibrant"
+msgstr "Vibrant"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "A high chroma palette. The primary palette's chroma is at maximum."
+msgstr "Une palette à haute chrominance. La chrominance de la palette principale est au maximum."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Tonal Spot"
+msgstr "Tache tonale"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "Default for Material theme colours. A pastel palette with a low chroma."
+msgstr "Par défaut pour les couleurs Material. Une palette pastel à faible chrominance."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Expressive"
+msgstr "Expressif"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "A medium chroma palette. The primary palette's hue is different from the seed colour, for variety."
+msgstr "Une palette à chrominance moyenne. La teinte de la palette principale diffère de la couleur source pour plus de variété."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Fidelity"
+msgstr "Fidélité"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "Matches the seed colour, even if the seed colour is very bright (high chroma)."
+msgstr "Correspond à la couleur source, même si celle-ci est très vive (haute chrominance)."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Content"
+msgstr "Contenu"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "Almost identical to fidelity."
+msgstr "Presque identique à la fidélité."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Fruit Salad"
+msgstr "Salade de fruits"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "A playful theme - the seed colour's hue does not appear in the theme."
+msgstr "Un thème ludique — la teinte de la couleur source n'apparaît pas dans le thème."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Rainbow"
+msgstr "Arc-en-ciel"
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Neutral"
+msgstr "Neutre"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "Close to greyscale, a hint of chroma."
+msgstr "Proche des niveaux de gris, avec une légère teinte."
+
+#: modules/launcher/services/M3Variants.qml
+msgctxt "M3 scheme variant name"
+msgid "Monochrome"
+msgstr "Monochrome"
+
+#: modules/launcher/services/M3Variants.qml
+msgid "All colours are greyscale, no chroma."
+msgstr "Toutes les couleurs sont en niveaux de gris, sans chrominance."
+
+#: modules/lock/center/InputField.qml
+msgid "Scanning face..."
+msgstr "Analyse du visage..."
+
+#: modules/lock/center/InputField.qml
+msgid "Max tries reached"
+msgstr "Nombre maximum d'essais atteint"
+
+#: modules/lock/center/InputField.qml
+msgid "Enter your password"
+msgstr "Entrez votre mot de passe"
+
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "FP ERROR: %1"
+msgstr "ERREUR EMPREINTE : %1"
+
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "FACE ERROR: %1"
+msgstr "ERREUR VISAGE: %1"
+
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "PW ERROR: %1"
+msgstr "ERREUR MOT DE PASSE : %1"
+
+#. TRANSLATORS: %1 = attempts used so far, %2 = maximum attempts allowed
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Fingerprint not recognised (%1/%2). Please try again or use password."
+msgstr "Empreinte non reconnue (%1/%2). Réessayez ou utilisez le mot de passe."
+
+#. TRANSLATORS: %1 = attempts used so far, %2 = maximum attempts allowed
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Face not recognised (%1/%2). Please try again or use password."
+msgstr "Visage non reconnu (%1/%2). Réessayez ou utilisez le mot de passe."
+
+#. TRANSLATORS: %1 = attempts used so far, %2 = maximum attempts allowed
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Fingerprint not recognised (%1/%2). Please try again."
+msgstr "Empreinte non reconnue (%1/%2). Réessayez."
+
+#. TRANSLATORS: %1 = attempts used so far, %2 = maximum attempts allowed
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Face not recognised (%1/%2). Please try again."
+msgstr "Visage non reconnu (%1/%2). Réessayez."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Incorrect password. Please try again or use fingerprint."
+msgstr "Mot de passe incorrect. Réessayez ou utilisez l'empreinte."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Incorrect password. Please try again or use face."
+msgstr "Mot de passe incorrect. Réessayez ou utilisez votre visage."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Incorrect password. Please try again."
+msgstr "Mot de passe incorrect. Veuillez réessayer."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Maximum password attempts reached. Please use fingerprint."
+msgstr "Nombre maximum de tentatives de mot de passe atteint. Veuillez utiliser l'empreinte."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Maximum password attempts reached. Please use face."
+msgstr "Tentatives maximales mot de passe atteintes. Utilisez le visage."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Maximum attempts for all authentication methods reached."
+msgstr "Tentatives maximales atteintes pour toutes les méthodes."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Maximum password attempts reached."
+msgstr "Nombre maximum de tentatives de mot de passe atteint."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Maximum fingerprint attempts reached. Please use password."
+msgstr "Nombre maximum de tentatives d'empreinte atteint. Veuillez utiliser le mot de passe."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Maximum face attempts reached. Please use password."
+msgstr "Tentatives maximales visage atteintes. Utilisez le mot de passe."
+
+#. TRANSLATORS: %1 = the active keyboard layout name, e.g. "English (US)"
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid ""
+"Caps lock and Num lock are ON.\n"
+"Keyboard layout: %1"
+msgstr ""
+"Verr. Maj. et Verr. Num. sont ACTIVÉS.\n"
+"Disposition du clavier : %1"
+
+#. TRANSLATORS: %1 = the active keyboard layout name, e.g. "English (US)"
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Caps lock is ON. Keyboard layout: %1"
+msgstr "Verr. Maj. est ACTIVÉ. Disposition : %1"
+
+#. TRANSLATORS: %1 = the active keyboard layout name, e.g. "English (US)"
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Num lock is ON. Keyboard layout: %1"
+msgstr "Verr. Num. est ACTIVÉ. Disposition : %1"
+
+#. TRANSLATORS: %1 = the active keyboard layout name, e.g. "English (US)"
+#: modules/lock/center/StateMessage.qml
+#, qt-format
+msgid "Keyboard layout: %1"
+msgstr "Disposition du clavier : %1"
+
+#: modules/lock/center/StateMessage.qml
+msgid "Caps lock and Num lock are ON."
+msgstr "Verr. Maj. et Verr. Num. sont ACTIVÉS."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Caps lock is ON."
+msgstr "Verr. Maj. est ACTIVÉ."
+
+#: modules/lock/center/StateMessage.qml
+msgid "Num lock is ON."
+msgstr "Verr. Num. est ACTIVÉ."
+
+#. TRANSLATORS: keep the label padded to 4 chars so the column stays aligned
+#: modules/lock/Fetch.qml
+#, qt-format
+msgid "OS  : %1"
+msgstr "OS  : %1"
+
+#. TRANSLATORS: keep the label padded to 4 chars so the column stays aligned
+#: modules/lock/Fetch.qml
+#, qt-format
+msgid "WM  : %1"
+msgstr "WM  : %1"
+
+#. TRANSLATORS: keep the label padded to 4 chars so the column stays aligned
+#: modules/lock/Fetch.qml
+#, qt-format
+msgid "USER: %1"
+msgstr "USER: %1"
+
+#. TRANSLATORS: keep the label padded to 4 chars so the column stays aligned
+#: modules/lock/Fetch.qml
+#, qt-format
+msgid "UP  : %1"
+msgstr "UP  : %1"
+
+#. TRANSLATORS: keep the label padded to 4 chars, (+) marks charging
+#: modules/lock/Fetch.qml
+#, qt-format
+msgid "BATT: (+) %1%"
+msgstr "BATT: (+) %1%"
+
+#: modules/lock/Fetch.qml
+#, qt-format
+msgid "BATT: %1%"
+msgstr "BATT: %1%"
+
+#: modules/lock/Media.qml
+msgid "Unknown track"
+msgstr "Piste inconnue"
+
+#: modules/lock/Media.qml
+msgid "Try playing some music!"
+msgstr "Essayez de jouer de la musique !"
+
+#: modules/lock/NotifDock.qml
+#, qt-plural-format
+msgid "%n notification"
+msgid_plural "%n notifications"
+msgstr[0] "%1 notification"
+msgstr[1] "%1 notification"
+
+#: modules/lock/NotifDock.qml
+#: modules/nexus/pages/services/NotificationsPage.qml
+#: modules/nexus/pages/ServicesPage.qml modules/sidebar/NotifDock.qml
+msgid "Notifications"
+msgstr "Notifications"
+
+#: modules/lock/NotifDock.qml
+msgid "Unlock for notifications"
+msgstr "Déverrouiller pour les notifications"
+
+#: modules/lock/NotifDock.qml
+msgid "No notifications"
+msgstr "Aucune notification"
+
+#. TRANSLATORS: %1 = apparent temperature, unit already included
+#: modules/lock/weather/BriefInfo.qml
+#, qt-format
+msgid "Feels like %1"
+msgstr "Ressenti : %1"
+
+#. TRANSLATORS: %1/%2 = today's max and min temperature, units already included
+#: modules/lock/weather/BriefInfo.qml
+#, qt-format
+msgid "High %1 • Low %2"
+msgstr "Max %1 • Min %2"
+
+#: modules/lock/weather/Forecast.qml
+msgid "Hourly forecast"
+msgstr "Prévisions par heure"
+
+#: modules/lock/weather/Forecast.qml
+msgctxt "forecast column"
+msgid "Now"
+msgstr "Maintenant"
+
+#: modules/nexus/common/AudioDeviceList.qml
+msgctxt "unknown audio device"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: modules/nexus/common/EthernetSection.qml
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+msgctxt "ethernet link state"
+msgid "Connected"
+msgstr "Connecté"
+
+#: modules/nexus/common/EthernetSection.qml
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+msgctxt "ethernet link state"
+msgid "Not connected"
+msgstr "Non connecté"
+
+#. TRANSLATORS: %1 = data transferred, already formatted with a unit
+#: modules/nexus/common/EthernetSection.qml
+#, qt-format
+msgid "Data usage: %1"
+msgstr "Données : %1"
+
+#: modules/nexus/common/EthernetSection.qml
+msgid "Wired connection"
+msgstr "Connexion filaire"
+
+#: modules/nexus/common/EthernetSection.qml
+#, qt-format
+msgctxt "ethernet link state with interface name"
+msgid "Not connected • %1"
+msgstr "Non connecté • %1"
+
+#: modules/nexus/common/EthernetSection.qml
+msgid "Local IP Address"
+msgstr "Adresse IP locale"
+
+#: modules/nexus/common/EthernetSection.qml
+msgid "Primary DNS"
+msgstr "DNS primaire"
+
+#: modules/nexus/common/NetworkList.qml
+msgid "No networks found"
+msgstr "Aucun réseau trouvé"
+
+#: modules/nexus/common/NetworkList.qml
+msgid "Wi-Fi disabled"
+msgstr "Wi-Fi désactivé"
+
+#: modules/nexus/common/NetworkList.qml
+msgctxt "network connected"
+msgid "Connected"
+msgstr "Connecté"
+
+#: modules/nexus/common/NetworkList.qml
+msgctxt "network saved"
+msgid "Saved"
+msgstr "Enregistré"
+
+#. TRANSLATORS: %1 = security type, %2 = connection status
+#: modules/nexus/common/NetworkList.qml
+#, qt-format
+msgctxt "network security and status"
+msgid "Security: %1 • %2"
+msgstr "Sécurité : %1%2"
+
+#: modules/nexus/common/NetworkList.qml
+#, qt-format
+msgctxt "network security"
+msgid "Security: %1"
+msgstr "Sécurité : %1"
+
+#: modules/nexus/NavPane.qml
+msgid "Search settings"
+msgstr "Rechercher dans les paramètres"
+
+#: modules/nexus/PageCompRegistry.qml
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+msgid "Page under construction"
+msgstr "Page en construction"
+
+#: modules/nexus/PageCompRegistry.qml
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+msgid "This page will be available in a future update."
+msgstr "Cette page sera disponible dans une prochaine mise à jour."
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Wallpaper & style"
+msgstr "Fonds d'écran & style"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Wallpaper, fonts, colours"
+msgstr "Fonds d'écran, polices, couleurs"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Wi-Fi, ethernet, VPN"
+msgstr "Wi-Fi, ethernet, VPN"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/BluetoothPage.qml
+msgid "Connected devices"
+msgstr "Appareils connectés"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Bluetooth, pairing"
+msgstr "Bluetooth, appairage"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/AudioPage.qml
+msgid "Audio"
+msgstr "Audio"
+
+#: modules/nexus/PageRegistry.qml
+msgid "App volumes, sound devices"
+msgstr "Volumes des applications, périphériques audio"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Updates"
+msgstr "Mises à jour"
+
+#: modules/nexus/PageRegistry.qml
+msgid "System updates"
+msgstr "Mises à jour système"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/AboutPage.qml
+msgid "Plugins"
+msgstr "Extensions"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Manage plugins"
+msgstr "Gérer les extensions"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/PanelsPage.qml
+msgid "Panels"
+msgstr "Panneaux"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Dashboard, taskbar, launcher, sidebar"
+msgstr "Tableau de bord, barre des tâches, lanceur, barre latérale"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/AppsPage.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Apps"
+msgstr "Applications"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Default apps, favourites, hidden apps"
+msgstr "Applications par défaut, favoris, applications masquées"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/ServicesPage.qml
+msgid "Services"
+msgstr "Services"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Poll intervals, lyrics backend"
+msgstr "Intervalles d'interrogation, moteur de paroles"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/LanguageAndRegion.qml
+msgid "Language & region"
+msgstr "Langue et région"
+
+#: modules/nexus/PageRegistry.qml
+msgid "UI language, weather location, display units"
+msgstr "Langue d'interface, emplacement météo, unités d'affichage"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/AboutPage.qml
+msgid "About"
+msgstr "À propos"
+
+#: modules/nexus/PageRegistry.qml
+msgid "System information, credits"
+msgstr "Informations système, crédits"
+
+#: modules/nexus/pages/AboutPage.qml
+msgid "System"
+msgstr "Système"
+
+#: modules/nexus/pages/AboutPage.qml
+msgid "Hostname"
+msgstr "Nom d'hôte"
+
+#: modules/nexus/pages/AboutPage.qml
+msgctxt "system model name"
+msgid "Device"
+msgstr "Appareil"
+
+#: modules/nexus/pages/AboutPage.qml
+msgid "Distro"
+msgstr "Distribution"
+
+#: modules/nexus/pages/AboutPage.qml
+msgid "Kernel"
+msgstr "Noyau"
+
+#. TRANSLATORS: BIOS or UEFI firmware version
+#: modules/nexus/pages/AboutPage.qml
+msgid "Firmware"
+msgstr "Micrologiciel"
+
+#: modules/nexus/pages/AboutPage.qml
+msgid "Software"
+msgstr "Logiciels"
+
+#: modules/nexus/pages/AboutPage.qml
+msgctxt "the caelestia shell itself, not a unix shell"
+msgid "Shell"
+msgstr "Environnement"
+
+#: modules/nexus/pages/AboutPage.qml
+msgctxt "the caelestia command line tool"
+msgid "CLI"
+msgstr "Interface en ligne de commande"
+
+#: modules/nexus/pages/AboutPage.qml
+msgid "Loaded plugins"
+msgstr "Extensions chargées"
+
+#: modules/nexus/pages/apps/AllApps.qml modules/nexus/pages/AppsPage.qml
+msgid "All apps"
+msgstr "Toutes les applications"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "App info"
+msgstr "Infos de l'application"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Launcher"
+msgstr "Lanceur"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Favourite"
+msgstr "Favori"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Matched by a regex in favouriteApps — edit the config file to change"
+msgstr "Correspondance par expression régulière dans les favoris — modifiez le fichier de config pour changer"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Pin to the top of the launcher"
+msgstr "Épingler en haut du lanceur"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Hidden"
+msgstr "Masquée"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Matched by a regex in hiddenApps — edit the config file to change"
+msgstr "Correspondance par expression régulière dans les applis masquées — modifiez le fichier de config pour changer"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Hide from the launcher"
+msgstr "Masquer du lanceur"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Details"
+msgstr "Détails"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "App ID"
+msgstr "Identifiant de l'application"
+
+#: modules/nexus/pages/apps/AppInfo.qml
+msgid "Command"
+msgstr "Commande"
+
+#: modules/nexus/pages/AppsPage.qml
+msgid "Default applications"
+msgstr "Applications par défaut"
+
+#: modules/nexus/pages/AppsPage.qml
+msgctxt "default app category"
+msgid "Terminal"
+msgstr "Terminal"
+
+#: modules/nexus/pages/AppsPage.qml
+msgctxt "default app category"
+msgid "Audio"
+msgstr "Audio"
+
+#: modules/nexus/pages/AppsPage.qml
+msgctxt "default app category"
+msgid "Media playback"
+msgstr "Lecture multimédia"
+
+#: modules/nexus/pages/AppsPage.qml
+msgctxt "default app category"
+msgid "File manager"
+msgstr "Gestionnaire de fichiers"
+
+#: modules/nexus/pages/AppsPage.qml
+msgctxt "app library"
+msgid "Library"
+msgstr "Bibliothèque"
+
+#: modules/nexus/pages/AppsPage.qml
+msgid "Browse installed apps, set favourites and hidden"
+msgstr "Parcourir les applications, gérer les favoris et masquées"
+
+#: modules/nexus/pages/audio/AppVolumes.qml modules/nexus/pages/AudioPage.qml
+msgid "App volumes"
+msgstr "Volumes des applications"
+
+#: modules/nexus/pages/audio/AppVolumes.qml
+msgid "Adjust the volume of individual apps currently playing audio."
+msgstr "Ajuster le volume de chaque application en cours de lecture audio."
+
+#: modules/nexus/pages/audio/AppVolumes.qml modules/nexus/pages/AudioPage.qml
+msgid "No apps playing audio"
+msgstr "Aucune application ne joue de l'audio"
+
+#: modules/nexus/pages/AudioPage.qml
+msgctxt "audio output"
+msgid "Output"
+msgstr "Sortie"
+
+#: modules/nexus/pages/AudioPage.qml
+msgctxt "audio output muted"
+msgid "Muted"
+msgstr "Muet"
+
+#: modules/nexus/pages/AudioPage.qml
+msgctxt "no audio outputs"
+msgid "No output devices"
+msgstr "Aucun périphérique de sortie"
+
+#: modules/nexus/pages/AudioPage.qml
+msgctxt "audio input"
+msgid "Input"
+msgstr "Entrée"
+
+#: modules/nexus/pages/AudioPage.qml
+msgctxt "audio input muted"
+msgid "Muted"
+msgstr "Muet"
+
+#: modules/nexus/pages/AudioPage.qml
+msgctxt "no audio inputs"
+msgid "No input devices"
+msgstr "Aucun périphérique d'entrée"
+
+#: modules/nexus/pages/AudioPage.qml
+#, qt-plural-format
+msgid "%n app playing audio"
+msgid_plural "%n apps playing audio"
+msgstr[0] "%1 applications jouent de l'audio"
+msgstr[1] "%1 applications jouent de l'audio"
+
+#: modules/nexus/pages/bluetooth/BluetoothPairing.qml
+#: modules/nexus/pages/BluetoothPage.qml
+msgid "Pair new device"
+msgstr "Appairer un nouvel appareil"
+
+#: modules/nexus/pages/bluetooth/BluetoothPairing.qml
+msgid "Available devices"
+msgstr "Appareils disponibles"
+
+#: modules/nexus/pages/bluetooth/BluetoothPairing.qml
+msgid "Searching for devices…"
+msgstr "Recherche d'appareils…"
+
+#: modules/nexus/pages/bluetooth/BluetoothPairing.qml
+msgid "Unknown device"
+msgstr "Appareil inconnu"
+
+#: modules/nexus/pages/bluetooth/BluetoothPairing.qml
+msgid "Pairing..."
+msgstr "Appairage..."
+
+#. TRANSLATORS: %1 = battery level, already formatted as a percentage
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+#: modules/nexus/pages/BluetoothPage.qml
+#, qt-format
+msgctxt "bluetooth device state with battery"
+msgid "Connected • %1"
+msgstr "Connecté • %1"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+#: modules/nexus/pages/BluetoothPage.qml
+msgctxt "bluetooth device state"
+msgid "Connected"
+msgstr "Connecté"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "bluetooth device state"
+msgid "Paired"
+msgstr "Appairé"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "bluetooth device state"
+msgid "Not paired"
+msgstr "Non appairé"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "unnamed bluetooth device"
+msgid "Device"
+msgstr "Appareil"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "button"
+msgid "Forget"
+msgstr "Oublier"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "button"
+msgid "Disconnect"
+msgstr "Déconnecter"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "button"
+msgid "Connect"
+msgstr "Connecter"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "bluetooth device state"
+msgid "Trusted"
+msgstr "Approuvé"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgid "Allow this device to connect automatically"
+msgstr "Autoriser cet appareil à se connecter automatiquement"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "bluetooth device state"
+msgid "Blocked"
+msgstr "Bloqué"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgid "Prevent this device from connecting"
+msgstr "Empêcher cet appareil de se connecter"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgid "Wake allowed"
+msgstr "Réveil autorisé"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgid "Allow this device to wake the system"
+msgstr "Autoriser cet appareil à réveiller le système"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "bluetooth device state"
+msgid "Unavailable"
+msgstr "Indisponible"
+
+#: modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+msgctxt "bluetooth MAC address"
+msgid "Address"
+msgstr "Adresse"
+
+#: modules/nexus/pages/BluetoothPage.qml
+msgid "No saved devices"
+msgstr "Aucun appareil enregistré"
+
+#: modules/nexus/pages/BluetoothPage.qml
+msgid "Bluetooth disabled"
+msgstr "Bluetooth désactivé"
+
+#: modules/nexus/pages/BluetoothPage.qml
+msgctxt "unknown bluetooth device"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: modules/nexus/pages/BluetoothPage.qml
+msgctxt "bluetooth device state"
+msgid "Saved"
+msgstr "Enregistré"
+
+#. TRANSLATORS: adjective: other devices can find this computer
+#: modules/nexus/pages/BluetoothPage.qml
+msgctxt "bluetooth setting"
+msgid "Discoverable"
+msgstr "Détectable"
+
+#: modules/nexus/pages/BluetoothPage.qml
+msgid "Allow nearby devices to find this one"
+msgstr "Autoriser les appareils proches à détecter cet appareil"
+
+#. TRANSLATORS: adjective: other devices are allowed to pair with this computer
+#: modules/nexus/pages/BluetoothPage.qml
+msgctxt "bluetooth setting"
+msgid "Pairable"
+msgstr "Appairable"
+
+#: modules/nexus/pages/BluetoothPage.qml
+msgid "Allow nearby devices to pair with this one"
+msgstr "Autoriser les appareils proches à s'appairer avec cet appareil"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "°C"
+msgstr "°C"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "°F"
+msgstr "°F"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "K"
+msgstr "K"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Binary (KiB, MiB)"
+msgstr "Binaire (KiB, MiB)"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Decimal (KB, MB)"
+msgstr "Décimal (KB, MB)"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "24-hour"
+msgstr "24 heures"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "12-hour"
+msgstr "12 heures"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Language"
+msgstr "Langue"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "UI language"
+msgstr "Langue de l'interface"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "The language used in the shell UI"
+msgstr "La langue utilisée dans l'interface de l'environnement"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Auto"
+msgstr "Automatique"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Location picker coming soon"
+msgstr "Sélecteur d'emplacement bientôt disponible"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Choose your weather location on a map in a future update"
+msgstr "Choisissez votre emplacement météo sur une carte dans une prochaine mise à jour"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Units"
+msgstr "Unités"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Temperature"
+msgstr "Température"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Units for weather temperatures"
+msgstr "Unités pour les températures météo"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "System temperatures"
+msgstr "Températures système"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Units for CPU and GPU temperatures"
+msgstr "Unités pour les températures CPU et GPU"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Data sizes"
+msgstr "Tailles de données"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Units for data sizes and network speeds"
+msgstr "Unités pour les tailles de données et les vitesses réseau"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Time & date"
+msgstr "Heure et date"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Clock format"
+msgstr "Format de l'horloge"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "How times are shown across the shell"
+msgstr "Comment les heures sont affichées dans l'environnement"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+#: modules/nexus/pages/NetworkPage.qml
+msgid "Add network"
+msgstr "Ajouter un réseau"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Enter the details below to manually connect to a network."
+msgstr "Entrez les détails pour vous connecter manuellement."
+
+#. TRANSLATORS: SSID is a protocol term, leave it untranslated
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Network name (SSID)"
+msgstr "Nom du réseau (SSID)"
+
+#. TRANSLATORS: sample network name, translate the e.g. but the name is a placeholder
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "e.g. MyHiddenNetwork"
+msgstr "ex. MonReseauCache"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Network name is required"
+msgstr "Nom du réseau requis"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Hidden network"
+msgstr "Réseau masqué"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Actively probe for a network that doesn't broadcast its name"
+msgstr "Sonder activement un réseau masqué"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Security"
+msgstr "Sécurité"
+
+#. TRANSLATORS: WPA/WPA2/WPA3 are protocol names, leave them untranslated
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "WPA/WPA2/WPA3 Personal"
+msgstr "WPA/WPA2/WPA3 Personnel"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgctxt "wifi security type"
+msgid "None (open)"
+msgstr "Aucune (ouvert)"
+
+#. TRANSLATORS: WPA is a protocol name, leave it untranslated
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "WPA passwords are at least 8 characters"
+msgstr "Les mots de passe WPA font au moins 8 caractères"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Connection failed — check the password"
+msgstr "Échec de connexion — vérifiez le mot de passe"
+
+#: modules/nexus/pages/network/AddNetworkPage.qml
+msgid "Password must be at least 8 characters"
+msgstr "Le mot de passe doit faire 8 caractères min."
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Edit VPN provider"
+msgstr "Modifier le fournisseur VPN"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Add VPN provider"
+msgstr "Ajouter un fournisseur VPN"
+
+#. TRANSLATORS: the four names in brackets are provider identifiers, leave them untranslated
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands."
+msgstr "Les noms intégrés remplissent automatiquement leurs commandes."
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Provider name"
+msgstr "Nom du fournisseur"
+
+#. TRANSLATORS: id here means the provider identifier, e.g. wireguard
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Built-in id or a custom name"
+msgstr "ID intégré ou nom personnalisé"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Provider name is required"
+msgstr "Nom du fournisseur requis"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Display name"
+msgstr "Nom d'affichage"
+
+#. TRANSLATORS: the name shown in the VPN provider list on the network page
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Shown in the list"
+msgstr "Affiché dans la liste"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/NetworkPage.qml
+msgctxt "network interface"
+msgid "Interface"
+msgstr "Interface"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Network interface (for WireGuard / status checks)"
+msgstr "Interface réseau (WireGuard / statuts)"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Custom commands (optional)"
+msgstr "Commandes personnalisées (optionnel)"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Connect command"
+msgstr "Commande de connexion"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Leave empty to use the built-in default"
+msgstr "Laisser vide pour utiliser le défaut"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Disconnect command"
+msgstr "Commande de déconnexion"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgid "Delete"
+msgstr "Supprimer"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgctxt "button"
+msgid "Save"
+msgstr "Enregistrer"
+
+#: modules/nexus/pages/network/AddVpnPage.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgctxt "button"
+msgid "Add"
+msgstr "Ajouter"
+
+#: modules/nexus/pages/network/AllNetworksPage.qml
+msgid "All networks"
+msgstr "Tous les réseaux"
+
+#: modules/nexus/pages/network/AllNetworksPage.qml
+msgctxt "network filter heading"
+msgid "Filters"
+msgstr "Filtres"
+
+#: modules/nexus/pages/network/AllNetworksPage.qml
+msgctxt "network filter"
+msgid "Saved"
+msgstr "Enregistré"
+
+#: modules/nexus/pages/network/AllNetworksPage.qml
+msgctxt "network filter"
+msgid "Secured"
+msgstr "Sécurisé"
+
+#: modules/nexus/pages/network/AllNetworksPage.qml
+msgctxt "network filter"
+msgid "5 GHz"
+msgstr "5 GHz"
+
+#: modules/nexus/pages/network/AllNetworksPage.qml
+msgctxt "network filter"
+msgid "2.4 GHz"
+msgstr "2.4 GHz"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Disconnect"
+msgstr "Déconnecter"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Connection"
+msgstr "Connexion"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+msgid "Status"
+msgstr "Statut"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+msgid "Speed"
+msgstr "Vitesse"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "IP address"
+msgstr "Adresse IP"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Gateway"
+msgstr "Passerelle"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "MAC address"
+msgstr "Adresse MAC"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "IPv4"
+msgstr "IPv4"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "IP assignment"
+msgstr "Attribution IP"
+
+#. TRANSLATORS: DHCP and DNS are protocol names, leave them untranslated
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Automatic (DHCP)"
+msgstr "Automatique (DHCP)"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Automatic, DNS only"
+msgstr "Automatique, DNS uniquement"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgctxt "ip configuration method"
+msgid "Manual"
+msgstr "Manuel"
+
+#. TRANSLATORS: CIDR is a networking term, leave it untranslated
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Address (CIDR)"
+msgstr "Adresse (CIDR)"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "IP and prefix, e.g. 192.168.1.50/24"
+msgstr "IP et préfixe, ex. 192.168.1.50/24"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Enter a valid address in CIDR notation"
+msgstr "Entrez une adresse CIDR valide"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Enter a valid gateway address"
+msgstr "Entrez une passerelle valide"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "DNS servers"
+msgstr "Serveurs DNS"
+
+#. TRANSLATORS: describes the DNS servers field above: several addresses separated by commas
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Comma-separated"
+msgstr "Séparé par des virgules"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Enter valid DNS server addresses"
+msgstr "Entrez des serveurs DNS valides"
+
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Apply"
+msgstr "Appliquer"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Forget"
+msgstr "Oublier"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Signal"
+msgstr "Signal"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+#: modules/nexus/pages/network/SavedNetworksPage.qml services/Nmcli.qml
+msgctxt "wifi security type"
+msgid "Open"
+msgstr "Ouvert"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Frequency"
+msgstr "Fréquence"
+
+#. TRANSLATORS: %1 = channel frequency; MHz is a unit, leave it untranslated
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+#, qt-format
+msgid "%1 MHz"
+msgstr "%1 MHz"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Behaviour"
+msgstr "Comportement"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Connect automatically"
+msgstr "Se connecter automatiquement"
+
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Join this network when it's in range"
+msgstr "Rejoindre ce réseau à portée"
+
+#: modules/nexus/pages/network/SavedNetworksPage.qml
+#: modules/nexus/pages/NetworkPage.qml
+msgid "Saved networks"
+msgstr "Réseaux enregistrés"
+
+#: modules/nexus/pages/network/SavedNetworksPage.qml
+msgid "No saved networks"
+msgstr "Aucun réseau enregistré"
+
+#: modules/nexus/pages/network/SavedNetworksPage.qml
+msgctxt "unknown wifi security"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#. TRANSLATORS: %1 = security type
+#: modules/nexus/pages/network/SavedNetworksPage.qml
+#, qt-format
+msgctxt "network connected with security"
+msgid "Connected • %1"
+msgstr "Connecté • %1"
+
+#: modules/nexus/pages/NetworkPage.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+#. TRANSLATORS: %1 = number of networks found
+#: modules/nexus/pages/NetworkPage.qml
+#, qt-format
+msgid "Show all networks (%1)"
+msgstr "Afficher tous les réseaux (%1)"
+
+#: modules/nexus/pages/NetworkPage.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml services/VPN.qml
+msgid "VPN"
+msgstr "VPN"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgid "No VPN providers configured"
+msgstr "Aucun fournisseur VPN configuré"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgid "Tap to select"
+msgstr "Appuyer pour sélectionner"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgid "Disconnecting..."
+msgstr "Déconnexion..."
+
+#: modules/nexus/pages/NetworkPage.qml
+msgctxt "vpn state"
+msgid "Connected"
+msgstr "Connecté"
+
+#: modules/nexus/pages/NetworkPage.qml services/VPN.qml
+msgid "Authentication required"
+msgstr "Authentification requise"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgid "An error occurred"
+msgstr "Une erreur est survenue"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgid "Selected"
+msgstr "Sélectionné"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgctxt "round-trip latency to the VPN endpoint"
+msgid "Current ping"
+msgstr "Ping actuel"
+
+#: modules/nexus/pages/NetworkPage.qml
+#, qt-format
+msgid "%1 ms"
+msgstr "%1 ms"
+
+#: modules/nexus/pages/NetworkPage.qml
+msgid "Add provider"
+msgstr "Ajouter le fournisseur"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/SidebarPanel.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "General"
+msgstr "Général"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Show on hover"
+msgstr "Afficher au survol"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Reveal when the cursor reaches the screen edge"
+msgstr "Révéler quand le curseur atteint le bord de l'écran"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Show clock seconds"
+msgstr "Afficher les secondes de l'horloge"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Display seconds for the clock in the main panel"
+msgstr "Afficher les secondes de l'horloge dans le panneau principal"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Tabs"
+msgstr "Onglets"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Performance widgets"
+msgstr "Widgets de performances"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/SidebarPanel.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Drag threshold"
+msgstr "Seuil de glissement"
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+msgid "Pixels dragged before the dashboard opens"
+msgstr "Pixels glissés avant l'ouverture du tableau de bord"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Action prefix"
+msgstr "Préfixe d'action"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Prefix used to run actions in the launcher"
+msgstr "Préfixe pour lancer des actions"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Prefix must not be alphanumeric"
+msgstr "Le préfixe ne doit pas être alphanumérique"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Display"
+msgstr "Écran"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Max items shown"
+msgstr "Nombre max d'éléments affichés"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Max wallpapers"
+msgstr "Nombre max de fonds d'écran"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Pixels dragged before the launcher opens"
+msgstr "Pixels glissés avant l'ouverture du lanceur"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Vim keybinds"
+msgstr "Raccourcis Vim"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Navigate results with Ctrl+hjkl"
+msgstr "Naviguer dans les résultats avec Ctrl+hjkl"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Enable dangerous actions"
+msgstr "Activer les actions dangereuses"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Allow actions that shut down or log out"
+msgstr "Autoriser les actions d'arrêt ou de déconnexion"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Fuzzy search"
+msgstr "Recherche approximative"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Actions"
+msgstr "Actions"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Schemes"
+msgstr "Schémas"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+msgid "Variants"
+msgstr "Variantes"
+
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Wallpapers"
+msgstr "Fonds d'écran"
+
+#: modules/nexus/pages/panels/SidebarPanel.qml
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Sidebar"
+msgstr "Barre latérale"
+
+#: modules/nexus/pages/panels/SidebarPanel.qml
+msgid "Pixels dragged before the sidebar opens"
+msgstr "Pixels glissés avant l'ouverture de la barre latérale"
+
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Active window"
+msgstr "Fenêtre active"
+
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+msgctxt "taskbar active window layout"
+msgid "Compact"
+msgstr "Compact"
+
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+msgctxt "taskbar active window: swap the title and class order"
+msgid "Inverted"
+msgstr "Inversé"
+
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+msgid "Only show the active window title while hovering"
+msgstr "Afficher le titre de la fenêtre active uniquement au survol"
+
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/panels/taskbar/BarTray.qml
+msgid "Popout on hover"
+msgstr "Popout au survol"
+
+#: modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+msgid "Show a window details popout when hovering"
+msgstr "Afficher un popout de détails de fenêtre au survol"
+
+#: modules/nexus/pages/panels/taskbar/BarClock.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Clock"
+msgstr "Horloge"
+
+#: modules/nexus/pages/panels/taskbar/BarClock.qml
+msgctxt "taskbar clock: draw a background behind the clock"
+msgid "Background"
+msgstr "Arrière-plan"
+
+#: modules/nexus/pages/panels/taskbar/BarClock.qml
+msgid "Show date"
+msgstr "Afficher la date"
+
+#: modules/nexus/pages/panels/taskbar/BarClock.qml
+msgid "Show icon"
+msgstr "Afficher l'icône"
+
+#: modules/nexus/pages/panels/taskbar/BarClock.qml
+msgid "Show seconds"
+msgstr "Afficher l'icône"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Lock keys"
+msgstr "Touches de verrouillage"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Keyboard layout"
+msgstr "Disposition du clavier"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Speakers"
+msgstr "Haut-parleurs"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Microphone"
+msgstr "Microphone"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Status icons"
+msgstr "Icônes de statut"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Visible icons"
+msgstr "Icônes visibles"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Add entry"
+msgstr "Ajouter une entrée"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Add new entry"
+msgstr "Ajouter une nouvelle entrée"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgid "Show a details popout when hovering the status icons"
+msgstr "Afficher un popout de détails au survol des icônes de statut"
+
+#: modules/nexus/pages/panels/taskbar/BarTray.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Tray"
+msgstr "Zone de notification"
+
+#: modules/nexus/pages/panels/taskbar/BarTray.qml
+msgctxt "taskbar tray: draw a background behind the tray"
+msgid "Background"
+msgstr "Arrière-plan"
+
+#. TRANSLATORS: tint system tray icons with the theme accent colour
+#: modules/nexus/pages/panels/taskbar/BarTray.qml
+msgid "Recolour icons"
+msgstr "Recolorer les icônes"
+
+#: modules/nexus/pages/panels/taskbar/BarTray.qml
+msgctxt "taskbar tray layout"
+msgid "Compact"
+msgstr "Compact"
+
+#: modules/nexus/pages/panels/taskbar/BarTray.qml
+msgid "Show the tray menu popout when hovering"
+msgstr "Afficher le menu de la zone de notification au survol"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Workspaces"
+msgstr "Espaces de travail"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgctxt "number of workspaces"
+msgid "Shown"
+msgstr "Affichés"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Number of workspaces displayed"
+msgstr "Nombre d'espaces de travail affichés"
+
+#. TRANSLATORS: the three following labels name visual decorations drawn on the workspace pill
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Active indicator"
+msgstr "Indicateur actif"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Active trail"
+msgstr "Traînée active"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Occupied background"
+msgstr "Arrière-plan occupé"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Show windows"
+msgstr "Afficher les fenêtres"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Show icons of open windows on each workspace"
+msgstr "Afficher les icônes des fenêtres ouvertes sur chaque espace de travail"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Show unoccupied"
+msgstr "Afficher les espaces inoccupés"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Show workspaces that are inactive and empty"
+msgstr "Afficher les espaces de travail inactifs et vides"
+
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Windows on special workspaces"
+msgstr "Fenêtres sur les espaces de travail spéciaux"
+
+#. TRANSLATORS: maximum number of window icons shown per workspace
+#: modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+msgid "Max window icons"
+msgstr "Nombre max d'icônes de fenêtres"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Taskbar"
+msgstr "Barre des tâches"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Persistent"
+msgstr "Persistante"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Keep the bar visible at all times"
+msgstr "Garder la barre toujours visible"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Reveal the bar when the cursor reaches the screen edge"
+msgstr "Révéler la barre quand le curseur atteint le bord de l'écran"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Pixels dragged before the bar reveals"
+msgstr "Pixels glissés avant l'affichage de la barre"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Components"
+msgstr "Composants"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Indicators, window icons"
+msgstr "Indicateurs, icônes de fenêtres"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Title display, popout"
+msgstr "Affichage du titre, popout"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "System tray icons"
+msgstr "Icônes de la zone de notification"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Visible indicators"
+msgstr "Indicateurs visibles"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Date, icon, background"
+msgstr "Date, icône, arrière-plan"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Scroll actions"
+msgstr "Actions de défilement"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Scroll over the workspace indicator to switch workspaces"
+msgstr "Défiler sur l'indicateur d'espace de travail pour changer d'espace de travail"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Volume"
+msgstr "Volume"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Scroll on the top half of the bar to adjust volume"
+msgstr "Défiler sur la moitié supérieure de la barre pour régler le volume"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Brightness"
+msgstr "Luminosité"
+
+#: modules/nexus/pages/panels/TaskbarPanel.qml
+msgid "Scroll on the bottom half of the bar to adjust brightness"
+msgstr "Défiler sur la moitié inférieure de la barre pour régler la luminosité"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Utilities"
+msgstr "Utilitaires"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Show the utilities panel"
+msgstr "Afficher le panneau utilitaires"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Cards"
+msgstr "Cartes"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Keep awake"
+msgstr "Garder éveillé"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Show the idle inhibitor card"
+msgstr "Afficher la carte d'inhibition de veille"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+#: modules/utilities/cards/Record.qml
+msgid "Screen recorder"
+msgstr "Enregistreur d'écran"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Show the screen recorder card"
+msgstr "Afficher l'enregistreur d'écran"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+#: modules/utilities/cards/Toggles.qml
+msgid "Quick toggles"
+msgstr "Basculements rapides"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Show the quick toggles card"
+msgstr "Afficher les basculements rapides"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Toggle wireless networking"
+msgstr "Basculer le réseau sans fil"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Toggle the Bluetooth adapter"
+msgstr "Basculer l'adaptateur Bluetooth"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Mute or unmute the default source"
+msgstr "Couper/Rétablir le micro"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Settings"
+msgstr "Paramètres"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Open the settings window"
+msgstr "Ouvrir les paramètres"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Game mode"
+msgstr "Mode jeu"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Toggle game mode"
+msgstr "Basculer le mode jeu"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Do not disturb"
+msgstr "Do not disturb"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Silence notifications"
+msgstr "Mettre les notifications sous silence"
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Connect or disconnect the VPN"
+msgstr "Connecter/Déconnecter le VPN"
+
+#: modules/nexus/pages/PanelsPage.qml
+msgctxt "panel status"
+msgid "Enabled"
+msgstr "Activé"
+
+#: modules/nexus/pages/PanelsPage.qml
+msgctxt "panel status"
+msgid "Disabled"
+msgstr "Désactivé"
+
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Always visible"
+msgstr "Toujours visible"
+
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Reveal on hover"
+msgstr "Afficher au survol"
+
+#: modules/nexus/pages/PanelsPage.qml
+msgid "Reveal on drag"
+msgstr "Afficher au glisser"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgctxt "show notifications over fullscreen apps"
+msgid "On"
+msgstr "Activé"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgctxt "show notifications over fullscreen apps"
+msgid "Off"
+msgstr "Désactivé"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgctxt "show toasts over fullscreen apps"
+msgid "Off"
+msgstr "Désactivé"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgctxt "show toasts over fullscreen apps: important ones only"
+msgid "Important"
+msgstr "Important"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgctxt "show toasts over fullscreen apps"
+msgid "On"
+msgstr "Activé"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Show in fullscreen"
+msgstr "Afficher en plein écran"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Whether notifications appear over fullscreen apps"
+msgstr "Si les notifications apparaissent par-dessus les applications en plein écran"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Expire automatically"
+msgstr "Expirer automatiquement"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Dismiss notifications after their timeout"
+msgstr "Ignorer les notifications après leur délai"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Open expanded"
+msgstr "Ouvrir développé"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Show notifications expanded by default"
+msgstr "Afficher les notifications développées par défaut"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Default timeout"
+msgstr "Délai par défaut"
+
+#. TRANSLATORS: ms is the millisecond unit, leave it untranslated
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Time before a notification dismisses (ms)"
+msgstr "Délai avant la fermeture d'une notification (ms)"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Group preview count"
+msgstr "Nombre d'aperçus de groupe"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Notifications shown per group before collapsing"
+msgstr "Notifications affichées par groupe avant repli"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Toasts"
+msgstr "Notifications flottantes"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Whether toasts appear over fullscreen apps"
+msgstr "Si les toasts apparaissent par-dessus les applications en plein écran"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Visible toasts"
+msgstr "Toasts visibles"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Maximum number of toasts shown at once"
+msgstr "Nombre maximum de toasts affichés simultanément"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Toast events"
+msgstr "Événements de toast"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Charging changes"
+msgstr "Changements de charge"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Game mode changes"
+msgstr "Changements de mode jeu"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Do not disturb changes"
+msgstr "Changements du mode ne pas déranger"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Audio output changes"
+msgstr "Changements de sortie audio"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Audio input changes"
+msgstr "Changements d'entrée audio"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Caps lock changes"
+msgstr "Changements du Verr. Maj."
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Num lock changes"
+msgstr "Changements du Verr. Num."
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "Keyboard layout changes"
+msgstr "Changements de disposition du clavier"
+
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "VPN changes"
+msgstr "Changements VPN"
+
+#: modules/nexus/pages/services/NotificationsPage.qml services/Players.qml
+msgid "Now playing"
+msgstr "En cours de lecture"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgctxt "lyrics backend"
+msgid "Auto"
+msgstr "Automatique"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgctxt "lyrics backend"
+msgid "Local"
+msgstr "Local"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgctxt "gpu type"
+msgid "Auto"
+msgstr "Automatique"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgctxt "gpu type"
+msgid "Generic"
+msgstr "Générique"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgctxt "gpu type"
+msgid "None"
+msgstr "Aucun"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Notifications, toasts, timeouts"
+msgstr "Notifications, alertes, délais"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Polling"
+msgstr "Interrogation"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Media refresh"
+msgstr "Actualisation média"
+
+#. TRANSLATORS: ms is the millisecond unit, leave it untranslated
+#: modules/nexus/pages/ServicesPage.qml
+msgid "How often the media position updates (ms)"
+msgstr "Fréquence de mise à jour de la position du média (ms)"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "System stats refresh"
+msgstr "Actualisation des stats système"
+
+#. TRANSLATORS: CPU and GPU are hardware abbreviations, leave them untranslated
+#: modules/nexus/pages/ServicesPage.qml
+msgid "CPU, memory and GPU update interval (seconds)"
+msgstr "Intervalle de mise à jour CPU, mémoire et GPU (secondes)"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Wi-Fi rescan"
+msgstr "Rescanner le Wi-Fi"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "How often available networks are rescanned (seconds)"
+msgstr "Fréquence de rescan des réseaux disponibles (secondes)"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Media & lyrics"
+msgstr "Média et paroles"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Lyrics backend"
+msgstr "Moteur de paroles"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Source used to fetch synced lyrics"
+msgstr "Source utilisée pour récupérer les paroles synchronisées"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Default player"
+msgstr "Lecteur par défaut"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Preferred media player when several are open"
+msgstr "Lecteur multimédia préféré quand plusieurs sont ouverts"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgctxt "default media player"
+msgid "Auto"
+msgstr "Automatique"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Input increments"
+msgstr "Incréments d'entrée"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Volume step"
+msgstr "Incrément de volume"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Amount the volume changes per scroll (%)"
+msgstr "Variation du volume par cran de défilement (%)"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Brightness step"
+msgstr "Incrément de luminosité"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Amount the brightness changes per scroll (%)"
+msgstr "Variation de la luminosité par cran de défilement (%)"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Max volume"
+msgstr "Volume maximum"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Upper limit for output volume (%)"
+msgstr "Limite supérieure du volume de sortie (%)"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Service tuning"
+msgstr "Réglage des services"
+
+#. TRANSLATORS: bars of a spectrum analyser, not the taskbar
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Visualiser bars"
+msgstr "Barres du visualiseur"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Number of bars in the audio visualisers"
+msgstr "Nombre de barres dans les visualiseurs audio"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Smart colour scheme"
+msgstr "Thème de couleurs intelligent"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Derive theme mode and variant from the wallpaper"
+msgstr "Déduire le mode et la variante du thème depuis le fond d'écran"
+
+#: modules/nexus/pages/ServicesPage.qml
+#, qt-format
+msgid "Monitoring: %1"
+msgstr "Surveillance : %1"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Override for GPU type"
+msgstr "Forcer le type de GPU"
+
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Colours"
+msgstr "Couleurs"
+
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "Browse"
+msgstr "Parcourir"
+
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "Select an image"
+msgstr "Sélectionner une image"
+
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "Random"
+msgstr "Aléatoire"
+
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "Featured wallpaper"
+msgstr "Fond d'écran mis en avant"
+
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "Local wallpapers"
+msgstr "Fonds d'écran locaux"
+
+#: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+msgid "No local wallpapers found"
+msgstr "Aucun fond d'écran local trouvé"
+
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Wallpaper disabled"
+msgstr "Fond d'écran désactivé"
+
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Display wallpaper"
+msgstr "Afficher le fond d'écran"
+
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Transparency"
+msgstr "Transparence"
+
+#. TRANSLATORS: %1/%2 = opacity values from 0 to 1 for the base surface and layered surfaces
+#: modules/nexus/pages/WallpaperAndStyle.qml
+#, qt-format
+msgid "Base %1, layers %2"
+msgstr "Base %1, couches %2"
+
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Dark theme"
+msgstr "Thème sombre"
+
+#: modules/nexus/WindowFactory.qml
+#, qt-format
+msgid "Nexus — %1"
+msgstr "Nexus — %1"
+
+#: modules/sidebar/Notif.qml
+msgid "No body here! :/"
+msgstr "Aucun contenu ici ! :/"
+
+#. TRANSLATORS: the count itself is rendered separately, immediately to the left
+#: modules/sidebar/NotifDock.qml
+msgctxt "notification count label, number shown separately"
+msgid "notification"
+msgid_plural "notifications"
+msgstr[0] "notification"
+msgstr[1] "notification"
+
+#: modules/sidebar/NotifDock.qml
+msgid "All up to date!"
+msgstr "Tout est à jour !"
+
+#: modules/utilities/cards/IdleInhibit.qml
+msgctxt "idle inhibitor"
+msgid "Keep awake"
+msgstr "Garder éveillé"
+
+#: modules/utilities/cards/IdleInhibit.qml
+msgctxt "idle inhibitor"
+msgid "Preventing sleep mode"
+msgstr "Empêche le mode veille"
+
+#: modules/utilities/cards/IdleInhibit.qml
+msgctxt "idle inhibitor"
+msgid "Normal power management"
+msgstr "Gestion normale de l'alimentation"
+
+#. TRANSLATORS: %1 = a clock time, e.g. 14:30
+#: modules/utilities/cards/IdleInhibit.qml
+#, qt-format
+msgid "Active since %1"
+msgstr "Actif depuis %1"
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recorder state"
+msgid "Paused"
+msgstr "En pause"
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recorder state"
+msgid "Running..."
+msgstr "En cours..."
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recorder state"
+msgid "Ready"
+msgstr "Prêt"
+
+#: modules/utilities/cards/Record.qml
+msgid "Record fullscreen"
+msgstr "Enregistrer en plein écran"
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recording mode"
+msgid "Fullscreen"
+msgstr "Plein écran"
+
+#: modules/utilities/cards/Record.qml
+msgid "Record region"
+msgstr "Enregistrer une région"
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recording mode"
+msgid "Region"
+msgstr "Région"
+
+#: modules/utilities/cards/Record.qml
+msgid "Record fullscreen with sound"
+msgstr "Enregistrer en plein écran avec le son"
+
+#: modules/utilities/cards/Record.qml
+msgid "Record region with sound"
+msgstr "Enregistrer une région avec le son"
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recording status"
+msgid "PAUSED"
+msgstr "EN PAUSE"
+
+#: modules/utilities/cards/Record.qml
+msgctxt "recording status"
+msgid "REC"
+msgstr "REC"
+
+#. TRANSLATORS: %1 = elapsed recording duration, e.g. 01:23
+#: modules/utilities/cards/Record.qml
+#, qt-format
+msgid "Recording for %1"
+msgstr "Enregistrement depuis %1"
+
+#: modules/utilities/cards/RecordingList.qml
+msgid "Recordings"
+msgstr "Enregistrements"
+
+#: modules/utilities/cards/RecordingList.qml
+#, qt-format
+msgid "Recording at %1"
+msgstr "Enregistrement à %1"
+
+#: modules/utilities/cards/RecordingList.qml
+msgid "No recordings found"
+msgstr "Aucun enregistrement trouvé"
+
+#: modules/utilities/RecordingDeleteModal.qml
+msgid "Delete recording?"
+msgstr "Supprimer l'enregistrement ?"
+
+#: modules/utilities/RecordingDeleteModal.qml
+#, qt-format
+msgid "Recording '%1' will be permanently deleted."
+msgstr "L'enregistrement « %1 » sera définitivement supprimé."
+
+#: modules/utilities/RecordingDeleteModal.qml
+msgctxt "button"
+msgid "Delete"
+msgstr "Supprimer"
+
+#: modules/windowinfo/Buttons.qml
+msgid "Move to workspace"
+msgstr "Déplacer vers un espace de travail"
+
+#: modules/windowinfo/Buttons.qml
+msgid "Tile"
+msgstr "Disposition en mosaïque"
+
+#: modules/windowinfo/Buttons.qml
+msgid "Float"
+msgstr "Mode flottant"
+
+#: modules/windowinfo/Buttons.qml
+msgid "Unpin"
+msgstr "Désépingler"
+
+#: modules/windowinfo/Buttons.qml
+msgid "Pin"
+msgstr "Épingler"
+
+#: modules/windowinfo/Buttons.qml
+msgid "Kill"
+msgstr "Tuer le processus"
+
+#: modules/windowinfo/Details.qml modules/windowinfo/Preview.qml
+msgid "No active client"
+msgstr "Aucun client actif"
+
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgctxt "window address"
+msgid "Address: %1"
+msgstr "Adresse : %1"
+
+#: modules/windowinfo/Details.qml
+msgctxt "window address"
+msgid "Address: unknown"
+msgstr "Adresse : %1"
+
+#. TRANSLATORS: %1/%2 = x and y position in pixels
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Position: %1, %2"
+msgstr "Position : %1, %2"
+
+#. TRANSLATORS: %1/%2 = width and height in pixels; the x is a multiplication sign
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Size: %1 x %2"
+msgstr "Taille : %1 x %2"
+
+#. TRANSLATORS: %1 = workspace name, %2 = workspace id
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Workspace: %1 (%2)"
+msgstr "Espace de travail : %1 (%2)"
+
+#. TRANSLATORS: %1 = monitor name, %2 = monitor id, %3/%4 = x/y position in pixels
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Monitor: %1 (%2) at %3, %4"
+msgstr "Moniteur : %1 (%2) à %3, %4"
+
+#: modules/windowinfo/Details.qml
+msgid "Monitor: unknown"
+msgstr "Moniteur : inconnu"
+
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Initial title: %1"
+msgstr "Titre initial : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Initial title: unknown"
+msgstr "Titre initial : %1"
+
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Initial class: %1"
+msgstr "Classe initiale : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Initial class: unknown"
+msgstr "Classe initiale : %1"
+
+#. TRANSLATORS: %1 = process id
+#: modules/windowinfo/Details.qml
+#, qt-format
+msgid "Process id: %1"
+msgstr "Identifiant de processus : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Floating: yes"
+msgstr "Flottant : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Floating: no"
+msgstr "Flottant : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Xwayland: yes"
+msgstr "Xwayland : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Xwayland: no"
+msgstr "Xwayland : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Pinned: yes"
+msgstr "Épinglé : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Pinned: no"
+msgstr "Épinglé : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Fullscreen state: off"
+msgstr "État plein écran : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Fullscreen state: maximised"
+msgstr "État plein écran : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Fullscreen state: on"
+msgstr "État plein écran : %1"
+
+#: modules/windowinfo/Details.qml
+msgid "Fullscreen state: unknown"
+msgstr "État plein écran : inconnu"
+
+#: modules/windowinfo/Preview.qml
+msgid "Try switching to a window"
+msgstr "Essayez de basculer vers une fenêtre"
+
+#. TRANSLATORS: %1 = window title, %2 = monitor name, %3/%4 = x/y position in pixels
+#: modules/windowinfo/Preview.qml
+#, qt-format
+msgid "%1 on monitor %2 at %3, %4"
+msgstr "%1 sur le moniteur %2 à %3, %4"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgctxt "temperature"
+msgid "%1°"
+msgstr "%1°"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgctxt "temperature"
+msgid "%1°F"
+msgstr "%1°F"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgctxt "temperature"
+msgid "%1 K"
+msgstr "%1 K"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgctxt "temperature"
+msgid "%1°C"
+msgstr "%1°C"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 B"
+msgstr "%1 o"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 KB"
+msgstr "%1 Ko"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 MB"
+msgstr "%1 MHz"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 GB"
+msgstr "%1 Go"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 TB"
+msgstr "%1 To"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 KiB"
+msgstr "%1 Kio"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 MiB"
+msgstr "%1 MHz"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 GiB"
+msgstr "%1 Gio"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 TiB"
+msgstr "%1 Tio"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 B/s"
+msgstr "%1 o/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 KB/s"
+msgstr "%1 Ko/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 MB/s"
+msgstr "%1 MHz"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 GB/s"
+msgstr "%1 Go/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 TB/s"
+msgstr "%1 To/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 KiB/s"
+msgstr "%1 Kio/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 MiB/s"
+msgstr "%1 Mio/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 GiB/s"
+msgstr "%1 Gio/s"
+
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgid "%1 TiB/s"
+msgstr "%1 Tio/s"
+
+#. TRANSLATORS: %1 = used amount, %2 = total amount with unit
+#: plugin/src/Caelestia/I18n/Units.qml
+#, qt-format
+msgctxt "used / total amount"
+msgid "%1 / %2"
+msgstr "%1 / %2"
+
+#: services/Audio.qml
+msgctxt "unknown audio stream"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: services/Audio.qml
+msgctxt "unknown application audio stream"
+msgid "Unknown application"
+msgstr "Application inconnue"
+
+#: services/Audio.qml
+msgctxt "unknown audio device"
+msgid "Unknown device"
+msgstr "Appareil inconnu"
+
+#: services/Audio.qml
+msgid "Audio output changed"
+msgstr "Sortie audio modifiée"
+
+#: services/Audio.qml
+#, qt-format
+msgid "Now using: %1"
+msgstr "Utilise maintenant : %1"
+
+#: services/Audio.qml
+msgid "Audio input changed"
+msgstr "Entrée audio modifiée"
+
+#: services/GameMode.qml
+msgid "Game mode enabled"
+msgstr "Mode jeu activé"
+
+#: services/GameMode.qml
+msgid "Disabled Hyprland animations, blur, gaps and shadows"
+msgstr "Animations, flou, marges et ombres d'Hyprland désactivés"
+
+#: services/GameMode.qml
+msgid "Game mode disabled"
+msgstr "Mode jeu désactivé"
+
+#: services/GameMode.qml
+msgid "Hyprland settings restored"
+msgstr "Paramètres d'Hyprland restaurés"
+
+#: services/Hypr.qml
+msgctxt "keyboard layout"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#: services/Nmcli.qml
+msgid "Enterprise"
+msgstr "Entreprise"
+
+#: services/Nmcli.qml
+msgid "Enhanced Open"
+msgstr "Ouvert amélioré"
+
+#. TRANSLATORS: %1 = a number
+#: services/Nmcli.qml
+#, qt-format
+msgid "%1 Gbps"
+msgstr "%1 Gbit/s"
+
+#. TRANSLATORS: %1 = a number
+#: services/Nmcli.qml
+#, qt-format
+msgid "%1 Mbps"
+msgstr "%1 MHz"
+
+#: services/NotifData.qml
+msgid "now"
+msgstr "maintenant"
+
+#: services/NotifData.qml
+#, qt-format
+msgctxt "abbreviated notification age, days"
+msgid "%1d"
+msgstr "+%1"
+
+#: services/NotifData.qml
+#, qt-format
+msgctxt "abbreviated notification age, hours"
+msgid "%1h"
+msgstr "+%1"
+
+#: services/NotifData.qml
+#, qt-format
+msgctxt "abbreviated notification age, minutes"
+msgid "%1m"
+msgstr "%1 ms"
+
+#: services/Notifs.qml
+msgid "Do not disturb enabled"
+msgstr "Ne pas déranger activé"
+
+#: services/Notifs.qml
+msgid "Popup notifications are now disabled"
+msgstr "Les notifications pop-up sont maintenant désactivées"
+
+#: services/Notifs.qml
+msgid "Do not disturb disabled"
+msgstr "Ne pas déranger désactivé"
+
+#: services/Notifs.qml
+msgid "Popup notifications are now enabled"
+msgstr "Les notifications pop-up sont maintenant activées"
+
+#: services/Players.qml
+#, qt-format
+msgctxt "track artist and title"
+msgid "%1 - %2"
+msgstr "%1 - %2"
+
+#: services/VPN.qml
+msgid "VPN connection failed"
+msgstr "La connexion VPN a échoué"
+
+#: services/VPN.qml
+msgid "VPN disconnection failed"
+msgstr "La déconnexion du VPN a échoué"
+
+#: services/VPN.qml
+msgid "Login required"
+msgstr "Nom du fournisseur requis"
+
+#: services/VPN.qml
+msgid "Machine authorisation required"
+msgstr "Authentification VPN requise"
+
+#: services/VPN.qml
+msgid "Tailscale may not be running"
+msgstr "Tailscale n'est peut-être pas en cours d'exécution"
+
+#: services/VPN.qml
+msgid "Failed to parse status"
+msgstr "Échec de la lecture de la configuration%1"
+
+#: services/VPN.qml
+msgid "WARP registration required"
+msgstr "Authentification requise"
+
+#: services/VPN.qml
+msgid "Unknown WARP status"
+msgstr "Artiste inconnu"
+
+#: services/VPN.qml
+msgid "VPN connected"
+msgstr "VPN connecté"
+
+#: services/VPN.qml
+#, qt-format
+msgid "Connected to %1"
+msgstr "Connecté à %1"
+
+#: services/VPN.qml
+msgid "VPN disconnected"
+msgstr "VPN déconnecté"
+
+#: services/VPN.qml
+#, qt-format
+msgid "Disconnected from %1"
+msgstr "Déconnecté de %1"
+
+#: services/VPN.qml
+msgid "VPN authentication required"
+msgstr "Authentification VPN requise"
+
+#: services/VPN.qml
+#, qt-format
+msgctxt "vpn name and reason"
+msgid "%1: %2"
+msgstr "%1 : %2"
+
+#: services/VPN.qml
+msgid "Unknown error"
+msgstr "Inconnu"
+
+#: services/VPN.qml
+msgid "VPN error"
+msgstr "Erreur VPN"
+
+#. TRANSLATORS: %1 = a shell command, leave it untranslated
+#: services/VPN.qml
+#, qt-format
+msgid "WireGuard module not loaded. Run: %1"
+msgstr "Module WireGuard non chargé. Exécutez : %1"
+
+#. TRANSLATORS: %1 = a shell command, leave it untranslated
+#: services/VPN.qml
+#, qt-format
+msgid "Permission denied. Run in terminal: %1"
+msgstr "Permission refusée. Exécutez dans un terminal : %1"
+
+#. TRANSLATORS: %1 = a shell command, leave it untranslated
+#: services/VPN.qml
+#, qt-format
+msgid "Service not running (run: %1)"
+msgstr "Service non lancé (exécutez : %1)"
+
+#: services/VPN.qml
+#, qt-format
+msgid "Could not start %1. Is it installed?"
+msgstr "Impossible de démarrer %1. Est-il installé ?"
+
+#: services/VPN.qml
+#, qt-format
+msgid "Could not connect to %1"
+msgstr "Impossible de se connecter à %1"
+
+#: services/Weather.qml
+msgid "No weather"
+msgstr "Météo indisponible"
+
+#: services/Weather.qml
+msgctxt "weather location unavailable"
+msgid "Unknown city"
+msgstr "Ville inconnue"
+
+#: services/Weather.qml
+msgid "Clear"
+msgstr "Dégagé"
+
+#: services/Weather.qml
+msgid "Partly cloudy"
+msgstr "Partiellement nuageux"
+
+#: services/Weather.qml
+msgid "Overcast"
+msgstr "Couvert"
+
+#: services/Weather.qml
+msgid "Fog"
+msgstr "Oublier"
+
+#: services/Weather.qml
+msgid "Drizzle"
+msgstr "Bruine"
+
+#: services/Weather.qml
+msgid "Freezing drizzle"
+msgstr "Bruine verglaçante"
+
+#: services/Weather.qml
+msgid "Light rain"
+msgstr "Pluie légère"
+
+#: services/Weather.qml
+msgid "Rain"
+msgstr "Arc-en-ciel"
+
+#: services/Weather.qml
+msgid "Heavy rain"
+msgstr "Forte pluie"
+
+#: services/Weather.qml
+msgid "Light snow"
+msgstr "Neige légère"
+
+#: services/Weather.qml
+msgid "Snow"
+msgstr "Neige"
+
+#: services/Weather.qml
+msgid "Heavy snow"
+msgstr "Forte neige"
+
+#: services/Weather.qml
+msgid "Light snow showers"
+msgstr "Légères averses de neige"
+
+#: services/Weather.qml
+msgid "Heavy snow showers"
+msgstr "Fortes averses de neige"
+
+#: services/Weather.qml
+msgid "Thunderstorm"
+msgstr "Orage"
+
+#: services/Weather.qml
+msgid "Thunderstorm with hail"
+msgstr "Orage avec grêle"
+
+#: services/Weather.qml
+msgctxt "weather condition"
+msgid "Unknown"
+msgstr "Inconnu"
+
+#. TRANSLATORS: %1 = a number
+#: utils/Strings.qml
+#, qt-format
+msgid "%1%"
+msgstr "%1%"
+
+#. TRANSLATORS: joins uptime components, e.g. "2 days, 3 hours"
+#: utils/SysInfo.qml
+msgctxt "uptime component separator"
+msgid ", "
+msgstr ", "
+
+#: utils/SysInfo.qml
+#, qt-plural-format
+msgid "%n minute"
+msgid_plural "%n minutes"
+msgstr[0] "%n minute"
+msgstr[1] "%n minutes"
+
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+#, c-format, qt-plural-format
+msgid "Config loaded with %n issue."
+msgid_plural "Config loaded with %n issues."
+msgstr[0] "Configuration chargée"
+msgstr[1] "Configuration chargée"
+
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+msgid "Config loaded successfully!"
+msgstr "Configuration chargée avec succès !"
+
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+msgid "Config loaded"
+msgstr "Configuration chargée"
+
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+msgid "Failed to parse token config"
+msgstr "Échec de la lecture de la configuration de jetons%1"
+
+#. TRANSLATORS: %1 = a monitor name
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+#, qt-format
+msgid "Failed to parse token config for %1"
+msgstr "Échec de la lecture de la configuration de jetons%1"
+
+#. TRANSLATORS: %1 = a monitor name
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+#, qt-format
+msgid "Failed to parse config"
+msgstr "Échec de la lecture de la configuration"
+
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+#, qt-format
+msgid "Failed to parse config for %1"
+msgstr "Échec de la lecture de la configuration%1"
+
+#. TRANSLATORS: %1 = a monitor name
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+#, qt-format
+msgid "Failed to save config"
+msgstr "Échec de la sauvegarde de la configuration"
+
+#: plugin/src/Caelestia/Config/rootnodes.cpp
+#, qt-format
+msgid "Failed to save config for %1"
+msgstr "Échec de la sauvegarde de la configuration%1"
+
+#. TRANSLATORS: %1 = a message from Qalculate, we don't translate it
+#: plugin/src/Caelestia/qalculator.cpp
+#, qt-format
+msgid "error: %1"
+msgstr "Réseau : %1"
+
+#. TRANSLATORS: %1 = a message from Qalculate, we don't translate it
+#: plugin/src/Caelestia/qalculator.cpp
+#, qt-format
+msgid "warning: %1"
+msgstr "Restant : %1 %"
+
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Caps lock is currently enabled"
+msgstr "Le verrouillage majuscule est actuellement activé"
+
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Caps lock is currently disabled"
+msgstr "Le verrouillage majuscule est actuellement désactivé"
+
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Num lock is currently enabled"
+msgstr "Le verrouillage numérique est actuellement activé"
+
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+msgid "Num lock is currently disabled"
+msgstr "Le verrouillage numérique est actuellement désactivé"
+
+#. TRANSLATORS: %1 = an XKB keyboard layout name, e.g. English (US)
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+#, qt-format
+msgid "Keyboard layout changed"
+msgstr "Disposition du clavier modifiée"
+
+#: plugin/src/Caelestia/Services/hyprdevices.cpp
+#, qt-format
+msgid "Layout changed to: %1"
+msgstr "Disposition modifiée en : %1"
+
+#: plugin/src/Caelestia/Services/sessionmanager.cpp
+msgid "Hibernate failed"
+msgstr "Hibernation échouée"
+
+#: plugin/src/Caelestia/Services/sessionmanager.cpp
+msgid "Enable hibernation to use this feature."
+msgstr "Activez l'hibernation pour utiliser cette fonctionnalité."
+
+#. TRANSLATORS: %1 = the non-integer number that was found
+#: plugin/src/Caelestia/Settings/codecs.cpp
+#, qt-format
+msgid "Expected an integer, got the real %1"
+msgstr "Un entier était attendu, nombre réel %1 reçu"
+
+#. TRANSLATORS: %1 = the value given, %2/%3 = the allowed minimum and maximum
+#: plugin/src/Caelestia/Settings/codecs.cpp
+#, qt-format
+msgid "Integer %1 is out of range, expected between %2 and %3"
+msgstr "L'entier %1 est hors limites, valeur attendue entre %2 et %3"
+
+#. TRANSLATORS: %1 = a config key name, %2 = a C++ type name; both are untranslated identifiers
+#: plugin/src/Caelestia/Settings/codecs.cpp
+#, qt-format
+msgid "Could not convert %1 to %2"
+msgstr "Impossible de convertir %1 en %2"
+
+#. TRANSLATORS: %1 = a config key name, %2 = a comma-separated list of allowed values; both untranslated
+#: plugin/src/Caelestia/Settings/codecs.cpp
+#, qt-format
+msgid "Invalid enum value %1. Expected one of %2"
+msgstr "Valeur d'énumération %1 invalide. Une valeur parmi %2 était attendue"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a boolean, got null"
+msgstr "Un booléen était attendu, null reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Value has the wrong type"
+msgstr "La valeur n'a pas le bon type"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a boolean, got a number"
+msgstr "Un booléen était attendu, un nombre reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a boolean, got a string"
+msgstr "Un booléen était attendu, une chaîne reçue"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a boolean, got an array"
+msgstr "Un booléen était attendu, un tableau reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a boolean, got an object"
+msgstr "Un booléen était attendu, un objet reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a boolean, got nothing"
+msgstr "Un booléen était attendu, rien reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got null"
+msgstr "Un entier était attendu, null reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got a boolean"
+msgstr "Un entier était attendu, un booléen reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got a number"
+msgstr "Un entier était attendu, un nombre (non entier) reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got a string"
+msgstr "Un entier était attendu, une chaîne reçue"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got an array"
+msgstr "Un entier était attendu, un tableau reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got an object"
+msgstr "Un entier était attendu, un objet reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an integer, got nothing"
+msgstr "Un entier était attendu, rien reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a number, got null"
+msgstr "Un nombre était attendu, null reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a number, got a boolean"
+msgstr "Un nombre était attendu, un booléen reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a number, got a string"
+msgstr "Un nombre était attendu, une chaîne reçue"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a number, got an array"
+msgstr "Un nombre était attendu, un tableau reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a number, got an object"
+msgstr "Un nombre était attendu, un objet reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a number, got nothing"
+msgstr "Un nombre était attendu, rien reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a string, got null"
+msgstr "Une chaîne était attendue, null reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a string, got a boolean"
+msgstr "Une chaîne était attendue, un booléen reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a string, got a number"
+msgstr "Une chaîne était attendue, un nombre reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a string, got an array"
+msgstr "Une chaîne était attendue, un tableau reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a string, got an object"
+msgstr "Une chaîne était attendue, un objet reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected a string, got nothing"
+msgstr "Une chaîne était attendue, rien reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an array, got null"
+msgstr "Un tableau était attendu, null reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an array, got a boolean"
+msgstr "Un tableau était attendu, un booléen reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an array, got a number"
+msgstr "Un tableau était attendu, un nombre reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an array, got a string"
+msgstr "Un tableau était attendu, une chaîne reçue"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an array, got an object"
+msgstr "Un tableau était attendu, un objet reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an array, got nothing"
+msgstr "Un tableau était attendu, rien reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an object, got null"
+msgstr "Un objet était attendu, null reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an object, got a boolean"
+msgstr "Un objet était attendu, un booléen reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an object, got a number"
+msgstr "Un objet était attendu, un nombre reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an object, got a string"
+msgstr "Un objet était attendu, une chaîne reçue"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an object, got an array"
+msgstr "Un objet était attendu, un tableau reçu"
+
+#: plugin/src/Caelestia/Settings/common.cpp
+msgid "Expected an object, got nothing"
+msgstr "Un objet était attendu, rien reçu"
+
+#: plugin/src/Caelestia/Settings/listnode.cpp
+#: plugin/src/Caelestia/Settings/objectnode.cpp
+msgid "Global properties should not be defined in overlay files"
+msgstr "Les propriétés globales ne doivent pas être définies dans les fichiers de surcouche"
+
+#. TRANSLATORS: %1 = a config key name
+#: plugin/src/Caelestia/Settings/objectnode.cpp
+#, qt-format
+msgid "Unknown option %1"
+msgstr "Option inconnue dans la configuration%1"
+
+#: plugin/src/Caelestia/Settings/settingsfile.cpp
+#, qt-format
+msgid "Failed to open: %1"
+msgstr "Échec de la lecture de la configuration%1"
+
+#: plugin/src/Caelestia/Settings/settingsfile.cpp
+#, qt-format
+msgid "Failed to parse: %1"
+msgstr "Échec de la lecture de la configuration%1"
+
+#: plugin/src/Caelestia/Settings/settingsfile.cpp
+msgid "Failed to create parent directory"
+msgstr "Échec de la création du dossier parent"
+
+#: plugin/src/Caelestia/Settings/settingsfile.cpp
+#, qt-format
+msgid "Failed to write: %1"
+msgstr "Échec de la lecture de la configuration%1"
+
+#: plugin/src/Caelestia/Config/generalconfig.hpp
+msgid "Low battery"
+msgstr "Batterie"
+
+#: plugin/src/Caelestia/Config/generalconfig.hpp
+msgid "You might want to plug in a charger"
+msgstr "Vous devriez peut-être brancher un chargeur"
+
+#: plugin/src/Caelestia/Config/generalconfig.hpp
+msgid "Did you see the previous message?"
+msgstr "Avez-vous vu le message précédent ?"
+
+#: plugin/src/Caelestia/Config/generalconfig.hpp
+msgid "You should probably plug in a charger <b>now</b>"
+msgstr "Vous devriez probablement brancher un chargeur <b>maintenant</b>"
+
+#: plugin/src/Caelestia/Config/generalconfig.hpp
+msgid "Critical battery level"
+msgstr "Niveau de batterie critique"
+
+#: plugin/src/Caelestia/Config/generalconfig.hpp
+msgid "PLUG THE CHARGER RIGHT NOW!!"
+msgstr "BRANCHEZ LE CHARGEUR MAINTENANT !!"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Calculator"
+msgstr "Calcul en cours..."
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Do simple maths equations (powered by Qalc)"
+msgstr "Faire de simples calculs (propulsé par Qalc)"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Scheme"
+msgstr "Schémas"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Change the current colour scheme"
+msgstr "Thème de couleurs intelligent"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Wallpaper"
+msgstr "Fonds d'écran"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Change the current wallpaper"
+msgstr "Fond d'écran mis en avant"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Variant"
+msgstr "Variantes"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Change the current scheme variant"
+msgstr "Changer la variante du thème actuel"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Random"
+msgstr "Aléatoire"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Switch to a random wallpaper"
+msgstr "Sélectionner un fond d'écran"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Light"
+msgstr "Clair"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Change the scheme to light mode"
+msgstr "Passer le thème en mode clair"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Dark"
+msgstr "Sombre"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Change the scheme to dark mode"
+msgstr "Passer le thème en mode sombre"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Shutdown"
+msgstr "Éteindre"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Shutdown the system"
+msgstr "Affiché dans la liste"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Reboot"
+msgstr "Redémarrer"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Reboot the system"
+msgstr "Redémarrer le système"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Logout"
+msgstr "Déconnexion"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Log out of the current session"
+msgstr "Se déconnecter de la session actuelle"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Lock"
+msgstr "Touches de verrouillage"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Lock the current session"
+msgstr "Verrouiller la session actuelle"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Sleep"
+msgstr "Veille"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Suspend then hibernate"
+msgstr "Mettre en veille puis hiberner"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgctxt "launcher action"
+msgid "Settings"
+msgstr "Paramètres"
+
+#: plugin/src/Caelestia/Config/launcherconfig.hpp
+msgid "Configure the shell"
+msgstr "Configurer l'environnement"
+
+#~ msgctxt "AboutPage|"
+#~ msgid "Quickshell"
+#~ msgstr "Quickshell"
+
+#~ msgctxt "AboutPage|"
+#~ msgid "Qt"
+#~ msgstr "Qt"
+
+#~ msgctxt "AddVpnPage|"
+#~ msgid "Cancel"
+#~ msgstr "Annuler"
+
+#~ msgctxt "AppsPage|"
+#~ msgid "All apps"
+#~ msgstr "Toutes les applications"
+
+#~ msgctxt "Audio|"
+#~ msgid "Unknown Device"
+#~ msgstr "Périphérique inconnu"
+
+#~ msgctxt "AudioDeviceList|"
+#~ msgid "Unknown"
+#~ msgstr "Inconnu"
+
+#~ msgctxt "AudioPage|"
+#~ msgid "Audio"
+#~ msgstr "Audio"
+
+#~ msgctxt "AudioPage|"
+#~ msgid "Muted"
+#~ msgstr "Muet"
+
+#~ msgctxt "AudioPage|"
+#~ msgid "App volumes"
+#~ msgstr "Volumes des applications"
+
+#~ msgctxt "AudioPage|"
+#~ msgid "No apps playing audio"
+#~ msgstr "Aucune application ne joue de l'audio"
+
+#~ msgctxt "AudioPage|"
+#~ msgid "1 app playing audio"
+#~ msgstr "1 application joue de l'audio"
+
+#~ msgctxt "AudioPopout|"
+#~ msgid "Output device"
+#~ msgstr "Périphérique de sortie"
+
+#~ msgctxt "AudioPopout|"
+#~ msgid "Input device"
+#~ msgstr "Périphérique d'entrée"
+
+#, qt-format
+#~ msgctxt "AudioPopout|"
+#~ msgid "Volume (%1)"
+#~ msgstr "Volume (%1)"
+
+#~ msgctxt "AudioPopout|"
+#~ msgid "Muted"
+#~ msgstr "Muet"
+
+#~ msgctxt "AudioPopout|"
+#~ msgid "Open settings"
+#~ msgstr "Ouvrir les paramètres"
+
+#~ msgctxt "BarStatusIcons|"
+#~ msgid "Add"
+#~ msgstr "Ajouter"
+
+#~ msgctxt "BarStatusIcons|"
+#~ msgid "Caps lock"
+#~ msgstr "Verr. Maj."
+
+#~ msgctxt "BarStatusIcons|"
+#~ msgid "Popout on hover"
+#~ msgstr "Popout au survol"
+
+#~ msgctxt "BarTray|"
+#~ msgid "Background"
+#~ msgstr "Arrière-plan"
+
+#~ msgctxt "BarTray|"
+#~ msgid "Compact"
+#~ msgstr "Compact"
+
+#~ msgctxt "BarTray|"
+#~ msgid "Popout on hover"
+#~ msgstr "Popout au survol"
+
+#~ msgctxt "BarWorkspaces|"
+#~ msgid "Per-monitor workspaces"
+#~ msgstr "Espaces de travail par moniteur"
+
+#~ msgctxt "BarWorkspaces|"
+#~ msgid "Show each monitor's workspaces independently"
+#~ msgstr "Afficher les espaces de travail de chaque moniteur de façon indépendante"
+
+#~ msgctxt "Battery|"
+#~ msgid "d"
+#~ msgstr "j"
+
+#~ msgctxt "Battery|"
+#~ msgid "h"
+#~ msgstr "h"
+
+#~ msgctxt "Battery|"
+#~ msgid "m"
+#~ msgstr "m"
+
+#, qt-format
+#~ msgctxt "Battery|"
+#~ msgid "Time %1: %2"
+#~ msgstr "Temps %1 : %2"
+
+#~ msgctxt "Battery|"
+#~ msgid "remaining"
+#~ msgstr "restant"
+
+#, qt-format
+#~ msgctxt "Battery|"
+#~ msgid "Reason: %1"
+#~ msgstr "Raison : %1"
+
+#~ msgctxt "BatteryTank|"
+#~ msgid "Battery"
+#~ msgstr "Batterie"
+
+#~ msgctxt "BatteryTank|"
+#~ msgid "..."
+#~ msgstr "..."
+
+#~ msgctxt "Bluetooth|"
+#~ msgid "Bluetooth"
+#~ msgstr "Bluetooth"
+
+#, qt-format
+#~ msgctxt "Bluetooth|"
+#~ msgid "%1 device%2 available"
+#~ msgstr "%1 appareil%2 disponible"
+
+#, qt-format
+#~ msgctxt "Bluetooth|"
+#~ msgid " (%1 connected)"
+#~ msgstr " (%1 connecté)"
+
+#~ msgctxt "Bluetooth|"
+#~ msgid "Open settings"
+#~ msgstr "Ouvrir les paramètres"
+
+#~ msgctxt "BluetoothPage|"
+#~ msgid "Bluetooth"
+#~ msgstr "Bluetooth"
+
+#~ msgctxt "BluetoothPage|"
+#~ msgid "Unknown"
+#~ msgstr "Inconnu"
+
+#, qt-format
+#~ msgctxt "BluetoothPage|"
+#~ msgid "Connected%1"
+#~ msgstr "Connecté%1"
+
+#~ msgctxt "BluetoothPage|"
+#~ msgid "Saved"
+#~ msgstr "Enregistré"
+
+#~ msgctxt "BluetoothPairing|"
+#~ msgid "Pair new device"
+#~ msgstr "Appairer un nouvel appareil"
+
+#~ msgctxt "BtDeviceInfo|"
+#~ msgid "Device"
+#~ msgstr "Appareil"
+
+#~ msgctxt "BtDeviceInfo|"
+#~ msgid "Connect"
+#~ msgstr "Connecter"
+
+#~ msgctxt "BtDeviceInfo|"
+#~ msgid "Battery"
+#~ msgstr "Batterie"
+
+#~ msgctxt "CalcItem|"
+#~ msgid "Calculating..."
+#~ msgstr "Calcul en cours..."
+
+#, qt-format
+#~ msgctxt "ConfigToasts|"
+#~ msgid "Unknown option in%1 token config"
+#~ msgstr "Option inconnue dans la configuration de jetons%1"
+
+#~ msgctxt "ConnectionInfoSection|"
+#~ msgid "IP Address"
+#~ msgstr "Adresse IP"
+
+#~ msgctxt "ConnectionInfoSection|"
+#~ msgid "Not available"
+#~ msgstr "Non disponible"
+
+#~ msgctxt "ConnectionInfoSection|"
+#~ msgid "Subnet Mask"
+#~ msgstr "Masque de sous-réseau"
+
+#~ msgctxt "ConnectionInfoSection|"
+#~ msgid "DNS Servers"
+#~ msgstr "Serveurs DNS"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Dashboard"
+#~ msgstr "Tableau de bord"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Enabled"
+#~ msgstr "Activé"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Show on hover"
+#~ msgstr "Afficher au survol"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Media"
+#~ msgstr "Média"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Performance"
+#~ msgstr "Performances"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Weather"
+#~ msgstr "Météo"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Battery"
+#~ msgstr "Batterie"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Network"
+#~ msgstr "Réseau"
+
+#~ msgctxt "DashboardPanel|"
+#~ msgid "Behaviour"
+#~ msgstr "Comportement"
+
+#~ msgctxt "DialogButtons|"
+#~ msgid "Cancel"
+#~ msgstr "Annuler"
+
+#~ msgctxt "DialogRowButton|"
+#~ msgid "Cancel"
+#~ msgstr "Annuler"
+
+#~ msgctxt "EthernetDetailPage|"
+#~ msgid "Disconnect"
+#~ msgstr "Déconnecter"
+
+#~ msgctxt "EthernetDetailPage|"
+#~ msgid "Connect"
+#~ msgstr "Connecter"
+
+#~ msgctxt "EthernetDetailPage|"
+#~ msgid "Connected"
+#~ msgstr "Connecté"
+
+#~ msgctxt "EthernetDetailPage|"
+#~ msgid "Interface"
+#~ msgstr "Interface"
+
+#~ msgctxt "EthernetDetailPage|"
+#~ msgid "—"
+#~ msgstr "—"
+
+#~ msgctxt "EthernetDetailPage|"
+#~ msgid "Gateway"
+#~ msgstr "Passerelle"
+
+#~ msgctxt "EthernetSection|"
+#~ msgid "Ethernet"
+#~ msgstr "Ethernet"
+
+#~ msgctxt "EthernetSection|"
+#~ msgid "Connected"
+#~ msgstr "Connecté"
+
+#~ msgctxt "EthernetSection|"
+#~ msgid "Not connected"
+#~ msgstr "Non connecté"
+
+#~ msgctxt "IdleInhibit|"
+#~ msgid "Keep Awake"
+#~ msgstr "Maintenir éveillé"
+
+#~ msgctxt "KbLayout|"
+#~ msgid "Keyboard Layouts"
+#~ msgstr "Dispositions du clavier"
+
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "System Default"
+#~ msgstr "Par défaut du système"
+
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "System language"
+#~ msgstr "Langue du système"
+
+#, qt-format
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "Follows your system locale (%1)"
+#~ msgstr "Suit la locale de votre système (%1)"
+
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "Choose language for widgets, sidebar, settings, etc."
+#~ msgstr "Choisissez la langue pour les widgets, la barre latérale, etc."
+
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "Saved"
+#~ msgstr "Enregistré"
+
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "Save & apply language"
+#~ msgstr "Enregistrer et appliquer la langue"
+
+#~ msgctxt "LanguageAndRegion|"
+#~ msgid "Weather"
+#~ msgstr "Météo"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Launcher"
+#~ msgstr "Lanceur"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "General"
+#~ msgstr "Général"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Enabled"
+#~ msgstr "Activé"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Show on hover"
+#~ msgstr "Afficher au survol"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Reveal when the cursor reaches the screen edge"
+#~ msgstr "Révéler quand le curseur atteint le bord de l'écran"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Drag threshold"
+#~ msgstr "Seuil de glissement"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Behaviour"
+#~ msgstr "Comportement"
+
+#~ msgctxt "LauncherPanel|"
+#~ msgid "Apps"
+#~ msgstr "Applications"
+
+#, qt-format
+#~ msgctxt "LockStatus|"
+#~ msgid "Capslock: %1"
+#~ msgstr "Verr. Maj : %1"
+
+#, qt-format
+#~ msgctxt "LockStatus|"
+#~ msgid "Numlock: %1"
+#~ msgstr "Verr. Num : %1"
+
+#~ msgctxt "LyricsInfo|"
+#~ msgid "Loading..."
+#~ msgstr "Chargement..."
+
+#~ msgctxt "LyricsInfo|"
+#~ msgid "No lyrics found"
+#~ msgstr "Aucune parole trouvée"
+
+#~ msgctxt "Media|"
+#~ msgid "Unknown album"
+#~ msgstr "Album inconnu"
+
+#~ msgctxt "Media|"
+#~ msgid "Unknown artist"
+#~ msgstr "Artiste inconnu"
+
+#~ msgctxt "MemoryCard|"
+#~ msgid "Memory"
+#~ msgstr "Mémoire"
+
+#~ msgctxt "Network|"
+#~ msgid "Enabled"
+#~ msgstr "Activé"
+
+#~ msgctxt "Network|"
+#~ msgid "Ethernet"
+#~ msgstr "Ethernet"
+
+#~ msgctxt "Network|"
+#~ msgid "Unknown"
+#~ msgstr "Inconnu"
+
+#~ msgctxt "NetworkCard|"
+#~ msgid "Network"
+#~ msgstr "Réseau"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Network"
+#~ msgstr "Réseau"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Forget"
+#~ msgstr "Oublier"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Disconnect"
+#~ msgstr "Déconnecter"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Connection"
+#~ msgstr "Connexion"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "—"
+#~ msgstr "—"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Security"
+#~ msgstr "Sécurité"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "IP address"
+#~ msgstr "Adresse IP"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Gateway"
+#~ msgstr "Passerelle"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "MAC address"
+#~ msgstr "Adresse MAC"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Behaviour"
+#~ msgstr "Comportement"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "IPv4"
+#~ msgstr "IPv4"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "IP assignment"
+#~ msgstr "Attribution IP"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Automatic (DHCP)"
+#~ msgstr "Automatique (DHCP)"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Automatic, DNS only"
+#~ msgstr "Automatique, DNS uniquement"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Manual"
+#~ msgstr "Manuel"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Address (CIDR)"
+#~ msgstr "Adresse (CIDR)"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "IP and prefix, e.g. 192.168.1.50/24"
+#~ msgstr "IP et préfixe, ex. 192.168.1.50/24"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Enter a valid address in CIDR notation"
+#~ msgstr "Entrez une adresse CIDR valide"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Enter a valid gateway address"
+#~ msgstr "Entrez une passerelle valide"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "DNS servers"
+#~ msgstr "Serveurs DNS"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Comma-separated"
+#~ msgstr "Séparé par des virgules"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Enter valid DNS server addresses"
+#~ msgstr "Entrez des serveurs DNS valides"
+
+#~ msgctxt "NetworkDetailPage|"
+#~ msgid "Apply"
+#~ msgstr "Appliquer"
+
+#~ msgctxt "NetworkList|"
+#~ msgid " • Connected"
+#~ msgstr " • Connecté"
+
+#~ msgctxt "NetworkList|"
+#~ msgid " • Saved"
+#~ msgstr " • Enregistré"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "Network"
+#~ msgstr "Réseau"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "Wi-Fi"
+#~ msgstr "Wi-Fi"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "Connected"
+#~ msgstr "Connecté"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "Interface"
+#~ msgstr "Interface"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "No networks found"
+#~ msgstr "Aucun réseau trouvé"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "Wi-Fi disabled"
+#~ msgstr "Wi-Fi désactivé"
+
+#, qt-format
+#~ msgctxt "NetworkPage|"
+#~ msgid "Security: %1%2"
+#~ msgstr "Sécurité : %1%2"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid " • Connected"
+#~ msgstr " • Connecté"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid " • Saved"
+#~ msgstr " • Enregistré"
+
+#~ msgctxt "NetworkPage|"
+#~ msgid "Add network"
+#~ msgstr "Ajouter un réseau"
+
+#~ msgctxt "Nmcli|"
+#~ msgid "Open"
+#~ msgstr "Ouvert"
+
+#, qt-format
+#~ msgctxt "NotifDock|"
+#~ msgid "%1 notification%2"
+#~ msgstr "%1 notification%2"
+
+#, qt-format
+#~ msgctxt "NotifDock|"
+#~ msgid "%1 notifications"
+#~ msgstr "%1 notifications"
+
+#, qt-format
+#~ msgctxt "NotifDock|"
+#~ msgid "notification%1"
+#~ msgstr "notification%1"
+
+#~ msgctxt "NotifDock|"
+#~ msgid "notifications"
+#~ msgstr "notifications"
+
+#~ msgctxt "NotificationsPage|"
+#~ msgid "Notifications"
+#~ msgstr "Notifications"
+
+#~ msgctxt "PageCompRegistry|"
+#~ msgid "Page under construction"
+#~ msgstr "Page en construction"
+
+#~ msgctxt "PageCompRegistry|"
+#~ msgid "This page will be available in a future update."
+#~ msgstr "Cette page sera disponible dans une prochaine mise à jour."
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Network"
+#~ msgstr "Réseau"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Wi-Fi, ethernet"
+#~ msgstr "Wi-Fi, ethernet"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Connected devices"
+#~ msgstr "Appareils connectés"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Audio"
+#~ msgstr "Audio"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Plugins"
+#~ msgstr "Extensions"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Apps"
+#~ msgstr "Applications"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "Language & region"
+#~ msgstr "Langue et région"
+
+#~ msgctxt "PageRegistry|"
+#~ msgid "About"
+#~ msgstr "À propos"
+
+#~ msgctxt "PanelsPage|"
+#~ msgid "Panels"
+#~ msgstr "Panneaux"
+
+#~ msgctxt "PanelsPage|"
+#~ msgid "Dashboard"
+#~ msgstr "Tableau de bord"
+
+#~ msgctxt "PanelsPage|"
+#~ msgid "Enabled"
+#~ msgstr "Activé"
+
+#~ msgctxt "PanelsPage|"
+#~ msgid "Launcher"
+#~ msgstr "Lanceur"
+
+#~ msgctxt "Performance|"
+#~ msgid "CPU"
+#~ msgstr "CPU"
+
+#~ msgctxt "Performance|"
+#~ msgid "GPU"
+#~ msgstr "GPU"
+
+#~ msgctxt "Players|"
+#~ msgid "Now Playing"
+#~ msgstr "En cours de lecture"
+
+#~ msgctxt "Preview|"
+#~ msgid "No active client"
+#~ msgstr "Aucun client actif"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "%1 MHz"
+#~ msgstr "%1 MHz"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "%1 ms"
+#~ msgstr "%1 ms"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "%1 notification"
+#~ msgstr "%1 notification"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "%1 notifications"
+#~ msgstr "%1 notifications"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "%1%"
+#~ msgstr "%1%"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "2.4 GHz"
+#~ msgstr "2.4 GHz"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "5 GHz"
+#~ msgstr "5 GHz"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Action prefix"
+#~ msgstr "Préfixe d'action"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Actively probe for a network that doesn't broadcast its name"
+#~ msgstr "Sonder activement un réseau masqué"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Add"
+#~ msgstr "Ajouter"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Add VPN provider"
+#~ msgstr "Ajouter un fournisseur VPN"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Add entry"
+#~ msgstr "Ajouter une entrée"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Add new entry"
+#~ msgstr "Ajouter une nouvelle entrée"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Add provider"
+#~ msgstr "Ajouter le fournisseur"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Address (CIDR)"
+#~ msgstr "Adresse (CIDR)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "All networks"
+#~ msgstr "Tous les réseaux"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "An error occurred"
+#~ msgstr "Une erreur est survenue"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Apply"
+#~ msgstr "Appliquer"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Authentication required"
+#~ msgstr "Authentification requise"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Automatic (DHCP)"
+#~ msgstr "Automatique (DHCP)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Automatic, DNS only"
+#~ msgstr "Automatique, DNS uniquement"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Built-in id or a custom name"
+#~ msgstr "ID intégré ou nom personnalisé"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands."
+#~ msgstr "Les noms intégrés remplissent automatiquement leurs commandes."
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "Caps lock and Num lock are ON.\\nKeyboard layout: %1"
+#~ msgstr "Verrouillage Maj et Num ACTIVÉS.\\nClavier: %1"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Choose language for widgets, sidebar, settings, etc."
+#~ msgstr "Choisissez la langue pour les widgets, la barre latérale, etc."
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Comma-separated"
+#~ msgstr "Séparé par des virgules"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Connect automatically"
+#~ msgstr "Se connecter automatiquement"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Connect command"
+#~ msgstr "Commande de connexion"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Connection"
+#~ msgstr "Connexion"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Connection failed — check the password"
+#~ msgstr "Échec de connexion — vérifiez le mot de passe"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Current Ping"
+#~ msgstr "Ping actuel"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Custom commands (optional)"
+#~ msgstr "Commandes personnalisées (optionnel)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "DNS servers"
+#~ msgstr "Serveurs DNS"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "Data usage: %1"
+#~ msgstr "Données : %1"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Disconnect command"
+#~ msgstr "Commande de déconnexion"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Disconnecting..."
+#~ msgstr "Déconnexion..."
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Display name"
+#~ msgstr "Nom d'affichage"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Edit VPN provider"
+#~ msgstr "Modifier le fournisseur VPN"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Enter a valid address in CIDR notation"
+#~ msgstr "Entrez une adresse CIDR valide"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Enter a valid gateway address"
+#~ msgstr "Entrez une passerelle valide"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Enter the details below to manually connect to a network."
+#~ msgstr "Entrez les détails pour vous connecter manuellement."
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Enter valid DNS server addresses"
+#~ msgstr "Entrez des serveurs DNS valides"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Filters"
+#~ msgstr "Filtres"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Frequency"
+#~ msgstr "Fréquence"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Fully charged!"
+#~ msgstr "Charge complète !"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Hidden network"
+#~ msgstr "Réseau masqué"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "IP address"
+#~ msgstr "Adresse IP"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "IP and prefix, e.g. 192.168.1.50/24"
+#~ msgstr "IP et préfixe, ex. 192.168.1.50/24"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "IP assignment"
+#~ msgstr "Attribution IP"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "IPv4"
+#~ msgstr "IPv4"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Interface"
+#~ msgstr "Interface"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Join this network when it's in range"
+#~ msgstr "Rejoindre ce réseau à portée"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Leave empty to use the built-in default"
+#~ msgstr "Laisser vide pour utiliser le défaut"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Local IP Address"
+#~ msgstr "Adresse IP locale"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Lock keys"
+#~ msgstr "Touches de verrouillage"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "MAC address"
+#~ msgstr "Adresse MAC"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Manual"
+#~ msgstr "Manuel"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Network interface (for WireGuard / status checks)"
+#~ msgstr "Interface réseau (WireGuard / statuts)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Network name (SSID)"
+#~ msgstr "Nom du réseau (SSID)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Network name is required"
+#~ msgstr "Nom du réseau requis"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "No VPN providers configured"
+#~ msgstr "Aucun fournisseur VPN configuré"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "None (open)"
+#~ msgstr "Aucune (ouvert)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Not connected"
+#~ msgstr "Non connecté"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "Not connected • %1"
+#~ msgstr "Non connecté • %1"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Open"
+#~ msgstr "Ouvert"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Password must be at least 8 characters"
+#~ msgstr "Le mot de passe doit faire 8 caractères min."
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Prefix must not be alphanumeric"
+#~ msgstr "Le préfixe ne doit pas être alphanumérique"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Prefix used to run actions in the launcher"
+#~ msgstr "Préfixe pour lancer des actions"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Primary DNS"
+#~ msgstr "DNS primaire"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Provider name"
+#~ msgstr "Nom du fournisseur"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Provider name is required"
+#~ msgstr "Nom du fournisseur requis"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Save"
+#~ msgstr "Enregistrer"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Save & apply language"
+#~ msgstr "Enregistrer et appliquer la langue"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Saved networks"
+#~ msgstr "Réseaux enregistrés"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Scanning face..."
+#~ msgstr "Analyse du visage..."
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Secured"
+#~ msgstr "Sécurisé"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Security"
+#~ msgstr "Sécurité"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Selected"
+#~ msgstr "Sélectionné"
+
+#, qt-format
+#~ msgctxt "QmlStrings|"
+#~ msgid "Show all networks (%1)"
+#~ msgstr "Afficher tous les réseaux (%1)"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Shown in the list"
+#~ msgstr "Affiché dans la liste"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Signal"
+#~ msgstr "Signal"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Speed"
+#~ msgstr "Vitesse"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Status"
+#~ msgstr "Statut"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "System Default"
+#~ msgstr "Par défaut du système"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Tap to select"
+#~ msgstr "Appuyer pour sélectionner"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "UI language"
+#~ msgstr "Langue de l'interface"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Utilities"
+#~ msgstr "Utilitaires"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "VPN"
+#~ msgstr "VPN"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "WPA passwords are at least 8 characters"
+#~ msgstr "Les mots de passe WPA font au moins 8 caractères"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "WPA/WPA2/WPA3 Personal"
+#~ msgstr "WPA/WPA2/WPA3 Personnel"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Wi-Fi, ethernet, VPN"
+#~ msgstr "Wi-Fi, ethernet, VPN"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "Wired connection"
+#~ msgstr "Connexion filaire"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "d"
+#~ msgstr "j"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "e.g. MyHiddenNetwork"
+#~ msgstr "ex. MonReseauCache"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "h"
+#~ msgstr "h"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "m"
+#~ msgstr "m"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "notification"
+#~ msgstr "notification"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "notifications"
+#~ msgstr "notifications"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "remaining"
+#~ msgstr "restant"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "until charged"
+#~ msgstr "avant charge complète"
+
+#~ msgctxt "QmlStrings|"
+#~ msgid "—"
+#~ msgstr "—"
+
+#~ msgctxt "Record|"
+#~ msgid "Screen Recorder"
+#~ msgstr "Enregistreur d'écran"
+
+#~ msgctxt "RecordingDeleteModal|"
+#~ msgid "Cancel"
+#~ msgstr "Annuler"
+
+#~ msgctxt "RecordingDeleteModal|"
+#~ msgid "Delete"
+#~ msgstr "Supprimer"
+
+#~ msgctxt "SavedNetworksPage|"
+#~ msgid "Saved networks"
+#~ msgstr "Réseaux enregistrés"
+
+#~ msgctxt "SavedNetworksPage|"
+#~ msgid "No saved networks"
+#~ msgstr "Aucun réseau enregistré"
+
+#~ msgctxt "SavedNetworksPage|"
+#~ msgid "Open"
+#~ msgstr "Ouvert"
+
+#~ msgctxt "SavedNetworksPage|"
+#~ msgid "Unknown"
+#~ msgstr "Inconnu"
+
+#, qt-format
+#~ msgctxt "SavedNetworksPage|"
+#~ msgid "Connected • %1"
+#~ msgstr "Connecté • %1"
+
+#~ msgctxt "SearchBar|"
+#~ msgid "Search settings"
+#~ msgstr "Rechercher dans les paramètres"
+
+#~ msgctxt "ServicesPage|"
+#~ msgid "Services"
+#~ msgstr "Services"
+
+#~ msgctxt "ServicesPage|"
+#~ msgid "Notifications"
+#~ msgstr "Notifications"
+
+#~ msgctxt "ServicesPage|"
+#~ msgid "GPU"
+#~ msgstr "GPU"
+
+#~ msgctxt "SidebarPanel|"
+#~ msgid "Sidebar"
+#~ msgstr "Barre latérale"
+
+#~ msgctxt "SidebarPanel|"
+#~ msgid "General"
+#~ msgstr "Général"
+
+#~ msgctxt "SidebarPanel|"
+#~ msgid "Enabled"
+#~ msgstr "Activé"
+
+#~ msgctxt "SidebarPanel|"
+#~ msgid "Drag threshold"
+#~ msgstr "Seuil de glissement"
+
+#~ msgctxt "StateMessage|"
+#~ msgid "Maximum password and fingerprint attempts reached."
+#~ msgstr "Nombre maximum de tentatives de mot de passe et d'empreinte atteint."
+
+#, qt-format
+#~ msgctxt "StateMessage|"
+#~ msgid "FACE ERROR: %1"
+#~ msgstr "ERREUR VISAGE: %1"
+
+#, qt-format
+#~ msgctxt "StateMessage|"
+#~ msgid "Face not recognized (%1/%2). Please try again or use password."
+#~ msgstr "Visage non reconnu (%1/%2). Réessayez ou utilisez le mot de passe."
+
+#, qt-format
+#~ msgctxt "StateMessage|"
+#~ msgid "Fingerprint not recognized (%1/%2). Please try again."
+#~ msgstr "Empreinte non reconnue (%1/%2). Réessayez."
+
+#, qt-format
+#~ msgctxt "StateMessage|"
+#~ msgid "Face not recognized (%1/%2). Please try again."
+#~ msgstr "Visage non reconnu (%1/%2). Réessayez."
+
+#~ msgctxt "StateMessage|"
+#~ msgid "Incorrect password. Please try again or use face."
+#~ msgstr "Mot de passe incorrect. Réessayez ou utilisez votre visage."
+
+#~ msgctxt "StateMessage|"
+#~ msgid "Maximum password attempts reached. Please use face."
+#~ msgstr "Tentatives maximales mot de passe atteintes. Utilisez le visage."
+
+#~ msgctxt "StateMessage|"
+#~ msgid "Maximum attempts for all authentication methods reached."
+#~ msgstr "Tentatives maximales atteintes pour toutes les méthodes."
+
+#~ msgctxt "StateMessage|"
+#~ msgid "Maximum face attempts reached. Please use password."
+#~ msgstr "Tentatives maximales visage atteintes. Utilisez le mot de passe."
+
+#~ msgctxt "StorageCard|"
+#~ msgid "Used"
+#~ msgstr "Utilisé"
+
+#~ msgctxt "StorageCard|"
+#~ msgid "Storage"
+#~ msgstr "Stockage"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Taskbar"
+#~ msgstr "Barre des tâches"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Behaviour"
+#~ msgstr "Comportement"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Show on hover"
+#~ msgstr "Afficher au survol"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Drag threshold"
+#~ msgstr "Seuil de glissement"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Workspaces"
+#~ msgstr "Espaces de travail"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Active window"
+#~ msgstr "Fenêtre active"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Tray"
+#~ msgstr "Zone de notification"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Status icons"
+#~ msgstr "Icônes de statut"
+
+#~ msgctxt "TaskbarPanel|"
+#~ msgid "Clock"
+#~ msgstr "Horloge"
+
+#~ msgctxt "Toggles|"
+#~ msgid "Quick Toggles"
+#~ msgstr "Bascules rapides"
+
+#, qt-format
+#~ msgctxt "User|"
+#~ msgid "up %1"
+#~ msgstr "allumé depuis %1"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Utilities"
+#~ msgstr "Utilitaires"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "General"
+#~ msgstr "Général"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Enabled"
+#~ msgstr "Activé"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Show the utilities panel"
+#~ msgstr "Afficher le panneau utilitaires"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Cards"
+#~ msgstr "Cartes"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Keep awake"
+#~ msgstr "Garder éveillé"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Show the idle inhibitor card"
+#~ msgstr "Afficher la carte d'inhibition de veille"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Screen recorder"
+#~ msgstr "Enregistreur d'écran"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Show the screen recorder card"
+#~ msgstr "Afficher l'enregistreur d'écran"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Quick toggles"
+#~ msgstr "Basculements rapides"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Show the quick toggles card"
+#~ msgstr "Afficher les basculements rapides"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Wi-Fi"
+#~ msgstr "Wi-Fi"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Toggle wireless networking"
+#~ msgstr "Basculer le réseau sans fil"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Bluetooth"
+#~ msgstr "Bluetooth"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Toggle the Bluetooth adapter"
+#~ msgstr "Basculer l'adaptateur Bluetooth"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Microphone"
+#~ msgstr "Microphone"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Mute or unmute the default source"
+#~ msgstr "Couper/Rétablir le micro"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Settings"
+#~ msgstr "Paramètres"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Open the settings window"
+#~ msgstr "Ouvrir les paramètres"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Game mode"
+#~ msgstr "Mode jeu"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Toggle game mode"
+#~ msgstr "Basculer le mode jeu"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Do not disturb"
+#~ msgstr "Ne pas déranger"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Silence notifications"
+#~ msgstr "Mettre les notifications sous silence"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "VPN"
+#~ msgstr "VPN"
+
+#~ msgctxt "UtilitiesPanel|"
+#~ msgid "Connect or disconnect the VPN"
+#~ msgstr "Connecter/Déconnecter le VPN"
+
+#~ msgctxt "WallpaperAndStyle|"
+#~ msgid "Wallpaper & style"
+#~ msgstr "Fonds d'écran & style"
+
+#~ msgctxt "WallpaperAndStyle|"
+#~ msgid "Wallpapers"
+#~ msgstr "Fonds d'écran"
+
+#~ msgctxt "WallpaperAndStyle|"
+#~ msgid "Colours"
+#~ msgstr "Couleurs"
+
+#~ msgctxt "WallpaperSelect|"
+#~ msgid "Wallpapers"
+#~ msgstr "Fonds d'écran"
+
+#~ msgctxt "WallpaperSelect|"
+#~ msgid "Image files"
+#~ msgstr "Fichiers image"
+
+#~ msgctxt "WeatherTab|"
+#~ msgid "Loading..."
+#~ msgstr "Chargement..."
+
+#~ msgctxt "WirelessPassword|"
+#~ msgid "Connect"
+#~ msgstr "Connecter"
+
+#~ msgctxt "WirelessPassword|"
+#~ msgid "Network: Unknown"
+#~ msgstr "Réseau : Inconnu"
+
+#~ msgctxt "WirelessPassword|"
+#~ msgid "Connecting..."
+#~ msgstr "Connexion en cours..."
+
+#~ msgctxt "WirelessPassword|"
+#~ msgid "Password"
+#~ msgstr "Mot de passe"
+
+#~ msgctxt "WirelessPassword|"
+#~ msgid "Cancel"
+#~ msgstr "Annuler"
+
+#~ msgctxt "Wrapper|"
+#~ msgid "Image files"
+#~ msgstr "Fichiers image"
+
+#~ msgctxt "caelestia::services::Gpu|"
+#~ msgid "None"
+#~ msgstr "Aucun"
