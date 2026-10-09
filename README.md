@@ -14,9 +14,9 @@ https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
 ## Components
 
--   Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
--   Window manager: [`Hyprland`](https://hypr.land)
--   Dots: [`caelestia`][dots-repo]
+- Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
+- Window manager: [`Hyprland`](https://hypr.land)
+- Dots: [`caelestia`][dots-repo]
 
 ## Installation
 
@@ -70,35 +70,35 @@ For home-manager, you can also use Caelestia's Home Manager module (explained in
 
 Dependencies:
 
--   [`caelestia-cli`](https://github.com/caelestia-dots/cli)
--   [`quickshell-git`](https://git.outfoxxed.me/quickshell/quickshell) - this has to be the git version, not the latest tagged version
--   `glibc`
--   `gcc-libs`
--   [`ddcutil`](https://github.com/rockowitz/ddcutil)
--   [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
--   [`libcava`](https://github.com/LukashonakV/cava)
--   [`networkmanager`](https://gitlab.freedesktop.org/NetworkManager/NetworkManager)
--   [`lm_sensors`](https://github.com/lm-sensors/lm-sensors)
--   [`aubio`](https://github.com/aubio/aubio)
--   [`libpipewire`](https://github.com/PipeWire/pipewire)
--   [`libqalculate`](https://github.com/Qalculate/libqalculate)
--   [`power-profiles-daemon`](https://gitlab.freedesktop.org/upower/power-profiles-daemon)
--   [`ttf-material-symbols-variable`](https://github.com/google/material-design-icons)
--   [`ttf-rubik-vf`](https://github.com/googlefonts/rubik)
--   [`ttf-cascadia-code-nerd`](https://github.com/ryanoasis/nerd-fonts)
--   `qt6-base`
--   `qt6-declarative`
--   `qt6-imageformats`
--   [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
--   [`swappy`](https://github.com/jtheoof/swappy)
--   [`fish`](https://github.com/fish-shell/fish-shell)
--   [`bash`](https://www.gnu.org/software/bash)
+- [`caelestia-cli`](https://github.com/caelestia-dots/cli)
+- [`quickshell-git`](https://git.outfoxxed.me/quickshell/quickshell) - this has to be the git version, not the latest tagged version
+- `glibc`
+- `gcc-libs`
+- [`ddcutil`](https://github.com/rockowitz/ddcutil)
+- [`brightnessctl`](https://github.com/Hummer12007/brightnessctl)
+- [`libcava`](https://github.com/LukashonakV/cava)
+- [`networkmanager`](https://gitlab.freedesktop.org/NetworkManager/NetworkManager)
+- [`lm_sensors`](https://github.com/lm-sensors/lm-sensors)
+- [`aubio`](https://github.com/aubio/aubio)
+- [`libpipewire`](https://github.com/PipeWire/pipewire)
+- [`libqalculate`](https://github.com/Qalculate/libqalculate)
+- [`power-profiles-daemon`](https://gitlab.freedesktop.org/upower/power-profiles-daemon)
+- [`ttf-material-symbols-variable`](https://github.com/google/material-design-icons)
+- [`ttf-rubik-vf`](https://github.com/googlefonts/rubik)
+- [`ttf-cascadia-code-nerd`](https://github.com/ryanoasis/nerd-fonts)
+- `qt6-base`
+- `qt6-declarative`
+- `qt6-imageformats`
+- [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
+- [`swappy`](https://github.com/jtheoof/swappy)
+- [`fish`](https://github.com/fish-shell/fish-shell)
+- [`bash`](https://www.gnu.org/software/bash)
 
 Build dependencies:
 
--   [`cmake`](https://gitlab.kitware.com/cmake/cmake)
--   [`ninja`](https://github.com/ninja-build/ninja)
--   `qt6-shadertools`
+- [`cmake`](https://gitlab.kitware.com/cmake/cmake)
+- [`ninja`](https://github.com/ninja-build/ninja)
+- `qt6-shadertools`
 
 > [!IMPORTANT]
 > The commands below (and in the "Updating" section) assume `$XDG_CONFIG_HOME` is set.
@@ -207,7 +207,6 @@ hyprctl monitors -j | jq -r '.[].name'
 Options set in these files will **override** the respective options in the global config. Any options not present in
 per-monitor configs will inherit their values from the global config.
 
-
 For example, to automatically hide the bar on the monitor named `DP-1`:
 
 **`~/.config/caelestia/monitors/DP-1/shell.json`**
@@ -273,40 +272,135 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "workspaces": "Rubik",
             "headline": {
                 "family": "GoogleSansFlex",
-                "large": { "size": 32, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
-                "medium": { "size": 28, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
-                "small": { "size": 24, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+                "large": {
+                    "size": 32,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "medium": {
+                    "size": 28,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "small": {
+                    "size": 24,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                }
             },
             "title": {
                 "family": "GoogleSansFlex",
-                "large": { "size": 22, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
-                "medium": { "size": 16, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
-                "small": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } }
+                "large": {
+                    "size": 22,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "medium": {
+                    "size": 16,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "small": {
+                    "size": 14,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                }
             },
             "body": {
                 "family": "GoogleSansFlex",
-                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
-                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } },
-                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+                "large": {
+                    "size": 16,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "medium": {
+                    "size": 14,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "small": {
+                    "size": 12,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                }
             },
             "label": {
                 "family": "GoogleSansFlex",
-                "large": { "size": 14, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
-                "medium": { "size": 12, "weight": 500, "italic": false, "vaxes": { "ROND": 25 } },
-                "small": { "size": 11, "weight": 400, "italic": false, "vaxes": { "ROND": 25 } }
+                "large": {
+                    "size": 14,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "medium": {
+                    "size": 12,
+                    "weight": 500,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                },
+                "small": {
+                    "size": 11,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": { "ROND": 25 }
+                }
             },
             "mono": {
                 "family": "CaskaydiaCove NF",
-                "large": { "size": 16, "weight": 400, "italic": false, "vaxes": {} },
-                "medium": { "size": 14, "weight": 400, "italic": false, "vaxes": {} },
-                "small": { "size": 12, "weight": 400, "italic": false, "vaxes": {} }
+                "large": {
+                    "size": 16,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                },
+                "medium": {
+                    "size": 14,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                },
+                "small": {
+                    "size": 12,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                }
             },
             "icon": {
                 "family": "Material Symbols Rounded",
-                "extraLarge": { "size": 36, "weight": 400, "italic": false, "vaxes": {} },
-                "large": { "size": 24, "weight": 400, "italic": false, "vaxes": {} },
-                "medium": { "size": 18, "weight": 400, "italic": false, "vaxes": {} },
-                "small": { "size": 15, "weight": 400, "italic": false, "vaxes": {} }
+                "extraLarge": {
+                    "size": 36,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                },
+                "large": {
+                    "size": 24,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                },
+                "medium": {
+                    "size": 18,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                },
+                "small": {
+                    "size": 15,
+                    "weight": 400,
+                    "italic": false,
+                    "vaxes": {}
+                }
             }
         },
         "anim": {
@@ -459,10 +553,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                     "icon": "monitor_heart"
                 }
             ],
-            "ignoredTags": [
-                "hide_in_bar",
-                "xwl_popup"
-            ],
+            "ignoredTags": ["hide_in_bar", "xwl_popup"],
             "windowIcons": [
                 {
                     "regex": "steam(_app_(default|[0-9]+))?",
@@ -753,7 +844,9 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "maxVolume": 1.0,
         "smartScheme": true,
         "defaultPlayer": "Spotify",
-        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
+        "playerAliases": [
+            { "from": "com.github.th_ch.youtube_music", "to": "YT Music" }
+        ],
         "lyricsBackend": "Auto"
     },
     "session": {
@@ -918,14 +1011,14 @@ Check out the configuring section on the [dots repo](https://github.com/caelesti
 
 See the [manual installation](#manual-installation) section for the corresponding repo.
 
-### I want to disable ___ feature!
+### I want to disable \_\_\_ feature!
 
 Please read the [configuring](#configuring) section.
 If there is no corresponding option, make a [feature request](https://github.com/caelestia-dots/shell/issues/new?template=feature.yml).
 
 ### How do I make my colour scheme change to match my wallpaper?
 
-Set a wallpaper via `>wallpaper` in the launcher or `caelestia wallpaper`, and set the scheme to the dynamic scheme via 
+Set a wallpaper via `>wallpaper` in the launcher or `caelestia wallpaper`, and set the scheme to the dynamic scheme via
 `>scheme` in the launcher or `caelestia scheme set`, e.g.:
 
 ```sh
@@ -952,16 +1045,16 @@ which helped me a lot with learning how to use Quickshell.
 
 Finally, another thank you to all the configs I took inspiration from (only one for now):
 
--   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
+- [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
 
 ## Stonks 📈
 
 <a href="https://www.star-history.com/#caelestia-dots/shell&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
- </picture>
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date&theme=dark" />
+        <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
+        <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=caelestia-dots/shell&type=Date" />
+    </picture>
 </a>
 
 [dots-repo]: https://github.com/caelestia-dots/caelestia
