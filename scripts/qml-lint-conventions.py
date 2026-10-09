@@ -123,7 +123,7 @@ def parse_imports(lines: list[str]) -> tuple[int | None, int | None, list[str], 
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if not stripped or stripped.startswith("//") or stripped.startswith("pragma "):
+        if not stripped or stripped.startswith(("//", "pragma ")):
             continue
         m = IMPORT_RE.match(stripped)
         if m:
@@ -218,16 +218,15 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
             break
 
     # Pragmas must come before imports
-    if pragma_indices and import_indices:
-        if pragma_indices[-1] > import_indices[0]:
-            violations.append(
-                Violation(
-                    rel,
-                    *line_span(lines, pragma_indices[-1] + 1),
-                    "file-structure",
-                    "pragmas should appear before imports",
-                )
+    if pragma_indices and import_indices and pragma_indices[-1] > import_indices[0]:
+        violations.append(
+            Violation(
+                rel,
+                *line_span(lines, pragma_indices[-1] + 1),
+                "file-structure",
+                "pragmas should appear before imports",
             )
+        )
 
     # Separator between pragmas and imports
     if pragma_indices and import_indices:
