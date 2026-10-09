@@ -36,7 +36,7 @@ Item {
                 }
 
                 StyledText {
-                    text: new Date().toLocaleDateString(Qt.locale(), "dddd, MMMM d")
+                    text: new Date().toLocaleDateString(Tr.locale, "dddd, MMMM d")
                     font: Tokens.font.body.small
                     color: Colours.palette.m3onSurfaceVariant
                 }
@@ -168,7 +168,7 @@ Item {
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: forecastItem.index === 0 ? Tr.trCtx("Today", "forecast column") : new Date(forecastItem.modelData.date).toLocaleDateString(Qt.locale(), "ddd")
+                            text: forecastItem.index === 0 ? Tr.trCtx("Today", "forecast column") : new Date(forecastItem.modelData.date).toLocaleDateString(Tr.locale, "ddd")
                             font: Tokens.font.body.builders.medium.weight(Font.DemiBold).build()
                             color: Colours.palette.m3primary
                         }
@@ -176,7 +176,7 @@ Item {
                         StyledText {
                             Layout.topMargin: -Tokens.spacing.extraSmall
                             Layout.alignment: Qt.AlignHCenter
-                            text: new Date(forecastItem.modelData.date).toLocaleDateString(Qt.locale(), "MMM d")
+                            text: new Date(forecastItem.modelData.date).toLocaleDateString(Tr.locale, "MMM d")
                             font: Tokens.font.body.small
                             opacity: 0.7
                             color: Colours.palette.m3onSurfaceVariant

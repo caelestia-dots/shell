@@ -5,6 +5,7 @@
   makeWrapper,
   makeFontsConf,
   fish,
+  gettext,
   ddcutil,
   brightnessctl,
   networkmanager,
@@ -91,10 +92,13 @@
     name = "caelestia-qml-plugin${lib.optionalString debug "-debug"}";
     src = lib.fileset.toSource {
       root = ./..;
-      fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin;
+      fileset = lib.fileset.unions [./../CMakeLists.txt ./../plugin ./../scripts/trs.fish];
     };
 
-    nativeBuildInputs = [cmake ninja pkg-config];
+    nativeBuildInputs = [cmake ninja pkg-config fish gettext];
+
+    # trs.fish is run by CMake to compile .po catalogs; its shebang is /usr/bin/env
+    postPatch = "patchShebangs scripts/trs.fish";
     buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtshadertools libqalculate pipewire aubio libcava fftw lm_sensors];
 
     dontWrapQtApps = true;
