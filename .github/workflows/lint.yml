@@ -5,19 +5,18 @@ on:
     branches:
       - main
   pull_request:
-    paths:
-      - "**"
-      - "!**/*.md"
-      - "!.github/**"
-      - ".github/workflows/build.yml"
-      - "!.vscode/**"
-      - "!assets/**"
-      - "!.gitignore"
-      - "!**/*.nix"
-      - "!**/flake.lock"
 
 jobs:
+  changes:
+    uses: ./.github/workflows/detect-changes.yml
+    permissions:
+      pull-requests: read
+    with:
+      filter-group: build
+
   lint-qml:
+    needs: changes
+    if: needs.changes.outputs.lint == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
@@ -55,6 +54,8 @@ jobs:
           test -z "$lint_out" || exit 1
 
   lint-cpp:
+    needs: changes
+    if: needs.changes.outputs.lint == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
@@ -73,3 +74,22 @@ jobs:
           clang-tidy --version
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
             -source-filter='^(?!.*/build/).*\.cpp$'
+
+  lint-check:
+    if: always()
+    needs:
+      - changes
+      - lint-qml
+      - lint-cpp
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Verify lint results
+        uses: $/.github/actions/verify-checks
+        with:
+          needs: ${{ toJSON(needs) }}
+          checks: |
+            {
+              "lint-qml": "lint",
+              "lint-cpp": "lint"
+            }
