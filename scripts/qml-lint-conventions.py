@@ -51,6 +51,38 @@ def disable_colour() -> None:
     RULE_COLOURS = dict.fromkeys(RULE_COLOURS, "")
 
 
+class Violation:
+    """One reported violation, spanning the source from `start` to `end`.
+
+    Both positions are 1 based line/column pairs. The end is exclusive, sitting
+    just past the last character, which is what an LSP range wants. Every rule
+    here is line shaped, so a span covers one line's content; the blank line
+    rules have nothing to cover and collapse to a caret.
+    """
+
+    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], rule: str, msg: str):
+        self.file = file
+        self.line, self.col = start
+        self.end_line, self.end_col = end
+        self.rule = rule
+        self.msg = msg
+
+    def __str__(self):
+        c = RULE_COLOURS.get(self.rule, "")
+        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "file": self.file,
+            "line": self.line,
+            "column": self.col,
+            "endLine": self.end_line,
+            "endColumn": self.end_col,
+            "rule": self.rule,
+            "message": self.msg,
+        }
+
+
 class Section(IntEnum):
     ID = 0
     PROPERTY = 1
@@ -123,7 +155,7 @@ def parse_imports(lines: list[str]) -> tuple[int | None, int | None, list[str], 
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if not stripped or stripped.startswith("//") or stripped.startswith("pragma "):
+        if not stripped or stripped.startswith(("//", "pragma ")):
             continue
         m = IMPORT_RE.match(stripped)
         if m:
@@ -150,8 +182,8 @@ def check_imports(lines: list[str], rel: str) -> list[Violation]:
     imports = [(i, *entry) for i, entry in enumerate(module_imports)]
 
     for j in range(1, len(imports)):
-        _, prev_line, prev_group, prev_depth, prev_mod = imports[j - 1]
-        _, curr_line, curr_group, curr_depth, curr_mod = imports[j]
+        _, _, prev_group, prev_depth, prev_mod = imports[j - 1]
+        _, _, curr_group, curr_depth, curr_mod = imports[j]
 
         # Find actual line number for the current import
         lineno = 0
@@ -190,7 +222,7 @@ def check_imports(lines: list[str], rel: str) -> list[Violation]:
 def fix_imports(lines: list[str]) -> list[str]:
     """Sort imports and return the modified lines."""
     first, last, relative, module = parse_imports(lines)
-    if first is None:
+    if first is None or last is None:
         return lines
 
     module.sort(key=lambda x: (x[1], x[2], x[3]))
@@ -218,16 +250,15 @@ def check_file_structure(lines: list[str], rel: str) -> list[Violation]:
             break
 
     # Pragmas must come before imports
-    if pragma_indices and import_indices:
-        if pragma_indices[-1] > import_indices[0]:
-            violations.append(
-                Violation(
-                    rel,
-                    *line_span(lines, pragma_indices[-1] + 1),
-                    "file-structure",
-                    "pragmas should appear before imports",
-                )
+    if pragma_indices and import_indices and pragma_indices[-1] > import_indices[0]:
+        violations.append(
+            Violation(
+                rel,
+                *line_span(lines, pragma_indices[-1] + 1),
+                "file-structure",
+                "pragmas should appear before imports",
             )
+        )
 
     # Separator between pragmas and imports
     if pragma_indices and import_indices:
@@ -361,8 +392,7 @@ def fix_section_separators(lines: list[str]) -> list[str]:
 
         if func_skip_depth > 0:
             func_skip_depth += stripped.count("{") - stripped.count("}")
-            if func_skip_depth <= 0:
-                func_skip_depth = 0
+            func_skip_depth = max(0, func_skip_depth)
             continue
 
         if stripped == "}":
@@ -457,38 +487,6 @@ INLINE_COMPONENT_RE = re.compile(r"^Component\s*\{")
 BEHAVIOR_ON_RE = re.compile(r"^[A-Z]\w+\s+on\s+\w[\w.]*\s*\{")
 # Attached signal handler: Component.onCompleted:, Drag.onDragStarted:, etc.
 ATTACHED_HANDLER_RE = re.compile(r"^[A-Z]\w+\.on[A-Z]\w*\s*:")
-
-
-class Violation:
-    """One reported violation, spanning the source from `start` to `end`.
-
-    Both positions are 1 based line/column pairs. The end is exclusive, sitting
-    just past the last character, which is what an LSP range wants. Every rule
-    here is line shaped, so a span covers one line's content; the blank line
-    rules have nothing to cover and collapse to a caret.
-    """
-
-    def __init__(self, file: str, start: tuple[int, int], end: tuple[int, int], rule: str, msg: str):
-        self.file = file
-        self.line, self.col = start
-        self.end_line, self.end_col = end
-        self.rule = rule
-        self.msg = msg
-
-    def __str__(self):
-        c = RULE_COLOURS.get(self.rule, "")
-        return f"{c}[{self.rule}]{RESET} {self.file}:{self.line}:{self.col}: {self.msg}"
-
-    def to_dict(self) -> dict[str, object]:
-        return {
-            "file": self.file,
-            "line": self.line,
-            "column": self.col,
-            "endLine": self.end_line,
-            "endColumn": self.end_col,
-            "rule": self.rule,
-            "message": self.msg,
-        }
 
 
 class ScopeTracker:
@@ -609,8 +607,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
         # Skip inside function bodies (JS code, not QML structure)
         if func_skip_depth > 0:
             func_skip_depth += stripped.count("{") - stripped.count("}")
-            if func_skip_depth <= 0:
-                func_skip_depth = 0
+            func_skip_depth = max(0, func_skip_depth)
             continue
 
         # Closing brace: pop all scopes deeper than this indent
