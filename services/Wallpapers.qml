@@ -15,6 +15,10 @@ Searcher {
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
     readonly property string fallback: Quickshell.shellPath("assets/wallpaper.webp")
 
+    // True while thumbnails are being regenerated; consumers use it to
+    // invalidate their image caches (sourceSize bump) without touching models.
+    readonly property bool thumbsBusy: thumbProcess.running
+
     property bool showPreview: false
     readonly property string current: showPreview ? previewPath : actualCurrent
     property string previewPath
@@ -46,6 +50,11 @@ Searcher {
             getPreviewColoursProc.running = true;
     }
 
+    function updateThumbs(): void {
+        if (Paths.videowallsdir !== Paths.wallsdir)
+            thumbProcess.running = true;
+    }
+
     function stopPreview(): void {
         showPreview = false;
         if (previewColourLock)
@@ -59,7 +68,7 @@ Searcher {
             Colours.showPreview = false;
     }
 
-    list: wallpapers.entries
+    list: [...wallpapers.entries, ...videoWallpapers.entries]
     key: "relativePath"
     useFuzzy: GlobalConfig.launcher.useFuzzy.wallpapers
     extraOpts: useFuzzy ? ({}) : ({
@@ -111,6 +120,14 @@ Searcher {
         filter: FileSystemModel.Images
     }
 
+    FileSystemModel {
+        id: videoWallpapers
+
+        recursive: true
+        path: Paths.videowallsdir
+        nameFilters: Images.validVideoExtensions.map(ext => "*." + ext)
+    }
+
     Process {
         id: getPreviewColoursProc
 
@@ -118,8 +135,15 @@ Searcher {
         stdout: StdioCollector {
             onStreamFinished: {
                 Colours.load(text, true);
-                Colours.showPreview = true;
+                if (root.showPreview)
+                    Colours.showPreview = true;
             }
         }
+    }
+
+    Process {
+        id: thumbProcess
+
+        command: ["caelestia", "wallpaper", "--update-thumbs"]
     }
 }
