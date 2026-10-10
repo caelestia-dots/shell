@@ -27,22 +27,26 @@ jobs:
         ${{ github.event_name == 'push'
             || steps.build-filter.outputs.build == 'true'
             || steps.build-filter.outputs.build-workflow == 'true'
-            || steps.build-filter.outputs.changes-workflow == 'true' }}
+            || steps.build-filter.outputs.changes-workflow == 'true'
+            || steps.build-filter.outputs.verification-action == 'true' }}
       lint: >-
         ${{ github.event_name == 'push'
             || steps.build-filter.outputs.lint == 'true'
             || steps.build-filter.outputs.lint-workflow == 'true'
-            || steps.build-filter.outputs.changes-workflow == 'true' }}
+            || steps.build-filter.outputs.changes-workflow == 'true'
+            || steps.build-filter.outputs.verification-action == 'true' }}
       format-cpp: >-
         ${{ github.event_name == 'push'
            || steps.format-filter.outputs.source-cpp == 'true'
            || steps.format-filter.outputs.format-workflow == 'true'
-           || steps.format-filter.outputs.changes-workflow == 'true' }}
+           || steps.format-filter.outputs.changes-workflow == 'true'
+           || steps.format-filter.outputs.verification-action == 'true' }}
       format-qml: >-
         ${{ github.event_name == 'push'
            || steps.format-filter.outputs.source-qml == 'true'
            || steps.format-filter.outputs.format-workflow == 'true'
-           || steps.format-filter.outputs.changes-workflow == 'true' }}
+           || steps.format-filter.outputs.changes-workflow == 'true'
+           || steps.format-filter.outputs.verification-action == 'true' }}
     steps:
       - name: Validate filter group
         env:
@@ -75,6 +79,8 @@ jobs:
               - ".github/workflows/lint.yml"
             changes-workflow:
               - ".github/workflows/detect-changes.yml"
+            verification-action:
+              - ".github/actions/verify-checks/**"
 
       - name: Filter changes for formatting
         uses: dorny/paths-filter@v4
@@ -95,3 +101,5 @@ jobs:
               - ".github/workflows/check-format.yml"
             changes-workflow:
               - ".github/workflows/detect-changes.yml"
+            verification-action:
+              - ".github/actions/verify-checks/**"

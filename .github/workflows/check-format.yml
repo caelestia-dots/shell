@@ -62,34 +62,11 @@ jobs:
     permissions: {}
     steps:
       - name: Verify formatting results
-        env:
-          CHANGES_RESULT: ${{ needs.changes.result }}
-          QML_REQUIRED: ${{ needs.changes.outputs.format-qml }}
-          CPP_REQUIRED: ${{ needs.changes.outputs.format-cpp }}
-          QML_RESULT: ${{ needs.check-qml.result }}
-          CPP_RESULT: ${{ needs.check-cpp.result }}
-        run: |
-          if [[ "$CHANGES_RESULT" != "success" ]]; then
-            echo "::error::Change detection did not succeed."
-            exit 1
-          fi
-
-          verify_result() {
-            local name="$1" required="$2" result="$3"
-
-            case "$required:$result" in
-              true:success)
-                echo "$name formatting passed."
-                ;;
-              false:skipped)
-                echo "$name formatting was not required."
-                ;;
-              *)
-                echo "::error::$name formatting: required=$required, result=$result."
-                return 1
-                ;;
-            esac
-          }
-
-          verify_result QML "$QML_REQUIRED" "$QML_RESULT" || exit 1
-          verify_result CPP "$CPP_REQUIRED" "$CPP_RESULT" || exit 1
+        uses: $/.github/actions/verify-checks
+        with:
+          needs: ${{ toJSON(needs) }}
+          checks: |
+            {
+              "check-qml": "format-qml",
+              "check-cpp": "format-cpp"
+            }

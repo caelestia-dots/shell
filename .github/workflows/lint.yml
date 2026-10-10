@@ -85,33 +85,11 @@ jobs:
     permissions: {}
     steps:
       - name: Verify lint results
-        env:
-          CHANGES_RESULT: ${{ needs.changes.result }}
-          LINT_REQUIRED: ${{ needs.changes.outputs.lint }}
-          QML_RESULT: ${{ needs.lint-qml.result }}
-          CPP_RESULT: ${{ needs.lint-cpp.result }}
-        run: |
-          if [[ "$CHANGES_RESULT" != "success" ]]; then
-            echo "::error::Change detection did not succeed."
-            exit 1
-          fi
-
-          case "$LINT_REQUIRED" in
-            true)
-              if [[ "$QML_RESULT" != "success" || "$CPP_RESULT" != "success" ]]; then
-                echo "::error::Required linting did not all succeed."
-                exit 1
-              fi
-              ;;
-            false)
-              if [[ "$QML_RESULT" != "skipped" || "$CPP_RESULT" != "skipped" ]]; then
-                echo "::error::Unexpected lint results."
-                exit 1
-              fi
-              echo "No files changed that required linting."
-              ;;
-            *)
-              echo "::error::Missing or invalid lint decision."
-              exit 1
-              ;;
-          esac
+        uses: $/.github/actions/verify-checks
+        with:
+          needs: ${{ toJSON(needs) }}
+          checks: |
+            {
+              "lint-qml": "lint",
+              "lint-cpp": "lint"
+            }
