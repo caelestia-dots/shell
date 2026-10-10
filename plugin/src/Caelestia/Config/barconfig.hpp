@@ -27,6 +27,7 @@ class BarPopouts : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, activeWindow, true)
     CONFIG_PROPERTY(bool, tray, true)
     CONFIG_PROPERTY(bool, statusIcons, true)
+    CONFIG_PROPERTY(bool, clock, false)
 };
 
 class BarWorkspaces : public settings::ObjectNode {
@@ -101,6 +102,7 @@ class BarClock : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, showDate, false)
     CONFIG_PROPERTY(bool, showIcon, true)
     CONFIG_PROPERTY(bool, showSeconds, false)
+    CONFIG_PROPERTY(int, hoverDelay, 140)
 };
 
 class BarConfig : public settings::ObjectNode {

@@ -114,6 +114,7 @@ class BarTokens : public settings::ObjectNode {
     CONFIG_PROPERTY(int, networkWidth, 320)
     CONFIG_PROPERTY(int, audioWidth, 320)
     CONFIG_PROPERTY(int, kbLayoutWidth, 320)
+    CONFIG_PROPERTY(int, clockFaceSize, 196)
 };
 
 class DashboardTokens : public settings::ObjectNode {

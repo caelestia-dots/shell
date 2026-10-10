@@ -32,6 +32,10 @@ Item {
         (content.item as Bar)?.checkPopout(y);
     }
 
+    function cancelClockHover(): void {
+        (content.item as Bar)?.cancelClockHover();
+    }
+
     function handleWheel(y: real, angleDelta: point): void {
         (content.item as Bar)?.handleWheel(y, angleDelta);
     }
