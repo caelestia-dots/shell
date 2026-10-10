@@ -8,34 +8,11 @@ on:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/detect-changes.yml
     permissions:
       pull-requests: read
-    outputs:
-      lint: >-
-        ${{ github.event_name == 'push'
-            || steps.filter.outputs.source == 'true'
-            || steps.filter.outputs.workflow == 'true' }}
-    steps:
-      - name: Filter modified paths
-        uses: dorny/paths-filter@v4
-        if: github.event_name == 'pull_request'
-        id: filter
-        with:
-          predicate-quantifier: every
-          filters: |
-            source:
-              - "**"
-              - "!**/*.md"
-              - "!.github/**"
-              - "!scripts/qml-lint-conventions.py"
-              - "!.vscode/**"
-              - "!assets/**"
-              - "!.gitignore"
-              - "!**/*.nix"
-              - "!**/flake.lock"
-            workflow:
-              - ".github/workflows/lint.yml"
+    with:
+      filter-group: build
 
   lint-qml:
     needs: changes

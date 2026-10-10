@@ -8,36 +8,11 @@ on:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/detect-changes.yml
     permissions:
       pull-requests: read
-    outputs:
-      format-cpp: >-
-        ${{ github.event_name == 'push'
-           || steps.filter.outputs.source-cpp == 'true'
-           || steps.filter.outputs.workflow == 'true' }}
-      format-qml: >-
-        ${{ github.event_name == 'push'
-           || steps.filter.outputs.source-qml == 'true'
-           || steps.filter.outputs.workflow == 'true' }}
-    steps:
-      - name: Filter modified paths
-        uses: dorny/paths-filter@v4
-        if: github.event_name == 'pull_request'
-        id: filter
-        with:
-          predicate-quantifier: some
-          filters: |
-            source-qml:
-              - "**/*.qml"
-              - "**/.qmlformat.ini"
-              - "scripts/qml-lint-conventions.py"
-            source-cpp:
-              - "{plugin,extras}/**/*.{cpp,hpp}"
-              - "**/[_.]clang-format"
-              - "**/.clang-format-ignore"
-            workflow:
-              - ".github/workflows/check-format.yml"
+    with:
+      filter-group: format
 
   check-qml:
     needs: changes
