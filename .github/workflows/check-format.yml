@@ -21,7 +21,8 @@ jobs:
            || steps.filter.outputs.source-qml == 'true'
            || steps.filter.outputs.workflow == 'true' }}
     steps:
-      - uses: dorny/paths-filter@v4
+      - name: Filter modified paths
+        uses: dorny/paths-filter@v4
         if: github.event_name == 'pull_request'
         id: filter
         with:
