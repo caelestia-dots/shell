@@ -64,7 +64,7 @@ Item {
 
             RowLayout {
                 spacing: Tokens.spacing.medium
-                visible: cpuCard.active || gpuCard.active
+                visible: cpuCard.active || gpuCard.active || gpuCards.count > 0
 
                 WrappedLoader {
                     id: cpuCard
@@ -88,7 +88,8 @@ Item {
                 WrappedLoader {
                     id: gpuCard
 
-                    active: Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None
+                    // Several GPUs get a card each from gpuCards instead
+                    active: Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None && Gpu.devices.length < 2
 
                     sourceComponent: HeroCard {
                         icon: "desktop_windows"
@@ -97,6 +98,31 @@ Item {
                         usage: Gpu.percentage
                         temperature: Gpu.temperature
                         accent: Colours.palette.m3secondary
+
+                        ServiceRef {
+                            service: Gpu
+                        }
+                    }
+                }
+
+                Repeater {
+                    id: gpuCards
+
+                    model: Config.dashboard.performance.showGpu && Gpu.devices.length > 1 ? Gpu.devices : null
+
+                    HeroCard {
+                        required property GpuDevice modelData
+                        required property int index
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        icon: "desktop_windows"
+                        label: Tr.tr("GPU %1").arg(index)
+                        subLabel: modelData.name
+                        usage: modelData.percentage
+                        temperature: modelData.temperature
+                        accent: index % 2 === 0 ? Colours.palette.m3secondary : Colours.palette.m3tertiary
 
                         ServiceRef {
                             service: Gpu
