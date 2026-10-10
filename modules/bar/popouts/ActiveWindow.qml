@@ -89,6 +89,16 @@ Item {
             ScreencopyView {
                 id: preview
 
+                // A ScreencopyView has no size until its first frame, so the
+                // popout opened without the preview, then jumped to fit it a
+                // few frames later. Fit the window's own size into the same box
+                // up front, so the popout opens at its final size.
+                readonly property var windowSize: Hypr.activeToplevel?.lastIpcObject.size ?? []
+                readonly property real fitScale: windowSize.length === 2 && windowSize[0] > 0 && windowSize[1] > 0 ? Math.min(constraintSize.width / windowSize[0], constraintSize.height / windowSize[1]) : 0
+
+                implicitWidth: fitScale > 0 ? Math.round(windowSize[0] * fitScale) : constraintSize.width
+                implicitHeight: fitScale > 0 ? Math.round(windowSize[1] * fitScale) : constraintSize.height
+
                 captureSource: Hypr.activeToplevel?.wayland ?? null // qmllint disable unresolved-type
                 live: visible
 
