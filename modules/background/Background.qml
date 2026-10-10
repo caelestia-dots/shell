@@ -7,6 +7,7 @@ import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.services
+import qs.utils
 
 Variants {
     model: Screens.screens.filter(s => GlobalConfig.forScreen(s.name).background.enabled)
@@ -60,12 +61,17 @@ Variants {
         Loader {
             id: clockLoader
 
+            readonly property string barPos: BarPosition.resolvedPosition(Config.bar.position)
+            readonly property int barThickness: Tokens.sizes.bar.innerWidth + Math.max(Tokens.padding.small, Config.border.thickness)
+
             asynchronous: true
             active: Config.background.desktopClock.enabled
 
             anchors.margins: Tokens.padding.extraLargeIncreased
-            anchors.leftMargin: Tokens.padding.extraLargeIncreased + Tokens.sizes.bar.innerWidth + Math.max(Tokens.padding.small, Config.border.thickness)
-
+            anchors.leftMargin: Tokens.padding.extraLargeIncreased + (barPos === "left" ? barThickness : 0)
+            anchors.rightMargin: Tokens.padding.extraLargeIncreased + (barPos === "right" ? barThickness : 0)
+            anchors.topMargin: Tokens.padding.extraLargeIncreased + (barPos === "top" ? barThickness : 0)
+            anchors.bottomMargin: Tokens.padding.extraLargeIncreased + (barPos === "bottom" ? barThickness : 0)
             state: Config.background.desktopClock.position
             states: [
                 State {

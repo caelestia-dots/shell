@@ -13,6 +13,8 @@ Item {
     required property ScreenState screenState
     required property bool sidebarOrSessionVisible
 
+    readonly property real slideOffset: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+
     property bool hovered
     readonly property Brightness.Monitor monitor: Brightness.getMonitorForScreen(root.screen)
     readonly property bool shouldBeActive: screenState.osd && Config.osd.enabled && !(screenState.utilities && Config.utilities.enabled)
@@ -39,7 +41,7 @@ Item {
     }
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
     opacity: 1 - offsetScale
