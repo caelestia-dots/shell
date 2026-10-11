@@ -16,9 +16,7 @@ Item {
 
     readonly property bool isDirectory: modelData.isDir
     readonly property bool isParent: modelData.isParent ?? false
-    readonly property var folderThumbnail: isDirectory && !isParent
-        ? Wallpapers.list.find(w => w.parentDir === modelData.path)
-        : null
+    readonly property var folderThumbnail: isDirectory && !isParent ? Wallpapers.list.find(w => w.parentDir === modelData.path) : null
 
     scale: 0.5
     opacity: 0
@@ -63,9 +61,7 @@ Item {
 
         CachingImage {
             anchors.fill: parent
-            path: root.isDirectory
-                ? (root.folderThumbnail ? root.folderThumbnail.path : "")
-                : root.modelData.path
+            path: root.isDirectory ? (root.folderThumbnail ? root.folderThumbnail.path : "") : root.modelData.path
             visible: !root.isDirectory || root.folderThumbnail !== null
             smooth: !root.PathView.view.moving
             sourceSize: {

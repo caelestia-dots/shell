@@ -100,20 +100,18 @@ PathView {
         readonly property string search: root.search.text.split(" ").slice(1).join(" ")
 
         values: {
-            const foldersInSearch = folders.entries.filter(folder =>
-                !search || folder.name.toLowerCase().includes(search.toLowerCase())
-            );
-            const imagesInSearch = Wallpapers.query(search).filter(image =>
-                image.parentDir === root.currentDir
-            );
+            const foldersInSearch = folders.entries.filter(folder => !search || folder.name.toLowerCase().includes(search.toLowerCase()));
+            const imagesInSearch = Wallpapers.query(search).filter(image => image.parentDir === root.currentDir);
 
-            const parentEntry = root.currentDir === Paths.wallsdir ? [] : [{
-                path: root.currentDir.slice(0, root.currentDir.lastIndexOf("/")),
-                relativePath: "..",
-                name: "..",
-                isDir: true,
-                isParent: true
-            }];
+            const parentEntry = root.currentDir === Paths.wallsdir ? [] : [
+                {
+                    path: root.currentDir.slice(0, root.currentDir.lastIndexOf("/")),
+                    relativePath: "..",
+                    name: "..",
+                    isDir: true,
+                    isParent: true
+                }
+            ];
 
             const entries = [...parentEntry, ...foldersInSearch, ...imagesInSearch];
 
@@ -129,9 +127,7 @@ PathView {
         onValuesChanged: {
             const firstEntry = values[0]?.isParent && values.length > 1 ? 1 : 0;
             const activeIndex = search ? -1 : values.findIndex(w => w.path === Wallpapers.actualCurrent);
-            const nextIndex = activeIndex >= 0
-                ? activeIndex
-                : values.length > firstEntry ? firstEntry : values.length > 0 ? 0 : -1;
+            const nextIndex = activeIndex >= 0 ? activeIndex : values.length > firstEntry ? firstEntry : values.length > 0 ? 0 : -1;
 
             if (root.currentIndex !== nextIndex)
                 root.currentIndex = nextIndex;
