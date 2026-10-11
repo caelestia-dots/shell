@@ -10,8 +10,15 @@ import qs.services
 Item {
     id: root
 
-    required property FileSystemEntry modelData
+    required property var modelData
     required property ScreenState screenState
+    required property var wallpaperList
+
+    readonly property bool isDirectory: modelData.isDir
+    readonly property bool isParent: modelData.isParent ?? false
+    readonly property var folderThumbnail: isDirectory && !isParent
+        ? Wallpapers.list.find(w => w.parentDir === modelData.path)
+        : null
 
     scale: 0.5
     opacity: 0
@@ -27,10 +34,7 @@ Item {
 
     StateLayer {
         radius: Tokens.rounding.large
-        onClicked: {
-            Wallpapers.setWallpaper(root.modelData.path);
-            root.screenState.launcher = false;
-        }
+        onClicked: wallpaperList.activateEntry(root.modelData)
     }
 
     Elevation {
@@ -57,21 +61,32 @@ Item {
         implicitWidth: Tokens.sizes.launcher.wallpaperWidth
         implicitHeight: implicitWidth / 16 * 9
 
-        MaterialIcon {
-            anchors.centerIn: parent
-            text: "image"
-            color: Colours.tPalette.m3outline
-            fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
-        }
-
         CachingImage {
             anchors.fill: parent
-            path: root.modelData.path
+            path: root.isDirectory
+                ? (root.folderThumbnail ? root.folderThumbnail.path : "")
+                : root.modelData.path
+            visible: !root.isDirectory || root.folderThumbnail !== null
             smooth: !root.PathView.view.moving
             sourceSize: {
                 const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
                 return Qt.size(image.implicitWidth * dpr, image.implicitHeight * dpr);
             }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: image.radius
+            color: "#80000000"
+            visible: root.isDirectory && root.folderThumbnail !== null
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            visible: root.isDirectory
+            text: root.isParent ? "arrow_back" : "folder"
+            color: Colours.tPalette.m3outline
+            fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
         }
     }
 
@@ -86,7 +101,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         renderType: Text.QtRendering
-        text: root.modelData.relativePath
+        text: root.isDirectory ? root.modelData.name : root.modelData.relativePath.split("/").pop()
         font: Tokens.font.label.medium
     }
 
