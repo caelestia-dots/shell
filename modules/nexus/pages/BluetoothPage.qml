@@ -190,8 +190,8 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
 
             first: true
-            // TRANSLATORS: adjective: other devices can find this computer
             settingAnchor: "bluetooth-discoverable"
+            // TRANSLATORS: adjective: other devices can find this computer
             text: Tr.trCtx("Discoverable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to find this one")
             disabled: !root.btEnabled
@@ -208,8 +208,8 @@ PageBase {
 
         ToggleRow {
             last: true
-            // TRANSLATORS: adjective: other devices are allowed to pair with this computer
             settingAnchor: "bluetooth-pairable"
+            // TRANSLATORS: adjective: other devices are allowed to pair with this computer
             text: Tr.trCtx("Pairable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to pair with this one")
             disabled: !root.btEnabled
