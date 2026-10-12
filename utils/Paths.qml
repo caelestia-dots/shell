@@ -17,6 +17,10 @@ Singleton {
     readonly property string cache: `${Quickshell.env("XDG_CACHE_HOME") || `${home}/.cache`}/caelestia`
     readonly property string config: `${Quickshell.env("XDG_CONFIG_HOME") || `${home}/.config`}/caelestia`
 
+    // Session scoped: /run is wiped on reboot and on logout, so state kept here
+    // does not outlive the compositor session it belongs to.
+    readonly property string runtime: Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"
+
     readonly property string imagecache: `${cache}/imagecache`
     readonly property string notifimagecache: `${imagecache}/notifs`
     readonly property string wallsdir: Quickshell.env("CAELESTIA_WALLPAPERS_DIR") || absolutePath(GlobalConfig.paths.wallpaperDir)
