@@ -12,6 +12,7 @@ StyledRect {
     property bool last
     // Identifier used by the settings search to scroll to this row.
     property string settingAnchor
+    property bool searchable: true
 
     // Briefly flash the row, used when the settings search jumps to it.
     function flashHighlight(): void {
