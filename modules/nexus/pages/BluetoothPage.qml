@@ -46,7 +46,7 @@ PageBase {
             placeholderText: root.btEnabled ? Tr.tr("No saved devices") : Tr.tr("Bluetooth disabled")
 
             model: ScriptModel {
-                values: Bluetooth.devices.values.filter(d => d.bonded).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name)) // qmllint disable unresolved-type
+                values: Bluetooth.devices.values.filter(d => d.bonded || d.paired || d.connected).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name)) // qmllint disable unresolved-type
             }
 
             delegate: StyledRect {
