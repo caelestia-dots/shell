@@ -60,7 +60,6 @@ body:
         ```
 
         </details>
-      render: text
     validations:
       required: false # Logs may not be available
 
