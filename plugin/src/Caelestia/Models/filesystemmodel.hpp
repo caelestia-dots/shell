@@ -63,7 +63,7 @@ private:
 
 class FileSystemModel : public QAbstractListModel {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(FileSystemModel)
 
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged)
     Q_PROPERTY(bool recursive READ recursive WRITE setRecursive NOTIFY recursiveChanged)
