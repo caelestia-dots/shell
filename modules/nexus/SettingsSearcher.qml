@@ -4,9 +4,11 @@ import "../../utils/scripts/fzf.js" as Fzf
 import "../../utils/scripts/settings-indexer.js" as SettingsIndexer
 import QtQuick
 import Quickshell
+import Quickshell.Bluetooth
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import qs.services
 import qs.utils
 
 // Search service over the settings index. The index is built by the shell
@@ -52,9 +54,7 @@ Singleton {
     property string cacheKey
     readonly property int maxResults: Math.max(1, GlobalConfig.nexus.maxSearchResults)
 
-    // accept(entry) -> bool filters out entries that can't be shown right now.
-    // It runs before the result limit, so filtered entries don't take up slots.
-    function query(search: string, accept: var): list<QtObject> {
+    function query(search: string): list<QtObject> {
         const tokens = SettingsIndexer.splitWords(search);
         if (tokens.length === 0)
             return [];
@@ -77,7 +77,7 @@ Singleton {
         const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a] || (parseInt(a) - parseInt(b)));
 
         const all = entries.instances;
-        const usable = e => e !== undefined && (!accept || accept(e));
+        const usable = e => e !== undefined && root.isAvailable(e.anchor);
         const out = [];
         for (const id of ranked) {
             const entry = all[parseInt(id)];
@@ -111,6 +111,22 @@ Singleton {
         }
 
         return out;
+    }
+
+    function isAvailable(anchor: string): bool {
+        // The ethernet section and its detail page need a wired device
+        if (anchor.startsWith("ethernet-"))
+            return Nmcli.hasAvailableEthernet;
+        // Adding a network can't be opened with Wi-Fi off
+        if (anchor === "network-add-network" || anchor.startsWith("add-network-"))
+            return Nmcli.wifiEnabled;
+        // The button only shows when there are more networks than the list fits
+        if (anchor === "network-all-networks")
+            return Nmcli.wifiEnabled && Nmcli.networks.length > GlobalConfig.nexus.maxNetworksShown;
+        // Pairing can't be opened with Bluetooth off
+        if (anchor === "bluetooth-pair-device")
+            return Bluetooth.defaultAdapter?.enabled ?? false;
+        return true;
     }
 
     // Look up a query token in the inverted index: exact match first, then any
