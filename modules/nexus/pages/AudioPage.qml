@@ -33,6 +33,7 @@ PageBase {
 
         ToggleRow {
             text: Tr.trCtx("Muted", "audio output muted")
+            searchable: false
             checked: Audio.muted
             onToggled: Audio.setStreamMuted(Audio.sink, checked)
         }
@@ -61,6 +62,7 @@ PageBase {
 
         ToggleRow {
             text: Tr.trCtx("Muted", "audio input muted")
+            searchable: false
             checked: Audio.sourceMuted
             onToggled: Audio.setStreamMuted(Audio.source, checked)
         }

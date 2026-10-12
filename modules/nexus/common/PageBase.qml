@@ -16,6 +16,7 @@ ColumnLayout {
     required property string title
     required property NexusState nState
     property bool isSubPage
+    property bool searchable: true
     readonly property int cappedWidth: Math.min(Tokens.sizes.nexus.maxContentWidth, width)
     readonly property alias flickable: flickable
     // Where this page is in its sub-page stack; a page outside one counts as shown
