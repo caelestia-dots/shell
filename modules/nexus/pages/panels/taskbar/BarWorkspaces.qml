@@ -19,8 +19,8 @@ PageBase {
 
         StepperRow {
             first: true
-            // TRANSLATORS: the number of workspaces shown on the bar
             settingAnchor: "bar-ws-shown"
+            // TRANSLATORS: the number of workspaces shown on the bar
             label: Tr.trCtx("Shown", "bar workspaces")
             subtext: Tr.tr("Number of workspaces displayed")
             value: Config.bar.workspaces.shown
@@ -84,8 +84,8 @@ PageBase {
 
         StepperRow {
             last: true
-            // TRANSLATORS: maximum number of window icons shown per workspace
             settingAnchor: "bar-ws-max-window-icons"
+            // TRANSLATORS: maximum number of window icons shown per workspace
             label: Tr.trCtx("Max window icons", "bar workspaces")
             value: Config.bar.workspaces.maxWindowIcons
             from: 0

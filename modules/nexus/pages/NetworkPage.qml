@@ -86,8 +86,8 @@ PageBase {
             clip: true
 
             icon: "expand_content"
-            // TRANSLATORS: %1 = number of networks found
             settingAnchor: "network-all-networks"
+            // TRANSLATORS: %1 = number of networks found
             text: Tr.tr("Show all networks (%1)").arg(Nmcli.networks.length)
             trailingIcon: "chevron_right"
             onClicked: root.nState.openSubPage(5) // All networks sub-page

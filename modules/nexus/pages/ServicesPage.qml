@@ -198,8 +198,8 @@ PageBase {
 
         StepperRow {
             first: true
-            // TRANSLATORS: bars of a spectrum analyser, not the taskbar
             settingAnchor: "services-visualiser-bars"
+            // TRANSLATORS: bars of a spectrum analyser, not the taskbar
             label: Tr.tr("Visualiser bars")
             subtext: Tr.tr("Number of bars in the audio visualisers")
             value: GlobalConfig.services.visualiserBars

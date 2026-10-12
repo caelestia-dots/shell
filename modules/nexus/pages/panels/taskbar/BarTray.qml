@@ -26,8 +26,8 @@ PageBase {
         }
 
         ToggleRow {
-            // TRANSLATORS: tint system tray icons with the theme accent colour
             settingAnchor: "bar-tray-recolour-icons"
+            // TRANSLATORS: tint system tray icons with the theme accent colour
             text: Tr.tr("Recolour icons")
             checked: Config.bar.tray.recolour
             onToggled: GlobalConfig.bar.tray.recolour = checked
