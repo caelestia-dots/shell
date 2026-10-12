@@ -9,7 +9,7 @@ namespace caelestia::config {
     namespace Name {                                                                                                   \
                                                                                                                        \
     Q_NAMESPACE                                                                                                        \
-    QML_ELEMENT                                                                                                        \
+    QML_NAMED_ELEMENT(Name)                                                                                            \
                                                                                                                        \
     enum Enum : quint8 {                                                                                               \
         __VA_ARGS__                                                                                                    \

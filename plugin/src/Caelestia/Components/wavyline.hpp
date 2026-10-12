@@ -7,7 +7,7 @@ namespace caelestia::components {
 
 class WavyLine : public QQuickPaintedItem {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(WavyLine)
 
     Q_PROPERTY(int lineWidth READ lineWidth WRITE setLineWidth NOTIFY lineWidthChanged FINAL)
     Q_PROPERTY(qreal amplitudeMultiplier READ amplitudeMultiplier WRITE setAmplitudeMultiplier NOTIFY
