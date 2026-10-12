@@ -156,7 +156,6 @@ const FIELD_WEIGHT = {
     keywords: 0.4,
     source: 0.3
 };
-const SKIP_LABELS = ["Muted", "None"];
 
 // Same layout as util::i18n::doMark for a string with only a context. Only
 // the context form is needed, the indexer never marks plurals or args.
@@ -537,7 +536,7 @@ function extractSettings(files, nav, readLines) {
             // Only expose a toggle path when read and write target the same
             // property (symmetric), so flipping from search is safe.
             const togglePath = rowType === "ToggleRow" && checkedPath && checkedPath === toggledPath ? checkedPath : "";
-            if (label && !SKIP_LABELS.includes(unmark(label)) && anchor) {
+            if (label && anchor) {
                 entries.push({
                     rowType: rowType,
                     pageIdx: meta.pageIdx,
