@@ -19,6 +19,8 @@ Item {
     required property int activeWsId
     required property int ws
     required property HyprlandMonitor monitor
+    property bool isHorizontal: false
+    property int maxHorizontalWindowIcons: 0
 
     required property int displayType
     required property bool showWindows
@@ -29,7 +31,8 @@ Item {
 
     readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags)
     readonly property bool isOccupied: toplevels.length > 0
-    readonly property bool hasWindows: isOccupied && showWindows && Config.bar.workspaces.maxWindowIcons > 0
+    readonly property int shownWindowCount: showWindows ? Math.max(0, Math.min(toplevels.length, isHorizontal ? maxHorizontalWindowIcons : Config.bar.workspaces.maxWindowIcons)) : 0
+    readonly property bool hasWindows: shownWindowCount > 0
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
 
@@ -48,6 +51,17 @@ Item {
         return Colours.layer(Colours.palette.m3outlineVariant, 2);
     }
 
+    readonly property real itemSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+    readonly property real windowIconSize: itemSize * 2 / 3
+    readonly property real horizontalWindowsWidth: shownWindowCount * windowIconSize
+    readonly property bool adding: isHorizontal ? AnimatedRepeater.adding : LazyListView.adding
+    readonly property bool removing: isHorizontal ? AnimatedRepeater.removing : LazyListView.removing
+    // Row publishes its destination before animating x; initial/add positions are immediate.
+    property real layoutX: x
+    readonly property real layoutStart: isHorizontal ? layoutX : LazyListView.layoutY
+    readonly property real layoutLength: isHorizontal ? implicitWidth : LazyListView.preferredHeight
+    readonly property real visibleLength: isHorizontal ? width : LazyListView.visibleHeight
+
     function updateShape(): void {
         const shape = indicator.item as MaterialShape;
         if (!shape)
@@ -59,11 +73,19 @@ Item {
             shape.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
     }
 
-    anchors.horizontalCenter: parent?.horizontalCenter
-    LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
-    LazyListView.visibleHeight: LazyListView.preferredHeight
+    anchors.horizontalCenter: isHorizontal ? undefined : parent?.horizontalCenter
+    anchors.verticalCenter: isHorizontal ? parent?.verticalCenter : undefined
 
-    opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
+    LazyListView.preferredHeight: isHorizontal ? itemSize : (LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0))
+    LazyListView.visibleHeight: isHorizontal ? itemSize : LazyListView.preferredHeight
+
+    width: isHorizontal ? (removing ? 0 : implicitWidth) : undefined
+    height: isHorizontal ? itemSize : undefined
+
+    implicitWidth: isHorizontal && hasWindows ? itemSize + Tokens.spacing.extraSmall / 2 + horizontalWindowsWidth : itemSize
+    implicitHeight: isHorizontal ? itemSize : layout.implicitHeight
+
+    opacity: removing || adding ? 0 : 1
 
     onFocusedChanged: updateShape()
     Component.onCompleted: updateShape()
@@ -73,7 +95,7 @@ Item {
     }
 
     Behavior on y {
-        enabled: root.LazyListView.ready
+        enabled: !root.isHorizontal && root.LazyListView.ready
 
         Anim {}
     }
@@ -88,7 +110,7 @@ Item {
         id: shapeComponent
 
         MaterialShape {
-            implicitSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+            implicitSize: root.itemSize
 
             color: root.fgColour
             scale: root.focused ? 2 / 3 : root.isOccupied ? 1 / 3 : 1 / 4
@@ -101,7 +123,9 @@ Item {
             }
 
             Behavior on scale {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultSpatial
+                }
             }
         }
     }
@@ -110,7 +134,10 @@ Item {
         id: textComponent
 
         StyledText {
+            height: root.itemSize
+            width: root.itemSize
             animate: true
+            elide: Text.ElideRight
             text: {
                 if (root.focused) {
                     const label = root.activeLabel;
@@ -139,7 +166,8 @@ Item {
                 return wsName;
             }
             color: root.fgColour
-            verticalAlignment: Qt.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
             font.family: Tokens.font.workspaces
         }
     }
@@ -152,7 +180,8 @@ Item {
             grade: 25
             text: iconCacher.icon
             color: root.fgColour
-            verticalAlignment: Qt.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
 
             WsIconCacher {
                 id: iconCacher
@@ -172,17 +201,50 @@ Item {
         }
     }
 
-    ColumnLayout {
+    Component {
+        id: windowDelegate
+
+        MaterialIcon {
+            required property HyprlandToplevel modelData
+            required property int index
+
+            width: root.isHorizontal ? (AnimatedRepeater.removing ? 0 : root.windowIconSize) : undefined
+            height: root.isHorizontal ? root.itemSize : implicitHeight
+            grade: 0
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: Icons.getAppCategoryIcon(modelData?.lastIpcObject.class ?? "", "terminal")
+            color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+            opacity: (root.isHorizontal ? AnimatedRepeater.adding || AnimatedRepeater.removing : LazyListView.adding || LazyListView.removing) ? 0 : 1
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            Behavior on y {
+                enabled: !root.isHorizontal
+
+                Anim {}
+            }
+        }
+    }
+
+    GridLayout {
         id: layout
 
         anchors.fill: parent
-        spacing: 0
+        columns: root.isHorizontal ? 2 : 1
+        columnSpacing: 0
+        rowSpacing: 0
 
         Loader {
             id: indicator
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+            Layout.alignment: root.isHorizontal ? Qt.AlignVCenter : (Qt.AlignHCenter | Qt.AlignTop)
+            Layout.preferredHeight: root.itemSize
+            Layout.preferredWidth: root.itemSize
             sourceComponent: {
                 if (root.displayType === BarWorkspaceDisplay.Icons)
                     return iconLoaderComponent;
@@ -195,54 +257,58 @@ Item {
         }
 
         Loader {
-            id: windows
-
             asynchronous: true
-
-            Layout.fillWidth: true
-            Layout.topMargin: -Tokens.spacing.extraSmall / 2
-            Layout.preferredHeight: root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
-
+            active: root.showWindows && (root.isHorizontal ? root.maxHorizontalWindowIcons : Config.bar.workspaces.maxWindowIcons) > 0
             visible: active
-            active: root.showWindows && Config.bar.workspaces.maxWindowIcons > 0
 
-            sourceComponent: LazyListView {
-                spacing: 0
-                implicitHeight: contentHeight
-                cullDelegates: false
-                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+            Layout.fillWidth: !root.isHorizontal
+            Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: root.isHorizontal && root.hasWindows ? Tokens.spacing.extraSmall / 2 : 0
+            Layout.topMargin: root.isHorizontal ? 0 : -Tokens.spacing.extraSmall / 2
+            Layout.preferredWidth: root.isHorizontal ? root.horizontalWindowsWidth : root.itemSize
+            Layout.preferredHeight: root.isHorizontal ? root.itemSize : root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
 
+            sourceComponent: root.isHorizontal ? horizontalWindows : verticalWindows
+        }
+    }
+
+    Component {
+        id: verticalWindows
+
+        LazyListView {
+            spacing: 0
+            implicitHeight: contentHeight
+            cullDelegates: false
+            removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+            model: ScriptModel {
+                values: Array.from({
+                    length: root.shownWindowCount
+                }, (_, i) => root.toplevels[i])
+            }
+            delegate: windowDelegate
+        }
+    }
+
+    Component {
+        id: horizontalWindows
+
+        Row {
+            spacing: 0
+
+            move: Transition {
+                Anim {
+                    properties: "x"
+                }
+            }
+
+            AnimatedRepeater {
                 model: ScriptModel {
-                    values: {
-                        const windows = root.toplevels;
-                        const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
-                        return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
-                    }
+                    values: Array.from({
+                        length: root.shownWindowCount
+                    }, (_, i) => root.toplevels[i])
                 }
-
-                delegate: MaterialIcon {
-                    id: win
-
-                    required property var modelData
-                    required property int index // Needed, LazyListView will fail to set it if it doesn't exist
-
-                    grade: 0
-                    horizontalAlignment: Text.AlignHCenter
-                    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
-
-                    opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
-
-                    Behavior on opacity {
-                        Anim {
-                            type: Anim.DefaultEffects
-                        }
-                    }
-
-                    Behavior on y {
-                        Anim {}
-                    }
-                }
+                delegate: windowDelegate
+                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
             }
         }
     }

@@ -8,6 +8,7 @@ import Caelestia.Config
 import Caelestia.Services
 import qs.components
 import qs.services
+import qs.utils
 
 Item {
     id: root
@@ -58,9 +59,14 @@ Item {
                 VisualiserBars {
                     id: bars
 
+                    readonly property string barPos: BarPosition.resolvedPosition(Config.bar.position)
+                    readonly property int barZone: ShellState.componentsFor(root.screen)?.bar?.exclusiveZone ?? 0
+
                     anchors.fill: parent
-                    anchors.margins: Config.border.thickness
-                    anchors.leftMargin: (ShellState.componentsFor(root.screen)?.bar?.exclusiveZone ?? 0) + Tokens.spacing.small * Config.background.visualiser.spacing
+                    anchors.leftMargin: barPos === "left" ? barZone + Tokens.spacing.small * Config.background.visualiser.spacing : Config.border.thickness
+                    anchors.rightMargin: barPos === "right" ? barZone + Tokens.spacing.small * Config.background.visualiser.spacing : Config.border.thickness
+                    anchors.topMargin: barPos === "top" ? barZone + Tokens.spacing.small * Config.background.visualiser.spacing : Config.border.thickness
+                    anchors.bottomMargin: barPos === "bottom" ? barZone + Tokens.spacing.small * Config.background.visualiser.spacing : Config.border.thickness
 
                     values: Audio.cava.values
                     primaryColor: Qt.alpha(Colours.palette.m3primary, 0.7)
@@ -70,6 +76,18 @@ Item {
                     animationDuration: Tokens.anim.durations.normal
 
                     Behavior on anchors.leftMargin {
+                        Anim {}
+                    }
+
+                    Behavior on anchors.rightMargin {
+                        Anim {}
+                    }
+
+                    Behavior on anchors.topMargin {
+                        Anim {}
+                    }
+
+                    Behavior on anchors.bottomMargin {
                         Anim {}
                     }
                 }

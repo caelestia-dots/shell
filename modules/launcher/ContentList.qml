@@ -11,7 +11,6 @@ import qs.utils
 Item {
     id: root
 
-    required property var content
     required property ScreenState screenState
     required property var panels
     required property real maxHeight
@@ -106,7 +105,6 @@ Item {
             search: root.search
             screenState: root.screenState
             panels: root.panels
-            content: root.content
         }
     }
 
