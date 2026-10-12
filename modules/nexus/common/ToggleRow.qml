@@ -17,7 +17,7 @@ StyledSwitch {
 
     // Briefly flash the row, used when the settings search jumps to it.
     function flashHighlight(): void {
-        bg.flashHighlight();
+        root.bg.flashHighlight();
     }
 
     Layout.fillWidth: true

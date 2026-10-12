@@ -28,10 +28,12 @@ Singleton {
     property var indexEntries: []
     property var inverted: ({})
     property var ranking: ({})
+    readonly property var tokenKeys: Object.keys(inverted).sort()
     readonly property var highlightCache: ({
             "search": "",
             "tokens": []
         })
+    readonly property var foldCache: ({})
     // fzf finder over the entries' titles, used as a fuzzy fallback
     // when the exact/prefix index lookup comes up short. fzf is the same matcher
     // the launcher uses, so typo and mid-word matching behave consistently.
@@ -119,9 +121,18 @@ Singleton {
         // whenever the typed text is itself a whole word ("icon" before "icons").
         // A prefix-only match ranks a little below an exact one.
         const result = ({});
-        for (const key of Object.keys(root.inverted)) {
-            if (!key.startsWith(token))
-                continue;
+        const keys = root.tokenKeys;
+        let lo = 0;
+        let hi = keys.length;
+        while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (keys[mid] < token)
+                lo = mid + 1;
+            else
+                hi = mid;
+        }
+        for (let k = lo; k < keys.length && keys[k].startsWith(token); k++) {
+            const key = keys[k];
             const factor = key === token ? 1 : 0.8;
             const rank = root.ranking[key] ?? ({});
             for (const id of root.inverted[key]) {
@@ -153,18 +164,32 @@ Singleton {
         // Match against the folded text so "gorunum" lights up "Görünüm", then
         // cut the original at the same offsets. Only word starts match, like
         // the index's prefix lookup.
-        const folded = SettingsIndexer.foldAligned(text);
+        let info = root.foldCache[text];
+        if (info === undefined) {
+            const folded = SettingsIndexer.foldAligned(text);
+            const starts = [];
+            for (let i = 0; i < folded.length; i++) {
+                if (i === 0 || SettingsIndexer.isSeparator(folded[i - 1]))
+                    starts.push(i);
+            }
+            info = {
+                "folded": folded,
+                "starts": starts
+            };
+            root.foldCache[text] = info;
+        }
+
+        const folded = info.folded;
         let out = "";
         let last = 0;
-        for (let i = 0; i < folded.length; i++) {
-            if (i > 0 && !SettingsIndexer.isSeparator(folded[i - 1]))
+        for (const i of info.starts) {
+            if (i < last)
                 continue;
             const len = tokens.reduce((max, t) => folded.startsWith(t, i) ? Math.max(max, t.length) : max, 0);
             if (len === 0)
                 continue;
             out += `${escape(text.slice(last, i))}<font color="${colour}">${escape(text.slice(i, i + len))}</font>`;
             last = i + len;
-            i = last - 1;
         }
 
         // Most subtexts have no match. The caller checks for a "<font" tag to
