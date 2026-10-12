@@ -35,21 +35,7 @@ VerticalFadeFlickable {
     readonly property var results: {
         if (!searching)
             return [];
-        // Sections hide themselves when what they configure isn't available -
-        // the ethernet rows when no cable is plugged in, the add-network flow
-        // when Wi-Fi is off. Their settings have to drop out of the results
-        // as well, or search links to a page that can't be opened. The query
-        // applies this before it cuts the list down, so hidden rows don't use
-        // up result slots. Read here so the binding tracks both.
-        const ethernet = Nmcli.hasAvailableEthernet;
-        const wifi = Nmcli.wifiEnabled;
-        return SettingsSearcher.query(search, e => {
-            if (!ethernet && e.anchor.startsWith("ethernet-"))
-                return false;
-            if (!wifi && (e.anchor.startsWith("add-network-") || e.anchor === "network-add-network"))
-                return false;
-            return true;
-        });
+        return SettingsSearcher.query(search);
     }
     // Results grouped by their top-level page, so the list can show one heading
     // per page with the matching settings joined underneath it (like the
