@@ -6,6 +6,7 @@
 #include <qdbuspendingcall.h>
 #include <qdbuspendingreply.h>
 #include <qdbusreply.h>
+#include <qdbusunixfiledescriptor.h>
 #include <qloggingcategory.h>
 
 #include "core/toaster.hpp"
@@ -58,6 +59,47 @@ SessionManager::SessionManager(QObject* parent)
     ok = bus->connect(k_loginService, m_sessionPath, k_sessionIface, u"Unlock"_s, this, SLOT(handleUnlockRequested()));
     if (!ok)
         qCWarning(lcSessionManager) << "Failed to connect to Unlock signal:" << bus->lastError().message();
+}
+
+bool SessionManager::inhibitLidSwitch() const {
+    return m_inhibitLidSwitch;
+}
+
+void SessionManager::setInhibitLidSwitch(bool inhibit) {
+    if (m_inhibitLidSwitch == inhibit)
+        return;
+
+    m_inhibitLidSwitch = inhibit;
+    emit inhibitLidSwitchChanged();
+
+    if (!inhibit) {
+        // Closing the fd releases the lock
+        m_lidSwitchLock = {};
+        return;
+    }
+
+    auto bus = getSystemBus();
+    if (!bus)
+        return;
+
+    auto msg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"Inhibit"_s);
+    msg.setArguments({ u"handle-lid-switch"_s, u"caelestia"_s, u"Keep awake is enabled"_s, u"block"_s });
+
+    const auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher* self) {
+        const QDBusPendingReply<QDBusUnixFileDescriptor> reply = *self;
+        self->deleteLater();
+
+        if (reply.isError()) {
+            qCWarning(lcSessionManager) << "Failed to inhibit lid switch:" << reply.error().message();
+            return;
+        }
+
+        // Disabled while the call was in flight, dropping the reply closes the fd
+        if (m_inhibitLidSwitch)
+            m_lidSwitchLock = reply.value();
+    });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
 }
 
 bool SessionManager::exec(const QStringList& command) {

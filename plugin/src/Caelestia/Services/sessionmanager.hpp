@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qdbusconnection.h>
+#include <qdbusunixfiledescriptor.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
@@ -16,8 +17,13 @@ class SessionManager : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
+    Q_PROPERTY(bool inhibitLidSwitch READ inhibitLidSwitch WRITE setInhibitLidSwitch NOTIFY inhibitLidSwitchChanged)
+
 public:
     explicit SessionManager(QObject* parent = nullptr);
+
+    [[nodiscard]] bool inhibitLidSwitch() const;
+    void setInhibitLidSwitch(bool inhibit);
 
     Q_INVOKABLE void logout();
     Q_INVOKABLE void suspend();
@@ -29,6 +35,7 @@ public:
     Q_INVOKABLE bool exec(const QStringList& command);
 
 signals:
+    void inhibitLidSwitchChanged();
     void aboutToSleep();
     void resumed();
     void lockRequested();
@@ -47,6 +54,9 @@ private:
     void callSession(const QString& method);
 
     QString m_sessionPath;
+
+    bool m_inhibitLidSwitch = false;
+    QDBusUnixFileDescriptor m_lidSwitchLock;
 };
 
 } // namespace caelestia::services
