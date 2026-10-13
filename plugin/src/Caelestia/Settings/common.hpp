@@ -47,7 +47,7 @@ private:
 
 class DiagnosticType : public QObject {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(DiagnosticType)
     QML_SINGLETON
 
 public:

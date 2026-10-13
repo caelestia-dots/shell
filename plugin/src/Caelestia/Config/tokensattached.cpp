@@ -19,11 +19,7 @@ const AppearanceConfig* resolveAppearance(const ConfigRoot* config, bool complet
 } // namespace
 
 Tokens::Tokens(QObject* parent)
-    : QQuickAttachedPropertyPropagator(parent)
-    , m_font(new FontTokens(this))
-    , m_anim(new AnimTokens(this)) {
-    bindAnim();
-    bindFont();
+    : QQuickAttachedPropertyPropagator(parent) {
     initialize();
 }
 
@@ -51,7 +47,6 @@ void Tokens::inheritScreen(const QString& screen) {
         m_tokens = TokensSingleton::instance()->forScreen(m_screen);
     }
 
-    bindFont();
     propagateScreen();
     emit sourceChanged();
 }
@@ -71,16 +66,6 @@ void Tokens::attachedParentChange(
     const auto* tokens = qobject_cast<Tokens*>(newParent);
     if (tokens)
         inheritScreen(tokens->screen());
-}
-
-void Tokens::bindAnim() {
-    m_anim->bindDurations(ConfigSingleton::instance()->appearance()->anim()->durations());
-    m_anim->bindCurves(TokensSingleton::instance()->appearance()->curves());
-}
-
-void Tokens::bindFont() {
-    const auto* appearance = m_config ? m_config->appearance() : ConfigSingleton::instance()->appearance();
-    m_font->bindFont(appearance->font());
 }
 
 #define TOKENS_ATTACHED_GETTER(Type, name)                                                                             \
@@ -108,11 +93,11 @@ const SizeTokens* Tokens::sizes() const {
 }
 
 const FontTokens* Tokens::font() const {
-    return m_font;
+    return (m_config ? m_config : ConfigSingleton::instance())->fontTokens();
 }
 
-const AnimTokens* Tokens::anim() const {
-    return m_anim;
+const AnimTokens* Tokens::anim() {
+    return AnimTokens::instance();
 }
 
 TokensRoot* Tokens::forScreen(const QString& screen) {

@@ -11,7 +11,7 @@ namespace caelestia {
 
 class Toast : public QObject {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(Toast)
     QML_UNCREATABLE("Toast instances can only be retrieved from a Toaster")
 
     Q_PROPERTY(bool closed READ closed NOTIFY closedChanged)
