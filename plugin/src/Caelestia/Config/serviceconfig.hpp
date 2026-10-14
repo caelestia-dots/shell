@@ -43,6 +43,8 @@ class ServiceConfig : public settings::ObjectNode {
             vmap({ { u"from"_s, u"com.github.th_ch.youtube_music"_s }, { u"to"_s, u"YT Music"_s } }),
         }))
     CONFIG_GLOBAL_ENUM_PROPERTY(LyricsBackend, lyricsBackend, LyricsBackend::Auto)
+    // Also block the lid switch while keep awake is on
+    CONFIG_GLOBAL_PROPERTY(bool, keepAwakeClamshell, false)
 };
 
 } // namespace caelestia::config

@@ -1,14 +1,18 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Caelestia.Config
+import Caelestia.Services
 
 Singleton {
     id: root
 
     property alias enabled: props.enabled
     readonly property alias enabledSince: props.enabledSince
+    readonly property bool clamshell: props.enabled && GlobalConfig.services.keepAwakeClamshell
 
     onEnabledChanged: {
         if (enabled)
@@ -22,6 +26,13 @@ Singleton {
         property date enabledSince
 
         reloadableId: "idleInhibitor"
+    }
+
+    // Stops the lid from suspending (or whatever logind is set to do) while keep awake is on
+    Binding {
+        target: SessionManager
+        property: "inhibitLidSwitch"
+        value: root.clamshell
     }
 
     IdleInhibitor {
