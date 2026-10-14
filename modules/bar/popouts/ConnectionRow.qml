@@ -13,6 +13,7 @@ StyledRect {
     property string subtitle
     property bool active
     property bool loading
+    property bool warning
     property bool first
     property bool last
     default property alias trailing: trailingRow.data
@@ -75,7 +76,11 @@ StyledRect {
                 visible: text
                 animate: true
                 text: root.subtitle
-                color: root.active ? Qt.alpha(Colours.palette.m3onSecondaryContainer, 0.8) : Colours.palette.m3onSurfaceVariant
+                color: {
+                    if (root.warning)
+                        return Colours.palette.m3error;
+                    return root.active ? Qt.alpha(Colours.palette.m3onSecondaryContainer, 0.8) : Colours.palette.m3onSurfaceVariant;
+                }
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
             }
