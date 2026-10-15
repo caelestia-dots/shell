@@ -12,7 +12,7 @@ Singleton {
 
     property alias enabled: props.enabled
     readonly property alias enabledSince: props.enabledSince
-    readonly property bool clamshell: props.enabled && GlobalConfig.services.keepAwakeClamshell
+    readonly property bool clamshell: props.enabled && GlobalConfig.general.idle.inhibitWhenLidClosed
 
     onEnabledChanged: {
         if (enabled)

@@ -89,11 +89,10 @@ PageBase {
         ToggleRow {
             first: true
             last: true
-            // TRANSLATORS: laptop running with the lid closed, e.g. on an external monitor
-            text: Tr.tr("Clamshell mode")
-            subtext: Tr.tr("Stay awake with the lid closed while keep awake is on")
-            checked: GlobalConfig.services.keepAwakeClamshell
-            onToggled: GlobalConfig.services.keepAwakeClamshell = checked
+            text: Tr.tr("Stay awake with the lid closed")
+            subtext: Tr.tr("Closing the lid won't suspend while keep awake is on")
+            checked: GlobalConfig.general.idle.inhibitWhenLidClosed
+            onToggled: GlobalConfig.general.idle.inhibitWhenLidClosed = checked
         }
 
         // Polling

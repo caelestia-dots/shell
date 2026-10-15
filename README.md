@@ -235,7 +235,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
-> - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `keepAwakeClamshell`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
+> - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
 > - `utilities`: `toasts.*`, `vpn.*`
 >
 > </details>
@@ -429,6 +429,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "lockBeforeSleep": true,
             "inhibitWhenAudio": true,
             "inhibitWhenCharging": false,
+            "inhibitWhenLidClosed": false,
             "timeouts": [
                 {
                     "timeout": 180,
@@ -847,8 +848,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "playerAliases": [
             { "from": "com.github.th_ch.youtube_music", "to": "YT Music" }
         ],
-        "lyricsBackend": "Auto",
-        "keepAwakeClamshell": false
+        "lyricsBackend": "Auto"
     },
     "session": {
         "enabled": true,
