@@ -56,7 +56,13 @@ StyledRect {
 
             StyledText {
                 Layout.fillWidth: true
-                text: IdleInhibitor.enabled ? Tr.trCtx("Preventing sleep mode", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor")
+                text: {
+                    if (IdleInhibitor.clamshell)
+                        return Tr.trCtx("Preventing sleep (clamshell mode)", "idle inhibitor");
+                    if (IdleInhibitor.enabled)
+                        return Tr.trCtx("Preventing sleep mode", "idle inhibitor");
+                    return Tr.trCtx("Normal power management", "idle inhibitor");
+                }
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
