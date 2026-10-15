@@ -299,14 +299,47 @@ ColumnLayout {
                 elide: Text.ElideRight
             }
 
-            MaterialIcon {
-                text: "bolt"
-                color: contents.accentColour
-                fontStyle: Tokens.font.icon.medium
-                fill: 1
+            // Power draw while discharging, charge rate while charging
+            StyledRect {
+                id: powerChip
 
-                scale: root.charging ? 1 : 0
-                opacity: root.charging ? 1 : 0
+                readonly property real watts: Math.abs(root.device.changeRate)
+                readonly property bool hasWatts: watts >= 0.05
+                readonly property bool shown: hasWatts || root.charging
+
+                implicitWidth: powerRow.implicitWidth + Tokens.padding.small * 2
+                implicitHeight: powerRow.implicitHeight + Tokens.padding.extraSmall
+
+                radius: Tokens.rounding.full
+                color: Qt.alpha(contents.accentColour, 0.15)
+
+                scale: shown ? 1 : 0
+                opacity: shown ? 1 : 0
+
+                Row {
+                    id: powerRow
+
+                    anchors.centerIn: parent
+                    spacing: root.charging && powerChip.hasWatts ? Tokens.spacing.extraSmall / 2 : 0
+
+                    MaterialIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: root.charging
+                        text: "bolt"
+                        color: contents.accentColour
+                        fontStyle: Tokens.font.icon.small
+                        fill: 1
+                    }
+
+                    StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: powerChip.hasWatts
+                        // TRANSLATORS: power in watts, e.g. 9.4 W
+                        text: Tr.tr("%1 W").arg(powerChip.watts.toLocaleString(Qt.locale(), "f", 1))
+                        color: contents.accentColour
+                        font: Tokens.font.label.large
+                    }
+                }
 
                 Behavior on scale {
                     Anim {
