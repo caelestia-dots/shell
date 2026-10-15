@@ -12,7 +12,8 @@ Singleton {
 
     property alias enabled: props.enabled
     readonly property alias enabledSince: props.enabledSince
-    readonly property bool clamshell: props.enabled && GlobalConfig.general.idle.inhibitWhenLidClosed
+    // Whether the lid switch is actually being blocked, requesting it can fail
+    readonly property bool inhibitingLidSwitch: SessionManager.lidSwitchInhibited
 
     onEnabledChanged: {
         if (enabled)
@@ -32,7 +33,7 @@ Singleton {
     Binding {
         target: SessionManager
         property: "inhibitLidSwitch"
-        value: root.clamshell
+        value: props.enabled && GlobalConfig.general.idle.inhibitWhenLidClosed
     }
 
     IdleInhibitor {

@@ -57,7 +57,7 @@ StyledRect {
             StyledText {
                 Layout.fillWidth: true
                 text: {
-                    if (IdleInhibitor.clamshell)
+                    if (IdleInhibitor.inhibitingLidSwitch)
                         return Tr.trCtx("Preventing sleep, even with the lid closed", "idle inhibitor");
                     if (IdleInhibitor.enabled)
                         return Tr.trCtx("Preventing sleep mode", "idle inhibitor");
