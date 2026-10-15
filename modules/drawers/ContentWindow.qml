@@ -241,8 +241,14 @@ StyledWindow {
             deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
             x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
             implicitWidth: panels.popouts.width * (1 + extraWidth)
+            // Concentric with the cards inside the popouts (card radius + popout padding)
+            radius: panels.popouts.isDetached ? Tokens.rounding.extraLarge : Tokens.rounding.extraLarge + Tokens.padding.large
 
             Behavior on extraWidth {
+                Anim {}
+            }
+
+            Behavior on radius {
                 Anim {}
             }
         }
