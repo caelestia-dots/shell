@@ -72,34 +72,67 @@ void SessionManager::setInhibitLidSwitch(bool inhibit) {
     m_inhibitLidSwitch = inhibit;
     emit inhibitLidSwitchChanged();
 
-    if (!inhibit) {
-        // Closing the fd releases the lock
-        m_lidSwitchLock = {};
-        return;
-    }
+    // Invalidates any request still in flight
+    m_lidSwitchRequest++;
+
+    if (inhibit)
+        acquireLidSwitchLock();
+    else
+        setLidSwitchLock({}); // Closing the fd releases the lock
+}
+
+bool SessionManager::lidSwitchInhibited() const {
+    return m_lidSwitchLock.isValid();
+}
+
+void SessionManager::acquireLidSwitchLock() {
+    const auto notifyFailed = [](const QString& error) {
+        qCWarning(lcSessionManager) << "Failed to inhibit lid switch:" << error;
+        Toaster::instance()->toast(mark(u"Unable to stay awake with the lid closed"_s),
+            mark(u"Closing the lid may still suspend: %1"_s, { error }), u"warning"_s, Toast::Type::Warning);
+    };
 
     auto bus = getSystemBus();
-    if (!bus)
+    if (!bus) {
+        notifyFailed(QDBusConnection::systemBus().lastError().message());
         return;
+    }
 
     auto msg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"Inhibit"_s);
     msg.setArguments({ u"handle-lid-switch"_s, u"caelestia"_s, u"Keep awake is enabled"_s, u"block"_s });
 
     const auto* watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher* self) {
-        const QDBusPendingReply<QDBusUnixFileDescriptor> reply = *self;
-        self->deleteLater();
+    connect(watcher, &QDBusPendingCallWatcher::finished, this,
+        [this, notifyFailed, request = m_lidSwitchRequest](QDBusPendingCallWatcher* self) {
+            const QDBusPendingReply<QDBusUnixFileDescriptor> reply = *self;
+            self->deleteLater();
 
-        if (reply.isError()) {
-            qCWarning(lcSessionManager) << "Failed to inhibit lid switch:" << reply.error().message();
-            return;
-        }
+            // Cancelled or requested again while in flight, dropping the reply closes the fd
+            if (request != m_lidSwitchRequest)
+                return;
 
-        // Disabled while the call was in flight, dropping the reply closes the fd
-        if (m_inhibitLidSwitch)
-            m_lidSwitchLock = reply.value();
-    });
+            if (reply.isError()) {
+                notifyFailed(reply.error().message());
+                return;
+            }
+
+            const auto lock = reply.value();
+            if (!lock.isValid()) {
+                notifyFailed(u"no inhibitor file descriptor received"_s);
+                return;
+            }
+
+            setLidSwitchLock(lock);
+        });
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
+}
+
+void SessionManager::setLidSwitchLock(const QDBusUnixFileDescriptor& lock) {
+    const bool wasInhibited = lidSwitchInhibited();
+    m_lidSwitchLock = lock;
+
+    if (lidSwitchInhibited() != wasInhibited)
+        emit lidSwitchInhibitedChanged();
 }
 
 bool SessionManager::exec(const QStringList& command) {
