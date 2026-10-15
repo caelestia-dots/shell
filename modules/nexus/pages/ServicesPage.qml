@@ -81,6 +81,21 @@ PageBase {
             onClicked: root.nState.openSubPage(1)
         }
 
+        // Keep awake
+        SectionHeader {
+            text: Tr.trCtx("Keep awake", "idle inhibitor")
+        }
+
+        ToggleRow {
+            first: true
+            last: true
+            // TRANSLATORS: laptop running with the lid closed, e.g. on an external monitor
+            text: Tr.tr("Clamshell mode")
+            subtext: Tr.tr("Stay awake with the lid closed while keep awake is on")
+            checked: GlobalConfig.services.keepAwakeClamshell
+            onToggled: GlobalConfig.services.keepAwakeClamshell = checked
+        }
+
         // Polling
         SectionHeader {
             text: Tr.tr("Polling")
