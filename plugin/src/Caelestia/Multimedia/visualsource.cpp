@@ -53,6 +53,18 @@ void VisualSource::setPlaying(bool playing) {
     emit playingChanged();
 }
 
+VisualSource::FillMode VisualSource::fillMode() const {
+    return m_fillMode;
+}
+
+void VisualSource::setFillMode(FillMode fillMode) {
+    if (m_fillMode == fillMode)
+        return;
+
+    m_fillMode = fillMode;
+    emit fillModeChanged();
+}
+
 QObject* VisualSource::videoOutput() const {
     return m_videoOutput;
 }

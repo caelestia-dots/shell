@@ -18,6 +18,8 @@ class VisualSource : public QObject {
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(QSize sourceSize READ sourceSize WRITE setSourceSize NOTIFY sourceSizeChanged)
     Q_PROPERTY(bool playing READ playing WRITE setPlaying NOTIFY playingChanged)
+    Q_PROPERTY(
+        caelestia::multimedia::VisualSource::FillMode fillMode READ fillMode WRITE setFillMode NOTIFY fillModeChanged)
     // A QML VideoOutput element from QtMultimedia
     Q_PROPERTY(QObject* videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
 
@@ -28,6 +30,13 @@ public:
         Live,
     };
     Q_ENUM(Type)
+
+    enum class FillMode : quint8 {
+        Stretch = 0,
+        PreserveAspectFit,
+        PreserveAspectCrop,
+    };
+    Q_ENUM(FillMode)
 
     explicit VisualSource(QObject* parent = nullptr);
 
@@ -44,6 +53,9 @@ public:
     [[nodiscard]] bool playing() const;
     void setPlaying(bool playing);
 
+    [[nodiscard]] FillMode fillMode() const;
+    void setFillMode(FillMode fillMode);
+
     [[nodiscard]] QObject* videoOutput() const;
     void setVideoOutput(QObject* videoOutput);
 
@@ -54,6 +66,7 @@ signals:
     void sourceChanged();
     void sourceSizeChanged();
     void playingChanged();
+    void fillModeChanged();
     void videoOutputChanged();
 
 private:
@@ -63,6 +76,7 @@ private:
     QString m_source;
     QSize m_sourceSize;
     bool m_playing = false;
+    FillMode m_fillMode = FillMode::PreserveAspectCrop;
     QObject* m_videoOutput = nullptr;
 };
 
