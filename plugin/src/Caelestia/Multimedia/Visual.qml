@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtMultimedia
 import Caelestia.Config
@@ -7,6 +9,7 @@ Item {
     id: root
 
     property alias source: vis.source
+    property alias fillMode: vis.fillMode
     readonly property bool ready: vis.videoReady || image.status === Image.Ready
 
     opacity: ready ? 1 : 0
@@ -30,7 +33,9 @@ Item {
 
         anchors.fill: parent
         active: vis.type === VisualSource.Live
-        sourceComponent: VideoOutput {}
+        sourceComponent: VideoOutput {
+            fillMode: vis.fillMode
+        }
     }
 
     Image {
@@ -39,5 +44,6 @@ Item {
         anchors.fill: parent
         source: vis.imagePath
         asynchronous: true
+        fillMode: vis.fillMode
     }
 }
