@@ -11,7 +11,9 @@ class VisualSource : public QObject {
     QML_NAMED_ELEMENT(VisualSource)
 
     Q_PROPERTY(caelestia::multimedia::VisualSource::Type type READ type NOTIFY typeChanged)
-    Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
+    Q_PROPERTY(bool videoReady READ videoReady NOTIFY videoReadyChanged)
+    // The path to the image (source or a cached file when type is Still), or preview if type is Live.
+    // The preview is cleared when the video is ready.
     Q_PROPERTY(QUrl imagePath READ imagePath NOTIFY imagePathChanged)
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(QSize sourceSize READ sourceSize WRITE setSourceSize NOTIFY sourceSizeChanged)
@@ -30,7 +32,7 @@ public:
     explicit VisualSource(QObject* parent = nullptr);
 
     [[nodiscard]] Type type() const;
-    [[nodiscard]] bool ready() const;
+    [[nodiscard]] bool videoReady() const;
     [[nodiscard]] QUrl imagePath() const;
 
     [[nodiscard]] QString source() const;
@@ -47,7 +49,7 @@ public:
 
 signals:
     void typeChanged();
-    void readyChanged();
+    void videoReadyChanged();
     void imagePathChanged();
     void sourceChanged();
     void sourceSizeChanged();
@@ -56,7 +58,7 @@ signals:
 
 private:
     Type m_type = Type::Unknown;
-    bool m_ready = false;
+    bool m_videoReady = false;
     QUrl m_imagePath;
     QString m_source;
     QSize m_sourceSize;

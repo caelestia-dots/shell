@@ -7,6 +7,16 @@ Item {
     id: root
 
     property alias source: vis.source
+    readonly property bool ready: vis.videoReady || image.status === Image.Ready
+
+    opacity: ready ? 1 : 0
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Tokens.anim.durations.expressiveDefaultEffects
+            easing: Tokens.anim.expressiveDefaultEffects
+        }
+    }
 
     VisualSource {
         id: vis
@@ -29,14 +39,5 @@ Item {
         anchors.fill: parent
         source: vis.imagePath
         asynchronous: true
-
-        opacity: status === Image.Ready && !vis.ready ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultEffects
-                easing: Tokens.anim.expressiveDefaultEffects
-            }
-        }
     }
 }
