@@ -9,8 +9,8 @@ VisualSource::Type VisualSource::type() const {
     return m_type;
 }
 
-bool VisualSource::ready() const {
-    return m_ready;
+bool VisualSource::videoReady() const {
+    return m_videoReady;
 }
 
 QString VisualSource::source() const {
