@@ -5,11 +5,11 @@
 
 namespace caelestia::multimedia {
 
-class Visual : public QQuickItem {
+class VisualSource : public QQuickItem {
     Q_OBJECT
-    QML_NAMED_ELEMENT(Visual)
+    QML_NAMED_ELEMENT(VisualSource)
 
-    Q_PROPERTY(caelestia::multimedia::Visual::Type type READ type NOTIFY typeChanged)
+    Q_PROPERTY(caelestia::multimedia::VisualSource::Type type READ type NOTIFY typeChanged)
     Q_PROPERTY(bool ready READ ready NOTIFY readyChanged)
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(bool playing READ playing WRITE setPlaying NOTIFY playingChanged)
@@ -23,7 +23,7 @@ public:
         Live,
     };
 
-    explicit Visual(QQuickItem* parent = nullptr);
+    explicit VisualSource(QQuickItem* parent = nullptr);
 
     [[nodiscard]] Type type() const;
     [[nodiscard]] bool ready() const;
