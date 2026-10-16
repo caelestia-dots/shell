@@ -13,6 +13,18 @@ bool Visual::ready() const {
     return m_ready;
 }
 
+QString Visual::source() const {
+    return m_source;
+}
+
+void Visual::setSource(const QString& source) {
+    if (m_source == source)
+        return;
+
+    m_source = source;
+    emit sourceChanged();
+}
+
 bool Visual::playing() const {
     return m_playing;
 }
