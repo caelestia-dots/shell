@@ -1,11 +1,10 @@
 #pragma once
 
 #include <qobject.h>
-#include <qquickitem.h>
 
 namespace caelestia::multimedia {
 
-class VisualSource : public QQuickItem {
+class VisualSource : public QObject {
     Q_OBJECT
     QML_NAMED_ELEMENT(VisualSource)
 
@@ -23,7 +22,7 @@ public:
         Live,
     };
 
-    explicit VisualSource(QQuickItem* parent = nullptr);
+    explicit VisualSource(QObject* parent = nullptr);
 
     [[nodiscard]] Type type() const;
     [[nodiscard]] bool ready() const;

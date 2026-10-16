@@ -2,8 +2,8 @@
 
 namespace caelestia::multimedia {
 
-VisualSource::VisualSource(QQuickItem* parent)
-    : QQuickItem(parent) {}
+VisualSource::VisualSource(QObject* parent)
+    : QObject(parent) {}
 
 VisualSource::Type VisualSource::type() const {
     return m_type;
