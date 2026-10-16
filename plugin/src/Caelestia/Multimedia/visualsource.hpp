@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qobject.h>
+#include <qqmlintegration.h>
 #include <qsize.h>
 
 namespace caelestia::multimedia {
@@ -24,6 +25,7 @@ public:
         Still,
         Live,
     };
+    Q_ENUM(Type)
 
     explicit VisualSource(QObject* parent = nullptr);
 
