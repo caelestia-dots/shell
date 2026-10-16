@@ -58,7 +58,7 @@ Item {
 
             current[0] = Math.min(i, beyond);
             if (start > 1)
-                current[start - 1] = beyond
+                current[start - 1] = beyond;
 
             let minDistance = current[0];
 
