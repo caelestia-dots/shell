@@ -17,12 +17,28 @@ QString VisualSource::source() const {
     return m_source;
 }
 
+QUrl VisualSource::imagePath() const {
+    return m_imagePath;
+}
+
 void VisualSource::setSource(const QString& source) {
     if (m_source == source)
         return;
 
     m_source = source;
     emit sourceChanged();
+}
+
+QSize VisualSource::sourceSize() const {
+    return m_sourceSize;
+}
+
+void VisualSource::setSourceSize(const QSize& size) {
+    if (m_sourceSize == size)
+        return;
+
+    m_sourceSize = size;
+    emit sourceSizeChanged();
 }
 
 bool VisualSource::playing() const {
