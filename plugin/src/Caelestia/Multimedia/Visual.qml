@@ -24,8 +24,8 @@ Item {
     VisualSource {
         id: vis
 
-        sourceSize: Qt.size(root.width, root.height)
         videoOutput: videoOut.item
+        sizeSource: root
     }
 
     Loader {

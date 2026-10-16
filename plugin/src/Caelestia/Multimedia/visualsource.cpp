@@ -29,18 +29,6 @@ void VisualSource::setSource(const QString& source) {
     emit sourceChanged();
 }
 
-QSize VisualSource::sourceSize() const {
-    return m_sourceSize;
-}
-
-void VisualSource::setSourceSize(const QSize& size) {
-    if (m_sourceSize == size)
-        return;
-
-    m_sourceSize = size;
-    emit sourceSizeChanged();
-}
-
 bool VisualSource::playing() const {
     return m_playing;
 }
@@ -75,6 +63,18 @@ void VisualSource::setVideoOutput(QObject* videoOutput) {
 
     m_videoOutput = videoOutput;
     emit videoOutputChanged();
+}
+
+QQuickItem* VisualSource::sizeSource() const {
+    return m_sizeSource;
+}
+
+void VisualSource::setSizeSource(QQuickItem* sizeSource) {
+    if (m_sizeSource == sizeSource)
+        return;
+
+    m_sizeSource = sizeSource;
+    emit sizeSourceChanged();
 }
 
 } // namespace caelestia::multimedia

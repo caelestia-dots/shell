@@ -2,6 +2,7 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qquickitem.h>
 #include <qsize.h>
 
 namespace caelestia::multimedia {
@@ -16,12 +17,13 @@ class VisualSource : public QObject {
     // The preview is cleared when the video is ready.
     Q_PROPERTY(QUrl imagePath READ imagePath NOTIFY imagePathChanged)
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(QSize sourceSize READ sourceSize WRITE setSourceSize NOTIFY sourceSizeChanged)
     Q_PROPERTY(bool playing READ playing WRITE setPlaying NOTIFY playingChanged)
     Q_PROPERTY(
         caelestia::multimedia::VisualSource::FillMode fillMode READ fillMode WRITE setFillMode NOTIFY fillModeChanged)
     // A QML VideoOutput element from QtMultimedia
     Q_PROPERTY(QObject* videoOutput READ videoOutput WRITE setVideoOutput NOTIFY videoOutputChanged)
+    // A QML item to use for the size of the loaded media
+    Q_PROPERTY(QQuickItem* sizeSource READ sizeSource WRITE setSizeSource NOTIFY sizeSourceChanged)
 
 public:
     enum class Type : quint8 {
@@ -47,9 +49,6 @@ public:
     [[nodiscard]] QString source() const;
     void setSource(const QString& source);
 
-    [[nodiscard]] QSize sourceSize() const;
-    void setSourceSize(const QSize& size);
-
     [[nodiscard]] bool playing() const;
     void setPlaying(bool playing);
 
@@ -59,25 +58,28 @@ public:
     [[nodiscard]] QObject* videoOutput() const;
     void setVideoOutput(QObject* videoOutput);
 
+    [[nodiscard]] QQuickItem* sizeSource() const;
+    void setSizeSource(QQuickItem* sizeSource);
+
 signals:
     void typeChanged();
     void videoReadyChanged();
     void imagePathChanged();
     void sourceChanged();
-    void sourceSizeChanged();
     void playingChanged();
     void fillModeChanged();
     void videoOutputChanged();
+    void sizeSourceChanged();
 
 private:
     Type m_type = Type::Unknown;
     bool m_videoReady = false;
     QUrl m_imagePath;
     QString m_source;
-    QSize m_sourceSize;
     bool m_playing = false;
     FillMode m_fillMode = FillMode::PreserveAspectCrop;
     QObject* m_videoOutput = nullptr;
+    QQuickItem* m_sizeSource = nullptr;
 };
 
 } // namespace caelestia::multimedia
