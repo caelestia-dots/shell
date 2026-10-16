@@ -1,23 +1,23 @@
-#include "visual.hpp"
+#include "visualsource.hpp"
 
 namespace caelestia::multimedia {
 
-Visual::Visual(QQuickItem* parent)
+VisualSource::VisualSource(QQuickItem* parent)
     : QQuickItem(parent) {}
 
-Visual::Type Visual::type() const {
+VisualSource::Type VisualSource::type() const {
     return m_type;
 }
 
-bool Visual::ready() const {
+bool VisualSource::ready() const {
     return m_ready;
 }
 
-QString Visual::source() const {
+QString VisualSource::source() const {
     return m_source;
 }
 
-void Visual::setSource(const QString& source) {
+void VisualSource::setSource(const QString& source) {
     if (m_source == source)
         return;
 
@@ -25,11 +25,11 @@ void Visual::setSource(const QString& source) {
     emit sourceChanged();
 }
 
-bool Visual::playing() const {
+bool VisualSource::playing() const {
     return m_playing;
 }
 
-void Visual::setPlaying(bool playing) {
+void VisualSource::setPlaying(bool playing) {
     if (m_playing == playing)
         return;
 
@@ -37,11 +37,11 @@ void Visual::setPlaying(bool playing) {
     emit playingChanged();
 }
 
-QObject* Visual::videoOutput() const {
+QObject* VisualSource::videoOutput() const {
     return m_videoOutput;
 }
 
-void Visual::setVideoOutput(QObject* videoOutput) {
+void VisualSource::setVideoOutput(QObject* videoOutput) {
     if (m_videoOutput == videoOutput)
         return;
 

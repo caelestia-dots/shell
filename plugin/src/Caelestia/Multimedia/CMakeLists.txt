@@ -1,7 +1,7 @@
 qml_module(caelestia-multimedia
     URI Caelestia.Multimedia
     SOURCES
-        visual.cpp
+        visualsource.cpp
     LIBRARIES
         Qt::Quick
         Qt::Multimedia
