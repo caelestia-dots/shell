@@ -18,6 +18,9 @@ StyledRect {
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
     readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
 
+    readonly property real compactSummaryRatio: 0.55
+    readonly property real compactSummaryWidth: Math.max(0, Math.min(dummySummary.width, width * compactSummaryRatio))
+
     implicitHeight: nonAnimHeight
 
     radius: Tokens.rounding.medium
@@ -38,6 +41,7 @@ StyledRect {
             timeStr.anchors.margins: root.Tokens.padding.medium
             expandedContent.anchors.margins: root.Tokens.padding.medium
             summary.width: root.width - root.Tokens.padding.medium * 2 - timeStr.implicitWidth - root.Tokens.spacing.small
+            summary.wrapMode: Text.WordWrap
             summary.maximumLineCount: Number.MAX_SAFE_INTEGER
         }
     }
@@ -61,11 +65,11 @@ StyledRect {
         anchors.top: parent.top
         anchors.left: parent.left
 
-        width: parent.width
+        width: root.compactSummaryWidth
         text: root.modelData?.summary ?? ""
         color: root.modelData?.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
         elide: Text.ElideRight
-        wrapMode: Text.WordWrap
+        wrapMode: Text.NoWrap
         maximumLineCount: 1
     }
 
@@ -77,6 +81,9 @@ StyledRect {
 
         visible: false
         text: root.modelData?.summary ?? ""
+        wrapMode: Text.NoWrap
+        elide: Text.ElideNone
+        maximumLineCount: 1
     }
 
     WrappedLoader {
@@ -84,7 +91,8 @@ StyledRect {
 
         shouldBeActive: !root.expanded
         anchors.top: parent.top
-        anchors.left: dummySummary.right
+        // Anchoring to dummySummary gives a negative width for long summaries
+        anchors.left: summary.right
         anchors.right: parent.right
         anchors.leftMargin: Tokens.spacing.small
 
@@ -92,6 +100,8 @@ StyledRect {
             text: String(root.modelData?.body ?? "").replace(/\n/g, " ")
             color: root.modelData?.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline
             elide: Text.ElideRight
+            wrapMode: Text.NoWrap
+            maximumLineCount: 1
         }
     }
 
