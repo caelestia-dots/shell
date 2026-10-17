@@ -148,6 +148,7 @@ Item {
         id: live
 
         anchors.fill: parent
+        playing: true
         animate: false
         layer.enabled: true
 
