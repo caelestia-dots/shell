@@ -19,4 +19,5 @@ include(cmake/qml-module.cmake)
 add_library(caelestia-util INTERFACE)
 target_include_directories(caelestia-util INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+add_subdirectory(3rdparty/rgbcx)
 add_subdirectory(src/Caelestia)
