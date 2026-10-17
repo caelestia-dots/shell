@@ -1,9 +1,13 @@
 #pragma once
 
+#include <qstring.h>
+
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
 namespace caelestia::config {
+
+using Qt::StringLiterals::operator""_s;
 
 class LockConfig : public settings::ObjectNode {
     CONFIG_NODE(LockConfig, settings::ObjectNode)
@@ -13,6 +17,12 @@ class LockConfig : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, recolourLogo, true)
     CONFIG_GLOBAL_PROPERTY(bool, enableFprint, true)
     CONFIG_GLOBAL_PROPERTY(int, maxFprintTries, 3)
+    // Generic face unlock (Howdy / Visage / future PAM face backends)
+    CONFIG_GLOBAL_PROPERTY(bool, enableFaceUnlock, true)
+    CONFIG_GLOBAL_PROPERTY(QString, faceAuthProvider, u"howdy"_s)
+    CONFIG_GLOBAL_PROPERTY(int, maxFaceAuthTries, 3)
+    CONFIG_GLOBAL_PROPERTY(bool, triggerFaceAuthOnWake, true)
+    // Deprecated Howdy-specific keys — kept for backward compatibility
     CONFIG_GLOBAL_PROPERTY(bool, enableHowdy, true)
     CONFIG_GLOBAL_PROPERTY(int, maxHowdyTries, 3)
     CONFIG_GLOBAL_PROPERTY(bool, triggerHowdyOnWake, true)
