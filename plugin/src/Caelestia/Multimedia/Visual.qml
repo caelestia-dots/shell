@@ -10,9 +10,10 @@ Item {
 
     property alias source: vis.source
     property alias fillMode: vis.fillMode
+    property bool animate: true
     readonly property bool ready: vis.videoReady || image.status === Image.Ready
 
-    opacity: ready ? 1 : 0
+    opacity: !animate || ready ? 1 : 0
 
     Behavior on opacity {
         NumberAnimation {
