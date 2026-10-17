@@ -177,6 +177,18 @@ qreal Gpu::temperature() const {
     return m_temperature;
 }
 
+QQmlListProperty<GpuDevice> Gpu::devicesProp() {
+    return { this, nullptr, &Gpu::devicesCount, &Gpu::devicesAt };
+}
+
+qsizetype Gpu::devicesCount(QQmlListProperty<GpuDevice>* prop) {
+    return static_cast<Gpu*>(prop->object)->m_devices.size();
+}
+
+GpuDevice* Gpu::devicesAt(QQmlListProperty<GpuDevice>* prop, qsizetype i) {
+    return static_cast<Gpu*>(prop->object)->m_devices.at(i);
+}
+
 void Gpu::setType(GpuType value) {
     if (value == m_type) {
         return;
@@ -184,6 +196,9 @@ void Gpu::setType(GpuType value) {
     m_type = value;
     if (m_type == GpuType::None) {
         resetUsage();
+    }
+    if (m_type != GpuType::Nvidia) {
+        resizeDevices(0);
     }
     emit typeChanged();
 }
@@ -335,8 +350,9 @@ void Gpu::startNvidiaUsage() {
     }
     m_nvidiaQuerying = true;
     const int generation = m_generation;
+    // Name goes last so a comma inside it cannot shift the numeric fields
     runProcess(u"nvidia-smi"_s,
-        { u"--query-gpu=utilization.gpu,temperature.gpu"_s, u"--format=csv,noheader,nounits"_s },
+        { u"--query-gpu=utilization.gpu,temperature.gpu,name"_s, u"--format=csv,noheader,nounits"_s },
         [this, generation](const QByteArray& out) {
             m_nvidiaQuerying = false;
 
@@ -345,20 +361,44 @@ void Gpu::startNvidiaUsage() {
                 return;
             }
 
-            const QList<QByteArray> parts = out.trimmed().split(',');
-            if (parts.size() < 2) {
+            const QByteArray trimmed = out.trimmed();
+            if (trimmed.isEmpty()) {
                 return;
             }
-            bool ok1 = false;
-            bool ok2 = false;
-            const qreal usage = parts.at(0).trimmed().toDouble(&ok1) / 100.0;
-            const qreal temp = parts.at(1).trimmed().toDouble(&ok2);
-            if (ok1 && std::abs(usage - m_percentage) > 0.0001) {
-                m_percentage = usage;
+
+            // One line per GPU. Splitting the whole output on commas instead glues one
+            // GPU's temperature to the next GPU's usage, so neither parses.
+            const QList<QByteArray> lines = trimmed.split('\n');
+            resizeDevices(lines.size());
+
+            for (qsizetype i = 0; i < lines.size(); ++i) {
+                const QList<QByteArray> parts = lines.at(i).split(',');
+                if (parts.size() < 3) {
+                    continue;
+                }
+                bool ok1 = false;
+                bool ok2 = false;
+                const qreal usage = parts.at(0).trimmed().toDouble(&ok1) / 100.0;
+                const qreal temp = parts.at(1).trimmed().toDouble(&ok2);
+
+                GpuDevice* const device = m_devices.at(i);
+                device->setName(cleanName(QString::fromUtf8(parts.mid(2).join(','))));
+                if (ok1) {
+                    device->setPercentage(usage);
+                }
+                if (ok2) {
+                    device->setTemperature(temp);
+                }
+            }
+
+            // The aggregate follows the first GPU, the same one the name probe reports
+            const GpuDevice* const first = m_devices.constFirst();
+            if (std::abs(first->percentage() - m_percentage) > 0.0001) {
+                m_percentage = first->percentage();
                 emit percentageChanged();
             }
-            if (ok2 && std::abs(temp - m_temperature) > 0.05) {
-                m_temperature = temp;
+            if (std::abs(first->temperature() - m_temperature) > 0.05) {
+                m_temperature = first->temperature();
                 emit temperatureChanged();
             }
         });
@@ -382,6 +422,19 @@ void Gpu::resetUsage() {
         m_temperature = 0.0;
         emit temperatureChanged();
     }
+}
+
+void Gpu::resizeDevices(qsizetype count) {
+    if (count == m_devices.size()) {
+        return;
+    }
+    while (m_devices.size() > count) {
+        m_devices.takeLast()->deleteLater();
+    }
+    while (m_devices.size() < count) {
+        m_devices.append(new GpuDevice(this));
+    }
+    emit devicesChanged();
 }
 
 } // namespace caelestia::services
