@@ -52,8 +52,8 @@ void gatherBlock(const QImage& image, int bx, int by, quint8* out) {
     for (int y = 0; y < 4; ++y) {
         const quint8* row = image.constScanLine(std::min(by * 4 + y, maxY));
         for (int x = 0; x < 4; ++x) {
-            const int px = std::min(bx * 4 + x, maxX);
-            std::memcpy(out + (y * 4 + x) * 4, row + px * 4, 4);
+            const qsizetype px = std::min(bx * 4 + x, maxX);
+            std::memcpy(out + static_cast<qsizetype>(y * 4 + x) * 4, row + px * 4, 4);
         }
     }
 }
@@ -106,12 +106,13 @@ QByteArray encodeBc3(const QImage& source) {
     header.glTypeSize = 1;
     header.glInternalFormat = k_glBc3;
     header.glBaseInternalFormat = k_glRgba;
-    header.pixelWidth = quint32(image.width());
-    header.pixelHeight = quint32(image.height());
+    header.pixelWidth = static_cast<quint32>(image.width());
+    header.pixelHeight = static_cast<quint32>(image.height());
     header.numberOfFaces = 1;
     header.numberOfMipmapLevels = 1;
 
-    QByteArray out(sizeof(header) + sizeof(imageSize) + imageSize, Qt::Uninitialized);
+    const auto totalSize = static_cast<qsizetype>(sizeof(header) + sizeof(imageSize)) + imageSize;
+    QByteArray out(totalSize, Qt::Uninitialized);
     std::memcpy(out.data(), &header, sizeof(header));
     std::memcpy(out.data() + sizeof(header), &imageSize, sizeof(imageSize));
     auto* blocks = reinterpret_cast<quint8*>(out.data() + sizeof(header) + sizeof(imageSize));
@@ -123,7 +124,7 @@ QByteArray encodeBc3(const QImage& source) {
         alignas(16) quint8 pixels[64];
         for (int bx = 0; bx < blocksW; ++bx) {
             gatherBlock(image, bx, by, pixels);
-            rgbcx::encode_bc3(k_rgbcxLevel, blocks + (qsizetype(by) * blocksW + bx) * 16, pixels);
+            rgbcx::encode_bc3(k_rgbcxLevel, blocks + (static_cast<qsizetype>(by) * blocksW + bx) * 16, pixels);
         }
     });
 
