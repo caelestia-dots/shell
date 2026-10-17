@@ -31,15 +31,9 @@ body:
   - type: textarea
     attributes:
       label: "Version info"
-      description: Run `caelestia -v` and paste the result below.
-      value: |
-        <details><summary>Version info</summary>
-
-        ```
-        <!-- Run `caelestia -v` and paste the result here! -->
-        ```
-
-        </details>
+      description: "Run `caelestia -v` and paste the result below."
+      placeholder: "Paste the output of `caelestia -v` here!"
+      render: text
     validations:
       required: true
 

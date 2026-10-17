@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
-import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Services
 import qs.components.misc
@@ -45,6 +44,14 @@ Singleton {
         Hyprland.dispatch(request);
     }
 
+    function focusWorkspace(ws: var): void {
+        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
+    }
+
+    function toggleSpecial(name: string): void {
+        dispatch(usingLua ? `hl.dsp.workspace.toggle_special("${name}")` : `togglespecialworkspace ${name}`);
+    }
+
     function cycleSpecialWorkspace(direction: string): void {
         const openSpecials = workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0);
 
@@ -57,11 +64,11 @@ Singleton {
             if (lastSpecialWorkspace) {
                 const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
                 if (workspace && workspace.lastIpcObject.windows > 0) {
-                    dispatch(usingLua ? `hl.dsp.focus({ workspace = "${lastSpecialWorkspace}" })` : `workspace ${lastSpecialWorkspace}`);
+                    focusWorkspace(lastSpecialWorkspace);
                     return;
                 }
             }
-            dispatch(usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[0].name}" })` : `workspace ${openSpecials[0].name}`);
+            focusWorkspace(openSpecials[0].name);
             return;
         }
 
@@ -75,7 +82,7 @@ Singleton {
                 nextIndex = (currentIndex - 1 + openSpecials.length) % openSpecials.length;
         }
 
-        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${openSpecials[nextIndex].name}" })` : `workspace ${openSpecials[nextIndex].name}`);
+        focusWorkspace(openSpecials[nextIndex].name);
     }
 
     function monitorNames(): list<string> {
@@ -86,16 +93,19 @@ Singleton {
         return Hyprland.monitorFor(screen);
     }
 
-    function toplevelsForWs(ws: int): list<HyprlandToplevel> {
-        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t));
+    function trimWsName(name: string): string {
+        return name.startsWith("special:") ? name.slice("special:".length) : name;
     }
 
-    function isToplevelIgnored(toplevel: HyprlandToplevel): bool {
+    function toplevelsForWs(ws: int, ignoredTags = []): list<HyprlandToplevel> {
+        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t, ignoredTags));
+    }
+
+    function isToplevelIgnored(toplevel: HyprlandToplevel, ignoredTags = []): bool {
         const ipc = toplevel?.lastIpcObject;
         if (!ipc?.class || !ipc.mapped)
             return true;
 
-        const ignoredTags = GlobalConfig.bar.workspaces.ignoredTags;
         return ipc.tags?.some(tag => ignoredTags.includes(tag.replace(/\*$/, ""))) ?? false;
     }
 

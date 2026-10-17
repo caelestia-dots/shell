@@ -15,7 +15,7 @@ Item {
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    readonly property var trayItemsToIndices: SystemTray.items.values.reduce((acc, item, i) => {
+    readonly property var trayItemsToIndices: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id)).reduce((acc, item, i) => {
         acc[item.id] = i;
         return acc;
     }, {})
@@ -126,7 +126,7 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => i.hasMenu && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => i.hasMenu && i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
@@ -153,7 +153,7 @@ Item {
 
                     TrayMenu {
                         popouts: root.popouts
-                        trayItem: trayMenu.modelData.menu // qmllint disable unresolved-type
+                        trayItem: trayMenu.modelData.menu // qmllint disable incompatible-type
                     }
                 }
             }

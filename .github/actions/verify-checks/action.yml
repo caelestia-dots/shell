@@ -1,0 +1,59 @@
+name: Verify checks
+description: Verify that required jobs succeeded and unnecessary jobs were skipped.
+
+inputs:
+  needs:
+    description: JSON dependency results and outputs.
+    required: true
+  checks:
+    description: JSON mapping of job IDs to change-detection output names.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Verify results
+      shell: python
+      env:
+        NEEDS_JSON: ${{ inputs.needs }}
+        CHECKS_JSON: ${{ inputs.checks }}
+      run: |
+        import json
+        import os
+        import sys
+
+        needs = json.loads(os.environ["NEEDS_JSON"])
+        checks = json.loads(os.environ["CHECKS_JSON"])
+
+
+        def fail(message):
+            sys.exit(f"::error::{message}")
+
+
+        changes = needs.get("changes", {})
+        if changes.get("result") != "success":
+            fail("Change detection did not succeed.")
+
+        if not isinstance(checks, dict) or not checks:
+            fail("Checks must be a non-empty mapping.")
+
+        if set(checks) != set(needs) - {"changes"}:
+            fail("Check mapping must cover every dependency except changes.")
+
+        outputs = changes.get("outputs", {})
+        failed = False
+
+        for job, output in checks.items():
+            required = outputs.get(output)
+            result = needs[job].get("result")
+
+            valid = (required, result) in (
+                ("true", "success"),
+                ("false", "skipped"),
+            )
+            failed |= not valid
+
+            prefix = "" if valid else "::error::"
+            print(f"{prefix}{job}: required={required}, result={result}")
+
+        sys.exit(int(failed))

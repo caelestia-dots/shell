@@ -121,7 +121,7 @@ private:
 namespace detail {
 
 struct FontConfig {
-    QString family = QString();
+    QString family = {};
     int size;
     int weight = QFont::Normal;
     bool italic = false;
@@ -136,10 +136,7 @@ struct FontConfig {
     class FontConfig##Style##Size : public settings::ObjectNode {                                                      \
         CONFIG_NODE(FontConfig##Style##Size, settings::ObjectNode)                                                     \
                                                                                                                        \
-        CONFIG_PROPERTY(QString, family, ARG([](const settings::Node* self) {                                          \
-            const auto family = ARG(props).family;                                                                     \
-            return family.isEmpty() ? self->parentNode()->value(u"family"_s).toString() : family;                      \
-        }))                                                                                                            \
+        CONFIG_PROPERTY(QString, family, ARG(props).family) /* Empty inherits the style family */                      \
         CONFIG_PROPERTY(int, size, ARG(props).size)                                                                    \
         CONFIG_PROPERTY(int, weight, ARG(props).weight)                                                                \
         CONFIG_PROPERTY(bool, italic, ARG(props).italic)                                                               \

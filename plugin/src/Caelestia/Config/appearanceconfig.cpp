@@ -12,7 +12,7 @@ template <typename Source, typename Target> void connectTokenSignals(Source* sou
     const auto* meta = source->metaObject();
 
     for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
-        auto prop = meta->property(i);
+        const auto prop = meta->property(i);
 
         if (prop.hasNotifySignal())
             QObject::connect(source, prop.notifySignal(), target,

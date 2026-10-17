@@ -90,7 +90,7 @@ ColumnLayout {
         Repeater {
             model: 10
 
-            Button {
+            WButton {
                 required property int index
                 readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
                 readonly property bool isCurrent: root.client?.workspace.id === wsId
@@ -100,7 +100,7 @@ ColumnLayout {
                 }
 
                 color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
-                onColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                textColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
                 text: wsId
                 disabled: isCurrent
             }
@@ -115,9 +115,9 @@ ColumnLayout {
 
         spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.medium : Tokens.spacing.small
 
-        Button {
+        WButton {
             color: Colours.palette.m3secondaryContainer
-            onColor: Colours.palette.m3onSecondaryContainer
+            textColor: Colours.palette.m3onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? Tr.tr("Tile") : Tr.tr("Float")
             onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.float({ window = "address:0x${root.client?.address}" })` : `togglefloating address:0x${root.client?.address}`)
         }
@@ -129,24 +129,24 @@ ColumnLayout {
             Layout.leftMargin: active ? 0 : -parent.spacing
             Layout.rightMargin: active ? 0 : -parent.spacing
 
-            sourceComponent: Button {
+            sourceComponent: WButton {
                 color: Colours.palette.m3secondaryContainer
-                onColor: Colours.palette.m3onSecondaryContainer
+                textColor: Colours.palette.m3onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? Tr.tr("Unpin") : Tr.tr("Pin")
                 onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })` : `pin address:0x${root.client?.address}`)
             }
         }
 
-        Button {
+        WButton {
             color: Colours.palette.m3errorContainer
-            onColor: Colours.palette.m3onErrorContainer
+            textColor: Colours.palette.m3onErrorContainer
             text: Tr.tr("Kill")
             onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })` : `killwindow address:0x${root.client?.address}`)
         }
     }
 
-    component Button: StyledRect {
-        property color onColor: Colours.palette.m3onSurface
+    component WButton: StyledRect {
+        property color textColor: Colours.palette.m3onSurface
         property alias disabled: stateLayer.disabled
         property alias text: label.text
 
@@ -160,7 +160,7 @@ ColumnLayout {
         StateLayer {
             id: stateLayer
 
-            color: parent.onColor
+            color: parent.textColor
             onClicked: parent.clicked()
         }
 
@@ -170,7 +170,7 @@ ColumnLayout {
             anchors.centerIn: parent
 
             animate: true
-            color: parent.onColor
+            color: parent.textColor
             font: Tokens.font.body.medium
         }
     }

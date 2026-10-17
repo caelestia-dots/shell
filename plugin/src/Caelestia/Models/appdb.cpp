@@ -31,7 +31,7 @@ AppEntry::AppEntry(QObject* entry, unsigned int frequency, QObject* parent)
         QObject::connect(m_entry, metaProp.notifySignal(), this, thisMetaProp.notifySignal());
     }
 
-    QObject::connect(m_entry, &QObject::destroyed, this, [this]() {
+    QObject::connect(m_entry, &QObject::destroyed, this, [this] {
         m_entry = nullptr;
         deleteLater();
     });
@@ -138,7 +138,7 @@ QString AppDb::path() const {
 }
 
 void AppDb::setPath(const QString& path) {
-    auto newPath = path.isEmpty() ? u":memory:"_s : path;
+    const auto newPath = path.isEmpty() ? u":memory:"_s : path;
 
     if (m_path == newPath) {
         return;
@@ -211,7 +211,7 @@ QQmlListProperty<AppEntry> AppDb::apps() {
 }
 
 void AppDb::incrementFrequency(const QString& id) {
-    auto db = QSqlDatabase::database(m_uuid);
+    const auto db = QSqlDatabase::database(m_uuid);
     QSqlQuery query(db);
 
     query.prepare(u"INSERT INTO frequencies (id, frequency) "
@@ -264,7 +264,7 @@ bool AppDb::isFavourite(const AppEntry* app) const {
 }
 
 quint32 AppDb::getFrequency(const QString& id) const {
-    auto db = QSqlDatabase::database(m_uuid);
+    const auto db = QSqlDatabase::database(m_uuid);
     QSqlQuery query(db);
 
     query.prepare(u"SELECT frequency FROM frequencies WHERE id = :id"_s);
@@ -298,7 +298,7 @@ void AppDb::updateApps() {
         if (!m_apps.contains(id)) {
             dirty = true;
             auto* const newEntry = new AppEntry(entry, getFrequency(id), this);
-            QObject::connect(newEntry, &QObject::destroyed, this, [id, this]() {
+            QObject::connect(newEntry, &QObject::destroyed, this, [id, this] {
                 if (m_apps.remove(id)) {
                     emit appsChanged();
                 }

@@ -11,7 +11,7 @@ namespace caelestia {
 
 class Toast : public QObject {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(Toast)
     QML_UNCREATABLE("Toast instances can only be retrieved from a Toaster")
 
     Q_PROPERTY(bool closed READ closed NOTIFY closedChanged)
@@ -26,7 +26,7 @@ public:
         Info = 0,
         Success,
         Warning,
-        Error
+        Error,
     };
     Q_ENUM(Type)
 
@@ -71,7 +71,7 @@ public:
 
     [[nodiscard]] QQmlListProperty<Toast> toasts();
 
-    Q_INVOKABLE void toast(const QString& title, const QString& message, const QString& icon = QString(),
+    Q_INVOKABLE void toast(const QString& title, const QString& message, const QString& icon = {},
         caelestia::Toast::Type type = Toast::Type::Info, int timeout = 5000);
 
 signals:

@@ -31,10 +31,7 @@ class AnimTokens : public QObject {
     Q_PROPERTY(caelestia::config::AnimDurations* durations READ durations NOTIFY durationsChanged)
 
 public:
-    explicit AnimTokens(QObject* parent = nullptr);
-
-    void bindCurves(AnimCurves* curves);
-    void bindDurations(AnimDurations* durations);
+    static AnimTokens* instance();
 
     [[nodiscard]] QEasingCurve emphasized() const;
     [[nodiscard]] QEasingCurve emphasizedAccel() const;
@@ -55,6 +52,10 @@ signals:
     void durationsChanged();
 
 private:
+    explicit AnimTokens(QObject* parent = nullptr);
+
+    void bindCurves(AnimCurves* curves);
+    void bindDurations(AnimDurations* durations);
     void rebuildCurves();
     static QEasingCurve buildCurve(const QList<qreal>& points);
 

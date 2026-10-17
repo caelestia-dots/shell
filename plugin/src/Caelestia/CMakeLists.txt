@@ -12,8 +12,8 @@ qml_module(caelestia-core
         Qt::Quick
         Qt::Concurrent
         PkgConfig::Qalculate
-        caelestia-util
 )
+target_link_libraries(caelestia-core PUBLIC caelestia-util)
 
 # Bake the shell version in so CUtils can expose it without spawning a process
 target_compile_definitions(caelestia-core PRIVATE CAELESTIA_VERSION="${VERSION}")

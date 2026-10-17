@@ -30,8 +30,10 @@ QVariantMap responseMetadata(const QNetworkReply* reply) {
         headers.insert(QString::fromLatin1(name).toLower(), QString::fromLatin1(value));
     }
 
-    return { { u"statusCode"_s, reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() },
-        { u"headers"_s, headers } };
+    return {
+        { u"statusCode"_s, reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() },
+        { u"headers"_s, headers },
+    };
 }
 
 } // namespace
@@ -63,7 +65,7 @@ void Requests::get(const QUrl& url, const QJSValue& onSuccess, const QJSValue& o
 
     auto* reply = m_manager->get(request);
 
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess, onError]() {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess, onError] {
         const QString body = QString::fromUtf8(reply->readAll());
 
         QJSValue metadata;

@@ -1,6 +1,7 @@
 qml_module(caelestia-components
     URI Caelestia.Components
     SOURCES
+        animatedrepeater.cpp
         lazylistview.cpp
         wavyline.cpp
         buttonrow.cpp

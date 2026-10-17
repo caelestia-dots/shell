@@ -25,7 +25,7 @@ void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen) {
     if (kind != ConfigKind::Shell || !screen.isEmpty())
         return;
 
-    auto* const config = static_cast<ConfigRoot*>(layer);
+    const auto* config = static_cast<ConfigRoot*>(layer);
     if (!config->utilities()->toasts()->configLoaded())
         return;
 
@@ -63,19 +63,26 @@ void saveFailed(ConfigKind kind, const QString& error, const QString& screen) {
 } // namespace detail
 
 ConfigRoot::ConfigRoot(const QString& path, ConfigRoot* fallback, QObject* parent)
-    : RootNode(path, fallback, parent) {
+    : RootNode(path, fallback, parent)
+    , m_fontTokens(new FontTokens(this)) {
     bindTokens();
     qCDebug(lcConfig) << "Created config root for" << nameFor(key());
 }
 
-void ConfigRoot::bindTokens() {
-    qCDebug(lcConfig) << "Binding appearance to token values for" << nameFor(key());
+const FontTokens* ConfigRoot::fontTokens() const {
+    return m_fontTokens;
+}
 
-    auto* const tokens = TokensSingleton::instance()->appearance();
+void ConfigRoot::bindTokens() {
+    qCDebug(lcConfig) << "Binding token values for" << nameFor(key());
+
+    const auto* tokens = TokensSingleton::instance()->appearance();
     m_appearance->rounding()->bindTokens(tokens->rounding());
     m_appearance->spacing()->bindTokens(tokens->spacing());
     m_appearance->padding()->bindTokens(tokens->padding());
     m_appearance->anim()->durations()->bindTokens(tokens->animDurations());
+
+    m_fontTokens->bindFont(m_appearance->font());
 }
 
 TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* parent)

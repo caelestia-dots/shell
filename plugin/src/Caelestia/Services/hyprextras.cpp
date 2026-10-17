@@ -98,7 +98,7 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
         if (!m_usingLua) {
             request += u"keyword "_s + it.key() + u' ' + it.value().toString() + u';';
         } else {
-            auto parts = it.key().split(u':');
+            const auto parts = it.key().split(u':');
             request += u"eval hl.config({ "_s + parts.join(u" = { "_s) + u" = "_s + it.value().toString() +
                        u" }"_s.repeated(parts.size() - 1) + u" });"_s;
         }
@@ -211,8 +211,8 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
 
     auto socket = SocketPtr::create(this);
 
-    QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this]() {
-        QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback]() {
+    QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this] {
+        QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback] {
             auto response = socket->readAll();
             callback(true, std::move(response));
             socket->close();

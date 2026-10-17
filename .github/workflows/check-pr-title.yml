@@ -9,14 +9,15 @@ on:
       - synchronize
 
 jobs:
-  check-pr-title:
+  validate-pr-title:
     runs-on: ubuntu-slim
 
     permissions:
       pull-requests: read
 
     steps:
-      - uses: amannn/action-semantic-pull-request@v6
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -54,3 +55,23 @@ jobs:
             scripts
           subjectPattern: ^(?![A-Z]).+$ # No starting with uppercase
           subjectPatternError: The subject must not start with an uppercase character.
+
+  sync-breaking-label:
+    runs-on: ubuntu-slim
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Sync breaking label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ "$TITLE" =~ ^[a-zA-Z]+(\([^\)]*\))?!: ]]; then
+            gh pr edit "$PR" --add-label breaking
+          else
+            gh pr edit "$PR" --remove-label breaking
+          fi

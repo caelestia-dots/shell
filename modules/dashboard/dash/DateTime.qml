@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -73,7 +74,7 @@ Item {
             asynchronous: true
             Layout.alignment: Qt.AlignHCenter
 
-            active: GlobalConfig.services.useTwelveHourClock
+            active: Units.twelveHourClock
             visible: active
 
             sourceComponent: StyledText {

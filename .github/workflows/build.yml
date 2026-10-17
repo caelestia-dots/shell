@@ -5,21 +5,23 @@ on:
     branches:
       - main
   pull_request:
-    paths:
-      - "**"
-      - "!**/*.md"
-      - "!.github/**"
-      - ".github/workflows/build.yml"
-      - "!.vscode/**"
-      - "!assets/**"
-      - "!.gitignore"
 
 jobs:
+  changes:
+    uses: ./.github/workflows/detect-changes.yml
+    permissions:
+      pull-requests: read
+    with:
+      filter-group: build
+
   build-nix:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout source
+        uses: actions/checkout@v7
 
       - name: Install Nix
         uses: nixbuild/nix-quick-install-action@v34
@@ -55,6 +57,8 @@ jobs:
         run: nix build
 
   build-cpp:
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     name: build-arch-${{ matrix.name }}
     runs-on: ubuntu-latest
     container:
@@ -70,11 +74,31 @@ jobs:
             compiler: clazy
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout source
+        uses: actions/checkout@v7
 
-      - name: Build
+      - name: CMake build
         run: |
           # Set version and git rev for CI build so we don't call git
           cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_FLAGS=-Werror \
             -DVERSION= -DGIT_REVISION=
           cmake --build build
+
+  build-check:
+    if: always()
+    needs:
+      - changes
+      - build-nix
+      - build-cpp
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Verify build results
+        uses: $/.github/actions/verify-checks
+        with:
+          needs: ${{ toJSON(needs) }}
+          checks: |
+            {
+              "build-nix": "build",
+              "build-cpp": "build"
+            }

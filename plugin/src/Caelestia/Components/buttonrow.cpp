@@ -26,7 +26,7 @@ void ButtonRow::setSpacing(qreal spacing) {
 
 void ButtonRow::itemChange(QQuickItem::ItemChange change, const QQuickItem::ItemChangeData& data) {
     if (change == QQuickItem::ItemChildAddedChange) {
-        auto* const child = data.item;
+        const auto* child = data.item;
         QObject::connect(child, &QQuickItem::implicitWidthChanged, this, &ButtonRow::invalidate);
         QObject::connect(child, &QQuickItem::implicitHeightChanged, this, &ButtonRow::invalidate);
         QObject::connect(child, &QQuickItem::visibleChanged, this, &ButtonRow::invalidate);
@@ -73,7 +73,7 @@ void ButtonRow::relayout() {
     qreal unreservedWidth = 0;
     int fillWidthCount = 0;
     qreal maxHeight = 0;
-    for (auto* const child : validChildren) {
+    for (const auto* child : validChildren) {
         maxHeight = qMax(maxHeight, child->implicitHeight());
 
         const auto prop = child->property("fillWidth");
@@ -95,7 +95,7 @@ void ButtonRow::relayout() {
 
     QList<qreal> baseWidths;
     baseWidths.reserve(nChildren);
-    for (auto* const child : validChildren)
+    for (const auto* child : validChildren)
         baseWidths.append(child->property("fillWidth").toBool() ? widthPerItem : child->implicitWidth());
 
     qreal accX = 0;

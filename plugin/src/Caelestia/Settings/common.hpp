@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qjsonvalue.h>
+#include <qlist.h>
 #include <qloggingcategory.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
@@ -32,9 +33,21 @@ private:
     Q_DISABLE_COPY_MOVE(WriteScope)
 };
 
+class InternalRead {
+public:
+    explicit InternalRead(Node* node);
+    ~InternalRead();
+
+private:
+    Node* const m_root;
+    const bool m_previous;
+
+    Q_DISABLE_COPY_MOVE(InternalRead)
+};
+
 class DiagnosticType : public QObject {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(DiagnosticType)
     QML_SINGLETON
 
 public:
@@ -71,7 +84,9 @@ public:
     QString option;
     QString message;
 
-    static Diagnostic mismatch(ExpectedType expected, const QJsonValue& value, const QString& option = QString());
+    static Diagnostic mismatch(ExpectedType expected, const QJsonValue& value, const QString& option = {});
+    static Diagnostic mismatch(
+        const QList<ExpectedType>& expected, const QJsonValue& value, const QString& option = {});
 
     bool operator==(const Diagnostic& other) const = default;
 };

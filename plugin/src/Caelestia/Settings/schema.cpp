@@ -1,5 +1,6 @@
 #include "schema.hpp"
 
+#include "codecs.hpp"
 #include "node.hpp"
 
 namespace {
@@ -19,6 +20,27 @@ QHash<const QMetaObject*, QHash<QString, Annotation>>& annotationCache() {
     return s_cache;
 }
 
+// Union options carry their alternatives in the annotation, everything else goes by property type
+const ValueCodec* resolveCodec(Descriptor& desc) {
+    auto& allowed = desc.annotation.allowedTypes;
+
+    if (allowed.isEmpty())
+        return ValueCodec::codecFor(desc.type);
+
+    if (desc.type.id() != QMetaType::QVariant) {
+        qCCritical(lcSchema, "Allowed types are only valid for QVariant properties, ignoring them for %s",
+            qUtf8Printable(desc.key));
+        allowed.clear();
+        return ValueCodec::codecFor(desc.type);
+    }
+
+    if (const auto* codec = ValueCodec::unionFor(allowed))
+        return codec;
+
+    allowed.clear();
+    return nullptr;
+}
+
 bool isNodeType(const QMetaType& type) {
     if (!type.flags().testFlag(QMetaType::PointerToQObject))
         return false;
@@ -28,18 +50,27 @@ bool isNodeType(const QMetaType& type) {
 
 } // namespace
 
-QVariant DefaultSpec::resolve(const Node* self) const {
-    if (func)
-        return func(self);
-    return value;
-}
-
 QString Descriptor::typeString() const {
-    return QString::fromUtf8(type.name());
+    if (annotation.allowedTypes.isEmpty())
+        return QString::fromUtf8(type.name());
+
+    QStringList names;
+    names.reserve(annotation.allowedTypes.size());
+    for (const auto& allowed : annotation.allowedTypes)
+        names << QString::fromUtf8(allowed.name());
+
+    return names.join(QStringLiteral(" | "));
 }
 
-QVariant Descriptor::defaultValue(const Node* self) const {
-    return annotation.defaultValue.resolve(self);
+bool Descriptor::accepts(const QMetaType& valueType) const {
+    // Unset is a valid state for QVariant options, they are simply absent from the file
+    if (type.id() == QMetaType::QVariant && !valueType.isValid())
+        return true;
+
+    if (annotation.allowedTypes.isEmpty())
+        return type == valueType;
+
+    return annotation.allowedTypes.contains(valueType);
 }
 
 Schema Schema::build(const QMetaObject* meta, int baseOffset, bool includeReadOnly) {
@@ -71,6 +102,13 @@ Schema Schema::build(const QMetaObject* meta, int baseOffset, bool includeReadOn
             .isNode = isNode,
             .annotation = annotations.value(key),
         };
+
+        if (!isNode) {
+            desc.codec = resolveCodec(desc);
+            if (!desc.codec)
+                qCCritical(lcSchema, "No codec for %s of type %s, it will not be loaded or saved", qUtf8Printable(key),
+                    desc.type.name());
+        }
 
         schema.m_descriptors.append(std::move(desc));
         schema.m_keyToIndex.insert(key, schema.m_descriptors.size() - 1);

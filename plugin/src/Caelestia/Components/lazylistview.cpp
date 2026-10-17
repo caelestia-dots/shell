@@ -53,6 +53,17 @@ void LazyListViewAttached::setVisibleHeight(qreal height) {
     emit visibleHeightChanged();
 }
 
+qreal LazyListViewAttached::layoutY() const {
+    return m_layoutY;
+}
+
+void LazyListViewAttached::setLayoutY(qreal y) {
+    if (qFuzzyCompare(m_layoutY + 1.0, y + 1.0))
+        return;
+    m_layoutY = y;
+    emit layoutYChanged();
+}
+
 bool LazyListViewAttached::ready() const {
     return m_ready;
 }
@@ -223,6 +234,18 @@ void LazyListView::setCacheBuffer(qreal buffer) {
     polish();
 }
 
+bool LazyListView::cullDelegates() const {
+    return m_cullDelegates;
+}
+
+void LazyListView::setCullDelegates(bool cull) {
+    if (m_cullDelegates == cull)
+        return;
+    m_cullDelegates = cull;
+    emit cullDelegatesChanged();
+    polish();
+}
+
 // --- Sizing ---
 
 qreal LazyListView::estimatedHeight() const {
@@ -328,7 +351,7 @@ LazyListView::HeightUpdate LazyListView::setKnownHeight(int index, qreal height)
 // A resize above the viewport shifts everything below it, so opted-in delegates
 // report the delta and let the consumer compensate its scroll position.
 void LazyListView::adjustViewportIfAbove(int index, QQuickItem* item, qreal delta) {
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (attached && attached->trackViewport() && m_layout[index].targetY < viewportTop())
         emit viewportAdjustNeeded(delta);
 }
@@ -337,7 +360,7 @@ qreal LazyListView::delegateHeight(QQuickItem* item) {
     if (!item)
         return 0;
 
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (attached && attached->preferredHeight() >= 0)
         return attached->preferredHeight();
 
@@ -348,7 +371,7 @@ qreal LazyListView::delegateVisibleHeight(QQuickItem* item) {
     if (!item)
         return 0;
 
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (attached && attached->visibleHeight() >= 0)
         return attached->visibleHeight();
 
@@ -358,7 +381,7 @@ qreal LazyListView::delegateVisibleHeight(QQuickItem* item) {
 bool LazyListView::isDelegateReady(QQuickItem* item) {
     if (!item)
         return false;
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     return !attached || attached->ready();
 }
 
@@ -392,6 +415,36 @@ int LazyListView::count() const {
     return m_model ? m_model->rowCount() : 0;
 }
 
+// Always false; bind through it to re-run itemAtIndex/itemAt on mapping changes
+bool LazyListView::itemsDirty() {
+    return false;
+}
+
+// Instantiated delegate for a model index, nullptr if outside the cache
+QQuickItem* LazyListView::itemAtIndex(int index) const {
+    return m_delegates.value(index).item;
+}
+
+// Hit test against instantiated delegates at their current visual positions
+QQuickItem* LazyListView::itemAt(qreal x, qreal y) const {
+    if (x < 0 || x >= width() || y < 0)
+        return nullptr;
+
+    const auto children = childItems();
+    for (auto* const item : children | std::views::reverse) {
+        if (!m_itemToIndex.contains(item) || !item->isVisible())
+            continue;
+
+        const auto top = item->y() + m_contentY;
+        const auto bottom = top + delegateVisibleHeight(item);
+
+        if (y >= top && y < bottom)
+            return item;
+    }
+
+    return nullptr;
+}
+
 // --- QQuickItem Overrides ---
 
 void LazyListView::componentComplete() {
@@ -407,7 +460,7 @@ void LazyListView::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
         return;
 
     if (!qFuzzyCompare(newGeometry.width(), oldGeometry.width())) {
-        for (auto& entry : m_delegates) {
+        for (const auto& entry : std::as_const(m_delegates)) {
             if (entry.item)
                 entry.item->setWidth(newGeometry.width());
         }
@@ -487,14 +540,16 @@ void LazyListView::finishDelayedInsert(QQuickItem* item) {
 
     // Re-check the bounds: revealing runs QML bindings and onReady handlers,
     // which may have mutated the model out from under us.
-    if (idx < static_cast<int>(m_layout.size()))
+    if (idx < static_cast<int>(m_layout.size())) {
         item->setProperty("y", m_layout[idx].targetY - m_contentY); // animate to layout position
+        updateLayoutY(item, idx);
+    }
 
     polish();
 }
 
 void LazyListView::positionDelegates() {
-    for (auto& entry : m_delegates) {
+    for (const auto& entry : std::as_const(m_delegates)) {
         if (!entry.item || entry.pendingRemoval || entry.pendingInsert)
             continue;
 
@@ -508,7 +563,15 @@ void LazyListView::positionDelegates() {
         // Use setProperty to go through the QML property system,
         // which triggers Behaviors (setY bypasses them).
         entry.item->setProperty("y", m_layout[idx].targetY - m_contentY);
+        updateLayoutY(entry.item, idx);
     }
+}
+
+// Publishes the non-animated position so delegates can read it while y animates
+void LazyListView::updateLayoutY(QQuickItem* item, int index) {
+    auto* attached = attachedFor(item);
+    if (attached)
+        attached->setLayoutY(m_layout[index].targetY - m_contentY);
 }
 
 // --- Layout Engine ---
@@ -611,6 +674,10 @@ std::pair<int, int> LazyListView::computeVisibleRange() const {
     if (m_layout.isEmpty())
         return { -1, -1 };
 
+    // Culling disabled: keep every delegate alive
+    if (!m_cullDelegates)
+        return { 0, static_cast<int>(m_layout.size()) - 1 };
+
     const auto vp = effectiveViewport();
     if (vp.isEmpty())
         return { -1, -1 };
@@ -676,6 +743,9 @@ void LazyListView::syncDelegates() {
                                                    created < static_cast<int>(toCreate.size()));
     if (created > 0 || workRemains)
         polish();
+
+    if (created > 0 || destroyed > 0)
+        emit itemsDirtyChanged();
 }
 
 // Delegates safe to destroy - outside the range to keep and no longer visually
@@ -751,6 +821,7 @@ int LazyListView::createDelegates(const QList<int>& indices, int budget) {
         // until the delegate signals ready via readyChanged.
         entry.pendingInsert = true;
         entry.item->setY(m_layout[idx].targetY - m_contentY);
+        updateLayoutY(entry.item, idx);
         m_itemToIndex.insert(entry.item, idx);
         m_delegates.insert(idx, entry);
         ++created;
@@ -820,7 +891,7 @@ void LazyListView::connectDelegate(const DelegateEntry& entry) {
     });
 
     // Watch attached properties if the delegate uses them
-    auto* attached = attachedFor(item);
+    const auto* attached = attachedFor(item);
     if (!attached)
         return;
 
@@ -954,6 +1025,7 @@ void LazyListView::remapDelegates(const std::function<int(int)>& mapIndex) {
     }
 
     m_delegates = std::move(remapped);
+    emit itemsDirtyChanged();
 }
 
 // --- Model Connection ---
@@ -985,7 +1057,7 @@ void LazyListView::connectModel() {
 }
 
 void LazyListView::disconnectModel() {
-    for (auto& conn : m_modelConnections)
+    for (const auto& conn : std::as_const(m_modelConnections))
         disconnect(conn);
     m_modelConnections.clear();
 }
@@ -1012,6 +1084,7 @@ void LazyListView::resetContent() {
         emit countChanged();
     }
 
+    emit itemsDirtyChanged();
     polish();
 }
 
@@ -1057,7 +1130,7 @@ void LazyListView::onRowsAboutToBeRemoved(const QModelIndex& parent, int first, 
                 attached->setRemoving(true);
 
             // Schedule destruction after the remove animation duration
-            auto* item = entry.item;
+            const auto* item = entry.item;
             QTimer::singleShot(m_removeDuration, this, [this, item] {
                 for (auto it = m_dyingDelegates.begin(); it != m_dyingDelegates.end(); ++it) {
                     if (it->item == item) {

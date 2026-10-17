@@ -48,7 +48,7 @@ void Config::propagateScreen() {
 void Config::attachedParentChange(
     QQuickAttachedPropertyPropagator* newParent, QQuickAttachedPropertyPropagator* oldParent) {
     Q_UNUSED(oldParent);
-    auto* const config = qobject_cast<Config*>(newParent);
+    const auto* config = qobject_cast<Config*>(newParent);
     if (config)
         inheritScreen(config->screen());
 }

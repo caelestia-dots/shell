@@ -8,7 +8,7 @@ namespace caelestia::components {
 
 class CircularIndicatorManager : public QObject {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(CircularIndicatorManager)
 
     Q_PROPERTY(qreal startFraction READ startFraction NOTIFY startFractionChanged)
     Q_PROPERTY(qreal endFraction READ endFraction NOTIFY endFractionChanged)
@@ -26,7 +26,7 @@ public:
 
     enum class IndeterminateAnimationType : quint8 {
         Advance = 0,
-        Retreat
+        Retreat,
     };
     Q_ENUM(IndeterminateAnimationType)
 

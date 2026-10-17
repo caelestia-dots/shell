@@ -3,61 +3,50 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Hyprland
 import M3Shapes
+import Caelestia.Components
 import Caelestia.Config
 import qs.components
 import qs.services
 import qs.utils
 
-ColumnLayout {
+Item {
     id: root
 
+    required property int modelData
     required property int index
     required property int activeWsId
-    required property var occupied
-    required property int groupOffset
-    required property bool shouldShow
+    required property int ws
+    required property HyprlandMonitor monitor
 
-    required property Repeater workspaceRepeater
-    required property real layoutSpacing
+    required property int displayType
+    required property bool showWindows
+    required property var iconRules
+    property string activeLabel
+    property string occupiedLabel
+    property string label
 
-    readonly property bool isWorkspace: true // Flag for finding workspace children
-    // Unanimated prop for others to use as reference
-    readonly property int size: implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
-
-    readonly property int ws: groupOffset + index + 1
-    readonly property bool isOccupied: occupied[ws] ?? false
-    readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows && (Config.bar.workspaces.maxWindowIcons > 0)
+    readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags)
+    readonly property bool isOccupied: toplevels.length > 0
+    readonly property bool hasWindows: isOccupied && showWindows && Config.bar.workspaces.maxWindowIcons > 0
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
 
-    readonly property real revealProgress: Math.max(0, Math.min(1, reveal))
-    readonly property bool revealTransitionRunning: revealAnimation.running
-    readonly property real precedingRevealProgress: {
-        let progress = 0;
-
-        for (let i = 0; i < index; ++i) {
-            const workspace = workspaceRepeater.itemAt(i) as Workspace;
-            if (workspace)
-                progress = Math.max(progress, workspace.revealProgress);
-        }
-
-        return progress;
+    property color offMonitorColour: Colours.palette.m3outlineVariant
+    readonly property bool onOtherMonitor: {
+        if (Config.bar.workspaces.perMonitor)
+            return false;
+        const mon = Hypr.workspaces.values.find(w => w.id === ws)?.monitor;
+        return !!(mon && mon !== monitor);
     }
-    readonly property real targetY: {
-        let offset = 0;
-
-        for (let i = 0; i < index; ++i) {
-            const workspace = workspaceRepeater.itemAt(i) as Workspace;
-            if (workspace?.shouldShow)
-                offset += workspace.size + layoutSpacing;
-        }
-
-        return offset;
+    readonly property color fgColour: {
+        if (onOtherMonitor)
+            return offMonitorColour;
+        if (focused || isOccupied || Config.bar.workspaces.occupiedBg)
+            return Colours.palette.m3onSurface;
+        return Colours.layer(Colours.palette.m3outlineVariant, 2);
     }
-
-    property real reveal: shouldShow ? 1 : 0
-    property real animatedSize: size
 
     function updateShape(): void {
         const shape = indicator.item as MaterialShape;
@@ -70,27 +59,29 @@ ColumnLayout {
             shape.shape = Qt.binding(() => isOccupied ? MaterialShape.Square : MaterialShape.Circle);
     }
 
-    Layout.alignment: Qt.AlignHCenter
-    Layout.preferredHeight: animatedSize * revealProgress
-    Layout.topMargin: layoutSpacing * Math.min(revealProgress, precedingRevealProgress)
+    anchors.horizontalCenter: parent?.horizontalCenter
+    LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
+    LazyListView.visibleHeight: LazyListView.preferredHeight
 
-    visible: shouldShow || revealProgress > 0
-    opacity: revealProgress
-    clip: true
-
-    spacing: 0
+    opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
 
     onFocusedChanged: updateShape()
     Component.onCompleted: updateShape()
 
-    Loader {
-        id: indicator
+    Behavior on LazyListView.visibleHeight {
+        Anim {}
+    }
 
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-        Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
-        sourceComponent: Config.bar.workspaces.displayType === BarWorkspaceDisplay.Text ? textComponent : shapeComponent
+    Behavior on y {
+        enabled: root.LazyListView.ready
 
-        onItemChanged: root.updateShape()
+        Anim {}
+    }
+
+    Behavior on opacity {
+        Anim {
+            type: Anim.DefaultEffects
+        }
     }
 
     Component {
@@ -99,7 +90,7 @@ ColumnLayout {
         MaterialShape {
             implicitSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            color: root.fgColour
             scale: root.focused ? 2 / 3 : root.isOccupied ? 1 / 3 : 1 / 4
 
             animationEasing: Tokens.anim.expressiveDefaultSpatial
@@ -122,101 +113,161 @@ ColumnLayout {
             animate: true
             text: {
                 if (root.focused) {
-                    const label = Config.bar.workspaces.activeLabel;
+                    const label = root.activeLabel;
                     if (label)
                         return label;
                 }
 
                 if (root.focused || root.isOccupied) {
-                    const label = Config.bar.workspaces.occupiedLabel;
+                    const label = root.occupiedLabel;
                     if (label)
                         return label;
                 }
 
-                const label = Config.bar.workspaces.label;
+                const label = root.label;
                 if (label)
                     return label;
 
                 const ws = Hypr.workspaces.values.find(w => w.id === root.ws);
-                const wsName = !ws || ws.name == root.ws ? root.ws : ws.name[0];
+                const wsName = !ws || ws.name == root.ws ? root.ws : Hypr.trimWsName(ws.name)[0];
 
                 const capitalisation = Config.bar.workspaces.capitalisation;
                 if (capitalisation === BarWorkspaceCapitalisation.Upper)
-                    return wsName.toString().toUpperCase();
+                    return String(wsName).toUpperCase();
                 else if (capitalisation === BarWorkspaceCapitalisation.Lower)
-                    return wsName.toString().toLowerCase();
+                    return String(wsName).toLowerCase();
                 return wsName;
             }
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            color: root.fgColour
             verticalAlignment: Qt.AlignVCenter
             font.family: Tokens.font.workspaces
         }
     }
 
-    Loader {
-        id: windows
+    Component {
+        id: iconComponent
 
-        asynchronous: true
+        MaterialIcon {
+            fill: 1
+            grade: 25
+            text: iconCacher.icon
+            color: root.fgColour
+            verticalAlignment: Qt.AlignVCenter
 
-        Layout.alignment: Qt.AlignHCenter
-        Layout.fillHeight: true
-        Layout.topMargin: -Tokens.spacing.extraSmall / 2
+            WsIconCacher {
+                id: iconCacher
+            }
+        }
+    }
 
-        visible: active
-        active: root.hasWindows
+    Component {
+        id: iconLoaderComponent
 
-        sourceComponent: Column {
-            spacing: 0
+        Loader {
+            sourceComponent: loaderIconCacher.icon ? iconComponent : textComponent
 
-            add: Transition {
-                Anim {
-                    properties: "scale"
-                    from: 0
-                    to: 1
-                    easing: Tokens.anim.standardDecel
-                }
+            WsIconCacher {
+                id: loaderIconCacher
+            }
+        }
+    }
+
+    ColumnLayout {
+        id: layout
+
+        anchors.fill: parent
+        spacing: 0
+
+        Loader {
+            id: indicator
+
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+            sourceComponent: {
+                if (root.displayType === BarWorkspaceDisplay.Icons)
+                    return iconLoaderComponent;
+                if (root.displayType === BarWorkspaceDisplay.Text)
+                    return textComponent;
+                return shapeComponent;
             }
 
-            move: Transition {
-                Anim {
-                    properties: "scale"
-                    to: 1
-                    easing: Tokens.anim.standardDecel
-                }
-                Anim {
-                    properties: "x,y"
-                }
-            }
+            onItemChanged: root.updateShape()
+        }
 
-            Repeater {
+        Loader {
+            id: windows
+
+            asynchronous: true
+
+            Layout.fillWidth: true
+            Layout.topMargin: -Tokens.spacing.extraSmall / 2
+            Layout.preferredHeight: root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
+
+            visible: active
+            active: root.showWindows && Config.bar.workspaces.maxWindowIcons > 0
+
+            sourceComponent: LazyListView {
+                spacing: 0
+                implicitHeight: contentHeight
+                cullDelegates: false
+                removeDuration: Tokens.anim.durations.expressiveDefaultEffects
+
                 model: ScriptModel {
                     values: {
-                        const windows = Hypr.toplevelsForWs(root.ws);
+                        const windows = root.toplevels;
                         const maxIcons = root.Config.bar.workspaces.maxWindowIcons;
                         return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
                     }
                 }
 
-                MaterialIcon {
+                delegate: MaterialIcon {
+                    id: win
+
                     required property var modelData
+                    required property int index // Needed, LazyListView will fail to set it if it doesn't exist
 
                     grade: 0
+                    horizontalAlignment: Text.AlignHCenter
                     text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+
+                    opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+
+                    Behavior on y {
+                        Anim {}
+                    }
                 }
             }
         }
     }
 
-    Behavior on animatedSize {
-        Anim {}
-    }
+    component WsIconCacher: QtObject {
+        id: cacher
 
-    Behavior on reveal {
-        Anim {
-            id: revealAnimation
+        property string name
+        readonly property string icon: Icons.matchIconRuleList(Hypr.trimWsName(name), root.iconRules)
+        readonly property HyprlandWorkspace wsObj: Hypr.workspaces.values.find(w => w.id === root.ws) ?? null
 
-            type: Anim.DefaultEffects
+        readonly property Connections conn: Connections {
+            function onNameChanged(): void {
+                cacher.updateName();
+            }
+
+            target: cacher.wsObj
         }
+
+        function updateName(): void {
+            if (wsObj)
+                name = wsObj.name;
+        }
+
+        onWsObjChanged: updateName()
+        Component.onCompleted: updateName()
     }
 }
