@@ -24,6 +24,13 @@ Item {
 
     property real offsetScale: shouldBeActive ? 0 : 1
 
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: content.implicitWidth || 630 // Hard coded fallback for first open
+
     onShouldBeActiveChanged: {
         if (shouldBeActive)
             implicitHeight = Qt.binding(() => content.implicitHeight);
@@ -31,10 +38,10 @@ Item {
             implicitHeight = implicitHeight; // Break binding during close anim
     }
 
-    visible: offsetScale < 1
-    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+    visible: offsetScale < 1 && !layoutHidden
+    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale - layoutShiftY
     implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth || 630 // Hard coded fallback for first open
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     opacity: 1 - offsetScale
 
     Component.onCompleted: Qt.callLater(() => Apps) // Load apps on init
