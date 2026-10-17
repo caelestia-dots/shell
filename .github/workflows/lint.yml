@@ -59,7 +59,7 @@ jobs:
 
           cat $lint_out
 
-          test -s $lint_out && exit 1
+          ! test -s $lint_out
 
   lint-cpp:
     needs: changes
