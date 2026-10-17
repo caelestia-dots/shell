@@ -50,8 +50,16 @@ jobs:
           set -l qml_files (string match -vr 'build/.*' **.qml)
 
           # Lint
-          set -l lint_out (/usr/lib/qt6/bin/qmllint --import disable $args $qml_files 2>&1 | tee /dev/stderr)
-          test -z "$lint_out" || exit 1
+          set -l lint_out (mktemp)
+          /usr/lib/qt6/bin/qmllint $args $qml_files 2> $lint_out
+
+          set -l singleton_pattern 'Type [A-Z][a-zA-Z0-9]* not declared as singleton in qmldir but using pragma Singleton'
+          set -l post_reload_hook_pattern 'PostReloadHook was not found\. Did you add all imports and dependencies\?'
+          sed -i -E "/(($singleton_pattern)|($post_reload_hook_pattern)) \[import\]/d" $lint_out
+
+          cat $lint_out
+
+          ! test -s $lint_out
 
   lint-cpp:
     needs: changes

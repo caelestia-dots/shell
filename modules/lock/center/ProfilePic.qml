@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import M3Shapes
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.components.effects
@@ -17,7 +18,7 @@ Item {
 
     implicitWidth: Math.round(centerWidth * 0.7)
     implicitHeight: {
-        shape.height; // Force update when shape height changes
+        CUtils.dependency(shape.height); // Force update when shape height changes
         return shape.pathBounds().height;
     }
 
