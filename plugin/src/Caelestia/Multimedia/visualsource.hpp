@@ -4,6 +4,8 @@
 #include <qqmlintegration.h>
 #include <qquickitem.h>
 #include <qsize.h>
+#include <qurl.h>
+#include <qvideoframe.h>
 
 namespace caelestia::multimedia {
 
@@ -72,6 +74,15 @@ signals:
     void sizeSourceChanged();
 
 private:
+    void setType(Type type);
+    void setVideoReady(bool videoReady);
+    void setImagePath(const QUrl& imagePath);
+    void refresh();
+    void watchWindow(QQuickWindow* window);
+    void onVideoFrame(const QVideoFrame& frame);
+    [[nodiscard]] QString localPath() const;
+    [[nodiscard]] Qt::AspectRatioMode aspectMode() const;
+
     Type m_type = Type::Unknown;
     bool m_videoReady = false;
     QUrl m_imagePath;
@@ -80,6 +91,10 @@ private:
     FillMode m_fillMode = FillMode::PreserveAspectCrop;
     QObject* m_videoOutput = nullptr;
     QQuickItem* m_sizeSource = nullptr;
+    QString m_key;
+    QSize m_bucket;
+    QMetaObject::Connection m_windowConn;
+    QMetaObject::Connection m_sinkConn;
 };
 
 } // namespace caelestia::multimedia
