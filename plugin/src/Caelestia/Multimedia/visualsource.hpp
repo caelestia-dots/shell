@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qmediaplayer.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qquickitem.h>
@@ -80,6 +81,7 @@ private:
     void refresh();
     void watchWindow(QQuickWindow* window);
     void onVideoFrame(const QVideoFrame& frame);
+    void syncPlayer();
     [[nodiscard]] QString localPath() const;
     [[nodiscard]] Qt::AspectRatioMode aspectMode() const;
 
@@ -95,6 +97,7 @@ private:
     QSize m_bucket;
     QMetaObject::Connection m_windowConn;
     QMetaObject::Connection m_sinkConn;
+    QMediaPlayer m_player;
 };
 
 } // namespace caelestia::multimedia

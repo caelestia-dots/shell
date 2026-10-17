@@ -11,7 +11,9 @@ namespace caelestia::multimedia {
 using Qt::StringLiterals::operator""_s;
 
 VisualSource::VisualSource(QObject* parent)
-    : QObject(parent) {}
+    : QObject(parent) {
+    m_player.setLoops(QMediaPlayer::Infinite);
+}
 
 VisualSource::Type VisualSource::type() const {
     return m_type;
@@ -48,6 +50,7 @@ void VisualSource::setSource(const QString& source) {
     setVideoReady(false);
     m_key.clear();
     refresh();
+    syncPlayer();
 }
 
 bool VisualSource::playing() const {
@@ -60,6 +63,7 @@ void VisualSource::setPlaying(bool playing) {
 
     m_playing = playing;
     emit playingChanged();
+    syncPlayer();
 }
 
 VisualSource::FillMode VisualSource::fillMode() const {
@@ -87,8 +91,8 @@ void VisualSource::setVideoOutput(QObject* videoOutput) {
     m_videoOutput = videoOutput;
     emit videoOutputChanged();
 
-    const auto* sink = m_videoOutput ? m_videoOutput->property("videoSink").value<QVideoSink*>() : nullptr;
-    if (sink)
+    m_player.setVideoOutput(m_videoOutput);
+    if (auto* const sink = m_player.videoSink())
         m_sinkConn = QObject::connect(sink, &QVideoSink::videoFrameChanged, this, &VisualSource::onVideoFrame);
 }
 
@@ -190,6 +194,17 @@ void VisualSource::onVideoFrame(const QVideoFrame& frame) {
 
     if (!m_key.isEmpty() && ImageCache::instance()->lookup(m_key).isEmpty())
         ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
+}
+
+void VisualSource::syncPlayer() {
+    const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
+    if (m_player.source() != url)
+        m_player.setSource(url);
+
+    if (m_playing && !url.isEmpty())
+        m_player.play();
+    else
+        m_player.pause();
 }
 
 QString VisualSource::localPath() const {

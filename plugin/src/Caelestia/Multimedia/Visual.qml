@@ -10,6 +10,8 @@ Item {
 
     property alias source: vis.source
     property alias fillMode: vis.fillMode
+    property alias playing: vis.playing
+    readonly property alias type: vis.type
     property bool animate: true
     readonly property bool ready: vis.videoReady || image.status === Image.Ready
 
