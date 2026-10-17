@@ -48,6 +48,7 @@ jobs:
             plugins
             services
             settings
+            shaders
             utils
 
             assets
