@@ -3,9 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Multimedia
+import Caelestia.Shaders
 import qs.components
 import qs.components.filedialog
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -13,26 +14,27 @@ Item {
     id: root
 
     property string source: Wallpapers.current
-    property CachingImage current
+    property ShaderEffectSource currentCapture: capture1
+    property real transitionProgress: 1
     property bool completed
 
     onSourceChanged: {
-        if (!source)
-            current = null;
-        else
-            current = imgComp.createObject(this, {
-                path: source
-            });
+        transitionAnim.stop();
+
+        if (transitionProgress < 1) {
+            currentCapture = currentCapture === capture1 ? capture2 : capture1;
+            currentCapture.sourceItem = transition;
+        } else {
+            currentCapture.sourceItem = live;
+        }
+
+        currentCapture.visible = true;
+        currentCapture.scheduleUpdate();
     }
 
     Component.onCompleted: {
-        if (source)
-            Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
-                completed = true;
-            });
+        completed = true;
+        live.source = source;
     }
 
     Loader {
@@ -101,35 +103,66 @@ Item {
         }
     }
 
-    Component {
-        id: imgComp
+    Anim on transitionProgress {
+        id: transitionAnim
 
-        CachingImage {
-            id: img
+        running: false
+        type: Anim.SlowEffects
+        to: 1
+    }
 
-            anchors.fill: parent
+    ShaderEffectSource {
+        id: capture1
 
-            opacity: 0
+        anchors.fill: parent
+        live: false
+        visible: false
 
-            onStatusChanged: {
-                if (status === Image.Ready)
-                    anim.start();
-            }
-
-            Anim on opacity {
-                id: anim
-
-                type: Anim.SlowEffects
-                running: false
-                from: 0
-                to: 1
-            }
-
-            Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
-                interval: anim.duration
-                onTriggered: img.destroy()
-            }
+        onScheduledUpdateCompleted: {
+            visible = false;
+            transition.from = this;
+            root.transitionProgress = 0;
+            live.source = root.source;
         }
+    }
+
+    ShaderEffectSource {
+        id: capture2
+
+        anchors.fill: parent
+        live: false
+        visible: false
+
+        onScheduledUpdateCompleted: {
+            visible = false;
+            transition.from = this;
+            root.transitionProgress = 0;
+            live.source = root.source;
+        }
+    }
+
+    Visual {
+        id: live
+
+        anchors.fill: parent
+        animate: false
+        layer.enabled: true
+
+        onReadyChanged: {
+            if (ready && source === root.source)
+                transitionAnim.start();
+        }
+    }
+
+    ShaderEffect {
+        id: transition
+
+        property Item from
+        property Item to: live
+        property real progress: root.transitionProgress
+
+        anchors.fill: parent
+        visible: root.transitionProgress < 1
+        fragmentShader: Shaders.crossfade
     }
 }
