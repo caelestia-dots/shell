@@ -47,6 +47,7 @@ void VisualSource::setSource(const QString& source) {
     else
         setType(Type::Unknown);
 
+    ++m_generation;
     setVideoReady(false);
     m_key.clear();
     refresh();
@@ -93,7 +94,21 @@ void VisualSource::setVideoOutput(QObject* videoOutput) {
 
     m_player.setVideoOutput(m_videoOutput);
     if (auto* const sink = m_player.videoSink())
-        m_sinkConn = QObject::connect(sink, &QVideoSink::videoFrameChanged, this, &VisualSource::onVideoFrame);
+        m_sinkConn = QObject::connect(
+            sink, &QVideoSink::videoFrameChanged, this,
+            [this](const QVideoFrame& frame) {
+                if (!frame.isValid())
+                    return;
+
+                QMetaObject::invokeMethod(
+                    this,
+                    [this, frame, generation = m_generation.load()] {
+                        if (generation == m_generation && m_type == Type::Live)
+                            onVideoFrame(frame);
+                    },
+                    Qt::QueuedConnection);
+            },
+            Qt::DirectConnection);
 }
 
 QQuickItem* VisualSource::sizeSource() const {
@@ -186,7 +201,7 @@ void VisualSource::refresh() {
 }
 
 void VisualSource::onVideoFrame(const QVideoFrame& frame) {
-    if (m_videoReady || !frame.isValid())
+    if (m_videoReady)
         return;
 
     setVideoReady(true);
