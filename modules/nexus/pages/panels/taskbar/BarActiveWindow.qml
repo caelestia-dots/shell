@@ -19,6 +19,12 @@ PageBase {
 
         ToggleRow {
             first: true
+            text: Tr.tr("Show title")
+            checked: Config.bar.activeWindow.showTitle
+            onToggled: GlobalConfig.bar.activeWindow.showTitle = checked
+        }
+
+        ToggleRow {
             text: Tr.trCtx("Compact", "taskbar active window layout")
             checked: Config.bar.activeWindow.compact
             onToggled: GlobalConfig.bar.activeWindow.compact = checked
