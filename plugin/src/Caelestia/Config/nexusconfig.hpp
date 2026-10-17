@@ -11,6 +11,7 @@ class NexusConfig : public settings::ObjectNode {
     CONFIG_PROPERTY(int, wallpapersPerRow, 4)
     CONFIG_PROPERTY(int, maxNetworksShown, 5)
     CONFIG_GLOBAL_PROPERTY(int, networkRescanInterval, 15000)
+    CONFIG_GLOBAL_PROPERTY(int, maxSearchResults, 25)
 };
 
 } // namespace caelestia::config

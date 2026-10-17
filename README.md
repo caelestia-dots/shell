@@ -232,7 +232,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
 > - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `triggerHowdyOnWake`
-> - `nexus`: `networkRescanInterval`
+> - `nexus`: `maxSearchResults`, `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
 > - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
@@ -812,7 +812,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "nexus": {
         "wallpapersPerRow": 4,
-        "networkRescanInterval": 15000
+        "networkRescanInterval": 15000,
+        "maxSearchResults": 25
     },
     "notifs": {
         "expire": true,
