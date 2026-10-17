@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qstring.h>
+#include <qstringlist.h>
 
 #include "settings/objectnode.hpp"
 #include "common.hpp"
@@ -46,6 +47,14 @@ class BackgroundVisualiser : public settings::ObjectNode {
     CONFIG_PROPERTY(qreal, spacing, 1)
 };
 
+class BackgroundSplash : public settings::ObjectNode {
+    CONFIG_NODE(BackgroundSplash, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, false)
+    CONFIG_PROPERTY(qreal, scale, 1.0)
+    CONFIG_PROPERTY(QStringList, command, (QStringList{ u"hyprctl"_s, u"splash"_s }))
+};
+
 class BackgroundConfig : public settings::ObjectNode {
     CONFIG_NODE(BackgroundConfig, settings::ObjectNode)
 
@@ -53,6 +62,7 @@ class BackgroundConfig : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, wallpaperEnabled, true)
     CONFIG_SUBOBJECT(DesktopClock, desktopClock)
     CONFIG_SUBOBJECT(BackgroundVisualiser, visualiser)
+    CONFIG_SUBOBJECT(BackgroundSplash, splash)
 };
 
 } // namespace caelestia::config
