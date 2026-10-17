@@ -63,7 +63,7 @@ class BarWorkspaces : public settings::ObjectNode {
         }))
     CONFIG_GLOBAL_LIST(IconRuleList, windowIcons,
         DEFAULT_ARG({
-            ICON_RULE_REGEX("steam(_app_(default|[0-9]+))?", "", "sports_esports"),
+            ICON_RULE_REGEX("steam(_app_(default|[0-9]+))?", "sports_esports"),
         }))
 };
 

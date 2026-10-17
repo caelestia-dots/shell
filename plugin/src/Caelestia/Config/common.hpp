@@ -66,7 +66,12 @@ CONFIG_LIST_TYPE(IconRule, IconRuleList)
     })
 
 // Shorthand for declaring an icon rule which is matched by regex
-#define ICON_RULE_REGEX(regex, flags, icon)                                                                            \
+#define ICON_RULE_REGEX(regex, icon)                                                                                   \
+    caelestia::settings::vmap({                                                                                        \
+        { u"regex"_s, QStringLiteral(regex) },                                                                         \
+        { u"icon"_s, QStringLiteral(icon) },                                                                           \
+    })
+#define ICON_RULE_REGEX_FLAGS(regex, flags, icon)                                                                      \
     caelestia::settings::vmap({                                                                                        \
         { u"regex"_s, QStringLiteral(regex) },                                                                         \
         { u"flags"_s, QStringLiteral(flags) },                                                                         \

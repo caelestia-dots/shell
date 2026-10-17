@@ -104,7 +104,7 @@ class IconFontStyle : public FontStyleBase {
 public:
     explicit IconFontStyle(QObject* parent = nullptr);
 
-    Q_INVOKABLE FontBuilder size(int pointSize);
+    Q_INVOKABLE caelestia::config::FontBuilder size(int pointSize);
 
     void bind(settings::ObjectNode* cfg) override;
 
