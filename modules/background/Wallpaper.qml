@@ -13,6 +13,8 @@ import qs.utils
 Item {
     id: root
 
+    readonly property transitionShader shader: Shaders.crossfade
+
     property string source: Wallpapers.current
     property ShaderEffectSource currentCapture: capture1
     property real transitionProgress: 1
@@ -103,11 +105,12 @@ Item {
         }
     }
 
-    Anim on transitionProgress {
+    NumberAnimation on transitionProgress {
         id: transitionAnim
 
         running: false
-        type: Anim.SlowEffects
+        duration: root.shader.duration * Tokens.anim.durations.scale
+        easing: root.shader.easing
         to: 1
     }
 
@@ -163,6 +166,6 @@ Item {
 
         anchors.fill: parent
         visible: root.transitionProgress < 1
-        fragmentShader: Shaders.crossfade
+        fragmentShader: root.shader.url
     }
 }
