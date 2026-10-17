@@ -8,6 +8,8 @@
 #include <qurl.h>
 #include <qvideoframe.h>
 
+#include <atomic>
+
 namespace caelestia::multimedia {
 
 class VisualSource : public QObject {
@@ -95,6 +97,7 @@ private:
     QQuickItem* m_sizeSource = nullptr;
     QString m_key;
     QSize m_bucket;
+    std::atomic<quint32> m_generation = 0;
     QMetaObject::Connection m_windowConn;
     QMetaObject::Connection m_sinkConn;
     QMediaPlayer m_player;
