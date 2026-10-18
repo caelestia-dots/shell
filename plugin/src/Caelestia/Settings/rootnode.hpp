@@ -20,9 +20,9 @@ public:
 
 signals:
     void diagnosticsChanged();
-    void treeLoaded(RootNode* self);
-    void treeLoadFailed(RootNode* self, const QString& error);
-    void treeSaveFailed(RootNode* self, const QString& error);
+    void treeLoaded(caelestia::settings::RootNode* self);
+    void treeLoadFailed(caelestia::settings::RootNode* self, const QString& error);
+    void treeSaveFailed(caelestia::settings::RootNode* self, const QString& error);
 
 private:
     SettingsFile* const m_file;

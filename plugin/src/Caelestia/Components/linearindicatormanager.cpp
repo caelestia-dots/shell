@@ -62,8 +62,14 @@ LinearIndicatorManager::LinearIndicatorManager(QObject* parent)
         QObject::connect(this, &LinearIndicatorManager::updated, el, &LinearIndicatorSegment::updated);
 }
 
-QList<LinearIndicatorSegment*> LinearIndicatorManager::activeIndicators() const {
-    return { m_activeIndicators.cbegin(), m_activeIndicators.cend() };
+QQmlListProperty<LinearIndicatorSegment> LinearIndicatorManager::activeIndicators() {
+    return { this, nullptr,
+        [](QQmlListProperty<LinearIndicatorSegment>*) {
+            return static_cast<qsizetype>(k_segments);
+        },
+        [](QQmlListProperty<LinearIndicatorSegment>* p, qsizetype i) {
+            return static_cast<LinearIndicatorManager*>(p->object)->m_activeIndicators[static_cast<size_t>(i)];
+        } };
 }
 
 qreal LinearIndicatorManager::progress() const {

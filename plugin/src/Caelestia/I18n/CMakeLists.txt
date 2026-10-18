@@ -54,5 +54,6 @@ qml_module(caelestia-i18n
         caelestia-util
         caelestia-config
     DEPENDENCIES
+        Caelestia
         Caelestia.Config
 )
