@@ -1,14 +1,19 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Caelestia.Config
+import Caelestia.Services
 
 Singleton {
     id: root
 
     property alias enabled: props.enabled
     readonly property alias enabledSince: props.enabledSince
+    // Whether the lid switch is actually being blocked, requesting it can fail
+    readonly property bool inhibitingLidSwitch: SessionManager.lidSwitchInhibited
 
     onEnabledChanged: {
         if (enabled)
@@ -22,6 +27,13 @@ Singleton {
         property date enabledSince
 
         reloadableId: "idleInhibitor"
+    }
+
+    // Stops the lid from suspending (or whatever logind is set to do) while keep awake is on
+    Binding {
+        target: SessionManager
+        property: "inhibitLidSwitch"
+        value: props.enabled && GlobalConfig.general.idle.inhibitWhenLidClosed
     }
 
     IdleInhibitor {

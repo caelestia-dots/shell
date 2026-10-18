@@ -429,6 +429,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "lockBeforeSleep": true,
             "inhibitWhenAudio": true,
             "inhibitWhenCharging": false,
+            "inhibitWhenLidClosed": false,
             "timeouts": [
                 {
                     "timeout": 180,
