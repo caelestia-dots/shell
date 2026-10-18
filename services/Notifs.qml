@@ -38,6 +38,27 @@ Singleton {
         return true;
     }
 
+    function clear(): void {
+        // close() reassigns root.list on every call (O(n) per call, plus a UI
+        // re-render per call), so clearing in a loop is O(n^2) and freezes the
+        // shell once history grows large. Mark everything closed and rebuild
+        // root.list exactly once instead.
+        const notifs = root.list.slice();
+        for (const notif of notifs)
+            notif.closed = true;
+
+        const removable = notifs.filter(n => n.locks.size === 0);
+        if (removable.length === 0)
+            return;
+
+        const removeSet = new Set(removable);
+        root.list = root.list.filter(n => !removeSet.has(n));
+        for (const notif of removable) {
+            notif.notification?.dismiss();
+            notif.destroy();
+        }
+    }
+
     onDndChanged: {
         if (!GlobalConfig.utilities.toasts.dndChanged)
             return;
@@ -136,16 +157,12 @@ Singleton {
         // qmllint enable unresolved-type
         name: "clearNotifs"
         description: "Clear all notifications"
-        onPressed: {
-            for (const notif of root.list.slice())
-                notif.close();
-        }
+        onPressed: root.clear()
     }
 
     IpcHandler {
         function clear(): void {
-            for (const notif of root.list.slice())
-                notif.close();
+            root.clear();
         }
 
         function isDndEnabled(): bool {
