@@ -38,7 +38,7 @@ Item {
                 return Tr.tr("Face not recognised (%1/%2). Please try again.").arg(pam.howdy.tries).arg(GlobalConfig.lock.maxHowdyTries);
         }
 
-        if (pam.lockMessage) // Password max tries message
+        if (pam.lockMessage) // Message from PAM, e.g. account locked
             return pam.lockMessage;
 
         // Password fail

@@ -46,6 +46,7 @@ Scope {
             howdy.abort();
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+            lockMessage = "";
             passwd.start();
         } else if (event.key === Qt.Key_Backspace) {
             if (event.modifiers & Qt.ControlModifier) {
@@ -79,11 +80,10 @@ Scope {
         config: "passwd"
         configDirectory: Quickshell.shellPath("assets/pam.d")
 
-        onMessageChanged: {
-            if (message.startsWith("The account is locked"))
-                root.lockMessage = message;
-            else if (root.lockMessage && message.endsWith(" left to unlock)"))
-                root.lockMessage += "\n" + message;
+        // Non-prompt messages, e.g. pam_faillock's lockout notice. They are localised, so don't match on the text
+        onPamMessage: {
+            if (!responseRequired && message)
+                root.lockMessage = root.lockMessage ? `${root.lockMessage}\n${message}` : message;
         }
 
         onResponseRequiredChanged: {
