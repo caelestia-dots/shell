@@ -8,8 +8,8 @@ layout(location = 0) out vec2 qt_TexCoord0;
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
-    float radius;
     vec2 size;
+    vec4 radii;
     vec4 color;
 };
 

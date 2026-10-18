@@ -29,17 +29,49 @@ void RoundedMask::setSource(QQuickItem* source) {
     update();
 }
 
-qreal RoundedMask::radius() const {
-    return m_radius;
+qreal RoundedMask::topLeftRadius() const {
+    return m_topLeftRadius;
 }
 
-void RoundedMask::setRadius(qreal radius) {
-    if (qFuzzyCompare(m_radius + 1.0, radius + 1.0))
-        return;
+void RoundedMask::setTopLeftRadius(qreal radius) {
+    if (updateRadius(m_topLeftRadius, radius))
+        emit topLeftRadiusChanged();
+}
 
-    m_radius = radius;
-    emit radiusChanged();
+qreal RoundedMask::topRightRadius() const {
+    return m_topRightRadius;
+}
+
+void RoundedMask::setTopRightRadius(qreal radius) {
+    if (updateRadius(m_topRightRadius, radius))
+        emit topRightRadiusChanged();
+}
+
+qreal RoundedMask::bottomRightRadius() const {
+    return m_bottomRightRadius;
+}
+
+void RoundedMask::setBottomRightRadius(qreal radius) {
+    if (updateRadius(m_bottomRightRadius, radius))
+        emit bottomRightRadiusChanged();
+}
+
+qreal RoundedMask::bottomLeftRadius() const {
+    return m_bottomLeftRadius;
+}
+
+void RoundedMask::setBottomLeftRadius(qreal radius) {
+    if (updateRadius(m_bottomLeftRadius, radius))
+        emit bottomLeftRadiusChanged();
+}
+
+bool RoundedMask::updateRadius(qreal& member, qreal radius) {
+    if (qFuzzyCompare(member + 1.0, radius + 1.0))
+        return false;
+
+    member = radius;
     update();
+    return true;
 }
 
 QColor RoundedMask::color() const {
@@ -124,9 +156,16 @@ QSGNode* RoundedMask::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* dat
         material->m_fallback.reset(window()->createTextureFromImage(blank));
     }
     material->m_texture = texture;
-    material->m_params[0] = static_cast<float>(m_radius) * dpr;
-    material->m_params[1] = static_cast<float>(width()) * dpr;
-    material->m_params[2] = static_cast<float>(height()) * dpr;
+    material->m_size[0] = static_cast<float>(width()) * dpr;
+    material->m_size[1] = static_cast<float>(height()) * dpr;
+    const auto maxRadius = static_cast<float>(std::min(width(), height()) / 2);
+    const auto clampRadius = [&](qreal radius) {
+        return std::clamp(static_cast<float>(radius), 0.0f, maxRadius) * dpr;
+    };
+    material->m_radii[0] = clampRadius(m_topLeftRadius);
+    material->m_radii[1] = clampRadius(m_topRightRadius);
+    material->m_radii[2] = clampRadius(m_bottomRightRadius);
+    material->m_radii[3] = clampRadius(m_bottomLeftRadius);
     const auto alpha = m_color.alphaF();
     material->m_color[0] = m_color.redF() * alpha;
     material->m_color[1] = m_color.greenF() * alpha;
@@ -155,7 +194,8 @@ int RoundedMaskMaterial::compare(const QSGMaterial* other) const {
     const auto fuzzyEqual = [](float a, float b) {
         return qFuzzyCompare(a + 1.0f, b + 1.0f);
     };
-    if (!std::ranges::equal(m_params, o->m_params, fuzzyEqual) || !std::ranges::equal(m_color, o->m_color, fuzzyEqual))
+    if (!std::ranges::equal(m_size, o->m_size, fuzzyEqual) || !std::ranges::equal(m_radii, o->m_radii, fuzzyEqual) ||
+        !std::ranges::equal(m_color, o->m_color, fuzzyEqual))
         return this < other ? -1 : 1;
     return 0;
 }
@@ -170,7 +210,7 @@ bool RoundedMaskMaterialShader::updateUniformData(
     Q_UNUSED(oldMaterial);
     auto* const mat = static_cast<RoundedMaskMaterial*>(newMaterial);
     QByteArray* const buf = state.uniformData();
-    Q_ASSERT(buf->size() >= 96);
+    Q_ASSERT(buf->size() >= 112);
 
     if (state.isMatrixDirty()) {
         const QMatrix4x4 m = state.combinedMatrix();
@@ -181,8 +221,9 @@ bool RoundedMaskMaterialShader::updateUniformData(
         std::memcpy(buf->data() + 64, &opacity, 4);
     }
 
-    std::memcpy(buf->data() + 68, mat->m_params, 12);
-    std::memcpy(buf->data() + 80, mat->m_color, 16);
+    std::memcpy(buf->data() + 72, mat->m_size, 8);
+    std::memcpy(buf->data() + 80, mat->m_radii, 16);
+    std::memcpy(buf->data() + 96, mat->m_color, 16);
     return true;
 }
 

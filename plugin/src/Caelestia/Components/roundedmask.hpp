@@ -20,7 +20,11 @@ class RoundedMask : public QQuickItem {
     QML_ELEMENT
 
     Q_PROPERTY(QQuickItem* source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY radiusChanged)
+    Q_PROPERTY(qreal topLeftRadius READ topLeftRadius WRITE setTopLeftRadius NOTIFY topLeftRadiusChanged)
+    Q_PROPERTY(qreal topRightRadius READ topRightRadius WRITE setTopRightRadius NOTIFY topRightRadiusChanged)
+    Q_PROPERTY(
+        qreal bottomRightRadius READ bottomRightRadius WRITE setBottomRightRadius NOTIFY bottomRightRadiusChanged)
+    Q_PROPERTY(qreal bottomLeftRadius READ bottomLeftRadius WRITE setBottomLeftRadius NOTIFY bottomLeftRadiusChanged)
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
 
 public:
@@ -29,15 +33,27 @@ public:
     [[nodiscard]] QQuickItem* source() const;
     void setSource(QQuickItem* source);
 
-    [[nodiscard]] qreal radius() const;
-    void setRadius(qreal radius);
+    [[nodiscard]] qreal topLeftRadius() const;
+    void setTopLeftRadius(qreal radius);
+
+    [[nodiscard]] qreal topRightRadius() const;
+    void setTopRightRadius(qreal radius);
+
+    [[nodiscard]] qreal bottomRightRadius() const;
+    void setBottomRightRadius(qreal radius);
+
+    [[nodiscard]] qreal bottomLeftRadius() const;
+    void setBottomLeftRadius(qreal radius);
 
     [[nodiscard]] QColor color() const;
     void setColor(const QColor& color);
 
 signals:
     void sourceChanged();
-    void radiusChanged();
+    void topLeftRadiusChanged();
+    void topRightRadiusChanged();
+    void bottomRightRadiusChanged();
+    void bottomLeftRadiusChanged();
     void colorChanged();
 
 protected:
@@ -50,9 +66,13 @@ private slots:
 
 private:
     void watchProvider(QSGTextureProvider* provider);
+    bool updateRadius(qreal& member, qreal radius);
 
     QPointer<QQuickItem> m_source;
-    qreal m_radius = 0;
+    qreal m_topLeftRadius = 0;
+    qreal m_topRightRadius = 0;
+    qreal m_bottomRightRadius = 0;
+    qreal m_bottomLeftRadius = 0;
     QColor m_color = Qt::transparent;
     // Render-thread state: the provider and node live and die on the render thread
     QSGTextureProvider* m_provider = nullptr;
@@ -67,8 +87,9 @@ public:
 
     QSGTexture* m_texture = nullptr;
     QScopedPointer<QSGTexture> m_fallback;
-    // radius, width, height in device pixels; laid out as in the shader's uniform block
-    float m_params[3] = {};
+    // device pixels; laid out as in the shader's uniform block
+    float m_size[2] = {};
+    float m_radii[4] = {};
     float m_color[4] = {};
 };
 
