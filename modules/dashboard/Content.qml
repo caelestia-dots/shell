@@ -66,7 +66,7 @@ Item {
         tabs: root.dashboardTabs
     }
 
-    ClippingRectangle {
+    ClipRect {
         id: viewWrapper
 
         anchors.top: tabs.bottom
