@@ -19,6 +19,35 @@ PathView {
 
     property string currentDir: Paths.wallsdir
 
+    readonly property int itemWidth: Tokens.sizes.launcher.wallpaperWidth * 0.8 + Tokens.padding.medium * 2
+
+    readonly property int numItems: {
+        const screen = (QsWindow.window as QsWindow)?.screen;
+        if (!screen)
+            return 0;
+
+        // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
+        const barMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
+        let outerMargins = 0;
+        if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
+            outerMargins = panels.popouts.nonAnimWidth;
+        if ((screenState.utilities || screenState.sidebar) && panels.utilities.implicitWidth > outerMargins)
+            outerMargins = panels.utilities.implicitWidth;
+        const maxWidth = screen.width - Config.border.rounding * 4 - (barMargins + outerMargins) * 2;
+
+        if (maxWidth <= 0)
+            return 0;
+
+        const maxItemsOnScreen = Math.floor(maxWidth / itemWidth);
+        const visible = Math.min(maxItemsOnScreen, Config.launcher.maxWallpapers, scriptModel.values.length);
+
+        if (visible === 2)
+            return 1;
+        if (visible > 1 && visible % 2 === 0)
+            return visible - 1;
+        return visible;
+    }
+
     function navigateTo(path: string): void {
         const rootPath = Paths.wallsdir;
         if (path !== rootPath && !path.startsWith(`${rootPath}/`))
@@ -55,43 +84,6 @@ PathView {
             return false;
 
         return activateEntry((currentItem as WallpaperItem).modelData);
-    }
-
-    readonly property int itemWidth: Tokens.sizes.launcher.wallpaperWidth * 0.8 + Tokens.padding.medium * 2
-
-    readonly property int numItems: {
-        const screen = (QsWindow.window as QsWindow)?.screen;
-        if (!screen)
-            return 0;
-
-        // Screen width - 4x outer rounding - 2x max side thickness (cause centered)
-        const barMargins = Math.max(Config.border.thickness, panels.bar.implicitWidth);
-        let outerMargins = 0;
-        if (panels.popouts.hasCurrent && panels.popouts.currentCenter + panels.popouts.nonAnimHeight / 2 > screen.height - content.implicitHeight - Config.border.thickness * 2)
-            outerMargins = panels.popouts.nonAnimWidth;
-        if ((screenState.utilities || screenState.sidebar) && panels.utilities.implicitWidth > outerMargins)
-            outerMargins = panels.utilities.implicitWidth;
-        const maxWidth = screen.width - Config.border.rounding * 4 - (barMargins + outerMargins) * 2;
-
-        if (maxWidth <= 0)
-            return 0;
-
-        const maxItemsOnScreen = Math.floor(maxWidth / itemWidth);
-        const visible = Math.min(maxItemsOnScreen, Config.launcher.maxWallpapers, scriptModel.values.length);
-
-        if (visible === 2)
-            return 1;
-        if (visible > 1 && visible % 2 === 0)
-            return visible - 1;
-        return visible;
-    }
-
-    FileSystemModel {
-        id: folders
-
-        path: root.currentDir
-        filter: FileSystemModel.Dirs
-        recursive: false
     }
 
     model: ScriptModel {
@@ -150,12 +142,17 @@ PathView {
     }
 
     implicitWidth: Math.min(numItems, count) * itemWidth
+
     pathItemCount: numItems
+
     cacheItemCount: 4
 
     snapMode: PathView.SnapToItem
+
     preferredHighlightBegin: 0.5
+
     preferredHighlightEnd: 0.5
+
     highlightRangeMode: PathView.StrictlyEnforceRange
 
     delegate: WallpaperItem {
@@ -193,5 +190,13 @@ PathView {
         }
 
         anchors.fill: parent
+    }
+
+    FileSystemModel {
+        id: folders
+
+        path: root.currentDir
+        filter: FileSystemModel.Dirs
+        recursive: false
     }
 }
