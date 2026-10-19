@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qelapsedtimer.h>
+#include <qhash.h>
 #include <qprocess.h>
 #include <qqmlintegration.h>
 #include <qstringlist.h>
@@ -53,6 +55,7 @@ private:
     void finishNameSource(int index, int generation, QString name);
 
     void readGenericUsage();
+    void readFdinfoUsage();
     void startNvidiaUsage();
     void readGpuTemperature();
     void resetUsage();
@@ -78,6 +81,21 @@ private:
     // /sys/class/drm card busy files, enumerated once at construction (the card
     // set is static at runtime) and reused by resolution and the tick path.
     QStringList m_busyFiles;
+
+    // Usage backend chosen during resolution. Generic covers both the sysfs busy
+    // file exposed by amdgpu and the fdinfo engine counters used by Intel iGPUs.
+    enum class UsageBackend {
+        None,
+        BusyFile,
+        Fdinfo,
+        Nvidia
+    };
+    UsageBackend m_backend = UsageBackend::None;
+
+    // Last per-client engine counters, used to turn the monotonic fdinfo values
+    // into a usage percentage.
+    QHash<qint64, QHash<QString, quint64>> m_fdinfoClients;
+    QElapsedTimer m_fdinfoTimer;
 
     // Bumped per resolution so callbacks from a superseded probe are dropped
     int m_generation = 0;
