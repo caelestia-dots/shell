@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Caelestia.Config
-import Caelestia.Models
 import qs.components
 import qs.components.effects
 import qs.components.images
@@ -32,7 +31,7 @@ Item {
 
     StateLayer {
         radius: Tokens.rounding.large
-        onClicked: wallpaperList.activateEntry(root.modelData)
+        onClicked: root.wallpaperList.activateEntry(root.modelData)
     }
 
     Elevation {
