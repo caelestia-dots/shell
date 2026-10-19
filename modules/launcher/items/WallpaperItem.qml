@@ -66,6 +66,7 @@ Item {
         Visual {
             anchors.fill: parent
             source: root.modelData.path
+            playing: root.PathView.isCurrentItem
         }
     }
 
