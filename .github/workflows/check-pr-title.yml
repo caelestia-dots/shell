@@ -44,9 +44,11 @@ jobs:
             core
             images
             models
+            multimedia
             plugins
             services
             settings
+            shaders
             utils
 
             assets
