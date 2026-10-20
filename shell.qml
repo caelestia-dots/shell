@@ -52,7 +52,7 @@ ShellRoot {
     Shortcuts {}
     BatteryMonitor {}
     GameMode {}
-    IdleInhibitor {}
+    IdleInhibit {}
     IdleMonitors {
         lock: lock
     }
