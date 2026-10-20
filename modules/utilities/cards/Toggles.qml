@@ -141,8 +141,8 @@ StyledRect {
                     roleValue: "dnd"
                     delegate: Toggle {
                         icon: "notifications_off"
-                        checked: Notifs.dnd
-                        onClicked: Notifs.dnd = !Notifs.dnd
+                        checked: PersistentState.doNotDisturb
+                        onClicked: PersistentState.doNotDisturb = !PersistentState.doNotDisturb
                     }
                 }
                 DelegateChoice {
