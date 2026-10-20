@@ -125,8 +125,8 @@ StyledRect {
                     roleValue: "gameMode"
                     delegate: Toggle {
                         icon: "gamepad"
-                        checked: GameMode.enabled
-                        onClicked: GameMode.enabled = !GameMode.enabled
+                        checked: RuntimeState.gameMode
+                        onClicked: RuntimeState.gameMode = !RuntimeState.gameMode
                     }
                 }
                 DelegateChoice {
@@ -141,8 +141,8 @@ StyledRect {
                     roleValue: "dnd"
                     delegate: Toggle {
                         icon: "notifications_off"
-                        checked: Notifs.dnd
-                        onClicked: Notifs.dnd = !Notifs.dnd
+                        checked: PersistentState.doNotDisturb
+                        onClicked: PersistentState.doNotDisturb = !PersistentState.doNotDisturb
                     }
                 }
                 DelegateChoice {

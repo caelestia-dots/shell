@@ -15,4 +15,7 @@ Q_DECLARE_LOGGING_CATEGORY(lcState)
 QString stateDir();
 QString monitorStateDir();
 
+QString runtimeDir();
+QString monitorRuntimeDir();
+
 } // namespace caelestia::state
