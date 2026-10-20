@@ -25,6 +25,7 @@ plugins
 services
 settings
 shaders
+state
 utils
 
 assets

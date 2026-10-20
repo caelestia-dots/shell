@@ -22,11 +22,13 @@ target_compile_definitions(caelestia-core PRIVATE CAELESTIA_VERSION="${VERSION}"
 list(APPEND CMAKE_AUTOMOC_MACRO_NAMES
     SETTINGS_NODE SETTINGS_NODE_NO_CTOR SETTINGS_LIST_TYPE SETTINGS_SINGLETON_DECL
     CONFIG_NODE CONFIG_NODE_NO_CTOR CONFIG_LIST_TYPE
+    STATE_NODE STATE_NODE_NO_CTOR STATE_LIST_TYPE
 )
 
 add_subdirectory(Settings)
 add_subdirectory(Components)
 add_subdirectory(Config)
+add_subdirectory(State)
 add_subdirectory(Models)
 add_subdirectory(Services)
 add_subdirectory(Blobs)
