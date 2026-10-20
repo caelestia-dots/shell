@@ -6,6 +6,7 @@ import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.State
 import qs.components
 import qs.components.controls
 import qs.services
@@ -22,16 +23,13 @@ StyledRect {
         const seenIds = new Set();
 
         return Config.utilities.quickToggles.values.filter(item => {
-            if (!item.enabled)
+            if (!item.enabled || seenIds.has(item.id))
                 return false;
 
-            if (seenIds.has(item.id)) {
-                return false;
-            }
+            // TODO: hide wallpaper playing toggle if wallpaper is live
 
-            if (item.id === "vpn") {
+            if (item.id === "vpn")
                 return GlobalConfig.utilities.vpn.selectedProvider.length > 0;
-            }
 
             seenIds.add(item.id);
             return true;
@@ -129,6 +127,14 @@ StyledRect {
                         icon: "gamepad"
                         checked: GameMode.enabled
                         onClicked: GameMode.enabled = !GameMode.enabled
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "wallpaperPlaying"
+                    delegate: Toggle {
+                        icon: "smart_display"
+                        checked: PersistentState.wallpaperPlaying
+                        onClicked: PersistentState.wallpaperPlaying = !PersistentState.wallpaperPlaying
                     }
                 }
                 DelegateChoice {
