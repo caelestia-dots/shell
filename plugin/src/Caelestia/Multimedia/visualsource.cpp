@@ -236,6 +236,8 @@ Qt::AspectRatioMode VisualSource::aspectMode() const {
     case FillMode::PreserveAspectCrop:
         return Qt::KeepAspectRatioByExpanding;
     }
+
+    Q_UNREACHABLE_RETURN(Qt::IgnoreAspectRatio);
 }
 
 } // namespace caelestia::multimedia
