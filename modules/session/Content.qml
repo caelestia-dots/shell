@@ -49,16 +49,20 @@ Column {
         KeyNavigation.down: hibernate
     }
 
-    AnimatedImage {
-        width: Tokens.sizes.session.button
-        height: Tokens.sizes.session.button
-        sourceSize.width: width * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1)
+    Loader {
+        active: Config.paths.sessionGif.trim() !== ""
 
-        playing: visible
-        asynchronous: true
-        speed: Config.general.sessionGifSpeed
-        source: Paths.absolutePath(Config.paths.sessionGif)
-        fillMode: AnimatedImage.PreserveAspectFit
+        sourceComponent: AnimatedImage {
+            width: Tokens.sizes.session.button
+            height: Tokens.sizes.session.button
+            sourceSize.width: width * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1)
+
+            playing: visible
+            asynchronous: true
+            speed: Config.general.sessionGifSpeed
+            source: Paths.absolutePath(Config.paths.sessionGif)
+            fillMode: AnimatedImage.PreserveAspectFit
+        }
     }
 
     SessionButton {
