@@ -19,6 +19,7 @@ public:
     };
 
     explicit SettingsFile(QString path, bool watch = true, QObject* parent = nullptr);
+    ~SettingsFile() override;
 
     [[nodiscard]] std::optional<QJsonValue> read() const;
     void write(const QJsonValue& json);
@@ -46,6 +47,7 @@ private:
     void scheduleLoad();
     void onLoadDebounced();
     void save();
+    void writeNow();
 };
 
 } // namespace caelestia::settings

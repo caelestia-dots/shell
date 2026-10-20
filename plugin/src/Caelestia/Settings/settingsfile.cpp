@@ -54,6 +54,11 @@ SettingsFile::SettingsFile(QString path, bool watch, QObject* parent)
     initWatcher();
 }
 
+SettingsFile::~SettingsFile() {
+    if (m_pendingWrite)
+        writeNow();
+}
+
 std::optional<QJsonValue> SettingsFile::read() const {
     return m_lastData;
 }
@@ -181,7 +186,10 @@ void SettingsFile::save() {
 
     // Debounce regardless of whether the save actually succeeded
     m_saveDebounce->start();
+    writeNow();
+}
 
+void SettingsFile::writeNow() {
     const auto json = m_pendingWrite.value();
     const auto data = (json.isObject() ? QJsonDocument(json.toObject()) : QJsonDocument(json.toArray())).toJson();
     m_pendingWrite = std::nullopt;
