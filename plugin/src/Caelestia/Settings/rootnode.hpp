@@ -12,7 +12,7 @@ class RootNode : public ObjectNode {
     Q_PROPERTY(QList<caelestia::settings::Diagnostic> diagnostics READ diagnostics NOTIFY diagnosticsChanged)
 
 public:
-    explicit RootNode(const QString& path, RootNode* fallback, QObject* parent = nullptr);
+    explicit RootNode(const QString& path, RootNode* fallback, QObject* parent = nullptr, bool watch = true);
 
     [[nodiscard]] QList<Diagnostic> diagnostics() const;
 

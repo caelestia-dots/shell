@@ -18,7 +18,7 @@ public:
         Error,
     };
 
-    explicit SettingsFile(QString path, QObject* parent = nullptr);
+    explicit SettingsFile(QString path, bool watch = true, QObject* parent = nullptr);
 
     [[nodiscard]] std::optional<QJsonValue> read() const;
     void write(const QJsonValue& json);
@@ -32,9 +32,9 @@ signals:
 
 private:
     QString m_path;
-    QFileSystemWatcher* m_watcher;
+    QFileSystemWatcher* m_watcher; // Null when not watching
     QTimer* m_saveDebounce;
-    QTimer* m_loadDebounce;
+    QTimer* m_loadDebounce; // Null when not watching
     int m_loadRetries;
     std::optional<QJsonValue> m_lastData;
     std::optional<QJsonValue> m_pendingWrite;
