@@ -199,6 +199,7 @@ Singleton {
             if (index >= 0) {
                 activeProcesses.splice(index, 1);
             }
+            proc.destroy();
         });
 
         Qt.callLater(() => {
