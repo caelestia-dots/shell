@@ -23,14 +23,14 @@ Scope {
         });
     }
 
-    function syncState(notifyDisabled: bool): void {
+    function syncState(enableDisable: bool): void {
         if (RuntimeState.gameMode) {
             root.applyGameMode();
             if (GlobalConfig.utilities.toasts.gameModeChanged)
                 Toaster.toast(Tr.tr("Game mode enabled"), Tr.tr("Disabled Hyprland animations, blur, gaps and shadows"), "gamepad");
-        } else {
+        } else if (enableDisable) {
             Hypr.extras.message("reload");
-            if (notifyDisabled && GlobalConfig.utilities.toasts.gameModeChanged)
+            if (GlobalConfig.utilities.toasts.gameModeChanged)
                 Toaster.toast(Tr.tr("Game mode disabled"), Tr.tr("Hyprland settings restored"), "gamepad");
         }
     }
