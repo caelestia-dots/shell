@@ -29,6 +29,10 @@ struct Handler {
 PStateRoot::PStateRoot(const QString& path, PStateRoot* fallback, QObject* parent)
     : RootNode(false, path, fallback, parent) {}
 
+RStateRoot::RStateRoot(const QString& path, RStateRoot* fallback, QObject* parent)
+    : RootNode(false, path, fallback, parent) {}
+
 SETTINGS_SINGLETON_IMPL(PersistentState, PStateRoot, stateDir(), monitorStateDir(), u"state.json"_s, Handler)
+SETTINGS_SINGLETON_IMPL(RuntimeState, RStateRoot, runtimeDir(), monitorRuntimeDir(), u"state.json"_s, Handler)
 
 } // namespace caelestia::state

@@ -16,6 +16,17 @@ public:
     explicit PStateRoot(const QString& path, PStateRoot* fallback = nullptr, QObject* parent = nullptr);
 };
 
+class RStateRoot : public settings::RootNode {
+    STATE_NODE_NO_CTOR(RStateRoot, settings::RootNode)
+    QML_ANONYMOUS
+
+    STATE_GLOBAL_PROPERTY(bool, gameMode, false)
+
+public:
+    explicit RStateRoot(const QString& path, RStateRoot* fallback = nullptr, QObject* parent = nullptr);
+};
+
 SETTINGS_SINGLETON_DECL(PersistentState, PStateRoot, PersistentState)
+SETTINGS_SINGLETON_DECL(RuntimeState, RStateRoot, RuntimeState)
 
 } // namespace caelestia::state

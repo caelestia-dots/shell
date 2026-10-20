@@ -16,4 +16,12 @@ QString monitorStateDir() {
     return stateDir() + u"/monitors"_s;
 }
 
+QString runtimeDir() {
+    return QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + u"/caelestia"_s;
+}
+
+QString monitorRuntimeDir() {
+    return runtimeDir() + u"/monitors"_s;
+}
+
 } // namespace caelestia::state
