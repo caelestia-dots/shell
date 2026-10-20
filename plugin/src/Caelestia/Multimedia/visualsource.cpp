@@ -93,7 +93,7 @@ void VisualSource::setVideoOutput(QObject* videoOutput) {
     emit videoOutputChanged();
 
     m_player.setVideoOutput(m_videoOutput);
-    if (auto* const sink = m_player.videoSink())
+    if (const auto* sink = m_player.videoSink())
         m_sinkConn = QObject::connect(
             sink, &QVideoSink::videoFrameChanged, this,
             [this](const QVideoFrame& frame) {
