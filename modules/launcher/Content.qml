@@ -62,7 +62,7 @@ Item {
         placeholderText: Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
 
         onAccepted: {
-            const currentItem = list.currentList?.currentItem;
+            const currentItem = list.showWallpapers ? list.currentList?.currentItem : list.currentList?.selectedItem();
             if (currentItem) {
                 if (list.showWallpapers) {
                     if (Colours.scheme === "dynamic" && currentItem.modelData.path !== Wallpapers.actualCurrent)

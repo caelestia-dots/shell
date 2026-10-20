@@ -26,6 +26,15 @@ StyledListView {
             displayText = search.text;
     }
 
+    function selectedItem(): Item {
+        // Transitions retain old rows, and ListView may update after the model.
+        if (displayText !== search.text || transitions[0].running)
+            return null;
+
+        const item = currentItem;
+        return item && item.modelData === model.values[currentIndex] ? item : null;
+    }
+
     function stateForText(text: string): string {
         const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
