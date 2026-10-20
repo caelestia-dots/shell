@@ -31,7 +31,7 @@ constexpr int k_maxLoadRetries = 3;
 
 } // namespace
 
-SettingsFile::SettingsFile(QString path, bool watch, QObject* parent)
+SettingsFile::SettingsFile(bool watch, QString path, QObject* parent)
     : QObject(parent)
     , m_path(std::move(path))
     , m_watcher(watch ? new QFileSystemWatcher(this) : nullptr)

@@ -18,7 +18,7 @@ public:
         Error,
     };
 
-    explicit SettingsFile(QString path, bool watch = true, QObject* parent = nullptr);
+    explicit SettingsFile(bool watch, QString path, QObject* parent = nullptr);
     ~SettingsFile() override;
 
     [[nodiscard]] std::optional<QJsonValue> read() const;
