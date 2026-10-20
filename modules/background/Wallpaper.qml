@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Multimedia
@@ -13,7 +14,15 @@ import qs.utils
 Item {
     id: root
 
-    readonly property transitionShader shader: Shaders.crossfade
+    readonly property transitionShader shader: {
+        CUtils.dependency(Config.background.wallpaperTransition);
+        let transition = CUtils.enumToString(Config.background, "wallpaperTransition");
+        if (!transition)
+            return Shaders.crossfade;
+
+        transition = transition[0].toLowerCase() + transition.slice(1);
+        return Shaders[transition] ?? Shaders.crossfade;
+    }
 
     property string source: Wallpapers.current
     property ShaderEffectSource currentCapture: capture1
