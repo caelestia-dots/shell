@@ -21,7 +21,6 @@ ShellRoot {
 
     Component.onCompleted: {
         // Force certain singletons to load on shell init instead of lazily
-        IdleInhibitor;
         Notifs;
         Players;
         Brightness;
@@ -53,6 +52,7 @@ ShellRoot {
     Shortcuts {}
     BatteryMonitor {}
     GameMode {}
+    IdleInhibitor {}
     IdleMonitors {
         lock: lock
     }
