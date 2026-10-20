@@ -1,10 +1,7 @@
 #pragma once
 
-#include <qjsengine.h>
-#include <qqmlengine.h>
-
-#include "settings/layerregistry.hpp"
 #include "settings/rootnode.hpp"
+#include "settings/singleton.hpp"
 #include "appearanceconfig.hpp"
 #include "backgroundconfig.hpp"
 #include "barconfig.hpp"
@@ -83,35 +80,27 @@ void loaded(ConfigKind kind, settings::RootNode* layer, const QString& screen);
 void loadFailed(ConfigKind kind, const QString& error, const QString& screen);
 void saveFailed(ConfigKind kind, const QString& error, const QString& screen);
 
+template <ConfigKind Kind> struct Handler {
+    static void loaded(settings::RootNode* layer, const QString& screen);
+    static void loadFailed(const QString& error, const QString& screen);
+    static void saveFailed(const QString& error, const QString& screen);
+};
+
+template <ConfigKind Kind> void Handler<Kind>::loaded(settings::RootNode* layer, const QString& screen) {
+    detail::loaded(Kind, layer, screen);
+}
+
+template <ConfigKind Kind> void Handler<Kind>::loadFailed(const QString& error, const QString& screen) {
+    detail::loadFailed(Kind, error, screen);
+}
+
+template <ConfigKind Kind> void Handler<Kind>::saveFailed(const QString& error, const QString& screen) {
+    detail::saveFailed(Kind, error, screen);
+}
+
 } // namespace detail
 
-#define SINGLETON_DECL(Type, Root, QmlName)                                                                            \
-    class Type : public Root {                                                                                         \
-        Q_OBJECT                                                                                                       \
-        QML_NAMED_ELEMENT(QmlName)                                                                                     \
-        QML_SINGLETON                                                                                                  \
-                                                                                                                       \
-    public:                                                                                                            \
-        static Type* instance();                                                                                       \
-        static Type* create(QQmlEngine*, QJSEngine*);                                                                  \
-                                                                                                                       \
-        [[nodiscard]] Q_INVOKABLE Root* forScreen(const QString& screen);                                              \
-                                                                                                                       \
-    private:                                                                                                           \
-        explicit Type(QObject* parent = nullptr);                                                                      \
-                                                                                                                       \
-        void onTreeLoaded(settings::RootNode* layer);                                                                  \
-        void onTreeLoadFailed(settings::RootNode* layer, const QString& error);                                        \
-        void onTreeSaveFailed(settings::RootNode* layer, const QString& error);                                        \
-                                                                                                                       \
-        void initLayer(Root* layer);                                                                                   \
-                                                                                                                       \
-        settings::LayerRegistry<Root> m_layers;                                                                        \
-    };
-
-SINGLETON_DECL(ConfigSingleton, ConfigRoot, GlobalConfig)
-SINGLETON_DECL(TokensSingleton, TokensRoot, TokenConfig)
-
-#undef SINGLETON_DECL
+SETTINGS_SINGLETON_DECL(ConfigSingleton, ConfigRoot, GlobalConfig)
+SETTINGS_SINGLETON_DECL(TokensSingleton, TokensRoot, TokenConfig)
 
 } // namespace caelestia::config

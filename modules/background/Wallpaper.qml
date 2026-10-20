@@ -6,6 +6,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Multimedia
 import Caelestia.Shaders
+import Caelestia.State
 import qs.components
 import qs.components.filedialog
 import qs.services
@@ -157,7 +158,7 @@ Item {
         id: live
 
         anchors.fill: parent
-        playing: true
+        playing: PersistentState.wallpaperPlaying
         animate: false
         layer.enabled: true
 
