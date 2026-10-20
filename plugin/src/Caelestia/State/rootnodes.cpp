@@ -10,10 +10,6 @@ QString nameFor(const QString& key) {
     return key.isEmpty() ? u"global"_s : key;
 }
 
-} // namespace
-
-namespace {
-
 struct Handler {
     static void loaded(settings::RootNode* layer, const QString& screen) {
         qCDebug(lcState) << "Loaded state for" << nameFor(screen) << "with" << layer->diagnostics().count() << "issues";
