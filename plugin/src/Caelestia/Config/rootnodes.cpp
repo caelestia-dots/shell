@@ -63,7 +63,7 @@ void saveFailed(ConfigKind kind, const QString& error, const QString& screen) {
 } // namespace detail
 
 ConfigRoot::ConfigRoot(const QString& path, ConfigRoot* fallback, QObject* parent)
-    : RootNode(path, fallback, parent)
+    : RootNode(true, path, fallback, parent)
     , m_fontTokens(new FontTokens(this)) {
     bindTokens();
     qCDebug(lcConfig) << "Created config root for" << nameFor(key());
@@ -86,7 +86,7 @@ void ConfigRoot::bindTokens() {
 }
 
 TokensRoot::TokensRoot(const QString& path, TokensRoot* fallback, QObject* parent)
-    : RootNode(path, fallback, parent) {
+    : RootNode(true, path, fallback, parent) {
     qCDebug(lcConfig) << "Created tokens root for" << nameFor(key());
 }
 
