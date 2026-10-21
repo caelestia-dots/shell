@@ -60,6 +60,8 @@ Item {
             transition.from = this;
             root.transitionProgress = 0;
             live.source = root.source;
+            if (live.ready)
+                transitionAnim.start();
         }
     }
 
@@ -75,6 +77,8 @@ Item {
             transition.from = this;
             root.transitionProgress = 0;
             live.source = root.source;
+            if (live.ready)
+                transitionAnim.start();
         }
     }
 
