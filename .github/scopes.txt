@@ -18,6 +18,7 @@ blobs
 components
 config
 core
+daemons
 images
 models
 multimedia
@@ -25,6 +26,7 @@ plugins
 services
 settings
 shaders
+state
 utils
 
 assets
