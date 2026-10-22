@@ -203,7 +203,7 @@ void VisualSource::refresh() {
         return;
 
     if (m_scalable || m_type == Type::Unknown) {
-        setSourceSize(m_sizeSource->size().toSize());
+        setSourceSize(m_scalable ? m_sizeSource->size().toSize() : QSize());
         setImagePath(rawUrl());
         return;
     }
