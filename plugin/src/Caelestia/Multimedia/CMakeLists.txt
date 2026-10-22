@@ -3,7 +3,6 @@ qml_module(caelestia-multimedia
     SOURCES
         visualsource.cpp
         imagecache.cpp
-        imagecacheworker.cpp
         ktxencoder.cpp
     QML_FILES
         Visual.qml
@@ -11,6 +10,6 @@ qml_module(caelestia-multimedia
         Qt::Quick
         Qt::Multimedia
         Qt::Concurrent
-        Qt::Sql
+        caelestia::caelestia
         rgbcx
 )
