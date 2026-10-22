@@ -4,10 +4,10 @@ import QtQuick
 import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Multimedia
 import qs.components
 import qs.components.effects
 import qs.components.filedialog
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -85,11 +85,11 @@ Item {
                 }
             }
 
-            CachingImage {
+            Visual {
                 id: pfp
 
                 anchors.fill: parent
-                path: `${Paths.home}/.face`
+                source: `${Paths.home}/.face`
             }
 
             StyledRect {

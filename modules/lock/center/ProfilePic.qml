@@ -4,9 +4,9 @@ import QtQuick
 import M3Shapes
 import Caelestia
 import Caelestia.Config
+import Caelestia.Multimedia
 import qs.components
 import qs.components.effects
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -43,11 +43,11 @@ Item {
         visible: pfp.status !== Image.Ready
     }
 
-    CachingImage {
+    Visual {
         id: pfp
 
         anchors.fill: shape
-        path: `${Paths.home}/.face`
+        source: `${Paths.home}/.face`
 
         layer.enabled: true
         layer.effect: Mask {
