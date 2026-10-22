@@ -2,6 +2,7 @@ import QtQuick
 import Caelestia.Config
 import Caelestia.Models
 import Caelestia.Multimedia
+import Caelestia.State
 import qs.components
 import qs.components.effects
 import qs.services
@@ -66,7 +67,7 @@ Item {
         Visual {
             anchors.fill: parent
             source: root.modelData.path
-            playing: root.PathView.isCurrentItem
+            playing: root.PathView.isCurrentItem && PersistentState.wallpaperPlaying
         }
     }
 
