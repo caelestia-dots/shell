@@ -40,7 +40,7 @@ Item {
         text: "person"
         color: Colours.palette.m3onSurfaceVariant
         fontStyle: Tokens.font.icon.size(root.centerWidth / 4).build()
-        visible: pfp.status !== Image.Ready
+        visible: !pfp.ready
     }
 
     Visual {
