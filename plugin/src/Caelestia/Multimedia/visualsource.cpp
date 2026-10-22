@@ -220,21 +220,24 @@ void VisualSource::refresh() {
     m_key = key;
     m_bucket = bucket;
     setSourceSize(bucket);
-    const auto cached = cache->lookup(key);
+    cache->lookup(key).then(this, [this, cache, key, path, bucket](const QUrl& cached) {
+        if (key != m_key)
+            return;
 
-    if (m_type == Type::Live) {
-        m_preview = cached;
-        setImagePath(m_videoReady ? QUrl() : cached);
-        syncPlayer();
-        return;
-    }
+        if (m_type == Type::Live) {
+            m_preview = cached;
+            setImagePath(m_videoReady ? QUrl() : cached);
+            syncPlayer();
+            return;
+        }
 
-    if (cached.isEmpty()) {
-        cache->store(key, path, bucket, aspectMode());
-        setImagePath(QUrl::fromLocalFile(path));
-    } else {
-        setImagePath(cached);
-    }
+        if (cached.isEmpty()) {
+            cache->store(key, path, bucket, aspectMode());
+            setImagePath(QUrl::fromLocalFile(path));
+        } else {
+            setImagePath(cached);
+        }
+    });
 }
 
 void VisualSource::onVideoFrame(const QVideoFrame& frame) {
@@ -244,8 +247,7 @@ void VisualSource::onVideoFrame(const QVideoFrame& frame) {
     setVideoReady(true);
     setImagePath({});
 
-    if (!m_key.isEmpty() && ImageCache::instance()->lookup(m_key).isEmpty())
-        ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
+    ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
 
     if (!m_playing)
         unload();
