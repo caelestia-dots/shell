@@ -69,7 +69,7 @@ Item {
                 id: img
 
                 anchors.fill: parent
-                fillMode: Image.PreserveAspectCrop
+                playing: stateLayer.containsMouse
             }
         }
 
@@ -86,6 +86,8 @@ Item {
     }
 
     StateLayer {
+        id: stateLayer
+
         anchors.bottomMargin: root.fillLabel ? 0 : layout.implicitHeight - imgWrapper.implicitHeight
         onClicked: root.clicked()
     }
