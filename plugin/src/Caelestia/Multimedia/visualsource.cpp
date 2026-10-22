@@ -23,6 +23,10 @@ bool VisualSource::videoReady() const {
     return m_videoReady;
 }
 
+QSize VisualSource::sourceSize() const {
+    return m_sourceSize;
+}
+
 QUrl VisualSource::imagePath() const {
     return m_imagePath;
 }
@@ -39,10 +43,15 @@ void VisualSource::setSource(const QString& source) {
     emit sourceChanged();
 
     const auto path = localPath();
-    const auto mime = path.isEmpty() ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    const auto provider = QUrl(m_source).scheme() == u"image"_s;
+    const auto mime = path.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    // We don't use the mime type for svg checking because Qt doesn't.
+    // See QQuickPixmap::isScalableImageFormat.
+    m_scalable = provider || path.endsWith(u"svg"_s) || path.endsWith(u"svgz"_s) || path.endsWith(u"pdf"_s);
+
     if (mime.startsWith(u"video/"_s))
         setType(Type::Live);
-    else if (mime.startsWith(u"image/"_s))
+    else if (provider || mime.startsWith(u"image/"_s))
         setType(Type::Still);
     else
         setType(Type::Unknown);
@@ -151,6 +160,14 @@ void VisualSource::setVideoReady(bool videoReady) {
     emit videoReadyChanged();
 }
 
+void VisualSource::setSourceSize(const QSize& sourceSize) {
+    if (m_sourceSize == sourceSize)
+        return;
+
+    m_sourceSize = sourceSize;
+    emit sourceSizeChanged();
+}
+
 void VisualSource::setImagePath(const QUrl& imagePath) {
     if (m_imagePath == imagePath)
         return;
@@ -177,6 +194,12 @@ void VisualSource::refresh() {
     if (!window || m_sizeSource->size().isEmpty())
         return;
 
+    if (m_scalable) {
+        setSourceSize(m_sizeSource->size().toSize());
+        setImagePath(QUrl(m_source).scheme() == u"image"_s ? QUrl(m_source) : QUrl::fromLocalFile(path));
+        return;
+    }
+
     auto* const cache = ImageCache::instance();
     const auto bucket = ImageCache::bucketFor((m_sizeSource->size() * window->devicePixelRatio()).toSize());
     const auto key = ImageCache::keyFor(path, bucket, aspectMode());
@@ -185,6 +208,7 @@ void VisualSource::refresh() {
 
     m_key = key;
     m_bucket = bucket;
+    setSourceSize(bucket);
     const auto cached = cache->lookup(key);
 
     if (m_type == Type::Live) {
