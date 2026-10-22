@@ -63,6 +63,7 @@ void VisualSource::setSource(const QString& source) {
     setVideoReady(false);
     m_key.clear();
     m_preview.clear();
+    m_position = 0;
     refresh();
     syncPlayer();
 }
@@ -267,10 +268,8 @@ void VisualSource::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 void VisualSource::syncPlayer() {
     const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
-    if (!m_player.source().isEmpty() && m_player.source() != url) {
+    if (!m_player.source().isEmpty() && m_player.source() != url)
         unload();
-        m_position = 0;
-    }
 
     if (url.isEmpty())
         return;
@@ -279,10 +278,12 @@ void VisualSource::syncPlayer() {
         if (m_loading)
             return;
 
-        if (m_playing)
+        if (m_playing) {
             m_player.play();
-        else if (m_videoReady)
+        } else if (m_videoReady) {
+            m_position = m_player.position();
             unload();
+        }
 
         return;
     }
@@ -297,9 +298,6 @@ void VisualSource::syncPlayer() {
 void VisualSource::unload() {
     if (m_player.source().isEmpty())
         return;
-
-    if (m_player.playbackState() == QMediaPlayer::PlayingState)
-        m_position = m_player.position();
 
     ++m_generation;
     m_player.setSource({});
