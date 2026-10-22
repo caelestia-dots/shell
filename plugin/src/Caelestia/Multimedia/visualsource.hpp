@@ -90,6 +90,7 @@ private:
     void onVideoFrame(const QVideoFrame& frame);
     void syncPlayer();
     [[nodiscard]] QString localPath() const;
+    [[nodiscard]] QUrl rawUrl() const;
     [[nodiscard]] Qt::AspectRatioMode aspectMode() const;
 
     Type m_type = Type::Unknown;

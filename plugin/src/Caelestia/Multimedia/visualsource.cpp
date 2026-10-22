@@ -187,8 +187,14 @@ void VisualSource::watchWindow(QQuickWindow* window) {
 
 void VisualSource::refresh() {
     const auto path = localPath();
-    if (path.isEmpty() || m_type == Type::Unknown || !m_sizeSource) {
+    if (path.isEmpty()) {
         setImagePath({});
+        return;
+    }
+
+    if (!m_sizeSource) {
+        setSourceSize({});
+        setImagePath(m_type == Type::Live ? QUrl() : rawUrl());
         return;
     }
 
@@ -196,9 +202,9 @@ void VisualSource::refresh() {
     if (!window || m_sizeSource->size().isEmpty())
         return;
 
-    if (m_scalable) {
+    if (m_scalable || m_type == Type::Unknown) {
         setSourceSize(m_sizeSource->size().toSize());
-        setImagePath(QUrl(m_source).scheme() == u"image"_s ? QUrl(m_source) : QUrl::fromLocalFile(path));
+        setImagePath(rawUrl());
         return;
     }
 
@@ -251,6 +257,11 @@ void VisualSource::syncPlayer() {
 QString VisualSource::localPath() const {
     const QUrl url(m_source);
     return url.isLocalFile() ? url.toLocalFile() : m_source;
+}
+
+QUrl VisualSource::rawUrl() const {
+    const QUrl url(m_source);
+    return url.isLocalFile() || !url.scheme().isEmpty() ? url : QUrl::fromLocalFile(m_source);
 }
 
 Qt::AspectRatioMode VisualSource::aspectMode() const {
