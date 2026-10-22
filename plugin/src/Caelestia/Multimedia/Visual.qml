@@ -46,6 +46,7 @@ Item {
 
         anchors.fill: parent
         source: vis.imagePath
+        sourceSize: vis.sourceSize
         asynchronous: true
         fillMode: vis.fillMode
     }

@@ -6,11 +6,11 @@ import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Models
+import Caelestia.Multimedia
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.components.filedialog
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -180,14 +180,16 @@ Item {
             }
         }
 
-        CachingIconImage {
+        Visual {
             id: icon
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: Tokens.padding.medium
 
-            implicitSize: Sizes.itemWidth - Tokens.padding.medium * 2
+            implicitWidth: Sizes.itemWidth - Tokens.padding.medium * 2
+            implicitHeight: implicitWidth
+            fillMode: VisualSource.PreserveAspectFit
 
             Component.onCompleted: {
                 const file = item.modelData;

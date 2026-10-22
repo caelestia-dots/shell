@@ -23,6 +23,10 @@ bool VisualSource::videoReady() const {
     return m_videoReady;
 }
 
+QSize VisualSource::sourceSize() const {
+    return m_sourceSize;
+}
+
 QUrl VisualSource::imagePath() const {
     return m_imagePath;
 }
@@ -39,10 +43,17 @@ void VisualSource::setSource(const QString& source) {
     emit sourceChanged();
 
     const auto path = localPath();
-    const auto mime = path.isEmpty() ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    const auto provider = QUrl(m_source).scheme() == u"image"_s;
+    const auto mime = path.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    // We don't use the mime type for svg checking because Qt doesn't.
+    // See QQuickPixmap::isScalableImageFormat.
+    const auto prettyPath = QUrl(m_source).path(QUrl::PrettyDecoded);
+    m_scalable =
+        provider || prettyPath.endsWith(u"svg"_s) || prettyPath.endsWith(u"svgz"_s) || prettyPath.endsWith(u"pdf"_s);
+
     if (mime.startsWith(u"video/"_s))
         setType(Type::Live);
-    else if (mime.startsWith(u"image/"_s))
+    else if (provider || mime.startsWith(u"image/"_s) || mime == u"application/pdf"_s)
         setType(Type::Still);
     else
         setType(Type::Unknown);
@@ -151,6 +162,14 @@ void VisualSource::setVideoReady(bool videoReady) {
     emit videoReadyChanged();
 }
 
+void VisualSource::setSourceSize(const QSize& sourceSize) {
+    if (m_sourceSize == sourceSize)
+        return;
+
+    m_sourceSize = sourceSize;
+    emit sourceSizeChanged();
+}
+
 void VisualSource::setImagePath(const QUrl& imagePath) {
     if (m_imagePath == imagePath)
         return;
@@ -168,14 +187,26 @@ void VisualSource::watchWindow(QQuickWindow* window) {
 
 void VisualSource::refresh() {
     const auto path = localPath();
-    if (path.isEmpty() || m_type == Type::Unknown || !m_sizeSource) {
+    if (path.isEmpty()) {
         setImagePath({});
+        return;
+    }
+
+    if (!m_sizeSource) {
+        setSourceSize({});
+        setImagePath(m_type == Type::Live ? QUrl() : rawUrl());
         return;
     }
 
     const auto* window = m_sizeSource->window();
     if (!window || m_sizeSource->size().isEmpty())
         return;
+
+    if (m_scalable || m_type == Type::Unknown) {
+        setSourceSize(m_scalable ? m_sizeSource->size().toSize() : QSize());
+        setImagePath(rawUrl());
+        return;
+    }
 
     auto* const cache = ImageCache::instance();
     const auto bucket = ImageCache::bucketFor((m_sizeSource->size() * window->devicePixelRatio()).toSize());
@@ -185,6 +216,7 @@ void VisualSource::refresh() {
 
     m_key = key;
     m_bucket = bucket;
+    setSourceSize(bucket);
     const auto cached = cache->lookup(key);
 
     if (m_type == Type::Live) {
@@ -225,6 +257,11 @@ void VisualSource::syncPlayer() {
 QString VisualSource::localPath() const {
     const QUrl url(m_source);
     return url.isLocalFile() ? url.toLocalFile() : m_source;
+}
+
+QUrl VisualSource::rawUrl() const {
+    const QUrl url(m_source);
+    return url.isLocalFile() || !url.scheme().isEmpty() ? url : QUrl::fromLocalFile(m_source);
 }
 
 Qt::AspectRatioMode VisualSource::aspectMode() const {

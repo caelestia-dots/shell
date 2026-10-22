@@ -18,6 +18,8 @@ class VisualSource : public QObject {
 
     Q_PROPERTY(caelestia::multimedia::VisualSource::Type type READ type NOTIFY typeChanged)
     Q_PROPERTY(bool videoReady READ videoReady NOTIFY videoReadyChanged)
+    // The decode size for imagePath, in logical pixels for scalable sources and device pixels otherwise
+    Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged)
     // The path to the image (source or a cached file when type is Still), or preview if type is Live.
     // The preview is cleared when the video is ready.
     Q_PROPERTY(QUrl imagePath READ imagePath NOTIFY imagePathChanged)
@@ -49,6 +51,7 @@ public:
 
     [[nodiscard]] Type type() const;
     [[nodiscard]] bool videoReady() const;
+    [[nodiscard]] QSize sourceSize() const;
     [[nodiscard]] QUrl imagePath() const;
 
     [[nodiscard]] QString source() const;
@@ -69,6 +72,7 @@ public:
 signals:
     void typeChanged();
     void videoReadyChanged();
+    void sourceSizeChanged();
     void imagePathChanged();
     void sourceChanged();
     void playingChanged();
@@ -79,16 +83,20 @@ signals:
 private:
     void setType(Type type);
     void setVideoReady(bool videoReady);
+    void setSourceSize(const QSize& sourceSize);
     void setImagePath(const QUrl& imagePath);
     void refresh();
     void watchWindow(QQuickWindow* window);
     void onVideoFrame(const QVideoFrame& frame);
     void syncPlayer();
     [[nodiscard]] QString localPath() const;
+    [[nodiscard]] QUrl rawUrl() const;
     [[nodiscard]] Qt::AspectRatioMode aspectMode() const;
 
     Type m_type = Type::Unknown;
     bool m_videoReady = false;
+    QSize m_sourceSize;
+    bool m_scalable = false;
     QUrl m_imagePath;
     QString m_source;
     bool m_playing = false;
