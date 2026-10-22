@@ -47,11 +47,13 @@ void VisualSource::setSource(const QString& source) {
     const auto mime = path.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
     // We don't use the mime type for svg checking because Qt doesn't.
     // See QQuickPixmap::isScalableImageFormat.
-    m_scalable = provider || path.endsWith(u"svg"_s) || path.endsWith(u"svgz"_s) || path.endsWith(u"pdf"_s);
+    const auto prettyPath = QUrl(m_source).path(QUrl::PrettyDecoded);
+    m_scalable =
+        provider || prettyPath.endsWith(u"svg"_s) || prettyPath.endsWith(u"svgz"_s) || prettyPath.endsWith(u"pdf"_s);
 
     if (mime.startsWith(u"video/"_s))
         setType(Type::Live);
-    else if (provider || mime.startsWith(u"image/"_s))
+    else if (provider || mime.startsWith(u"image/"_s) || mime == u"application/pdf"_s)
         setType(Type::Still);
     else
         setType(Type::Unknown);
