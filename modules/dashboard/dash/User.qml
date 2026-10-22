@@ -74,7 +74,7 @@ Item {
             Loader {
                 anchors.centerIn: parent
                 asynchronous: true
-                active: pfp.status !== Image.Ready
+                active: !pfp.ready
 
                 sourceComponent: MaterialIcon {
                     text: "person_add"
@@ -94,7 +94,7 @@ Item {
 
             StyledRect {
                 anchors.fill: parent
-                color: Qt.alpha(Colours.palette.m3scrim, pfp.status === Image.Ready ? 0.4 : 0)
+                color: Qt.alpha(Colours.palette.m3scrim, pfp.ready ? 0.4 : 0)
                 opacity: mouse.containsMouse ? 1 : 0
                 layer.enabled: opacity < 1
 
