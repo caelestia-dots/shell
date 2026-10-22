@@ -88,7 +88,9 @@ private:
     void refresh();
     void watchWindow(QQuickWindow* window);
     void onVideoFrame(const QVideoFrame& frame);
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void syncPlayer();
+    void unload();
     [[nodiscard]] QString localPath() const;
     [[nodiscard]] QUrl rawUrl() const;
     [[nodiscard]] Qt::AspectRatioMode aspectMode() const;
@@ -105,6 +107,9 @@ private:
     QQuickItem* m_sizeSource = nullptr;
     QString m_key;
     QSize m_bucket;
+    QUrl m_preview;
+    qint64 m_position = 0;
+    bool m_loading = false;
     std::atomic<quint32> m_generation = 0;
     QMetaObject::Connection m_windowConn;
     QMetaObject::Connection m_sinkConn;

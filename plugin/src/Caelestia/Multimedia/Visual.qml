@@ -38,6 +38,7 @@ Item {
         active: vis.type === VisualSource.Live
         sourceComponent: VideoOutput {
             fillMode: vis.fillMode
+            endOfStreamPolicy: VideoOutput.KeepLastFrame
         }
     }
 
