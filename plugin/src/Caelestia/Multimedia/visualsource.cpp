@@ -13,6 +13,7 @@ using Qt::StringLiterals::operator""_s;
 VisualSource::VisualSource(QObject* parent)
     : QObject(parent) {
     m_player.setLoops(QMediaPlayer::Infinite);
+    QObject::connect(&m_player, &QMediaPlayer::mediaStatusChanged, this, &VisualSource::onMediaStatusChanged);
 }
 
 VisualSource::Type VisualSource::type() const {
@@ -61,6 +62,8 @@ void VisualSource::setSource(const QString& source) {
     ++m_generation;
     setVideoReady(false);
     m_key.clear();
+    m_preview.clear();
+    m_position = 0;
     refresh();
     syncPlayer();
 }
@@ -220,7 +223,9 @@ void VisualSource::refresh() {
     const auto cached = cache->lookup(key);
 
     if (m_type == Type::Live) {
+        m_preview = cached;
         setImagePath(m_videoReady ? QUrl() : cached);
+        syncPlayer();
         return;
     }
 
@@ -233,7 +238,7 @@ void VisualSource::refresh() {
 }
 
 void VisualSource::onVideoFrame(const QVideoFrame& frame) {
-    if (m_videoReady)
+    if (m_videoReady && m_playing)
         return;
 
     setVideoReady(true);
@@ -241,17 +246,61 @@ void VisualSource::onVideoFrame(const QVideoFrame& frame) {
 
     if (!m_key.isEmpty() && ImageCache::instance()->lookup(m_key).isEmpty())
         ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
+
+    if (!m_playing)
+        unload();
+}
+
+void VisualSource::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    // Stopping also reports LoadedMedia, so only react to loads started here
+    if (status != QMediaPlayer::LoadedMedia || !m_loading)
+        return;
+
+    m_loading = false;
+    if (m_position > 0)
+        m_player.setPosition(m_position);
+
+    if (m_playing)
+        m_player.play();
+    else
+        m_player.pause();
 }
 
 void VisualSource::syncPlayer() {
     const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
-    if (m_player.source() != url)
-        m_player.setSource(url);
+    if (!m_player.source().isEmpty() && m_player.source() != url)
+        unload();
 
-    if (m_playing && !url.isEmpty())
-        m_player.play();
-    else
-        m_player.pause();
+    if (url.isEmpty())
+        return;
+
+    if (m_player.source() == url) {
+        if (m_loading)
+            return;
+
+        if (m_playing) {
+            m_player.play();
+        } else if (m_videoReady) {
+            m_position = m_player.position();
+            unload();
+        }
+
+        return;
+    }
+
+    const auto previewPending = m_sizeSource && m_key.isEmpty();
+    if (m_playing || (!previewPending && m_preview.isEmpty())) {
+        m_loading = true;
+        m_player.setSource(url);
+    }
+}
+
+void VisualSource::unload() {
+    if (m_player.source().isEmpty())
+        return;
+
+    ++m_generation;
+    m_player.setSource({});
 }
 
 QString VisualSource::localPath() const {
