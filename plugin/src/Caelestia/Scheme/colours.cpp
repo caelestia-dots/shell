@@ -101,24 +101,12 @@ QString Colours::scheme() const {
     return m_state.name;
 }
 
-void Colours::setScheme(const QString& scheme) {
-    applyState(scheme, m_state.flavour, m_state.mode);
-}
-
 QString Colours::flavour() const {
     return m_state.flavour;
 }
 
-void Colours::setFlavour(const QString& flavour) {
-    applyState(m_state.name, flavour, m_state.mode);
-}
-
 Colours::Mode Colours::mode() const {
     return m_state.mode == lib::Mode::Light ? Mode::Light : Mode::Dark;
-}
-
-void Colours::setMode(Mode mode) {
-    applyState(m_state.name, m_state.flavour, mode == Mode::Light ? lib::Mode::Light : lib::Mode::Dark);
 }
 
 ColourPalette* Colours::palette() const {
@@ -151,6 +139,18 @@ void Colours::reset() {
 
     m_committed = true;
     emit committedChanged();
+}
+
+void Colours::setScheme(const QString& scheme, bool commit) {
+    setState(scheme, m_state.flavour, m_state.mode, commit);
+}
+
+void Colours::setFlavour(const QString& flavour, bool commit) {
+    setState(m_state.name, flavour, m_state.mode, commit);
+}
+
+void Colours::setMode(Mode mode, bool commit) {
+    setState(m_state.name, m_state.flavour, mode == Mode::Light ? lib::Mode::Light : lib::Mode::Dark, commit);
 }
 
 QColor Colours::_layer(const QColor& colour, int layer) const {
@@ -210,28 +210,35 @@ void Colours::loadState() {
     });
 }
 
-void Colours::applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed) {
+void Colours::setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit) {
+    applyState(scheme, flavour, mode).then(this, [this, commit] {
+        if (commit)
+            this->commit();
+    });
+}
+
+QFuture<void> Colours::applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed) {
     if (scheme == k_dynamic) {
         const auto colours = Wallpapers::instance()->colours();
         if (colours.isEmpty()) {
             qCCritical(lcColours) << "Failed to apply scheme: no colours found in the current wallpaper";
-            return;
+            return QtFuture::makeReadyVoidFuture();
         }
 
-        getSchemeData(lib::Scheme::forColour(colours.first()), flavour, mode)
-            .then(this, [this, committed](const lib::SchemeData& data) {
-                applyState(data, committed);
-            });
-    } else {
-        lib::Scheme::forName(scheme)
-            .then([flavour, mode](const std::shared_ptr<lib::Scheme>& s) {
-                return getSchemeData(s, flavour, mode);
-            })
-            .unwrap()
+        return getSchemeData(lib::Scheme::forColour(colours.first()), flavour, mode)
             .then(this, [this, committed](const lib::SchemeData& data) {
                 applyState(data, committed);
             });
     }
+
+    return lib::Scheme::forName(scheme)
+        .then([flavour, mode](const std::shared_ptr<lib::Scheme>& s) {
+            return getSchemeData(s, flavour, mode);
+        })
+        .unwrap()
+        .then(this, [this, committed](const lib::SchemeData& data) {
+            applyState(data, committed);
+        });
 }
 
 void Colours::applyState(const lib::SchemeData& data, bool committed) {
