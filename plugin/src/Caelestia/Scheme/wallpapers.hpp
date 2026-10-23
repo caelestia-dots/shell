@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qfilesystemwatcher.h>
 #include <qqmlintegration.h>
 
 #include <caelestia/media/analysis.hpp>
@@ -47,11 +48,19 @@ signals:
 private:
     explicit Wallpapers(QObject* parent = nullptr);
 
-    bool m_committed = false;
+    bool m_committed = true;
     QString m_current;
     QString m_currentCommitted;
 
     media::Analysis m_analysis;
+    QFileSystemWatcher m_watcher;
+
+    void loadState();
+    void applyState(const QString& path, bool committed);
+
+    void watch(const QString& path);
+    void handleFileChanged(const QString& path);
+    void handleDirectoryChanged();
 };
 
 } // namespace caelestia::shell::scheme
