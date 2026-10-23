@@ -67,9 +67,18 @@ Region {
         height: panel.height * (1 - root.panels.utilities.offsetScale) + root.borderThickness
     }
 
+    // Union of where the popout is and where it is settling, so the hole leads the animation rather
+    // than trailing it: shaped from the animated geometry alone, a cursor moving onto a popout that
+    // is still sliding or growing lands outside the mask and is handed to the window underneath,
+    // which reaches the shell as a pointer leave. No offsetScale — panel.width already has it.
     R {
+        readonly property real settleY: root.panels.popoutsWrapper.targetY
+        readonly property real unionY: Math.min(panel.y, settleY)
+
         panel: root.panels.popoutsWrapper
-        width: panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
+        y: unionY + root.borderThickness
+        width: Math.max(panel.width, root.panels.popoutsWrapper.nonAnimWidth)
+        height: Math.max(panel.y + panel.height, settleY + root.panels.popoutsWrapper.nonAnimHeight) - unionY
     }
 
     component R: Region {
