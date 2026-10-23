@@ -11,7 +11,7 @@
 #include <mutex>
 #include <numeric>
 
-namespace caelestia::multimedia::ktx {
+namespace caelestia::shell::multimedia::ktx {
 
 namespace {
 
@@ -131,4 +131,4 @@ QByteArray encodeBc3(const QImage& source) {
     return out;
 }
 
-} // namespace caelestia::multimedia::ktx
+} // namespace caelestia::shell::multimedia::ktx

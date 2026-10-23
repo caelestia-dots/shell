@@ -6,7 +6,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 Q_DECLARE_LOGGING_CATEGORY(lcSettings)
 
@@ -59,7 +59,7 @@ public:
     };
     Q_ENUM(Type)
 
-    Q_INVOKABLE static QString toString(caelestia::settings::DiagnosticType::Type t);
+    Q_INVOKABLE static QString toString(caelestia::shell::settings::DiagnosticType::Type t);
 };
 
 enum class ExpectedType : quint8 {
@@ -91,4 +91,4 @@ public:
     bool operator==(const Diagnostic& other) const = default;
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

@@ -6,7 +6,7 @@
 
 #include "imagecache.hpp"
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -326,4 +326,4 @@ Qt::AspectRatioMode VisualSource::aspectMode() const {
     Q_UNREACHABLE_RETURN(Qt::IgnoreAspectRatio);
 }
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

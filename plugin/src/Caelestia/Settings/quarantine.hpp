@@ -4,7 +4,7 @@
 #include <qjsonvalue.h>
 #include <qtclasshelpermacros.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 class Quarantine {
 public:
@@ -30,4 +30,4 @@ private:
     QHash<QString, QJsonValue> m_quarantine;
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

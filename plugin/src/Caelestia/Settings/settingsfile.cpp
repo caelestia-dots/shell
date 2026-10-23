@@ -19,7 +19,7 @@ Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
@@ -228,4 +228,4 @@ void SettingsFile::writeNow() {
     initWatcher(); // The file may have just been created, or replaced by the rename
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

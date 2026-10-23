@@ -2,7 +2,7 @@
 
 #include "service.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 ServiceRef::ServiceRef(Service* service, QObject* parent)
     : QObject(parent)
@@ -33,4 +33,4 @@ void ServiceRef::setService(Service* service) {
     }
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

@@ -11,7 +11,7 @@
 #include <qsgtexture.h>
 #include <qsgtextureprovider.h>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 class RoundedMaskNode;
 
@@ -109,4 +109,4 @@ public:
     void preprocess() override;
 };
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

@@ -3,7 +3,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class SidebarConfig : public settings::ObjectNode {
     CONFIG_NODE(SidebarConfig, settings::ObjectNode)
@@ -14,4 +14,4 @@ class SidebarConfig : public settings::ObjectNode {
     CONFIG_PROPERTY(int, dragThreshold, 80)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config
