@@ -10,9 +10,9 @@
 #include <qstring.h>
 #include <qurl.h>
 
-#include "caelestia/utils/cache.hpp"
+#include <caelestia/utils/cache.hpp>
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 class RemoteCache : public QObject {
     Q_OBJECT
@@ -56,4 +56,4 @@ private:
     QSet<QUrl> m_revalidating;
 };
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia
