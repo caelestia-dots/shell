@@ -4,6 +4,7 @@ qml_module(caelestia-multimedia
         visualsource.cpp
         imagecache.cpp
         ktxencoder.cpp
+        visualanalyser.cpp
     QML_FILES
         Visual.qml
     LIBRARIES
