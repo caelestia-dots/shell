@@ -14,7 +14,7 @@ class Wallpapers : public QObject {
     /// Wallpapers follow the same commit model as Colours.
     Q_PROPERTY(bool committed READ committed NOTIFY committedChanged)
 
-    Q_PROPERTY(QString current READ current WRITE setCurrent NOTIFY currentChanged)
+    Q_PROPERTY(QString current READ current WRITE setWallpaper NOTIFY currentChanged)
     Q_PROPERTY(QString currentCommitted READ currentCommitted NOTIFY currentCommittedChanged)
 
     Q_PROPERTY(QList<QColor> colours READ colours NOTIFY coloursChanged)
@@ -26,14 +26,15 @@ public:
     [[nodiscard]] bool committed() const;
 
     [[nodiscard]] QString current() const;
-    void setCurrent(const QString& current);
+    Q_INVOKABLE void setWallpaper(const QString& path, bool commit = false);
 
     [[nodiscard]] QString currentCommitted() const;
 
     [[nodiscard]] QList<QColor> colours() const;
-    [[nodiscard]] Q_INVOKABLE QList<QColor> coloursFor(const QString& path) const;
-
     [[nodiscard]] const media::Analysis& analysis() const;
+
+    Q_INVOKABLE void commit();
+    Q_INVOKABLE void reset();
 
 signals:
     void committedChanged();
@@ -45,6 +46,10 @@ signals:
 
 private:
     explicit Wallpapers(QObject* parent = nullptr);
+
+    bool m_committed = false;
+    QString m_current;
+    QString m_currentCommitted;
 
     media::Analysis m_analysis;
 };
