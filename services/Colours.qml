@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Caelestia.Config
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import qs.services
 import qs.utils
 
