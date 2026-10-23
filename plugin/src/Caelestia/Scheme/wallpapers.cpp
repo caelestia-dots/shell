@@ -10,15 +10,23 @@
 
 namespace caelestia::shell::scheme {
 
+namespace {
+
+QString wallpaperDir() {
+    // TODO: migrate to lib ConfigPaths::wallpaperDir
+    return config::ConfigSingleton::instance()->paths()->wallpaperDir();
+}
+
+} // namespace
+
 Wallpapers::Wallpapers(QObject* parent)
     : QObject(parent)
     , m_model(new models::FileSystemModel(this)) {
-    const auto* paths = config::ConfigSingleton::instance()->paths();
     m_model->setRecursive(true);
     m_model->setFilter(models::FileSystemModel::Filter::Images | models::FileSystemModel::Filter::Videos);
-    m_model->setPath(paths->wallpaperDir());
-    connect(paths, &config::UserPaths::wallpaperDirChanged, this, [this, paths] {
-        m_model->setPath(paths->wallpaperDir());
+    m_model->setPath(wallpaperDir());
+    connect(config::ConfigSingleton::instance()->paths(), &config::UserPaths::wallpaperDirChanged, this, [this] {
+        m_model->setPath(wallpaperDir());
     });
 
     connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &Wallpapers::handleFileChanged);
@@ -53,13 +61,6 @@ QString Wallpapers::current() const {
     return m_current;
 }
 
-void Wallpapers::setWallpaper(const QString& path, bool commit) {
-    applyState(path, false);
-
-    if (commit)
-        this->commit();
-}
-
 QString Wallpapers::currentCommitted() const {
     return m_currentCommitted;
 }
@@ -90,6 +91,24 @@ void Wallpapers::reset() {
         return;
 
     loadState();
+}
+
+void Wallpapers::setWallpaper(const QString& path, bool commit) {
+    applyState(path, false);
+
+    if (commit)
+        this->commit();
+}
+
+QString Wallpapers::defaultWallpaper() {
+    return wallpaper::defaultWallpaper();
+}
+
+QString Wallpapers::categoryFor(const models::FileSystemEntry* entry) {
+    auto category = entry->parentDir().mid(wallpaperDir().size() + 1);
+    if (const auto idx = category.indexOf(u'/'); idx != -1)
+        return category.mid(0, idx);
+    return category;
 }
 
 void Wallpapers::loadState() {

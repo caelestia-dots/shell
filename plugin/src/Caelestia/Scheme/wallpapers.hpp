@@ -17,7 +17,7 @@ class Wallpapers : public QObject {
     /// Wallpapers follow the same commit model as Colours.
     Q_PROPERTY(bool committed READ committed NOTIFY committedChanged)
 
-    Q_PROPERTY(QString current READ current WRITE setWallpaper NOTIFY currentChanged)
+    Q_PROPERTY(QString current READ current NOTIFY currentChanged)
     Q_PROPERTY(QString currentCommitted READ currentCommitted NOTIFY currentCommittedChanged)
 
     Q_PROPERTY(QList<QColor> colours READ colours NOTIFY coloursChanged)
@@ -31,7 +31,6 @@ public:
     [[nodiscard]] bool committed() const;
 
     [[nodiscard]] QString current() const;
-    Q_INVOKABLE void setWallpaper(const QString& path, bool commit = false);
 
     [[nodiscard]] QString currentCommitted() const;
 
@@ -42,6 +41,10 @@ public:
 
     Q_INVOKABLE void commit();
     Q_INVOKABLE void reset();
+
+    Q_INVOKABLE void setWallpaper(const QString& path, bool commit = true);
+    Q_INVOKABLE static QString defaultWallpaper();
+    Q_INVOKABLE static QString categoryFor(const caelestia::shell::models::FileSystemEntry* entry);
 
 signals:
     void committedChanged();
