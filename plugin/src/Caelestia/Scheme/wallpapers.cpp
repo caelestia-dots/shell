@@ -109,8 +109,11 @@ void Wallpapers::applyState(const QString& path, bool committed) {
             if (path != m_current)
                 return;
 
+            const auto oldColours = m_analysis.colours;
             m_analysis = analysis;
-            emit coloursChanged();
+
+            if (oldColours != m_analysis.colours)
+                emit coloursChanged();
             emit analysisDone();
         });
     }
