@@ -173,6 +173,7 @@ private:
     [[nodiscard]] QColor alter(const QColor& colour, qreal alpha, int layer) const;
 
     void loadState();
+    void applyState(const QString& scheme, const QString& flavour, lib::Mode mode);
     void applyState(const lib::SchemeData& data, bool committed = false);
     void syncTPalette();
 
