@@ -4,6 +4,7 @@ import "items"
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components.controls
 import qs.services
 
@@ -35,7 +36,7 @@ PathView {
             return 0;
 
         const maxItemsOnScreen = Math.floor(maxWidth / itemWidth);
-        const visible = Math.min(maxItemsOnScreen, Config.launcher.maxWallpapers, scriptModel.values.length);
+        const visible = Math.min(maxItemsOnScreen, Config.launcher.maxWallpapers, count);
 
         if (visible === 2)
             return 1;
@@ -44,21 +45,22 @@ PathView {
         return visible;
     }
 
-    model: ScriptModel {
-        id: scriptModel
+    model: Wallpapers.model
+    // ScriptModel {
+    //     id: scriptModel
 
-        readonly property string search: root.search.text.split(" ").slice(1).join(" ")
+    //     readonly property string search: root.search.text.split(" ").slice(1).join(" ")
 
-        values: Wallpapers.query(search)
-        onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
-    }
+    //     values: Wallpapers.query(search)
+    //     onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
+    // }
 
-    Component.onCompleted: currentIndex = Wallpapers.list.findIndex(w => w.path === Wallpapers.actualCurrent)
-    Component.onDestruction: Wallpapers.stopPreview()
+    Component.onCompleted: currentIndex = Wallpapers.model.entries.findIndex(w => w.path === Wallpapers.currentCommitted)
+    Component.onDestruction: Wallpapers.reset()
 
     onCurrentItemChanged: {
         if (currentItem)
-            Wallpapers.preview((currentItem as WallpaperItem).modelData.path);
+            Wallpapers.setWallpaper((currentItem as WallpaperItem).modelData.path, false);
     }
 
     implicitWidth: Math.min(numItems, count) * itemWidth

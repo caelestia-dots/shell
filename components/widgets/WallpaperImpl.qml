@@ -2,9 +2,9 @@ import QtQuick
 import Caelestia
 import Caelestia.Config
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import Caelestia.Shaders
 import Caelestia.State
-import qs.services
 
 Item {
     id: root

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -140,7 +141,7 @@ Item {
             }
 
             StyledText {
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : Tr.tr("Try searching for something else")
+                text: root.state === "wallpapers" && Wallpapers.model.entries.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : Tr.tr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.medium
             }
