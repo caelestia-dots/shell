@@ -86,6 +86,11 @@ Colours::Colours(QObject* parent)
     connect(transparency, &config::AppearanceTransparency::baseChanged, this, &Colours::updateLayer);
     connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::updateLayer);
     connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::updateLayer);
+
+    connect(Wallpapers::instance(), &Wallpapers::coloursChanged, this, [this] {
+        if (m_state.name == k_dynamic)
+            applyState(m_state.name, m_state.flavour, m_state.mode, Wallpapers::instance()->committed());
+    });
 }
 
 bool Colours::committed() const {
@@ -205,17 +210,17 @@ void Colours::loadState() {
     });
 }
 
-void Colours::applyState(const QString& scheme, const QString& flavour, lib::Mode mode) {
+void Colours::applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed) {
     if (scheme == k_dynamic) {
         const auto colours = Wallpapers::instance()->colours();
         if (colours.isEmpty()) {
-            qCCritical(lcColours) << "Failed to apply mode: no colours found in the current wallpaper";
+            qCCritical(lcColours) << "Failed to apply scheme: no colours found in the current wallpaper";
             return;
         }
 
         getSchemeData(lib::Scheme::forColour(colours.first()), flavour, mode)
-            .then(this, [this](const lib::SchemeData& data) {
-                applyState(data);
+            .then(this, [this, committed](const lib::SchemeData& data) {
+                applyState(data, committed);
             });
     } else {
         lib::Scheme::forName(scheme)
@@ -223,8 +228,8 @@ void Colours::applyState(const QString& scheme, const QString& flavour, lib::Mod
                 return getSchemeData(s, flavour, mode);
             })
             .unwrap()
-            .then(this, [this](const lib::SchemeData& data) {
-                applyState(data);
+            .then(this, [this, committed](const lib::SchemeData& data) {
+                applyState(data, committed);
             });
     }
 }
