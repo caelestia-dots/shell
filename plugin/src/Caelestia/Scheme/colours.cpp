@@ -91,6 +91,8 @@ Colours::Colours(QObject* parent)
         if (m_state.name == k_dynamic)
             applyState(m_state.name, m_state.flavour, m_state.mode, Wallpapers::instance()->committed());
     });
+
+    loadState();
 }
 
 bool Colours::committed() const {
