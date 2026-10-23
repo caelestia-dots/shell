@@ -186,11 +186,11 @@ CustomMouseArea {
                 if (showSidebarHover && !screenState.sidebar) {
                     screenState.sidebar = true;
                 } else if (!sidebarShortcutActive) {
-                    const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y);
+                    const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y) || inRightPanel(panels.utilities, x, y);
                     if (!inSidebarArea)
                         screenState.sidebar = false;
                 } else if (showSidebarHover) {
-                    // Mouse re-entered sidebar area while in shortcut mode → transition to hover control
+                    // If hovering over sidebar area while in shortcut mode, transition to hover control   
                     sidebarShortcutActive = false;
                 }
             }
@@ -316,7 +316,7 @@ CustomMouseArea {
         function onSidebarChanged() {
             if (root.screenState.sidebar) {
                 // Sidebar became visible, immediately check if this should be shortcut mode
-                const inSidebarArea = root.inRightPanel(root.panels.sidebar, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.sessionWrapper, root.mouseX, root.mouseY);
+                const inSidebarArea = root.inRightPanel(root.panels.sidebar, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.sessionWrapper, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.utilities, root.mouseX, root.mouseY);
                 if (!inSidebarArea)
                     root.sidebarShortcutActive = true;
             } else {
