@@ -118,9 +118,7 @@ void Wallpapers::loadState() {
 }
 
 void Wallpapers::applyState(const QString& path, bool committed) {
-    const bool pathChanged = m_current != path;
-
-    if (pathChanged) {
+    if (m_current != path) {
         m_current = path;
         emit currentChanged();
 
