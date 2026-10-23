@@ -7,7 +7,7 @@
 
 #include "remotecache.hpp"
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 namespace {
 
@@ -110,4 +110,4 @@ qreal VisualAnalyser::luminance() const {
     return m_analysis.luminance;
 }
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia
