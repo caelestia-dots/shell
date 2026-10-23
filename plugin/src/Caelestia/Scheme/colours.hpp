@@ -114,8 +114,7 @@ private:
 
 class Colours : public QObject {
     Q_OBJECT
-    QML_NAMED_ELEMENT(Colours)
-    QML_SINGLETON
+    QML_NAMED_ELEMENT(ColoursImpl)
 
     /// All scheme/colour properties are previews that are applied to only the shell until committed.
     /// When a scheme property is changed, it will not be committed until `commit()` is called.
@@ -128,6 +127,8 @@ class Colours : public QObject {
 
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* palette READ palette CONSTANT)
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* tPalette READ tPalette CONSTANT)
+
+    Q_PROPERTY(bool __layerNeedsUpdate READ layerNeedsUpdate NOTIFY layerNeedsUpdateChanged)
 
 public:
     enum class Mode : quint8 {
@@ -152,14 +153,20 @@ public:
     [[nodiscard]] ColourPalette* palette() const;
     [[nodiscard]] ColourPalette* tPalette() const;
 
+    [[nodiscard]] static bool layerNeedsUpdate();
+
     Q_INVOKABLE void commit();
     Q_INVOKABLE void reset();
 
-    [[nodiscard]] Q_INVOKABLE QColor layer(const QColor& colour, int layer = 1) const;
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    [[nodiscard]] Q_INVOKABLE QColor _layer(const QColor& colour, int layer) const;
+    [[nodiscard]] QColor layer(const QColor& colour, int layer = 1) const;
 
 signals:
     void committedChanged();
     void schemeChanged();
+
+    void layerNeedsUpdateChanged();
 
 private:
     bool m_committed = true;
@@ -171,6 +178,8 @@ private:
     QFileSystemWatcher m_watcher;
 
     [[nodiscard]] QColor alter(const QColor& colour, qreal alpha, int layer) const;
+
+    void updateLayer();
 
     void loadState();
     void applyState(const QString& scheme, const QString& flavour, lib::Mode mode);
