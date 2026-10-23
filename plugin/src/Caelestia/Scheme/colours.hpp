@@ -2,6 +2,7 @@
 
 #include <qcolor.h>
 #include <qfilesystemwatcher.h>
+#include <qfuture.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
@@ -121,9 +122,9 @@ class Colours : public QObject {
     /// Properties can be reset via `reset()`.
     Q_PROPERTY(bool committed READ committed NOTIFY committedChanged)
 
-    Q_PROPERTY(QString scheme READ scheme WRITE setScheme NOTIFY schemeChanged)
-    Q_PROPERTY(QString flavour READ flavour WRITE setFlavour NOTIFY schemeChanged)
-    Q_PROPERTY(caelestia::shell::scheme::Colours::Mode mode READ mode WRITE setMode NOTIFY schemeChanged)
+    Q_PROPERTY(QString scheme READ scheme NOTIFY schemeChanged)
+    Q_PROPERTY(QString flavour READ flavour NOTIFY schemeChanged)
+    Q_PROPERTY(caelestia::shell::scheme::Colours::Mode mode READ mode NOTIFY schemeChanged)
 
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* palette READ palette CONSTANT)
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* tPalette READ tPalette CONSTANT)
@@ -142,13 +143,8 @@ public:
     [[nodiscard]] bool committed() const;
 
     [[nodiscard]] QString scheme() const;
-    void setScheme(const QString& scheme);
-
     [[nodiscard]] QString flavour() const;
-    void setFlavour(const QString& flavour);
-
     [[nodiscard]] Mode mode() const;
-    void setMode(Mode mode);
 
     [[nodiscard]] ColourPalette* palette() const;
     [[nodiscard]] ColourPalette* tPalette() const;
@@ -157,6 +153,10 @@ public:
 
     Q_INVOKABLE void commit();
     Q_INVOKABLE void reset();
+
+    Q_INVOKABLE void setScheme(const QString& scheme, bool commit = true);
+    Q_INVOKABLE void setFlavour(const QString& flavour, bool commit = true);
+    Q_INVOKABLE void setMode(Mode mode, bool commit = true);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     [[nodiscard]] Q_INVOKABLE QColor _layer(const QColor& colour, int layer) const;
@@ -182,7 +182,8 @@ private:
     void updateLayer();
 
     void loadState();
-    void applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed = false);
+    void setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit);
+    QFuture<void> applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed = false);
     void applyState(const lib::SchemeData& data, bool committed = false);
     void syncTPalette();
 
