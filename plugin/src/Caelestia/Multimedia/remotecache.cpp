@@ -55,7 +55,7 @@ QString bodyKeyFor(const QUrl& url, const QByteArray& body) {
 
 } // namespace
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 bool RemoteCache::Meta::isFresh() const {
     return fetchedAt.isValid() && QDateTime::currentDateTimeUtc() < fetchedAt.addSecs(maxAge);
@@ -196,4 +196,4 @@ QUrl RemoteCache::fileFor(const Meta& meta) const {
     return meta.bodyKey.isEmpty() ? QUrl() : QUrl::fromLocalFile(m_files.pathFor(meta.bodyKey));
 }
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

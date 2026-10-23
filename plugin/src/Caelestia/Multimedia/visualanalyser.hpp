@@ -9,7 +9,7 @@
 
 #include <caelestia/media/analysis.hpp>
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 class VisualAnalyser : public QObject, public QQmlParserStatus {
     Q_OBJECT
@@ -48,4 +48,4 @@ private:
     void apply(QFuture<media::Analysis> future);
 };
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia
