@@ -9,7 +9,7 @@ Q_LOGGING_CATEGORY(lcSchema, "caelestia.settings.schema", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 namespace {
 
@@ -130,4 +130,4 @@ const Descriptor* Schema::get(const QString& key) const {
     return it != m_keyToIndex.end() ? &m_descriptors[it.value()] : nullptr;
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

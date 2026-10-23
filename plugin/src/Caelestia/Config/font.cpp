@@ -2,7 +2,7 @@
 
 #include "appearanceconfig.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 namespace {
 
@@ -274,4 +274,4 @@ void FontTokens::rebuildClock() {
     emit clockChanged();
 }
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

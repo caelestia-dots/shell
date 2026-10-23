@@ -7,7 +7,7 @@
 #include <qthread.h>
 #include <qurl.h>
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 class ImageCacheWorker;
 
@@ -33,4 +33,4 @@ private:
     ImageCacheWorker* m_worker;
 };
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

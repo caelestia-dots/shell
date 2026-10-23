@@ -5,7 +5,7 @@
 
 #include "pluralrules.hpp"
 
-namespace caelestia::i18n {
+namespace caelestia::shell::i18n {
 
 class Translator : public QObject {
     Q_OBJECT
@@ -72,4 +72,4 @@ private:
     void setLanguage(const QString& language);
 };
 
-} // namespace caelestia::i18n
+} // namespace caelestia::shell::i18n

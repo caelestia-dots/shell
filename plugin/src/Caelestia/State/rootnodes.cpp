@@ -1,6 +1,6 @@
 #include "rootnodes.hpp"
 
-namespace caelestia::state {
+namespace caelestia::shell::state {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -35,4 +35,4 @@ RStateRoot::RStateRoot(const QString& path, RStateRoot* fallback, QObject* paren
 SETTINGS_SINGLETON_IMPL(PersistentState, PStateRoot, stateDir(), monitorStateDir(), u"state.json"_s, Handler)
 SETTINGS_SINGLETON_IMPL(RuntimeState, RStateRoot, runtimeDir(), monitorRuntimeDir(), u"state.json"_s, Handler)
 
-} // namespace caelestia::state
+} // namespace caelestia::shell::state

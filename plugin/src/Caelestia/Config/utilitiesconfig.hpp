@@ -6,7 +6,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -77,4 +77,4 @@ class UtilitiesConfig : public settings::ObjectNode {
         }))
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

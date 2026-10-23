@@ -7,7 +7,7 @@
 #include <qqmlintegration.h>
 #include <qquickitem.h>
 
-namespace caelestia::images {
+namespace caelestia::shell::images {
 
 class ImageAnalyser : public QObject {
     Q_OBJECT
@@ -59,4 +59,4 @@ private:
     static void analyse(QPromise<AnalyseResult>& promise, const QImage& image, int rescaleSize);
 };
 
-} // namespace caelestia::images
+} // namespace caelestia::shell::images
