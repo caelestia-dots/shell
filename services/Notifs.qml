@@ -141,10 +141,10 @@ Singleton {
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
-        name: "dnd"
-        description: "Toggle Do Not Disturb"
+        name: "toggleDnd"
+        description: "Toggle do not disturb"
         onPressed: {
-            props.dnd = !props.dnd;
+            PersistentState.doNotDisturb = !PersistentState.doNotDisturb;
         }
     }
 
