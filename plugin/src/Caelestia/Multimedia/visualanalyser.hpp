@@ -1,15 +1,19 @@
 #pragma once
 
 #include <qcolor.h>
+#include <qfuture.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qqmlparserstatus.h>
+#include <qurl.h>
 
 #include <caelestia/media/analysis.hpp>
 
 namespace caelestia::multimedia {
 
-class VisualAnalyser : public QObject {
+class VisualAnalyser : public QObject, public QQmlParserStatus {
     Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
     QML_ELEMENT
 
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
@@ -25,6 +29,9 @@ public:
     [[nodiscard]] QColor dominantColour() const;
     [[nodiscard]] qreal luminance() const;
 
+    void classBegin() override;
+    void componentComplete() override;
+
 signals:
     void sourceChanged();
     void dominantColourChanged();
@@ -33,8 +40,12 @@ signals:
 private:
     QString m_source;
     media::Analysis m_analysis;
+    bool m_complete = false;
 
+    void resolve();
     void analyse(const QString& path);
+    void analyseProvider(const QUrl& url);
+    void apply(QFuture<media::Analysis> future);
 };
 
 } // namespace caelestia::multimedia
