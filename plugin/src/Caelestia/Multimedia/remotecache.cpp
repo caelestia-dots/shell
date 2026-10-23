@@ -4,6 +4,7 @@
 #include <qdatastream.h>
 #include <qloggingcategory.h>
 #include <qnetworkrequest.h>
+#include <qtconcurrentrun.h>
 
 #include <algorithm>
 #include <utility>
@@ -173,17 +174,22 @@ QFuture<QUrl> RemoteCache::onReply(const QUrl& url, Meta meta, QNetworkReply* re
         return QtFuture::makeReadyValueFuture(existing);
     }
 
-    const auto body = reply->readAll();
-    const auto previous = std::exchange(meta.bodyKey, bodyKeyFor(url, body));
     meta.etag = reply->header(QNetworkRequest::ETagHeader).toString();
     meta.lastModified = reply->header(QNetworkRequest::LastModifiedHeader).toDateTime();
-    m_meta.store(metaKeyFor(url), meta.serialise());
 
-    if (meta.bodyKey == previous)
-        return QtFuture::makeReadyValueFuture(existing);
+    const auto body = reply->readAll();
+    return QtConcurrent::run(bodyKeyFor, url, body)
+        .then(this,
+            [this, url, meta, body](const QString& key) mutable {
+                const auto previous = std::exchange(meta.bodyKey, key);
+                m_meta.store(metaKeyFor(url), meta.serialise());
+                if (key == previous)
+                    return QtFuture::makeReadyValueFuture(fileFor(meta));
 
-    m_files.store(meta.bodyKey, body);
-    return m_files.lookup(meta.bodyKey);
+                m_files.store(key, body);
+                return m_files.lookup(key);
+            })
+        .unwrap();
 }
 
 QUrl RemoteCache::fileFor(const Meta& meta) const {
