@@ -190,7 +190,7 @@ CustomMouseArea {
                     if (!inSidebarArea)
                         screenState.sidebar = false;
                 } else if (showSidebarHover) {
-                    // If hovering over sidebar area while in shortcut mode, transition to hover control   
+                    // If hovering over sidebar area while in shortcut mode, transition to hover control
                     sidebarShortcutActive = false;
                 }
             }
