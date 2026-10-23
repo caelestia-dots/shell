@@ -7,5 +7,8 @@ qml_module(caelestia-scheme
         Colours.qml
     LIBRARIES
         caelestia-config
+        caelestia-models
         caelestia::caelestia
+    DEPENDENCIES
+        Caelestia.Models
 )

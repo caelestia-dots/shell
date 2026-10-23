@@ -5,6 +5,8 @@
 
 #include <caelestia/media/analysis.hpp>
 
+#include "models/filesystemmodel.hpp"
+
 namespace caelestia::shell::scheme {
 
 class Wallpapers : public QObject {
@@ -20,6 +22,8 @@ class Wallpapers : public QObject {
 
     Q_PROPERTY(QList<QColor> colours READ colours NOTIFY coloursChanged)
 
+    Q_PROPERTY(caelestia::shell::models::FileSystemModel* model READ model CONSTANT)
+
 public:
     static Wallpapers* instance();
     static Wallpapers* create(QQmlEngine* engine, QJSEngine* jsEngine);
@@ -33,6 +37,8 @@ public:
 
     [[nodiscard]] QList<QColor> colours() const;
     [[nodiscard]] const media::Analysis& analysis() const;
+
+    [[nodiscard]] models::FileSystemModel* model() const;
 
     Q_INVOKABLE void commit();
     Q_INVOKABLE void reset();
@@ -54,6 +60,7 @@ private:
 
     media::Analysis m_analysis;
     QFileSystemWatcher m_watcher;
+    models::FileSystemModel* const m_model;
 
     void loadState();
     void applyState(const QString& path, bool committed);
