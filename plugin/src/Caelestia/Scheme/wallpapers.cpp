@@ -5,10 +5,22 @@
 
 #include <caelestia/wallpaper/wallpaper.hpp>
 
+#include "config/rootnodes.hpp"
+#include "config/userpaths.hpp"
+
 namespace caelestia::shell::scheme {
 
 Wallpapers::Wallpapers(QObject* parent)
-    : QObject(parent) {
+    : QObject(parent)
+    , m_model(new models::FileSystemModel(this)) {
+    const auto* paths = config::ConfigSingleton::instance()->paths();
+    m_model->setRecursive(true);
+    m_model->setFilter(models::FileSystemModel::Filter::Images | models::FileSystemModel::Filter::Videos);
+    m_model->setPath(paths->wallpaperDir());
+    connect(paths, &config::UserPaths::wallpaperDirChanged, this, [this, paths] {
+        m_model->setPath(paths->wallpaperDir());
+    });
+
     connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &Wallpapers::handleFileChanged);
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &Wallpapers::handleDirectoryChanged);
 
@@ -58,6 +70,10 @@ QList<QColor> Wallpapers::colours() const {
 
 const media::Analysis& Wallpapers::analysis() const {
     return m_analysis;
+}
+
+models::FileSystemModel* Wallpapers::model() const {
+    return m_model;
 }
 
 void Wallpapers::commit() {
