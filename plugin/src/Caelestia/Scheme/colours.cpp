@@ -80,6 +80,12 @@ Colours::Colours(QObject* parent)
     QDir().mkpath(dir);
     m_watcher.addPath(dir);
     watch(lib::statePath());
+
+    const auto* transparency = config::ConfigSingleton::instance()->appearance()->transparency();
+    connect(transparency, &config::AppearanceTransparency::enabledChanged, this, &Colours::syncTPalette);
+    connect(transparency, &config::AppearanceTransparency::baseChanged, this, &Colours::syncTPalette);
+    connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::syncTPalette);
+    connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::syncTPalette);
 }
 
 bool Colours::committed() const {
@@ -165,10 +171,8 @@ QColor Colours::alter(const QColor& colour, qreal alpha, int layer) const {
     const auto wallBoostLight = layer == 1 ? 3.0 : 1.0;
     const auto wallBoost = light ? wallBoostLight : 2.5;
     const auto* transparency = config::ConfigSingleton::instance()->appearance()->transparency();
-// TODO: wallLuminance should be in wallpapers service (placeholder 0.3 for now)
-#define wallLuminance() 0.3
-    const auto offset = direction * strength * (1 - transparency->base()) * (1 + wallLuminance() * wallBoost);
-#undef wallLuminance
+    const auto wallLuminance = Wallpapers::instance()->analysis().luminance;
+    const auto offset = direction * strength * (1 - transparency->base()) * (1 + wallLuminance * wallBoost);
     const auto scale = (lum + offset) / lum;
 
     const auto scaled = [scale](float c) -> float {
