@@ -5,7 +5,7 @@
 #include <qsize.h>
 #include <qstring.h>
 
-#include "caelestia/utils/cache.hpp"
+#include <caelestia/utils/cache.hpp>
 
 namespace caelestia::shell::multimedia {
 
