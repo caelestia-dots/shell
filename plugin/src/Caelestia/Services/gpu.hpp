@@ -2,9 +2,11 @@
 
 #include <qprocess.h>
 #include <qqmlintegration.h>
+#include <qqmllist.h>
 #include <qstringlist.h>
 
 #include "config/enums.hpp"
+#include "gpudevice.hpp"
 #include "tickingservice.hpp"
 
 namespace caelestia::services {
@@ -21,6 +23,7 @@ class Gpu : public TickingService {
     Q_PROPERTY(bool detecting READ detecting NOTIFY detectingChanged)
     Q_PROPERTY(qreal percentage READ percentage NOTIFY percentageChanged)
     Q_PROPERTY(qreal temperature READ temperature NOTIFY temperatureChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::services::GpuDevice> devices READ devicesProp NOTIFY devicesChanged)
 
 public:
     explicit Gpu(QObject* parent = nullptr);
@@ -30,6 +33,7 @@ public:
     [[nodiscard]] bool detecting() const;
     [[nodiscard]] qreal percentage() const;
     [[nodiscard]] qreal temperature() const;
+    [[nodiscard]] QQmlListProperty<GpuDevice> devicesProp();
 
 signals:
     void typeChanged();
@@ -37,6 +41,7 @@ signals:
     void detectingChanged();
     void percentageChanged();
     void temperatureChanged();
+    void devicesChanged();
 
 protected:
     void tick() override;
@@ -56,6 +61,10 @@ private:
     void startNvidiaUsage();
     void readGpuTemperature();
     void resetUsage();
+    void resizeDevices(qsizetype count);
+
+    static qsizetype devicesCount(QQmlListProperty<GpuDevice>* prop);
+    static GpuDevice* devicesAt(QQmlListProperty<GpuDevice>* prop, qsizetype i);
 
     // Runs a one-shot process, delivering its stdout to callback exactly once (empty
     // output if it fails, crashes or never starts), then tears the process down.
@@ -74,6 +83,9 @@ private:
     bool m_detecting = false;
     qreal m_percentage = 0.0;
     qreal m_temperature = 0.0;
+    // One per GPU nvidia-smi reports, in its index order. Only the NVIDIA backend
+    // can sample GPUs individually, so this stays empty for every other type.
+    QList<GpuDevice*> m_devices;
 
     // /sys/class/drm card busy files, enumerated once at construction (the card
     // set is static at runtime) and reused by resolution and the tick path.
