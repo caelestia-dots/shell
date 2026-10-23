@@ -82,10 +82,10 @@ Colours::Colours(QObject* parent)
     watch(lib::statePath());
 
     const auto* transparency = config::ConfigSingleton::instance()->appearance()->transparency();
-    connect(transparency, &config::AppearanceTransparency::enabledChanged, this, &Colours::syncTPalette);
-    connect(transparency, &config::AppearanceTransparency::baseChanged, this, &Colours::syncTPalette);
-    connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::syncTPalette);
-    connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::syncTPalette);
+    connect(transparency, &config::AppearanceTransparency::enabledChanged, this, &Colours::updateLayer);
+    connect(transparency, &config::AppearanceTransparency::baseChanged, this, &Colours::updateLayer);
+    connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::updateLayer);
+    connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::updateLayer);
 }
 
 bool Colours::committed() const {
@@ -124,6 +124,10 @@ ColourPalette* Colours::tPalette() const {
     return m_tPalette;
 }
 
+bool Colours::layerNeedsUpdate() {
+    return false;
+}
+
 void Colours::commit() {
     if (m_committed)
         return;
@@ -142,6 +146,10 @@ void Colours::reset() {
 
     m_committed = true;
     emit committedChanged();
+}
+
+QColor Colours::_layer(const QColor& colour, int layer) const {
+    return this->layer(colour, layer);
 }
 
 QColor Colours::layer(const QColor& colour, int layer) const {
@@ -179,6 +187,11 @@ QColor Colours::alter(const QColor& colour, qreal alpha, int layer) const {
         return static_cast<float>(std::clamp(static_cast<qreal>(c) * scale, 0.0, 1.0));
     };
     return QColor::fromRgbF(scaled(colour.redF()), scaled(colour.greenF()), scaled(colour.blueF()), a);
+}
+
+void Colours::updateLayer() {
+    emit layerNeedsUpdateChanged();
+    syncTPalette();
 }
 
 void Colours::loadState() {
