@@ -18,7 +18,7 @@ Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia {
+namespace caelestia::shell {
 
 void CUtils::dependency(const QVariant& value) {
     Q_UNUSED(value);
@@ -227,4 +227,4 @@ QString CUtils::qtVersion() {
     return QStringLiteral(QT_VERSION_STR);
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

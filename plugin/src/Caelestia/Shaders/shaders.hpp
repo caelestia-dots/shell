@@ -8,7 +8,7 @@
 #include "config/anim.hpp"
 #include "config/rootnodes.hpp"
 
-namespace caelestia::shaders {
+namespace caelestia::shell::shaders {
 
 struct TransitionShader {
     Q_GADGET
@@ -30,7 +30,7 @@ class Shaders : public QObject {
     QML_SINGLETON
 
 #define TRANSITION(name, file, durationName, easingCurve)                                                              \
-    Q_PROPERTY(caelestia::shaders::TransitionShader name READ name CONSTANT)                                           \
+    Q_PROPERTY(caelestia::shell::shaders::TransitionShader name READ name CONSTANT)                                    \
                                                                                                                        \
 public:                                                                                                                \
     [[nodiscard]] static TransitionShader name() {                                                                     \
@@ -79,4 +79,4 @@ public:
         : QObject(parent) {};
 };
 
-} // namespace caelestia::shaders
+} // namespace caelestia::shell::shaders

@@ -9,7 +9,7 @@
 #include "quarantine.hpp"
 #include "schema.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 class Node : public QObject {
     Q_OBJECT
@@ -97,4 +97,4 @@ template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type
     return fallback ? fallback->*member : defaultValue;
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

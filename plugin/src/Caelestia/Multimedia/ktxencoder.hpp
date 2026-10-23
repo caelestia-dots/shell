@@ -6,7 +6,7 @@
 #include <qrect.h>
 #include <qsize.h>
 
-namespace caelestia::multimedia::ktx {
+namespace caelestia::shell::multimedia::ktx {
 
 struct Fit {
     QSize scaled;
@@ -18,4 +18,4 @@ struct Fit {
 [[nodiscard]] QImage readFitted(const QString& path, const QSize& bucket, Qt::AspectRatioMode mode);
 [[nodiscard]] QByteArray encodeBc3(const QImage& source);
 
-} // namespace caelestia::multimedia::ktx
+} // namespace caelestia::shell::multimedia::ktx

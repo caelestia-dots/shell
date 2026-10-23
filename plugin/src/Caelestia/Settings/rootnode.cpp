@@ -2,7 +2,7 @@
 
 #include <qjsonobject.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 RootNode::RootNode(bool watch, const QString& path, RootNode* fallback, QObject* parent)
     : ObjectNode(fallback, parent)
@@ -43,4 +43,4 @@ void RootNode::saveToFile() {
     m_file->write(toJson());
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

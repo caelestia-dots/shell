@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -258,4 +258,4 @@ void RoundedMaskNode::preprocess() {
         markDirty(DirtyMaterial);
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

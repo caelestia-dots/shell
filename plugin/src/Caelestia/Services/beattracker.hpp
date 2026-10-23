@@ -6,7 +6,7 @@
 
 #include "audioprovider.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class BeatProcessor : public AudioProcessor {
     Q_OBJECT
@@ -48,4 +48,4 @@ private:
     void updateBpm(smpl_t bpm);
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

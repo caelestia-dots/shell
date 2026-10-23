@@ -7,14 +7,14 @@
 
 #include "core/circularbuffer.hpp"
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 class SparklineItem : public QQuickPaintedItem {
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(caelestia::CircularBuffer* line1 READ line1 WRITE setLine1 NOTIFY line1Changed)
-    Q_PROPERTY(caelestia::CircularBuffer* line2 READ line2 WRITE setLine2 NOTIFY line2Changed)
+    Q_PROPERTY(caelestia::shell::CircularBuffer* line1 READ line1 WRITE setLine1 NOTIFY line1Changed)
+    Q_PROPERTY(caelestia::shell::CircularBuffer* line2 READ line2 WRITE setLine2 NOTIFY line2Changed)
     Q_PROPERTY(QColor line1Color READ line1Color WRITE setLine1Color NOTIFY line1ColorChanged)
     Q_PROPERTY(QColor line2Color READ line2Color WRITE setLine2Color NOTIFY line2ColorChanged)
     Q_PROPERTY(qreal line1FillAlpha READ line1FillAlpha WRITE setLine1FillAlpha NOTIFY line1FillAlphaChanged)
@@ -87,4 +87,4 @@ private:
     qreal m_lineWidth = 2.0;
 };
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

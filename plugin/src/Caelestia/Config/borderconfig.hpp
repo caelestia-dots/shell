@@ -3,7 +3,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class BorderConfig : public settings::ObjectNode {
     CONFIG_NODE(BorderConfig, settings::ObjectNode)
@@ -20,4 +20,4 @@ public:
     [[nodiscard]] int clampedThickness() const;
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

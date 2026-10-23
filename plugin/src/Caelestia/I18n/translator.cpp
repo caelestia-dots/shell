@@ -17,7 +17,7 @@ Q_LOGGING_CATEGORY(lcI18n, "caelestia.i18n", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::i18n {
+namespace caelestia::shell::i18n {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -328,4 +328,4 @@ void Translator::setLanguage(const QString& language) {
     emit languageChanged();
 }
 
-} // namespace caelestia::i18n
+} // namespace caelestia::shell::i18n
