@@ -182,7 +182,7 @@ private:
     void updateLayer();
 
     void loadState();
-    void applyState(const QString& scheme, const QString& flavour, lib::Mode mode);
+    void applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed = false);
     void applyState(const lib::SchemeData& data, bool committed = false);
     void syncTPalette();
 
