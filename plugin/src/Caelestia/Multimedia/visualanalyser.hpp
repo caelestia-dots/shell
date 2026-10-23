@@ -2,6 +2,7 @@
 
 #include <qcolor.h>
 #include <qobject.h>
+#include <qqmlintegration.h>
 
 #include <caelestia/media/analysis.hpp>
 
@@ -9,6 +10,7 @@ namespace caelestia::multimedia {
 
 class VisualAnalyser : public QObject {
     Q_OBJECT
+    QML_ELEMENT
 
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(QColor dominantColour READ dominantColour NOTIFY dominantColourChanged)
