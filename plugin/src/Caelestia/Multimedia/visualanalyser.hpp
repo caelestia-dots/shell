@@ -31,6 +31,8 @@ signals:
 private:
     QString m_source;
     media::Analysis m_analysis;
+
+    void analyse(const QString& path);
 };
 
 } // namespace caelestia::multimedia

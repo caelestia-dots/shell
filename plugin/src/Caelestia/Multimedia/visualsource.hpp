@@ -94,6 +94,8 @@ private:
     void setSourceSize(const QSize& sourceSize);
     void updateImageRect();
     void setImagePath(const QUrl& imagePath);
+    void load();
+    void setLocalPath(const QString& path);
     void refresh();
     void loadBucket(const QSize& bucket);
     void watchWindow(QQuickWindow* window);
@@ -101,7 +103,6 @@ private:
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void syncPlayer();
     void unload();
-    [[nodiscard]] QString localPath() const;
     [[nodiscard]] QUrl rawUrl() const;
     [[nodiscard]] Qt::AspectRatioMode aspectMode() const;
 
@@ -112,6 +113,7 @@ private:
     bool m_scalable = false;
     QUrl m_imagePath;
     QString m_source;
+    QString m_localPath;
     bool m_playing = false;
     FillMode m_fillMode = FillMode::PreserveAspectCrop;
     QObject* m_videoOutput = nullptr;
