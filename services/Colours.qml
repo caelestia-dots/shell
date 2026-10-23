@@ -5,7 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.Config
-import Caelestia.Images
+import Caelestia.Multimedia
 import qs.services
 import qs.utils
 
@@ -113,7 +113,7 @@ Singleton {
         onLoaded: root.load(text(), false)
     }
 
-    ImageAnalyser {
+    VisualAnalyser {
         id: analyser
 
         source: Wallpapers.current
