@@ -51,6 +51,7 @@ ShellRoot {
     // Daemons
     Shortcuts {}
     BatteryMonitor {}
+    BlurController {}
     GameMode {}
     IdleInhibit {}
     IdleMonitors {
