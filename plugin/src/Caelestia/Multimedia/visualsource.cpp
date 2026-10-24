@@ -299,35 +299,30 @@ void VisualSource::refresh() {
 void VisualSource::loadBucket(const QSize& bucket) {
     auto* const cache = ImageCache::instance();
     const auto& path = m_localPath;
+    const auto cached = cache->lookupSync(m_key);
 
     m_textureSize = bucket;
 
-    cache->lookup(m_key).then(this, [this, cache, key = m_key, path, bucket](const QUrl& cached) {
-        if (key != m_key)
-            return;
+    if (m_type == Type::Live) {
+        setSourceSize(bucket);
+        m_preview = cached;
+        setImagePath(m_videoReady ? QUrl() : cached);
+        syncPlayer();
+        return;
+    }
 
-        if (m_type == Type::Live) {
-            setSourceSize(bucket);
-            m_preview = cached;
-            setImagePath(m_videoReady ? QUrl() : cached);
-            syncPlayer();
-            return;
-        }
-
-        if (cached.isEmpty()) {
-            cache->store(key, path, bucket, aspectMode());
-            // Qt decodes the whole image, and scales before it transforms
-            const auto cover = ktx::coverFor(path, bucket);
-            if (m_fillMode == FillMode::PreserveAspectCrop && cover.size.isValid())
-                m_textureSize = cover.size;
-            setSourceSize(cover.transposed ? bucket.transposed() : bucket);
-            setImagePath(QUrl::fromLocalFile(path));
-            updateImageRect();
-        } else {
-            setSourceSize(bucket);
-            setImagePath(cached);
-        }
-    });
+    if (cached.isEmpty()) {
+        cache->store(m_key, path, bucket, aspectMode());
+        // Qt decodes the whole image, and scales before it transforms
+        const auto cover = ktx::coverFor(path, bucket);
+        if (m_fillMode == FillMode::PreserveAspectCrop && cover.size.isValid())
+            m_textureSize = cover.size;
+        setSourceSize(cover.transposed ? bucket.transposed() : bucket);
+        setImagePath(QUrl::fromLocalFile(path));
+    } else {
+        setSourceSize(bucket);
+        setImagePath(cached);
+    }
 }
 
 void VisualSource::onVideoFrame(const QVideoFrame& frame) {
