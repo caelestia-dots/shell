@@ -52,10 +52,12 @@ QFuture<lib::SchemeData> getSchemeData(
 
 } // namespace
 
-void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void()>& fn) {
+void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void(bool)>& fn) {
     QObject::connect(Wallpapers::instance(), &Wallpapers::analysisDone, receiver, fn);
     QObject::connect(
-        config::ConfigSingleton::instance()->services(), &config::ServiceConfig::smartSchemeChanged, receiver, fn);
+        config::ConfigSingleton::instance()->services(), &config::ServiceConfig::smartSchemeChanged, receiver, [fn] {
+            fn(false);
+        });
 }
 
 QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode, bool smart) {
@@ -119,12 +121,12 @@ Colours::Colours(QObject* parent)
     connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::updateLayer);
     connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::updateLayer);
 
-    connectResolveSchemeUpdates(this, [this] {
-        if (m_state.name != k_dynamic)
+    connectResolveSchemeUpdates(this, [this](bool committed) {
+        if (committed || m_state.name != k_dynamic)
             return;
 
         const auto smart = config::ConfigSingleton::instance()->services()->smartScheme();
-        applyState(m_state.name, m_state.flavour, m_state.mode, Wallpapers::instance()->committed(), smart);
+        applyState(m_state.name, m_state.flavour, m_state.mode, false, smart);
     });
 
     loadState();
@@ -167,20 +169,17 @@ void Colours::commit() {
     if (m_committed)
         return;
 
-    theme::Theme(m_state).apply().then(this, [this] {
-        m_committed = true;
-        emit committedChanged();
+    theme::Theme(m_state).apply().onFailed(this, [](const std::exception& e) {
+        qCWarning(lcColours) << "Failed to apply theme:" << e.what();
     });
-}
-
-void Colours::reset() {
-    if (m_committed)
-        return;
-
-    loadState();
 
     m_committed = true;
     emit committedChanged();
+}
+
+void Colours::reset() {
+    if (!m_committed)
+        loadState();
 }
 
 void Colours::setScheme(const QString& scheme, const QString& flavour, bool commit) {
@@ -294,8 +293,8 @@ void Colours::applyState(const lib::SchemeData& data, bool committed) {
     if (schemeChanged)
         emit this->schemeChanged();
 
-    if (!committed && m_committed) {
-        m_committed = false;
+    if (committed != m_committed) {
+        m_committed = committed;
         emit committedChanged();
     }
 }
