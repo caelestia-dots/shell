@@ -4,13 +4,14 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
 StyledRect {
     id: root
 
-    readonly property color colour: Colours.palette.m3tertiary
+    readonly property color colour: Colours.palette.tertiary
     readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
     readonly property var font: Tokens.font.body.builders.small.scale(1.1)
 
@@ -23,7 +24,7 @@ StyledRect {
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: layout.implicitHeight + root.padding * 2
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
+    color: Config.bar.clock.background ? Colours.tPalette.surfaceContainer : Qt.alpha(Colours.tPalette.surfaceContainer, 0)
     radius: Tokens.rounding.full
 
     ColumnLayout {
@@ -74,7 +75,7 @@ StyledRect {
                     Layout.topMargin: 4
                     Layout.bottomMargin: Tokens.padding.extraSmall / 2
                     implicitHeight: 1
-                    color: Colours.palette.m3outlineVariant
+                    color: Colours.palette.outlineVariant
                 }
             }
         }

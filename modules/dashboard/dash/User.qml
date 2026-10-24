@@ -5,10 +5,10 @@ import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
 import qs.components.filedialog
-import qs.services
 import qs.utils
 
 Item {
@@ -17,7 +17,7 @@ Item {
     required property ScreenState screenState
     required property FileDialog facePicker
 
-    property color pfpFallbackColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+    property color pfpFallbackColour: Colours.layer(Colours.palette.surfaceContainerHighest, 2)
 
     anchors.fill: parent
     anchors.margins: Tokens.padding.large
@@ -78,7 +78,7 @@ Item {
 
                 sourceComponent: MaterialIcon {
                     text: "person_add"
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     fontStyle: Tokens.font.icon.extraLarge
                     fill: 1
                     grade: -2 // Ugh material symbols are such a pain with fill
@@ -94,7 +94,7 @@ Item {
 
             StyledRect {
                 anchors.fill: parent
-                color: Qt.alpha(Colours.palette.m3scrim, pfp.ready ? 0.4 : 0)
+                color: Qt.alpha("black", pfp.ready ? 0.4 : 0)
                 opacity: mouse.containsMouse ? 1 : 0
                 layer.enabled: opacity < 1
 
@@ -108,7 +108,7 @@ Item {
                     anchors.centerIn: parent
                     implicitSize: parent.height * 0.7
                     shape: MaterialShape.Diamond
-                    color: Colours.palette.m3primary
+                    color: Colours.palette.primary
                     scale: mouse.pressed ? 0.9 : mouse.containsMouse ? 1 : 0.7
 
                     Behavior on color {
@@ -124,7 +124,7 @@ Item {
                     MaterialIcon {
                         anchors.centerIn: parent
                         text: "person_edit"
-                        color: Colours.palette.m3onPrimary
+                        color: Colours.palette.onPrimary
                         fontStyle: Tokens.font.icon.large
                     }
                 }
@@ -138,7 +138,7 @@ Item {
         x: Tokens.padding.extraSmall
         implicitSize: Tokens.sizes.dashboard.logoSize + Tokens.padding.small * 2
         shape: MaterialShape.Gem
-        color: Colours.palette.m3primaryContainer
+        color: Colours.palette.primaryContainer
 
         Behavior on color {
             CAnim {}
@@ -158,7 +158,7 @@ Item {
 
             source: SysInfo.osLogo
             implicitSize: Tokens.sizes.dashboard.logoSize
-            colour: Colours.palette.m3onPrimaryContainer
+            colour: Colours.palette.onPrimaryContainer
         }
     }
 
@@ -168,8 +168,8 @@ Item {
         Logo {
             implicitWidth: Tokens.sizes.dashboard.logoSize
             implicitHeight: Tokens.sizes.dashboard.logoSize
-            topColour: Colours.palette.m3primary
-            bottomColour: Colours.palette.m3onPrimaryContainer
+            topColour: Colours.palette.primary
+            bottomColour: Colours.palette.onPrimaryContainer
         }
     }
 
@@ -182,7 +182,7 @@ Item {
         anchors.leftMargin: -Tokens.padding.extraLargeIncreased
         implicitSize: Tokens.sizes.dashboard.uptimeSize + Tokens.padding.small * 2
         shape: MaterialShape.ClamShell
-        color: Colours.palette.m3tertiaryContainer
+        color: Colours.palette.tertiaryContainer
 
         Behavior on color {
             CAnim {}
@@ -191,7 +191,7 @@ Item {
         MaterialIcon {
             anchors.centerIn: parent
             text: "clock_arrow_up"
-            color: Colours.palette.m3onTertiaryContainer
+            color: Colours.palette.onTertiaryContainer
             fontStyle: Tokens.font.icon.medium
         }
     }
@@ -219,7 +219,7 @@ Item {
         implicitWidth: 10
         implicitHeight: 10
         radius: Tokens.rounding.full
-        color: Colours.palette.m3secondaryContainer
+        color: Colours.palette.secondaryContainer
     }
 
     StyledRect {
@@ -232,7 +232,7 @@ Item {
         implicitWidth: 15
         implicitHeight: 15
         radius: Tokens.rounding.full
-        color: Colours.palette.m3secondaryContainer
+        color: Colours.palette.secondaryContainer
     }
 
     StyledRect {
@@ -243,7 +243,7 @@ Item {
         y: Tokens.padding.extraSmall
 
         radius: Tokens.rounding.largeIncreased
-        color: Colours.palette.m3secondaryContainer
+        color: Colours.palette.secondaryContainer
         implicitWidth: wmLabel.implicitWidth + Tokens.padding.medium * 2
         implicitHeight: wmLabel.implicitHeight + Tokens.padding.small * 2
 
@@ -258,7 +258,7 @@ Item {
 
                 anchors.verticalCenter: parent.verticalCenter
                 text: "select_window"
-                color: Colours.palette.m3onSecondaryContainer
+                color: Colours.palette.onSecondaryContainer
                 fontStyle: wmText.font
             }
 
@@ -268,7 +268,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.1)
                 text: SysInfo.wm + "..."
-                color: Colours.palette.m3onSecondaryContainer
+                color: Colours.palette.onSecondaryContainer
                 font: Tokens.font.body.builders.small.vaxis("slnt", -4).build()
                 width: Math.min(implicitWidth, Tokens.sizes.dashboard.userWidth - wmContainer.x - Tokens.padding.medium * 2 - wmIcon.implicitWidth - wmLabel.spacing - Tokens.padding.extraLarge)
                 elide: Text.ElideRight

@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 
 Item {
     id: root
@@ -34,7 +34,7 @@ Item {
             Layout.fillWidth: true
             implicitHeight: width
             radius: Tokens.rounding.largeIncreased
-            color: Colours.tPalette.m3surfaceContainer
+            color: Colours.tPalette.surfaceContainer
 
             Loader {
                 anchors.centerIn: parent
@@ -46,7 +46,7 @@ Item {
                     implicitWidth: loadingIndicator.implicitSize + Tokens.padding.large * 2
                     implicitHeight: loadingIndicator.implicitSize + Tokens.padding.large * 2
 
-                    color: Colours.palette.m3primaryContainer
+                    color: Colours.palette.primaryContainer
                     radius: Tokens.rounding.full
 
                     LoadingIndicator {
@@ -78,7 +78,7 @@ Item {
 
             Layout.bottomMargin: Tokens.padding.small
             Layout.fillWidth: true
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: Tokens.font.label.builders.small.weight(Font.Medium).build()
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight

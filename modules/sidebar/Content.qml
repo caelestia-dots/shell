@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -21,7 +21,7 @@ Item {
             Layout.fillHeight: true
 
             radius: Tokens.rounding.large
-            color: Colours.tPalette.m3surfaceContainerLow
+            color: Colours.tPalette.surfaceContainerLow
 
             NotifDock {
                 objectName: "sidebarNotifications"
@@ -36,7 +36,7 @@ Item {
             Layout.fillWidth: true
             implicitHeight: 1
 
-            color: Colours.tPalette.m3outlineVariant
+            color: Colours.tPalette.outlineVariant
         }
     }
 }

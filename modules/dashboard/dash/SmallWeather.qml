@@ -1,5 +1,6 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -21,7 +22,7 @@ Item {
 
         animate: true
         text: Weather.icon
-        color: Colours.palette.m3secondary
+        color: Colours.palette.secondary
         fontStyle: Tokens.font.icon.builders.extraLarge.scale(1.6).build()
     }
 
@@ -39,7 +40,7 @@ Item {
 
             animate: true
             text: Weather.temp
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             font: Tokens.font.headline.builders.medium.width(110).weight(Font.DemiBold).build()
         }
 

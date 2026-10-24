@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 RadioButton {
     id: root
@@ -19,13 +19,13 @@ RadioButton {
         implicitHeight: 20
         radius: Tokens.rounding.full
         color: "transparent"
-        border.color: root.checked ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+        border.color: root.checked ? Colours.palette.primary : Colours.palette.onSurfaceVariant
         border.width: 2
         anchors.verticalCenter: parent.verticalCenter
 
         StateLayer {
             anchors.margins: -Tokens.padding.small
-            color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
+            color: root.checked ? Colours.palette.onSurface : Colours.palette.primary
             z: -1
             onClicked: root.click()
         }
@@ -36,7 +36,7 @@ RadioButton {
             implicitHeight: 8
 
             radius: Tokens.rounding.full
-            color: Qt.alpha(Colours.palette.m3primary, root.checked ? 1 : 0)
+            color: Qt.alpha(Colours.palette.primary, root.checked ? 1 : 0)
         }
 
         Behavior on border.color {

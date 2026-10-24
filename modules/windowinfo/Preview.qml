@@ -7,8 +7,8 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -30,7 +30,7 @@ Item {
 
         implicitWidth: view.implicitWidth
 
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.tPalette.surfaceContainer
         radius: Tokens.rounding.medium
 
         Loader {
@@ -44,21 +44,21 @@ Item {
                 MaterialIcon {
                     Layout.alignment: Qt.AlignHCenter
                     text: "web_asset_off"
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     fontStyle: Tokens.font.icon.builders.extraLarge.scale(3).build()
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.tr("No active client")
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.body.builders.large.size(28).weight(Font.Medium).build()
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.tr("Try switching to a window")
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.body.large
                 }
             }

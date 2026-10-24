@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -23,7 +24,7 @@ Item {
 
         y: -root.calcTopOff(hourMetrics)
         text: Time.hourStr
-        color: Colours.palette.m3primary
+        color: Colours.palette.primary
         font: Tokens.font.headline.builders.large.scale(7 * root.centerScale).width(30).build()
 
         TextMetrics {
@@ -41,7 +42,7 @@ Item {
         y: -root.calcTopOff(minuteMetrics)
 
         text: Time.minuteStr
-        color: Colours.palette.m3secondary
+        color: Colours.palette.secondary
         font: Tokens.font.headline.builders.large.scale((Units.twelveHourClock ? 3.8 : 7) * root.centerScale).width(30).build()
 
         TextMetrics {
@@ -61,7 +62,7 @@ Item {
         asynchronous: true
 
         sourceComponent: StyledRect {
-            color: Colours.tPalette.m3surfaceContainerHigh
+            color: Colours.tPalette.surfaceContainerHigh
             radius: Tokens.rounding.large
 
             implicitWidth: minuteMetrics.tightBoundingRect.width
@@ -79,7 +80,7 @@ Item {
                 }
 
                 text: Time.amPmStr
-                color: Colours.palette.m3onSurface
+                color: Colours.palette.onSurface
                 font: Tokens.font.headline.builders.small.scale(2 * root.centerScale).width(30).build()
 
                 TextMetrics {

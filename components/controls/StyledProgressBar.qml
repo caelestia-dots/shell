@@ -5,8 +5,8 @@ import QtQuick.Templates
 import Caelestia
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ProgressBar {
     id: root
@@ -17,8 +17,8 @@ ProgressBar {
         Stopped
     }
 
-    property color fgColour: Colours.palette.m3primary
-    property color bgColour: Colours.palette.m3secondaryContainer
+    property color fgColour: Colours.palette.primary
+    property color bgColour: Colours.palette.secondaryContainer
 
     property bool wavy
     property bool wavePaused

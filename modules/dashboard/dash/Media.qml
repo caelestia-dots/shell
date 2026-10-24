@@ -4,6 +4,7 @@ import QtQuick
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.controls
@@ -49,7 +50,7 @@ Item {
         anchors.centerIn: cover
         implicitSize: cover.width + root.arcCoverGap + thickness * 2
 
-        fgColour: Colours.palette.m3primary
+        fgColour: Colours.palette.primary
         strokeWidth: Tokens.sizes.dashboard.mediaProgressThickness
         startAngle: -90 - sweepAngle / 2
         sweepAngle: Tokens.sizes.dashboard.mediaProgressSweep
@@ -81,7 +82,7 @@ Item {
         animate: true
         horizontalAlignment: Text.AlignHCenter
         text: (Players.active?.trackTitle ?? Tr.tr("No media")) || Tr.tr("Unknown title")
-        color: Colours.palette.m3primary
+        color: Colours.palette.primary
         font: Tokens.font.title.small
 
         width: parent.implicitWidth - Tokens.padding.extraLargeIncreased
@@ -98,7 +99,7 @@ Item {
         animate: true
         horizontalAlignment: Text.AlignHCenter
         text: (Players.active?.trackAlbum ?? Tr.tr("No media")) || Tr.tr("Unknown album")
-        color: Colours.palette.m3outline
+        color: Colours.palette.outline
         font: Tokens.font.body.small
 
         width: parent.implicitWidth - Tokens.padding.extraLargeIncreased
@@ -115,7 +116,7 @@ Item {
         animate: true
         horizontalAlignment: Text.AlignHCenter
         text: (Players.active?.trackArtist ?? Tr.tr("No media")) || Tr.tr("Unknown artist")
-        color: Colours.palette.m3secondary
+        color: Colours.palette.secondary
 
         width: parent.implicitWidth - Tokens.padding.extraLargeIncreased
         elide: Text.ElideRight

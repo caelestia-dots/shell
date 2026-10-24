@@ -4,9 +4,9 @@ import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -28,7 +28,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: "tune"
                 fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).build()
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
 
             StyledText {
@@ -36,14 +36,14 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("No widgets enabled")
                 font: Tokens.font.title.large
-                color: Colours.palette.m3onSurface
+                color: Colours.palette.onSurface
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("Enable widgets in the dashboard settings")
                 font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
         }
     }
@@ -77,7 +77,7 @@ Item {
                         subLabel: Cpu.name
                         usage: Cpu.percentage
                         temperature: Cpu.temperature
-                        accent: Colours.palette.m3primary
+                        accent: Colours.palette.primary
 
                         ServiceRef {
                             service: Cpu
@@ -96,7 +96,7 @@ Item {
                         subLabel: Gpu.name || (Gpu.detecting ? Tr.tr("Detecting GPU...") : Tr.trCtx("None", "GPU name"))
                         usage: Gpu.percentage
                         temperature: Gpu.temperature
-                        accent: Colours.palette.m3secondary
+                        accent: Colours.palette.secondary
 
                         ServiceRef {
                             service: Gpu

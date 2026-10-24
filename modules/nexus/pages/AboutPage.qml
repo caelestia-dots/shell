@@ -4,8 +4,8 @@ import Quickshell.Io
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -78,7 +78,7 @@ PageBase {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: CUtils.version ? `v${CUtils.version}` : "…"
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     font: Tokens.font.body.medium
                 }
             }

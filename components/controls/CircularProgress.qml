@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Shapes
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -16,8 +16,8 @@ Item {
     property int strokeWidth: Tokens.padding.small
     property int padding: 0
     property int spacing: Tokens.spacing.small
-    property color fgColour: Colours.palette.m3primary
-    property color bgColour: Colours.palette.m3secondaryContainer
+    property color fgColour: Colours.palette.primary
+    property color bgColour: Colours.palette.secondaryContainer
     property alias hasEndIndicator: dot.active
 
     property bool wavy: false

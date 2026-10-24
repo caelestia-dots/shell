@@ -5,9 +5,9 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
-import qs.services
 import qs.modules.drawers
 
 MouseArea {
@@ -106,7 +106,7 @@ MouseArea {
         StyledRect {
             anchors.fill: parent
             radius: parent.radius
-            color: Colours.palette.m3surfaceContainerLow
+            color: Colours.palette.surfaceContainerLow
 
             ColumnLayout {
                 id: column
@@ -137,7 +137,7 @@ MouseArea {
                         bottomLeftRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
                         bottomRightRadius: index === repeater?.count - 1 ? Tokens.rounding.medium : radius
 
-                        color: Qt.alpha(Colours.palette.m3tertiaryContainer, active ? 1 : 0)
+                        color: Qt.alpha(Colours.palette.tertiaryContainer, active ? 1 : 0)
 
                         Behavior on radius {
                             Anim {}
@@ -149,7 +149,7 @@ MouseArea {
                             bottomLeftRadius: parent.bottomLeftRadius
                             bottomRightRadius: parent.bottomRightRadius
 
-                            color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
+                            color: item.active ? Colours.palette.onTertiaryContainer : Colours.palette.onSurface
                             disabled: !root.expanded
                             onClicked: {
                                 root.itemSelected(item.modelData);
@@ -169,14 +169,14 @@ MouseArea {
                             MaterialIcon {
                                 Layout.alignment: Qt.AlignVCenter
                                 text: item.modelData?.icon ?? ""
-                                color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
+                                color: item.active ? Colours.palette.onTertiaryContainer : Colours.palette.onSurfaceVariant
                             }
 
                             StyledText {
                                 Layout.alignment: Qt.AlignVCenter
                                 Layout.fillWidth: true
                                 text: item.modelData?.text ?? ""
-                                color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
+                                color: item.active ? Colours.palette.onTertiaryContainer : Colours.palette.onSurface
                             }
 
                             Loader {
@@ -187,7 +187,7 @@ MouseArea {
 
                                 sourceComponent: MaterialIcon {
                                     text: item.modelData.trailingIcon
-                                    color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
+                                    color: item.active ? Colours.palette.onTertiaryContainer : Colours.palette.onSurfaceVariant
                                 }
                             }
                         }

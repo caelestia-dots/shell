@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.nexus.common
 
 ConnectedRect {
@@ -14,7 +14,7 @@ ConnectedRect {
     property string subtext
     property alias value: value.text
     property string icon
-    property color iconColour: Colours.palette.m3onSurfaceVariant
+    property color iconColour: Colours.palette.onSurfaceVariant
     property Component leadingComponent: icon ? iconComp : null
 
     Layout.fillWidth: true
@@ -61,7 +61,7 @@ ConnectedRect {
                 Layout.fillWidth: true
                 visible: root.subtext
                 text: root.subtext
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
             }
@@ -72,7 +72,7 @@ ConnectedRect {
 
             Layout.maximumWidth: root.width / 2
             horizontalAlignment: Text.AlignRight
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: Tokens.font.body.small
             elide: Text.ElideRight
         }

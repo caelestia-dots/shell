@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -13,7 +13,7 @@ Item {
     required property var workspaces
     required property int wsSpacing
 
-    readonly property color colour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+    readonly property color colour: Colours.layer(Colours.palette.surfaceContainerHighest, 2)
     property color colourAnimated: colour
 
     Behavior on colourAnimated {

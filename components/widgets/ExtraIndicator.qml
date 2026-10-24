@@ -1,8 +1,8 @@
 import "../effects"
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 StyledRect {
     required property int extra
@@ -10,7 +10,7 @@ StyledRect {
     anchors.right: parent.right
     anchors.margins: Tokens.padding.medium
 
-    color: Colours.palette.m3tertiary
+    color: Colours.palette.tertiary
     radius: Tokens.rounding.medium
 
     implicitWidth: count.implicitWidth + Tokens.padding.medium * 2
@@ -33,7 +33,7 @@ StyledRect {
         anchors.centerIn: parent
         animate: parent.opacity > 0
         text: `+${parent.extra}`
-        color: Colours.palette.m3onTertiary
+        color: Colours.palette.onTertiary
     }
 
     Behavior on opacity {

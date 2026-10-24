@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.misc
@@ -20,7 +21,7 @@ StyledRect {
     implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
 
     radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     Ref {
         service: Recorder
@@ -46,7 +47,7 @@ StyledRect {
                 }
 
                 radius: Tokens.rounding.full
-                color: Recorder.running ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+                color: Recorder.running ? Colours.palette.secondary : Colours.palette.secondaryContainer
 
                 MaterialIcon {
                     id: icon
@@ -54,7 +55,7 @@ StyledRect {
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: 1
                     text: "screen_record"
-                    color: Recorder.running ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                    color: Recorder.running ? Colours.palette.onSecondary : Colours.palette.onSecondaryContainer
                     fontStyle: Tokens.font.icon.large
                 }
             }
@@ -73,7 +74,7 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: Recorder.paused ? Tr.trCtx("Paused", "recorder state") : Recorder.running ? Tr.trCtx("Running...", "recorder state") : Tr.trCtx("Ready", "recorder state")
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
                     animate: true
@@ -188,7 +189,7 @@ StyledRect {
 
             StyledRect {
                 radius: Tokens.rounding.full
-                color: Recorder.paused ? Colours.palette.m3tertiary : Colours.palette.m3error
+                color: Recorder.paused ? Colours.palette.tertiary : Colours.palette.error
 
                 implicitWidth: recText.implicitWidth + Tokens.padding.medium * 2
                 implicitHeight: recText.implicitHeight + Tokens.padding.large
@@ -199,7 +200,7 @@ StyledRect {
                     anchors.centerIn: parent
                     animate: true
                     text: Recorder.paused ? Tr.trCtx("PAUSED", "recording status") : Tr.trCtx("REC", "recording status")
-                    color: Recorder.paused ? Colours.palette.m3onTertiary : Colours.palette.m3onError
+                    color: Recorder.paused ? Colours.palette.onTertiary : Colours.palette.onError
                     font: Tokens.font.mono.small
                 }
 
@@ -279,8 +280,8 @@ StyledRect {
                     shapeMorph: true
                     isRound: true
                     icon: "stop"
-                    inactiveColour: Colours.palette.m3error
-                    inactiveOnColour: Colours.palette.m3onError
+                    inactiveColour: Colours.palette.error
+                    inactiveOnColour: Colours.palette.onError
                     font: Tokens.font.icon.medium
                     onClicked: Recorder.stop()
 

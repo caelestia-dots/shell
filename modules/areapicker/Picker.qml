@@ -6,6 +6,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Caelestia
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
 import qs.services
@@ -235,7 +236,7 @@ MouseArea {
         id: overlay
 
         anchors.fill: parent
-        color: Colours.palette.m3secondaryContainer
+        color: Colours.palette.secondaryContainer
         opacity: 0.3
 
         layer.enabled: true
@@ -269,7 +270,7 @@ MouseArea {
         color: "transparent"
         radius: root.realRounding > 0 ? root.realRounding + root.realBorderWidth : 0
         border.width: root.realBorderWidth
-        border.color: Colours.palette.m3primary
+        border.color: Colours.palette.primary
 
         x: selectionRect.x - root.realBorderWidth
         y: selectionRect.y - root.realBorderWidth

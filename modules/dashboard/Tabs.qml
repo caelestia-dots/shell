@@ -5,9 +5,9 @@ import QtQuick.Layouts
 import QtQuick.Templates
 import Quickshell
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 
 Item {
     id: root
@@ -85,7 +85,7 @@ Item {
             anchors.right: parent.right
             implicitHeight: parent.implicitHeight * 2
 
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             radius: Tokens.rounding.full
         }
 
@@ -106,7 +106,7 @@ Item {
         anchors.right: parent.right
 
         implicitHeight: 1
-        color: Colours.palette.m3outlineVariant
+        color: Colours.palette.outlineVariant
     }
 
     component Tab: TabButton {
@@ -149,7 +149,7 @@ Item {
                 implicitHeight: parent.height + Tokens.sizes.dashboard.tabIndicatorSpacing * 2
 
                 radius: Tokens.rounding.medium
-                color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                color: tab.current ? Colours.palette.primary : Colours.palette.onSurface
                 onClicked: root.screenState.dashboardTab = tab.TabBar.index
             }
 
@@ -160,7 +160,7 @@ Item {
                 anchors.bottom: label.top
 
                 text: tab.iconName
-                color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                color: tab.current ? Colours.palette.primary : Colours.palette.onSurfaceVariant
                 fill: tab.current ? 1 : 0
                 fontStyle: Tokens.font.icon.medium
 
@@ -178,7 +178,7 @@ Item {
                 anchors.bottom: parent.bottom
 
                 text: tab.text
-                color: tab.current ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                color: tab.current ? Colours.palette.primary : Colours.palette.onSurfaceVariant
             }
         }
     }

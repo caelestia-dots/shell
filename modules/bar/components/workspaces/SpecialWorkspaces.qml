@@ -6,6 +6,7 @@ import Quickshell.Hyprland
 import Caelestia
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
 import qs.services
@@ -165,7 +166,7 @@ Item {
             activeWsId: root.activeSpecialId
             ws: modelData
             monitor: root.monitor
-            offMonitorColour: Colours.palette.m3outline
+            offMonitorColour: Colours.palette.outline
             displayType: Config.bar.workspaces.specialDisplayType
             showWindows: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             iconRules: GlobalConfig.bar.workspaces.specialWorkspaceIcons
@@ -191,8 +192,8 @@ Item {
         sourceComponent: ActiveIndicator {
             activeWs: root.activeWs
             mask: view
-            color: Colours.palette.m3tertiary
-            contentColour: Colours.palette.m3onTertiary
+            color: Colours.palette.tertiary
+            contentColour: Colours.palette.onTertiary
         }
     }
 

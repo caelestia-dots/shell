@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -77,7 +78,7 @@ PageBase {
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.extraSmall
             text: Tr.tr("Enter the details below to manually connect to a network.")
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
         }
@@ -207,8 +208,8 @@ PageBase {
 
                 shapeMorph: true
                 isRound: true
-                inactiveColour: Colours.palette.m3primary
-                inactiveOnColour: Colours.palette.m3onPrimary
+                inactiveColour: Colours.palette.primary
+                inactiveOnColour: Colours.palette.onPrimary
                 stateLayer.disabled: root.connecting || ssidField.text.trim().length === 0
 
                 implicitWidth: connectMetrics.width + Tokens.padding.extraLarge * 2
