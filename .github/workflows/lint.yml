@@ -5,19 +5,18 @@ on:
     branches:
       - main
   pull_request:
-    paths:
-      - "**"
-      - "!**/*.md"
-      - "!.github/**"
-      - ".github/workflows/build.yml"
-      - "!.vscode/**"
-      - "!assets/**"
-      - "!.gitignore"
-      - "!**/*.nix"
-      - "!**/flake.lock"
 
 jobs:
+  changes:
+    uses: ./.github/workflows/detect-changes.yml
+    permissions:
+      pull-requests: read
+    with:
+      filter-group: build
+
   lint-qml:
+    needs: changes
+    if: needs.changes.outputs.lint == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
@@ -51,10 +50,20 @@ jobs:
           set -l qml_files (string match -vr 'build/.*' **.qml)
 
           # Lint
-          set -l lint_out (/usr/lib/qt6/bin/qmllint --import disable $args $qml_files 2>&1 | tee /dev/stderr)
-          test -z "$lint_out" || exit 1
+          set -l lint_out (mktemp)
+          /usr/lib/qt6/bin/qmllint $args $qml_files 2> $lint_out
+
+          set -l singleton_pattern 'Type [A-Z][a-zA-Z0-9]* not declared as singleton in qmldir but using pragma Singleton'
+          set -l post_reload_hook_pattern 'PostReloadHook was not found\. Did you add all imports and dependencies\?'
+          sed -i -E "/(($singleton_pattern)|($post_reload_hook_pattern)) \[import\]/d" $lint_out
+
+          cat $lint_out
+
+          ! test -s $lint_out
 
   lint-cpp:
+    needs: changes
+    if: needs.changes.outputs.lint == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
@@ -73,3 +82,22 @@ jobs:
           clang-tidy --version
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
             -source-filter='^(?!.*/build/).*\.cpp$'
+
+  lint-check:
+    if: always()
+    needs:
+      - changes
+      - lint-qml
+      - lint-cpp
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Verify lint results
+        uses: $/.github/actions/verify-checks
+        with:
+          needs: ${{ toJSON(needs) }}
+          checks: |
+            {
+              "lint-qml": "lint",
+              "lint-cpp": "lint"
+            }

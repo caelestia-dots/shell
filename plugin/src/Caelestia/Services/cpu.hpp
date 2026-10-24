@@ -4,7 +4,7 @@
 
 #include "tickingservice.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class Cpu : public TickingService {
     Q_OBJECT
@@ -45,4 +45,4 @@ private:
     bool m_nameLoaded = false;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

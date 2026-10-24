@@ -14,7 +14,7 @@ Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::services::hypr {
+namespace caelestia::shell::services::hypr {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -233,4 +233,4 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
     return socket;
 }
 
-} // namespace caelestia::services::hypr
+} // namespace caelestia::shell::services::hypr

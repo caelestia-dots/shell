@@ -4,7 +4,7 @@
 #include <qqmlintegration.h>
 #include <qvariant.h>
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class FontBuilder {
     Q_GADGET
@@ -12,7 +12,7 @@ class FontBuilder {
 
 public:
     FontBuilder() = default;
-    explicit FontBuilder(const QFont& font);
+    explicit FontBuilder(QFont font);
 
     [[nodiscard]] Q_INVOKABLE FontBuilder family(const QString& family);
     [[nodiscard]] Q_INVOKABLE FontBuilder size(int pointSize);
@@ -37,4 +37,4 @@ private:
     QFont m_font;
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

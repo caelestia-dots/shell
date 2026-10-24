@@ -2,7 +2,7 @@
 
 #include <qbytearray.h>
 
-namespace caelestia::i18n {
+namespace caelestia::shell::i18n {
 
 namespace {
 
@@ -292,4 +292,4 @@ qsizetype PluralRules::parsePrimary() {
     return -1;
 }
 
-} // namespace caelestia::i18n
+} // namespace caelestia::shell::i18n
