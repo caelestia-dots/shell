@@ -534,39 +534,79 @@ void Lyrics::tryLrclib(int reqId) {
         }
         if (reply->error() != QNetworkReply::NoError) {
             qCDebug(lcLyrics) << "lrclib /get error:" << reply->errorString();
-            chainNext(LyricsBackend::LRCLIB, reqId);
+            tryLrclibSearch(reqId);
             return;
         }
-        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonObject obj = doc.object();
-        const QString synced = obj.value(u"syncedLyrics"_s).toString();
-        const qint64 id = static_cast<qint64>(obj.value(u"id"_s).toDouble());
-
-        if (synced.isEmpty()) {
+        if (!applyLrclibResult(QJsonDocument::fromJson(reply->readAll()).object())) {
             qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << m_artist << "-" << m_title;
-            chainNext(LyricsBackend::LRCLIB, reqId);
-            return;
+            tryLrclibSearch(reqId);
         }
-
-        const auto lines = parseLrc(synced);
-        if (lines.isEmpty()) {
-            chainNext(LyricsBackend::LRCLIB, reqId);
-            return;
-        }
-
-        writeCachedLrc(LyricsBackend::LRCLIB, QString::number(id), synced);
-        setLines(lines, LyricsBackend::LRCLIB);
-        const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), obj.value(u"trackName"_s).toString(),
-            obj.value(u"artistName"_s).toString(), obj.value(u"albumName"_s).toString(),
-            obj.value(u"duration"_s).toDouble());
-        appendCandidates({ cand });
-        m_selected = cand;
-        emit selectedCandidateChanged();
-        if (!m_settingFromPrefs) {
-            persistTrackPrefs();
-        }
-        setLoading(false);
     });
+}
+
+// /get returns a single exact match, which may only have plainLyrics even when other
+// entries for the same track are synced, so fall back to the first synced search result
+void Lyrics::tryLrclibSearch(int reqId) {
+    QUrl url(u"https://lrclib.net/api/search"_s);
+    QUrlQuery q;
+    q.addQueryItem(u"track_name"_s, m_title);
+    q.addQueryItem(u"artist_name"_s, m_artist);
+    url.setQuery(q);
+
+    auto* reply = getJson(url, lrclibHeaders());
+    trackReply(reqId, reply);
+
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, reqId] {
+        reply->deleteLater();
+        if (reqId != m_currentRequestId) {
+            return;
+        }
+        if (reply->error() != QNetworkReply::NoError) {
+            qCDebug(lcLyrics) << "lrclib /search error:" << reply->errorString();
+            chainNext(LyricsBackend::LRCLIB, reqId);
+            return;
+        }
+
+        constexpr qreal k_durationToleranceSecs = 2.0;
+        for (const auto& v : QJsonDocument::fromJson(reply->readAll()).array()) {
+            const QJsonObject o = v.toObject();
+            if (m_duration > 0 && qAbs(o.value(u"duration"_s).toDouble() - m_duration) > k_durationToleranceSecs) {
+                continue;
+            }
+            if (applyLrclibResult(o)) {
+                return;
+            }
+        }
+
+        chainNext(LyricsBackend::LRCLIB, reqId);
+    });
+}
+
+bool Lyrics::applyLrclibResult(const QJsonObject& obj) {
+    const QString synced = obj.value(u"syncedLyrics"_s).toString();
+    if (synced.isEmpty()) {
+        return false;
+    }
+
+    const auto lines = parseLrc(synced);
+    if (lines.isEmpty()) {
+        return false;
+    }
+
+    const qint64 id = static_cast<qint64>(obj.value(u"id"_s).toDouble());
+    writeCachedLrc(LyricsBackend::LRCLIB, QString::number(id), synced);
+    setLines(lines, LyricsBackend::LRCLIB);
+    const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), obj.value(u"trackName"_s).toString(),
+        obj.value(u"artistName"_s).toString(), obj.value(u"albumName"_s).toString(),
+        obj.value(u"duration"_s).toDouble());
+    appendCandidates({ cand });
+    m_selected = cand;
+    emit selectedCandidateChanged();
+    if (!m_settingFromPrefs) {
+        persistTrackPrefs();
+    }
+    setLoading(false);
+    return true;
 }
 
 void Lyrics::tryNetEase(int reqId) {
