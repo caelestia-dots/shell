@@ -83,20 +83,12 @@ void Wallpapers::commit() {
 
     wallpaper::set(m_current).then(this, [this] {
         applyState(m_current, true);
-
-        m_committed = true;
-        emit committedChanged();
     });
 }
 
 void Wallpapers::reset() {
-    if (m_committed)
-        return;
-
-    loadState();
-
-    m_committed = true;
-    emit committedChanged();
+    if (!m_committed)
+        loadState();
 }
 
 void Wallpapers::setWallpaper(const QString& path, bool commit) {
@@ -128,7 +120,7 @@ void Wallpapers::applyState(const QString& path, bool committed) {
         m_current = path;
         emit currentChanged();
 
-        media::analyseForPath(path).then(this, [this, path](const media::Analysis& analysis) {
+        media::analyseForPath(path).then(this, [this, path, committed](const media::Analysis& analysis) {
             if (path != m_current)
                 return;
 
@@ -137,7 +129,7 @@ void Wallpapers::applyState(const QString& path, bool committed) {
 
             if (oldColours != m_analysis.colours)
                 emit coloursChanged();
-            emit analysisDone();
+            emit analysisDone(committed);
         });
     }
 
@@ -146,8 +138,8 @@ void Wallpapers::applyState(const QString& path, bool committed) {
         emit currentCommittedChanged();
     }
 
-    if (!committed && m_committed) {
-        m_committed = false;
+    if (committed != m_committed) {
+        m_committed = committed;
         emit committedChanged();
     }
 }
