@@ -14,7 +14,12 @@ using Qt::StringLiterals::operator""_s;
 
 SchemeOpener::SchemeOpener(QObject* parent)
     : QObject(parent)
-    , m_palette(new ColourPalette(this)) {}
+    , m_palette(new ColourPalette(this)) {
+    connectResolveSchemeUpdates(this, [this] {
+        if (m_name == u"dynamic"_s)
+            resolve();
+    });
+}
 
 QString SchemeOpener::name() const {
     return m_name;
@@ -55,6 +60,19 @@ void SchemeOpener::setMode(Colours::Mode mode) {
     resolve();
 }
 
+bool SchemeOpener::smart() const {
+    return m_smart;
+}
+
+void SchemeOpener::setSmart(bool smart) {
+    if (m_smart == smart)
+        return;
+
+    m_smart = smart;
+    emit smartChanged();
+    resolve();
+}
+
 ColourPalette* SchemeOpener::palette() const {
     return m_palette;
 }
@@ -71,7 +89,7 @@ void SchemeOpener::resolve() {
         return;
 
     const auto generation = ++m_generation;
-    resolveScheme(m_name, m_flavour, static_cast<lib::Mode>(m_mode))
+    resolveScheme(m_name, m_flavour, static_cast<lib::Mode>(m_mode), m_smart)
         .then(this,
             [this, generation](const lib::SchemeData& data) {
                 if (generation == m_generation)
