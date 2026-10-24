@@ -2,6 +2,7 @@
 
 #include <qdir.h>
 #include <qfileinfo.h>
+#include <qrandom.h>
 
 #include <caelestia/wallpaper/wallpaper.hpp>
 
@@ -89,6 +90,17 @@ void Wallpapers::commit() {
 void Wallpapers::reset() {
     if (!m_committed)
         loadState();
+}
+
+void Wallpapers::setRandom(bool commit) {
+    if (m_model->rowCount() == 0)
+        return;
+
+    const auto index = m_model->index(QRandomGenerator::global()->bounded(m_model->rowCount()), 0);
+    applyState(m_model->data(index, Qt::UserRole).value<models::FileSystemEntry*>()->path(), false);
+
+    if (commit)
+        this->commit();
 }
 
 void Wallpapers::setWallpaper(const QString& path, bool commit) {
