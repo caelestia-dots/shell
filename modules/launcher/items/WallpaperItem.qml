@@ -13,6 +13,16 @@ Item {
     required property FileSystemEntry modelData
     required property ScreenState screenState
 
+    // Enter accepts the current card through this too
+    function accept(): void {
+        const path = modelData.path;
+        // Hold the colours this card previews until path.txt loads, so the global scheme doesn't flash in between
+        if (Colours.scheme === "dynamic" && path === Wallpapers.previewPath && path !== Wallpapers.actualCurrent)
+            Wallpapers.previewColourLock = true;
+        Wallpapers.setWallpaper(path);
+        screenState.launcher = false;
+    }
+
     scale: 0.5
     opacity: 0
     z: PathView.z ?? 0 // qmllint disable missing-property
@@ -29,10 +39,7 @@ Item {
         id: stateLayer
 
         radius: Tokens.rounding.large
-        onClicked: {
-            Wallpapers.setWallpaper(root.modelData.path);
-            root.screenState.launcher = false;
-        }
+        onClicked: root.accept()
     }
 
     Elevation {
