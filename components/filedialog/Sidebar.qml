@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.filedialog
-import qs.services
 
 StyledRect {
     id: root
@@ -16,7 +16,7 @@ StyledRect {
     implicitWidth: Sizes.sidebarWidth
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     ColumnLayout {
         id: inner
@@ -32,7 +32,7 @@ StyledRect {
             Layout.topMargin: Tokens.padding.extraSmall / 2
             Layout.bottomMargin: Tokens.spacing.medium
             text: Tr.trCtx("Files", "file dialog sidebar heading")
-            color: Colours.palette.m3onSurface
+            color: Colours.palette.onSurface
             font: Tokens.font.body.builders.large.weight(Font.Bold).build()
         }
 
@@ -49,10 +49,10 @@ StyledRect {
                 implicitHeight: placeInner.implicitHeight + Tokens.padding.medium * 2
 
                 radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3secondaryContainer, selected ? 1 : 0)
+                color: Qt.alpha(Colours.palette.secondaryContainer, selected ? 1 : 0)
 
                 StateLayer {
-                    color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                    color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
                     onClicked: {
                         if (place.modelData === "Home")
                             root.dialog.cwd = ["Home"];
@@ -90,7 +90,7 @@ StyledRect {
                                 return "video_library";
                             return "folder";
                         }
-                        color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
                         fontStyle: Tokens.font.icon.medium
                         fill: place.selected ? 1 : 0
 
@@ -104,7 +104,7 @@ StyledRect {
                     StyledText {
                         Layout.fillWidth: true
                         text: place.modelData
-                        color: place.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
                         font: Tokens.font.body.small
                         elide: Text.ElideRight
                     }

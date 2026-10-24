@@ -6,12 +6,12 @@ import Quickshell
 import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.components.widgets
-import qs.services
 import qs.utils
 
 StyledRect {
@@ -25,7 +25,7 @@ StyledRect {
 
     implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
     radius: Tokens.rounding.extraLarge
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     ServiceRef {
         service: Cpu
@@ -93,9 +93,9 @@ StyledRect {
                     icon: "memory"
                     value: Strings.percentOne(Cpu.percentage)
                     fillValue: Cpu.percentage
-                    colour: Colours.palette.m3primary
-                    shapeColour: Colours.palette.m3primaryContainer
-                    fillColour: Qt.alpha(Colours.palette.m3secondary, 0.3)
+                    colour: Colours.palette.primary
+                    shapeColour: Colours.palette.primaryContainer
+                    fillColour: Qt.alpha(Colours.palette.secondary, 0.3)
                     shape: MaterialShape.Pentagon
 
                     MaterialShape {
@@ -103,7 +103,7 @@ StyledRect {
                         y: Math.max(cpu.mShape.pointAtAngle(45).y - implicitSize / 2, 1 - Tokens.padding.large)
 
                         shape: Cpu.temperature > 90 ? MaterialShape.SoftBurst : MaterialShape.Circle
-                        color: Cpu.temperature > 90 ? Colours.palette.m3errorContainer : Colours.palette.m3secondaryContainer
+                        color: Cpu.temperature > 90 ? Colours.palette.errorContainer : Colours.palette.secondaryContainer
                         implicitSize: {
                             const size = Math.round(tempLabel.implicitHeight * 2);
                             return size % 2 === 0 ? size : size + 1; // Ensure even size so center works properly
@@ -120,7 +120,7 @@ StyledRect {
                             anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.04)
 
                             text: Units.formatSensorTemp(Cpu.temperature)
-                            color: Cpu.temperature > 90 ? Colours.palette.m3onErrorContainer : Colours.palette.m3secondary
+                            color: Cpu.temperature > 90 ? Colours.palette.onErrorContainer : Colours.palette.secondary
                             font: Tokens.font.title.builders.medium.scale(cpu.width / 112).width(50).build()
                         }
                     }
@@ -130,9 +130,9 @@ StyledRect {
                     icon: "memory_alt"
                     value: Strings.percentOne(Memory.percentage)
                     fillValue: Memory.percentage
-                    colour: Colours.palette.m3tertiary
-                    shapeColour: Colours.palette.m3onTertiary
-                    fillColour: Qt.alpha(Colours.palette.m3tertiary, 0.3)
+                    colour: Colours.palette.tertiary
+                    shapeColour: Colours.palette.onTertiary
+                    fillColour: Qt.alpha(Colours.palette.tertiary, 0.3)
                     shape: MaterialShape.Slanted
                 }
 
@@ -140,9 +140,9 @@ StyledRect {
                     icon: "hard_disk"
                     value: Strings.percentOne(Storage.percentage)
                     fillValue: Storage.percentage
-                    colour: Colours.palette.m3secondary
-                    shapeColour: Colours.palette.m3secondaryContainer
-                    fillColour: Qt.alpha(Colours.palette.m3secondary, 0.4)
+                    colour: Colours.palette.secondary
+                    shapeColour: Colours.palette.secondaryContainer
+                    fillColour: Qt.alpha(Colours.palette.secondary, 0.4)
                     shape: MaterialShape.Gem
                 }
             }
@@ -196,8 +196,8 @@ StyledRect {
         Layout.fillWidth: true
         Layout.preferredHeight: width
 
-        inactiveColour: activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
-        inactiveOnColour: activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        inactiveColour: activeFocus ? Colours.palette.secondaryContainer : Colours.tPalette.surfaceContainerHigh
+        inactiveOnColour: activeFocus ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
         radius: pressed ? Tokens.rounding.medium : activeFocus ? Tokens.rounding.extraLarge : Tokens.rounding.largeIncreased
         font: Tokens.font.icon.builders.large.scale(root.fontScale * 1.3).build()
         onClicked: exec()
@@ -262,7 +262,7 @@ StyledRect {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: res.icon
-                color: Colours.palette.m3secondary
+                color: Colours.palette.secondary
                 fontStyle: Tokens.font.icon.builders.medium.scale(root.fontScale).build()
             }
 

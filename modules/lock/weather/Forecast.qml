@@ -4,6 +4,7 @@ import M3Shapes
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -11,7 +12,7 @@ import qs.utils
 StyledRect {
     id: root
 
-    color: Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+    color: Colours.layer(Colours.palette.surfaceContainerHigh, 2)
     radius: Tokens.rounding.extraLargeIncreased
     implicitHeight: header.anchors.margins + header.implicitHeight + Tokens.spacing.medium + layout.implicitHeight + layout.anchors.bottomMargin
 
@@ -65,7 +66,7 @@ StyledRect {
                     Layout.alignment: Qt.AlignHCenter
                     implicitSize: temp.implicitHeight + Tokens.padding.medium * 2
                     shape: MaterialShape.Cookie4Sided
-                    color: Qt.alpha(Colours.palette.m3primary, hour.index === 0 ? 1 : 0)
+                    color: Qt.alpha(Colours.palette.primary, hour.index === 0 ? 1 : 0)
 
                     Behavior on color {
                         CAnim {}
@@ -76,7 +77,7 @@ StyledRect {
 
                         anchors.centerIn: parent
                         text: Weather.formatTemp(hour.cond.tempC, true)
-                        color: hour.index === 0 ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                        color: hour.index === 0 ? Colours.palette.onPrimary : Colours.palette.onSurface
                         font: Tokens.font.title.medium
                     }
                 }
@@ -84,21 +85,21 @@ StyledRect {
                 MaterialIcon {
                     Layout.alignment: Qt.AlignHCenter
                     text: hour.cond.icon
-                    color: Colours.palette.m3secondary
+                    color: Colours.palette.secondary
                     fontStyle: Tokens.font.icon.large
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Strings.percent(hour.cond.precipChance)
-                    color: Colours.palette.m3primary
+                    color: Colours.palette.primary
                 }
 
                 StyledText {
                     Layout.topMargin: Tokens.spacing.extraSmall
                     Layout.alignment: Qt.AlignHCenter
                     text: hour.index === 0 ? Tr.trCtx("Now", "forecast column") : Tr.formatDateTime(new Date(hour.cond.timestamp.replace("T", " ")), Units.twelveHourClock ? "ha" : "hh:00")
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     font: Tokens.font.body.medium
                 }
             }

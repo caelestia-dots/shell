@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell.Wayland
 import Quickshell.Widgets
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -53,7 +54,7 @@ Item {
                 StyledText {
                     Layout.fillWidth: true
                     text: Hypr.activeToplevel?.lastIpcObject.class ?? ""
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     elide: Text.ElideRight
                 }
             }

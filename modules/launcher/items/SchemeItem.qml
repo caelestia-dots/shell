@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.launcher.services
 
 Item {
@@ -14,6 +14,14 @@ Item {
 
     anchors.left: parent?.left
     anchors.right: parent?.right
+
+    SchemeOpener {
+        id: opener
+
+        name: root.modelData?.name ?? ""
+        flavour: root.modelData?.flavour ?? ""
+        mode: !root.modelData || root.modelData.modes.includes(Colours.mode) ? Colours.mode : root.modelData.modes[0]
+    }
 
     StateLayer {
         radius: Tokens.rounding.large
@@ -32,9 +40,9 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             border.width: 1
-            border.color: Qt.alpha(`#${root.modelData?.colours?.outline}`, 0.5)
+            border.color: Qt.alpha(opener.palette.outline, 0.5)
 
-            color: `#${root.modelData?.colours?.surface}`
+            color: opener.palette.surface
             radius: Tokens.rounding.full
             implicitWidth: parent.height * 0.8
             implicitHeight: parent.height * 0.8
@@ -53,7 +61,7 @@ Item {
                     anchors.right: parent.right
 
                     implicitWidth: preview.implicitWidth
-                    color: `#${root.modelData?.colours?.primary}`
+                    color: opener.palette.primary
                     radius: Tokens.rounding.full
                 }
             }
@@ -75,7 +83,7 @@ Item {
             StyledText {
                 text: root.modelData?.name ?? ""
                 font: Tokens.font.body.small
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
 
                 elide: Text.ElideRight
                 anchors.left: parent.left
@@ -90,11 +98,11 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
-            active: `${root.modelData?.name} ${root.modelData?.flavour}` === Schemes.currentScheme
+            active: root.modelData?.name === Colours.scheme && root.modelData?.flavour === Colours.flavour
 
             sourceComponent: MaterialIcon {
                 text: "check"
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.large
             }
         }

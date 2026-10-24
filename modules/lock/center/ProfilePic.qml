@@ -5,16 +5,16 @@ import M3Shapes
 import Caelestia
 import Caelestia.Config
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
-import qs.services
 import qs.utils
 
 Item {
     id: root
 
     required property int centerWidth
-    readonly property color bgColour: Colours.tPalette.m3surfaceContainerHighest
+    readonly property color bgColour: Colours.tPalette.surfaceContainerHighest
 
     implicitWidth: Math.round(centerWidth * 0.7)
     implicitHeight: {
@@ -38,7 +38,7 @@ Item {
         anchors.centerIn: parent
 
         text: "person"
-        color: Colours.palette.m3onSurfaceVariant
+        color: Colours.palette.onSurfaceVariant
         fontStyle: Tokens.font.icon.size(root.centerWidth / 4).build()
         visible: !pfp.ready
     }

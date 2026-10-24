@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.launcher.services
 
 Item {
@@ -51,7 +51,7 @@ Item {
             StyledText {
                 text: root.modelData?.description ?? ""
                 font: Tokens.font.body.small
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
 
                 elide: Text.ElideRight
                 anchors.left: parent.left
@@ -66,11 +66,11 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
-            active: root.modelData?.variant === Schemes.currentVariant
+            active: Colours.scheme === "dynamic" && root.modelData?.variant === Colours.flavour
 
             sourceComponent: MaterialIcon {
                 text: "check"
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.large
             }
         }

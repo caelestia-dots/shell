@@ -3,19 +3,19 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 
 StyledRect {
     id: root
 
-    readonly property color accent: Colours.palette.m3secondary
+    readonly property color accent: Colours.palette.secondary
     readonly property real percentage: Storage.primaryDisk?.perc ?? 0
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.extraExtraLarge
 
     implicitWidth: layout.implicitWidth + layout.anchors.margins * 2
@@ -75,7 +75,7 @@ StyledRect {
                         Layout.alignment: Qt.AlignHCenter
                         text: Tr.trCtx("Used", "storage used")
                         font: Tokens.font.body.small
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                     }
                 }
             }

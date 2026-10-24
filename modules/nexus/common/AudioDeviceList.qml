@@ -6,8 +6,8 @@ import Quickshell
 import Quickshell.Services.Pipewire
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.nexus.common
 
 ItemList {
@@ -57,14 +57,14 @@ ItemList {
                 implicitWidth: implicitHeight
                 implicitHeight: devIcon.implicitHeight + Tokens.padding.small * 2
                 radius: Tokens.rounding.full
-                color: device.active ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+                color: device.active ? Colours.palette.primary : Colours.palette.secondaryContainer
 
                 MaterialIcon {
                     id: devIcon
 
                     anchors.centerIn: parent
                     text: root.iconName
-                    color: device.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                    color: device.active ? Colours.palette.onPrimary : Colours.palette.onSecondaryContainer
                     fontStyle: Tokens.font.icon.medium
                     fill: device.active ? 1 : 0
 
@@ -83,7 +83,7 @@ ItemList {
 
             MaterialIcon {
                 text: "check"
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
                 fontStyle: Tokens.font.icon.medium
                 opacity: device.active ? 1 : 0
 

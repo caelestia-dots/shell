@@ -7,11 +7,11 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Models
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.components.filedialog
-import qs.services
 import qs.utils
 
 Item {
@@ -22,7 +22,7 @@ Item {
 
     StyledRect {
         anchors.fill: parent
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.tPalette.surfaceContainer
 
         layer.enabled: true
         layer.effect: Mask {
@@ -56,13 +56,13 @@ Item {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "scan_delete"
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.Medium).build()
             }
 
             StyledText {
                 text: Tr.tr("This folder is empty")
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 font: Tokens.font.body.builders.large.weight(Font.Medium).build()
             }
         }
@@ -166,7 +166,7 @@ Item {
         implicitHeight: nonAnimHeight
 
         radius: Tokens.rounding.large
-        color: Qt.alpha(Colours.tPalette.m3surfaceContainerHighest, GridView.isCurrentItem ? Colours.tPalette.m3surfaceContainerHighest.a : 0)
+        color: GridView.isCurrentItem ? Colours.tPalette.surfaceContainerHighest : Qt.alpha(Colours.tPalette.surfaceContainerHighest, 0)
         z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
         clip: true
 

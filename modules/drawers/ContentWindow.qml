@@ -8,6 +8,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.services
@@ -38,7 +39,7 @@ StyledWindow {
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
 
-    property color surfaceColour: Colours.tPalette.m3surface
+    property color surfaceColour: Colours.tPalette.surface
 
     readonly property int dragMaskPadding: {
         if (focusGrab.active || panels.popouts.isDetached)
@@ -133,7 +134,7 @@ StyledWindow {
     StyledRect {
         anchors.fill: parent
         opacity: (root.screenState.session && Config.session.enabled) || panels.popouts.detachedMode !== "" ? 0.5 : 0
-        color: Colours.palette.m3scrim
+        color: "black"
 
         Behavior on opacity {
             Anim {
@@ -149,7 +150,7 @@ StyledWindow {
         layer.effect: MultiEffect {
             shadowEnabled: true
             blurMax: 15
-            shadowColor: Qt.alpha(Colours.palette.m3shadow, Math.max(0, root.shadowOpacity))
+            shadowColor: Qt.alpha("black", Math.max(0, root.shadowOpacity))
         }
 
         BlobGroup {
