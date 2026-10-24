@@ -83,6 +83,9 @@ void Wallpapers::commit() {
 
     wallpaper::set(m_current).then(this, [this] {
         applyState(m_current, true);
+
+        m_committed = true;
+        emit committedChanged();
     });
 }
 
@@ -91,6 +94,9 @@ void Wallpapers::reset() {
         return;
 
     loadState();
+
+    m_committed = true;
+    emit committedChanged();
 }
 
 void Wallpapers::setWallpaper(const QString& path, bool commit) {
