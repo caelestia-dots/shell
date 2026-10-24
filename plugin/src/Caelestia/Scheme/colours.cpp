@@ -2,6 +2,7 @@
 
 #include <qloggingcategory.h>
 
+#include <caelestia/scheme/smart.hpp>
 #include <caelestia/theme/theme.hpp>
 
 #include <stdexcept>
@@ -51,14 +52,23 @@ QFuture<lib::SchemeData> getSchemeData(
 
 } // namespace
 
-QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode) {
+void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void()>& fn) {
+    QObject::connect(Wallpapers::instance(), &Wallpapers::analysisDone, receiver, fn);
+    QObject::connect(
+        config::ConfigSingleton::instance()->services(), &config::ServiceConfig::smartSchemeChanged, receiver, fn);
+}
+
+QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode, bool smart) {
     if (scheme == k_dynamic) {
-        const auto colours = Wallpapers::instance()->colours();
-        if (colours.isEmpty()) {
+        const auto analysis = Wallpapers::instance()->analysis();
+        if (analysis.colours.isEmpty()) {
             return QtFuture::makeExceptionalFuture<lib::SchemeData>(
                 std::make_exception_ptr(std::runtime_error("no colours found in the current wallpaper")));
         }
-        return getSchemeData(lib::Scheme::forColour(colours.first()), flavour, mode);
+
+        const auto choice = lib::smartChoice(analysis);
+        return getSchemeData(lib::Scheme::forColour(analysis.colours.first()), smart ? choice.flavour : flavour,
+            smart ? choice.mode : mode);
     }
 
     return lib::Scheme::forName(scheme)
@@ -109,9 +119,12 @@ Colours::Colours(QObject* parent)
     connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::updateLayer);
     connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::updateLayer);
 
-    connect(Wallpapers::instance(), &Wallpapers::coloursChanged, this, [this] {
-        if (m_state.name == k_dynamic)
-            applyState(m_state.name, m_state.flavour, m_state.mode, Wallpapers::instance()->committed());
+    connectResolveSchemeUpdates(this, [this] {
+        if (m_state.name != k_dynamic)
+            return;
+
+        const auto smart = config::ConfigSingleton::instance()->services()->smartScheme();
+        applyState(m_state.name, m_state.flavour, m_state.mode, Wallpapers::instance()->committed(), smart);
     });
 
     loadState();
@@ -171,15 +184,15 @@ void Colours::reset() {
 }
 
 void Colours::setScheme(const QString& scheme, const QString& flavour, bool commit) {
-    setState(scheme, flavour, m_state.mode, commit);
+    setState(scheme, flavour, m_state.mode, commit, flavour.isEmpty());
 }
 
 void Colours::setFlavour(const QString& flavour, bool commit) {
-    setState(m_state.name, flavour, m_state.mode, commit);
+    setState(m_state.name, flavour, m_state.mode, commit, false);
 }
 
 void Colours::setMode(Mode mode, bool commit) {
-    setState(m_state.name, m_state.flavour, static_cast<lib::Mode>(mode), commit);
+    setState(m_state.name, m_state.flavour, static_cast<lib::Mode>(mode), commit, false);
 }
 
 QColor Colours::_layer(const QColor& colour, int layer) const {
@@ -251,15 +264,16 @@ void Colours::loadSchemes() {
     });
 }
 
-void Colours::setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit) {
-    applyState(scheme, flavour, mode).then(this, [this, commit] {
+void Colours::setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit, bool smart) {
+    applyState(scheme, flavour, mode, false, smart).then(this, [this, commit] {
         if (commit)
             this->commit();
     });
 }
 
-QFuture<void> Colours::applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed) {
-    return resolveScheme(scheme, flavour, mode)
+QFuture<void> Colours::applyState(
+    const QString& scheme, const QString& flavour, lib::Mode mode, bool committed, bool smart) {
+    return resolveScheme(scheme, flavour, mode, smart)
         .then(this,
             [this, committed](const lib::SchemeData& data) {
                 applyState(data, committed);

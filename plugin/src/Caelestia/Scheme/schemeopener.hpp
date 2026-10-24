@@ -15,6 +15,7 @@ class SchemeOpener : public QObject, public QQmlParserStatus {
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString flavour READ flavour WRITE setFlavour NOTIFY flavourChanged)
     Q_PROPERTY(caelestia::shell::scheme::Colours::Mode mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(bool smart READ smart WRITE setSmart NOTIFY smartChanged)
 
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* palette READ palette CONSTANT)
 
@@ -30,6 +31,9 @@ public:
     [[nodiscard]] Colours::Mode mode() const;
     void setMode(Colours::Mode mode);
 
+    [[nodiscard]] bool smart() const;
+    void setSmart(bool smart);
+
     [[nodiscard]] ColourPalette* palette() const;
 
     void classBegin() override;
@@ -39,11 +43,13 @@ signals:
     void nameChanged();
     void flavourChanged();
     void modeChanged();
+    void smartChanged();
 
 private:
     QString m_name;
     QString m_flavour;
     Colours::Mode m_mode = Colours::Mode::Dark;
+    bool m_smart = false;
     ColourPalette* const m_palette;
 
     bool m_complete = false;
