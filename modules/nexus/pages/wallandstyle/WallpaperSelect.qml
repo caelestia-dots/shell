@@ -100,7 +100,7 @@ PageBase {
                 id: localWalls
 
                 model: {
-                    const walls = Wallpapers.list;
+                    const walls = Wallpapers.model.entries;
                     const baseDir = Paths.wallsdir;
                     const categories = {};
                     const list = [];
