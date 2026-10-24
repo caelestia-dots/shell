@@ -42,6 +42,7 @@ public:
     Q_INVOKABLE void commit();
     Q_INVOKABLE void reset();
 
+    Q_INVOKABLE void setRandom(bool commit = true);
     Q_INVOKABLE void setWallpaper(const QString& path, bool commit = true);
     Q_INVOKABLE static QString defaultWallpaper();
     Q_INVOKABLE static QString categoryFor(const caelestia::shell::models::FileSystemEntry* entry);
