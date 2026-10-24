@@ -1,7 +1,11 @@
 #pragma once
 
+#include <qbytearray.h>
 #include <qelapsedtimer.h>
+#include <qhash.h>
 #include <qqmlintegration.h>
+
+#include <utility>
 
 #include "core/circularbuffer.hpp"
 #include "tickingservice.hpp"
@@ -41,6 +45,8 @@ protected:
     void tick() override;
 
 private:
+    [[nodiscard]] static bool readCounters(QHash<QByteArray, std::pair<quint64, quint64>>& counters);
+
     qreal m_downloadSpeed = 0.0;
     qreal m_uploadSpeed = 0.0;
     qreal m_downloadTotal = 0.0;
@@ -50,8 +56,7 @@ private:
     CircularBuffer* m_downloadBuffer = nullptr;
     CircularBuffer* m_uploadBuffer = nullptr;
 
-    quint64 m_prevRx = 0;
-    quint64 m_prevTx = 0;
+    QHash<QByteArray, std::pair<quint64, quint64>> m_prev;
     bool m_initialized = false;
     QElapsedTimer m_timer;
 };
