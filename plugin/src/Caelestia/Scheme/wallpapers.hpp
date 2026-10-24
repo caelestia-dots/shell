@@ -54,7 +54,7 @@ signals:
     void currentCommittedChanged();
     void coloursChanged();
 
-    void analysisDone();
+    void analysisDone(bool committed);
 
 private:
     explicit Wallpapers(QObject* parent = nullptr);
