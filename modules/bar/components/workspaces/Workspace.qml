@@ -4,7 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import M3Shapes
+import Caelestia
 import Caelestia.Components
 import Caelestia.Config
 import qs.components
@@ -19,6 +21,7 @@ Item {
     required property int activeWsId
     required property int ws
     required property HyprlandMonitor monitor
+    required property Item appIconLayer
 
     required property int displayType
     required property bool showWindows
@@ -220,18 +223,52 @@ Item {
                     }
                 }
 
-                delegate: MaterialIcon {
+                delegate: Item {
                     id: win
 
                     required property var modelData
                     required property int index // Needed, LazyListView will fail to set it if it doesn't exist
+                    readonly property bool hasAppIcon: (appIconLoader.item as IconImage)?.status === Image.Ready
 
-                    grade: 0
-                    horizontalAlignment: Text.AlignHCenter
-                    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
-
+                    implicitWidth: fallbackIcon.implicitWidth
+                    implicitHeight: fallbackIcon.implicitHeight
                     opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
+
+                    MaterialIcon {
+                        id: fallbackIcon
+
+                        anchors.fill: parent
+                        grade: 0
+                        horizontalAlignment: Text.AlignHCenter
+                        text: Icons.getAppCategoryIcon(win.modelData.lastIpcObject.class, "terminal")
+                        color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+                        // Switch only the glyph's visibility; keep its colour animation unchanged.
+                        visible: !win.hasAppIcon
+                    }
+
+                    Loader {
+                        id: appIconLoader
+
+                        parent: root.appIconLayer
+                        active: root.Config.bar.workspaces.showAppIcons
+                        // Follow both lazy lists' animations without entering the colourised layer.
+                        x: root.x + layout.x + windows.x + ((windows.item as LazyListView)?.x ?? 0) + win.x + (win.width - width) / 2
+                        y: root.y + layout.y + windows.y + ((windows.item as LazyListView)?.y ?? 0) + win.y + (win.height - height) / 2
+                        visible: root.visible && windows.visible && win.visible
+                        opacity: root.opacity * win.opacity * (root.onOtherMonitor ? 0.5 : 1)
+
+                        sourceComponent: IconImage {
+                            readonly property string iconName: {
+                                CUtils.dependency(DesktopEntries.applications.values);
+                                return DesktopEntries.heuristicLookup(win.modelData.lastIpcObject.class)?.icon ?? "";
+                            }
+
+                            implicitSize: Math.min(win.width, win.height)
+                            source: iconName ? Quickshell.iconPath(iconName, true) : ""
+                            asynchronous: true
+                            visible: status === Image.Ready
+                        }
+                    }
 
                     Behavior on opacity {
                         Anim {
