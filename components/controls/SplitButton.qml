@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Row {
     id: root
@@ -31,10 +31,10 @@ Row {
     readonly property alias textRow: textRow
     readonly property alias expandBtn: expandBtn
 
-    property color colour: type == SplitButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
-    property color textColour: type == SplitButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
-    property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
+    property color colour: type == SplitButton.Filled ? Colours.palette.primary : Colours.palette.secondaryContainer
+    property color textColour: type == SplitButton.Filled ? Colours.palette.onPrimary : Colours.palette.onSecondaryContainer
+    property color disabledColour: Qt.alpha(Colours.palette.onSurface, 0.1)
+    property color disabledTextColour: Qt.alpha(Colours.palette.onSurface, 0.38)
 
     spacing: Math.floor(Tokens.spacing.extraSmall / 2)
 

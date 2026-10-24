@@ -5,6 +5,7 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.containers
@@ -166,7 +167,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 implicitWidth: shape.implicitSize + Tokens.padding.medium * 2
                 implicitHeight: shape.implicitSize + Tokens.padding.medium * 2
-                color: Colours.palette.m3primaryContainer
+                color: Colours.palette.primaryContainer
                 radius: Tokens.rounding.full
 
                 LoadingIndicator {
@@ -180,7 +181,7 @@ Item {
 
             StyledText {
                 text: Tr.tr("Loading lyrics...")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.title.medium
             }
         }
@@ -207,12 +208,12 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: "sentiment_sad"
                 fontStyle: Tokens.font.icon.builders.large.scale(2).build()
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
             }
 
             StyledText {
                 text: Tr.tr("No lyrics found")
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 font: Tokens.font.title.medium
             }
         }
@@ -259,14 +260,14 @@ Item {
             anchors.right: lyrics.contentItem.right
 
             text: modelData || ". . ."
-            color: ListView.isCurrentItem ? Colours.palette.m3primary : mouse.containsMouse ? Colours.palette.m3onSurface : Colours.palette.m3outline
+            color: ListView.isCurrentItem ? Colours.palette.primary : mouse.containsMouse ? Colours.palette.onSurface : Colours.palette.outline
             font: Tokens.font.body.medium
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
             layer.enabled: effectScale > 0
             layer.effect: MultiEffect {
                 shadowEnabled: true
-                shadowColor: Colours.palette.m3primary
+                shadowColor: Colours.palette.primary
                 shadowOpacity: 0.5 * lyric.effectScale
                 shadowBlur: 0.6 * lyric.effectScale
                 blur: 0.4 * lyric.effectScale

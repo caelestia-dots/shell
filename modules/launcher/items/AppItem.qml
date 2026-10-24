@@ -2,8 +2,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.utils
 import qs.modules.launcher.services
 
@@ -62,7 +62,7 @@ Item {
 
                 text: (root.modelData?.comment || root.modelData?.genericName || root.modelData?.name) ?? ""
                 font: Tokens.font.body.small
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
 
                 elide: Text.ElideRight
                 width: root.width - icon.width - favouriteIcon.width - Tokens.rounding.extraLargeIncreased
@@ -82,7 +82,7 @@ Item {
             sourceComponent: MaterialIcon {
                 text: "favorite"
                 fill: 1
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
             }
         }
     }

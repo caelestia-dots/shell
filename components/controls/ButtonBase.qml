@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 StyledRect {
     id: root
@@ -37,8 +37,8 @@ StyledRect {
     property color inactiveColour
     property color activeOnColour
     property color inactiveOnColour
-    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
-    property color disabledOnColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
+    property color disabledColour: Qt.alpha(Colours.palette.onSurface, 0.1)
+    property color disabledOnColour: Qt.alpha(Colours.palette.onSurface, 0.38)
 
     property bool internalChecked
     property real shapeMorphExpansion: shapeMorph && pressed ? 24 : 0 // Apparently it's always 24px no matter the width of the button

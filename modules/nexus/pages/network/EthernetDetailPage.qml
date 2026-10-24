@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -124,8 +125,8 @@ PageBase {
                 fillWidth: true
                 shapeMorph: true
                 isRound: true
-                inactiveColour: root.device?.connected ? Colours.palette.m3primaryContainer : Colours.palette.m3secondaryContainer
-                inactiveOnColour: root.device?.connected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSecondaryContainer
+                inactiveColour: root.device?.connected ? Colours.palette.primaryContainer : Colours.palette.secondaryContainer
+                inactiveOnColour: root.device?.connected ? Colours.palette.onPrimaryContainer : Colours.palette.onSecondaryContainer
 
                 implicitWidth: connectLayout.implicitWidth + Tokens.padding.extraLarge * 2
                 implicitHeight: connectLayout.implicitHeight + Tokens.padding.medium * 2
@@ -306,8 +307,8 @@ PageBase {
 
                 shapeMorph: true
                 isRound: true
-                inactiveColour: Colours.palette.m3primary
-                inactiveOnColour: Colours.palette.m3onPrimary
+                inactiveColour: Colours.palette.primary
+                inactiveOnColour: Colours.palette.onPrimary
                 stateLayer.disabled: !root.ipLoaded || root.savingIp
 
                 implicitWidth: applyContent.implicitWidth + Tokens.padding.extraLarge * 2

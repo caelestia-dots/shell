@@ -7,10 +7,10 @@ import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Models
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.services
 import qs.utils
 
 ColumnLayout {
@@ -95,7 +95,7 @@ ColumnLayout {
                     date.setMonth(date.getMonth() - 1); // Woe (months start from 0)
                     return Tr.tr("Recording at %1").arg(Qt.formatDateTime(date, Qt.locale()));
                 }
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 elide: Text.ElideRight
             }
 
@@ -122,8 +122,8 @@ ColumnLayout {
             IconButton {
                 icon: "delete_forever"
                 type: IconButton.Text
-                label.color: Colours.palette.m3error
-                stateLayer.color: Colours.palette.m3error
+                label.color: Colours.palette.error
+                stateLayer.color: Colours.palette.error
                 onClicked: root.props.recordingConfirmDelete = recording.modelData.path
             }
         }
@@ -169,7 +169,7 @@ ColumnLayout {
                 MaterialIcon {
                     Layout.alignment: Qt.AlignHCenter
                     text: "scan_delete"
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     fontStyle: Tokens.font.icon.extraLarge
 
                     opacity: root.props.recordingListExpanded ? 1 : 0
@@ -197,7 +197,7 @@ ColumnLayout {
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
                         text: "scan_delete"
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
 
                         opacity: !root.props.recordingListExpanded ? 1 : 0
                         scale: !root.props.recordingListExpanded ? 1 : 0
@@ -220,7 +220,7 @@ ColumnLayout {
 
                     StyledText {
                         text: Tr.tr("No recordings found")
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
                     }
                 }
             }

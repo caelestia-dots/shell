@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -38,7 +38,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                color: Colours.tPalette.m3surfaceContainer
+                color: Colours.tPalette.surfaceContainer
                 radius: Tokens.rounding.large
                 clip: true
 
@@ -51,7 +51,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: buttons.implicitHeight
 
-                color: Colours.tPalette.m3surfaceContainer
+                color: Colours.tPalette.surfaceContainer
                 radius: Tokens.rounding.large
 
                 Buttons {

@@ -3,14 +3,14 @@ import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
-import qs.services
 
 StyledRect {
     id: root
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.extraLarge
 
     implicitWidth: Tokens.sizes.dashboard.perfNetworkCardWidth
@@ -33,7 +33,7 @@ StyledRect {
 
             MaterialIcon {
                 text: "swap_vert"
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
                 fontStyle: Tokens.font.icon.medium
             }
 
@@ -58,10 +58,10 @@ StyledRect {
 
                 anchors.fill: parent
                 line1: NetworkUsage.uploadBuffer
-                line1Color: Colours.palette.m3secondary
+                line1Color: Colours.palette.secondary
                 line1FillAlpha: 0.15
                 line2: NetworkUsage.downloadBuffer
-                line2Color: Colours.palette.m3tertiary
+                line2Color: Colours.palette.tertiary
                 line2FillAlpha: 0.2
                 maxValue: smoothMax
                 historyLength: NetworkUsage.historyLength
@@ -96,7 +96,7 @@ StyledRect {
                 anchors.centerIn: parent
                 text: Tr.tr("Collecting data...")
                 font: Tokens.font.body.small
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 visible: NetworkUsage.downloadBuffer.count < 2
             }
         }
@@ -108,14 +108,14 @@ StyledRect {
 
             MaterialIcon {
                 text: "download"
-                color: Colours.palette.m3tertiary
+                color: Colours.palette.tertiary
                 fontStyle: Tokens.font.icon.medium
             }
 
             StyledText {
                 text: Tr.trCtx("Download", "network throughput")
                 font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
 
             Item {
@@ -125,7 +125,7 @@ StyledRect {
             StyledText {
                 text: Units.formatBytes(NetworkUsage.downloadSpeed ?? 0, true)
                 font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
-                color: Colours.palette.m3tertiary
+                color: Colours.palette.tertiary
             }
         }
 
@@ -136,14 +136,14 @@ StyledRect {
 
             MaterialIcon {
                 text: "upload"
-                color: Colours.palette.m3secondary
+                color: Colours.palette.secondary
                 fontStyle: Tokens.font.icon.medium
             }
 
             StyledText {
                 text: Tr.trCtx("Upload", "network throughput")
                 font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
 
             Item {
@@ -153,7 +153,7 @@ StyledRect {
             StyledText {
                 text: Units.formatBytes(NetworkUsage.uploadSpeed ?? 0, true)
                 font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
-                color: Colours.palette.m3secondary
+                color: Colours.palette.secondary
             }
         }
 
@@ -164,14 +164,14 @@ StyledRect {
 
             MaterialIcon {
                 text: "history"
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.medium
             }
 
             StyledText {
                 text: Tr.trCtx("Total", "total network data transferred")
                 font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
 
             Item {
@@ -186,7 +186,7 @@ StyledRect {
                     return Tr.tr("↓%1 ↑%2").arg(downText).arg(upText);
                 }
                 font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
         }
     }

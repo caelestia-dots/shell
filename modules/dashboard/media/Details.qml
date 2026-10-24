@@ -4,6 +4,7 @@ import Quickshell.Services.Mpris
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -47,7 +48,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Players.active?.trackArtist || Tr.tr("Unknown artist")
-        color: Colours.palette.m3onSurfaceVariant
+        color: Colours.palette.onSurfaceVariant
         font: Tokens.font.title.medium
         elide: Text.ElideRight
         animate: true
@@ -56,7 +57,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Players.active?.trackAlbum || Tr.tr("Unknown album")
-        color: Colours.palette.m3secondary
+        color: Colours.palette.secondary
         font: Tokens.font.title.medium
         elide: Text.ElideRight
         animate: true
@@ -79,7 +80,7 @@ ColumnLayout {
 
             Layout.preferredWidth: timeMetrics.width
             text: root.lengthStr(Players.active?.position ?? -1)
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: timeMetrics.font
             horizontalAlignment: Text.AlignHCenter
         }
@@ -112,7 +113,7 @@ ColumnLayout {
         StyledText {
             Layout.preferredWidth: timeMetrics.width
             text: root.hasUnknownLength ? "--:--" : root.lengthStr(Players.active?.length ?? -1)
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: timeMetrics.font
             horizontalAlignment: Text.AlignHCenter
         }

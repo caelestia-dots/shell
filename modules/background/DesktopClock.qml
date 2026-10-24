@@ -5,6 +5,7 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.State
 import qs.components
 import qs.services
@@ -20,10 +21,10 @@ Item {
     readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
     readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur && !RuntimeState.gameMode
     readonly property bool invertColors: Config.background.desktopClock.invertColors
-    readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
-    readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
-    readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
-    readonly property color safeTertiary: useLightSet ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
+    readonly property bool useLightSet: Colours.mode === ColoursImpl.Light ? !invertColors : invertColors
+    readonly property color safePrimary: useLightSet ? Colours.palette.primaryContainer : Colours.palette.primary
+    readonly property color safeSecondary: useLightSet ? Colours.palette.secondaryContainer : Colours.palette.secondary
+    readonly property color safeTertiary: useLightSet ? Colours.palette.tertiaryContainer : Colours.palette.tertiary
 
     implicitWidth: layout.implicitWidth + (Tokens.padding.large * 4 * root.clockScale)
     implicitHeight: layout.implicitHeight + (Tokens.padding.extraLargeIncreased * root.clockScale)
@@ -36,7 +37,7 @@ Item {
         layer.enabled: Config.background.desktopClock.shadow.enabled
         layer.effect: MultiEffect {
             shadowEnabled: true
-            shadowColor: Colours.palette.m3shadow
+            shadowColor: "black"
             shadowOpacity: Config.background.desktopClock.shadow.opacity
             shadowBlur: Config.background.desktopClock.shadow.blur
         }
@@ -67,7 +68,7 @@ Item {
             anchors.fill: parent
             radius: Tokens.rounding.extraLarge * root.clockScale
             opacity: Config.background.desktopClock.background.opacity
-            color: Colours.palette.m3surface
+            color: Colours.palette.surface
 
             layer.enabled: root.blurEnabled
         }

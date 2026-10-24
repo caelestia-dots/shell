@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -184,7 +185,7 @@ PageBase {
                         implicitWidth: implicitHeight
                         implicitHeight: providerIcon.implicitHeight + Tokens.padding.small * 2
                         radius: Tokens.rounding.full
-                        color: provider.isConnected ? Colours.palette.m3primaryContainer : provider.isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHighest
+                        color: provider.isConnected ? Colours.palette.primaryContainer : provider.isSelected ? Colours.palette.secondaryContainer : Colours.palette.surfaceContainerHighest
 
                         MaterialIcon {
                             id: providerIcon
@@ -192,7 +193,7 @@ PageBase {
                             anchors.centerIn: parent
                             text: provider.isConnected || provider.isSelected ? "vpn_key" : "vpn_key_off"
                             fill: provider.isConnected ? 1 : 0
-                            color: provider.isConnected ? Colours.palette.m3onPrimaryContainer : provider.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
+                            color: provider.isConnected ? Colours.palette.onPrimaryContainer : provider.isSelected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurfaceVariant
                             fontStyle: Tokens.font.icon.medium
                             animate: true
                         }
@@ -231,15 +232,15 @@ PageBase {
                             }
                             color: {
                                 if (!provider.isSelected)
-                                    return Colours.palette.m3onSurfaceVariant;
+                                    return Colours.palette.onSurfaceVariant;
                                 switch (VPN.status.state) {
                                 case "connected":
-                                    return Colours.palette.m3primary;
+                                    return Colours.palette.primary;
                                 case "needs-auth":
                                 case "error":
-                                    return Colours.palette.m3error;
+                                    return Colours.palette.error;
                                 default:
-                                    return Colours.palette.m3secondary;
+                                    return Colours.palette.secondary;
                                 }
                             }
                             font: Tokens.font.label.small
@@ -274,7 +275,7 @@ PageBase {
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
                                     text: Tr.trCtx("Interface", "network interface")
-                                    color: Colours.palette.m3onSurfaceVariant
+                                    color: Colours.palette.onSurfaceVariant
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
                                     horizontalAlignment: Text.AlignRight
@@ -283,7 +284,7 @@ PageBase {
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
                                     text: provider.modelData.interface
-                                    color: Colours.palette.m3outline
+                                    color: Colours.palette.outline
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
                                     horizontalAlignment: Text.AlignRight
@@ -296,7 +297,7 @@ PageBase {
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
                                     text: Tr.trCtx("Current ping", "round-trip latency to the VPN endpoint")
-                                    color: Colours.palette.m3onSurfaceVariant
+                                    color: Colours.palette.onSurfaceVariant
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
                                     horizontalAlignment: Text.AlignRight
@@ -311,12 +312,12 @@ PageBase {
                                         implicitWidth: Math.round(Tokens.font.body.small.pointSize * 0.7)
                                         implicitHeight: implicitWidth
                                         radius: Tokens.rounding.full
-                                        color: VPN.pingMs <= 80 ? Colours.palette.m3primary : VPN.pingMs <= 150 ? Colours.palette.m3tertiary : Colours.palette.m3error
+                                        color: VPN.pingMs <= 80 ? Colours.palette.primary : VPN.pingMs <= 150 ? Colours.palette.tertiary : Colours.palette.error
                                     }
 
                                     StyledText {
                                         text: Tr.tr("%1 ms").arg(VPN.pingMs)
-                                        color: Colours.palette.m3outline
+                                        color: Colours.palette.outline
                                         font: Tokens.font.label.small
                                         elide: Text.ElideRight
                                         horizontalAlignment: Text.AlignRight

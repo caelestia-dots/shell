@@ -69,7 +69,7 @@ Item {
                     Wallpapers.setWallpaper(currentItem.modelData.path);
                     root.screenState.launcher = false;
                 } else if (text.startsWith(GlobalConfig.launcher.actionPrefix)) {
-                    if (text.startsWith(`${GlobalConfig.launcher.actionPrefix}calc `))
+                    if (typeof currentItem.onClicked === "function")
                         currentItem.onClicked();
                     else
                         currentItem.modelData.onClicked(list.currentList);

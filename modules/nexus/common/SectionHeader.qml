@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 StyledText {
     property bool first
@@ -12,7 +12,7 @@ StyledText {
     Layout.bottomMargin: Tokens.spacing.extraSmall
     Layout.leftMargin: Tokens.padding.small
 
-    color: Colours.palette.m3onSurfaceVariant
+    color: Colours.palette.onSurfaceVariant
     font: Tokens.font.label.medium
     elide: Text.ElideRight
 }

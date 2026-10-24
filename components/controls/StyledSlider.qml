@@ -5,8 +5,8 @@ import QtQuick.Templates
 import Caelestia
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Slider {
     id: root
@@ -19,8 +19,8 @@ Slider {
     property bool interactionOnMove: true
     readonly property bool dragging: mouse.pressed
 
-    property color fgColour: enabled ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3onSurface, 0.38)
-    property color bgColour: enabled ? Colours.palette.m3secondaryContainer : Qt.alpha(Colours.palette.m3onSurface, 0.1)
+    property color fgColour: enabled ? Colours.palette.primary : Qt.alpha(Colours.palette.onSurface, 0.38)
+    property color bgColour: enabled ? Colours.palette.secondaryContainer : Qt.alpha(Colours.palette.onSurface, 0.1)
 
     property real pos: visualPosition
     property real filledWidth

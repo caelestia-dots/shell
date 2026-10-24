@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -30,14 +31,14 @@ ColumnLayout {
         }
 
         StyledRect {
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             radius: Tokens.rounding.medium
 
             implicitWidth: moveToWsIcon.implicitWidth + Tokens.padding.small
             implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.extraSmall
 
             StateLayer {
-                color: Colours.palette.m3onPrimary
+                color: Colours.palette.onPrimary
                 onClicked: root.moveToWsExpanded = !root.moveToWsExpanded
             }
 
@@ -48,7 +49,7 @@ ColumnLayout {
 
                 animate: true
                 text: root.moveToWsExpanded ? "expand_more" : "keyboard_arrow_right"
-                color: Colours.palette.m3onPrimary
+                color: Colours.palette.onPrimary
                 fontStyle: Tokens.font.icon.large
             }
         }
@@ -99,8 +100,8 @@ ColumnLayout {
                     Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.move({ window = "address:0x${root.client?.address}", workspace = "${wsId}", follow = true })` : `movetoworkspace ${wsId},address:0x${root.client?.address}`);
                 }
 
-                color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
-                textColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
+                color: isCurrent ? Colours.tPalette.surfaceContainerHighest : Colours.palette.tertiaryContainer
+                textColor: isCurrent ? Colours.palette.onSurface : Colours.palette.onTertiaryContainer
                 text: wsId
                 disabled: isCurrent
             }
@@ -116,8 +117,8 @@ ColumnLayout {
         spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.medium : Tokens.spacing.small
 
         WButton {
-            color: Colours.palette.m3secondaryContainer
-            textColor: Colours.palette.m3onSecondaryContainer
+            color: Colours.palette.secondaryContainer
+            textColor: Colours.palette.onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? Tr.tr("Tile") : Tr.tr("Float")
             onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.float({ window = "address:0x${root.client?.address}" })` : `togglefloating address:0x${root.client?.address}`)
         }
@@ -130,23 +131,23 @@ ColumnLayout {
             Layout.rightMargin: active ? 0 : -parent.spacing
 
             sourceComponent: WButton {
-                color: Colours.palette.m3secondaryContainer
-                textColor: Colours.palette.m3onSecondaryContainer
+                color: Colours.palette.secondaryContainer
+                textColor: Colours.palette.onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? Tr.tr("Unpin") : Tr.tr("Pin")
                 onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })` : `pin address:0x${root.client?.address}`)
             }
         }
 
         WButton {
-            color: Colours.palette.m3errorContainer
-            textColor: Colours.palette.m3onErrorContainer
+            color: Colours.palette.errorContainer
+            textColor: Colours.palette.onErrorContainer
             text: Tr.tr("Kill")
             onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })` : `killwindow address:0x${root.client?.address}`)
         }
     }
 
     component WButton: StyledRect {
-        property color textColor: Colours.palette.m3onSurface
+        property color textColor: Colours.palette.onSurface
         property alias disabled: stateLayer.disabled
         property alias text: label.text
 

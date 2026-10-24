@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -38,7 +38,7 @@ Item {
 
             y: modelData ? modelData.y - root.wsSpacing / 2 + shift : 0
             implicitHeight: 1
-            color: Colours.palette.m3outline
+            color: Colours.palette.outline
 
             opacity: AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0 || root.workspaces[index - 1]?.ws === modelData?.ws - 1 ? 0 : 1
 

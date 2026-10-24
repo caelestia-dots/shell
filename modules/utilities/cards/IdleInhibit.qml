@@ -2,10 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.State
 import qs.components
 import qs.components.controls
-import qs.services
 
 StyledRect {
     id: root
@@ -15,7 +15,7 @@ StyledRect {
     implicitHeight: nonAnimHeight
 
     radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     clip: true
 
     RowLayout {
@@ -32,14 +32,14 @@ StyledRect {
             implicitHeight: icon.implicitHeight + Tokens.padding.large
 
             radius: Tokens.rounding.full
-            color: RuntimeState.inhibitIdle ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+            color: RuntimeState.inhibitIdle ? Colours.palette.secondary : Colours.palette.secondaryContainer
 
             MaterialIcon {
                 id: icon
 
                 anchors.centerIn: parent
                 text: "coffee"
-                color: RuntimeState.inhibitIdle ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                color: RuntimeState.inhibitIdle ? Colours.palette.onSecondary : Colours.palette.onSecondaryContainer
                 fontStyle: Tokens.font.icon.large
             }
         }
@@ -58,7 +58,7 @@ StyledRect {
             StyledText {
                 Layout.fillWidth: true
                 text: RuntimeState.inhibitIdle ? Tr.trCtx("Preventing sleep mode", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.body.small
                 elide: Text.ElideRight
             }
@@ -90,7 +90,7 @@ StyledRect {
             implicitHeight: activeText.implicitHeight + Tokens.padding.small
 
             radius: Tokens.rounding.full
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
 
             StyledText {
                 id: activeText
@@ -98,7 +98,7 @@ StyledRect {
                 anchors.centerIn: parent
                 // TRANSLATORS: %1 = a clock time, e.g. 14:30
                 text: Tr.tr("Active since %1").arg(Qt.formatTime(new Date(RuntimeState.inhibitingIdleSince), Units.twelveHourClock ? "hh:mm a" : "hh:mm"))
-                color: Colours.palette.m3onPrimary
+                color: Colours.palette.onPrimary
                 font: Tokens.font.body.builders.small.size(Math.round(Tokens.font.body.small.pointSize * 0.9)).build()
             }
         }

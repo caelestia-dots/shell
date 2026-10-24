@@ -6,10 +6,10 @@ import QtQuick.Shapes
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
-import qs.services
 
 Loader {
     id: root
@@ -45,7 +45,7 @@ Loader {
                 anchors.rightMargin: -parent.width * (1 - root.deformMatrix.m11) / 2 // Additional bit to account for deform
                 anchors.bottomMargin: -parent.height * 0.1 // Additional bit to account for overshoot
                 topLeftRadius: Tokens.rounding.extraLarge
-                color: Colours.palette.m3scrim
+                color: "black"
             }
 
             Shape {
@@ -66,11 +66,11 @@ Loader {
 
                         GradientStop {
                             position: 0
-                            color: Qt.alpha(Colours.palette.m3scrim, 0)
+                            color: Qt.alpha("black", 0)
                         }
                         GradientStop {
                             position: 1
-                            color: Colours.palette.m3scrim
+                            color: "black"
                         }
                     }
 
@@ -106,11 +106,11 @@ Loader {
 
                         GradientStop {
                             position: 0
-                            color: Qt.alpha(Colours.palette.m3scrim, 0)
+                            color: Qt.alpha("black", 0)
                         }
                         GradientStop {
                             position: 1
-                            color: Colours.palette.m3scrim
+                            color: "black"
                         }
                     }
 
@@ -140,7 +140,7 @@ Loader {
         StyledRect {
             anchors.centerIn: parent
             radius: Tokens.rounding.extraLarge
-            color: Colours.palette.m3surfaceContainerHigh
+            color: Colours.palette.surfaceContainerHigh
 
             scale: 0
             Component.onCompleted: scale = Qt.binding(() => root.props.recordingConfirmDelete ? 1 : 0)
@@ -175,7 +175,7 @@ Loader {
                 StyledText {
                     Layout.fillWidth: true
                     text: Tr.tr("Recording '%1' will be permanently deleted.").arg(deleteConfirmation.path)
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     font: Tokens.font.body.small
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
