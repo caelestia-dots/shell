@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -62,7 +63,7 @@ ColumnLayout {
                 StyledText {
                     Layout.alignment: Qt.AlignRight
                     text: Nmcli.activeEthernet ? Tr.trCtx("Connected", "ethernet link state") : Tr.trCtx("Not connected", "ethernet link state")
-                    color: Nmcli.activeEthernet ? Colours.palette.m3primary : Colours.palette.m3outline
+                    color: Nmcli.activeEthernet ? Colours.palette.primary : Colours.palette.outline
                     font: Tokens.font.label.small
                 }
 
@@ -71,7 +72,7 @@ ColumnLayout {
                     visible: Nmcli.activeEthernet && Nmcli.ethernetDataUsage.length > 0
                     // TRANSLATORS: %1 = data transferred, already formatted with a unit
                     text: Tr.tr("Data usage: %1").arg(Nmcli.ethernetDataUsage)
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.label.small
                 }
             }
@@ -121,7 +122,7 @@ ColumnLayout {
                     implicitWidth: implicitHeight
                     implicitHeight: ethIcon.implicitHeight + Tokens.padding.small * 2
                     radius: Tokens.rounding.full
-                    color: ethRow.isConnected ? Colours.palette.m3primaryContainer : Colours.palette.m3surfaceContainerHighest
+                    color: ethRow.isConnected ? Colours.palette.primaryContainer : Colours.palette.surfaceContainerHighest
 
                     MaterialIcon {
                         id: ethIcon
@@ -129,7 +130,7 @@ ColumnLayout {
                         anchors.centerIn: parent
                         text: ethRow.isConnected ? "lan" : "settings_ethernet"
                         fill: text === "lan" ? 1 : 0
-                        color: ethRow.isConnected ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurfaceVariant
+                        color: ethRow.isConnected ? Colours.palette.onPrimaryContainer : Colours.palette.onSurfaceVariant
                         fontStyle: Tokens.font.icon.medium
                         animate: true
                     }
@@ -151,7 +152,7 @@ ColumnLayout {
                     StyledText {
                         Layout.fillWidth: true
                         text: ethRow.isConnected ? ethRow.modelData.iface : Tr.trCtx("Not connected • %1", "ethernet link state with interface name").arg(ethRow.modelData.iface)
-                        color: ethRow.isConnected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                        color: ethRow.isConnected ? Colours.palette.primary : Colours.palette.onSurfaceVariant
                         font: Tokens.font.label.small
                         elide: Text.ElideRight
                         animate: true
@@ -222,7 +223,7 @@ ColumnLayout {
 
                 MaterialIcon {
                     text: "chevron_right"
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     fontStyle: Tokens.font.icon.small
                 }
             }
@@ -241,7 +242,7 @@ ColumnLayout {
         StyledText {
             Layout.alignment: Qt.AlignRight
             text: ethDetail.label
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: Tokens.font.label.small
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignRight
@@ -250,7 +251,7 @@ ColumnLayout {
         StyledText {
             Layout.alignment: Qt.AlignRight
             text: ethDetail.value
-            color: Colours.palette.m3outline
+            color: Colours.palette.outline
             font: Tokens.font.label.small
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignRight

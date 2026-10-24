@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ScrollBar {
     id: root
@@ -62,7 +62,7 @@ ScrollBar {
             return 0;
         }
         radius: Tokens.rounding.full
-        color: Colours.palette.m3secondary
+        color: Colours.palette.secondary
 
         MouseArea {
             id: mouse

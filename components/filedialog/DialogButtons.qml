@@ -1,8 +1,8 @@
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 StyledRect {
     id: root
@@ -12,7 +12,7 @@ StyledRect {
 
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     RowLayout {
         id: inner
@@ -31,7 +31,7 @@ StyledRect {
             Layout.fillHeight: true
             Layout.rightMargin: Tokens.spacing.medium
 
-            color: Colours.tPalette.m3surfaceContainerHigh
+            color: Colours.tPalette.surfaceContainerHigh
             radius: Tokens.rounding.medium
 
             StyledText {
@@ -47,7 +47,7 @@ StyledRect {
         }
 
         StyledRect {
-            color: Colours.tPalette.m3surfaceContainerHigh
+            color: Colours.tPalette.surfaceContainerHigh
             radius: Tokens.rounding.medium
 
             implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
@@ -65,12 +65,12 @@ StyledRect {
                 anchors.margins: Tokens.padding.medium
 
                 text: Tr.trCtx("Select", "button")
-                color: root.dialog.selectionValid ? Colours.palette.m3onSurface : Colours.palette.m3outline
+                color: root.dialog.selectionValid ? Colours.palette.onSurface : Colours.palette.outline
             }
         }
 
         StyledRect {
-            color: Colours.tPalette.m3surfaceContainerHigh
+            color: Colours.tPalette.surfaceContainerHigh
             radius: Tokens.rounding.medium
 
             implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2

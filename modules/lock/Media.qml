@@ -4,6 +4,7 @@ import Quickshell
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.images
@@ -16,7 +17,7 @@ ClipRect {
 
     implicitHeight: layout.implicitHeight + layout.anchors.margins * 2
     radius: Tokens.rounding.extraLarge
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     FadeImage {
         anchors.fill: parent
@@ -34,7 +35,7 @@ ClipRect {
 
         StyledRect {
             anchors.fill: parent
-            color: Colours.palette.m3surface
+            color: Colours.palette.surface
             opacity: 0.7
         }
 
@@ -58,7 +59,7 @@ ClipRect {
             Layout.fillWidth: true
             animate: true
             text: (Players.active?.trackTitle ?? Tr.tr("Nothing playing")) || Tr.tr("Unknown track")
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             horizontalAlignment: Text.AlignHCenter
             font: Tokens.font.title.medium
             elide: Text.ElideRight
@@ -68,7 +69,7 @@ ClipRect {
             Layout.fillWidth: true
             animate: true
             text: (Players.active?.trackArtist ?? Tr.tr("Try playing some music!")) || Tr.tr("Unknown artist")
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             horizontalAlignment: Text.AlignHCenter
             font: Tokens.font.body.small
             elide: Text.ElideRight

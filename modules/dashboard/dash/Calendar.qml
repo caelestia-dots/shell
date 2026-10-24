@@ -6,10 +6,10 @@ import QtQuick.Layouts
 import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
-import qs.services
 
 CustomMouseArea {
     id: root
@@ -117,7 +117,7 @@ CustomMouseArea {
                 implicitHeight: monthYearDisplay.implicitHeight + Tokens.padding.extraSmall * 2
 
                 StateLayer {
-                    color: Colours.palette.m3primary
+                    color: Colours.palette.primary
                     radius: pressed ? Tokens.rounding.small : height / 2
                     disabled: {
                         const now = new Date();
@@ -142,7 +142,7 @@ CustomMouseArea {
 
                     anchors.centerIn: parent
                     text: grid.title
-                    color: Colours.palette.m3primary
+                    color: Colours.palette.primary
                     font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
                 }
             }
@@ -169,7 +169,7 @@ CustomMouseArea {
                 horizontalAlignment: Text.AlignHCenter
                 text: model.shortName
                 font: Tokens.font.body.builders.small.weight(Font.Medium).build()
-                color: (model.day === 0 || model.day === 6) ? Colours.palette.m3tertiary : Colours.palette.m3onSurface
+                color: (model.day === 0 || model.day === 6) ? Colours.palette.tertiary : Colours.palette.onSurface
             }
         }
 
@@ -211,9 +211,9 @@ CustomMouseArea {
                         color: {
                             const dayOfWeek = dayItem.model.date.getDay();
                             if (dayOfWeek === 0 || dayOfWeek === 6)
-                                return Colours.palette.m3tertiary;
+                                return Colours.palette.tertiary;
 
-                            return Colours.palette.m3onSurfaceVariant;
+                            return Colours.palette.onSurfaceVariant;
                         }
                         opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
                         font: Tokens.font.body.small
@@ -239,7 +239,7 @@ CustomMouseArea {
                 shape: MaterialShape.Sunny
 
                 clip: true
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
 
                 opacity: todayItem ? 1 : 0
 
@@ -251,8 +251,8 @@ CustomMouseArea {
                     implicitHeight: grid.height
 
                     source: grid
-                    sourceColor: Colours.palette.m3onSurface
-                    colorizationColor: Colours.palette.m3onPrimary
+                    sourceColor: Colours.palette.onSurface
+                    colorizationColor: Colours.palette.onPrimary
                 }
             }
         }

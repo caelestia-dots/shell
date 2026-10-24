@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -108,7 +109,7 @@ ItemList {
 
             MaterialIcon {
                 text: Icons.getNetworkIcon(network.modelData.strength)
-                color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                color: network.modelData.active ? Colours.palette.primary : Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.medium
                 opacity: network.textOpacity
             }
@@ -139,7 +140,7 @@ ItemList {
                             return Tr.trCtx("Security: %1 • %2", "network security and status").arg(net.security).arg(status);
                         return Tr.trCtx("Security: %1", "network security").arg(net.security);
                     }
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.label.small
                     elide: Text.ElideRight
                 }
@@ -153,7 +154,7 @@ ItemList {
 
                     MaterialIcon {
                         text: network.modelData.active ? "settings" : "lock"
-                        color: network.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                        color: network.modelData.active ? Colours.palette.primary : Colours.palette.onSurfaceVariant
                         fontStyle: Tokens.font.icon.medium
                         opacity: network.textOpacity
                     }

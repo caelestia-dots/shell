@@ -3,9 +3,9 @@ import QtQuick.Layouts
 import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 
 StyledRect {
@@ -18,7 +18,7 @@ StyledRect {
     required property real usage
     required property real temperature
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.extraLarge
 
     implicitWidth: Tokens.sizes.dashboard.perfHeroCardWidth
@@ -69,7 +69,7 @@ StyledRect {
             Layout.fillWidth: true
             text: root.subLabel
             font: Tokens.font.body.small
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             elide: Text.ElideRight
         }
     }
@@ -89,7 +89,7 @@ StyledRect {
             MaterialIcon {
                 Layout.topMargin: Math.round(fontInfo.pointSize * 0.08)
                 text: root.temperature > 90 ? "thermometer_alert" : "thermometer"
-                color: root.temperature > 90 ? Colours.palette.m3error : root.accent
+                color: root.temperature > 90 ? Colours.palette.error : root.accent
                 fontStyle: Tokens.font.icon.medium
                 fill: 1
             }
@@ -116,7 +116,7 @@ StyledRect {
         anchors.margins: Tokens.padding.medium
 
         implicitSize: Tokens.sizes.dashboard.perfUsageShapeSize
-        color: Colours.palette.m3secondaryContainer
+        color: Colours.palette.secondaryContainer
         shape: {
             if (root.usage >= 0.8)
                 return MaterialShape.SoftBurst;
@@ -137,7 +137,7 @@ StyledRect {
 
             // TRANSLATORS: labels the CPU or GPU utilisation percentage shown below it
             text: Tr.trCtx("Usage", "resource usage")
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             font: Tokens.font.body.small
         }
 
