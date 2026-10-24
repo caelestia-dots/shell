@@ -87,6 +87,9 @@ namespace caelestia::shell::scheme {
 
 namespace lib = ::caelestia::scheme;
 
+/// Fails for unknown schemes, or for "dynamic" when the current wallpaper has no colours.
+QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode);
+
 class ColourPalette : public QObject {
     Q_OBJECT
     QML_ELEMENT
@@ -113,6 +116,9 @@ private:
     lib::SchemeColours m_colours;
 };
 
+struct SchemeHandle;
+Q_MOC_INCLUDE("schemehandles.hpp")
+
 class Colours : public QObject {
     Q_OBJECT
     QML_NAMED_ELEMENT(ColoursImpl)
@@ -125,6 +131,8 @@ class Colours : public QObject {
     Q_PROPERTY(QString scheme READ scheme NOTIFY schemeChanged)
     Q_PROPERTY(QString flavour READ flavour NOTIFY schemeChanged)
     Q_PROPERTY(caelestia::shell::scheme::Colours::Mode mode READ mode NOTIFY schemeChanged)
+
+    Q_PROPERTY(QList<caelestia::shell::scheme::SchemeHandle> schemes READ schemes NOTIFY schemesChanged)
 
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* palette READ palette CONSTANT)
     Q_PROPERTY(caelestia::shell::scheme::ColourPalette* tPalette READ tPalette CONSTANT)
@@ -146,6 +154,8 @@ public:
     [[nodiscard]] QString flavour() const;
     [[nodiscard]] Mode mode() const;
 
+    [[nodiscard]] QList<SchemeHandle> schemes() const;
+
     [[nodiscard]] ColourPalette* palette() const;
     [[nodiscard]] ColourPalette* tPalette() const;
 
@@ -154,7 +164,7 @@ public:
     Q_INVOKABLE void commit();
     Q_INVOKABLE void reset();
 
-    Q_INVOKABLE void setScheme(const QString& scheme, bool commit = true);
+    Q_INVOKABLE void setScheme(const QString& scheme, const QString& flavour, bool commit = true);
     Q_INVOKABLE void setFlavour(const QString& flavour, bool commit = true);
     Q_INVOKABLE void setMode(Mode mode, bool commit = true);
 
@@ -165,6 +175,7 @@ public:
 signals:
     void committedChanged();
     void schemeChanged();
+    void schemesChanged();
 
     void layerNeedsUpdateChanged();
 
@@ -175,6 +186,7 @@ private:
     ColourPalette* const m_tPalette;
 
     lib::SchemeData m_state;
+    QList<SchemeHandle> m_schemes;
     QFileSystemWatcher m_watcher;
 
     [[nodiscard]] QColor alter(const QColor& colour, qreal alpha, int layer) const;
@@ -182,6 +194,7 @@ private:
     void updateLayer();
 
     void loadState();
+    void loadSchemes();
     void setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit);
     QFuture<void> applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed = false);
     void applyState(const lib::SchemeData& data, bool committed = false);
