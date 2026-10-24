@@ -87,8 +87,9 @@ namespace caelestia::shell::scheme {
 
 namespace lib = ::caelestia::scheme;
 
+void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void()>& fn);
 /// Fails for unknown schemes, or for "dynamic" when the current wallpaper has no colours.
-QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode);
+QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode, bool smart);
 
 class ColourPalette : public QObject {
     Q_OBJECT
@@ -195,8 +196,8 @@ private:
 
     void loadState();
     void loadSchemes();
-    void setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit);
-    QFuture<void> applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed = false);
+    void setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit, bool smart);
+    QFuture<void> applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed, bool smart);
     void applyState(const lib::SchemeData& data, bool committed = false);
     void syncTPalette();
 
