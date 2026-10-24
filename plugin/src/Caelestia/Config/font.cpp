@@ -18,15 +18,31 @@ FontStyleBase::FontStyleBase(QObject* parent)
     : QObject(parent) {}
 
 QFont FontStyleBase::large() const {
+    ensureBuilt();
     return m_large;
 }
 
 QFont FontStyleBase::medium() const {
+    ensureBuilt();
     return m_medium;
 }
 
 QFont FontStyleBase::small() const {
+    ensureBuilt();
     return m_small;
+}
+
+// Built when first READ, not when bound. Every attached Tokens owns all six
+// styles and binds them twice on the way up (once global in its constructor,
+// once for its screen), so an eager rebuild made ~38 QFonts per item that
+// touches `Tokens.` at all -- most of which never read a font. Profiled at 8%
+// of the GUI thread under a clipboard-reader key mash, after the disconnect
+// walk above it was gone.
+void FontStyleBase::ensureBuilt() const {
+    if (!m_dirty)
+        return;
+    m_dirty = false;
+    buildFonts();
 }
 
 QFont FontStyleBase::buildFont(const settings::ObjectNode* cfg, const QString& fallbackFamily, qreal scale) {
@@ -58,26 +74,35 @@ void FontStyleBase::bind(settings::ObjectNode* cfg) {
     if (m_cfg == cfg)
         return;
 
-    if (m_cfg) {
-        disconnect(m_cfg, nullptr, this, nullptr);
-        disconnect(style(m_cfg, u"large"_s), nullptr, this, nullptr);
-        disconnect(style(m_cfg, u"medium"_s), nullptr, this, nullptr);
-        disconnect(style(m_cfg, u"small"_s), nullptr, this, nullptr);
-    }
+    // By handle, never disconnect(sender, nullptr, this, nullptr). That form
+    // walks the sender's WHOLE connection list looking for this receiver, and
+    // the senders here are the shared config nodes: every attached Tokens in
+    // the shell owns six of these styles, all connected to the same few nodes,
+    // so the list is thousands long and every item that is created, reparented
+    // or destroyed paid for 24 walks of it. Profiled under a clipboard-reader
+    // key mash: 20% of the GUI thread inside that walk alone.
+    for (auto& conn : m_conns)
+        disconnect(conn);
+    m_conns.clear();
 
     m_cfg = cfg;
 
     if (cfg) {
-        connect(cfg, &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
-        connect(style(cfg, u"large"_s), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
-        connect(style(cfg, u"medium"_s), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
-        connect(style(cfg, u"small"_s), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        m_conns << connect(cfg, &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        m_conns << connect(style(cfg, u"large"_s), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        m_conns << connect(style(cfg, u"medium"_s), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
+        m_conns << connect(style(cfg, u"small"_s), &settings::Node::optionChanged, this, &FontStyleBase::rebuild);
     }
 
     rebuild();
 }
 
 void FontStyleBase::rebuild() {
+    m_dirty = true;
+    emit fontsChanged();
+}
+
+void FontStyleBase::buildFonts() const {
     if (m_cfg) {
         const auto family = m_cfg->value(u"family"_s).toString();
         m_large = buildFont(style(m_cfg, u"large"_s), family, m_scale);
@@ -88,7 +113,6 @@ void FontStyleBase::rebuild() {
         m_medium = QFont();
         m_small = QFont();
     }
-    emit fontsChanged();
 }
 
 void FontStyleBase::setScale(qreal scale) {
@@ -115,23 +139,22 @@ IconFontStyle::IconFontStyle(QObject* parent)
     , m_builders(new IconFontBuilders(this, this)) {}
 
 FontBuilder IconFontStyle::size(int pointSize) {
-    return FontBuilder(m_small).size(pointSize);
+    return FontBuilder(small()).size(pointSize);
 }
 
 void IconFontStyle::bind(settings::ObjectNode* cfg) {
     if (m_cfg == cfg)
         return;
 
-    if (m_cfg)
-        disconnect(style(m_cfg, u"extraLarge"_s), nullptr, this, nullptr);
-
+    // The base drops every handle, this one included -- see FontStyleBase::bind.
     FontStyleBase::bind(cfg);
 
     if (cfg)
-        connect(style(cfg, u"extraLarge"_s), &settings::Node::optionChanged, this, &IconFontStyle::rebuild);
+        m_conns << connect(style(cfg, u"extraLarge"_s), &settings::Node::optionChanged, this, &IconFontStyle::rebuild);
 }
 
 QFont IconFontStyle::extraLarge() const {
+    ensureBuilt();
     return m_extraLarge;
 }
 
@@ -139,14 +162,14 @@ IconFontBuilders* IconFontStyle::builders() const {
     return m_builders;
 }
 
-void IconFontStyle::rebuild() {
+void IconFontStyle::buildFonts() const {
     if (m_cfg) {
         const auto family = m_cfg->value(u"family"_s).toString();
         m_extraLarge = buildFont(style(m_cfg, u"extraLarge"_s), family, m_scale);
     } else {
         m_extraLarge = QFont();
     }
-    FontStyleBase::rebuild();
+    FontStyleBase::buildFonts();
 }
 
 // FontBuilders
@@ -225,8 +248,9 @@ void FontTokens::bindFont(AppearanceFont* font) {
     if (m_font == font)
         return;
 
-    if (m_font)
-        disconnect(m_font, nullptr, this, nullptr);
+    for (auto& conn : m_fontConns)
+        disconnect(conn);
+    m_fontConns.clear();
 
     m_font = font;
 
@@ -239,9 +263,9 @@ void FontTokens::bindFont(AppearanceFont* font) {
         m_mono->bind(font->mono());
         m_icon->bind(font->icon());
 
-        connect(font, &AppearanceFont::clockChanged, this, &FontTokens::rebuildClock);
-        connect(font, &AppearanceFont::scaleChanged, this, &FontTokens::rebuildScale);
-        connect(font, &AppearanceFont::workspacesChanged, this, &FontTokens::workspacesChanged);
+        m_fontConns << connect(font, &AppearanceFont::clockChanged, this, &FontTokens::rebuildClock);
+        m_fontConns << connect(font, &AppearanceFont::scaleChanged, this, &FontTokens::rebuildScale);
+        m_fontConns << connect(font, &AppearanceFont::workspacesChanged, this, &FontTokens::workspacesChanged);
     } else {
         rebuildScale();
         m_headline->bind(nullptr);
