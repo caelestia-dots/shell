@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import "items"
+import "services"
 import QtQuick
 import Quickshell
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components.controls
-import qs.services
 
 PathView {
     id: root
@@ -45,15 +45,14 @@ PathView {
         return visible;
     }
 
-    model: Wallpapers.model
-    // ScriptModel {
-    //     id: scriptModel
+    model: ScriptModel {
+        id: scriptModel
 
-    //     readonly property string search: root.search.text.split(" ").slice(1).join(" ")
+        readonly property string search: root.search.text.split(" ").slice(1).join(" ")
 
-    //     values: Wallpapers.query(search)
-    //     onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.actualCurrent)
-    // }
+        values: WallpaperSearch.query(search)
+        onValuesChanged: root.currentIndex = search ? 0 : values.findIndex(w => w.path === Wallpapers.currentCommitted)
+    }
 
     Component.onCompleted: currentIndex = Wallpapers.model.entries.findIndex(w => w.path === Wallpapers.currentCommitted)
     Component.onDestruction: Wallpapers.reset()
