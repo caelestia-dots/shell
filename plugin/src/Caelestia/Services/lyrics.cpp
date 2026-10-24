@@ -568,7 +568,8 @@ void Lyrics::tryLrclibSearch(int reqId) {
         }
 
         constexpr qreal k_durationToleranceSecs = 2.0;
-        for (const auto& v : QJsonDocument::fromJson(reply->readAll()).array()) {
+        const QJsonArray results = QJsonDocument::fromJson(reply->readAll()).array();
+        for (const auto& v : results) {
             const QJsonObject o = v.toObject();
             if (m_duration > 0 && qAbs(o.value(u"duration"_s).toDouble() - m_duration) > k_durationToleranceSecs) {
                 continue;
