@@ -55,7 +55,10 @@ PathView {
     }
 
     Component.onCompleted: currentIndex = Wallpapers.model.entries.findIndex(w => w.path === Wallpapers.currentCommitted)
-    Component.onDestruction: Wallpapers.reset()
+    Component.onDestruction: {
+        Wallpapers.reset();
+        Colours.reset();
+    }
 
     onCurrentItemChanged: {
         if (currentItem)
