@@ -46,8 +46,8 @@ Singleton {
             title: Tr.tr("Nexus — %1").arg(PageRegistry.pages[nexus.nState.currentPageIdx].label)
 
             Component.onDestruction: {
-                if (root.openWindow === win)
-                    root.openWindow = null;
+                if (WindowFactory.openWindow === win)
+                    WindowFactory.openWindow = null;
             }
 
             Nexus {
