@@ -28,6 +28,7 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bluetooth-bluetooth"
             text: Tr.tr("Bluetooth")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -179,6 +180,7 @@ PageBase {
         RowButton {
             last: true
             icon: "add"
+            settingAnchor: "bluetooth-pair-device"
             text: Tr.tr("Pair new device")
             disabled: !root.btEnabled
             onClicked: root.nState.openSubPage(2)
@@ -188,6 +190,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
 
             first: true
+            settingAnchor: "bluetooth-discoverable"
             // TRANSLATORS: adjective: other devices can find this computer
             text: Tr.trCtx("Discoverable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to find this one")
@@ -205,6 +208,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bluetooth-pairable"
             // TRANSLATORS: adjective: other devices are allowed to pair with this computer
             text: Tr.trCtx("Pairable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to pair with this one")
