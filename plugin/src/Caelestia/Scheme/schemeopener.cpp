@@ -15,7 +15,8 @@ using Qt::StringLiterals::operator""_s;
 SchemeOpener::SchemeOpener(QObject* parent)
     : QObject(parent)
     , m_palette(new ColourPalette(this)) {
-    connectResolveSchemeUpdates(this, [this] {
+    connectResolveSchemeUpdates(this, [this](bool committed) {
+        Q_UNUSED(committed);
         if (m_name == u"dynamic"_s)
             resolve();
     });

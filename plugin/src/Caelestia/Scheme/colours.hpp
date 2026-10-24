@@ -87,7 +87,7 @@ namespace caelestia::shell::scheme {
 
 namespace lib = ::caelestia::scheme;
 
-void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void()>& fn);
+void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void(bool)>& fn);
 /// Fails for unknown schemes, or for "dynamic" when the current wallpaper has no colours.
 QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode, bool smart);
 
