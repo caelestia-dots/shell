@@ -131,6 +131,16 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
 
+            text: Tr.tr("Blur")
+            subtext: Tr.tr("Blur shell surfaces")
+            disabled: !Tokens.transparency.enabled
+            checked: Tokens.transparency.blurEnabled
+            onToggled: GlobalConfig.appearance.transparency.blurEnabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+
             last: true
             text: Tr.tr("Dark theme")
             checked: Colours.mode === ColoursImpl.Dark
