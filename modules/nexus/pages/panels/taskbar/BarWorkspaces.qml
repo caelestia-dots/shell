@@ -74,6 +74,14 @@ PageBase {
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
         }
 
+        ToggleRow {
+            text: Tr.trCtx("Application icons", "bar workspaces")
+            subtext: Tr.tr("Show application icons instead of category symbols")
+            checked: Config.bar.workspaces.showAppIcons
+            disabled: Config.bar.workspaces.maxWindowIcons <= 0 || !(Config.bar.workspaces.showWindows || Config.bar.workspaces.showWindowsOnSpecialWorkspaces)
+            onToggled: GlobalConfig.bar.workspaces.showAppIcons = checked
+        }
+
         StepperRow {
             last: true
             // TRANSLATORS: maximum number of window icons shown per workspace
