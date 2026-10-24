@@ -13,6 +13,13 @@ Item {
     readonly property int spacing: Tokens.spacing.small
     property bool flag
 
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: Tokens.sizes.utilities.toastWidth - Tokens.padding.medium * 2
+
     function shouldShowToast(toast: Toast): bool {
         if (!Notifs.hasFullscreen())
             return true;
@@ -23,7 +30,9 @@ Item {
         return false;
     }
 
-    implicitWidth: Tokens.sizes.utilities.toastWidth - Tokens.padding.medium * 2
+    visible: implicitHeight > 0 && !layoutHidden
+
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     implicitHeight: {
         let h = -spacing;
         for (let i = 0; i < repeater.count; i++) {
