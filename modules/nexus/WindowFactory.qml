@@ -11,8 +11,14 @@ import qs.modules.nexus
 Singleton {
     id: root
 
+    // Track open Nexus window to prevent duplicates
+    property var openWindow: null
+
     function create(parent: Item, props: var): void {
-        nexusComp.createObject(parent ?? dummy, props);
+        if (root.openWindow)
+            return;
+        const win = nexusComp.createObject(parent ?? dummy, props);
+        root.openWindow = win;
     }
 
     QtObject {
@@ -28,11 +34,6 @@ Singleton {
             color: Colours.tPalette.m3surface
             surfaceFormat.opaque: false
 
-            onVisibleChanged: {
-                if (!visible)
-                    destroy();
-            }
-
             implicitWidth: nexus.implicitWidth
             implicitHeight: nexus.implicitHeight
 
@@ -43,6 +44,11 @@ Singleton {
             contentItem.Tokens.screen: screen.name
 
             title: Tr.tr("Nexus — %1").arg(PageRegistry.pages[nexus.nState.currentPageIdx].label)
+
+            Component.onDestruction: {
+                if (WindowFactory.openWindow === win)
+                    WindowFactory.openWindow = null;
+            }
 
             Nexus {
                 id: nexus
