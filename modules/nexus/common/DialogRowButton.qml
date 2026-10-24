@@ -5,10 +5,10 @@ import QtQuick.Layouts
 import Caelestia.Blobs
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
-import qs.services
 
 Item {
     id: root
@@ -45,7 +45,7 @@ Item {
     BlobGroup {
         id: blobGroup
 
-        color: root.open ? Colours.palette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainer
+        color: root.open ? Colours.palette.surfaceContainerHighest : Colours.tPalette.surfaceContainer
 
         Behavior on color {
             CAnim {}
@@ -191,7 +191,7 @@ Item {
                         active: root.separateContent
                         sourceComponent: StyledRect {
                             implicitHeight: 1
-                            color: Colours.palette.m3outline
+                            color: Colours.palette.outline
                         }
                     }
 
@@ -209,7 +209,7 @@ Item {
                         active: root.separateContent
                         sourceComponent: StyledRect {
                             implicitHeight: 1
-                            color: Colours.palette.m3outline
+                            color: Colours.palette.outline
                         }
                     }
 

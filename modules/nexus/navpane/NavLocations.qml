@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
-import qs.services
 import qs.modules.nexus
 
 VerticalFadeFlickable {
@@ -50,7 +50,7 @@ VerticalFadeFlickable {
                     return h % 2 === 0 ? h : h + 1;
                 }
 
-                color: isCurrentPage ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                color: isCurrentPage ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2)
 
                 topLeftRadius: stateLayer.pressed ? Tokens.rounding.medium : isCurrentPage ? Tokens.rounding.extraLargeIncreased : isCategoryStart ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
                 topRightRadius: stateLayer.pressed ? Tokens.rounding.medium : isCurrentPage ? Tokens.rounding.extraLargeIncreased : isCategoryStart ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
@@ -88,14 +88,14 @@ VerticalFadeFlickable {
                         implicitWidth: height
 
                         radius: Tokens.rounding.full
-                        color: item.isCurrentPage ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+                        color: item.isCurrentPage ? Colours.palette.primary : Colours.palette.secondaryContainer
 
                         MaterialIcon {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: 1
 
                             text: item.modelData.icon
-                            color: item.isCurrentPage ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                            color: item.isCurrentPage ? Colours.palette.onPrimary : Colours.palette.onSecondaryContainer
                             fontStyle: Tokens.font.icon.builders.medium.weight(Font.Medium).build()
                             grade: 25
                             fill: item.modelData.noFill ? 0 : 1
@@ -116,7 +116,7 @@ VerticalFadeFlickable {
                         StyledText {
                             Layout.fillWidth: true
                             text: item.modelData.description
-                            color: Colours.palette.m3onSurfaceVariant
+                            color: Colours.palette.onSurfaceVariant
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                         }

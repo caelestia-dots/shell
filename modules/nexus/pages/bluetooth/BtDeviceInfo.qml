@@ -6,9 +6,9 @@ import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -59,8 +59,8 @@ PageBase {
                 shapeMorph: true
                 isRound: true
 
-                inactiveColour: Colours.palette.m3errorContainer
-                inactiveOnColour: Colours.palette.m3onErrorContainer
+                inactiveColour: Colours.palette.errorContainer
+                inactiveOnColour: Colours.palette.onErrorContainer
 
                 implicitWidth: forgetBtnLayout.implicitWidth + Tokens.padding.extraLarge * 2
                 implicitHeight: forgetBtnLayout.implicitHeight + Tokens.padding.medium * 2
@@ -98,8 +98,8 @@ PageBase {
                 shapeMorph: true
                 isRound: true
 
-                inactiveColour: Colours.palette.m3primaryContainer
-                inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                inactiveColour: Colours.palette.primaryContainer
+                inactiveOnColour: Colours.palette.onPrimaryContainer
                 stateLayer.disabled: root.loading
 
                 implicitWidth: connectBtnContent.implicitWidth + Tokens.padding.extraLarge * 2
@@ -212,7 +212,7 @@ PageBase {
 
                     StyledText {
                         text: root.device?.batteryAvailable ? Strings.percentOne(root.device.battery) : Tr.trCtx("Unavailable", "bluetooth device state")
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
                         font: Tokens.font.body.small
                     }
                 }
@@ -252,7 +252,7 @@ PageBase {
 
                 StyledText {
                     text: root.device?.address ?? ""
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.body.small
                 }
             }

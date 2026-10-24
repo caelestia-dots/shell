@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -95,7 +96,7 @@ Item {
                         Layout.topMargin: (pathBounds().height - implicitSize) / 2
                         Layout.bottomMargin: (pathBounds().height - implicitSize) / 2 + Tokens.spacing.small
                         Layout.alignment: Qt.AlignHCenter
-                        color: Colours.palette.m3primaryContainer
+                        color: Colours.palette.primaryContainer
                         implicitSize: icon.implicitHeight + Tokens.padding.extraLarge * 2
                         shape: MaterialShape.ClamShell
 
@@ -109,7 +110,7 @@ Item {
                             anchors.centerIn: parent
                             text: "queue_music"
                             fontStyle: Tokens.font.icon.builders.large.scale(2).build()
-                            color: Colours.palette.m3onPrimaryContainer
+                            color: Colours.palette.onPrimaryContainer
                         }
                     }
 
@@ -121,7 +122,7 @@ Item {
 
                     StyledText {
                         text: Tr.tr("Play something for it to show up here!")
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                         font: Tokens.font.body.large
                     }
                 }

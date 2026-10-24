@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.services
 import qs.modules.launcher.items
 import qs.modules.launcher.services
 
@@ -70,7 +70,7 @@ StyledListView {
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
         radius: Tokens.rounding.large
-        color: Colours.palette.m3onSurface
+        color: Colours.palette.onSurface
         opacity: 0.08
 
         y: root.currentItem?.y ?? 0
@@ -83,11 +83,6 @@ StyledListView {
     }
 
     state: screenState.launcher ? requestedState : displayState
-
-    onStateChanged: {
-        if (state === "scheme" || state === "variant")
-            Schemes.reload();
-    }
 
     Component.onCompleted: displayText = search.text
 

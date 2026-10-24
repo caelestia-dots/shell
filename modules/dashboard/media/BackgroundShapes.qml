@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import M3Shapes
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -75,8 +76,8 @@ Item {
 
         implicitSize: root.minSize + (index / root.count) * (root.maxSize - root.minSize)
         shape: root.shapePool[Math.floor(Math.random() * root.shapePool.length)]
-        color: [Colours.palette.m3primaryContainer, Colours.palette.m3secondaryContainer, Colours.palette.m3tertiaryContainer, Colours.palette.m3outlineVariant][colourIdx]
-        opacity: Colours.light ? root.lightOpacities[colourIdx] : root.darkOpacities[colourIdx]
+        color: [Colours.palette.primaryContainer, Colours.palette.secondaryContainer, Colours.palette.tertiaryContainer, Colours.palette.outlineVariant][colourIdx]
+        opacity: Colours.mode === ColoursImpl.Light ? root.lightOpacities[colourIdx] : root.darkOpacities[colourIdx]
         rotation: root.rand(0, 360)
 
         Component.onCompleted: {

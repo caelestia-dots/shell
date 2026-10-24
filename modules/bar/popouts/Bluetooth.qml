@@ -6,9 +6,9 @@ import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 
 ColumnLayout {
@@ -57,7 +57,7 @@ ColumnLayout {
                 return Tr.trN("%n device available (%1 connected)", "%n devices available (%1 connected)", devices.length).arg(connected);
             return Tr.trN("%n device available", "%n devices available", devices.length);
         }
-        color: Colours.palette.m3onSurfaceVariant
+        color: Colours.palette.onSurfaceVariant
         font: Tokens.font.body.small
     }
 
@@ -109,7 +109,7 @@ ColumnLayout {
             MaterialIcon {
                 visible: device.modelData.state === BluetoothDeviceState.Connected
                 text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
-                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                color: device.modelData.batteryAvailable && device.modelData.battery < 0.2 ? Colours.palette.error : Colours.palette.onSurfaceVariant
             }
 
             StyledRect {
@@ -119,7 +119,7 @@ ColumnLayout {
                 implicitHeight: connectIcon.implicitHeight + Tokens.padding.extraSmall
 
                 radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0)
+                color: Qt.alpha(Colours.palette.primary, device.modelData.state === BluetoothDeviceState.Connected ? 1 : 0)
 
                 CircularIndicator {
                     anchors.fill: parent
@@ -127,7 +127,7 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.onPrimary : Colours.palette.onSurface
                     disabled: device.loading
                     onClicked: device.modelData.connected = !device.modelData.connected
                 }
@@ -138,7 +138,7 @@ ColumnLayout {
                     anchors.centerIn: parent
                     animate: true
                     text: device.modelData.connected ? "link_off" : "link"
-                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+                    color: device.modelData.state === BluetoothDeviceState.Connected ? Colours.palette.onPrimary : Colours.palette.onSurface
 
                     opacity: device.loading ? 0 : 1
 
@@ -175,8 +175,8 @@ ColumnLayout {
     IconTextButton {
         Layout.fillWidth: true
         Layout.topMargin: Tokens.spacing.medium
-        inactiveColour: Colours.palette.m3primaryContainer
-        inactiveOnColour: Colours.palette.m3onPrimaryContainer
+        inactiveColour: Colours.palette.primaryContainer
+        inactiveOnColour: Colours.palette.onPrimaryContainer
         verticalPadding: Tokens.padding.extraSmall
         text: Tr.tr("Open settings")
         icon: "settings"

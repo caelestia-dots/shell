@@ -4,10 +4,10 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
-import qs.services
 
 ListView {
     id: root
@@ -120,9 +120,9 @@ ListView {
                 item.radiusLerpProg: 1
                 placeholder.opacity: 0.1
                 elevation.opacity: 1
-                itemBg.color: Colours.palette.m3primaryContainer
-                dragIcon.color: Colours.palette.m3onPrimaryContainer
-                label.color: Colours.palette.m3onPrimaryContainer
+                itemBg.color: Colours.palette.primaryContainer
+                dragIcon.color: Colours.palette.onPrimaryContainer
+                label.color: Colours.palette.onPrimaryContainer
             }
         }
 
@@ -146,7 +146,7 @@ ListView {
             id: placeholder
 
             anchors.fill: parent
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             radius: Tokens.rounding.extraSmall
             topLeftRadius: item.topRadius
             topRightRadius: item.topRadius
@@ -246,7 +246,7 @@ ListView {
                 id: itemBg
 
                 anchors.fill: parent
-                color: Colours.tPalette.m3surfaceContainer
+                color: Colours.tPalette.surfaceContainer
                 radius: item.lerpRadius(Tokens.rounding.extraSmall, Tokens.rounding.large)
                 topLeftRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
                 topRightRadius: item.lerpRadius(item.topRadius, Tokens.rounding.large)
@@ -265,7 +265,7 @@ ListView {
                     radius: itemBg.radius
                     topLeftRadius: itemBg.topLeftRadius
                     topRightRadius: itemBg.topRightRadius
-                    color: Colours.palette.m3onSurface
+                    color: Colours.palette.onSurface
                     opacity: parent.containsMouse && !item.held ? 0.08 : 0
 
                     Behavior on opacity {
@@ -290,7 +290,7 @@ ListView {
                     id: dragIcon
 
                     text: "drag_indicator"
-                    color: Qt.alpha(Colours.palette.m3onSurfaceVariant, enabledSwitch.checked ? 1 : 0.5)
+                    color: Qt.alpha(Colours.palette.onSurfaceVariant, enabledSwitch.checked ? 1 : 0.5)
                     fontStyle: Tokens.font.icon.medium
                 }
 
@@ -299,7 +299,7 @@ ListView {
 
                     Layout.fillWidth: true
                     text: root.labelFor(item.modelData)
-                    color: Qt.alpha(Colours.palette.m3onSurface, enabledSwitch.checked ? 1 : 0.5)
+                    color: Qt.alpha(Colours.palette.onSurface, enabledSwitch.checked ? 1 : 0.5)
                     elide: Text.ElideRight
                 }
 
@@ -315,7 +315,7 @@ ListView {
                     type: IconButton.Text
                     isRound: true
                     icon: "delete"
-                    inactiveOnColour: Colours.palette.m3error
+                    inactiveOnColour: Colours.palette.error
                     font: Tokens.font.icon.medium
                     label.fill: 0
 

@@ -6,7 +6,6 @@ import Caelestia.Scheme
 import Caelestia.State
 import qs.components
 import qs.components.effects
-import qs.services
 
 Item {
     id: root
@@ -54,7 +53,7 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         y: Tokens.padding.large
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.tPalette.surfaceContainer
         radius: Tokens.rounding.large
 
         implicitWidth: Tokens.sizes.launcher.wallpaperWidth
@@ -63,7 +62,7 @@ Item {
         MaterialIcon {
             anchors.centerIn: parent
             text: "image"
-            color: Colours.tPalette.m3outline
+            color: Colours.tPalette.outline
             fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.DemiBold).build()
         }
 

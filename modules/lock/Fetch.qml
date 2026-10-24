@@ -6,9 +6,9 @@ import Quickshell.Services.UPower
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
-import qs.services
 import qs.utils
 
 StyledRect {
@@ -19,7 +19,7 @@ StyledRect {
 
     implicitHeight: layout.implicitHeight + layout.anchors.topMargin + layout.anchors.margins
     radius: Tokens.rounding.medium
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     ColumnLayout {
         id: layout
@@ -40,7 +40,7 @@ StyledRect {
                 implicitWidth: prompt.implicitWidth + Tokens.padding.medium * 2
                 implicitHeight: prompt.implicitHeight + Tokens.padding.small * 2
 
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
                 radius: Tokens.rounding.medium
 
                 MonoText {
@@ -48,7 +48,7 @@ StyledRect {
 
                     anchors.centerIn: parent
                     text: ">"
-                    color: Colours.palette.m3onPrimary
+                    color: Colours.palette.onPrimary
                 }
             }
 
@@ -172,7 +172,7 @@ StyledRect {
         ColouredIcon {
             source: SysInfo.osLogo
             implicitSize: height
-            colour: Colours.palette.m3primary
+            colour: Colours.palette.primary
             layer.enabled: Config.lock.recolourLogo
         }
     }

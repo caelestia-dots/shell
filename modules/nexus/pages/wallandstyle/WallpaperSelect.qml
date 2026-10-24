@@ -11,7 +11,6 @@ import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.filedialog
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -160,7 +159,7 @@ PageBase {
             visible: active
 
             sourceComponent: StyledRect {
-                color: Colours.tPalette.m3surfaceContainer
+                color: Colours.tPalette.surfaceContainer
                 radius: Tokens.rounding.extraLarge
                 implicitHeight: noWallsLayout.implicitHeight + Tokens.padding.extraExtraLarge * 2
 
@@ -173,14 +172,14 @@ PageBase {
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
                         text: "hide_image"
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
                         fontStyle: Tokens.font.icon.extraLarge
                     }
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
                         text: Tr.tr("No local wallpapers found")
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
                         font: Tokens.font.title.small
                     }
                 }

@@ -2,9 +2,9 @@ pragma Singleton
 
 import ".."
 import QtQuick
-import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.utils
 
 Searcher {
@@ -80,7 +80,7 @@ Searcher {
 
         function onClicked(list: AppList): void {
             list.screenState.launcher = false;
-            Quickshell.execDetached(["caelestia", "scheme", "set", "-v", variant]);
+            Colours.setScheme("dynamic", variant);
         }
     }
 }
