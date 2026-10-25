@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qlocale.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 
@@ -15,6 +16,7 @@ class Translator : public QObject {
 
     Q_PROPERTY(QStringList supportedLanguages READ supportedLanguages CONSTANT)
     Q_PROPERTY(QString language READ language WRITE setLanguageQml NOTIFY languageChanged)
+    Q_PROPERTY(QLocale locale READ locale NOTIFY languageChanged)
 
 public:
     explicit Translator(QObject* parent = nullptr);
@@ -23,6 +25,7 @@ public:
 
     [[nodiscard]] QStringList supportedLanguages() const;
     [[nodiscard]] QString language() const;
+    [[nodiscard]] QLocale locale() const;
     static void setLanguageQml(const QString& language);
 
     // NOLINTBEGIN(readability-identifier-naming)

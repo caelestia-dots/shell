@@ -42,7 +42,7 @@ QString resourceDir() {
 }
 
 // Substitutes the count into a plural form. `%n` is plain, `%Ln` is localised
-void substitutePercentN(QString& text, int n) {
+void substitutePercentN(QString& text, int n, const QLocale& locale) {
     qsizetype pos = 0;
     while ((pos = text.indexOf(u'%', pos)) >= 0) {
         auto len = 1;
@@ -55,7 +55,7 @@ void substitutePercentN(QString& text, int n) {
             continue;
         }
 
-        const auto count = localised ? QLocale().toString(n) : QString::number(n);
+        const auto count = localised ? locale.toString(n) : QString::number(n);
         text.replace(pos, len + 1, count);
         pos += count.size();
     }
@@ -85,6 +85,13 @@ QStringList Translator::supportedLanguages() const {
 
 QString Translator::language() const {
     return m_language;
+}
+
+QLocale Translator::locale() const {
+    const auto system = QLocale::system();
+    if (m_language.isEmpty() || system.name() == m_language || system.bcp47Name() == m_language)
+        return system;
+    return QLocale(m_language);
 }
 
 void Translator::setLanguageQml(const QString& language) {
@@ -292,7 +299,7 @@ QString Translator::translatePlural(const QString& text, const QString& plural, 
             result = translated;
     }
 
-    substitutePercentN(result, n);
+    substitutePercentN(result, n, locale());
     return result;
 }
 
