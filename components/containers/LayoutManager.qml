@@ -50,9 +50,7 @@ Item {
     // Narrower than this a panel is a sliver rather than a panel, so a cap this
     // small hides it instead of squeezing it. A 4px strip of notification card
     // reads as a rendering glitch, not as a layout result.
-    property int minWidth: 64
-
-    
+property int minWidth: 64
 
     property int passCount: 0
 
