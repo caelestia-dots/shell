@@ -92,7 +92,11 @@
     name = "caelestia-qml-plugin${lib.optionalString debug "-debug"}";
     src = lib.fileset.toSource {
       root = ./..;
-      fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin ./../scripts/trs.fish;
+      fileset = lib.fileset.unions [
+        ./../CMakeLists.txt
+        ./../plugin
+        ./../scripts/trs.fish
+      ];
     };
 
     nativeBuildInputs = [cmake ninja pkg-config fish gettext];
