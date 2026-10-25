@@ -95,19 +95,32 @@ RemoteCache::RemoteCache(QObject* parent)
     , m_meta(u"multimedia/remote/meta"_s, k_maxMetaBytes, k_version) {}
 
 QFuture<QUrl> RemoteCache::fetch(const QUrl& url) {
-    if (const auto it = m_pending.constFind(url); it != m_pending.cend())
-        return *it;
+    auto& waiters = m_pending[url];
+    QPromise<QUrl> promise;
+    promise.start();
+    auto future = promise.future();
+    waiters.push_back(std::move(promise));
 
-    auto future = m_meta.lookup(metaKeyFor(url))
-                      .then(this,
-                          [this, url](const QByteArray& data) {
-                              return resolve(url, Meta::deserialise(data));
-                          })
-                      .unwrap();
-    m_pending.insert(url, future);
-    future.then(this, [this, url](const QUrl&) {
-        m_pending.remove(url);
-    });
+    if (waiters.size() > 1)
+        return future;
+
+    m_meta.lookup(metaKeyFor(url))
+        .then(this,
+            [this, url](const QByteArray& data) {
+                return resolve(url, Meta::deserialise(data));
+            })
+        .unwrap()
+        .then(this, [this, url](const QUrl& file) {
+            const auto settled = m_pending.extract(url);
+            if (settled.empty())
+                return;
+
+            for (auto& p : settled.mapped()) {
+                p.addResult(file);
+                p.finish();
+            }
+        });
+
     return future;
 }
 
