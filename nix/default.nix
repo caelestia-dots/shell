@@ -5,6 +5,7 @@
   makeWrapper,
   makeFontsConf,
   fish,
+  gettext,
   ddcutil,
   brightnessctl,
   networkmanager,
