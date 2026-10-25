@@ -263,7 +263,7 @@ Item {
                                 return DesktopEntries.heuristicLookup(win.modelData.lastIpcObject.class)?.icon ?? "";
                             }
 
-                            implicitSize: Math.min(win.width, win.height)
+                            implicitSize: Math.round(fallbackIcon.fontInfo.pixelSize)
                             source: iconName ? Quickshell.iconPath(iconName, true) : ""
                             asynchronous: true
                             visible: status === Image.Ready
