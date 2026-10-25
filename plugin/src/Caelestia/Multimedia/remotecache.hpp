@@ -2,15 +2,18 @@
 
 #include <qdatetime.h>
 #include <qfuture.h>
-#include <qhash.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
 #include <qobject.h>
+#include <qpromise.h>
 #include <qset.h>
 #include <qstring.h>
 #include <qurl.h>
 
 #include <caelestia/utils/cache.hpp>
+
+#include <map>
+#include <vector>
 
 namespace caelestia::shell::multimedia {
 
@@ -52,7 +55,7 @@ private:
     utils::FileCache m_files;
     utils::BlobCache m_meta;
     QNetworkAccessManager m_manager;
-    QHash<QUrl, QFuture<QUrl>> m_pending;
+    std::map<QUrl, std::vector<QPromise<QUrl>>> m_pending;
     QSet<QUrl> m_revalidating;
 };
 
