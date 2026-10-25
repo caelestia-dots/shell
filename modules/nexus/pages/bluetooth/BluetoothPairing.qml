@@ -15,7 +15,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
+    readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
 
     function setScan(on: bool): void {
         if (adapter?.enabled)
@@ -75,7 +75,7 @@ PageBase {
             list.anchors.top: scanIndicator.bottom
 
             model: ScriptModel {
-                values: Bluetooth.devices.values.filter(d => !d.bonded).sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name)) // qmllint disable unresolved-type
+                values: Bluetooth.devices.values.filter(d => !d.bonded).sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name))
             }
 
             delegate: Item {

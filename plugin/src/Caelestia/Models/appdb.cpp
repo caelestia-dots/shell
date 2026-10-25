@@ -13,7 +13,7 @@ Q_LOGGING_CATEGORY(lcAppDb, "caelestia.appdb", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::models {
+namespace caelestia::shell::models {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -327,4 +327,4 @@ void AppDb::updateApps() {
     }
 }
 
-} // namespace caelestia::models
+} // namespace caelestia::shell::models

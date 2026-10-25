@@ -19,7 +19,7 @@ Item {
     Layout.preferredWidth: preview.implicitWidth + Tokens.padding.extraLargeIncreased
     Layout.fillHeight: true
 
-    StyledClippingRect {
+    ClipRect {
         id: preview
 
         anchors.horizontalCenter: parent.horizontalCenter
@@ -69,7 +69,7 @@ Item {
 
             anchors.centerIn: parent
 
-            captureSource: root.client?.wayland ?? null // qmllint disable unresolved-type
+            captureSource: root.client?.wayland ?? null
             live: true
 
             constraintSize.width: root.client ? parent.height * Math.min(root.screen.width / root.screen.height, root.client?.lastIpcObject.size[0] / root.client?.lastIpcObject.size[1]) : parent.height

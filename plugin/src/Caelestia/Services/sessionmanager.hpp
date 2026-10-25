@@ -10,7 +10,7 @@
 
 #include <optional>
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class SessionManager : public QObject {
     Q_OBJECT
@@ -67,4 +67,4 @@ private:
     QDBusUnixFileDescriptor m_lidSwitchLock;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

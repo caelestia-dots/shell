@@ -3,7 +3,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class NexusConfig : public settings::ObjectNode {
     CONFIG_NODE(NexusConfig, settings::ObjectNode)
@@ -13,4 +13,4 @@ class NexusConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(int, networkRescanInterval, 15000)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config
