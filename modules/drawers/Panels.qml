@@ -60,11 +60,11 @@ Item {
     Component.onCompleted: {
         LayoutManager.registerPanel(panelKeys.dashboard, dashboard, LayoutManager.priorityHigh, "none", "top");
         LayoutManager.registerPanel(panelKeys.launcher, launcher, LayoutManager.priorityHigh, "none", "bottom");
-        LayoutManager.registerPanel(panelKeys.osd, osd, LayoutManager.priorityHigh, "right", "none");
+        // LayoutManager.registerPanel(panelKeys.osd, osd, LayoutManager.priorityHigh, "right", "none");
         LayoutManager.registerPanel(panelKeys.session, session, LayoutManager.priorityHigh, "right", "none");
-        LayoutManager.registerPanel(panelKeys.notifications, notifications, LayoutManager.priorityMedium, "right", "top");
-        LayoutManager.registerPanel(panelKeys.sidebar, sidebar, LayoutManager.priorityMedium, "right", "none");
-        LayoutManager.registerPanel(panelKeys.utilities, utilities, LayoutManager.priorityMedium, "none", "bottom");
+        LayoutManager.registerPanel(panelKeys.notifications, notifications, LayoutManager.priorityLow, "right", "top");
+        LayoutManager.registerPanel(panelKeys.sidebar, sidebar, LayoutManager.priorityMedium, "right", "bottom");
+        LayoutManager.registerPanel(panelKeys.utilities, utilities, LayoutManager.priorityMedium, "right", "bottom");
         LayoutManager.registerPanel(panelKeys.popouts, popoutsWrapper, LayoutManager.priorityLow, "none", "none");
         LayoutManager.registerPanel(panelKeys.toasts, toasts, LayoutManager.priorityMedium, "none", "none");
 
@@ -106,6 +106,10 @@ Item {
 
     Connections {
         function onOffsetScaleChanged() {
+            LayoutManager.requestLayoutUpdate();
+        }
+
+        function onVisibleChanged() {
             LayoutManager.requestLayoutUpdate();
         }
 

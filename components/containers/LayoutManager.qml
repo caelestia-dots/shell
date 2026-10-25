@@ -52,10 +52,7 @@ Item {
     // reads as a rendering glitch, not as a layout result.
     property int minWidth: 64
 
-    // Flip to trace every pass. Off by default: the debounce timer fires on each
-    // frame of a drawer animation, so an always-on trace floods the journal.
-    // Silenced with QT_LOGGING_RULES="caelestia.layoutmanager.debug=false".
-    property bool debug: false
+    
 
     property int passCount: 0
 
@@ -92,8 +89,6 @@ Item {
     function unregisterPanel(key: string) {
         if (!(key in registry))
             return;
-        if (debug)
-            trace(`unregister ${key}`);
         resetPanel(registry[key]);
         delete registry[key];
     }
@@ -121,61 +116,24 @@ Item {
         }
         entries.sort((a, b) => b.priority - a.priority);
 
-        if (debug)
-            trace(`pass ${passCount} · ${Object.keys(registry).length} registered · ${entries.length} placed · ${skipped.length} skipped · spacing=${root.spacing}`);
-
         const placed = [];
         for (const entry of entries) {
             const base = baseRect(entry);
 
-            if (debug)
-                trace(`  place ${entry.key}  prio=${entry.priority}  edges=${entry.hEdge}/${entry.vEdge}  natural=${num(entry.panel.naturalWidth)}  base=${fmtRect(base)}`);
-
-            // Recomputed from zero every pass: a shift is only ever justified by a
-            // blocker present in this pass, so it unwinds on its own once the
-            // blocker goes away.
             const fit = resolve(entry, base, placed);
             const settled = apply(entry, fit.maxWidth, fit.shiftX, fit.shiftY);
-            if (debug) {
-                if (oscillating(entry, settled))
-                    trace(`    WARN ${entry.key} oscillating: ${entry.history.join(" → ")}`);
-                else
-                    trace(`  done  ${entry.key}  maxWidth=${num(settled.maxWidth)} shiftX=${num(settled.shiftX)} shiftY=${num(settled.shiftY)}  ${settled.hidden ? "hidden, no room" : settled.changed ? "changed" : "unchanged"}`);
-            }
-
-            // A panel with no room is not drawn, so it reserves nothing for the
-            // panels placed after it either.
-            if (!settled.hidden)
-                placed.push({
-                    key: entry.key,
-                    rect: resolvedRect(entry, base, fit.maxWidth, fit.shiftX, fit.shiftY)
-                });
-        }
-
-        if (debug) {
-            for (const entry of skipped)
-                trace(`  skip  ${entry.key}  ${skipReason(entry.panel)}`);
-            trace(`pass ${passCount} done`);
+            placed.push({
+                key: entry.key,
+                rect: resolvedRect(entry, base, fit.maxWidth, fit.shiftX, fit.shiftY)
+            });
         }
     }
 
-    // Nudges and caps for one panel against everything already placed this pass,
-    // least disruptive first: slide along the horizontal anchor, then the vertical
-    // one, and only then shrink.
-    //
-    // A nudge is accepted only once it has been checked to actually clear the
-    // blocker. A panel pinned to the far edge of the screen has nowhere to slide
-    // to when the blocker sits towards the middle, and taking the clamped nudge
-    // anyway would leave the panel overlapping while the pass still counted it as
-    // placed. Falling through to the cap is what makes a lower priority panel give
-    // way instead of being shoved into its neighbour.
     function resolve(entry, base: rect, placed: list<var>) {
         let maxWidth = Infinity;
         let shiftX = 0;
         let shiftY = 0;
 
-        // A sweep only ever tightens the result, so the number of blockers bounds
-        // the work; a sweep that changes nothing settles the panel.
         for (let sweep = 0; sweep <= placed.length; sweep++) {
             let changed = false;
 
@@ -191,8 +149,6 @@ Item {
                 if (dx !== null) {
                     const wanted = clampShiftX(entry, dx);
                     if (clears(entry, base, maxWidth, wanted, shiftY, blocker)) {
-                        if (debug)
-                            trace(`    vs ${other.key}  shiftX ${num(shiftX)} → ${num(wanted)}${wanted === dx ? "" : `  (clamped from ${num(dx)})`}`);
                         shiftX = wanted;
                         changed = true;
                         continue;
@@ -203,8 +159,6 @@ Item {
                 if (dy !== null) {
                     const wanted = clampShiftY(entry, dy);
                     if (clears(entry, base, maxWidth, shiftX, wanted, blocker)) {
-                        if (debug)
-                            trace(`    vs ${other.key}  shiftY ${num(shiftY)} → ${num(wanted)}${wanted === dy ? "" : `  (clamped from ${num(dy)})`}`);
                         shiftY = wanted;
                         changed = true;
                         continue;
@@ -213,8 +167,6 @@ Item {
 
                 const cap = capFor(entry, blocker, shiftX);
                 if (cap < maxWidth) {
-                    if (debug)
-                        trace(`    vs ${other.key}  cap ${num(maxWidth)} → ${num(cap)}  (no room to move)`);
                     maxWidth = cap;
                     changed = true;
                 }
@@ -240,11 +192,6 @@ Item {
 
     function apply(entry, maxWidth: real, shiftX: real, shiftY: real) {
         const panel = entry.panel;
-        // Less room than a panel can usefully occupy is no room: the cap would
-        // round to the same value it uses to mean "uncapped", and a sliver drawn
-        // over the panel that took the space is worse than no panel at all. The
-        // width is left uncapped underneath, which is what lets a later pass
-        // measure the panel and bring it back once the blocker is gone.
         const noRoom = maxWidth !== Infinity && maxWidth < root.minWidth;
         const width = noRoom || maxWidth === Infinity ? 0 : Math.floor(maxWidth);
         let changed = false;
@@ -254,9 +201,10 @@ Item {
             panel.layoutMaxWidth = width;
             changed = true;
         }
-        if (entry.hidden !== noRoom) {
-            entry.hidden = noRoom;
-            panel.layoutHidden = noRoom;
+
+        if (entry.hidden) {
+            entry.hidden = false;
+            panel.layoutHidden = false;
             changed = true;
         }
         if (entry.appliedX !== shiftX) {
@@ -272,7 +220,6 @@ Item {
 
         return {
             changed,
-            hidden: noRoom,
             maxWidth: width,
             shiftX,
             shiftY
@@ -407,62 +354,12 @@ Item {
         return !(a.y + a.height + gap <= b.y || b.y + b.height + gap <= a.y);
     }
 
-    // On-demand dump, for when a pass trace is too much noise: shows what is
-    // registered and what it is currently sitting at.
-    function dumpState() {
-        const keys = Object.keys(registry);
-        console.log(logCat, `[layout] ${keys.length} registered · ${root.passCount} passes · spacing=${root.spacing}`);
-        for (const key of keys) {
-            const e = registry[key];
-            console.log(logCat, `[layout]   ${key}  prio=${e.priority}  edges=${e.hEdge}/${e.vEdge}  natural=${num(e.panel.naturalWidth)}  applied=max ${num(e.appliedMaxWidth)} x ${num(e.appliedX)} y ${num(e.appliedY)}${e.hidden ? " hidden" : ""}  ${skipReason(e.panel)}`);
-        }
-    }
-
-    // Why a panel was left out of the pass. The usual answer is a drawer that is
-    // still fully collapsed, which is correct: an off-screen panel has no
-    // geometry worth reserving space for. `hidden` is not a reason: a panel this
-    // manager hid is measured anyway, so that it can be brought back.
-    function skipReason(panel) {
-        if (panel === null)
-            return "panel is null";
-        if (!panel.visible)
-            return "visible=false";
-        if (panel.Window === null)
-            return "not in a window yet";
-        if (panel.width <= 0 || panel.height <= 0)
-            return `collapsed ${Math.round(panel.width)}x${Math.round(panel.height)}`;
-        return "renderable";
-    }
-
-    // An A-B-A-B pattern across passes means two panels are trading a spot rather
-    // than settling, which no amount of further passing will fix. A history that
-    // never changes is the opposite: the panel is already settled.
-    function oscillating(entry, settled) {
-        const signature = `${settled.maxWidth}/${settled.shiftX}/${settled.shiftY}`;
-        entry.history.push(signature);
-        if (entry.history.length > 4)
-            entry.history.shift();
-        const n = entry.history.length;
-        return n >= 3 && entry.history[n - 1] === entry.history[n - 3] && entry.history[n - 1] !== entry.history[n - 2];
-    }
-
     function fmtRect(r) {
         return `${Math.round(r.x)},${Math.round(r.y)} ${Math.round(r.width)}x${Math.round(r.height)}`;
     }
 
     function num(value) {
         return value === Infinity ? "inf" : Math.round(value);
-    }
-
-    function trace(message) {
-        console.log(logCat, `[layout] ${message}`);
-    }
-
-    LoggingCategory {
-        id: logCat
-
-        name: "caelestia.layoutmanager"
-        defaultLogLevel: LoggingCategory.Debug
     }
 
     Timer {
