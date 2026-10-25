@@ -5,7 +5,7 @@
 #include "util/i18n.hpp"
 #include "codecs.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -198,4 +198,4 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
     }
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

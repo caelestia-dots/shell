@@ -5,7 +5,7 @@
 
 #include "tickingservice.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class Memory : public TickingService {
     Q_OBJECT
@@ -36,4 +36,4 @@ private:
     quint64 m_lastTotal = 0;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

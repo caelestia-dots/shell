@@ -17,7 +17,7 @@ Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfo
 
 } // namespace
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
@@ -204,4 +204,4 @@ void SessionManager::handleUnlockRequested() {
     emit unlockRequested();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

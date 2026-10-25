@@ -45,7 +45,7 @@ ColumnLayout {
 
             if (!Nmcli.wifiEnabled)
                 return Tr.trCtx("Off", "wireless disabled");
-            return Tr.trN("%n network", "%n networks", Nmcli.networks.length); // qmllint disable missing-property
+            return Tr.trN("%n network", "%n networks", Nmcli.networks.length);
         }
         active: root.wireless ? Nmcli.wifiEnabled : !!Nmcli.activeEthernet
         hasToggle: root.wireless

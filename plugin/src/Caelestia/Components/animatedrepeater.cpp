@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -469,4 +469,4 @@ void AnimatedRepeater::onDataChanged(
         updateItemData(i);
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

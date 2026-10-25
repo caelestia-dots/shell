@@ -17,7 +17,7 @@ ColumnLayout {
 
     required property PopoutState popouts
 
-    readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
+    readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
     readonly property bool adapterEnabled: adapter?.enabled ?? false
 
     spacing: Tokens.spacing.small
@@ -27,14 +27,14 @@ ColumnLayout {
         icon: {
             if (!root.adapterEnabled)
                 return "bluetooth_disabled";
-            return Bluetooth.devices.values.some(d => d.connected) ? "bluetooth_connected" : "bluetooth"; // qmllint disable unresolved-type
+            return Bluetooth.devices.values.some(d => d.connected) ? "bluetooth_connected" : "bluetooth";
         }
         title: Tr.tr("Bluetooth")
         subtitle: {
             if (!root.adapterEnabled)
                 return Tr.trCtx("Off", "bluetooth disabled");
 
-            const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
+            const devices = Bluetooth.devices.values;
             const connected = devices.filter(d => d.connected).length;
             if (connected > 0)
                 // TRANSLATORS: number of connected bluetooth devices
@@ -56,7 +56,7 @@ ColumnLayout {
         placeholderText: root.adapterEnabled ? Tr.tr("No devices found") : Tr.tr("Bluetooth disabled")
 
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5) // qmllint disable unresolved-type
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5)
         }
 
         delegate: ConnectionRow {
@@ -64,14 +64,14 @@ ColumnLayout {
 
             required property int index
             required property BluetoothDevice modelData
-            readonly property bool connecting: modelData.state === BluetoothDeviceState.Connecting // qmllint disable unresolved-type
-            readonly property bool disconnecting: modelData.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
+            readonly property bool connecting: modelData.state === BluetoothDeviceState.Connecting
+            readonly property bool disconnecting: modelData.state === BluetoothDeviceState.Disconnecting
 
             width: ListView.view.width
             first: index === 0
             last: index === ListView.view.count - 1
 
-            active: modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
+            active: modelData.state === BluetoothDeviceState.Connected
             loading: connecting || disconnecting
             warning: modelData.connected && modelData.batteryAvailable && modelData.battery < 0.2
             icon: Icons.getBluetoothIcon(modelData.icon)
