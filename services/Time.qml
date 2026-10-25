@@ -18,7 +18,7 @@ Singleton {
     readonly property string amPmStr: timeComponents[2] ?? ""
 
     function format(fmt: string): string {
-        return clock.date.toLocaleString(Qt.locale(), fmt);
+        return Tr.formatDateTime(clock.date, fmt);
     }
 
     SystemClock {
