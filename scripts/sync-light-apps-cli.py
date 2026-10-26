@@ -7,9 +7,11 @@ import argparse
 import json
 from pathlib import Path
 
+# Keep Kitty live-reload when syncing light-apps (do not wipe this hook).
 POST_HOOK = (
     'test -f "${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/force-apps-light" '
     '&& dconf write /org/gnome/desktop/interface/color-scheme "\'prefer-light\'"'
+    ' ; "$HOME/.config/caelestia/scripts/kitty-reload-colours.sh" || true'
 )
 
 

@@ -81,7 +81,8 @@ StyledRect {
             }
 
             SplitButton {
-                disabled: Recorder.running
+                // While recording the main chip must not re-fire start (toggle-stop race)
+                disabled: Recorder.running || Recorder.arming
 
                 active: menuItems.find(m => root.props.recordingMode === m.icon + m.text) ?? menuItems[0]
                 menu.onItemSelected: item => root.props.recordingMode = item.icon + item.text

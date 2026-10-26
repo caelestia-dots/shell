@@ -140,11 +140,28 @@ Singleton {
         return "";
     }
 
+    // Resolve a desktop/theme icon without returning a broken image:// that paints as magenta checkerboard.
+    // Empty string => caller should show a Material/vector fallback.
+    function resolveThemeIcon(iconName: string, fallback: string): string {
+        const name = iconName || "";
+        const fb = !fallback || fallback === "image-missing" ? "application-x-executable" : fallback;
+        if (!name)
+            return Quickshell.hasThemeIcon(fb) ? Quickshell.iconPath(fb) : "";
+        if (name.startsWith("file:") || name.startsWith("image:"))
+            return name;
+        if (name.startsWith("/"))
+            return `file://${name}`;
+        if (Quickshell.hasThemeIcon(name))
+            return Quickshell.iconPath(name);
+        if (Quickshell.hasThemeIcon(fb))
+            return Quickshell.iconPath(fb);
+        return "";
+    }
+
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
-        if (fallback !== "undefined")
-            return Quickshell.iconPath(icon, fallback);
-        return Quickshell.iconPath(icon);
+        const fb = fallback && fallback !== "undefined" ? fallback : "application-x-executable";
+        return root.resolveThemeIcon(icon || "", fb);
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {

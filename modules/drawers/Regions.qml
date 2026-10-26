@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.modules.bar as Bar
+import qs.modules.launcher.services
 
 Region {
     id: root
@@ -31,6 +32,16 @@ Region {
         panel: root.panels.launcher
         y: root.win.height - height
         height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
+    }
+
+    // Desktop edit dialog is centered on the full drawer; without this, clicks pass
+    // through the layer mask, clear the focus grab, and dismiss the launcher.
+    Region {
+        x: root.x
+        y: root.y
+        width: Apps.editingDesktop ? root.width : 0
+        height: Apps.editingDesktop ? root.height : 0
+        intersection: Intersection.Subtract
     }
 
     R {

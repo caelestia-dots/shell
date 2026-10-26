@@ -167,9 +167,27 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "clock"
                 delegate: EntryWrapper {
-                    Clock {
-                        objectName: "taskbarClock"
-                        popouts: root.popouts
+                    Column {
+                        objectName: "taskbarClockColumn"
+                        spacing: Tokens.spacing.medium
+
+                        Clock {
+                            objectName: "taskbarClock"
+                            popouts: root.popouts
+                        }
+
+                        // Persistent while recording — survives utilities panel closing on workspace switch
+                        Loader {
+                            active: Recorder.running
+                            visible: active
+                            asynchronous: false
+                            width: Tokens.sizes.bar.innerWidth
+
+                            sourceComponent: RecordingIndicator {
+                                objectName: "taskbarRecording"
+                                screenState: root.screenState
+                            }
+                        }
                     }
                 }
             }

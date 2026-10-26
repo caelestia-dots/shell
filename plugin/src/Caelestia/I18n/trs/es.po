@@ -1423,6 +1423,46 @@ msgstr "Coincide con una expresión regular en hiddenApps: edita el archivo de c
 msgid "Hide from the launcher"
 msgstr "Ocultar del lanzador"
 
+#: modules/launcher/items/AppItem.qml
+msgid "Edit application…"
+msgstr "Editar aplicación…"
+
+#: modules/launcher/items/AppItem.qml
+msgid "Add to favourites"
+msgstr "Añadir a favoritos"
+
+#: modules/launcher/items/AppItem.qml
+msgid "Remove from favourites"
+msgstr "Quitar de favoritos"
+
+#: modules/launcher/items/AppItem.qml
+msgid "Reset customization"
+msgstr "Restablecer personalización"
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Edit application"
+msgstr "Editar aplicación"
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Application name"
+msgstr "Nombre de la aplicación"
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Description"
+msgstr "Descripción"
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Theme name or file path"
+msgstr "Nombre del tema o ruta de archivo"
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Choose icon"
+msgstr "Elegir icono"
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Images"
+msgstr "Imágenes"
+
 #: modules/nexus/pages/apps/AppInfo.qml
 msgid "Details"
 msgstr "Detalles"

@@ -12,6 +12,7 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.modules.bar
+import qs.modules.launcher.services
 
 StyledWindow {
     id: root
@@ -125,7 +126,9 @@ StyledWindow {
         }
         windows: [root]
         onCleared: {
-            root.screenState.launcher = false;
+            // Keep launcher up while the centered desktop-edit dialog is open
+            if (!Apps.editingDesktop)
+                root.screenState.launcher = false;
             root.screenState.session = false;
             root.screenState.sidebar = false;
             root.screenState.dashboard = false;

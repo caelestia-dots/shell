@@ -12,24 +12,44 @@ Singleton {
     readonly property alias paused: props.paused
     readonly property alias elapsed: props.elapsed
     property int refCount: 0
-    property bool needsStart
-    property list<string> startArgs
-    property bool needsStop
-    property bool needsPause
+    property bool arming
+
+    readonly property string startScript: `${Quickshell.shellDir}/scripts/record-start.sh`
 
     function start(extraArgs = []): void {
-        needsStart = true;
-        startArgs = extraArgs;
-        checkProc.running = true;
+        if (props.running || root.arming)
+            return;
+
+        root.arming = true;
+        // Detached: must not be tied to the utilities panel Process lifetime
+        Quickshell.execDetached([root.startScript, ...extraArgs]);
+        props.running = true;
+        props.paused = false;
+        props.elapsed = 0;
+
+        // Confirm pid shortly after start; clear arming either way
+        armingTimer.restart();
+        checkTimer.restart();
     }
 
     function stop(): void {
-        needsStop = true;
-        checkProc.running = true;
+        if (!props.running && !root.arming)
+            return;
+        root.arming = false;
+        Quickshell.execDetached(["caelestia", "record"]);
+        props.running = false;
+        props.paused = false;
+        checkTimer.restart();
     }
 
     function togglePause(): void {
-        needsPause = true;
+        if (!props.running)
+            return;
+        Quickshell.execDetached(["caelestia", "record", "-p"]);
+        props.paused = !props.paused;
+    }
+
+    function syncFromSystem(): void {
         checkProc.running = true;
     }
 
@@ -38,7 +58,7 @@ Singleton {
 
         property bool running: false
         property bool paused: false
-        property real elapsed: 0 // Might get too large for int
+        property real elapsed: 0
 
         reloadableId: "recorder"
     }
@@ -46,53 +66,45 @@ Singleton {
     Process {
         id: checkProc
 
-        running: true
         command: ["pidof", "gpu-screen-recorder"]
         onExited: code => {
-            const running = code === 0;
+            const alive = code === 0;
+            if (root.arming && alive)
+                root.arming = false;
 
-            if (running && root.needsStop) {
-                commandProc.exec(["caelestia", "record"]);
-                props.running = false;
-                props.paused = false;
-            } else if (running && root.needsPause) {
-                commandProc.exec(["caelestia", "record", "-p"]);
-                props.paused = !props.paused;
-            } else if (!running && root.needsStart) {
-                commandProc.exec(["caelestia", "record", ...root.startArgs]);
-                props.running = true;
-                props.paused = false;
-                props.elapsed = 0;
-            } else if (running !== props.running && !commandProc.running) {
-                // The recording was started/stopped outside the shell (e.g. via
-                // keybind), or our command finished without reaching the optimistic state
-                props.running = running;
-                props.paused = false;
-                props.elapsed = 0;
+            if (alive === props.running)
+                return;
+
+            // External start/stop (keybind) or start failed
+            if (!root.arming) {
+                props.running = alive;
+                if (!alive) {
+                    props.paused = false;
+                    props.elapsed = 0;
+                }
+            } else if (!alive) {
+                // Still arming and no process yet — keep optimistic running until armingTimer ends
             }
-
-            root.needsStart = false;
-            root.needsStop = false;
-            root.needsPause = false;
         }
     }
 
-    Process {
-        id: commandProc
+    Timer {
+        id: armingTimer
 
-        // The command owns the transition: `caelestia record` blocks on slurp for
-        // region captures, and waits for the recorder to finalise the file when
-        // stopping. Reconcile once it has actually finished.
-        onExited: checkProc.running = true
+        interval: 2500
+        onTriggered: {
+            root.arming = false;
+            checkProc.running = true;
+        }
     }
 
-    // Only poll while something is showing the state, i.e. the utilities drawer is open
     Timer {
-        interval: 1000
-        running: root.refCount > 0
+        id: checkTimer
+
+        interval: 800
+        running: props.running || root.arming || root.refCount > 0
         repeat: true
         triggeredOnStart: true
-
         onTriggered: checkProc.running = true
     }
 

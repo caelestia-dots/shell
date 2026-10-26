@@ -11,11 +11,13 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | Área | Qué ganas |
 | --- | --- |
 | **Activities** | Espacios de trabajo agrupados (Casa / Trabajo / Juegos…), overview, estilo por actividad |
-| **Barra** | Pills de actividades, iconos de apps en workspaces, tray y status más claros |
+| **Barra** | Pills de actividades, iconos de apps en workspaces, indicador **REC**, tray y status más claros |
 | **Reloj** | Popout con calendario + temporizadores (con sonido y persistencia) |
+| **Grabación** | Captura de pantalla estable (no se corta al salir del panel); indicador en la barra |
 | **Notificaciones** | Clic → enfoca la app / ventana relacionada |
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
-| **Launcher** | Se abre al llevar el puntero al borde inferior (centrado), además del atajo |
+| **Launcher** | Hover inferior, clic derecho para editar `.desktop` (nombre / descripción / icono) |
+| **Kitty** | Paleta alineada con la activity activa (plantilla + recarga en vivo) |
 | **Atajos** | Remapeables desde Nexus; atajos de activities incluidos |
 
 ---
@@ -35,7 +37,7 @@ Sistema opcional (activado por defecto en este fork) que agrupa desktops de Hypr
 - Atajo por defecto: **Super + Tab** (remapeable).
 - Vista a pantalla completa de todas las actividades y sus desktops.
 - Clic en un desktop para ir a él.
-- Arrastra ventanas entre desktops.
+- Arrastra ventanas entre desktops (también entre activities); al soltar se enfoca el destino y se aplica su look.
 - Apps **ancladas (pinned)** no se arrastran y muestran un icono de pin.
 - Cierra con Escape o clic fuera.
 
@@ -91,6 +93,44 @@ require("caelestia-activity-rules")  -- reglas de activities / pins (Nexus → S
 - Se cierra al sacar el puntero (como el dashboard), con Escape, al elegir una app, o al perder el foco.
   Si lo abriste con el atajo, se mantiene hasta Escape / elegir app (igual que el resto de paneles por tecla).
 - Se puede desactivar el hover en **Nexus → Panels → Launcher → Show on hover**.
+- **Clic derecho** sobre una app: menú contextual (un solo menú abierto a la vez) con:
+  - Editar nombre / descripción / icono (diálogo centrado; el launcher no se cierra al editar)
+  - Override guardado en `~/.local/share/applications`
+  - Favoritos, ocultar o restablecer la personalización
+
+---
+
+## Grabación de pantalla
+
+- Card de **Screen recorder** en el panel de utilities (fullscreen / región, con o sin audio).
+- El arranque va **desacoplado** del ciclo de vida del panel (`scripts/record-start.sh`), así la captura **no se aborta** al sacar el ratón del panel o al cambiar de desktop.
+- Mientras grabas, utilities/sidebar **permanecen abiertos** al salir el puntero (evita teardowns mid-capture).
+- Indicador **REC** / **PAUSE** bajo el reloj en la barra mientras hay grabación activa.
+- El chip principal del recorder no re-dispara start mientras ya está grabando (evita toggle-stop accidental).
+
+---
+
+## Kitty y colores de la activity
+
+Kitty no es un target nativo de Caelestia; este fork lo integra así:
+
+1. Plantilla de usuario: `~/.config/caelestia/templates/kitty.conf` (variables `{{ surface.hex }}`, `{{ term0.hex }}`, …).
+2. Generada en: `~/.local/state/caelestia/theme/kitty.conf`.
+3. En `~/.config/kitty/kitty.conf`:
+
+```conf
+include ~/.local/state/caelestia/theme/kitty.conf
+allow_remote_control yes
+listen_on unix:${XDG_RUNTIME_DIR}/kitty-{kitty_pid}.sock
+```
+
+4. Recarga en vivo al cambiar wallpaper / esquema / activity:
+   - `~/.config/caelestia/scripts/kitty-reload-colours.sh`
+   - Hook en `cli.json` (`theme.postHook` / `wallpaper.postHook`)
+   - `scripts/caelestia-quiet.py` (usado por la shell) llama a esa recarga tras aplicar colores
+5. En zsh (ventanas nuevas): `cat ~/.local/state/caelestia/sequences.txt` en `~/.zshrc`.
+
+Tras el primer arranque de Kitty con `listen_on`, al cambiar de activity (barra, atajos u overview) la paleta de las ventanas abiertas se actualiza sola.
 
 ---
 
@@ -124,6 +164,8 @@ El reloj lleva siempre la pastilla de fondo; al hover se resalta como el resto d
 - **Tray**: muestra también ítems en estado Passive (p. ej. Teams en idle); highlight al hover / menú abierto; tamaño de icono estable.
 - **Status icons**: pastilla al hover como el tray; en PC de sobremesa se oculta el icono de batería.
 - **Popouts** de status un poco más anchos para que no se recorten.
+- **Reloj** centrado de forma estable en el slot de la barra.
+- Indicador de **grabación** bajo el reloj (ver sección anterior).
 - En escritorio sin batería: perfil de energía forzado a Performance; controles de perfil solo en portátil.
 
 ---
@@ -155,5 +197,6 @@ Cámbialos en **Nexus → Keyboard & mouse**.
 ## Notas
 
 - Esto es un **fork**: no sustituye la documentación de instalación de upstream ([README](./README.md)).
+- Historial de cambios recientes: [CHANGELOG.md](./CHANGELOG.md).
 - Algunas piezas siguen en evolución; si algo no aparece tras actualizar, reinicia la shell (`caelestia shell -r`) y comprueba los `require(...)` de Hyprland.
-- Script opcional de desarrollo: `scripts/caelestia-quiet.py` (CLI de tema más silenciosa); no forma parte de la UI diaria.
+- `scripts/caelestia-quiet.py` evita spamear OSC a todos los PTY al cambiar el tema (y recarga Kitty); lo usa la shell al aplicar wallpaper/esquema por activity.

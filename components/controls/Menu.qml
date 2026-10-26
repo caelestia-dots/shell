@@ -44,7 +44,17 @@ MouseArea {
     enabled: expanded
     hoverEnabled: expanded
     cursorShape: expanded ? Qt.ArrowCursor : undefined
+    // Left click outside dismisses; right click passes through so another item can open its menu
+    acceptedButtons: Qt.LeftButton
     onClicked: expanded = false
+    z: expanded ? 1000 : 0
+
+    onExpandedChanged: {
+        if (expanded)
+            Menus.activate(root);
+        else
+            Menus.deactivate(root);
+    }
 
     opacity: expanded ? 1 : 0
     layer.enabled: opacity < 1
@@ -99,6 +109,7 @@ MouseArea {
 
         MouseArea {
             anchors.fill: parent
+            acceptedButtons: Qt.NoButton
             hoverEnabled: true
             onWheel: e => e.accepted = true
         }
@@ -143,22 +154,6 @@ MouseArea {
                             Anim {}
                         }
 
-                        StateLayer {
-                            topLeftRadius: parent.topLeftRadius
-                            topRightRadius: parent.topRightRadius
-                            bottomLeftRadius: parent.bottomLeftRadius
-                            bottomRightRadius: parent.bottomRightRadius
-
-                            color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
-                            disabled: !root.expanded
-                            onClicked: {
-                                root.itemSelected(item.modelData);
-                                root.active = item.modelData;
-                                item.modelData.clicked();
-                                root.expanded = false;
-                            }
-                        }
-
                         RowLayout {
                             id: menuOptionRow
 
@@ -189,6 +184,45 @@ MouseArea {
                                     text: item.modelData.trailingIcon
                                     color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurfaceVariant
                                 }
+                            }
+                        }
+
+                        StateLayer {
+                            id: stateLayerVisual
+
+                            z: 1
+                            topLeftRadius: parent.topLeftRadius
+                            topRightRadius: parent.topRightRadius
+                            bottomLeftRadius: parent.bottomLeftRadius
+                            bottomRightRadius: parent.bottomRightRadius
+
+                            color: item.active ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSurface
+                            disabled: true
+                            manualHoverOverride: clickArea.containsMouse
+                            manualPressOverride: clickArea.pressed
+                        }
+
+                        // Empty hit target above icon/text — no children that can steal events
+                        MouseArea {
+                            id: clickArea
+
+                            anchors.fill: parent
+                            z: 2
+                            enabled: root.expanded
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onPressed: e => stateLayerVisual.press(e.x, e.y)
+                            onClicked: {
+                                const selected = item.modelData;
+                                root.itemSelected(selected);
+                                root.active = selected;
+                                // Invoke action before closing — collapsing first lets the
+                                // click fall through to widgets underneath (e.g. SplitButton
+                                // re-firing the same action, which toggles record off).
+                                selected.clicked();
+                                Qt.callLater(() => {
+                                    root.expanded = false;
+                                });
                             }
                         }
                     }

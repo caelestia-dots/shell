@@ -6,6 +6,8 @@ import qs.components
 import qs.components.controls
 import qs.modules.bar as Bar
 import qs.modules.bar.popouts as BarPopouts
+import qs.modules.launcher.services
+import qs.services
 
 CustomMouseArea {
     id: root
@@ -77,7 +79,9 @@ CustomMouseArea {
             if (!dashboardShortcutActive)
                 screenState.dashboard = false;
 
-            if (!utilitiesShortcutActive)
+            // Keep utilities/sidebar open while recording — closing the panel was
+            // tearing down UI mid-capture and aborting gpu-screen-recorder.
+            if (!utilitiesShortcutActive && !Recorder.running && !Recorder.arming)
                 screenState.utilities = false;
 
             if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
@@ -88,12 +92,12 @@ CustomMouseArea {
             if (Config.bar.showOnHover)
                 bar.isHovered = false;
 
-            // Close sidebar on leave unless opened by shortcut (Super+N)
-            if (!sidebarShortcutActive)
+            // Close sidebar on leave unless opened by shortcut (Super+N) or recording
+            if (!sidebarShortcutActive && !Recorder.running && !Recorder.arming)
                 screenState.sidebar = false;
 
-            // Close launcher on leave unless opened by shortcut (e.g. Alt+Space)
-            if (Config.launcher.showOnHover && !launcherShortcutActive)
+            // Close launcher on leave unless opened by shortcut or desktop edit dialog
+            if (Config.launcher.showOnHover && !launcherShortcutActive && !Apps.editingDesktop)
                 screenState.launcher = false;
         }
     }
@@ -209,10 +213,14 @@ CustomMouseArea {
         // Show/hide launcher on hover, or show/hide on drag if hover is disabled
         if (Config.launcher.showOnHover) {
             const showLauncher = inBottomPanel(panels.launcher, x, y);
-            if (!launcherShortcutActive)
+            if (Apps.editingDesktop) {
+                // Keep launcher open while the centered edit dialog has focus/hover
+                screenState.launcher = true;
+            } else if (!launcherShortcutActive) {
                 screenState.launcher = showLauncher;
-            else if (showLauncher)
+            } else if (showLauncher) {
                 launcherShortcutActive = false;
+            }
         } else if (pressed && inBottomPanel(panels.launcher, dragStart.x, dragStart.y) && withinPanelWidth(panels.launcher, x, y)) {
             if (dragY < -Config.launcher.dragThreshold)
                 screenState.launcher = true;
@@ -246,8 +254,8 @@ CustomMouseArea {
 
         if (!sidebarShortcutActive) {
             screenState.sidebar = showNotifsCorner || (screenState.sidebar && overNotifsPanel);
-            // Avoid utilities-only panel stealing the corner
-            if (showNotifsCorner)
+            // Avoid utilities-only panel stealing the corner (but not while recording)
+            if (showNotifsCorner && !Recorder.running && !Recorder.arming)
                 screenState.utilities = false;
         } else if (showNotifsCorner || overNotifsPanel) {
             sidebarShortcutActive = false;

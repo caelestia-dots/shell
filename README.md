@@ -14,9 +14,10 @@ https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
 > [!IMPORTANT]
 > **Este repositorio es un fork** de [caelestia-dots/shell](https://github.com/caelestia-dots/shell) con extras
-> (activities, popout del reloj con timers, focus desde notificaciones, página Shell en Nexus, etc.).
+> (activities + overview drag&drop, launcher con edición de `.desktop`, grabación estable con indicador REC,
+> timers en el reloj, focus desde notificaciones, Kitty alineado al esquema de la activity, página Shell en Nexus, etc.).
 >
-> Para usuarios finales: lee **[FEATURES.md](./FEATURES.md)** — qué incluye y cómo usarlo.
+> Para usuarios finales: **[FEATURES.md](./FEATURES.md)** (qué incluye y cómo usarlo) y **[CHANGELOG.md](./CHANGELOG.md)** (cambios recientes).
 > La instalación y la configuración base siguen documentadas abajo (upstream).
 
 ## Components
@@ -1050,6 +1051,10 @@ Set a wallpaper via `>wallpaper` in the launcher or `caelestia wallpaper`, and s
 caelestia wallpaper -f <path_to_wallpaper>
 caelestia scheme set -n dynamic
 ```
+
+In this fork, each **activity** can keep its own wallpaper/scheme. Switching activity (bar, keybinds, or overview)
+re-applies that look. For **Kitty** to follow the same palette (including open windows), see the Kitty section in
+[FEATURES.md](./FEATURES.md).
 
 ### My wallpapers aren't showing up in the launcher!
 

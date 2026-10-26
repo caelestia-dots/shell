@@ -18,6 +18,7 @@ Item {
 
     readonly property int padding: Tokens.padding.large
     readonly property int rounding: Tokens.rounding.extraLarge
+    readonly property bool editingDesktop: editDialog.open
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
@@ -84,9 +85,17 @@ Item {
         Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
         Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
 
-        Keys.onEscapePressed: root.screenState.launcher = false
+        Keys.onEscapePressed: {
+            if (editDialog.open)
+                editDialog.close();
+            else
+                root.screenState.launcher = false;
+        }
 
         Keys.onPressed: event => {
+            if (editDialog.open)
+                return;
+
             if (!GlobalConfig.launcher.vimKeybinds)
                 return;
 
@@ -111,8 +120,11 @@ Item {
 
         Connections {
             function onLauncherChanged(): void {
-                if (!root.screenState.launcher)
+                if (!root.screenState.launcher) {
                     search.text = "";
+                    if (editDialog.open)
+                        editDialog.close();
+                }
             }
 
             function onSessionChanged(): void {
@@ -121,6 +133,19 @@ Item {
             }
 
             target: root.screenState
+        }
+    }
+
+    DesktopEditDialog {
+        id: editDialog
+        // Reparents itself to the drawer interaction wrapper for full-size browse UI
+    }
+
+    Connections {
+        target: Apps
+
+        function onEditRequested(entry: var): void {
+            editDialog.show(entry);
         }
     }
 }

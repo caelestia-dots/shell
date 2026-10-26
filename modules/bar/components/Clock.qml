@@ -43,39 +43,47 @@ MouseArea {
     ColumnLayout {
         id: layout
 
-        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
         spacing: Tokens.spacing.extraSmall
 
         Loader {
+            Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
             active: Config.bar.clock.showIcon
             visible: active
 
             sourceComponent: MaterialIcon {
+                anchors.horizontalCenter: parent.horizontalCenter
                 text: "calendar_month"
                 color: root.colour
             }
         }
 
         Loader {
+            Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
             active: Config.bar.clock.showDate
             visible: active
 
             sourceComponent: ColumnLayout {
+                width: layout.width
                 spacing: layout.spacing - 4
 
                 StyledText {
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
                     text: Time.format("ddd")
                     font: Tokens.font.body.builders.small.scale(0.9).build()
                     color: root.colour
                 }
 
                 StyledText {
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
                     text: Time.format("d")
                     font: root.font.scale(1.1).build()
                     color: root.colour
@@ -83,8 +91,8 @@ MouseArea {
 
                 StyledRect {
                     Layout.fillWidth: true
-                    Layout.leftMargin: -Tokens.padding.extraSmall
-                    Layout.rightMargin: -Tokens.padding.extraSmall
+                    Layout.leftMargin: Tokens.padding.extraSmall
+                    Layout.rightMargin: Tokens.padding.extraSmall
                     Layout.topMargin: 4
                     Layout.bottomMargin: Tokens.padding.extraSmall / 2
                     implicitHeight: 1
@@ -94,7 +102,8 @@ MouseArea {
         }
 
         StyledText {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             text: Time.hourStr
             font: root.fontFor(text, hourMetrics.width)
             color: root.colour
@@ -108,8 +117,9 @@ MouseArea {
         }
 
         StyledText {
+            Layout.fillWidth: true
             Layout.topMargin: -parent.spacing - 4
-            Layout.alignment: Qt.AlignHCenter
+            horizontalAlignment: Text.AlignHCenter
             text: Time.minuteStr
             font: root.fontFor(text, minMetrics.width)
             color: root.colour
@@ -123,6 +133,7 @@ MouseArea {
         }
 
         Loader {
+            Layout.fillWidth: true
             Layout.topMargin: -parent.spacing - 4
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
@@ -130,6 +141,8 @@ MouseArea {
             visible: active
 
             sourceComponent: StyledText {
+                width: layout.width
+                horizontalAlignment: Text.AlignHCenter
                 text: Time.format("ss")
                 font: root.fontFor(text, secMetrics.width)
                 color: root.colour
@@ -144,6 +157,7 @@ MouseArea {
         }
 
         Loader {
+            Layout.fillWidth: true
             Layout.topMargin: -parent.spacing - 4
             Layout.alignment: Qt.AlignHCenter
             asynchronous: true
@@ -151,6 +165,8 @@ MouseArea {
             visible: active
 
             sourceComponent: StyledText {
+                width: layout.width
+                horizontalAlignment: Text.AlignHCenter
                 text: Time.amPmStr.toLowerCase()
                 font: Tokens.font.body.builders.small.scale(0.9).build()
                 color: root.colour

@@ -1,8 +1,13 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.utils
 import qs.modules.launcher.services
@@ -19,11 +24,55 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
+        id: layer
+
         radius: Tokens.rounding.large
-        onClicked: {
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: event => {
+            if (event.button === Qt.RightButton) {
+                // Menus.activate closes any other open menu first
+                contextMenu.expanded = true;
+                event.accepted = true;
+                return;
+            }
             Apps.launch(root.modelData);
             root.screenState.launcher = false;
         }
+    }
+
+    Menu {
+        id: contextMenu
+
+        attachTo: root
+        attachSideX: Menu.Left
+        attachSideY: Menu.Bottom
+        thisSideX: Menu.Left
+        thisSideY: Menu.Top
+        marginX: Tokens.padding.medium
+        marginY: Tokens.padding.extraSmall
+
+        items: [
+            MenuItem {
+                icon: "edit"
+                text: Tr.tr("Edit application…")
+                onClicked: Apps.requestEdit(root.modelData)
+            },
+            MenuItem {
+                icon: Apps.isFavourite(root.modelData?.id ?? "") ? "star" : "star_outline"
+                text: Apps.isFavourite(root.modelData?.id ?? "") ? Tr.tr("Remove from favourites") : Tr.tr("Add to favourites")
+                onClicked: Apps.toggleFavourite(root.modelData.id)
+            },
+            MenuItem {
+                icon: "visibility_off"
+                text: Tr.tr("Hide from launcher")
+                onClicked: Apps.hideFromLauncher(root.modelData.id)
+            },
+            MenuItem {
+                icon: "restart_alt"
+                text: Tr.tr("Reset customization")
+                onClicked: Apps.resetDesktopOverride(root.modelData.id)
+            }
+        ]
     }
 
     Item {
@@ -32,14 +81,37 @@ Item {
         anchors.rightMargin: Tokens.padding.medium
         anchors.margins: Tokens.padding.small
 
-        IconImage {
+        Item {
             id: icon
 
-            asynchronous: true
-            source: Quickshell.iconPath(root.modelData?.icon, "image-missing")
-            implicitSize: parent.height * 0.8
-
+            implicitWidth: parent.height * 0.8
+            implicitHeight: parent.height * 0.8
             anchors.verticalCenter: parent.verticalCenter
+
+            readonly property string iconSource: Icons.resolveThemeIcon(root.modelData?.icon || "", "application-x-executable")
+
+            IconImage {
+                id: iconImage
+
+                anchors.fill: parent
+                asynchronous: true
+                source: icon.iconSource
+                visible: icon.iconSource.length > 0 && status === Image.Ready
+            }
+
+            StyledRect {
+                anchors.fill: parent
+                radius: width * 0.22
+                color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+                visible: !iconImage.visible
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: "apps"
+                    color: Colours.palette.m3onSurfaceVariant
+                    fontStyle: Tokens.font.icon.extraLarge
+                }
+            }
         }
 
         Item {
