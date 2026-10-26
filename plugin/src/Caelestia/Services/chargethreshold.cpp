@@ -4,7 +4,7 @@
 #include <qfile.h>
 #include <qfileinfo.h>
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -69,4 +69,4 @@ void ChargeThreshold::updateThreshold(int threshold) {
     emit thresholdChanged();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services
