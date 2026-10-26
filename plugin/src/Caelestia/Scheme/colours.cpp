@@ -4,6 +4,7 @@
 
 #include <caelestia/scheme/smart.hpp>
 #include <caelestia/theme/theme.hpp>
+#include <caelestia/wallpaper/wallpaper.hpp>
 
 #include <stdexcept>
 
@@ -241,13 +242,12 @@ void Colours::updateLayer() {
 }
 
 void Colours::loadState() {
-    if (const auto state = lib::loadState()) {
-        applyState(*state, true);
-        return;
-    }
-
-    lib::defaultScheme().then(this, [this](const lib::SchemeData& data) {
+    bool ok;
+    wallpaper::currentScheme(&ok).then(this, [this, ok](const lib::SchemeData& data) {
         applyState(data, true);
+
+        if (!ok)
+            lib::saveState(data);
     });
 }
 
