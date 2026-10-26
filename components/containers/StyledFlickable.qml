@@ -6,28 +6,27 @@ Flickable {
 
     // How far one wheel notch scrolls
     property real wheelStep: 120
-    property bool doneFakeFlick
 
     maximumFlickVelocity: 3000
 
-    // Reset only when the user scrolls again, so the flick this triggers can't
-    // trigger another rebound and leave the view stuck "moving" - which makes
-    // the Flickable swallow every press meant for the controls inside it.
+    // Don't let a running wheel animation fight the user grabbing the content
     onDraggingChanged: {
         if (dragging)
-            doneFakeFlick = false;
+            wheelAnim.stop();
     }
 
     rebound: Transition {
         enabled: Math.abs(root.verticalOvershoot) >= 0.5 || Math.abs(root.horizontalOvershoot) >= 0.5
 
         onRunningChanged: {
-            if (!running && !root.doneFakeFlick) {
-                root.doneFakeFlick = true;
-                root.flick(1, 1);
-                root.flick(-1, -1);
-                Qt.callLater(() => root.cancelFlick());
-            }
+            if (running)
+                return;
+            const x = root.contentX;
+            const y = root.contentY;
+            root.contentX = x + 1;
+            root.contentY = y + 1;
+            root.contentX = x;
+            root.contentY = y;
         }
 
         Anim {
@@ -37,6 +36,7 @@ Flickable {
 
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse
+        blocking: root.contentHeight + root.topMargin + root.bottomMargin > root.height
 
         onWheel: event => {
             const min = -root.topMargin;
@@ -46,7 +46,6 @@ Flickable {
             if (to === root.contentY)
                 return;
 
-            root.doneFakeFlick = false;
             wheelAnim.to = to;
             wheelAnim.restart();
         }
