@@ -17,7 +17,7 @@ import qs.daemons
 ShellRoot {
     id: root
 
-    settings.watchFiles: true
+    settings.watchFiles: false
 
     Component.onCompleted: {
         // Force certain singletons to load on shell init instead of lazily
