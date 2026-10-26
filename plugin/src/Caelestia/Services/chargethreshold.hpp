@@ -4,7 +4,7 @@
 
 #include "tickingservice.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class ChargeThreshold : public TickingService {
     Q_OBJECT
@@ -36,4 +36,4 @@ private:
     int m_threshold = 100;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services
