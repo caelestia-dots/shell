@@ -7,12 +7,16 @@ import Caelestia.I18n
 import qs.components
 import qs.services
 
-StyledRect {
+MouseArea {
     id: root
 
-    readonly property color colour: Colours.palette.m3tertiary
-    readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
+    required property var popouts
+
+    readonly property color colour: highlighted ? Colours.palette.m3onPrimary : Colours.palette.m3tertiary
+    readonly property int padding: Tokens.padding.medium
     readonly property var font: Tokens.font.body.builders.small.scale(1.1)
+    readonly property bool menuOpen: popouts?.hasCurrent && popouts?.currentName === "clock"
+    readonly property bool highlighted: containsMouse || menuOpen
 
     function fontFor(text: string, metricWidth: int): font {
         // We don't count seconds for the max width because it changes too often
@@ -20,11 +24,21 @@ StyledRect {
         return root.font.width(scale * 100).letterSpacing(scale).build();
     }
 
+    hoverEnabled: true
+    cursorShape: Qt.PointingHandCursor
+    acceptedButtons: Qt.NoButton
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: layout.implicitHeight + root.padding * 2
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
-    radius: Tokens.rounding.full
+    StyledRect {
+        anchors.fill: parent
+        radius: Tokens.rounding.full
+        color: root.highlighted ? Colours.palette.m3primary : Colours.tPalette.m3surfaceContainer
+
+        Behavior on color {
+            CAnim {}
+        }
+    }
 
     ColumnLayout {
         id: layout

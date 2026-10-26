@@ -81,12 +81,16 @@ StyledRect {
             }
         }
         onClicked: event => {
-            if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton)
+            if (event.button !== Qt.LeftButton || Math.abs(root.x) > root.implicitWidth * 0.05)
                 return;
 
-            const actions = root.modelData.actions;
-            if (actions.length === 1)
-                actions[0].invoke();
+            if (GlobalConfig.notifs.actionOnClick) {
+                const actions = root.modelData.actions;
+                if (actions.length === 1)
+                    actions[0].invoke();
+            }
+
+            Notifs.focusSource(root.modelData);
         }
 
         Item {

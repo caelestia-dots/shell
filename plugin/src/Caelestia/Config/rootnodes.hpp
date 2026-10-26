@@ -2,6 +2,7 @@
 
 #include "settings/rootnode.hpp"
 #include "settings/singleton.hpp"
+#include "activitiesconfig.hpp"
 #include "appearanceconfig.hpp"
 #include "backgroundconfig.hpp"
 #include "barconfig.hpp"
@@ -29,6 +30,7 @@ class ConfigRoot : public settings::RootNode {
     QML_ANONYMOUS
 
     CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_SUBOBJECT(ActivitiesConfig, activities)
     CONFIG_SUBOBJECT(AppearanceConfig, appearance)
     CONFIG_SUBOBJECT(GeneralConfig, general)
     CONFIG_SUBOBJECT(BackgroundConfig, background)

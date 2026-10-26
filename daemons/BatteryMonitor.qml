@@ -12,6 +12,13 @@ Scope {
     readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels.values].sort((a, b) => a.level - b.level)
     property real lastPercentage: 100
 
+    function ensureDesktopPerformance(): void {
+        if (UPower.displayDevice.isLaptopBattery)
+            return;
+        if (PowerProfiles.profile !== PowerProfile.Performance)
+            PowerProfiles.profile = PowerProfile.Performance;
+    }
+
     function handleBatteryWarnings(): void {
         const p = UPower.displayDevice.percentage * 100;
 
@@ -60,11 +67,18 @@ Scope {
         function onReadyChanged(): void {
             if (!UPower.displayDevice.ready)
                 return;
+            root.ensureDesktopPerformance();
             root.handleBatteryWarnings();
+        }
+
+        function onIsLaptopBatteryChanged(): void {
+            root.ensureDesktopPerformance();
         }
 
         target: UPower.displayDevice
     }
+
+    Component.onCompleted: root.ensureDesktopPerformance()
 
     Connections {
         function onPercentageChanged(): void {

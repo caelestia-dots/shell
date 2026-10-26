@@ -17,8 +17,17 @@ PageBase {
     title: Tr.tr("Colours")
     isSubPage: true
 
+    readonly property string targetActivityId: root.nState.editingActivityId || Activities.principalId
+    readonly property var look: {
+        void Activities.styleRevision;
+        return Activities.resolveStyle(root.targetActivityId);
+    }
+
     readonly property int schemesPerRow: 2
-    readonly property bool dynamicActive: Colours.scheme === "dynamic"
+    readonly property bool dynamicActive: {
+        const name = root.look.scheme || Colours.scheme;
+        return name === "dynamic";
+    }
 
     function schemeList(filterDynamic: bool): var {
         const list = [...Schemes.list].filter(s => filterDynamic ? s.name === "dynamic" : s.name !== "dynamic");
@@ -66,7 +75,10 @@ PageBase {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: Schemes.currentScheme || Tr.tr("Unknown")
+                        text: {
+                            const s = root.look;
+                            return (s.scheme && s.flavour) ? `${s.scheme} ${s.flavour}` : (Schemes.currentScheme || Tr.tr("Unknown"));
+                        }
                         font: Tokens.font.body.large
                         elide: Text.ElideRight
                     }
@@ -75,7 +87,7 @@ PageBase {
                         Layout.fillWidth: true
                         visible: root.dynamicActive
                         // TRANSLATORS: %1 = Material colour variant name (e.g. tonalspot)
-                        text: Tr.tr("Material style: %1").arg(Schemes.currentVariant || "—")
+                        text: Tr.tr("Material style: %1").arg(root.look.variant || Schemes.currentVariant || "—")
                         color: Colours.palette.m3outline
                         font: Tokens.font.body.small
                         elide: Text.ElideRight
@@ -89,8 +101,8 @@ PageBase {
             Layout.bottomMargin: 0
             text: Tr.tr("Dark theme")
             subtext: Tr.tr("Shell and bar colours")
-            checked: !Colours.light
-            onToggled: Colours.setMode(checked ? "dark" : "light")
+            checked: root.look.mode !== "light"
+            onToggled: Activities.setActivityMode(root.targetActivityId, checked ? "dark" : "light")
         }
 
         ToggleRow {
@@ -99,8 +111,8 @@ PageBase {
             Layout.bottomMargin: Tokens.spacing.medium
             text: Tr.tr("Light apps")
             subtext: Tr.tr("Keep GTK/Qt apps light even if the shell is dark")
-            checked: Colours.lightApps
-            onToggled: Colours.setLightApps(checked)
+            checked: root.look.lightApps > 0
+            onToggled: Activities.setActivityLightApps(root.targetActivityId, checked)
         }
 
         StyledText {
@@ -205,8 +217,8 @@ PageBase {
                         variantId: modelData.variant
                         first: index === 0
                         last: index === M3Variants.list.length - 1
-                        selected: variantId === Schemes.currentVariant
-                        onClicked: Schemes.setVariant(variantId)
+                        selected: variantId === (root.look.variant || Schemes.currentVariant)
+                        onClicked: Activities.setActivityVariant(root.targetActivityId, variantId)
                     }
                 }
             }
@@ -236,11 +248,11 @@ PageBase {
                 opacity: modelData ? 1 : 0
                 enabled: !!modelData
                 scheme: modelData
-                selected: modelData && `${modelData.name} ${modelData.flavour}` === Schemes.currentScheme
+                selected: modelData && `${modelData.name} ${modelData.flavour}` === `${root.look.scheme} ${root.look.flavour}`
                 onClicked: {
                     if (!modelData)
                         return;
-                    Schemes.setScheme(modelData.name, modelData.flavour);
+                    Activities.setActivityScheme(root.targetActivityId, modelData.name, modelData.flavour);
                 }
             }
         }

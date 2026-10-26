@@ -109,11 +109,11 @@ class BarTokens : public settings::ObjectNode {
 
     CONFIG_PROPERTY(int, innerWidth, 40)
     CONFIG_PROPERTY(int, windowPreviewSize, 400)
-    CONFIG_PROPERTY(int, trayMenuWidth, 300)
-    CONFIG_PROPERTY(int, batteryWidth, 250)
-    CONFIG_PROPERTY(int, networkWidth, 320)
-    CONFIG_PROPERTY(int, audioWidth, 320)
-    CONFIG_PROPERTY(int, kbLayoutWidth, 320)
+    CONFIG_PROPERTY(int, trayMenuWidth, 320)
+    CONFIG_PROPERTY(int, batteryWidth, 320)
+    CONFIG_PROPERTY(int, networkWidth, 360)
+    CONFIG_PROPERTY(int, audioWidth, 360)
+    CONFIG_PROPERTY(int, kbLayoutWidth, 360)
 };
 
 class DashboardTokens : public settings::ObjectNode {

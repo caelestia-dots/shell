@@ -23,10 +23,10 @@ QtObject {
     readonly property list<Component> pageComps: [
         // Appearance
         Component {
-            // Wallpaper & style
+            // Shell (activities + per-activity look)
             StackPage {
                 Component {
-                    WallpaperAndStyle {}
+                    ShellPage {}
                 }
                 Component {
                     WallpaperSelect {}

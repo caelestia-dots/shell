@@ -109,6 +109,28 @@ Scope {
         }
     }
 
+    CustomShortcut {
+        name: "activityNext"
+        description: "Switch to next activity"
+        onPressed: Activities.focusActivityByOffset(1)
+    }
+
+    CustomShortcut {
+        name: "activityPrev"
+        description: "Switch to previous activity"
+        onPressed: Activities.focusActivityByOffset(-1)
+    }
+
+    CustomShortcut {
+        name: "activityOverview"
+        description: "Toggle activities overview"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            Activities.toggleOverview();
+        }
+    }
+
     IpcHandler {
         function toggle(drawer: string): void {
             if (list().split("\n").includes(drawer)) {

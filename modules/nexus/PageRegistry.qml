@@ -9,9 +9,9 @@ QtObject {
     readonly property list<var> pages: [
         // Appearance
         {
-            label: Tr.tr("Wallpaper & style"),
+            label: Tr.tr("Shell"),
             icon: "palette",
-            description: Tr.tr("Wallpaper, fonts, colours"),
+            description: Tr.tr("Activities, wallpaper and colours"),
             category: "appearance"
         },
 

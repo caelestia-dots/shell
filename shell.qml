@@ -8,6 +8,7 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.services
+import qs.modules.activities
 import qs.modules.areapicker
 import qs.modules.background
 import qs.modules.drawers
@@ -25,6 +26,7 @@ ShellRoot {
         Players;
         Brightness;
         Keybinds;
+        Activities;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)
@@ -44,6 +46,7 @@ ShellRoot {
     // Modules
     Background {}
     Drawers {}
+    Overview {}
     AreaPicker {}
     Lock {
         id: lock

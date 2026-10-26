@@ -14,6 +14,7 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     QML_ATTACHED(Config)
 
     Q_PROPERTY(QString screen READ screen WRITE inheritScreen NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::shell::config::ActivitiesConfig* activities READ activities NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::AppearanceConfig* appearance READ appearance NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::GeneralConfig* general READ general NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::BackgroundConfig* background READ background NOTIFY sourceChanged)
@@ -37,6 +38,7 @@ public:
     [[nodiscard]] QString screen() const;
     void inheritScreen(const QString& screen);
 
+    [[nodiscard]] const ActivitiesConfig* activities() const;
     [[nodiscard]] const AppearanceConfig* appearance() const;
     [[nodiscard]] const GeneralConfig* general() const;
     [[nodiscard]] const BackgroundConfig* background() const;

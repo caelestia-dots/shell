@@ -33,17 +33,19 @@ Searcher {
         getSchemes.running = true;
     }
 
+    readonly property string quietCli: Quickshell.shellPath("scripts/caelestia-quiet.py")
+
     function setScheme(name: string, flavour: string): void {
         // Optimistic UI update; Colours.FileView confirms when scheme.json lands
         root.currentScheme = `${name} ${flavour}`;
-        runSet(["caelestia", "scheme", "set", "-n", name, "-f", flavour]);
+        runSet(["python3", root.quietCli, "scheme", "set", "-n", name, "-f", flavour]);
     }
 
     function setVariant(variant: string): void {
         root.currentVariant = variant;
         // Only regenerates colours when the active scheme is "dynamic".
         // On static schemes this just stores the preference for later.
-        runSet(["caelestia", "scheme", "set", "-v", variant]);
+        runSet(["python3", root.quietCli, "scheme", "set", "-v", variant]);
     }
 
     function runSet(command: list<string>): void {

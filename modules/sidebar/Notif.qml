@@ -148,6 +148,7 @@ StyledRect {
 
         NotifActionList {
             notif: root.modelData
+            screenState: root.screenState
         }
     }
 

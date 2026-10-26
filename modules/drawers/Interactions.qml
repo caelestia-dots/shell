@@ -23,6 +23,7 @@ CustomMouseArea {
     property bool osdShortcutActive
     property bool utilitiesShortcutActive
     property bool sidebarShortcutActive
+    property bool launcherShortcutActive
 
     function withinPanelHeight(panel: Item, x: real, y: real): bool {
         const panelY = root.borderThickness + panel.y;
@@ -90,6 +91,10 @@ CustomMouseArea {
             // Close sidebar on leave unless opened by shortcut (Super+N)
             if (!sidebarShortcutActive)
                 screenState.sidebar = false;
+
+            // Close launcher on leave unless opened by shortcut (e.g. Alt+Space)
+            if (Config.launcher.showOnHover && !launcherShortcutActive)
+                screenState.launcher = false;
         }
     }
 
@@ -201,10 +206,13 @@ CustomMouseArea {
                 screenState.sidebar = false;
         }
 
-        // Show launcher on hover, or show/hide on drag if hover is disabled
+        // Show/hide launcher on hover, or show/hide on drag if hover is disabled
         if (Config.launcher.showOnHover) {
-            if (!screenState.launcher && inBottomPanel(panels.launcher, x, y))
-                screenState.launcher = true;
+            const showLauncher = inBottomPanel(panels.launcher, x, y);
+            if (!launcherShortcutActive)
+                screenState.launcher = showLauncher;
+            else if (showLauncher)
+                launcherShortcutActive = false;
         } else if (pressed && inBottomPanel(panels.launcher, dragStart.x, dragStart.y) && withinPanelWidth(panels.launcher, x, y)) {
             if (dragY < -Config.launcher.dragThreshold)
                 screenState.launcher = true;
@@ -261,8 +269,12 @@ CustomMouseArea {
     // Monitor individual visibility changes
     Connections {
         function onLauncherChanged() {
-            // If launcher is hidden, clear shortcut flags for dashboard and OSD
-            if (!root.screenState.launcher) {
+            if (root.screenState.launcher) {
+                const inLauncherArea = root.inBottomPanel(root.panels.launcher, root.mouseX, root.mouseY);
+                if (!inLauncherArea)
+                    root.launcherShortcutActive = true;
+            } else {
+                root.launcherShortcutActive = false;
                 root.dashboardShortcutActive = false;
                 root.osdShortcutActive = false;
                 root.utilitiesShortcutActive = false;

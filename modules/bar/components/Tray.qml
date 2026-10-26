@@ -10,6 +10,8 @@ import qs.services
 StyledRect {
     id: root
 
+    required property var popouts
+
     readonly property alias layout: layout
     readonly property alias items: items
     readonly property alias expandIcon: expandIcon
@@ -20,6 +22,8 @@ StyledRect {
     property bool expanded
 
     readonly property real nonAnimHeight: {
+        if (items.count === 0)
+            return 0;
         if (!Config.bar.tray.compact)
             return layout.implicitHeight + padding * 2;
         const pad = (Config.bar.tray.background ? Tokens.padding.extraSmall : 0) + padding;
@@ -34,7 +38,7 @@ StyledRect {
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: nonAnimHeight
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)
+    color: (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer : "transparent"
     radius: Tokens.rounding.full
 
     Column {
@@ -43,7 +47,7 @@ StyledRect {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: root.padding
-        spacing: Tokens.spacing.small
+        spacing: Config.bar.tray.background ? Tokens.spacing.medium / 2 : Tokens.spacing.small
 
         opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
 
@@ -71,10 +75,13 @@ StyledRect {
             id: items
 
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                // Keep Passive items (e.g. idle Teams/Electron apps); only honour explicit hides.
+                values: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
-            TrayItem {}
+            TrayItem {
+                popouts: root.popouts
+            }
         }
 
         Behavior on opacity {

@@ -86,8 +86,15 @@ Singleton {
             root.scheduleAppThemeApply();
     }
 
+    readonly property string quietCli: Quickshell.shellPath("scripts/caelestia-quiet.py")
+
+    function runSchemeSet(cliArgs: list<string>): void {
+        Quickshell.execDetached(["python3", root.quietCli, ...cliArgs]);
+    }
+
     function setMode(mode: string): void {
-        Quickshell.execDetached(["caelestia", "scheme", "set", "--notify", "-m", mode]);
+        // No --notify: error toasts with OSC dumps are worse than silent failure here
+        root.runSchemeSet(["scheme", "set", "-m", mode]);
         root.scheduleAppThemeApply();
     }
 
@@ -102,7 +109,7 @@ Singleton {
 
         // Re-apply scheme so GTK/Qt theming is enabled/disabled immediately
         const mode = root.currentLight ? "light" : "dark";
-        Quickshell.execDetached(["caelestia", "scheme", "set", "-m", mode]);
+        root.runSchemeSet(["scheme", "set", "-m", mode]);
         root.scheduleAppThemeApply();
     }
 
@@ -137,15 +144,23 @@ Singleton {
     }
 
     function reloadHyprRules(): void {
-        let rule, trEnabled;
+        const ignoreAlpha = Math.max(0, transparency.base - 0.03);
+        const msgs = [];
         if (Hypr.usingLua) {
-            rule = `eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, %1 = %2 })`;
-            trEnabled = transparency.enabled;
+            const drawersBlur = transparency.enabled;
+            msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, blur = ${drawersBlur} })`);
+            msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, ignore_alpha = ${ignoreAlpha} })`);
+            // Overview always uses the translucent + Hyprland blur look
+            msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-activities-overview" }, blur = true })`);
+            msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-activities-overview" }, ignore_alpha = ${ignoreAlpha} })`);
         } else {
-            rule = "keyword layerrule %1 %2, match:namespace caelestia-drawers";
-            trEnabled = transparency.enabled ? 1 : 0;
+            const drawersBlur = transparency.enabled ? 1 : 0;
+            msgs.push(`keyword layerrule blur ${drawersBlur}, match:namespace caelestia-drawers`);
+            msgs.push(`keyword layerrule ignore_alpha ${ignoreAlpha}, match:namespace caelestia-drawers`);
+            msgs.push(`keyword layerrule blur 1, match:namespace caelestia-activities-overview`);
+            msgs.push(`keyword layerrule ignore_alpha ${ignoreAlpha}, match:namespace caelestia-activities-overview`);
         }
-        Hypr.extras.batchMessage([rule.arg("blur").arg(trEnabled), rule.arg("ignore_alpha").arg(Math.max(0, transparency.base - 0.03))]);
+        Hypr.extras.batchMessage(msgs);
     }
 
     function requestReloadHyprRules(): void {

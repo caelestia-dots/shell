@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Services.UPower
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -12,10 +13,13 @@ import qs.modules.bar.components.status
 StyledRect {
     id: root
 
+    required property var popouts
+
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
 
     readonly property int spacing: Tokens.spacing.medium / 2
+    readonly property int iconPad: Tokens.padding.extraSmall
 
     // Index of the first/last entry that isn't collapsed, for edge margin gating
     readonly property int firstPresent: {
@@ -37,6 +41,9 @@ StyledRect {
     function collapsed(entry: var): bool {
         if (entry.id === "lockStatus")
             return !Hypr.capsLock && !Hypr.numLock;
+        // Desktops have no battery / power-profile UI in the status strip
+        if (entry.id === "battery")
+            return !UPower.displayDevice.isLaptopBattery;
         return false;
     }
 
@@ -71,7 +78,7 @@ StyledRect {
                     roleValue: "lockStatus"
                     delegate: EntryWrapper {
                         LockStatus {
-                            colour: root.colour
+                            colour: parent.iconColour
                             parentSpacing: root.spacing
                         }
                     }
@@ -84,7 +91,7 @@ StyledRect {
                         MaterialIcon {
                             animate: true
                             text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
-                            color: root.colour
+                            color: parent.iconColour
                             fontStyle: Tokens.font.icon.medium
                             fill: 1
                         }
@@ -99,7 +106,7 @@ StyledRect {
                         MaterialIcon {
                             animate: true
                             text: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
-                            color: root.colour
+                            color: parent.iconColour
                             fontStyle: Tokens.font.icon.medium
                             fill: 1
                         }
@@ -111,7 +118,7 @@ StyledRect {
                         StyledText {
                             animate: true
                             text: Hypr.kbLayout
-                            color: root.colour
+                            color: parent.iconColour
                             font: Tokens.font.mono.medium
                         }
                     }
@@ -122,7 +129,7 @@ StyledRect {
                         MaterialIcon {
                             animate: true
                             text: Nmcli.activeEthernet ? "cable" : Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
-                            color: root.colour
+                            color: parent.iconColour
                         }
                     }
                 }
@@ -130,7 +137,7 @@ StyledRect {
                     roleValue: "bluetooth"
                     delegate: EntryWrapper {
                         BluetoothStatus {
-                            colour: root.colour
+                            colour: parent.iconColour
                         }
                     }
                 }
@@ -138,7 +145,7 @@ StyledRect {
                     roleValue: "battery"
                     delegate: EntryWrapper {
                         BatteryStatus {
-                            colour: root.colour
+                            colour: parent.iconColour
                         }
                     }
                 }
@@ -147,6 +154,8 @@ StyledRect {
     }
 
     component EntryWrapper: Item {
+        id: wrap
+
         required property var modelData
         required property int index
         property int margin: root.spacing / 2
@@ -156,14 +165,46 @@ StyledRect {
         default property Item item
         property string name: modelData.id.toLowerCase()
 
+        readonly property bool menuOpen: root.popouts?.hasCurrent && root.popouts?.currentName === name
+        readonly property bool highlighted: hover.containsMouse || menuOpen
+        readonly property color iconColour: highlighted ? Colours.palette.m3onPrimary : root.colour
+
         Layout.topMargin: Math.round(topGap)
         Layout.bottomMargin: Math.round(bottomGap)
         Layout.alignment: Qt.AlignHCenter
+        Layout.preferredHeight: present ? implicitHeight : 0
+        visible: present
+        clip: true
+        opacity: present ? 1 : 0
 
-        implicitWidth: item?.implicitWidth ?? 0
-        implicitHeight: item?.implicitHeight ?? 0
+        implicitWidth: present ? (item?.implicitWidth ?? 0) + root.iconPad * 2 : 0
+        implicitHeight: present ? (item?.implicitHeight ?? 0) + root.iconPad * 2 : 0
 
-        children: item
+        onItemChanged: {
+            if (!item)
+                return;
+            item.parent = wrap;
+            item.anchors.centerIn = wrap;
+        }
+
+        StyledRect {
+            anchors.fill: parent
+            radius: Tokens.rounding.full
+            color: wrap.highlighted ? Colours.palette.m3primary : "transparent"
+            z: -1
+
+            Behavior on color {
+                CAnim {}
+            }
+        }
+
+        MouseArea {
+            id: hover
+
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.NoButton
+        }
 
         Behavior on topGap {
             Anim {
@@ -172,6 +213,12 @@ StyledRect {
         }
 
         Behavior on bottomGap {
+            Anim {
+                type: Anim.SlowEffects
+            }
+        }
+
+        Behavior on opacity {
             Anim {
                 type: Anim.SlowEffects
             }

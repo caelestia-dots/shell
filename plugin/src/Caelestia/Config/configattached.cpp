@@ -65,6 +65,7 @@ void Config::attachedParentChange(
         return ConfigSingleton::instance()->name();                                                                    \
     }
 
+CONFIG_ATTACHED_GETTER(ActivitiesConfig, activities)
 CONFIG_ATTACHED_GETTER(AppearanceConfig, appearance)
 CONFIG_ATTACHED_GETTER(GeneralConfig, general)
 CONFIG_ATTACHED_GETTER(BackgroundConfig, background)

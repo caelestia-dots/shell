@@ -12,6 +12,13 @@
 
 https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
+> [!IMPORTANT]
+> **Este repositorio es un fork** de [caelestia-dots/shell](https://github.com/caelestia-dots/shell) con extras
+> (activities, popout del reloj con timers, focus desde notificaciones, página Shell en Nexus, etc.).
+>
+> Para usuarios finales: lee **[FEATURES.md](./FEATURES.md)** — qué incluye y cómo usarlo.
+> La instalación y la configuración base siguen documentadas abajo (upstream).
+
 ## Components
 
 - Widgets: [`Quickshell`](https://quickshell.outfoxxed.me)
@@ -153,6 +160,9 @@ Wire that file into your Hyprland Lua config (and avoid duplicating the same bin
 ```lua
 -- Managed by Caelestia Keybinds (Nexus → Keyboard & mouse)
 require("caelestia-binds")
+
+-- Activity workspace rules + app pinning (Nexus → Shell)
+require("caelestia-activity-rules")
 ```
 
 Multimedia keys that you prefer to keep outside the mapper (e.g. volume via `wpctl`) can stay in

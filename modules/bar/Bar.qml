@@ -68,6 +68,10 @@ ColumnLayout {
                 popouts.hasCurrent = false;
                 tray.expanded = true;
             }
+        } else if (id === "clock") {
+            popouts.currentName = "clock";
+            popouts.currentCenter = Qt.binding(() => (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y);
+            popouts.hasCurrent = true;
         } else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {
             popouts.currentName = id.toLowerCase();
             popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
@@ -81,10 +85,14 @@ ColumnLayout {
             // Workspace scroll
             const mon = Hypr.monitorFor(screen);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
-            if (specialWs?.length > 0)
+            if (specialWs?.length > 0) {
                 Hypr.dispatch(Hypr.usingLua ? `hl.dsp.workspace.toggle_special("${specialWs.slice(8)}")` : `togglespecialworkspace ${specialWs.slice(8)}`);
-            else if (angleDelta.y < 0 || mon.activeWorkspace?.id > 1)
+            } else if (GlobalConfig.activities.enabled) {
+                // Stay within the current activity; activity switching uses dedicated shortcuts
+                Activities.focusNextInActivity(angleDelta.y > 0 ? -1 : 1);
+            } else if (angleDelta.y < 0 || mon.activeWorkspace?.id > 1) {
                 Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "r${angleDelta.y > 0 ? "-" : "+"}1" })` : `workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
+            }
         } else if (y < screen.height / 2 && Config.bar.scrollActions.volume) {
             // Volume scroll on top half
             if (angleDelta.y > 0)
@@ -130,10 +138,10 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "workspaces"
                 delegate: EntryWrapper {
-                    Workspaces {
+                    Loader {
                         objectName: "taskbarWorkspaces"
-                        screen: root.screen
-                        fullscreen: root.fullscreen
+                        active: true
+                        sourceComponent: GlobalConfig.activities.enabled ? activitiesComp : workspacesComp
                     }
                 }
             }
@@ -152,6 +160,7 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     Tray {
                         objectName: "taskbarTray"
+                        popouts: root.popouts
                     }
                 }
             }
@@ -160,6 +169,7 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     Clock {
                         objectName: "taskbarClock"
+                        popouts: root.popouts
                     }
                 }
             }
@@ -168,6 +178,7 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     StatusIcons {
                         objectName: "taskbarStatusIcons"
+                        popouts: root.popouts
                     }
                 }
             }
@@ -197,5 +208,23 @@ ColumnLayout {
         implicitHeight: item?.implicitHeight ?? 0
 
         children: item
+    }
+
+    Component {
+        id: workspacesComp
+
+        Workspaces {
+            screen: root.screen
+            fullscreen: root.fullscreen
+        }
+    }
+
+    Component {
+        id: activitiesComp
+
+        ActivitiesStrip {
+            screen: root.screen
+            fullscreen: root.fullscreen
+        }
     }
 }

@@ -128,7 +128,7 @@ PageBase {
             }
 
             Repeater {
-                model: ["windows", "workspaces", "apps", "shell", "notifications", "media", "system", "capture"]
+                model: ["windows", "workspaces", "activities", "apps", "shell", "notifications", "media", "system", "capture"]
 
                 ColumnLayout {
                     id: section

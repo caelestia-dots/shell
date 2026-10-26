@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: caelestia-shell\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 15:08+0100\n"
+"POT-Creation-Date: 2026-10-26 15:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1216,6 +1216,35 @@ msgstr ""
 msgid "Shell shortcuts and remapping"
 msgstr ""
 
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/ActivitiesPage.qml
+#: services/Keybinds.qml
+msgid "Activities"
+msgstr ""
+
+#: modules/nexus/PageRegistry.qml
+msgid "Group workspaces into activities"
+msgstr ""
+#: modules/nexus/pages/ShellPage.qml
+msgid "Activities, wallpaper and colours"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Group workspaces into activities and give each one its own wallpaper and colours. Empty look fields inherit from Home."
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Look"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Inheriting wallpaper and colours from Home"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Use Home look"
+msgstr ""
+
+
 #: modules/nexus/PageRegistry.qml modules/nexus/pages/AboutPage.qml
 msgid "About"
 msgstr ""
@@ -1266,6 +1295,93 @@ msgstr ""
 
 #: modules/nexus/pages/AboutPage.qml
 msgid "Loaded plugins"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Untitled rule"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Group Hyprland workspaces into activities. Each activity appears as a separate pill on the bar."
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/SidebarPanel.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "General"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Enable activities"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Show activity pills on the bar and use activity shortcuts"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Show app icons on workspaces"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Use real application icons; when off, show category icons under the workspace marker"
+msgstr ""
+
+#. TRANSLATORS: %1 = workspace id range, e.g. "1–2"
+#: modules/nexus/pages/ActivitiesPage.qml
+#, qt-format
+msgid "Workspaces %1"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Name"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Icon"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Material Symbols icon name"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Desktops"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Number of workspaces in this activity"
+msgstr ""
+
+#. TRANSLATORS: %1 = 1-based desktop number within the activity
+#: modules/nexus/pages/ActivitiesPage.qml
+#, qt-format
+msgid "Desktop %1"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Add app"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Installed apps"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+#: modules/nexus/pages/network/AddVpnPage.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+msgctxt "button"
+msgid "Add"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "Add activity"
+msgstr ""
+
+#: modules/nexus/pages/ActivitiesPage.qml
+msgid "New activity"
 msgstr ""
 
 #: modules/nexus/pages/apps/AllApps.qml modules/nexus/pages/AppsPage.qml
@@ -1786,12 +1902,6 @@ msgctxt "button"
 msgid "Save"
 msgstr ""
 
-#: modules/nexus/pages/network/AddVpnPage.qml
-#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
-msgctxt "button"
-msgid "Add"
-msgstr ""
-
 #: modules/nexus/pages/network/AllNetworksPage.qml
 msgid "All networks"
 msgstr ""
@@ -2041,13 +2151,6 @@ msgstr ""
 
 #: modules/nexus/pages/NetworkPage.qml
 msgid "Add provider"
-msgstr ""
-
-#: modules/nexus/pages/panels/DashboardPanel.qml
-#: modules/nexus/pages/panels/LauncherPanel.qml
-#: modules/nexus/pages/panels/SidebarPanel.qml
-#: modules/nexus/pages/panels/UtilitiesPanel.qml
-msgid "General"
 msgstr ""
 
 #: modules/nexus/pages/panels/DashboardPanel.qml
@@ -3445,6 +3548,22 @@ msgid "Switch to the previous existing workspace"
 msgstr ""
 
 #: services/Keybinds.qml
+msgid "Next activity"
+msgstr ""
+
+#: services/Keybinds.qml
+msgid "Jump to the first desktop of the next activity"
+msgstr ""
+
+#: services/Keybinds.qml
+msgid "Previous activity"
+msgstr ""
+
+#: services/Keybinds.qml
+msgid "Jump to the first desktop of the previous activity"
+msgstr ""
+
+#: services/Keybinds.qml
 msgid "Terminal"
 msgstr ""
 
@@ -4130,6 +4249,18 @@ msgstr ""
 msgid "Failed to write: %1"
 msgstr ""
 
+#: plugin/src/Caelestia/Config/activitiesconfig.hpp
+msgid "Home"
+msgstr ""
+
+#: plugin/src/Caelestia/Config/activitiesconfig.hpp
+msgid "Games"
+msgstr ""
+
+#: plugin/src/Caelestia/Config/activitiesconfig.hpp
+msgid "Work"
+msgstr ""
+
 #: plugin/src/Caelestia/Config/generalconfig.hpp
 msgid "Low battery"
 msgstr ""
@@ -4269,4 +4400,140 @@ msgstr ""
 
 #: plugin/src/Caelestia/Config/launcherconfig.hpp
 msgid "Configure the shell"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Activity icon"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Change icon"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Search icons"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Apartment"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Work outline"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Controller"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "School"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Study"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Code"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Design"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Art"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Music"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Movies"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Photos"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Chat"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Mail"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Web"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Cloud"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Science"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Fitness"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Food"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Coffee"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Shopping"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Travel"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Flight"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Favorite"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Star"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Bolt"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Night"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Day"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Layers"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Folder"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Person"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Groups"
 msgstr ""

@@ -40,7 +40,9 @@ StyledRect {
     Component.onCompleted: runAnim()
 
     clip: true
-    y: start + mask.y
+    // Parent Loader is already aligned to the list; only offset by the item layoutY
+    y: start
+    implicitWidth: mask.width
     implicitHeight: end - start
     radius: Tokens.rounding.full
     color: Colours.palette.m3primary
@@ -65,9 +67,14 @@ StyledRect {
         target: root.activeWs?.LazyListView ?? null
     }
 
+    // Recolor overlay for markers / category glyphs. Real desktop IconImages
+    // sit above the pill (z-order) and must keep their original colours.
     Colouriser {
         id: colouriser
 
+        readonly property bool recolorContent: !(root.activeWs?.hasDesktopAppIcons ?? false)
+
+        visible: recolorContent
         source: root.mask
         sourceColor: Colours.palette.m3onSurface
         colorizationColor: Colours.palette.m3onPrimary

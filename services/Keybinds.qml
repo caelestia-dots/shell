@@ -295,6 +295,30 @@ Singleton {
             dispatch: "hl.dsp.focus({ workspace = \"e-1\" })",
             category: "workspaces"
         },
+        {
+            id: "activityNext",
+            label: () => Tr.tr("Next activity"),
+            description: () => Tr.tr("Jump to the first desktop of the next activity"),
+            defaultBind: "SUPER + CTRL + Right",
+            global: "caelestia:activityNext",
+            category: "activities"
+        },
+        {
+            id: "activityPrev",
+            label: () => Tr.tr("Previous activity"),
+            description: () => Tr.tr("Jump to the first desktop of the previous activity"),
+            defaultBind: "SUPER + CTRL + Left",
+            global: "caelestia:activityPrev",
+            category: "activities"
+        },
+        {
+            id: "activityOverview",
+            label: () => Tr.tr("Activities overview"),
+            description: () => Tr.tr("Show a preview of all activities and desktops"),
+            defaultBind: "SUPER + Tab",
+            global: "caelestia:activityOverview",
+            category: "activities"
+        },
         // --- Window manager: apps ---
         {
             id: "openTerminal",
@@ -508,6 +532,7 @@ Singleton {
     readonly property var categoryLabels: ({
             windows: () => Tr.tr("Windows"),
             workspaces: () => Tr.tr("Workspaces"),
+            activities: () => Tr.tr("Activities"),
             apps: () => Tr.tr("Applications"),
             shell: () => Tr.tr("Shell"),
             notifications: () => Tr.tr("Notifications"),

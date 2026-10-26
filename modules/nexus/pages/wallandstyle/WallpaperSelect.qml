@@ -20,6 +20,13 @@ PageBase {
     title: Tr.tr("Wallpapers")
     isSubPage: true
 
+    readonly property string targetActivityId: root.nState.editingActivityId || Activities.principalId
+
+    function pickWallpaper(path: string): void {
+        Activities.setActivityWallpaper(root.targetActivityId, path);
+        root.nState.closeSubPage();
+    }
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -47,10 +54,7 @@ PageBase {
                     title: Tr.tr("Select an image")
                     filterLabel: Tr.tr("Image files")
                     filters: Images.validImageExtensions
-                    onAccepted: path => {
-                        Wallpapers.setWallpaper(path);
-                        root.nState.closeSubPage();
-                    }
+                    onAccepted: path => root.pickWallpaper(path)
                 }
             }
 
@@ -76,10 +80,7 @@ PageBase {
             source: Quickshell.shellPath("assets/wallpaper.webp")
             text: Tr.tr("Featured wallpaper")
             fillLabel: false
-            onClicked: {
-                Wallpapers.setWallpaper(Quickshell.shellPath("assets/wallpaper.webp"));
-                root.nState.closeSubPage();
-            }
+            onClicked: root.pickWallpaper(Quickshell.shellPath("assets/wallpaper.webp"))
         }
 
         StyledText {
@@ -143,8 +144,7 @@ PageBase {
                             root.nState.selectedWallpaperCategory = Wallpapers.getCategoryFor(modelData);
                             root.nState.openSubPage(2); // Category page
                         } else {
-                            Wallpapers.setWallpaper(modelData.path);
-                            root.nState.closeSubPage();
+                            root.pickWallpaper(modelData.path);
                         }
                     }
                 }

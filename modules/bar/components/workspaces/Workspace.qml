@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import M3Shapes
 import Caelestia.Components
 import Caelestia.Config
@@ -23,6 +24,9 @@ Item {
     required property int displayType
     required property bool showWindows
     required property var iconRules
+    // true: real desktop IconImages, hide ws marker when occupied
+    // false: category MaterialIcons under the marker (upstream look)
+    property bool desktopAppIcons: false
     property string activeLabel
     property string occupiedLabel
     property string label
@@ -30,6 +34,7 @@ Item {
     readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags)
     readonly property bool isOccupied: toplevels.length > 0
     readonly property bool hasWindows: isOccupied && showWindows && Config.bar.workspaces.maxWindowIcons > 0
+    readonly property bool hasDesktopAppIcons: hasWindows && desktopAppIcons
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
 
@@ -60,7 +65,9 @@ Item {
     }
 
     anchors.horizontalCenter: parent?.horizontalCenter
-    LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight + (hasWindows ? Tokens.padding.extraSmall : 0)
+    // Padding is part of layout.implicitHeight so ActiveIndicator stays in sync
+    readonly property real contentPad: hasWindows ? Tokens.padding.small : 0
+    LazyListView.preferredHeight: LazyListView.removing ? 0 : layout.implicitHeight
     LazyListView.visibleHeight: LazyListView.preferredHeight
 
     opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
@@ -175,14 +182,30 @@ Item {
     ColumnLayout {
         id: layout
 
-        anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        width: parent.width
         spacing: 0
+
+        // Top inset so icons clear the active-indicator rounded edge
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.contentPad
+            visible: root.contentPad > 0
+        }
 
         Loader {
             id: indicator
 
+            // Hide marker whenever window icons occupy the slot (desktop or category)
+            readonly property bool showMarker: !root.hasWindows
+
             Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-            Layout.preferredHeight: Tokens.sizes.bar.innerWidth - Tokens.padding.small
+            Layout.preferredHeight: showMarker ? Tokens.sizes.bar.innerWidth - Tokens.padding.small : 0
+            opacity: showMarker ? 1 : 0
+            active: showMarker || status === Loader.Ready
+            visible: Layout.preferredHeight > 0
+
             sourceComponent: {
                 if (root.displayType === BarWorkspaceDisplay.Icons)
                     return iconLoaderComponent;
@@ -192,6 +215,16 @@ Item {
             }
 
             onItemChanged: root.updateShape()
+
+            Behavior on Layout.preferredHeight {
+                Anim {}
+            }
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
         }
 
         Loader {
@@ -200,7 +233,7 @@ Item {
             asynchronous: true
 
             Layout.fillWidth: true
-            Layout.topMargin: -Tokens.spacing.extraSmall / 2
+            Layout.topMargin: root.hasWindows ? 0 : -Tokens.spacing.extraSmall / 2
             Layout.preferredHeight: root.hasWindows && item ? (item as LazyListView).layoutHeight : 0
 
             visible: active
@@ -220,18 +253,40 @@ Item {
                     }
                 }
 
-                delegate: MaterialIcon {
+                delegate: Item {
                     id: win
 
                     required property var modelData
                     required property int index // Needed, LazyListView will fail to set it if it doesn't exist
 
-                    grade: 0
-                    horizontalAlignment: Text.AlignHCenter
-                    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+                    readonly property int iconSize: Math.round((Tokens.sizes.bar.innerWidth - Tokens.padding.small) * 0.55)
+                    readonly property string appClass: modelData.lastIpcObject?.class ?? ""
 
-                    opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
+                    width: parent?.width ?? Tokens.sizes.bar.innerWidth
+                    implicitHeight: root.desktopAppIcons ? iconSize + Tokens.padding.extraSmall : (winIcon.implicitHeight || iconSize)
+
+                    opacity: LazyListView.adding || LazyListView.removing ? 0 : (root.onOtherMonitor ? 0.55 : 1)
+
+                    // Real desktop/theme icons when the activities setting is on
+                    IconImage {
+                        anchors.centerIn: parent
+                        asynchronous: true
+                        visible: root.desktopAppIcons
+                        implicitSize: win.iconSize
+                        source: Icons.getAppIcon(win.appClass, "image-missing")
+                    }
+
+                    // Upstream category glyphs when the setting is off
+                    MaterialIcon {
+                        id: winIcon
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible: !root.desktopAppIcons
+                        grade: 0
+                        horizontalAlignment: Text.AlignHCenter
+                        text: Icons.getAppCategoryIcon(win.appClass, "terminal")
+                        color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+                    }
 
                     Behavior on opacity {
                         Anim {
@@ -244,6 +299,13 @@ Item {
                     }
                 }
             }
+        }
+
+        // Bottom inset matching the top so the active pill wraps icons cleanly
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.contentPad
+            visible: root.contentPad > 0
         }
     }
 

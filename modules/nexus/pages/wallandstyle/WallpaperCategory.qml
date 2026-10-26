@@ -43,7 +43,8 @@ PageBase {
                 source: String(modelData?.path ?? "")
                 text: modelData?.name ?? ""
                 onClicked: {
-                    Wallpapers.setWallpaper(modelData.path);
+                    const id = root.nState.editingActivityId || Activities.principalId;
+                    Activities.setActivityWallpaper(id, modelData.path);
                     root.nState.closeSubPage();
                     root.nState.closeSubPage();
                 }

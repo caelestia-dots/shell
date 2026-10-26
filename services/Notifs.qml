@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
+import Quickshell.Services.SystemTray
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
@@ -38,6 +39,100 @@ Singleton {
         return true;
     }
 
+    function resolveDesktopEntry(hints: var): var {
+        const desktopEntry = hints?.desktopEntry || "";
+        if (desktopEntry) {
+            const byId = DesktopEntries.byId(desktopEntry) || DesktopEntries.byId(`${desktopEntry}.desktop`);
+            if (byId)
+                return byId;
+        }
+
+        for (const key of [hints?.appName, hints?.appIcon]) {
+            if (!key)
+                continue;
+            const entry = DesktopEntries.heuristicLookup(key);
+            if (entry)
+                return entry;
+        }
+
+        return null;
+    }
+
+    function scoreTrayItem(item: var, tokens: list<string>): int {
+        if (!item)
+            return -1;
+
+        const fields = [item.id, item.title, item.tooltipTitle, item.tooltipDescription].map(v => Hypr.normalizeAppToken(v)).filter(Boolean);
+        if (fields.length === 0)
+            return -1;
+
+        let best = -1;
+        for (const token of tokens) {
+            if (!token)
+                continue;
+            for (const field of fields) {
+                if (field === token)
+                    return 100;
+                if (field.includes(token) || token.includes(field))
+                    best = Math.max(best, 60);
+            }
+        }
+        return best;
+    }
+
+    function findTrayItem(hints: var): var {
+        const tokens = Hypr.collectAppTokens(hints);
+        if (tokens.length === 0)
+            return null;
+
+        let best = null;
+        let bestScore = -1;
+        for (const item of SystemTray.items.values) {
+            const score = root.scoreTrayItem(item, tokens);
+            if (score > bestScore) {
+                bestScore = score;
+                best = item;
+            }
+        }
+        return bestScore >= 0 ? best : null;
+    }
+
+    function focusSource(notif: var): bool {
+        if (!notif)
+            return false;
+
+        const hints = {
+            desktopEntry: notif.desktopEntry || notif.notification?.desktopEntry || "",
+            appName: notif.appName || "",
+            appIcon: notif.appIcon || ""
+        };
+
+        const toplevel = Hypr.findAppToplevel(hints);
+        const trayItem = toplevel ? null : root.findTrayItem(hints);
+        const desktopEntry = (!toplevel && !trayItem) ? root.resolveDesktopEntry(hints) : null;
+
+        // Dismiss UI first so layer-shell doesn't restore the previous workspace/window.
+        if (notif.popup)
+            notif.popup = false;
+
+        let opened = false;
+        if (toplevel) {
+            Hypr.focusToplevel(toplevel, true);
+            opened = true;
+        } else if (trayItem) {
+            // Background apps (e.g. Teams minimized to tray): show their window.
+            trayItem.activate();
+            opened = true;
+        } else if (desktopEntry) {
+            desktopEntry.execute();
+            opened = true;
+        }
+
+        // Clear the notification after activating its source.
+        notif.close();
+        return opened;
+    }
+
     onListChanged: {
         if (loaded)
             saveTimer.restart();
@@ -68,6 +163,7 @@ Singleton {
                     body: n.body,
                     appIcon: n.appIcon,
                     appName: n.appName,
+                    desktopEntry: n.desktopEntry,
                     image: n.image,
                     expireTimeout: n.expireTimeout,
                     urgency: n.urgency,

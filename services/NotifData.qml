@@ -45,6 +45,7 @@ QtObject {
     property string body
     property string appIcon
     property string appName
+    property string desktopEntry
     property string image
     property var hints // Hints are not persisted across restarts
     property real expireTimeout: GlobalConfig.notifs.defaultExpireTimeout
@@ -144,6 +145,10 @@ QtObject {
             notif.appName = notif.notification.appName;
         }
 
+        function onDesktopEntryChanged(): void {
+            notif.desktopEntry = notif.notification.desktopEntry;
+        }
+
         function onImageChanged(): void {
             notif.image = notif.notification.image;
             notif.maybeTriggerDummyImageLoader();
@@ -233,6 +238,7 @@ QtObject {
         body = notification.body;
         appIcon = notification.appIcon;
         appName = notification.appName;
+        desktopEntry = notification.desktopEntry;
         image = notification.image;
         maybeTriggerDummyImageLoader();
         expireTimeout = notification.expireTimeout;

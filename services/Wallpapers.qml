@@ -29,13 +29,21 @@ Searcher {
         return category;
     }
 
+    readonly property string quietCli: Quickshell.shellPath("scripts/caelestia-quiet.py")
+
+    // Use quiet wrapper so apply_terms does not broadcast OSC to every PTY
+    // (that spam surfaces as a system notification in some clients).
+    function runWallpaper(cliArgs: list<string>): void {
+        Quickshell.execDetached(["python3", root.quietCli, ...cliArgs]);
+    }
+
     function setRandom(): void {
-        Quickshell.execDetached(["caelestia", "wallpaper", "-r", ...smartArg]);
+        root.runWallpaper(["wallpaper", "-r", ...smartArg]);
     }
 
     function setWallpaper(path: string): void {
         actualCurrent = path;
-        Quickshell.execDetached(["caelestia", "wallpaper", "-f", path, ...smartArg]);
+        root.runWallpaper(["wallpaper", "-f", path, ...smartArg]);
     }
 
     function preview(path: string): void {
@@ -91,7 +99,7 @@ Searcher {
             let wall = text().trim();
             if (!wall) {
                 wall = root.fallback;
-                Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
+                root.runWallpaper(["wallpaper", "-f", root.fallback, ...root.smartArg]);
             }
             root.actualCurrent = wall;
             root.previewColourLock = false;
@@ -99,7 +107,7 @@ Searcher {
         onLoadFailed: {
             root.actualCurrent = root.fallback;
             root.previewColourLock = false;
-            Quickshell.execDetached(["caelestia", "wallpaper", "-f", root.fallback, ...root.smartArg]);
+            root.runWallpaper(["wallpaper", "-f", root.fallback, ...root.smartArg]);
         }
     }
 

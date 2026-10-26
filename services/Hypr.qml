@@ -48,6 +48,137 @@ Singleton {
         dispatch(usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
     }
 
+    property var pendingFocusToplevel: null
+
+    readonly property Timer focusDefer: Timer {
+        interval: 80
+        repeat: false
+        onTriggered: {
+            const t = root.pendingFocusToplevel;
+            root.pendingFocusToplevel = null;
+            if (t)
+                root.focusToplevelNow(t);
+        }
+    }
+
+    function focusToplevel(toplevel: var, defer: bool): void {
+        if (!toplevel)
+            return;
+        if (defer) {
+            root.pendingFocusToplevel = toplevel;
+            focusDefer.restart();
+            return;
+        }
+        root.focusToplevelNow(toplevel);
+    }
+
+    function focusToplevelNow(toplevel: var): void {
+        if (!toplevel)
+            return;
+        const raw = String(toplevel.address ?? "");
+        if (!raw)
+            return;
+        const addr = raw.startsWith("0x") ? raw : `0x${raw}`;
+        const wsId = toplevel.workspace?.id ?? toplevel.lastIpcObject?.workspace?.id;
+        if (wsId != null && wsId !== root.activeWsId)
+            root.focusWorkspace(wsId);
+        dispatch(usingLua ? `hl.dsp.focus({ window = "address:${addr}" })` : `focuswindow address:${addr}`);
+    }
+
+    function normalizeAppToken(value: string): string {
+        return String(value || "").trim().toLowerCase().replace(/\.desktop$/, "");
+    }
+
+    function collectAppTokens(hints: var): list<string> {
+        const tokens = [];
+        const push = v => {
+            const t = root.normalizeAppToken(v);
+            if (t && !tokens.includes(t))
+                tokens.push(t);
+        };
+
+        const desktopEntry = hints?.desktopEntry ?? "";
+        push(desktopEntry);
+        if (desktopEntry) {
+            const entry = DesktopEntries.byId(desktopEntry) || DesktopEntries.byId(`${desktopEntry}.desktop`);
+            push(entry?.id);
+            push(entry?.startupClass);
+            push(entry?.name);
+        }
+
+        const appName = hints?.appName ?? "";
+        push(appName);
+        if (appName) {
+            const entry = DesktopEntries.heuristicLookup(appName);
+            push(entry?.id);
+            push(entry?.startupClass);
+            push(entry?.name);
+        }
+
+        const appIcon = hints?.appIcon ?? "";
+        push(appIcon);
+        if (appIcon) {
+            const entry = DesktopEntries.heuristicLookup(appIcon);
+            push(entry?.id);
+            push(entry?.startupClass);
+            push(entry?.name);
+        }
+
+        return tokens;
+    }
+
+    function scoreToplevelForApp(toplevel: var, tokens: list<string>): int {
+        const ipc = toplevel?.lastIpcObject;
+        const cls = root.normalizeAppToken(ipc?.class);
+        const initial = root.normalizeAppToken(ipc?.initialClass);
+        if (!cls && !initial)
+            return -1;
+
+        let best = -1;
+        for (const token of tokens) {
+            if (!token)
+                continue;
+            if (cls === token || initial === token)
+                best = Math.max(best, 100);
+            else if (cls.endsWith(`.${token}`) || initial.endsWith(`.${token}`))
+                best = Math.max(best, 80);
+            else if ((token.length >= 3 && (cls.includes(token) || initial.includes(token))) || (cls.length >= 3 && token.includes(cls)) || (initial.length >= 3 && token.includes(initial)))
+                best = Math.max(best, 40);
+        }
+
+        // Prefer visible windows, but still allow focusing minimized/hidden ones.
+        if (best >= 0 && ipc && !ipc.mapped)
+            best = Math.max(1, best - 25);
+
+        return best;
+    }
+
+    function findAppToplevel(hints: var): var {
+        const tokens = root.collectAppTokens(hints);
+        if (tokens.length === 0)
+            return null;
+
+        let best = null;
+        let bestScore = -1;
+        for (const t of toplevels.values) {
+            const score = root.scoreToplevelForApp(t, tokens);
+            if (score > bestScore) {
+                bestScore = score;
+                best = t;
+            }
+        }
+
+        return bestScore >= 0 ? best : null;
+    }
+
+    function focusApp(hints: var, defer: bool): bool {
+        const best = root.findAppToplevel(hints);
+        if (!best)
+            return false;
+        root.focusToplevel(best, defer);
+        return true;
+    }
+
     function toggleSpecial(name: string): void {
         dispatch(usingLua ? `hl.dsp.workspace.toggle_special("${name}")` : `togglespecialworkspace ${name}`);
     }

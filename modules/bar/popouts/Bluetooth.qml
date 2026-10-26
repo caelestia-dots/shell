@@ -16,7 +16,7 @@ ColumnLayout {
 
     required property PopoutState popouts
 
-    width: 300
+    width: Math.max(360, Tokens.sizes.bar.networkWidth)
     spacing: Tokens.spacing.small
 
     StyledText {

@@ -158,6 +158,9 @@ ClipRect {
             asynchronous: true
             anchors.left: workspaces.left
             anchors.right: workspaces.right
+            anchors.top: workspaces.top
+            anchors.bottom: workspaces.bottom
+            z: 0
             active: Config.bar.workspaces.activeIndicator
 
             sourceComponent: ActiveIndicator {
@@ -169,8 +172,16 @@ ClipRect {
             }
         }
 
+        // workspaces LazyListView is declared above — raise it above the indicator
+        Binding {
+            target: workspaces
+            property: "z"
+            value: 1
+        }
+
         MouseArea {
             anchors.fill: workspaces
+            z: 2
             onClicked: event => {
                 const ws = (workspaces.itemAt(event.x, event.y) as Workspace)?.ws;
                 if (!ws)

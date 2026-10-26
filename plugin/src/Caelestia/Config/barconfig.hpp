@@ -87,7 +87,7 @@ CONFIG_LIST_TYPE(BarTrayIconSub, BarTrayIconSubList)
 class BarTray : public settings::ObjectNode {
     CONFIG_NODE(BarTray, settings::ObjectNode)
 
-    CONFIG_PROPERTY(bool, background, false)
+    CONFIG_PROPERTY(bool, background, true)
     CONFIG_PROPERTY(bool, recolour, false)
     CONFIG_PROPERTY(bool, compact, false)
     CONFIG_GLOBAL_LIST(BarTrayIconSubList, iconSubs, {})
@@ -99,7 +99,7 @@ class BarClock : public settings::ObjectNode {
 
     CONFIG_PROPERTY(bool, background, false)
     CONFIG_PROPERTY(bool, showDate, false)
-    CONFIG_PROPERTY(bool, showIcon, true)
+    CONFIG_PROPERTY(bool, showIcon, false)
     CONFIG_PROPERTY(bool, showSeconds, false)
 };
 
@@ -132,8 +132,8 @@ class BarConfig : public settings::ObjectNode {
             LIST_ENTRY(spacer, true),
             LIST_ENTRY(activeWindow, true),
             LIST_ENTRY(spacer, true),
-            LIST_ENTRY(tray, true),
             LIST_ENTRY(clock, true),
+            LIST_ENTRY(tray, true),
             LIST_ENTRY(statusIcons, true),
             LIST_ENTRY(power, true),
         }))

@@ -12,15 +12,24 @@ Item {
     id: root
 
     required property PopoutState popouts
+    required property ShellScreen screen
     readonly property Popout currentPopout: content.children.find(c => c.shouldBeActive) ?? null
     readonly property Item current: currentPopout?.item ?? null
 
-    readonly property var trayItemsToIndices: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id)).reduce((acc, item, i) => {
+    readonly property var trayItemsToIndices: SystemTray.items.values.filter(i => !GlobalConfig.bar.tray.hiddenIcons.includes(i.id)).reduce((acc, item, i) => {
         acc[item.id] = i;
         return acc;
     }, {})
 
-    implicitWidth: currentPopout ? currentPopout.implicitWidth + Tokens.padding.large * 2 : 0
+    // Prefer the laid-out width when larger than implicitWidth so fixed-width
+    // popouts (battery/network/…) are not clipped by a narrower implicit size.
+    implicitWidth: {
+        if (!currentPopout)
+            return 0;
+        const item = currentPopout.item;
+        const w = Math.max(currentPopout.implicitWidth, item?.width ?? 0, item?.implicitWidth ?? 0);
+        return w + Tokens.padding.large * 2;
+    }
     implicitHeight: currentPopout ? currentPopout.implicitHeight + Tokens.padding.large * 2 : 0
 
     Item {
@@ -108,6 +117,13 @@ Item {
         }
 
         Popout {
+            name: "clock"
+            sourceComponent: ClockPopout {
+                screenState: ShellState.forScreen(root.screen)
+            }
+        }
+
+        Popout {
             name: "audio"
             sourceComponent: AudioPopout {
                 popouts: root.popouts
@@ -126,7 +142,7 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => i.hasMenu && i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+                values: SystemTray.items.values.filter(i => i.hasMenu && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
             Popout {
