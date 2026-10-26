@@ -19,6 +19,8 @@ Flickable {
     }
 
     rebound: Transition {
+        enabled: Math.abs(root.verticalOvershoot) >= 0.5 || Math.abs(root.horizontalOvershoot) >= 0.5
+
         onRunningChanged: {
             if (!running && !root.doneFakeFlick) {
                 root.doneFakeFlick = true;
