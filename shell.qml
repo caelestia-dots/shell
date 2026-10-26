@@ -24,6 +24,7 @@ ShellRoot {
         Notifs;
         Players;
         Brightness;
+        Keybinds;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)

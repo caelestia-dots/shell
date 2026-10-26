@@ -15,9 +15,12 @@ Singleton {
     property bool showPreview
     property string scheme
     property string flavour
+    property string variant
     readonly property bool light: showPreview ? previewLight : currentLight
     property bool currentLight
     property bool previewLight
+    // Apps can stay light while the shell uses a dark scheme
+    property bool lightApps
     readonly property M3Palette palette: showPreview ? preview : current
     readonly property M3TPalette tPalette: M3TPalette {}
     readonly property M3Palette current: M3Palette {}
@@ -27,6 +30,7 @@ Singleton {
 
     property bool cooldownPending
     property real lastBaseTransparency
+    property bool lightAppsLoaded
 
     function getLuminance(c: color): real {
         if (c.r == 0 && c.g == 0 && c.b == 0)
@@ -66,6 +70,7 @@ Singleton {
         if (!isPreview) {
             root.scheme = scheme.name;
             flavour = scheme.flavour;
+            root.variant = scheme.variant ?? "";
             currentLight = scheme.mode === "light";
         } else {
             previewLight = scheme.mode === "light";
@@ -76,10 +81,59 @@ Singleton {
             if (colours.hasOwnProperty(propName))
                 colours[propName] = `#${colour}`;
         }
+
+        if (!isPreview)
+            root.scheduleAppThemeApply();
     }
 
     function setMode(mode: string): void {
         Quickshell.execDetached(["caelestia", "scheme", "set", "--notify", "-m", mode]);
+        root.scheduleAppThemeApply();
+    }
+
+    function setLightApps(enabled: bool): void {
+        if (root.lightApps === enabled && root.lightAppsLoaded)
+            return;
+
+        root.lightApps = enabled;
+        root.persistLightApps();
+        root.syncCliThemeConfig();
+        root.applyAppTheme();
+
+        // Re-apply scheme so GTK/Qt theming is enabled/disabled immediately
+        const mode = root.currentLight ? "light" : "dark";
+        Quickshell.execDetached(["caelestia", "scheme", "set", "-m", mode]);
+        root.scheduleAppThemeApply();
+    }
+
+    function persistLightApps(): void {
+        lightAppsFile.setText(JSON.stringify({
+                lightApps: root.lightApps
+            }, null, 4) + "\n");
+
+        const flag = `${Paths.state}/force-apps-light`;
+        if (root.lightApps)
+            Quickshell.execDetached(["touch", flag]);
+        else
+            Quickshell.execDetached(["rm", "-f", flag]);
+    }
+
+    function applyAppTheme(): void {
+        const prefer = root.lightApps || root.currentLight ? "prefer-light" : "prefer-dark";
+        Quickshell.execDetached(["dconf", "write", "/org/gnome/desktop/interface/color-scheme", `'${prefer}'`]);
+    }
+
+    function scheduleAppThemeApply(): void {
+        appThemeTimer.restart();
+    }
+
+    function syncCliThemeConfig(): void {
+        // Keep CLI theme hooks in sync: skip GTK/Qt overrides while apps stay light
+        Quickshell.execDetached([
+            "python3",
+            Quickshell.shellPath("scripts/sync-light-apps-cli.py"),
+            root.lightApps ? "--light-apps" : "--no-light-apps"
+        ]);
     }
 
     function reloadHyprRules(): void {
@@ -118,6 +172,42 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onLoaded: root.load(text(), false)
+    }
+
+    FileView {
+        id: lightAppsFile
+
+        printErrors: false
+        path: `${Paths.state}/light-apps.json`
+        onLoaded: {
+            try {
+                const data = JSON.parse(text());
+                root.lightApps = !!data.lightApps;
+            } catch (e) {
+                root.lightApps = false;
+            }
+            root.lightAppsLoaded = true;
+            root.persistLightApps();
+            root.syncCliThemeConfig();
+            root.scheduleAppThemeApply();
+        }
+        onLoadFailed: err => {
+            root.lightApps = false;
+            root.lightAppsLoaded = true;
+            if (err === FileViewError.FileNotFound)
+                Qt.callLater(() => {
+                    root.persistLightApps();
+                    root.syncCliThemeConfig();
+                });
+            root.scheduleAppThemeApply();
+        }
+    }
+
+    Timer {
+        id: appThemeTimer
+
+        interval: 400
+        onTriggered: root.applyAppTheme()
     }
 
     ImageAnalyser {

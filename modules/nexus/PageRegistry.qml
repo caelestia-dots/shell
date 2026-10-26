@@ -82,6 +82,12 @@ QtObject {
             description: Tr.tr("UI language, weather location, display units"),
             category: "shell"
         },
+        {
+            label: Tr.tr("Keyboard & mouse"),
+            icon: "keyboard",
+            description: Tr.tr("Shell shortcuts and remapping"),
+            category: "shell"
+        },
 
         // About
         {

@@ -131,10 +131,20 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
 
-            last: true
             text: Tr.tr("Dark theme")
+            subtext: Tr.tr("Shell and bar colours")
             checked: !Colours.light
             onToggled: Colours.setMode(checked ? "dark" : "light")
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+
+            last: true
+            text: Tr.tr("Light apps")
+            subtext: Tr.tr("Keep GTK/Qt apps light even if the shell is dark")
+            checked: Colours.lightApps
+            onToggled: Colours.setLightApps(checked)
         }
     }
 }

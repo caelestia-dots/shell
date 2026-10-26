@@ -87,7 +87,8 @@ CustomMouseArea {
             if (Config.bar.showOnHover)
                 bar.isHovered = false;
 
-            if (Config.sidebar.showOnHover && !sidebarShortcutActive)
+            // Close sidebar on leave unless opened by shortcut (Super+N)
+            if (!sidebarShortcutActive)
                 screenState.sidebar = false;
         }
     }
@@ -230,16 +231,23 @@ CustomMouseArea {
                 screenState.dashboard = false;
         }
 
-        // Show utilities on hover
-        const showUtilities = inBottomPanel(panels.utilities, x, y, true);
+        // Bottom-right corner opens the notifications sidebar (not utilities-only).
+        // Utilities remain available via Super+U.
+        const showNotifsCorner = inBottomPanel(panels.utilities, x, y, true);
+        const overNotifsPanel = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.utilities, x, y);
 
-        // Always update visibility based on hover if not in shortcut mode
-        if (!utilitiesShortcutActive) {
-            screenState.utilities = showUtilities;
-        } else if (showUtilities) {
-            // If hovering over utilities area while in shortcut mode, transition to hover control
-            utilitiesShortcutActive = false;
+        if (!sidebarShortcutActive) {
+            screenState.sidebar = showNotifsCorner || (screenState.sidebar && overNotifsPanel);
+            // Avoid utilities-only panel stealing the corner
+            if (showNotifsCorner)
+                screenState.utilities = false;
+        } else if (showNotifsCorner || overNotifsPanel) {
+            sidebarShortcutActive = false;
         }
+
+        // Keep utilities hover disabled for the corner; shortcut / explicit toggle only
+        if (utilitiesShortcutActive && showNotifsCorner)
+            utilitiesShortcutActive = false;
 
         // Show popouts on hover
         if (x < bar.implicitWidth) {

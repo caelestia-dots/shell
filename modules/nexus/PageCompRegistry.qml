@@ -175,6 +175,14 @@ QtObject {
                 }
             }
         },
+        Component {
+            // Keyboard & mouse
+            StackPage {
+                Component {
+                    KeybindsPage {}
+                }
+            }
+        },
 
         // About
         Component {
