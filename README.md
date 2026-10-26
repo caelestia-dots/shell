@@ -145,7 +145,21 @@ via a `hl.on("hyprland.start", ...)` function in the Hyprland config.
 
 ### Shortcuts/IPC
 
-All keybinds are accessible via Hyprland [global shortcuts](https://wiki.hypr.land/Configuring/Basics/Binds/#dbus-global-shortcuts).
+Shell and window-manager shortcuts can be remapped from **Nexus → Keyboard & mouse**.
+The shell writes `~/.config/hypr/caelestia-binds.lua` and reloads Hyprland when you change a bind.
+
+Wire that file into your Hyprland Lua config (and avoid duplicating the same binds elsewhere):
+
+```lua
+-- Managed by Caelestia Keybinds (Nexus → Keyboard & mouse)
+require("caelestia-binds")
+```
+
+Multimedia keys that you prefer to keep outside the mapper (e.g. volume via `wpctl`) can stay in
+`hyprland.lua` as normal `hl.bind(...)` entries.
+
+Global shortcuts are also available via Hyprland
+[global shortcuts](https://wiki.hypr.land/Configuring/Basics/Binds/#dbus-global-shortcuts).
 If using the [Caelestia dotfiles][dots-repo], the keybinds are already configured for you.
 Otherwise, the [`keybinds.lua`](https://github.com/caelestia-dots/caelestia/blob/main/hypr/hyprland/keybinds.lua#L63-L67) file
 contains an example of how to use global shortcuts.
