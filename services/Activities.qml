@@ -65,6 +65,13 @@ Singleton {
     property string lastAppliedStyleKey: ""
     // Bumped when any activity look field changes so UI bindings refresh
     property int styleRevision: 0
+    // Serial style apply: wallpaper then scheme set must not race (wallpaper
+    // --no-smart keeps the previous mode and can overwrite a concurrent setMode).
+    property int styleApplyGen: 0
+    property int pendingLightApps: -1
+    property int pendingTransparency: -1
+    property string pendingVerifyMode: ""
+    readonly property string styleCli: Quickshell.shellPath("scripts/apply-activity-style.py")
 
     function bumpStyleRevision(): void {
         root.styleRevision++;
@@ -146,6 +153,31 @@ Singleton {
         return [style.wallpaper, style.scheme, style.flavour, style.variant, style.mode, style.transparency, style.lightApps].join("\x1f");
     }
 
+    function finishPendingStyleExtras(): void {
+        if (root.pendingLightApps >= 0) {
+            const want = root.pendingLightApps > 0;
+            // Scheme already applied with the activity mode — do not re-set mode.
+            if (want !== Colours.lightApps || !Colours.lightAppsLoaded)
+                Colours.setLightApps(want, false);
+            root.pendingLightApps = -1;
+        }
+        if (root.pendingTransparency >= 0) {
+            const wantTr = root.pendingTransparency > 0;
+            if (wantTr !== GlobalConfig.appearance.transparency.enabled)
+                GlobalConfig.appearance.transparency.enabled = wantTr;
+            root.pendingTransparency = -1;
+        }
+    }
+
+    function onStyleApplyFinished(gen: int): void {
+        // Ignore stale exits from a cancelled Process (gen property may already
+        // have been bumped for the replacement run).
+        if (gen !== root.styleApplyGen || styleApplyProc.running)
+            return;
+        root.finishPendingStyleExtras();
+        styleVerifyTimer.restart();
+    }
+
     function applyStyleForActivity(activityId: string): void {
         root.ensurePrincipalStyle();
         const id = root.enabled ? (activityId || root.currentActivity?.id || root.principalId) : root.principalId;
@@ -157,31 +189,47 @@ Singleton {
         root.lastStyleActivityId = id;
 
         const wallpaperChanged = !!(style.wallpaper && style.wallpaper !== Wallpapers.actualCurrent);
-        if (wallpaperChanged)
-            Wallpapers.setWallpaper(style.wallpaper);
-
         const schemeNow = `${Colours.scheme} ${Colours.flavour}`;
         const schemeWant = `${style.scheme} ${style.flavour}`;
-        // Wallpaper + smartScheme already regenerates dynamic colours — avoid a
-        // second `scheme set` that dumps OSC sequences to the parent tty.
-        const skipScheme = wallpaperChanged && style.scheme === "dynamic" && GlobalConfig.services.smartScheme;
-        if (!skipScheme && style.scheme && schemeWant !== schemeNow)
-            Schemes.setScheme(style.scheme, style.flavour);
+        const modeMismatch = !!(style.mode && (style.mode === "light") !== Colours.currentLight);
+        const variantMismatch = !!(style.variant && style.variant !== Colours.variant);
+        const schemeMismatch = !!(style.scheme && schemeWant !== schemeNow);
+        // Wallpaper file change must regenerate dynamic colours with the activity mode.
+        const needScheme = wallpaperChanged || schemeMismatch || variantMismatch || modeMismatch;
 
-        if (!skipScheme && style.variant && style.variant !== Colours.variant)
-            Schemes.setVariant(style.variant);
+        root.pendingLightApps = style.lightApps;
+        root.pendingTransparency = style.transparency;
+        root.pendingVerifyMode = style.mode || "";
 
-        const wantLight = style.mode === "light";
-        if (!wallpaperChanged && style.mode && wantLight !== Colours.currentLight)
-            Colours.setMode(style.mode);
+        if (!wallpaperChanged && !needScheme) {
+            root.finishPendingStyleExtras();
+            return;
+        }
 
-        const wantLightApps = style.lightApps > 0;
-        if (wantLightApps !== Colours.lightApps)
-            Colours.setLightApps(wantLightApps);
+        root.styleApplyGen++;
+        const gen = root.styleApplyGen;
+        // Single Python process: wallpaper files (no colour apply) + one scheme apply.
+        const cmd = ["python3", root.styleCli];
+        if (wallpaperChanged) {
+            Wallpapers.actualCurrent = style.wallpaper;
+            cmd.push("--wallpaper", style.wallpaper);
+        }
+        if (needScheme || wallpaperChanged) {
+            if (style.scheme)
+                cmd.push("--name", style.scheme);
+            if (style.flavour)
+                cmd.push("--flavour", style.flavour);
+            if (style.mode)
+                cmd.push("--mode", style.mode);
+            if (style.variant)
+                cmd.push("--variant", style.variant);
+        }
 
-        const wantTr = style.transparency > 0;
-        if (wantTr !== GlobalConfig.appearance.transparency.enabled)
-            GlobalConfig.appearance.transparency.enabled = wantTr;
+        if (styleApplyProc.running)
+            styleApplyProc.running = false;
+        styleApplyProc.gen = gen;
+        styleApplyProc.command = cmd;
+        styleApplyProc.running = true;
     }
 
     function applyCurrentStyleSoon(): void {
@@ -537,8 +585,34 @@ Singleton {
     Timer {
         id: styleApplyTimer
 
-        interval: 120
+        interval: 40
         onTriggered: root.applyStyleForActivity(root.styleTargetId())
+    }
+
+    Timer {
+        id: styleVerifyTimer
+
+        interval: 200
+        onTriggered: {
+            const want = root.pendingVerifyMode;
+            if (!want)
+                return;
+            const wantLight = want === "light";
+            if (wantLight === Colours.currentLight)
+                return;
+            // scheme.json lost a race or FileView lagged — force another apply
+            root.lastAppliedStyleKey = "";
+            root.applyStyleForActivity(root.styleTargetId());
+        }
+    }
+
+    Process {
+        id: styleApplyProc
+
+        property int gen: 0
+        stdout: StdioCollector {
+            onStreamFinished: root.onStyleApplyFinished(styleApplyProc.gen)
+        }
     }
 
     Connections {

@@ -48,6 +48,9 @@ ColumnLayout {
             const items = (ch.item as StatusIcons).items;
             const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
             if (icon) {
+                // Keep OTP dialog open while hovering the VPN icon
+                if (icon.name === "vpn" && popouts.currentName === "vpnOtp")
+                    return;
                 popouts.currentName = icon.name;
                 popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
                 popouts.hasCurrent = true;
@@ -197,6 +200,7 @@ ColumnLayout {
                     StatusIcons {
                         objectName: "taskbarStatusIcons"
                         popouts: root.popouts
+                        bar: root
                     }
                 }
             }

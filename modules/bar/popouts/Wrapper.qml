@@ -66,7 +66,7 @@ Item {
 
     focus: hasCurrent
     Keys.onEscapePressed: {
-        // Forward escape to password popout if active, otherwise close
+        // Forward escape to password / OTP popout if active, otherwise close
         if (currentName === "wirelesspassword" && content.item) {
             const passwordPopout = (content.item as Content)?.children.find(c => c.name === "wirelesspassword");
             if (passwordPopout && passwordPopout.item) {
@@ -74,12 +74,19 @@ Item {
                 return;
             }
         }
+        if (currentName === "vpnOtp" && content.item) {
+            const otpPopout = (content.item as Content)?.children.find(c => c.name === "vpnOtp");
+            if (otpPopout && otpPopout.item) {
+                otpPopout.item.closeDialog();
+                return;
+            }
+        }
         close();
     }
 
     Keys.onPressed: event => {
-        // Don't intercept keys when password popout is active - let it handle them
-        if (currentName === "wirelesspassword") {
+        // Don't intercept keys when password/OTP popout is active - let it handle them
+        if (currentName === "wirelesspassword" || currentName === "vpnOtp") {
             event.accepted = false;
         }
     }
@@ -97,7 +104,7 @@ Item {
     }
 
     Binding {
-        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "clock"))
+        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "vpnOtp" || root.currentName === "clock"))
 
         target: QsWindow.window
         property: "WlrLayershell.keyboardFocus"

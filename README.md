@@ -630,6 +630,10 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "enabled": true
             },
             {
+                "id": "vpn",
+                "enabled": true
+            },
+            {
                 "id": "battery",
                 "enabled": true
             }

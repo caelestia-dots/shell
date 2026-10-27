@@ -2,6 +2,14 @@
 
 Cambios relevantes de este fork respecto a releases internas. El detalle de uso está en [FEATURES.md](./FEATURES.md).
 
+## 2026-10-27
+
+### Madison VPN
+
+- Icono VPN en la pastilla de status (bajo Bluetooth).
+- Clic = conectar (diálogo OTP Caelestia) / desconectar.
+- Scripts en `madison_vpn_widget` (`hyprland/`) instalados a `~/.local/share/madison-vpn/`.
+
 ## 2026-10-26
 
 ### Launcher

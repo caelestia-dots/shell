@@ -41,9 +41,10 @@ Searcher {
         root.runWallpaper(["wallpaper", "-r", ...smartArg]);
     }
 
-    function setWallpaper(path: string): void {
+    function setWallpaper(path: string, noSmart = false): void {
         actualCurrent = path;
-        root.runWallpaper(["wallpaper", "-f", path, ...smartArg]);
+        const smart = noSmart || !GlobalConfig.services.smartScheme ? ["--no-smart"] : [];
+        root.runWallpaper(["wallpaper", "-f", path, ...smart]);
     }
 
     function preview(path: string): void {

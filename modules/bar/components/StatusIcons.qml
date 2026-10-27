@@ -10,10 +10,13 @@ import qs.services
 import qs.utils
 import qs.modules.bar.components.status
 
+// MadisonVpn used by vpn entry click handling
+
 StyledRect {
     id: root
 
     required property var popouts
+    required property Item bar
 
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
@@ -137,6 +140,14 @@ StyledRect {
                     roleValue: "bluetooth"
                     delegate: EntryWrapper {
                         BluetoothStatus {
+                            colour: parent.iconColour
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "vpn"
+                    delegate: EntryWrapper {
+                        VpnStatus {
                             colour: parent.iconColour
                         }
                     }

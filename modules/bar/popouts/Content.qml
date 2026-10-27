@@ -112,6 +112,20 @@ Item {
         }
 
         Popout {
+            name: "vpn"
+            sourceComponent: Vpn {
+                popouts: root.popouts
+            }
+        }
+
+        Popout {
+            name: "vpnOtp"
+            sourceComponent: VpnOtp {
+                popouts: root.popouts
+            }
+        }
+
+        Popout {
             name: "battery"
             sourceComponent: Battery {}
         }

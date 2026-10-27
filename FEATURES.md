@@ -18,6 +18,7 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
 | **Launcher** | Hover inferior, clic derecho para editar `.desktop` (nombre / descripción / icono) |
 | **Kitty** | Paleta alineada con la activity activa (plantilla + recarga en vivo) |
+| **Madison VPN** | Icono bajo Bluetooth: conectar (OTP en diálogo) / desconectar |
 | **Atajos** | Remapeables desde Nexus; atajos de activities incluidos |
 
 ---
@@ -107,6 +108,24 @@ require("caelestia-activity-rules")  -- reglas de activities / pins (Nexus → S
 - Mientras grabas, utilities/sidebar **permanecen abiertos** al salir el puntero (evita teardowns mid-capture).
 - Indicador **REC** / **PAUSE** bajo el reloj en la barra mientras hay grabación activa.
 - El chip principal del recorder no re-dispara start mientras ya está grabando (evita toggle-stop accidental).
+
+---
+
+## Madison VPN (FortiClient / openfortivpn)
+
+Icono en la pastilla de status (debajo de Bluetooth):
+
+- Clic desconectado → diálogo OTP integrado → conecta
+- Clic conectado → desconecta
+- Estado con poll (`~/.local/share/madison-vpn/status_vpn.sh`)
+
+Scripts e install: repo privado [madison_vpn_widget](https://github.com/iMacnucintosh/madison_vpn_widget) → carpeta `hyprland/`:
+
+```bash
+cd madison_vpn_widget/hyprland && ./install.sh
+```
+
+Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN».
 
 ---
 

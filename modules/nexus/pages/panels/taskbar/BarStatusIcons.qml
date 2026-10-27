@@ -15,6 +15,7 @@ PageBase {
             microphone: Tr.tr("Microphone"),
             network: Tr.tr("Network"),
             bluetooth: Tr.tr("Bluetooth"),
+            vpn: Tr.tr("Madison VPN"),
             battery: Tr.tr("Battery")
         })
 

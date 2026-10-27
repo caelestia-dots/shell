@@ -4637,3 +4637,46 @@ msgstr "Persona"
 #: modules/nexus/pages/ShellPage.qml
 msgid "Groups"
 msgstr "Grupos"
+
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/bar/popouts/VpnOtp.qml
+#: services/MadisonVpn.qml
+msgid "Madison VPN"
+msgstr "Madison VPN"
+
+#: modules/bar/popouts/VpnOtp.qml
+msgid "Enter your MFA OTP to connect"
+msgstr "Introduce el OTP MFA para conectar"
+
+#: modules/bar/popouts/VpnOtp.qml
+msgid "6-digit OTP"
+msgstr "OTP de 6 dígitos"
+
+#: services/MadisonVpn.qml
+#, qt-format
+msgid "Connected · %1"
+msgstr "Conectado · %1"
+
+#: services/MadisonVpn.qml
+msgid "Login failed (user / password / OTP / certificate)."
+msgstr "Error de acceso (usuario / contraseña / OTP / certificado)."
+
+#: services/MadisonVpn.qml
+#, qt-format
+msgid "Could not start the VPN tunnel (code %1)."
+msgstr "No se pudo levantar el túnel VPN (código %1)."
+
+#: services/MadisonVpn.qml
+msgctxt "madison vpn state"
+msgid "Disconnected"
+msgstr "Desconectado"
+
+#: services/MadisonVpn.qml
+msgctxt "madison vpn state"
+msgid "Connecting…"
+msgstr "Conectando…"
+
+#: services/MadisonVpn.qml
+msgctxt "madison vpn state"
+msgid "Disconnecting…"
+msgstr "Desconectando…"

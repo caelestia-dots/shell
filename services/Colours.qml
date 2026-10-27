@@ -98,7 +98,7 @@ Singleton {
         root.scheduleAppThemeApply();
     }
 
-    function setLightApps(enabled: bool): void {
+    function setLightApps(enabled: bool, reapplyScheme = true): void {
         if (root.lightApps === enabled && root.lightAppsLoaded)
             return;
 
@@ -107,9 +107,13 @@ Singleton {
         root.syncCliThemeConfig();
         root.applyAppTheme();
 
-        // Re-apply scheme so GTK/Qt theming is enabled/disabled immediately
-        const mode = root.currentLight ? "light" : "dark";
-        root.runSchemeSet(["scheme", "set", "-m", mode]);
+        // Re-apply scheme so GTK/Qt theming is enabled/disabled immediately.
+        // Skip when the caller already issued a scheme set with the intended mode
+        // (activity style apply) — otherwise we can race and restore the old mode.
+        if (reapplyScheme) {
+            const mode = root.currentLight ? "light" : "dark";
+            root.runSchemeSet(["scheme", "set", "-m", mode]);
+        }
         root.scheduleAppThemeApply();
     }
 
