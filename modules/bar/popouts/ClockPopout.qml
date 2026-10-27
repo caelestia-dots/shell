@@ -36,16 +36,23 @@ ColumnLayout {
 
     StyledRect {
         Layout.fillWidth: true
-        implicitHeight: calendar.implicitHeight
+        implicitHeight: Hydration.enabled ? hydration.implicitHeight : calendar.implicitHeight
         radius: Tokens.rounding.extraLarge
-        color: Colours.tPalette.m3surfaceContainerHigh
+        color: Hydration.enabled ? "transparent" : Colours.tPalette.m3surfaceContainerHigh
 
         Calendar {
             id: calendar
 
+            visible: !Hydration.enabled
             anchors.left: parent.left
             anchors.right: parent.right
             screenState: root.screenState
+        }
+
+        HydrationWidget {
+            id: hydration
+
+            visible: Hydration.enabled
         }
     }
 

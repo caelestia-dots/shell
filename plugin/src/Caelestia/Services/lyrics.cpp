@@ -854,8 +854,18 @@ void Lyrics::persistTrackPrefs() {
 }
 
 QString Lyrics::lyricsDir() {
-    QString dir = config::ConfigSingleton::instance()->paths()->lyricsDir();
-    if (dir.isEmpty()) {
+    const auto* cfg = config::ConfigSingleton::instance();
+    if (!cfg) {
+        return {};
+    }
+    const auto* paths = cfg->paths();
+    if (!paths) {
+        return {};
+    }
+
+    // Copy by value — never operate on a possibly-dangling config string view.
+    QString dir = QString(paths->lyricsDir());
+    if (dir.isEmpty() || dir.isNull()) {
         return {};
     }
     if (dir == u"~"_s) {
@@ -863,7 +873,7 @@ QString Lyrics::lyricsDir() {
     } else if (dir.startsWith(u"~/"_s)) {
         dir.replace(0, 1, QDir::homePath());
     }
-    while (dir.endsWith(u'/') && dir.size() > 1) {
+    while (dir.size() > 1 && dir.back() == QLatin1Char('/')) {
         dir.chop(1);
     }
     return dir;

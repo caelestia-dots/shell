@@ -5,11 +5,14 @@ import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.modules.nexus.common
 
 PageBase {
     id: root
+
+    property bool hydrationSettingsOpen: false
 
     title: Tr.tr("Complements")
 
@@ -36,7 +39,6 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             leadingIcon: "timer"
             text: Tr.tr("Timers")
             subtext: Timers.enabled
@@ -44,6 +46,189 @@ PageBase {
                 : Tr.tr("Disabled — active timers are cleared")
             checked: GlobalConfig.addons.timers.enabled
             onToggled: Timers.setEnabled(checked)
+        }
+
+        ConnectedRect {
+            id: hydrationCard
+
+            Layout.fillWidth: true
+            last: true
+            implicitHeight: hydrationCol.implicitHeight + Tokens.padding.medium * 2
+
+            ColumnLayout {
+                id: hydrationCol
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Tokens.padding.medium
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.largeIncreased
+                spacing: Tokens.spacing.medium
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.spacing.medium
+
+                    MaterialIcon {
+                        text: "water_drop"
+                        color: Colours.palette.m3onSurfaceVariant
+                        fontStyle: Tokens.font.icon.medium
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Tr.tr("Hydration")
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Hydration.enabled
+                                ? (root.hydrationSettingsOpen
+                                    ? Tr.tr("%1 ml · reminder every %2 min").arg(GlobalConfig.addons.hydration.dailyGoalMl).arg(GlobalConfig.addons.hydration.reminderMinutes)
+                                    : Tr.tr("Replaces the dashboard calendar with a water intake tracker"))
+                                : Tr.tr("Disabled — calendar stays on the dashboard")
+                            color: Colours.palette.m3outline
+                            font: Tokens.font.label.small
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+                        }
+                    }
+
+                    IconButton {
+                        visible: Hydration.enabled
+                        isRound: true
+                        icon: root.hydrationSettingsOpen ? "expand_less" : "expand_more"
+                        type: IconButton.Text
+                        font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
+                        padding: Tokens.padding.small
+                        Layout.alignment: Qt.AlignVCenter
+                        onClicked: root.hydrationSettingsOpen = !root.hydrationSettingsOpen
+                    }
+
+                    StyledSwitch {
+                        Layout.alignment: Qt.AlignVCenter
+                        checked: GlobalConfig.addons.hydration.enabled
+                        onToggled: {
+                            Hydration.setEnabled(checked);
+                            if (!checked)
+                                root.hydrationSettingsOpen = false;
+                            else
+                                root.hydrationSettingsOpen = true;
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: Hydration.enabled && root.hydrationSettingsOpen
+                    spacing: Tokens.spacing.small
+
+                    component SettingRow: RowLayout {
+                        property alias label: settingLabel.text
+                        property alias subtext: settingSub.text
+                        property alias value: spin.value
+                        property alias from: spin.from
+                        property alias to: spin.to
+                        property alias stepSize: spin.stepSize
+                        signal moved(value: real)
+
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.medium
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            StyledText {
+                                id: settingLabel
+                                Layout.fillWidth: true
+                                font: Tokens.font.body.small
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                id: settingSub
+                                Layout.fillWidth: true
+                                visible: text.length > 0
+                                color: Colours.palette.m3outline
+                                font: Tokens.font.label.small
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        StyledSpinBox {
+                            id: spin
+                            cLayer: 2
+                            onValueModified: parent.moved(value)
+                        }
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Daily goal")
+                        subtext: Tr.tr("Target water intake per day (ml)")
+                        value: GlobalConfig.addons.hydration.dailyGoalMl
+                        from: 500
+                        to: 8000
+                        stepSize: 100
+                        onMoved: v => Hydration.setDailyGoal(v)
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Reminder interval")
+                        subtext: Tr.tr("Minutes without a sip before a reminder")
+                        value: GlobalConfig.addons.hydration.reminderMinutes
+                        from: 5
+                        to: 120
+                        stepSize: 5
+                        onMoved: v => Hydration.setReminderMinutes(v)
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Preset 1")
+                        subtext: Tr.tr("Quick-add button amount (ml)")
+                        value: GlobalConfig.addons.hydration.presetMl0
+                        from: 1
+                        to: 1000
+                        stepSize: 1
+                        onMoved: v => Hydration.setPreset(0, v)
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Preset 2")
+                        value: GlobalConfig.addons.hydration.presetMl1
+                        from: 1
+                        to: 1000
+                        stepSize: 1
+                        onMoved: v => Hydration.setPreset(1, v)
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Preset 3")
+                        value: GlobalConfig.addons.hydration.presetMl2
+                        from: 1
+                        to: 1000
+                        stepSize: 1
+                        onMoved: v => Hydration.setPreset(2, v)
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Preset 4")
+                        value: GlobalConfig.addons.hydration.presetMl3
+                        from: 1
+                        to: 1000
+                        stepSize: 1
+                        onMoved: v => Hydration.setPreset(3, v)
+                    }
+                }
+            }
         }
 
         StyledText {

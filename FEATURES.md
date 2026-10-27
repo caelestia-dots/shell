@@ -12,14 +12,14 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | --- | --- |
 | **Activities** | Espacios de trabajo agrupados (Casa / Trabajo / Juegos…), overview, estilo por actividad |
 | **Barra** | Pills de actividades, iconos de apps en workspaces, indicador **REC**, tray y status más claros |
-| **Reloj** | Popout con calendario + temporizadores (con sonido y persistencia) |
+| **Reloj** | Popout con calendario (o hidratación) + temporizadores (con sonido y persistencia) |
 | **Grabación** | Estable (no se corta al salir del panel); guarda en `~/Vídeos/Videocapturas de pantalla` |
 | **Notificaciones** | Clic → enfoca la app / ventana relacionada |
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
 | **Launcher** | Hover inferior, edición de `.desktop`, iconos Papirus |
 | **Kitty / GTK** | Paleta alineada a la activity (Kitty + Thunar/Material) |
 | **Madison VPN** | Complemento on/off en Nexus; icono OTP / desconectar; engranaje config; limpia túnel tras sleep |
-| **Complementos** | Nexus → Complementos: Madison VPN + Timers (on/off) con iconos |
+| **Complementos** | Nexus → Complementos: Madison VPN + Timers + Hidratación (on/off) con iconos |
 | **Utilities** | Mantener activo (café) en interruptores rápidos, ON por defecto |
 | **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
 | **Updates** | Arch / AUR / Flatpak: icono+badge, popout, Nexus; update en fondo (panel) o con logs (Nexus) |
@@ -138,6 +138,7 @@ Página **Nexus → Complementos** (sustituye el placeholder de Plugins):
 - Lista de features opcionales del fork, con icono identificativo por fila.
 - **Madison VPN**: interruptor on/off. Al desactivar se oculta el icono, se para el poll y se ejecuta teardown (`disconnect` + `heal`) para matar `openfortivpn`/helper.
 - **Timers**: interruptor on/off. Al desactivar se limpian timers activos y se oculta la sección del popout del reloj (el calendario sigue).
+- **Hidratación**: interruptor on/off (opt-in). Al activar sustituye el calendario del dashboard Nexus (y del popout del reloj) por un depósito con waves, meta diaria (default 3000 ml), botones +20/+83/+250/+500 configurables, undo del último trago, y recordatorio con acciones si pasan N minutos (default 15) sin registrar un trago. Estado en `~/.local/state/caelestia/hydration.json`.
 
 ## Madison VPN (FortiClient / openfortivpn)
 

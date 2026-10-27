@@ -5154,3 +5154,72 @@ msgstr "Desactivado: se cancelan los temporizadores activos"
 msgid "Madison VPN config: ~/.config/openfortivpn/config (popout gear). Scripts: ~/.local/share/madison-vpn/"
 msgstr "Config Madison VPN: ~/.config/openfortivpn/config (engranaje del popout). Scripts: ~/.local/share/madison-vpn/"
 
+#: modules/nexus/pages/ComplementsPage.qml
+#: services/Hydration.qml
+msgid "Hydration"
+msgstr "Hidratación"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Replaces the dashboard calendar with a water intake tracker"
+msgstr "Sustituye el calendario del dashboard por un seguidor de agua"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Disabled — calendar stays on the dashboard"
+msgstr "Desactivado: el calendario permanece en el dashboard"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Hydration settings"
+msgstr "Ajustes de hidratación"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "%1 ml · reminder every %2 min"
+msgstr "%1 ml · recordatorio cada %2 min"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Daily goal"
+msgstr "Meta diaria"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Target water intake per day (ml)"
+msgstr "Cantidad de agua objetivo al día (ml)"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Reminder interval"
+msgstr "Intervalo de recordatorio"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Minutes without a sip before a reminder"
+msgstr "Minutos sin un trago antes del recordatorio"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Preset 1"
+msgstr "Preset 1"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Preset 2"
+msgstr "Preset 2"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Preset 3"
+msgstr "Preset 3"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Preset 4"
+msgstr "Preset 4"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Quick-add button amount (ml)"
+msgstr "Cantidad del botón de suma rápida (ml)"
+
+#: services/Hydration.qml
+msgid "Time to drink water"
+msgstr "Hora de beber agua"
+
+#: services/Hydration.qml
+msgid "%1 / %2 ml — tap an amount to log it"
+msgstr "%1 / %2 ml — toca una cantidad para registrarla"
+
+#: modules/dashboard/dash/HydrationWidget.qml
+msgid "%1 / %2 ml"
+msgstr "%1 / %2 ml"
+

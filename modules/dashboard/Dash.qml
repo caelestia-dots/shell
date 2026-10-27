@@ -60,14 +60,23 @@ GridLayout {
         Layout.column: 1
         Layout.columnSpan: 3
         Layout.fillWidth: true
-        Layout.preferredHeight: calendar.implicitHeight
+        Layout.fillHeight: Hydration.enabled
+        Layout.preferredHeight: Hydration.enabled ? Math.max(hydration.implicitHeight, 220) : calendar.implicitHeight
+        color: Hydration.enabled ? "transparent" : Colours.tPalette.m3surfaceContainer
 
         radius: Tokens.rounding.extraLarge
 
         Calendar {
             id: calendar
 
+            visible: !Hydration.enabled
             screenState: root.screenState
+        }
+
+        HydrationWidget {
+            id: hydration
+
+            visible: Hydration.enabled
         }
     }
 

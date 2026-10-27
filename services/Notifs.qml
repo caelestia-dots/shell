@@ -152,11 +152,20 @@ Singleton {
         target: PersistentState
     }
 
+    function pushLocal(properties: var): var {
+        const props = Object.assign({
+                popup: root.shouldShowPopup()
+            }, properties);
+        const comp = notifComp.createObject(root, props);
+        root.list = [comp, ...root.list];
+        return comp;
+    }
+
     Timer {
         id: saveTimer
 
         interval: 1000
-        onTriggered: storage.setText(JSON.stringify(root.notClosed.map(n => ({
+        onTriggered: storage.setText(JSON.stringify(root.notClosed.filter(n => !(n.notificationId || "").startsWith("local:")).map(n => ({
                     time: n.time,
                     id: n.id,
                     summary: n.summary,
