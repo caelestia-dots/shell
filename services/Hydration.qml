@@ -201,8 +201,8 @@ Singleton {
         root.dismissReminder();
         root.lastRemindAt = Date.now();
 
-        const p2 = root.presets[2] || 250;
-        const p3 = root.presets[3] || 500;
+        const p0 = root.presets[0] || 20;
+        const p1 = root.presets[1] || 83;
         const notif = Notifs.pushLocal({
                 notificationId: "local:hydration",
                 summary: Tr.tr("Time to drink water"),
@@ -216,18 +216,18 @@ Singleton {
 
         notif.actions = [
             {
-                identifier: "add-mid",
-                text: `+${p2} ml`,
+                identifier: "add-small",
+                text: `+${p0} ml`,
                 invoke: () => {
-                    root.addMl(p2);
+                    root.addMl(p0);
                     notif.close();
                 }
             },
             {
-                identifier: "add-large",
-                text: `+${p3} ml`,
+                identifier: "add-sip",
+                text: `+${p1} ml`,
                 invoke: () => {
-                    root.addMl(p3);
+                    root.addMl(p1);
                     notif.close();
                 }
             }

@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Caelestia.Config
 import Caelestia.I18n
+import qs.services
 import qs.utils
 
 Singleton {
@@ -24,6 +25,8 @@ Singleton {
     property string search: ""
     property int currentIndex: 0
     property var pendingPaste: null
+    // Window that had focus before the Exclusive overlay stole it
+    property string pasteTargetAddress: ""
 
     property list<var> history: []
     property list<var> favorites: []
@@ -53,9 +56,31 @@ Singleton {
                 section: "history"
             }))]
 
+    function capturePasteTarget(): void {
+        const t = Hypr.activeToplevel;
+        const raw = String(t?.address ?? "");
+        root.pasteTargetAddress = raw ? (raw.startsWith("0x") ? raw : `0x${raw}`) : "";
+    }
+
+    function restorePasteTarget(): void {
+        const addr = root.pasteTargetAddress;
+        if (!addr)
+            return;
+        Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ window = "address:${addr}" })` : `focuswindow address:${addr}`);
+    }
+
+    function pasteKeyCommand(): string {
+        // Prefer Hyprland's virtual shortcut (reliable after layer-shell Exclusive focus),
+        // fall back to wtype for non-Hypr / older compositors.
+        if (Hypr.usingLua)
+            return `hyprctl dispatch 'hl.dsp.send_shortcut({ mods = "CTRL", key = "v" })' 2>/dev/null || wtype -M ctrl -P v -m ctrl`;
+        return `wtype -M ctrl -P v -m ctrl`;
+    }
+
     function openAtCursor(): void {
         if (!root.enabled)
             return;
+        root.capturePasteTarget();
         root.search = "";
         root.currentIndex = 0;
         root.reloadHistory();
@@ -92,6 +117,8 @@ Singleton {
     function select(item: var): void {
         if (!item)
             return;
+        // Copy immediately while the overlay closes — don't serialize behind focus wait
+        root.copyItem(item);
         root.pendingPaste = item;
         root.close();
         pasteTimer.restart();
@@ -301,22 +328,29 @@ Singleton {
             }, null, 2));
     }
 
+    function copyItem(item: var): void {
+        if (!item)
+            return;
+        if (item.uid && item.kind === "text" && item.text !== undefined) {
+            Quickshell.execDetached(["sh", "-c", `printf '%s' ${JSON.stringify(item.text)} | wl-copy`]);
+            return;
+        }
+        if (item.path && item.kind === "image") {
+            const mime = root.mimeForImagePath(item.path);
+            Quickshell.execDetached(["sh", "-c", `wl-copy --type ${JSON.stringify(mime)} < ${JSON.stringify(item.path)}`]);
+            return;
+        }
+        if (item.id)
+            Quickshell.execDetached(["sh", "-c", `cliphist decode ${JSON.stringify(String(item.id))} | wl-copy`]);
+    }
+
     function pasteItem(item: var): void {
         if (!item)
             return;
 
-        if (item.uid && item.kind === "text" && item.text !== undefined) {
-            Quickshell.execDetached(["sh", "-c", `printf '%s' ${JSON.stringify(item.text)} | wl-copy && sleep 0.05 && wtype -M ctrl -P v -m ctrl`]);
-            return;
-        }
-        // File-manager copies and favourited images: paste image bytes from path
-        if (item.path && item.kind === "image") {
-            const mime = root.mimeForImagePath(item.path);
-            Quickshell.execDetached(["sh", "-c", `wl-copy --type ${JSON.stringify(mime)} < ${JSON.stringify(item.path)} && sleep 0.05 && wtype -M ctrl -P v -m ctrl`]);
-            return;
-        }
-        if (item.id)
-            Quickshell.execDetached(["sh", "-c", `cliphist decode ${JSON.stringify(String(item.id))} | wl-copy && sleep 0.05 && wtype -M ctrl -P v -m ctrl`]);
+        // Focus was captured at open; restore then fire Ctrl+V (copy already started in select)
+        root.restorePasteTarget();
+        Quickshell.execDetached(["sh", "-c", `sleep 0.05 && ${root.pasteKeyCommand()}`]);
     }
 
     onMaxItemsChanged: root.syncCliphistMaxItems()
@@ -336,7 +370,8 @@ Singleton {
     Timer {
         id: pasteTimer
 
-        interval: 90
+        // Minimum for Exclusive layer teardown; copy already ran in parallel
+        interval: 100
         repeat: false
         onTriggered: {
             root.pasteItem(root.pendingPaste);
