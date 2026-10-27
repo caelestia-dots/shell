@@ -118,7 +118,7 @@ Item {
     }
 
     Binding {
-        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "vpnOtp" || root.currentName === "vpnSettings" || root.currentName === "clock"))
+        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "vpnOtp" || root.currentName === "vpnSettings" || root.currentName === "updatesPassword" || root.currentName === "clock"))
 
         target: QsWindow.window
         property: "WlrLayershell.keyboardFocus"

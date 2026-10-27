@@ -110,6 +110,18 @@ Scope {
     }
 
     CustomShortcut {
+        name: "workspaceNext"
+        description: "Switch to next workspace / desktop"
+        onPressed: Activities.focusWorkspaceByOffset(1)
+    }
+
+    CustomShortcut {
+        name: "workspacePrev"
+        description: "Switch to previous workspace / desktop"
+        onPressed: Activities.focusWorkspaceByOffset(-1)
+    }
+
+    CustomShortcut {
         name: "activityNext"
         description: "Switch to next activity"
         onPressed: Activities.focusActivityByOffset(1)

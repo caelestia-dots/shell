@@ -440,8 +440,30 @@ Singleton {
             return;
         const act = root.currentActivity;
         const local = root.activeWsId - act.startWs;
-        const next = Math.max(0, Math.min(act.workspaceCount - 1, local + delta));
-        root.focusWorkspace(act.workspaceIds[next]);
+        const next = local + delta;
+        if (next >= 0 && next < act.workspaceCount) {
+            root.focusWorkspace(act.workspaceIds[next]);
+            return;
+        }
+        // At activity edge: stay put unless cross-activity workspace cycling is enabled
+        if (!GlobalConfig.activities.crossActivityWorkspaces)
+            return;
+        const acts = root.mappedActivities;
+        const idx = root.currentActivityIndex;
+        if (delta > 0) {
+            if (idx + 1 < acts.length)
+                root.focusWorkspace(acts[idx + 1].workspaceIds[0]);
+        } else if (idx > 0) {
+            const prev = acts[idx - 1];
+            root.focusWorkspace(prev.workspaceIds[prev.workspaceCount - 1]);
+        }
+    }
+
+    function focusWorkspaceByOffset(delta: int): void {
+        if (root.enabled)
+            root.focusNextInActivity(delta);
+        else
+            Hyprland.dispatch(`hl.dsp.focus({ workspace = "e${delta > 0 ? "+" : "-"}${Math.abs(delta)}" })`);
     }
 
     function toggleOverview(): void {

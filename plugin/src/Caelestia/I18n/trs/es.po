@@ -3145,6 +3145,14 @@ msgstr "Mostrar iconos de apps en los escritorios"
 msgid "Use real application icons; when off, show category icons under the workspace marker"
 msgstr "Usar iconos reales de las apps; si está desactivado, se muestran iconos de categoría bajo el marcador"
 
+#: modules/nexus/pages/ShellPage.qml
+msgid "Cross-activity desktop shortcuts"
+msgstr "Saltar entre actividades al cambiar de escritorio"
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Allow next/previous desktop shortcuts to leave the current activity; when off, they stay inside it"
+msgstr "Permitir que los atajos de escritorio anterior/siguiente salten a otra actividad; si está desactivado, se quedan dentro de la actual"
+
 #: modules/nexus/pages/ShellPage.qml services/Keybinds.qml
 msgid "Activities"
 msgstr "Actividades"
@@ -3984,16 +3992,16 @@ msgid "Next workspace"
 msgstr "Escritorio siguiente"
 
 #: services/Keybinds.qml
-msgid "Switch to the next existing workspace"
-msgstr "Cambiar al siguiente escritorio existente"
+msgid "Switch to the next desktop (respects activity boundaries unless cross-activity is enabled)"
+msgstr "Cambiar al siguiente escritorio (respeta los límites de actividad salvo que esté permitido saltar)"
 
 #: services/Keybinds.qml
 msgid "Previous workspace"
 msgstr "Escritorio anterior"
 
 #: services/Keybinds.qml
-msgid "Switch to the previous existing workspace"
-msgstr "Cambiar al escritorio existente anterior"
+msgid "Switch to the previous desktop (respects activity boundaries unless cross-activity is enabled)"
+msgstr "Cambiar al escritorio anterior (respeta los límites de actividad salvo que esté permitido saltar)"
 
 #: services/Keybinds.qml
 msgid "Next activity"

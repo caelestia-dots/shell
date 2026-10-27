@@ -173,11 +173,18 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Show app icons on workspaces")
             subtext: Tr.tr("Use real application icons; when off, show category icons under the workspace marker")
             checked: GlobalConfig.activities.showWindowIcons
             onToggled: GlobalConfig.activities.showWindowIcons = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Cross-activity desktop shortcuts")
+            subtext: Tr.tr("Allow next/previous desktop shortcuts to leave the current activity; when off, they stay inside it")
+            checked: GlobalConfig.activities.crossActivityWorkspaces
+            onToggled: GlobalConfig.activities.crossActivityWorkspaces = checked
         }
 
         SectionHeader {

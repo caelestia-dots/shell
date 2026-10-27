@@ -283,17 +283,17 @@ Singleton {
         {
             id: "workspaceNext",
             label: () => Tr.tr("Next workspace"),
-            description: () => Tr.tr("Switch to the next existing workspace"),
+            description: () => Tr.tr("Switch to the next desktop (respects activity boundaries unless cross-activity is enabled)"),
             defaultBind: "SUPER + mouse_down",
-            dispatch: "hl.dsp.focus({ workspace = \"e+1\" })",
+            global: "caelestia:workspaceNext",
             category: "workspaces"
         },
         {
             id: "workspacePrev",
             label: () => Tr.tr("Previous workspace"),
-            description: () => Tr.tr("Switch to the previous existing workspace"),
+            description: () => Tr.tr("Switch to the previous desktop (respects activity boundaries unless cross-activity is enabled)"),
             defaultBind: "SUPER + mouse_up",
-            dispatch: "hl.dsp.focus({ workspace = \"e-1\" })",
+            global: "caelestia:workspacePrev",
             category: "workspaces"
         },
         {

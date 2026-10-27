@@ -33,6 +33,12 @@ ColumnLayout {
         passwordField.text = "";
     }
 
+    function focusPasswordField(): void {
+        passwordField.text = "";
+        root.forceActiveFocus();
+        passwordField.forceActiveFocus();
+    }
+
     visible: shouldBeVisible
     focus: shouldBeVisible
 
@@ -40,8 +46,21 @@ ColumnLayout {
 
     onShouldBeVisibleChanged: {
         if (shouldBeVisible) {
-            passwordField.text = "";
-            Qt.callLater(() => passwordField.forceActiveFocus());
+            // Wait for OnDemand keyboard focus Binding to apply (same pattern as Wi-Fi password)
+            focusTimer.restart();
+        } else if (Updates.awaitingPassword && !Updates.installing) {
+            // Left the password UI without confirming (e.g. hover dismissed the popout)
+            Updates.cancelPassword();
+        }
+    }
+
+    Connections {
+        target: root.popouts
+
+        function onHasCurrentChanged(): void {
+            // Hover-away dismisses the layer without changing currentName first
+            if (!root.popouts.hasCurrent && Updates.awaitingPassword && !Updates.installing)
+                Updates.cancelPassword();
         }
     }
 
@@ -63,6 +82,21 @@ ColumnLayout {
                 passwordField.text = "";
                 root.popouts.hasCurrent = false;
             }
+        }
+        function onAuthErrorChanged(): void {
+            // Wrong password — keep dialog open and refocus for retry
+            if (root.shouldBeVisible && Updates.authError.length)
+                focusTimer.restart();
+        }
+    }
+
+    Timer {
+        id: focusTimer
+
+        interval: 150
+        onTriggered: {
+            if (root.shouldBeVisible)
+                root.focusPasswordField();
         }
     }
 
