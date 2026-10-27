@@ -3,7 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
-import M3Shapes
+import Caelestia.Blobs
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -16,7 +16,11 @@ ClipRect {
     readonly property real fillLevel: Hydration.progress
     property real animFill: 0
     property real wavePhase: 0
-    readonly property bool presetsOpen: drinkHover.containsMouse
+    readonly property bool presetsOpen: fabHover.hovered || panelHover.hovered || closeGrace.running
+    readonly property real drinkPad: Tokens.padding.medium
+    readonly property real drinkSize: 44
+    // Small overlap so blobs fuse; panel grows up from the FAB, flush with its right edge
+    readonly property real drinkNeck: Tokens.spacing.small
     // Largest closest to the glass FAB
     readonly property var presetOrder: {
         const out = [];
@@ -154,42 +158,121 @@ ClipRect {
         }
     }
 
-    // Glass FAB bottom-right; hover reveals +/− presets
-    MouseArea {
-        id: drinkHover
+    // FAB bottom-right; hover blooms presets out of the button (same BlobGroup trick as lyrics info)
+    Item {
+        id: drinkSlot
 
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.padding.medium
-        implicitWidth: drinkCol.implicitWidth
-        implicitHeight: drinkCol.implicitHeight
-        hoverEnabled: true
+        width: root.drinkSize
+        height: root.drinkSize
         z: 2
 
-        ColumnLayout {
-            id: drinkCol
+        Timer {
+            id: closeGrace
+
+            // Bridge the gap between FAB and panel while the cursor travels the neck
+            interval: 280
+        }
+
+        function armCloseGrace(): void {
+            if (fabHover.hovered || panelHover.hovered)
+                closeGrace.stop();
+            else
+                closeGrace.restart();
+        }
+
+        BlobGroup {
+            id: drinkBlobs
+
+            color: Colours.palette.m3surfaceContainerHighest
+            smoothing: Tokens.rounding.medium
+            cornerFill: false
+
+            Behavior on color {
+                CAnim {}
+            }
+        }
+
+        BlobRect {
+            id: fabBlob
+
+            anchors.fill: parent
+            anchors.margins: root.presetsOpen || fabHover.hovered ? -Tokens.padding.extraSmall : 0
+            group: drinkBlobs
+            radius: root.presetsOpen ? Tokens.rounding.large : Tokens.rounding.extraLarge
+
+            Behavior on anchors.margins {
+                Anim {}
+            }
+
+            Behavior on radius {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+        }
+
+        BlobRect {
+            id: panelBlob
 
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            spacing: Tokens.spacing.extraSmall
+            implicitWidth: parent.width
+            implicitHeight: parent.height
+            group: drinkBlobs
+            radius: Tokens.rounding.large
+            deformScale: 0.00001
 
-            StyledRect {
-                Layout.alignment: Qt.AlignRight
-                implicitWidth: presetsPanel.implicitWidth + Tokens.padding.small * 2
-                implicitHeight: presetsPanel.implicitHeight + Tokens.padding.small * 2
-                radius: Tokens.rounding.large
-                color: Colours.palette.m3surfaceContainerHighest
-                opacity: root.presetsOpen ? 1 : 0
-                visible: opacity > 0.01
+            states: State {
+                name: "open"
+                when: root.presetsOpen
+
+                PropertyChanges {
+                    // Grow upward from the FAB, right edges aligned (neck at top of the +)
+                    panelBlob.anchors.rightMargin: 0
+                    panelBlob.anchors.bottomMargin: drinkSlot.height - root.drinkNeck
+                    panelBlob.implicitWidth: Math.max(presetsPanel.implicitWidth + root.drinkPad * 2, drinkSlot.width)
+                    panelBlob.implicitHeight: Math.max(presetsPanel.implicitHeight + root.drinkPad * 2, drinkSlot.height)
+                    presetsContent.opacity: 1
+                }
+            }
+
+            transitions: Transition {
+                Anim {
+                    properties: "rightMargin,implicitWidth"
+                }
+                Anim {
+                    properties: "bottomMargin,implicitHeight"
+                    easing: Tokens.anim.expressiveFastSpatial
+                }
+                Anim {
+                    property: "opacity"
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            Behavior on implicitWidth {
+                Anim {}
+            }
+
+            Behavior on implicitHeight {
+                Anim {}
+            }
+
+            Item {
+                id: presetsContent
+
+                anchors.fill: parent
+                clip: true
+                opacity: 0
                 enabled: root.presetsOpen
 
-                layer.enabled: true
-                layer.effect: SoftShadow {}
+                HoverHandler {
+                    id: panelHover
 
-                Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
-                    }
+                    onHoveredChanged: drinkSlot.armCloseGrace()
                 }
 
                 RowLayout {
@@ -229,27 +312,23 @@ ClipRect {
                     }
                 }
             }
+        }
 
-            // M3 Cookie4Sided — same family as the dash resource “Uso” chip
-            MaterialShape {
-                Layout.alignment: Qt.AlignRight
-                implicitSize: 44
-                shape: MaterialShape.Cookie4Sided
-                color: Colours.palette.m3secondaryContainer
+        Item {
+            anchors.fill: parent
+            z: 1
 
-                layer.enabled: true
-                layer.effect: SoftShadow {}
+            HoverHandler {
+                id: fabHover
 
-                StateLayer {
-                    anchors.fill: parent
-                }
+                onHoveredChanged: drinkSlot.armCloseGrace()
+            }
 
-                MaterialIcon {
-                    anchors.centerIn: parent
-                    text: "add"
-                    color: Colours.palette.m3onSecondaryContainer
-                    fontStyle: Tokens.font.icon.builders.medium.weight(Font.Bold).build()
-                }
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: "add"
+                color: Colours.palette.m3onSurface
+                fontStyle: Tokens.font.icon.builders.medium.weight(Font.Bold).build()
             }
         }
     }
@@ -261,11 +340,11 @@ ClipRect {
         required property bool subtract
         required property int amount
 
-        implicitWidth: 64
-        implicitHeight: 32
+        implicitWidth: 56
+        implicitHeight: 28
         radius: Tokens.rounding.full
         color: chip.subtract
-            ? Qt.tint(Colours.palette.m3surfaceContainerHighest, Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.22))
+            ? Qt.tint(Colours.palette.m3surfaceContainerHighest, Qt.rgba(Colours.palette.m3error.r, Colours.palette.m3error.g, Colours.palette.m3error.b, 0.28))
             : Colours.palette.m3secondaryContainer
 
         StateLayer {
@@ -284,8 +363,6 @@ ClipRect {
             font: Tokens.font.label.medium
             color: chip.subtract ? Colours.palette.m3error : Colours.palette.m3onSecondaryContainer
             opacity: chip.subtract ? 0.85 : 1
-            layer.enabled: true
-            layer.effect: SoftShadow {}
         }
     }
 
