@@ -9,8 +9,6 @@
 
 namespace caelestia::shell::multimedia {
 
-using Qt::StringLiterals::operator""_s;
-
 VisualSource::VisualSource(QObject* parent)
     : QObject(parent) {
     m_player.setLoops(QMediaPlayer::Infinite);
@@ -71,18 +69,17 @@ void VisualSource::setLocalPath(const QString& path) {
 }
 
 void VisualSource::load() {
-    const auto provider = QUrl(m_source).scheme() == u"image"_s;
+    const auto provider = QUrl(m_source).scheme() == u"image";
     const auto mime =
         m_localPath.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(m_localPath).name();
     // We don't use the mime type for svg checking because Qt doesn't.
     // See QQuickPixmap::isScalableImageFormat.
     const auto prettyPath = QUrl(m_source).path(QUrl::PrettyDecoded);
-    m_scalable =
-        provider || prettyPath.endsWith(u"svg"_s) || prettyPath.endsWith(u"svgz"_s) || prettyPath.endsWith(u"pdf"_s);
+    m_scalable = provider || prettyPath.endsWith(u"svg") || prettyPath.endsWith(u"svgz") || prettyPath.endsWith(u"pdf");
 
-    if (mime.startsWith(u"video/"_s))
+    if (mime.startsWith(u"video/"))
         setType(Type::Live);
-    else if (provider || mime.startsWith(u"image/"_s) || mime == u"application/pdf"_s)
+    else if (provider || mime.startsWith(u"image/") || mime == u"application/pdf")
         setType(Type::Still);
     else
         setType(Type::Unknown);
