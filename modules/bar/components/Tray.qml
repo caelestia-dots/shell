@@ -47,6 +47,8 @@ StyledRect {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: root.padding
+        // Fixed width so differently padded tray glyphs stay horizontally centered
+        width: root.width
         spacing: Config.bar.tray.background ? Tokens.spacing.medium / 2 : Tokens.spacing.small
 
         opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
@@ -80,6 +82,7 @@ StyledRect {
             }
 
             TrayItem {
+                anchors.horizontalCenter: parent.horizontalCenter
                 popouts: root.popouts
             }
         }
