@@ -94,7 +94,7 @@ jobs:
               - "**/.qmlformat.ini"
               - "scripts/qml-lint-conventions.py"
             source-cpp:
-              - "{plugin,extras}/**/*.{cpp,hpp}"
+              - "plugin/**/*.{cpp,hpp}"
               - "**/[_.]clang-format"
               - "**/.clang-format-ignore"
             format-workflow:
