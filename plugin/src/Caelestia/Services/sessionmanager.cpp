@@ -19,15 +19,16 @@ Q_LOGGING_CATEGORY(lcSessionManager, "caelestia.services.sessionmanager", QtInfo
 
 namespace caelestia::shell::services {
 
+using Qt::StringLiterals::operator""_L1;
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
 
 namespace {
 
-const QString k_loginService = u"org.freedesktop.login1"_s;
-const QString k_loginPath = u"/org/freedesktop/login1"_s;
-const QString k_loginIface = u"org.freedesktop.login1.Manager"_s;
-const QString k_sessionIface = u"org.freedesktop.login1.Session"_s;
+constexpr auto k_loginService = "org.freedesktop.login1"_L1;
+constexpr auto k_loginPath = "/org/freedesktop/login1"_L1;
+constexpr auto k_loginIface = "org.freedesktop.login1.Manager"_L1;
+constexpr auto k_sessionIface = "org.freedesktop.login1.Session"_L1;
 
 } // namespace
 
@@ -76,9 +77,9 @@ bool SessionManager::exec(const QStringList& command) {
 
     auto cmd = command.first();
     // Alias systemctl and loginctl to raw dbus calls (only match exact command)
-    if ((cmd == u"systemctl"_s || cmd == u"loginctl"_s) && command.size() == 2)
+    if ((cmd == u"systemctl" || cmd == u"loginctl") && command.size() == 2)
         cmd = command.at(1);
-    if (cmd == u"loginctl"_s && command.size() == 3 && command.at(1) == u"terminate-user"_s && command.at(2).isEmpty())
+    if (cmd == u"loginctl" && command.size() == 3 && command.at(1) == u"terminate-user" && command.at(2).isEmpty())
         cmd = u"logout"_s; // Manual alias `loginctl terminate-user ''` -> logout
 
     // Normalise command
@@ -151,7 +152,7 @@ bool SessionManager::queryHibernateAvailable() {
         qCWarning(lcSessionManager) << "Failed to query hibernate support:" << hibernateReply.error().message();
     } else {
         const auto state = hibernateReply.value();
-        return state == u"yes"_s || state == u"challenge"_s;
+        return state == u"yes" || state == u"challenge";
     }
 
     return false;

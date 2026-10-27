@@ -24,7 +24,7 @@ using Qt::StringLiterals::operator""_s;
 
 namespace {
 
-const QString k_dynamic = u"dynamic"_s;
+constexpr QStringView k_dynamic = u"dynamic";
 
 qreal luminance(const QColor& colour) {
     const auto r = static_cast<qreal>(colour.redF());

@@ -17,7 +17,7 @@ SchemeOpener::SchemeOpener(QObject* parent)
     , m_palette(new ColourPalette(this)) {
     connectResolveSchemeUpdates(this, [this](bool committed) {
         Q_UNUSED(committed);
-        if (m_name == u"dynamic"_s)
+        if (m_name == u"dynamic")
             resolve();
     });
 }

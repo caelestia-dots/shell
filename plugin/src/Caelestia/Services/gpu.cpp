@@ -49,7 +49,7 @@ QString parseNvidiaName(const QByteArray& out) {
 QString parseGlxinfoName(const QByteArray& out) {
     const QStringList lines = QString::fromUtf8(out).split(u'\n');
     for (const QString& line : lines) {
-        const qsizetype idx = line.indexOf(u"Device:"_s);
+        const qsizetype idx = line.indexOf(u"Device:");
         if (idx < 0) {
             continue;
         }
