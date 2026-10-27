@@ -12,8 +12,8 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    // Plugin support is not wired up yet; always 0 for now
-    readonly property int pluginCount: 0
+    // Fork complements currently enabled (Madison VPN, Timers, …)
+    readonly property int pluginCount: (MadisonVpn.enabled ? 1 : 0) + (Timers.enabled ? 1 : 0)
 
     property string quickshellVersion
     property string cliVersion

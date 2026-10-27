@@ -125,7 +125,7 @@ StyledRect {
                     return Colours.palette.m3onSurface;
                 }
                 opacity: 0.8
-                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
             }
         }
     }

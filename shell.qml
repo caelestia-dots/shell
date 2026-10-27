@@ -32,6 +32,7 @@ ShellRoot {
         Activities;
         Clipboard;
         Updates;
+        MadisonVpn;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)

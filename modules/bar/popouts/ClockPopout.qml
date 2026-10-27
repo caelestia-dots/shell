@@ -51,6 +51,7 @@ ColumnLayout {
 
     ColumnLayout {
         Layout.fillWidth: true
+        visible: Timers.enabled
         spacing: Tokens.spacing.small
 
         StyledText {

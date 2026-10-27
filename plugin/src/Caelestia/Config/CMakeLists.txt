@@ -13,6 +13,7 @@ qml_module(caelestia-config
         anim.cpp
         enums.hpp
         activitiesconfig.hpp
+        addonsconfig.hpp
         backgroundconfig.hpp
         barconfig.hpp
         dashboardconfig.hpp

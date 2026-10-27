@@ -9,6 +9,7 @@ StyledSwitch {
     id: root
 
     property string subtext
+    property string leadingIcon
     property alias first: bg.first
     property alias last: bg.last
     readonly property alias bg: bg
@@ -46,37 +47,47 @@ StyledSwitch {
         anchors.leftMargin: root.horizontalPadding
         anchors.rightMargin: Tokens.spacing.medium
 
-        implicitWidth: column.implicitWidth
-        implicitHeight: column.implicitHeight
+        implicitWidth: row.implicitWidth
+        implicitHeight: row.implicitHeight
 
-        Column {
-            id: column
+        RowLayout {
+            id: row
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 0
+            spacing: Tokens.spacing.medium
 
-            StyledText {
-                id: label
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                text: root.text
-                font: root.font
-                elide: Text.ElideRight
+            MaterialIcon {
+                visible: root.leadingIcon.length > 0
+                text: root.leadingIcon
+                color: Colours.palette.m3onSurfaceVariant
+                fontStyle: Tokens.font.icon.medium
+                Layout.alignment: Qt.AlignVCenter
             }
 
-            StyledText {
-                anchors.left: parent.left
-                anchors.right: parent.right
+            Column {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                spacing: 0
 
-                visible: root.subtext
-                text: root.subtext
-                color: Colours.palette.m3outline
-                font: Tokens.font.label.small
-                elide: Text.ElideRight
+                StyledText {
+                    id: label
+
+                    width: parent.width
+                    text: root.text
+                    font: root.font
+                    elide: Text.ElideRight
+                }
+
+                StyledText {
+                    width: parent.width
+                    visible: root.subtext
+                    text: root.subtext
+                    color: Colours.palette.m3outline
+                    font: Tokens.font.label.small
+                    elide: Text.ElideRight
+                }
             }
         }
     }

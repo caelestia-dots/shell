@@ -50,6 +50,9 @@ StyledRect {
         // Hide updates badge when there is nothing to install (keep visible while installing)
         if (entry.id === "updates")
             return !Updates.hasUpdates && !Updates.busy && !Updates.installing;
+        // Complements: Madison VPN can be turned off entirely
+        if (entry.id === "vpn")
+            return !MadisonVpn.enabled;
         return false;
     }
 

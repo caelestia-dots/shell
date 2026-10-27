@@ -13,6 +13,8 @@ Singleton {
     readonly property string scriptsDir: `${Quickshell.env("HOME")}/.local/share/madison-vpn`
     readonly property string configPath: `${Quickshell.env("HOME")}/.config/openfortivpn/config`
 
+    readonly property bool enabled: GlobalConfig.addons.madisonVpn.enabled
+
     property bool connected: false
     property string vpnIp: ""
     property string statusText: Tr.trCtx("Disconnected", "madison vpn state")
@@ -20,6 +22,7 @@ Singleton {
     property bool otpOpen: false
     property string lastError: ""
     property bool wasConnected: false
+    property bool tearingDown: false
 
     // Editable openfortivpn connection fields (rest of the file is preserved on save)
     property string cfgHost: ""
@@ -33,13 +36,21 @@ Singleton {
     readonly property bool connecting: busy && !connected
     readonly property bool disconnecting: busy && connected
 
+    function setEnabled(on: bool): void {
+        if (GlobalConfig.addons.madisonVpn.enabled === on)
+            return;
+        GlobalConfig.addons.madisonVpn.enabled = on;
+    }
+
     function refreshStatus(): void {
-        if (statusProc.running)
+        if (!root.enabled || statusProc.running)
             return;
         statusProc.running = true;
     }
 
     function onResumed(): void {
+        if (!root.enabled)
+            return;
         // After sleep the SSL tunnel is usually dead while ppp0 still looks up.
         // Heal tears down zombies + clears hosts/DNS; then burst-poll status.
         if (!healProc.running)
@@ -49,7 +60,7 @@ Singleton {
     }
 
     function toggle(): void {
-        if (root.busy)
+        if (!root.enabled || root.busy)
             return;
         if (root.connected)
             root.disconnect();
@@ -58,7 +69,7 @@ Singleton {
     }
 
     function requestOtp(): void {
-        if (root.busy || root.connected)
+        if (!root.enabled || root.busy || root.connected)
             return;
         root.lastError = "";
         root.otpOpen = true;
@@ -70,6 +81,8 @@ Singleton {
     }
 
     function connectWithOtp(otp: string): void {
+        if (!root.enabled)
+            return;
         const token = (otp || "").replace(/\s+/g, "");
         if (token.length === 0 || root.busy)
             return;
@@ -83,11 +96,40 @@ Singleton {
     }
 
     function disconnect(): void {
-        if (root.busy || !root.connected)
+        if (!root.enabled || root.busy || !root.connected)
             return;
         root.busy = true;
         root.statusText = Tr.trCtx("Disconnecting…", "madison vpn state");
         disconnectProc.running = true;
+    }
+
+    // Kill tunnel / openfortivpn even if status already looks disconnected
+    function teardown(): void {
+        root.cancelOtp();
+        root.tearingDown = true;
+        root.busy = true;
+        root.lastError = "";
+        root.statusText = Tr.trCtx("Disconnected", "madison vpn state");
+        resumeBurst.stop();
+        if (connectProc.running)
+            connectProc.running = false;
+        if (statusProc.running)
+            statusProc.running = false;
+        if (disconnectProc.running) {
+            // Already stopping; heal will run on exit
+            return;
+        }
+        disconnectProc.running = true;
+    }
+
+    function clearRuntimeState(): void {
+        root.connected = false;
+        root.vpnIp = "";
+        root.busy = false;
+        root.wasConnected = false;
+        root.otpOpen = false;
+        root.tearingDown = false;
+        root.statusText = Tr.trCtx("Disconnected", "madison vpn state");
     }
 
     function reloadConfig(): void {
@@ -183,6 +225,10 @@ Singleton {
     }
 
     function applyStatus(out: string): void {
+        if (!root.enabled) {
+            root.clearRuntimeState();
+            return;
+        }
         const parts = (out || "").trim().split("|");
         const state = parts[0] || "disconnected";
         const ip = parts[1] || "";
@@ -216,9 +262,20 @@ Singleton {
         command: [`${root.scriptsDir}/heal_vpn.sh`]
         running: false
         stdout: StdioCollector {
-            onStreamFinished: root.applyStatus(text)
+            onStreamFinished: {
+                if (root.tearingDown || !root.enabled)
+                    root.clearRuntimeState();
+                else
+                    root.applyStatus(text);
+            }
         }
-        onExited: () => root.refreshStatus()
+        onExited: () => {
+            if (root.tearingDown || !root.enabled) {
+                root.clearRuntimeState();
+                return;
+            }
+            root.refreshStatus();
+        }
     }
 
     Process {
@@ -233,6 +290,10 @@ Singleton {
             }
         }
         onExited: code => {
+            if (!root.enabled) {
+                root.clearRuntimeState();
+                return;
+            }
             if (code === 0) {
                 if (GlobalConfig.utilities.toasts.vpnChanged)
                     Toaster.toast(Tr.tr("Madison VPN"), Tr.tr("VPN connected"), "vpn_lock");
@@ -257,6 +318,16 @@ Singleton {
         stdout: StdioCollector {}
         stderr: StdioCollector {}
         onExited: () => {
+            if (root.tearingDown || !root.enabled) {
+                // After forced stop, heal to clear DNS/hosts/zombies
+                if (!healProc.running)
+                    healProc.running = true;
+                else
+                    root.clearRuntimeState();
+                if (GlobalConfig.utilities.toasts.vpnChanged)
+                    Toaster.toast(Tr.tr("Madison VPN"), Tr.tr("Complement disabled"), "shield");
+                return;
+            }
             if (GlobalConfig.utilities.toasts.vpnChanged)
                 Toaster.toast(Tr.tr("Madison VPN"), Tr.tr("VPN disconnected"), "shield");
             root.refreshStatus();
@@ -264,8 +335,10 @@ Singleton {
     }
 
     Timer {
+        id: poll
+
         interval: 8000
-        running: true
+        running: root.enabled
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refreshStatus()
@@ -278,6 +351,10 @@ Singleton {
         interval: 1500
         repeat: true
         onTriggered: {
+            if (!root.enabled) {
+                resumeBurst.stop();
+                return;
+            }
             root.refreshStatus();
             resumeBurst.ticks++;
             if (resumeBurst.ticks >= 6)
@@ -290,6 +367,19 @@ Singleton {
 
         function onResumed(): void {
             root.onResumed();
+        }
+    }
+
+    Connections {
+        target: GlobalConfig.addons.madisonVpn
+
+        function onEnabledChanged(): void {
+            if (root.enabled) {
+                root.tearingDown = false;
+                root.refreshStatus();
+            } else {
+                root.teardown();
+            }
         }
     }
 
@@ -308,5 +398,8 @@ Singleton {
         }
     }
 
-    Component.onCompleted: root.refreshStatus()
+    Component.onCompleted: {
+        if (root.enabled)
+            root.refreshStatus();
+    }
 }

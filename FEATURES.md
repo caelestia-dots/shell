@@ -18,7 +18,8 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
 | **Launcher** | Hover inferior, edición de `.desktop`, iconos Papirus |
 | **Kitty / GTK** | Paleta alineada a la activity (Kitty + Thunar/Material) |
-| **Madison VPN** | Icono bajo Bluetooth: OTP / desconectar; engranaje para editar `openfortivpn`; limpia túnel tras sleep |
+| **Madison VPN** | Complemento on/off en Nexus; icono OTP / desconectar; engranaje config; limpia túnel tras sleep |
+| **Complementos** | Nexus → Complementos: Madison VPN + Timers (on/off) con iconos |
 | **Utilities** | Mantener activo (café) en interruptores rápidos, ON por defecto |
 | **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
 | **Updates** | Arch / AUR / Flatpak: icono+badge, popout, Nexus; update en fondo (panel) o con logs (Nexus) |
@@ -130,7 +131,17 @@ Inspirado en [arch-update-checker](https://github.com/iMacnucintosh/arch-update-
 
 ---
 
+## Complementos
+
+Página **Nexus → Complementos** (sustituye el placeholder de Plugins):
+
+- Lista de features opcionales del fork, con icono identificativo por fila.
+- **Madison VPN**: interruptor on/off. Al desactivar se oculta el icono, se para el poll y se ejecuta teardown (`disconnect` + `heal`) para matar `openfortivpn`/helper.
+- **Timers**: interruptor on/off. Al desactivar se limpian timers activos y se oculta la sección del popout del reloj (el calendario sigue).
+
 ## Madison VPN (FortiClient / openfortivpn)
+
+Requiere el complemento activo en Nexus → Complementos (default on).
 
 Icono en la pastilla de status (debajo de Bluetooth):
 
@@ -145,7 +156,7 @@ Scripts e install: repo privado [madison_vpn_widget](https://github.com/iMacnuci
 cd madison_vpn_widget/hyprland && ./install.sh
 ```
 
-Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma; **no** van en este repo). Engranaje en el popout VPN para editar host/puerto/usuario/`set-dns`/`trusted-cert` (password/OTP no se muestran). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN».
+Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma; **no** van en este repo). Engranaje en el popout VPN para editar host/puerto/usuario/`set-dns`/`trusted-cert` (password/OTP no se muestran). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN» cuando el complemento está activo.
 
 ---
 

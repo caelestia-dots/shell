@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
+import Caelestia.Config
 import Caelestia.I18n
 import qs.services
 import qs.utils
@@ -12,13 +13,15 @@ import qs.utils
 Singleton {
     id: root
 
+    readonly property bool enabled: GlobalConfig.addons.timers.enabled
+
     property list<var> timers: []
     property int nextId: 1
     property bool loaded: false
 
     readonly property Timer tick: Timer {
         interval: 250
-        running: root.timers.length > 0
+        running: root.enabled && root.timers.length > 0
         repeat: true
         onTriggered: root.tickTimers()
     }
@@ -26,6 +29,17 @@ Singleton {
     readonly property Timer saveTimer: Timer {
         interval: 200
         onTriggered: root.persist()
+    }
+
+    function setEnabled(on: bool): void {
+        if (GlobalConfig.addons.timers.enabled === on)
+            return;
+        GlobalConfig.addons.timers.enabled = on;
+    }
+
+    function clearAll(): void {
+        root.timers = [];
+        root.schedulePersist();
     }
 
     function formatRemaining(ms: int): string {
@@ -58,6 +72,8 @@ Singleton {
     }
 
     function addMinutes(minutes: real, label: string): void {
+        if (!root.enabled)
+            return;
         const mins = Math.max(0.05, Number(minutes) || 0);
         const durationMs = Math.round(mins * 60000);
         const id = root.nextId++;
@@ -81,6 +97,8 @@ Singleton {
     }
 
     function tickTimers(): void {
+        if (!root.enabled)
+            return;
         const now = Date.now();
         const kept = [];
         let finished = false;
@@ -126,15 +144,26 @@ Singleton {
                 endAt: endAt,
                 remainingMs: remaining
             };
+            if (!root.enabled)
+                continue;
             if (remaining <= 0)
                 root.finish(entry);
             else
                 kept.push(entry);
         }
         root.nextId = Math.max(Number(data?.nextId) || 1, maxId + 1);
-        root.timers = kept;
+        root.timers = root.enabled ? kept : [];
         root.loaded = true;
         root.schedulePersist();
+    }
+
+    Connections {
+        target: GlobalConfig.addons.timers
+
+        function onEnabledChanged(): void {
+            if (!root.enabled)
+                root.clearAll();
+        }
     }
 
     FileView {

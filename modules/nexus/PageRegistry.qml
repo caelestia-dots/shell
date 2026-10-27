@@ -51,9 +51,9 @@ QtObject {
             category: "system"
         },
         {
-            label: Tr.tr("Plugins"),
+            label: Tr.tr("Complements"),
             icon: "extension",
-            description: Tr.tr("Manage plugins"),
+            description: Tr.tr("Optional fork features (Madison VPN, …)"),
             category: "system"
         },
 

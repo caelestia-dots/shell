@@ -20,9 +20,12 @@ Cambios relevantes de este fork respecto a releases internas. El detalle de uso 
 - Rutas/`file://` a imagen desde el explorador se muestran y pegan como imagen.
 - Misma superficie/blur que el panel izquierdo; límite configurable (default 50) en Nexus → Services.
 
-### Madison VPN
+### Complementos / Madison VPN / Timers
 
-- Icono VPN en la pastilla de status (bajo Bluetooth).
+- **Nexus → Complementos**: toggles Madison VPN + Timers (iconos `verified_user` / `timer`).
+- VPN off: oculta icono, para poll, teardown disconnect+heal.
+- Timers off: limpia timers activos y oculta la sección en el popout del reloj.
+- Icono VPN en la pastilla de status (bajo Bluetooth) cuando el complemento está on.
 - Clic = conectar (diálogo OTP Caelestia) / desconectar.
 - Engranaje en el popout: editar config local de openfortivpn (sin secretos en el repo).
 - Scripts en `madison_vpn_widget` (`hyprland/`) instalados a `~/.local/share/madison-vpn/`.

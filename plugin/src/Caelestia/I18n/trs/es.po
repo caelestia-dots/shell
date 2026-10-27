@@ -5115,3 +5115,42 @@ msgstr "Consulta el registro para más detalles."
 #: services/Updates.qml modules/bar/popouts/UpdatesPassword.qml modules/nexus/pages/UpdatesPage.qml
 msgid "Update cancelled."
 msgstr "Actualización cancelada."
+
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Complements"
+msgstr "Complementos"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Optional fork features (Madison VPN, …)"
+msgstr "Funciones opcionales del fork (Madison VPN, …)"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "FortiClient / openfortivpn status icon and connect flow"
+msgstr "Icono de estado FortiClient / openfortivpn y flujo de conexión"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Disabled — tunnel and related processes are stopped"
+msgstr "Desactivado: túnel y procesos asociados detenidos"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Connection settings live in ~/.config/openfortivpn/config (edit from the VPN popout gear). Scripts: ~/.local/share/madison-vpn/"
+msgstr "La configuración de conexión está en ~/.config/openfortivpn/config (editar desde el engranaje del popout VPN). Scripts: ~/.local/share/madison-vpn/"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Complement disabled"
+msgstr "Complemento desactivado"
+
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Quick timers from the clock popout"
+msgstr "Temporizadores rápidos desde el popout del reloj"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Disabled — active timers are cleared"
+msgstr "Desactivado: se cancelan los temporizadores activos"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Madison VPN config: ~/.config/openfortivpn/config (popout gear). Scripts: ~/.local/share/madison-vpn/"
+msgstr "Config Madison VPN: ~/.config/openfortivpn/config (engranaje del popout). Scripts: ~/.local/share/madison-vpn/"
+

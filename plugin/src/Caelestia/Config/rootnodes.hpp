@@ -3,6 +3,7 @@
 #include "settings/rootnode.hpp"
 #include "settings/singleton.hpp"
 #include "activitiesconfig.hpp"
+#include "addonsconfig.hpp"
 #include "appearanceconfig.hpp"
 #include "backgroundconfig.hpp"
 #include "barconfig.hpp"
@@ -31,6 +32,7 @@ class ConfigRoot : public settings::RootNode {
 
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_SUBOBJECT(ActivitiesConfig, activities)
+    CONFIG_SUBOBJECT(AddonsConfig, addons)
     CONFIG_SUBOBJECT(AppearanceConfig, appearance)
     CONFIG_SUBOBJECT(GeneralConfig, general)
     CONFIG_SUBOBJECT(BackgroundConfig, background)
