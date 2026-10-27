@@ -1782,12 +1782,32 @@ msgid "The language used in the shell UI"
 msgstr "El idioma usado en la interfaz del shell"
 
 #: modules/nexus/pages/LanguageAndRegion.qml
-msgid "Location picker coming soon"
-msgstr "Selector de ubicación próximamente"
+msgid "Detecting location…"
+msgstr "Detectando ubicación…"
 
 #: modules/nexus/pages/LanguageAndRegion.qml
-msgid "Choose your weather location on a map in a future update"
-msgstr "Elige la ubicación del tiempo en un mapa en una próxima actualización"
+msgid "Manual location"
+msgstr "Ubicación manual"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Automatic (IP)"
+msgstr "Automática (IP)"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Search for a city"
+msgstr "Buscar una ciudad"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Searching…"
+msgstr "Buscando…"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "No cities found"
+msgstr "No se encontraron ciudades"
+
+#: modules/nexus/pages/LanguageAndRegion.qml
+msgid "Use current location"
+msgstr "Usar ubicación actual"
 
 #: modules/nexus/pages/LanguageAndRegion.qml
 msgid "Units"

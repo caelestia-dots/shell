@@ -21,7 +21,11 @@ Singleton {
     property double ipApiBlockedUntil: 0
     property bool citiesLoaded: false
     property string pendingCoords
+    property list<var> searchResults
+    property bool searching: false
+    property int searchToken: 0
 
+    readonly property bool isManualLocation: !!GlobalConfig.services.weatherLocation
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc ? getWeatherCondition(cc.weatherCode) : Tr.tr("No weather")
     readonly property string temp: formatTemp(cc?.tempC)
@@ -225,6 +229,93 @@ Singleton {
                 reload();
             }
         });
+    }
+
+    function formatSearchLabel(result: var): string {
+        const parts = [];
+        if (result?.name)
+            parts.push(result.name);
+        if (result?.admin1)
+            parts.push(result.admin1);
+        if (result?.country)
+            parts.push(result.country);
+        return parts.join(", ");
+    }
+
+    function clearSearch(): void {
+        searchToken++;
+        searching = false;
+        searchResults = [];
+    }
+
+    function searchLocations(query: string): void {
+        const q = (query ?? "").trim();
+        if (q.length < 2) {
+            clearSearch();
+            return;
+        }
+
+        const token = ++searchToken;
+        searching = true;
+        const lang = Tr.locale.name.split("_")[0] || "en";
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=8&language=${lang}&format=json`;
+
+        Requests.get(url, text => {
+            if (token !== root.searchToken)
+                return;
+            root.searching = false;
+
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (error) {
+                console.warn(lc, `Unable to parse geocoding response: ${error}`);
+                root.searchResults = [];
+                return;
+            }
+
+            const results = json.results ?? [];
+            root.searchResults = results.map(r => ({
+                name: r.name ?? "",
+                admin1: r.admin1 ?? "",
+                country: r.country ?? "",
+                latitude: r.latitude,
+                longitude: r.longitude,
+                label: root.formatSearchLabel(r)
+            }));
+        }, error => {
+            if (token !== root.searchToken)
+                return;
+            root.searching = false;
+            root.searchResults = [];
+            console.warn(lc, `Geocoding request failed: ${error}`);
+        });
+    }
+
+    function applyLocation(lat: real, lon: real, displayName): void {
+        if (!Number.isFinite(lat) || !Number.isFinite(lon))
+            return;
+
+        const coords = `${lat},${lon}`;
+        const name = `${displayName ?? ""}`.trim();
+        if (name) {
+            city = fixCityName(name);
+            cacheCity(coords, city);
+        }
+
+        clearSearch();
+        loc = coords;
+        GlobalConfig.services.weatherLocation = coords;
+    }
+
+    function useAutomaticLocation(): void {
+        clearSearch();
+        loc = "";
+        city = "";
+        if (GlobalConfig.services.weatherLocation)
+            GlobalConfig.services.weatherLocation = "";
+        else
+            reload();
     }
 
     function fetchWeatherData(): void {

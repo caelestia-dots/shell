@@ -24,6 +24,7 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
 | **Updates** | Arch / AUR / Flatpak: icono+badge, popout, Nexus; update en fondo (panel) o con logs (Nexus) |
 | **Atajos** | Remapeables desde Nexus; Super+E → Thunar; atajos de activities |
+| **Tiempo** | Buscar ciudad en Nexus → Idioma y región, o ubicación automática por IP |
 
 ---
 

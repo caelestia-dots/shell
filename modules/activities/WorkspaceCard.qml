@@ -30,7 +30,7 @@ Item {
     }
 
     implicitWidth: cardWidth
-    implicitHeight: cardWidth / Math.max(0.5, aspect) + label.implicitHeight + Tokens.spacing.small
+    implicitHeight: cardWidth / Math.max(0.5, aspect)
 
     function containsDragPoint(globalPos: point): bool {
         const local = cardFrame.mapFromGlobal(globalPos.x, globalPos.y);
@@ -295,15 +295,6 @@ Item {
                     }
                 }
             }
-        }
-
-        StyledText {
-            id: label
-
-            Layout.alignment: Qt.AlignHCenter
-            text: root.wsId
-            color: root.dropHover ? Colours.palette.m3tertiary : (root.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant)
-            font: Tokens.font.label.large
         }
     }
 

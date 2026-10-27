@@ -112,41 +112,190 @@ PageBase {
             text: Tr.tr("Weather")
         }
 
-        // Placeholder until the map-based location picker lands
         ConnectedRect {
+            id: weatherLocationCard
+
             Layout.fillWidth: true
             first: true
             last: true
-            implicitHeight: comingSoon.implicitHeight + Tokens.padding.extraLarge * 2
+            implicitHeight: weatherLocCol.implicitHeight + Tokens.padding.medium * 2
 
             ColumnLayout {
-                id: comingSoon
+                id: weatherLocCol
 
-                anchors.centerIn: parent
-                width: parent.width - Tokens.padding.largeIncreased * 2
-                spacing: Tokens.padding.extraSmall
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Tokens.padding.medium
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.largeIncreased
+                spacing: Tokens.spacing.medium
 
-                MaterialIcon {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: "map"
-                    color: Colours.palette.m3outlineVariant
-                    fontStyle: Tokens.font.icon.extraLarge
-                }
-
-                StyledText {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: Tr.tr("Location picker coming soon")
-                    color: Colours.palette.m3outlineVariant
-                    font: Tokens.font.title.small
-                }
-
-                StyledText {
+                RowLayout {
                     Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
-                    text: Tr.tr("Choose your weather location on a map in a future update")
-                    color: Colours.palette.m3outlineVariant
-                    font: Tokens.font.body.small
+                    spacing: Tokens.spacing.medium
+
+                    MaterialIcon {
+                        text: "location_on"
+                        color: Colours.palette.m3onSurfaceVariant
+                        fontStyle: Tokens.font.icon.medium
+                        fill: 1
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Weather.city || Tr.tr("Detecting location…")
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Weather.isManualLocation ? Tr.tr("Manual location") : Tr.tr("Automatic (IP)")
+                            color: Colours.palette.m3outline
+                            font: Tokens.font.label.small
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+
+                StyledTextField {
+                    id: weatherSearchField
+
+                    Layout.fillWidth: true
+                    leadingIcon: "search"
+                    placeholderText: Tr.tr("Search for a city")
+                    inputMethodHints: Qt.ImhNoPredictiveText
+
+                    onTextEdited: weatherSearchDebounce.restart()
+                    onAccepted: {
+                        weatherSearchDebounce.stop();
+                        Weather.searchLocations(text);
+                    }
+
+                    Timer {
+                        id: weatherSearchDebounce
+
+                        interval: 300
+                        onTriggered: Weather.searchLocations(weatherSearchField.text)
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: Weather.searching || Weather.searchResults.length > 0 || (weatherSearchField.text.trim().length >= 2 && !Weather.searching && Weather.searchResults.length === 0)
+                    spacing: Tokens.spacing.extraSmall
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        visible: Weather.searching
+                        text: Tr.tr("Searching…")
+                        color: Colours.palette.m3outline
+                        font: Tokens.font.label.small
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        visible: !Weather.searching && weatherSearchField.text.trim().length >= 2 && Weather.searchResults.length === 0
+                        text: Tr.tr("No cities found")
+                        color: Colours.palette.m3outline
+                        font: Tokens.font.label.small
+                    }
+
+                    Repeater {
+                        model: Weather.searchResults
+
+                        StyledRect {
+                            id: resultRow
+
+                            required property var modelData
+                            required property int index
+
+                            Layout.fillWidth: true
+                            implicitHeight: resultInner.implicitHeight + Tokens.padding.small * 2
+                            radius: Tokens.rounding.medium
+                            color: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+
+                            StateLayer {
+                                radius: parent.radius
+                                onClicked: {
+                                    Weather.applyLocation(resultRow.modelData.latitude, resultRow.modelData.longitude, resultRow.modelData.name);
+                                    weatherSearchField.text = "";
+                                    Weather.clearSearch();
+                                }
+                            }
+
+                            RowLayout {
+                                id: resultInner
+
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: Tokens.padding.medium
+                                anchors.rightMargin: Tokens.padding.medium
+                                spacing: Tokens.spacing.small
+
+                                MaterialIcon {
+                                    text: "place"
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    fontStyle: Tokens.font.icon.small
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: resultRow.modelData.label
+                                    font: Tokens.font.body.small
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: autoLocRow.implicitHeight
+                    opacity: Weather.isManualLocation ? 1 : 0.5
+
+                    Behavior on opacity {
+                        Anim {}
+                    }
+
+                    StateLayer {
+                        anchors.fill: parent
+                        disabled: !Weather.isManualLocation
+                        onClicked: {
+                            weatherSearchField.text = "";
+                            Weather.useAutomaticLocation();
+                        }
+                    }
+
+                    RowLayout {
+                        id: autoLocRow
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: Tokens.spacing.small
+
+                        MaterialIcon {
+                            text: "my_location"
+                            color: Colours.palette.m3onSurfaceVariant
+                            fontStyle: Tokens.font.icon.small
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Tr.tr("Use current location")
+                            font: Tokens.font.body.small
+                            color: Colours.palette.m3onSurfaceVariant
+                        }
+                    }
                 }
             }
         }
