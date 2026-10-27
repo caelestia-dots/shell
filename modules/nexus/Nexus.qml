@@ -20,6 +20,13 @@ Item {
 
     signal close
 
+    Component.onCompleted: {
+        if (Updates.pendingNexusPageIdx >= 0) {
+            nState.currentPageIdx = Updates.pendingNexusPageIdx;
+            Updates.pendingNexusPageIdx = -1;
+        }
+    }
+
     implicitWidth: Math.round(implicitHeight * Tokens.sizes.nexus.ratio)
     implicitHeight: Math.round(nState.screen.height * Tokens.sizes.nexus.heightMult)
 

@@ -46,7 +46,7 @@ QtObject {
         // System
         {
             label: Tr.tr("Updates"),
-            icon: "update",
+            icon: "autorenew",
             description: Tr.tr("System updates"),
             category: "system"
         },

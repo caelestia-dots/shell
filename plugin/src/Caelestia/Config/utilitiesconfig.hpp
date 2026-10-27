@@ -25,6 +25,7 @@ class UtilitiesToasts : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, kbLayoutChanged, true)
     CONFIG_PROPERTY(bool, kbLimit, true)
     CONFIG_PROPERTY(bool, vpnChanged, true)
+    CONFIG_PROPERTY(bool, updatesAvailable, true)
     CONFIG_PROPERTY(bool, nowPlaying, false)
 };
 
@@ -63,6 +64,21 @@ class UtilitiesClipboard : public settings::ObjectNode {
     CONFIG_PROPERTY(int, maxItems, 50)
 };
 
+class UtilitiesUpdates : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesUpdates, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, checkArch, true)
+    CONFIG_PROPERTY(bool, checkAur, true)
+    CONFIG_PROPERTY(bool, checkFlatpak, true)
+    CONFIG_PROPERTY(QString, aurWrapper, u"yay"_s)
+    CONFIG_PROPERTY(int, pollIntervalMinutes, 30)
+    CONFIG_PROPERTY(bool, notifications, true)
+    CONFIG_PROPERTY(bool, allowSingleModification, true)
+    CONFIG_PROPERTY(QString, aurFlags, u"--noconfirm"_s)
+    CONFIG_PROPERTY(QString, flatpakFlags, u"--assumeyes"_s)
+    CONFIG_PROPERTY(QString, lastList, {})
+};
+
 class UtilitiesConfig : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesConfig, settings::ObjectNode)
 
@@ -72,6 +88,7 @@ class UtilitiesConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesVpn, vpn)
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesClipboard, clipboard)
+    CONFIG_GLOBAL_SUBOBJECT(UtilitiesUpdates, updates)
     CONFIG_LIST(EntryList, quickToggles,
         DEFAULT_ARG({
             LIST_ENTRY(wifi, true),

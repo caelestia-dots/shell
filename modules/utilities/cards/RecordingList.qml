@@ -108,7 +108,12 @@ ColumnLayout {
                 onClicked: {
                     root.screenState.utilities = false;
                     root.screenState.sidebar = false;
-                    Quickshell.execDetached([...GlobalConfig.general.apps.playback, recording.modelData.path]);
+                    const path = recording.modelData.path;
+                    const playback = GlobalConfig.general.apps.playback;
+                    if (playback.length > 0)
+                        Quickshell.execDetached([...playback, path]);
+                    else
+                        Quickshell.execDetached(["xdg-open", path]);
                 }
             }
 

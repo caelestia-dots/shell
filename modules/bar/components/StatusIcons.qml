@@ -47,6 +47,9 @@ StyledRect {
         // Desktops have no battery / power-profile UI in the status strip
         if (entry.id === "battery")
             return !UPower.displayDevice.isLaptopBattery;
+        // Hide updates badge when there is nothing to install (keep visible while installing)
+        if (entry.id === "updates")
+            return !Updates.hasUpdates && !Updates.busy && !Updates.installing;
         return false;
     }
 
@@ -148,6 +151,14 @@ StyledRect {
                     roleValue: "vpn"
                     delegate: EntryWrapper {
                         VpnStatus {
+                            colour: parent.iconColour
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "updates"
+                    delegate: EntryWrapper {
+                        UpdatesStatus {
                             colour: parent.iconColour
                         }
                     }

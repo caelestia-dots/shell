@@ -102,14 +102,17 @@ Item {
             spacing: Tokens.spacing.small
 
             Repeater {
+                // Open-app is the card click; skip empty app actions (e.g. Teams blanks)
                 model: [
                     {
                         isClose: true
                     },
-                    {
-                        isOpen: true
-                    },
-                    ...(root.notif?.actions ?? []),
+                    ...(root.notif?.actions ?? []).filter(a => {
+                        const text = (a?.text || "").trim();
+                        if (text.length > 0)
+                            return true;
+                        return !!(root.notif?.hasActionIcons && a?.identifier);
+                    }),
                     {
                         isCopy: true
                     }
@@ -142,10 +145,6 @@ Item {
                         onClicked: {
                             if (action.modelData.isClose) {
                                 root.notif.close();
-                            } else if (action.modelData.isOpen) {
-                                if (root.screenState)
-                                    root.screenState.sidebar = false;
-                                Notifs.focusSource(root.notif);
                             } else if (action.modelData.isCopy) {
                                 Quickshell.clipboardText = root.notif.body;
                                 (actionInner.item as MaterialIcon).text = "inventory";
@@ -162,7 +161,7 @@ Item {
                         id: actionInner
 
                         anchors.centerIn: parent
-                        sourceComponent: action.modelData.isClose || action.modelData.isOpen || action.modelData.isCopy ? iconBtn : root.notif?.hasActionIcons ? iconComp : textComp
+                        sourceComponent: action.modelData.isClose || action.modelData.isCopy ? iconBtn : root.notif?.hasActionIcons ? iconComp : textComp
                     }
 
                     Component {
@@ -170,7 +169,7 @@ Item {
 
                         MaterialIcon {
                             animate: action.modelData.isCopy ?? false
-                            text: action.modelData.isCopy ? "content_copy" : action.modelData.isOpen ? "open_in_new" : "close"
+                            text: action.modelData.isCopy ? "content_copy" : "delete"
                             color: Colours.palette.m3onSurfaceVariant
                         }
                     }

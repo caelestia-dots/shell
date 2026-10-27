@@ -229,7 +229,14 @@ Singleton {
     }
 
     function toplevelsForWs(ws: int, ignoredTags = []): list<HyprlandToplevel> {
-        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t, ignoredTags));
+        // Sort left→right, then top→bottom so bar/overview icons match layout
+        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t, ignoredTags)).slice().sort((a, b) => {
+            const aa = a?.lastIpcObject?.at;
+            const bb = b?.lastIpcObject?.at;
+            if (!aa || !bb)
+                return !aa - !bb;
+            return (aa[0] - bb[0]) || (aa[1] - bb[1]);
+        });
     }
 
     function isToplevelIgnored(toplevel: HyprlandToplevel, ignoredTags = []): bool {

@@ -18,9 +18,10 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
 | **Launcher** | Hover inferior, edición de `.desktop`, iconos Papirus |
 | **Kitty / GTK** | Paleta alineada a la activity (Kitty + Thunar/Material) |
-| **Madison VPN** | Icono bajo Bluetooth: OTP / desconectar; limpia túnel zombie tras sleep |
+| **Madison VPN** | Icono bajo Bluetooth: OTP / desconectar; engranaje para editar `openfortivpn`; limpia túnel tras sleep |
 | **Utilities** | Mantener activo (café) en interruptores rápidos, ON por defecto |
 | **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
+| **Updates** | Arch / AUR / Flatpak: icono+badge, popout, Nexus; update en fondo (panel) o con logs (Nexus) |
 | **Atajos** | Remapeables desde Nexus; Super+E → Thunar; atajos de activities |
 
 ---
@@ -117,6 +118,18 @@ require("caelestia-activity-rules")  -- reglas de activities / pins (Nexus → S
 
 ---
 
+## System updates
+
+Inspirado en [arch-update-checker](https://github.com/iMacnucintosh/arch-update-checker):
+
+- **Nexus → Updates**: refrescar, contador, actualizar sistema, lista expandable (info / update / uninstall / URL).
+- Engranaje → fuentes (Arch / AUR / Flatpak, todas on por defecto), wrapper AUR (**yay**), intervalo, notificaciones, single-package.
+- Icono en status (junto a Madison VPN) **solo si hay paquetes**; badge con el número; popout rápido.
+- Poll cada **30 min**; toast al detectar paquetes nuevos (default on).
+- **Actualizar sistema**: popup de contraseña → en **panel** corre en segundo plano; en **Nexus** muestra log en vivo. Notificación al terminar + rechequeo. Paquete suelto / orphans siguen en terminal.
+
+---
+
 ## Madison VPN (FortiClient / openfortivpn)
 
 Icono en la pastilla de status (debajo de Bluetooth):
@@ -132,7 +145,7 @@ Scripts e install: repo privado [madison_vpn_widget](https://github.com/iMacnuci
 cd madison_vpn_widget/hyprland && ./install.sh
 ```
 
-Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN».
+Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma; **no** van en este repo). Engranaje en el popout VPN para editar host/puerto/usuario/`set-dns`/`trusted-cert` (password/OTP no se muestran). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN».
 
 ---
 
@@ -195,9 +208,8 @@ El reloj lleva siempre la pastilla de fondo; al hover se resalta como el resto d
 
 ## Notificaciones
 
-- **Clic izquierdo** en un popup: intenta enfocar la ventana de la app (cambia de workspace si hace falta).  
-  Si no hay ventana: puede activar el ítem del system tray o lanzar el `.desktop` de la app, y cierra la notificación.
-- En la **sidebar**, acción de abrir con el mismo comportamiento.
+- **Clic izquierdo** en un popup o en la card de la **sidebar**: enfoca/abre la app (workspace, tray o `.desktop`) y cierra la notificación. No hay botón aparte de “abrir”.
+- Botones de la card: cerrar, acciones de la app (si tienen texto/icono útil) y copiar; se ocultan acciones vacías (p. ej. Teams).
 - Compatible con `actionOnClick` cuando hay una sola acción de notificación.
 
 ---

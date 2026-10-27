@@ -196,7 +196,8 @@ CustomMouseArea {
                 if (showSidebarHover && !screenState.sidebar) {
                     screenState.sidebar = true;
                 } else if (!sidebarShortcutActive) {
-                    const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y) || inRightPanel(panels.utilities, x, y);
+                    // Include OSD: volume/brightness sit beside utilities and must not dismiss the panel
+                    const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y) || inRightPanel(panels.utilities, x, y) || inRightPanel(panels.osdWrapper, x, y);
                     if (!inSidebarArea)
                         screenState.sidebar = false;
                 } else if (showSidebarHover) {
@@ -250,7 +251,8 @@ CustomMouseArea {
         // Bottom-right corner opens the notifications sidebar (not utilities-only).
         // Utilities remain available via Super+U.
         const showNotifsCorner = inBottomPanel(panels.utilities, x, y, true);
-        const overNotifsPanel = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.utilities, x, y);
+        // OSD (volume/brightness) docks beside utilities — count it as still "over" the panel
+        const overNotifsPanel = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.utilities, x, y) || inRightPanel(panels.osdWrapper, x, y);
 
         if (!sidebarShortcutActive) {
             screenState.sidebar = showNotifsCorner || (screenState.sidebar && overNotifsPanel);
@@ -344,7 +346,7 @@ CustomMouseArea {
         function onSidebarChanged() {
             if (root.screenState.sidebar) {
                 // Sidebar became visible, immediately check if this should be shortcut mode
-                const inSidebarArea = root.inRightPanel(root.panels.sidebar, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.sessionWrapper, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.utilities, root.mouseX, root.mouseY);
+                const inSidebarArea = root.inRightPanel(root.panels.sidebar, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.sessionWrapper, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.utilities, root.mouseX, root.mouseY) || root.inRightPanel(root.panels.osdWrapper, root.mouseX, root.mouseY);
                 if (!inSidebarArea)
                     root.sidebarShortcutActive = true;
             } else {

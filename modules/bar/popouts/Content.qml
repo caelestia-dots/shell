@@ -126,6 +126,27 @@ Item {
         }
 
         Popout {
+            name: "vpnSettings"
+            sourceComponent: VpnSettings {
+                popouts: root.popouts
+            }
+        }
+
+        Popout {
+            name: "updates"
+            sourceComponent: UpdatesPopout {
+                popouts: root.popouts
+            }
+        }
+
+        Popout {
+            name: "updatesPassword"
+            sourceComponent: UpdatesPassword {
+                popouts: root.popouts
+            }
+        }
+
+        Popout {
             name: "battery"
             sourceComponent: Battery {}
         }

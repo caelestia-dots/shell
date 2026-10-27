@@ -183,6 +183,12 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.tr("New system updates")
+            checked: GlobalConfig.utilities.toasts.updatesAvailable
+            onToggled: GlobalConfig.utilities.toasts.updatesAvailable = checked
+        }
+
+        ToggleRow {
             last: true
             text: Tr.tr("Now playing")
             checked: GlobalConfig.utilities.toasts.nowPlaying

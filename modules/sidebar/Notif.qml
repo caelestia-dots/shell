@@ -26,6 +26,18 @@ StyledRect {
         return expanded ? c : Qt.alpha(c, 0);
     }
 
+    // Click the card → open/focus the app (replaces the old open_in_new button)
+    StateLayer {
+        anchors.fill: parent
+        radius: root.radius
+        z: -1
+        onClicked: {
+            if (root.screenState)
+                root.screenState.sidebar = false;
+            Notifs.focusSource(root.modelData);
+        }
+    }
+
     state: expanded ? "expanded" : ""
 
     states: State {

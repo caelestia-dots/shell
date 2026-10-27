@@ -474,13 +474,18 @@ StyledRect {
                     fillWidth: root.modelData.actions.length === 0
                     inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3secondary : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
                     inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onSecondary : Colours.palette.m3onSurfaceVariant
-                    icon: "close"
+                    icon: "delete"
                     padding: Tokens.padding.extraSmall
                     onClicked: root.modelData.close()
                 }
 
                 Repeater {
-                    model: root.modelData.actions
+                    model: (root.modelData.actions ?? []).filter(a => {
+                        const text = (a?.text || "").trim();
+                        if (text.length > 0)
+                            return true;
+                        return !!(root.modelData.hasActionIcons && a?.identifier);
+                    })
 
                     TextButton {
                         required property var modelData

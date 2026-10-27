@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
@@ -10,6 +11,7 @@ import qs.components
 import qs.components.controls
 import qs.components.widgets
 import qs.services
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -244,11 +246,13 @@ PageBase {
                         }
                     }
 
-                    // Name + icon picker on one row
+                    // Name + icon + desktop count on one standalone row
                     ConnectedRect {
                         id: nameIconRow
 
                         Layout.fillWidth: true
+                        first: true
+                        last: true
                         implicitHeight: nameIconLayout.implicitHeight + Tokens.padding.medium + Math.max(0, Tokens.padding.large - nameField.verticalPadding) * 2
 
                         RowLayout {
@@ -261,25 +265,6 @@ PageBase {
                             anchors.rightMargin: Tokens.padding.largeIncreased
                             spacing: Tokens.spacing.medium
 
-                            StyledText {
-                                text: Tr.tr("Name")
-                                font: Tokens.font.body.small
-                            }
-
-                            StyledTextField {
-                                id: nameField
-
-                                Layout.preferredWidth: Tokens.sizes.nexus.textFieldWidth
-                                Layout.maximumWidth: nameIconRow.width / 2
-                                Layout.alignment: Qt.AlignVCenter
-                                verticalPadding: Tokens.padding.small
-                                text: actRow.modelData.name ? Tr.trMarked(actRow.modelData.name) : ""
-                                onEditingFinished: {
-                                    actRow.modelData.name = text;
-                                    Activities.syncSoon();
-                                }
-                            }
-
                             IconButton {
                                 Layout.alignment: Qt.AlignVCenter
                                 icon: actRow.modelData.icon || "home"
@@ -288,8 +273,40 @@ PageBase {
                                 onClicked: iconPicker.open = true
                             }
 
-                            Item {
+                            StyledTextField {
+                                id: nameField
+
                                 Layout.fillWidth: true
+                                Layout.minimumWidth: Tokens.sizes.nexus.smallTextFieldWidth
+                                Layout.alignment: Qt.AlignVCenter
+                                verticalPadding: Tokens.padding.small
+                                // Outlined field cuts a notch for placeholderText — use it as the label
+                                placeholderText: Tr.tr("Name")
+                                text: actRow.modelData.name ? Tr.trMarked(actRow.modelData.name) : ""
+                                onEditingFinished: {
+                                    actRow.modelData.name = text;
+                                    Activities.syncSoon();
+                                }
+                            }
+
+                            StyledText {
+                                Layout.alignment: Qt.AlignVCenter
+                                text: Tr.tr("Desktops")
+                                color: Colours.palette.m3outline
+                                font: Tokens.font.label.small
+                            }
+
+                            StyledSpinBox {
+                                Layout.alignment: Qt.AlignVCenter
+                                from: 1
+                                to: 10
+                                stepSize: 1
+                                value: actRow.modelData.workspaceCount
+                                cLayer: 2
+                                onValueModified: {
+                                    actRow.modelData.workspaceCount = Math.round(value);
+                                    Activities.syncSoon();
+                                }
                             }
                         }
                     }
@@ -316,18 +333,6 @@ PageBase {
                             if (!selectedItem)
                                 return;
                             actRow.modelData.icon = selectedItem;
-                            Activities.syncSoon();
-                        }
-                    }
-
-                    StepperRow {
-                        label: Tr.tr("Desktops")
-                        subtext: Tr.tr("Number of workspaces in this activity")
-                        value: actRow.modelData.workspaceCount
-                        from: 1
-                        to: 10
-                        onMoved: v => {
-                            actRow.modelData.workspaceCount = Math.round(v);
                             Activities.syncSoon();
                         }
                     }
@@ -429,9 +434,10 @@ PageBase {
                             id: deskBlock
 
                             required property int index
+                            readonly property var deskRules: root.rulesFor(actRow.modelData.id, deskBlock.index)
 
                             Layout.fillWidth: true
-                            spacing: Tokens.spacing.extraSmall / 2
+                            spacing: Tokens.spacing.small
 
                             StyledText {
                                 Layout.fillWidth: true
@@ -441,62 +447,90 @@ PageBase {
                                 font: Tokens.font.label.large
                             }
 
-                            Repeater {
-                                model: root.rulesFor(actRow.modelData.id, deskBlock.index)
+                            // Connected Material list: pins + trailing "Add app"
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Tokens.spacing.extraSmall / 2
 
-                                RowLayout {
-                                    id: pinRow
+                                Repeater {
+                                    model: deskBlock.deskRules
 
-                                    required property var modelData
-                                    required property int index
+                                    ConnectedRect {
+                                        id: pinRow
 
-                                    Layout.fillWidth: true
-                                    spacing: Tokens.spacing.small
+                                        required property var modelData
+                                        required property int index
 
-                                    MaterialIcon {
-                                        text: "push_pin"
-                                        fontStyle: Tokens.font.icon.small
-                                        color: Colours.palette.m3outline
-                                    }
-
-                                    StyledText {
                                         Layout.fillWidth: true
-                                        text: root.appLabelForClass(pinRow.modelData.classMatch)
-                                        font: Tokens.font.body.small
-                                        elide: Text.ElideRight
-                                    }
+                                        first: index === 0
+                                        last: false
+                                        implicitHeight: pinLayout.implicitHeight + Tokens.padding.medium * 2
 
-                                    StyledText {
-                                        visible: !!(pinRow.modelData.classMatch)
-                                        text: pinRow.modelData.classMatch
-                                        color: Colours.palette.m3outline
-                                        font: Tokens.font.label.small
-                                        elide: Text.ElideRight
-                                        Layout.maximumWidth: Tokens.sizes.bar.innerWidth * 4
-                                    }
+                                        RowLayout {
+                                            id: pinLayout
 
-                                    IconButton {
-                                        icon: "close"
-                                        type: IconButton.Text
-                                        isRound: true
-                                        onClicked: root.removeRule(pinRow.modelData)
+                                            anchors.fill: parent
+                                            anchors.margins: Tokens.padding.medium
+                                            anchors.leftMargin: Tokens.padding.largeIncreased
+                                            anchors.rightMargin: Tokens.padding.largeIncreased
+                                            spacing: Tokens.spacing.medium
+
+                                            IconImage {
+                                                Layout.alignment: Qt.AlignVCenter
+                                                asynchronous: true
+                                                implicitSize: Math.round(Tokens.font.icon.medium.pointSize * 1.6)
+                                                source: Icons.getAppIcon(pinRow.modelData.classMatch || "", "application-x-executable")
+                                            }
+
+                                            ColumnLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 0
+
+                                                StyledText {
+                                                    Layout.fillWidth: true
+                                                    text: root.appLabelForClass(pinRow.modelData.classMatch)
+                                                    font: Tokens.font.body.small
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                StyledText {
+                                                    Layout.fillWidth: true
+                                                    visible: !!(pinRow.modelData.classMatch)
+                                                    text: pinRow.modelData.classMatch
+                                                    color: Colours.palette.m3outline
+                                                    font: Tokens.font.label.small
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+
+                                            IconButton {
+                                                icon: "close"
+                                                type: IconButton.Text
+                                                isRound: true
+                                                inactiveOnColour: Colours.palette.m3error
+                                                label.fill: 0
+                                                onClicked: root.removeRule(pinRow.modelData)
+                                            }
+                                        }
                                     }
                                 }
-                            }
 
-                            DialogSelectButton {
-                                rootParent: root.flickable
-                                icon: "add"
-                                label: Tr.tr("Add app")
-                                header: Tr.tr("Installed apps")
-                                acceptLabel: Tr.trCtx("Add", "button")
-                                searchable: true
-                                searchPlaceholder: Tr.tr("Search apps")
-                                model: root.installedApps()
-                                onAccepted: {
-                                    if (!selectedItem)
-                                        return;
-                                    root.addRule(actRow.modelData.id, deskBlock.index, selectedItem);
+                                DialogSelectButton {
+                                    rootParent: root.flickable
+                                    first: deskBlock.deskRules.length === 0
+                                    last: true
+                                    icon: "add"
+                                    label: Tr.tr("Add app")
+                                    header: Tr.tr("Installed apps")
+                                    acceptLabel: Tr.trCtx("Add", "button")
+                                    searchable: true
+                                    searchPlaceholder: Tr.tr("Search apps")
+                                    model: root.installedApps()
+                                    onAccepted: {
+                                        if (!selectedItem)
+                                            return;
+                                        root.addRule(actRow.modelData.id, deskBlock.index, selectedItem);
+                                    }
                                 }
                             }
                         }

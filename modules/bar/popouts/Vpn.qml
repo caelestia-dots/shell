@@ -21,11 +21,27 @@ ColumnLayout {
         root.popouts.currentName = "vpnOtp";
     }
 
-    StyledText {
+    RowLayout {
+        Layout.fillWidth: true
         Layout.topMargin: Tokens.padding.medium
         Layout.rightMargin: Tokens.padding.extraSmall
-        text: Tr.tr("Madison VPN")
-        font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+        spacing: Tokens.spacing.small
+
+        StyledText {
+            Layout.fillWidth: true
+            text: Tr.tr("Madison VPN")
+            font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+        }
+
+        IconButton {
+            icon: "settings"
+            type: IconButton.Text
+            isRound: true
+            onClicked: {
+                MadisonVpn.reloadConfig();
+                root.popouts.currentName = "vpnSettings";
+            }
+        }
     }
 
     RowLayout {

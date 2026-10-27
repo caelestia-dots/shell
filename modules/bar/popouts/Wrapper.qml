@@ -81,12 +81,26 @@ Item {
                 return;
             }
         }
+        if (currentName === "vpnSettings" && content.item) {
+            const settingsPopout = (content.item as Content)?.children.find(c => c.name === "vpnSettings");
+            if (settingsPopout && settingsPopout.item) {
+                settingsPopout.item.closeDialog();
+                return;
+            }
+        }
+        if (currentName === "updatesPassword" && content.item) {
+            const updatesPw = (content.item as Content)?.children.find(c => c.name === "updatesPassword");
+            if (updatesPw && updatesPw.item) {
+                updatesPw.item.closeDialog();
+                return;
+            }
+        }
         close();
     }
 
     Keys.onPressed: event => {
-        // Don't intercept keys when password/OTP popout is active - let it handle them
-        if (currentName === "wirelesspassword" || currentName === "vpnOtp") {
+        // Don't intercept keys when password/OTP/settings popout is active - let it handle them
+        if (currentName === "wirelesspassword" || currentName === "vpnOtp" || currentName === "vpnSettings" || currentName === "updatesPassword") {
             event.accepted = false;
         }
     }
@@ -104,7 +118,7 @@ Item {
     }
 
     Binding {
-        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "vpnOtp" || root.currentName === "clock"))
+        when: root.isDetached || (root.hasCurrent && (root.currentName === "wirelesspassword" || root.currentName === "vpnOtp" || root.currentName === "vpnSettings" || root.currentName === "clock"))
 
         target: QsWindow.window
         property: "WlrLayershell.keyboardFocus"

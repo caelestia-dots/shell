@@ -17,9 +17,9 @@ using util::i18n::mark;
 class GeneralApps : public settings::ObjectNode {
     CONFIG_NODE(GeneralApps, settings::ObjectNode)
 
-    CONFIG_PROPERTY(QStringList, terminal, { u"foot"_s })
+    CONFIG_PROPERTY(QStringList, terminal, { u"kitty"_s })
     CONFIG_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
-    CONFIG_PROPERTY(QStringList, playback, { u"mpv"_s })
+    CONFIG_PROPERTY(QStringList, playback, { u"vlc"_s })
     CONFIG_PROPERTY(QStringList, explorer, { u"thunar"_s })
 };
 

@@ -26,6 +26,9 @@ Item {
     property real openWidth: Math.min(rootParent.width * 0.8, Tokens.sizes.nexus.maxDialogWidth)
     property real openHeight: Math.min(rootParent.height * 0.8, Tokens.sizes.nexus.maxDialogHeight)
     property bool open
+    // Connected-list shape (default last=true for stacked Nexus rows). Standalone: first+last.
+    property bool first: false
+    property bool last: true
 
     signal accepted
     signal cancelled
@@ -135,9 +138,9 @@ Item {
             group: blobGroup
             opacity: blobGroup.color.a
 
-            radius: Tokens.rounding.extraSmall
-            bottomLeftRadius: Tokens.rounding.extraLarge
-            bottomRightRadius: Tokens.rounding.extraLarge
+            radius: root.first ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+            bottomLeftRadius: root.last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
+            bottomRightRadius: root.last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
         }
 
         RowButton {
@@ -152,7 +155,8 @@ Item {
             height: Math.min(implicitHeight, parent.height) // Clamp to parent height due to overshoot anim
             color: "transparent"
 
-            last: true
+            first: root.first
+            last: root.last
             icon: root.icon
             text: root.label
             onClicked: root.open = true

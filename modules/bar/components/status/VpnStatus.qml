@@ -21,7 +21,8 @@ Item {
         // Shield-style glyphs (like KDE network-vpn)
         text: MadisonVpn.connected ? "verified_user" : "remove_moderator"
         fill: MadisonVpn.connected ? 1 : 0
-        color: MadisonVpn.connected ? Colours.palette.m3primary : root.colour
+        // Always follow EntryWrapper colour so hover (m3onPrimary on m3primary pill) stays readable
+        color: root.colour
         opacity: MadisonVpn.busy ? 0.55 : 1
 
         SequentialAnimation on opacity {

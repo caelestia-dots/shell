@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: caelestia-shell\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-26 15:48+0100\n"
+"POT-Creation-Date: 2026-10-27 13:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,15 +43,18 @@ msgid "%1 (%2)"
 msgstr ""
 
 #: components/filedialog/DialogButtons.qml
+#: modules/launcher/DesktopEditDialog.qml modules/nexus/pages/ShellPage.qml
 msgctxt "button"
 msgid "Select"
 msgstr ""
 
-#: components/filedialog/DialogButtons.qml
-#: modules/bar/popouts/WirelessPassword.qml
+#: components/filedialog/DialogButtons.qml modules/bar/popouts/VpnOtp.qml
+#: modules/bar/popouts/VpnSettings.qml modules/bar/popouts/WirelessPassword.qml
+#: modules/launcher/DesktopEditDialog.qml
 #: modules/nexus/common/DialogRowButton.qml
 #: modules/nexus/pages/network/AddNetworkPage.qml
 #: modules/nexus/pages/network/AddVpnPage.qml
+#: modules/nexus/pages/UpdatesPage.qml
 #: modules/utilities/RecordingDeleteModal.qml
 msgctxt "button"
 msgid "Cancel"
@@ -122,12 +125,16 @@ msgstr ""
 msgid "Hyprland settings restored"
 msgstr ""
 
-#: modules/areapicker/Picker.qml
-msgid "Screenshot taken"
+#: modules/activities/OverviewContent.qml services/Keybinds.qml
+msgid "Activities overview"
 msgstr ""
 
-#: modules/areapicker/Picker.qml
-msgid "Screenshot copied to clipboard"
+#: modules/activities/OverviewContent.qml
+msgid "Click a desktop to switch · Drag windows to move · Esc to close"
+msgstr ""
+
+#: modules/activities/WorkspaceCard.qml
+msgid "Empty"
 msgstr ""
 
 #: modules/background/Wallpaper.qml
@@ -150,6 +157,17 @@ msgstr ""
 #: modules/bar/components/ActiveWindow.qml
 msgctxt "shown when no window is focused"
 msgid "Desktop"
+msgstr ""
+
+#: modules/bar/components/RecordingIndicator.qml
+msgctxt "recording status"
+msgid "PAUSE"
+msgstr ""
+
+#: modules/bar/components/RecordingIndicator.qml
+#: modules/utilities/cards/Record.qml
+msgctxt "recording status"
+msgid "REC"
 msgstr ""
 
 #: modules/bar/popouts/AudioPopout.qml
@@ -189,7 +207,8 @@ msgid_plural "%n hours"
 msgstr[0] ""
 msgstr[1] ""
 
-#: modules/bar/popouts/Battery.qml
+#: modules/bar/popouts/Battery.qml modules/bar/popouts/ClockPopout.qml
+#: services/Timers.qml
 #, qt-plural-format
 msgid "%n min"
 msgid_plural "%n mins"
@@ -237,15 +256,6 @@ msgstr ""
 #, qt-format
 msgctxt "battery remaining"
 msgid "Remaining: %1%"
-msgstr ""
-
-#: modules/bar/popouts/Battery.qml
-msgid "No battery detected"
-msgstr ""
-
-#: modules/bar/popouts/Battery.qml
-#, qt-format
-msgid "Power profile: %1"
 msgstr ""
 
 #: modules/bar/popouts/Battery.qml
@@ -309,6 +319,14 @@ msgid "%n device available"
 msgid_plural "%n devices available"
 msgstr[0] ""
 msgstr[1] ""
+
+#: modules/bar/popouts/ClockPopout.qml
+msgid "Timers"
+msgstr ""
+
+#: modules/bar/popouts/ClockPopout.qml
+msgid "No active timers"
+msgstr ""
 
 #: modules/bar/popouts/kblayout/KbLayout.qml
 msgid "Keyboard layouts"
@@ -390,10 +408,93 @@ msgctxt "button"
 msgid "Back"
 msgstr ""
 
+#: modules/bar/popouts/UpdatesPopout.qml modules/nexus/PageRegistry.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Updates"
+msgstr ""
+
+#: modules/bar/popouts/UpdatesPopout.qml modules/nexus/PageRegistry.qml
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "System updates"
+msgstr ""
+
+#: modules/bar/popouts/UpdatesPopout.qml modules/nexus/pages/UpdatesPage.qml
+msgid "No updates available."
+msgstr ""
+
+#: modules/bar/popouts/UpdatesPopout.qml
+msgid "Update system"
+msgstr ""
+
+#: modules/bar/popouts/UpdatesPopout.qml
+msgid "Open in Nexus"
+msgstr ""
+
+#: modules/bar/popouts/Vpn.qml modules/bar/popouts/VpnOtp.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: services/MadisonVpn.qml
+msgid "Madison VPN"
+msgstr ""
+
+#: modules/bar/popouts/Vpn.qml
+#: modules/nexus/pages/network/EthernetDetailPage.qml
+#: modules/nexus/pages/network/NetworkDetailPage.qml
+msgid "Disconnect"
+msgstr ""
+
+#: modules/bar/popouts/Vpn.qml modules/bar/popouts/VpnOtp.qml
 #: modules/bar/popouts/WirelessPassword.qml
 #: modules/nexus/pages/network/AddNetworkPage.qml
 #: modules/nexus/pages/network/EthernetDetailPage.qml
 msgid "Connect"
+msgstr ""
+
+#: modules/bar/popouts/VpnOtp.qml
+msgid "Enter your MFA OTP to connect"
+msgstr ""
+
+#: modules/bar/popouts/VpnOtp.qml
+msgid "6-digit OTP"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgid "VPN settings"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgid "Stored in ~/.config/openfortivpn/config"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgctxt "vpn server hostname"
+msgid "Host"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgctxt "vpn server port"
+msgid "Port"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgctxt "vpn authentication realm"
+msgid "Realm"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgctxt "vpn username"
+msgid "Username"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+msgctxt "vpn password"
+msgid "Password"
+msgstr ""
+
+#: modules/bar/popouts/VpnSettings.qml
+#: modules/nexus/pages/network/AddVpnPage.qml
+msgctxt "button"
+msgid "Save"
 msgstr ""
 
 #: modules/bar/popouts/WirelessPassword.qml
@@ -423,8 +524,25 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
+#: modules/clipboard/Panel.qml modules/nexus/pages/ServicesPage.qml
+msgid "Clipboard"
+msgstr ""
+
+#: modules/clipboard/Panel.qml
+msgid "Search clipboard…"
+msgstr ""
+
+#: modules/clipboard/Panel.qml
+msgid "No matches"
+msgstr ""
+
+#: modules/clipboard/Panel.qml
+msgid "Clipboard is empty"
+msgstr ""
+
 #: modules/dashboard/Content.qml modules/nexus/pages/panels/DashboardPanel.qml
-#: modules/nexus/pages/PanelsPage.qml services/Keybinds.qml
+#: modules/nexus/pages/PanelsPage.qml modules/nexus/pages/ShellPage.qml
+#: services/Keybinds.qml
 msgid "Dashboard"
 msgstr ""
 
@@ -727,6 +845,62 @@ msgstr ""
 
 #: modules/launcher/ContentList.qml
 msgid "Try searching for something else"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Edit application"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Application name"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Description"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Icon"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Theme name or file path"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml modules/nexus/pages/KeybindsPage.qml
+msgid "Cancel"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Save"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Choose icon"
+msgstr ""
+
+#: modules/launcher/DesktopEditDialog.qml
+msgid "Images"
+msgstr ""
+
+#: modules/launcher/items/AppItem.qml
+msgid "Edit application…"
+msgstr ""
+
+#: modules/launcher/items/AppItem.qml
+msgid "Remove from favourites"
+msgstr ""
+
+#: modules/launcher/items/AppItem.qml
+msgid "Add to favourites"
+msgstr ""
+
+#: modules/launcher/items/AppItem.qml
+msgid "Hide from launcher"
+msgstr ""
+
+#: modules/launcher/items/AppItem.qml
+msgid "Reset customization"
 msgstr ""
 
 #: modules/launcher/items/CalcItem.qml
@@ -1044,6 +1218,10 @@ msgctxt "unknown audio device"
 msgid "Unknown"
 msgstr ""
 
+#: modules/nexus/common/DialogSelectButton.qml
+msgid "Search"
+msgstr ""
+
 #: modules/nexus/common/EthernetSection.qml
 #: modules/nexus/pages/network/EthernetDetailPage.qml
 msgctxt "ethernet link state"
@@ -1131,12 +1309,13 @@ msgstr ""
 msgid "This page will be available in a future update."
 msgstr ""
 
-#: modules/nexus/PageRegistry.qml modules/nexus/pages/WallpaperAndStyle.qml
-msgid "Wallpaper & style"
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/ShellPage.qml
+#: services/Keybinds.qml
+msgid "Shell"
 msgstr ""
 
 #: modules/nexus/PageRegistry.qml
-msgid "Wallpaper, fonts, colours"
+msgid "Activities, wallpaper and colours"
 msgstr ""
 
 #: modules/nexus/PageRegistry.qml
@@ -1159,14 +1338,6 @@ msgstr ""
 msgid "App volumes, sound devices"
 msgstr ""
 
-#: modules/nexus/PageRegistry.qml
-msgid "Updates"
-msgstr ""
-
-#: modules/nexus/PageRegistry.qml
-msgid "System updates"
-msgstr ""
-
 #: modules/nexus/PageRegistry.qml modules/nexus/pages/AboutPage.qml
 msgid "Plugins"
 msgstr ""
@@ -1185,6 +1356,7 @@ msgstr ""
 
 #: modules/nexus/PageRegistry.qml modules/nexus/pages/AppsPage.qml
 #: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/ShellPage.qml
 msgid "Apps"
 msgstr ""
 
@@ -1215,35 +1387,6 @@ msgstr ""
 #: modules/nexus/PageRegistry.qml
 msgid "Shell shortcuts and remapping"
 msgstr ""
-
-#: modules/nexus/PageRegistry.qml modules/nexus/pages/ActivitiesPage.qml
-#: services/Keybinds.qml
-msgid "Activities"
-msgstr ""
-
-#: modules/nexus/PageRegistry.qml
-msgid "Group workspaces into activities"
-msgstr ""
-#: modules/nexus/pages/ShellPage.qml
-msgid "Activities, wallpaper and colours"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Group workspaces into activities and give each one its own wallpaper and colours. Empty look fields inherit from Home."
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Look"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Inheriting wallpaper and colours from Home"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Use Home look"
-msgstr ""
-
 
 #: modules/nexus/PageRegistry.qml modules/nexus/pages/AboutPage.qml
 msgid "About"
@@ -1295,93 +1438,6 @@ msgstr ""
 
 #: modules/nexus/pages/AboutPage.qml
 msgid "Loaded plugins"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Untitled rule"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Group Hyprland workspaces into activities. Each activity appears as a separate pill on the bar."
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-#: modules/nexus/pages/panels/DashboardPanel.qml
-#: modules/nexus/pages/panels/LauncherPanel.qml
-#: modules/nexus/pages/panels/SidebarPanel.qml
-#: modules/nexus/pages/panels/UtilitiesPanel.qml
-msgid "General"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Enable activities"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Show activity pills on the bar and use activity shortcuts"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Show app icons on workspaces"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Use real application icons; when off, show category icons under the workspace marker"
-msgstr ""
-
-#. TRANSLATORS: %1 = workspace id range, e.g. "1–2"
-#: modules/nexus/pages/ActivitiesPage.qml
-#, qt-format
-msgid "Workspaces %1"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Name"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Icon"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Material Symbols icon name"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Desktops"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Number of workspaces in this activity"
-msgstr ""
-
-#. TRANSLATORS: %1 = 1-based desktop number within the activity
-#: modules/nexus/pages/ActivitiesPage.qml
-#, qt-format
-msgid "Desktop %1"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Add app"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Installed apps"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-#: modules/nexus/pages/network/AddVpnPage.qml
-#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
-msgctxt "button"
-msgid "Add"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "Add activity"
-msgstr ""
-
-#: modules/nexus/pages/ActivitiesPage.qml
-msgid "New activity"
 msgstr ""
 
 #: modules/nexus/pages/apps/AllApps.qml modules/nexus/pages/AppsPage.qml
@@ -1673,10 +1729,6 @@ msgid "“%1” is already used by “%2”. Do you want to reassign it?"
 msgstr ""
 
 #: modules/nexus/pages/KeybindsPage.qml
-msgid "Cancel"
-msgstr ""
-
-#: modules/nexus/pages/KeybindsPage.qml
 msgid "Replace"
 msgstr ""
 
@@ -1898,8 +1950,10 @@ msgid "Delete"
 msgstr ""
 
 #: modules/nexus/pages/network/AddVpnPage.qml
+#: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+#: modules/nexus/pages/ShellPage.qml
 msgctxt "button"
-msgid "Save"
+msgid "Add"
 msgstr ""
 
 #: modules/nexus/pages/network/AllNetworksPage.qml
@@ -1929,11 +1983,6 @@ msgstr ""
 #: modules/nexus/pages/network/AllNetworksPage.qml
 msgctxt "network filter"
 msgid "2.4 GHz"
-msgstr ""
-
-#: modules/nexus/pages/network/EthernetDetailPage.qml
-#: modules/nexus/pages/network/NetworkDetailPage.qml
-msgid "Disconnect"
 msgstr ""
 
 #: modules/nexus/pages/network/EthernetDetailPage.qml
@@ -2062,6 +2111,7 @@ msgstr ""
 #: modules/nexus/pages/panels/LauncherPanel.qml
 #: modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
 #: modules/nexus/pages/panels/TaskbarPanel.qml
+#: modules/nexus/pages/UpdatesSettings.qml
 msgid "Behaviour"
 msgstr ""
 
@@ -2151,6 +2201,14 @@ msgstr ""
 
 #: modules/nexus/pages/NetworkPage.qml
 msgid "Add provider"
+msgstr ""
+
+#: modules/nexus/pages/panels/DashboardPanel.qml
+#: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/panels/SidebarPanel.qml
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+#: modules/nexus/pages/ShellPage.qml
+msgid "General"
 msgstr ""
 
 #: modules/nexus/pages/panels/DashboardPanel.qml
@@ -2255,6 +2313,7 @@ msgid "Variants"
 msgstr ""
 
 #: modules/nexus/pages/panels/LauncherPanel.qml
+#: modules/nexus/pages/ShellPage.qml
 #: modules/nexus/pages/wallandstyle/WallpaperSelect.qml
 #: modules/nexus/pages/WallpaperAndStyle.qml
 msgid "Wallpapers"
@@ -2571,11 +2630,16 @@ msgid "Mute or unmute the default source"
 msgstr ""
 
 #: modules/nexus/pages/panels/UtilitiesPanel.qml
+#: modules/nexus/pages/ShellPage.qml
 msgid "Settings"
 msgstr ""
 
 #: modules/nexus/pages/panels/UtilitiesPanel.qml
 msgid "Open the settings window"
+msgstr ""
+
+#: modules/nexus/pages/panels/UtilitiesPanel.qml
+msgid "Prevent sleep / idle suspend"
 msgstr ""
 
 #: modules/nexus/pages/panels/UtilitiesPanel.qml
@@ -2742,6 +2806,10 @@ msgstr ""
 msgid "VPN changes"
 msgstr ""
 
+#: modules/nexus/pages/services/NotificationsPage.qml
+msgid "New system updates"
+msgstr ""
+
 #: modules/nexus/pages/services/NotificationsPage.qml services/Players.qml
 msgid "Now playing"
 msgstr ""
@@ -2773,6 +2841,22 @@ msgstr ""
 
 #: modules/nexus/pages/ServicesPage.qml
 msgid "Notifications, toasts, timeouts"
+msgstr ""
+
+#: modules/nexus/pages/ServicesPage.qml services/Keybinds.qml
+msgid "Clipboard history"
+msgstr ""
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Floating popout (Super+Shift+V) backed by cliphist"
+msgstr ""
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "History size"
+msgstr ""
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Maximum number of clipboard entries to keep"
 msgstr ""
 
 #: modules/nexus/pages/ServicesPage.qml
@@ -2888,9 +2972,374 @@ msgstr ""
 msgid "Override for GPU type"
 msgstr ""
 
+#: modules/nexus/pages/ShellPage.qml
+#: plugin/src/Caelestia/Config/activitiesconfig.hpp
+msgid "Home"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Apartment"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+#: plugin/src/Caelestia/Config/activitiesconfig.hpp
+msgid "Work"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Work outline"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+#: plugin/src/Caelestia/Config/activitiesconfig.hpp
+msgid "Games"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Controller"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "School"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Study"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Code"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml services/Keybinds.qml
+msgid "Terminal"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Design"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Art"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Music"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Movies"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Photos"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Chat"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Mail"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Web"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Cloud"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Science"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Fitness"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Food"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Coffee"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Shopping"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Travel"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Flight"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Favorite"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Star"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Bolt"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Night"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Day"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Layers"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Folder"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Person"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Groups"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Untitled rule"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Group workspaces into activities and give each one its own wallpaper and colours. Empty look fields inherit from Home."
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Enable activities"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Show activity pills on the bar and use activity shortcuts"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Show app icons on workspaces"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Use real application icons; when off, show category icons under the workspace marker"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml services/Keybinds.qml
+msgid "Activities"
+msgstr ""
+
+#. TRANSLATORS: %1 = workspace id range, e.g. "1–2"
+#: modules/nexus/pages/ShellPage.qml
+#, qt-format
+msgid "Workspaces %1"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Name"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Desktops"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Change icon"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Activity icon"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Search icons"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Look"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Inheriting wallpaper and colours from Home"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
 #: modules/nexus/pages/wallandstyle/ColourSelect.qml
 #: modules/nexus/pages/WallpaperAndStyle.qml
 msgid "Colours"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Transparency"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Dark theme"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Shell and bar colours"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Light apps"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+#: modules/nexus/pages/wallandstyle/ColourSelect.qml
+#: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Keep GTK/Qt apps light even if the shell is dark"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Use Home look"
+msgstr ""
+
+#. TRANSLATORS: %1 = 1-based desktop number within the activity
+#: modules/nexus/pages/ShellPage.qml
+#, qt-format
+msgid "Desktop %1"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Add app"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Installed apps"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Search apps"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "Add activity"
+msgstr ""
+
+#: modules/nexus/pages/ShellPage.qml
+msgid "New activity"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Updating single packages is blocked by default due to high risk of system breakage. Enable it in settings?"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgctxt "button"
+msgid "Enable"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Available"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Info"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Update"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Uninstall"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "URL"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesPage.qml
+msgid "Clear orphans"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Update settings"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Sources"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Arch repositories"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Official packages via checkupdates"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "AUR"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Arch User Repository via the selected wrapper"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Flatpak"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Flatpak remotes"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "AUR wrapper"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Wrapper"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Used for AUR checks and installs"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Poll interval"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Minutes between automatic checks"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Notify on new updates"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Toast when newly available packages are detected"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Allow single-package updates"
+msgstr ""
+
+#: modules/nexus/pages/UpdatesSettings.qml
+msgid "Risky: can break partial upgrades on Arch"
 msgstr ""
 
 #: modules/nexus/pages/wallandstyle/ColourSelect.qml
@@ -2905,26 +3354,6 @@ msgstr ""
 #: modules/nexus/pages/wallandstyle/ColourSelect.qml
 #, qt-format
 msgid "Material style: %1"
-msgstr ""
-
-#: modules/nexus/pages/wallandstyle/ColourSelect.qml
-#: modules/nexus/pages/WallpaperAndStyle.qml
-msgid "Dark theme"
-msgstr ""
-
-#: modules/nexus/pages/wallandstyle/ColourSelect.qml
-#: modules/nexus/pages/WallpaperAndStyle.qml
-msgid "Shell and bar colours"
-msgstr ""
-
-#: modules/nexus/pages/wallandstyle/ColourSelect.qml
-#: modules/nexus/pages/WallpaperAndStyle.qml
-msgid "Light apps"
-msgstr ""
-
-#: modules/nexus/pages/wallandstyle/ColourSelect.qml
-#: modules/nexus/pages/WallpaperAndStyle.qml
-msgid "Keep GTK/Qt apps light even if the shell is dark"
 msgstr ""
 
 #: modules/nexus/pages/wallandstyle/ColourSelect.qml
@@ -2976,15 +3405,15 @@ msgid "No local wallpapers found"
 msgstr ""
 
 #: modules/nexus/pages/WallpaperAndStyle.qml
+msgid "Wallpaper & style"
+msgstr ""
+
+#: modules/nexus/pages/WallpaperAndStyle.qml
 msgid "Wallpaper disabled"
 msgstr ""
 
 #: modules/nexus/pages/WallpaperAndStyle.qml
 msgid "Display wallpaper"
-msgstr ""
-
-#: modules/nexus/pages/WallpaperAndStyle.qml
-msgid "Transparency"
 msgstr ""
 
 #. TRANSLATORS: %1/%2 = opacity values from 0 to 1 for the base surface and layered surfaces
@@ -3079,11 +3508,6 @@ msgstr ""
 #: modules/utilities/cards/Record.qml
 msgctxt "recording status"
 msgid "PAUSED"
-msgstr ""
-
-#: modules/utilities/cards/Record.qml
-msgctxt "recording status"
-msgid "REC"
 msgstr ""
 
 #. TRANSLATORS: %1 = elapsed recording duration, e.g. 01:23
@@ -3410,6 +3834,24 @@ msgstr ""
 msgid "Audio input changed"
 msgstr ""
 
+#: services/Clipboard.qml
+msgid "Image"
+msgstr ""
+
+#: services/Clipboard.qml
+#, qt-format
+msgid "Image · %1"
+msgstr ""
+
+#: services/Clipboard.qml
+#, qt-format
+msgid "Binary · %1"
+msgstr ""
+
+#: services/Clipboard.qml
+msgid "Binary data"
+msgstr ""
+
 #: services/Hypr.qml
 msgctxt "keyboard layout"
 msgid "Unknown"
@@ -3564,7 +4006,7 @@ msgid "Jump to the first desktop of the previous activity"
 msgstr ""
 
 #: services/Keybinds.qml
-msgid "Terminal"
+msgid "Show a preview of all activities and desktops"
 msgstr ""
 
 #: services/Keybinds.qml
@@ -3736,15 +4178,15 @@ msgid "Frozen region capture to the clipboard"
 msgstr ""
 
 #: services/Keybinds.qml
+msgid "Open clipboard history and paste into the focused window"
+msgstr ""
+
+#: services/Keybinds.qml
 msgid "Windows"
 msgstr ""
 
 #: services/Keybinds.qml
 msgid "Applications"
-msgstr ""
-
-#: services/Keybinds.qml
-msgid "Shell"
 msgstr ""
 
 #: services/Keybinds.qml
@@ -3754,6 +4196,63 @@ msgstr ""
 #: services/Keybinds.qml
 #, qt-format
 msgid "Already used by “%1”"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgctxt "madison vpn state"
+msgid "Disconnected"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgctxt "madison vpn state"
+msgid "Connecting…"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgctxt "madison vpn state"
+msgid "Disconnecting…"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgid "Host is required"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgid "Port must be a number"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgid "Could not write VPN config"
+msgstr ""
+
+#: services/MadisonVpn.qml
+#, qt-format
+msgid "Connected · %1"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgid "VPN dropped (reconnect after sleep)"
+msgstr ""
+
+#: services/MadisonVpn.qml services/VPN.qml
+msgid "VPN connected"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgid "Login failed (user / password / OTP / certificate)."
+msgstr ""
+
+#: services/MadisonVpn.qml
+#, qt-format
+msgid "Could not start the VPN tunnel (code %1)."
+msgstr ""
+
+#: services/MadisonVpn.qml services/VPN.qml
+msgid "VPN disconnected"
+msgstr ""
+
+#: services/MadisonVpn.qml
+msgid "Could not read VPN config"
 msgstr ""
 
 #: services/Nmcli.qml
@@ -3820,6 +4319,81 @@ msgctxt "track artist and title"
 msgid "%1 - %2"
 msgstr ""
 
+#: services/Timers.qml
+msgid "Timer finished"
+msgstr ""
+
+#: services/Timers.qml
+msgid "Time's up"
+msgstr ""
+
+#: services/Updates.qml
+msgid "Checking for updates…"
+msgstr ""
+
+#: services/Updates.qml
+msgid "No update sources enabled"
+msgstr ""
+
+#: services/Updates.qml
+msgid "System is up to date"
+msgstr ""
+
+#: services/Updates.qml
+#, qt-format, qt-plural-format
+msgid "%n update available (%1)"
+msgid_plural "%n updates available (%1)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: services/Updates.qml
+#, qt-plural-format
+msgid "%n update available"
+msgid_plural "%n updates available"
+msgstr[0] ""
+msgstr[1] ""
+
+#: services/Updates.qml
+msgid "##### Caelestia updates #####"
+msgstr ""
+
+#: services/Updates.qml
+msgid "Press any key to close…"
+msgstr ""
+
+#: services/Updates.qml
+msgid "Updating system…"
+msgstr ""
+
+#: services/Updates.qml
+#, qt-format
+msgid "Updating %1…"
+msgstr ""
+
+#: services/Updates.qml
+#, qt-format
+msgid "Uninstalling %1…"
+msgstr ""
+
+#: services/Updates.qml
+msgid "Cleaning orphans…"
+msgstr ""
+
+#: services/Updates.qml
+#, qt-plural-format
+msgid "%n new update"
+msgid_plural "%n new updates"
+msgstr[0] ""
+msgstr[1] ""
+
+#: services/Updates.qml
+msgid "Update check failed"
+msgstr ""
+
+#: services/Updates.qml
+msgid "Update check timed out"
+msgstr ""
+
 #: services/VPN.qml
 msgid "VPN connection failed"
 msgstr ""
@@ -3853,16 +4427,8 @@ msgid "Unknown WARP status"
 msgstr ""
 
 #: services/VPN.qml
-msgid "VPN connected"
-msgstr ""
-
-#: services/VPN.qml
 #, qt-format
 msgid "Connected to %1"
-msgstr ""
-
-#: services/VPN.qml
-msgid "VPN disconnected"
 msgstr ""
 
 #: services/VPN.qml
@@ -4249,18 +4815,6 @@ msgstr ""
 msgid "Failed to write: %1"
 msgstr ""
 
-#: plugin/src/Caelestia/Config/activitiesconfig.hpp
-msgid "Home"
-msgstr ""
-
-#: plugin/src/Caelestia/Config/activitiesconfig.hpp
-msgid "Games"
-msgstr ""
-
-#: plugin/src/Caelestia/Config/activitiesconfig.hpp
-msgid "Work"
-msgstr ""
-
 #: plugin/src/Caelestia/Config/generalconfig.hpp
 msgid "Low battery"
 msgstr ""
@@ -4400,140 +4954,4 @@ msgstr ""
 
 #: plugin/src/Caelestia/Config/launcherconfig.hpp
 msgid "Configure the shell"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Activity icon"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Change icon"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Search icons"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Apartment"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Work outline"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Controller"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "School"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Study"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Code"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Design"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Art"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Music"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Movies"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Photos"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Chat"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Mail"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Web"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Cloud"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Science"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Fitness"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Food"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Coffee"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Shopping"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Travel"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Flight"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Favorite"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Star"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Bolt"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Night"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Day"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Layers"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Folder"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Person"
-msgstr ""
-
-#: modules/nexus/pages/ShellPage.qml
-msgid "Groups"
 msgstr ""

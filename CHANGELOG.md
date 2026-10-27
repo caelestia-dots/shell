@@ -4,6 +4,14 @@ Cambios relevantes de este fork respecto a releases internas. El detalle de uso 
 
 ## 2026-10-27
 
+### System updates
+
+- Página **Nexus → Updates** (lista desplegable, refrescar, actualizar sistema / paquete).
+- Fuentes configurables (Arch, AUR, Flatpak; todas on por defecto); wrapper AUR default **yay**.
+- Icono en la pastilla de status (junto a VPN) solo si hay updates; popout rápido + enlace a Nexus.
+- Poll cada 30 min; toast de paquetes nuevos (configurable, default on).
+- Actualizar sistema: password popup → fondo desde el panel / logs en Nexus; toast al terminar.
+
 ### Clipboard
 
 - Historial flotante estilo Plasma/Caelestia (`cliphist`): **Super+Shift+V** (remapeable).
@@ -16,6 +24,7 @@ Cambios relevantes de este fork respecto a releases internas. El detalle de uso 
 
 - Icono VPN en la pastilla de status (bajo Bluetooth).
 - Clic = conectar (diálogo OTP Caelestia) / desconectar.
+- Engranaje en el popout: editar config local de openfortivpn (sin secretos en el repo).
 - Scripts en `madison_vpn_widget` (`hyprland/`) instalados a `~/.local/share/madison-vpn/`.
 - Tras **suspender/reanudar**: health-check (ping a intranet); si el túnel está zombie se limpia y el icono pasa a desconectado (toast). Comando `madison-vpn heal` + `heal_vpn.sh`.
 
@@ -33,6 +42,7 @@ Cambios relevantes de este fork respecto a releases internas. El detalle de uso 
 - Carpeta por defecto: `~/Vídeos/Videocapturas de pantalla` (`CAELESTIA_RECORDINGS_DIR` / `Paths.recsdir`).
 - Wrappers `record-start.sh` / `record.sh` fijan esa ruta al start/stop/pause.
 - Abrir carpeta desde la lista usa el explorador configurado (`thunar` por defecto).
+- Reproducir (▶) abre con `apps.playback` (**VLC** por defecto); MIME `video/*` también apunta a VLC.
 
 ### Explorador / Hyprland
 

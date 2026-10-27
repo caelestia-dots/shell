@@ -16,6 +16,7 @@ PageBase {
             network: Tr.tr("Network"),
             bluetooth: Tr.tr("Bluetooth"),
             vpn: Tr.tr("Madison VPN"),
+            updates: Tr.tr("Updates"),
             battery: Tr.tr("Battery")
         })
 

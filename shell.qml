@@ -31,6 +31,7 @@ ShellRoot {
         Keybinds;
         Activities;
         Clipboard;
+        Updates;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)

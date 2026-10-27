@@ -11,6 +11,7 @@ Singleton {
     id: root
 
     readonly property string scriptsDir: `${Quickshell.env("HOME")}/.local/share/madison-vpn`
+    readonly property string configPath: `${Quickshell.env("HOME")}/.config/openfortivpn/config`
 
     property bool connected: false
     property string vpnIp: ""
@@ -19,6 +20,15 @@ Singleton {
     property bool otpOpen: false
     property string lastError: ""
     property bool wasConnected: false
+
+    // Editable openfortivpn connection fields (rest of the file is preserved on save)
+    property string cfgHost: ""
+    property string cfgPort: "10443"
+    property string cfgUsername: ""
+    property string cfgPassword: ""
+    property string cfgRealm: ""
+    property bool configLoaded: false
+    property string configError: ""
 
     readonly property bool connecting: busy && !connected
     readonly property bool disconnecting: busy && connected
@@ -78,6 +88,98 @@ Singleton {
         root.busy = true;
         root.statusText = Tr.trCtx("Disconnecting…", "madison vpn state");
         disconnectProc.running = true;
+    }
+
+    function reloadConfig(): void {
+        root.configError = "";
+        configFile.reload();
+    }
+
+    function applyConfigText(text: string): void {
+        let host = "";
+        let port = "10443";
+        let username = "";
+        let password = "";
+        let realm = "";
+        for (const raw of (text || "").split("\n")) {
+            const line = raw.trim();
+            if (!line || line.startsWith("#"))
+                continue;
+            const eq = line.indexOf("=");
+            if (eq < 0)
+                continue;
+            const key = line.slice(0, eq).trim();
+            const value = line.slice(eq + 1).trim();
+            switch (key) {
+            case "host":
+                host = value;
+                break;
+            case "port":
+                port = value || "10443";
+                break;
+            case "username":
+                username = value;
+                break;
+            case "password":
+                password = value;
+                break;
+            case "realm":
+                realm = value;
+                break;
+            }
+        }
+        root.cfgHost = host;
+        root.cfgPort = port;
+        root.cfgUsername = username;
+        root.cfgPassword = password;
+        root.cfgRealm = realm;
+        root.configLoaded = true;
+    }
+
+    function saveConfig(): bool {
+        if (!root.cfgHost.trim()) {
+            root.configError = Tr.tr("Host is required");
+            return false;
+        }
+        const port = (root.cfgPort || "").trim() || "10443";
+        if (!/^\d+$/.test(port)) {
+            root.configError = Tr.tr("Port must be a number");
+            return false;
+        }
+
+        const updates = {
+            host: root.cfgHost.trim(),
+            port: port,
+            username: root.cfgUsername.trim(),
+            password: root.cfgPassword,
+            realm: root.cfgRealm.trim()
+        };
+        const seen = {};
+        const src = configFile.text() || "";
+        const lines = src.length ? src.split("\n") : [];
+        const out = lines.map(raw => {
+            const m = raw.match(/^(\s*)([\w-]+)(\s*=\s*)(.*)$/);
+            if (!m)
+                return raw;
+            const key = m[2];
+            if (!(key in updates))
+                return raw;
+            seen[key] = true;
+            return `${m[1]}${key}${m[3]}${updates[key]}`;
+        });
+        for (const key of Object.keys(updates)) {
+            if (!seen[key])
+                out.push(`${key} = ${updates[key]}`);
+        }
+        try {
+            configFile.setText(out.join("\n").replace(/\n+$/, "") + "\n");
+            root.configError = "";
+            root.cfgPort = port;
+            return true;
+        } catch (e) {
+            root.configError = Tr.tr("Could not write VPN config");
+            return false;
+        }
     }
 
     function applyStatus(out: string): void {
@@ -188,6 +290,21 @@ Singleton {
 
         function onResumed(): void {
             root.onResumed();
+        }
+    }
+
+    FileView {
+        id: configFile
+
+        path: root.configPath
+        printErrors: false
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.applyConfigText(text())
+        onLoadFailed: err => {
+            root.configLoaded = true;
+            if (err !== FileViewError.FileNotFound)
+                root.configError = Tr.tr("Could not read VPN config");
         }
     }
 
