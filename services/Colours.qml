@@ -130,6 +130,8 @@ Singleton {
     }
 
     function applyAppTheme(): void {
+        // lightApps: keep portal/libadwaita/Qt apps on a light palette even if the
+        // shell/scheme (and Thunar CSS) follow a dark activity look.
         const prefer = root.lightApps || root.currentLight ? "prefer-light" : "prefer-dark";
         Quickshell.execDetached(["dconf", "write", "/org/gnome/desktop/interface/color-scheme", `'${prefer}'`]);
     }
@@ -154,6 +156,9 @@ Singleton {
             const drawersBlur = transparency.enabled;
             msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, blur = ${drawersBlur} })`);
             msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-drawers" }, ignore_alpha = ${ignoreAlpha} })`);
+            // Same surface treatment as drawers (m3surface + hypr blur)
+            msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-clipboard" }, blur = ${drawersBlur} })`);
+            msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-clipboard" }, ignore_alpha = ${ignoreAlpha} })`);
             // Overview always uses the translucent + Hyprland blur look
             msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-activities-overview" }, blur = true })`);
             msgs.push(`eval hl.layer_rule({ match = { namespace = "caelestia-activities-overview" }, ignore_alpha = ${ignoreAlpha} })`);
@@ -161,6 +166,8 @@ Singleton {
             const drawersBlur = transparency.enabled ? 1 : 0;
             msgs.push(`keyword layerrule blur ${drawersBlur}, match:namespace caelestia-drawers`);
             msgs.push(`keyword layerrule ignore_alpha ${ignoreAlpha}, match:namespace caelestia-drawers`);
+            msgs.push(`keyword layerrule blur ${drawersBlur}, match:namespace caelestia-clipboard`);
+            msgs.push(`keyword layerrule ignore_alpha ${ignoreAlpha}, match:namespace caelestia-clipboard`);
             msgs.push(`keyword layerrule blur 1, match:namespace caelestia-activities-overview`);
             msgs.push(`keyword layerrule ignore_alpha ${ignoreAlpha}, match:namespace caelestia-activities-overview`);
         }

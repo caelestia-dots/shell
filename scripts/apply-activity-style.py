@@ -15,32 +15,15 @@ from pathlib import Path
 
 
 def _patch_theme_quiet() -> None:
-    import caelestia.utils.theme as theme
-    from caelestia.utils.paths import c_state_dir
+    import importlib.util
 
-    def apply_terms_quiet(sequences: str) -> None:
-        state = c_state_dir / "sequences.txt"
-        state.parent.mkdir(parents=True, exist_ok=True)
-        state.write_text(sequences)
-
-    orig_apply_colours = theme.apply_colours
-    kitty = Path.home() / ".config/caelestia/scripts/kitty-reload-colours.sh"
-
-    def apply_colours_quiet(colours: dict[str, str], mode: str) -> None:
-        orig_apply_colours(colours, mode)
-        if kitty.is_file():
-            try:
-                subprocess.run(
-                    [str(kitty)],
-                    check=False,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            except OSError:
-                pass
-
-    theme.apply_terms = apply_terms_quiet
-    theme.apply_colours = apply_colours_quiet
+    # Reuse caelestia-quiet patches (GTK live theme, Papirus/kdeglobals, Kitty).
+    quiet_path = Path(__file__).with_name("caelestia-quiet.py")
+    spec = importlib.util.spec_from_file_location("caelestia_quiet", quiet_path)
+    quiet = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(quiet)
+    quiet._patch_theme()
 
 
 def _set_wallpaper_files(wall: Path) -> None:

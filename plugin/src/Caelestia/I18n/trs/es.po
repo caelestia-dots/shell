@@ -4680,3 +4680,59 @@ msgstr "Conectando…"
 msgctxt "madison vpn state"
 msgid "Disconnecting…"
 msgstr "Desconectando…"
+
+#: modules/clipboard/Panel.qml
+#: modules/nexus/pages/ServicesPage.qml
+#: services/Keybinds.qml
+msgid "Clipboard"
+msgstr "Portapapeles"
+
+#: modules/clipboard/Panel.qml
+msgid "Search clipboard…"
+msgstr "Buscar en el portapapeles…"
+
+#: modules/clipboard/Panel.qml
+msgid "No matches"
+msgstr "Sin resultados"
+
+#: modules/clipboard/Panel.qml
+msgid "Clipboard is empty"
+msgstr "El portapapeles está vacío"
+
+#: services/Clipboard.qml
+#, qt-format
+msgid "Image · %1"
+msgstr "Imagen · %1"
+
+#: services/Clipboard.qml
+msgid "Image"
+msgstr "Imagen"
+
+#: services/Clipboard.qml
+#, qt-format
+msgid "Binary · %1"
+msgstr "Binario · %1"
+
+#: services/Clipboard.qml
+msgid "Binary data"
+msgstr "Datos binarios"
+
+#: services/Keybinds.qml
+msgid "Clipboard history"
+msgstr "Historial del portapapeles"
+
+#: services/Keybinds.qml
+msgid "Open clipboard history and paste into the focused window"
+msgstr "Abrir el historial del portapapeles y pegar en la ventana enfocada"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Floating popout (Super+Shift+V) backed by cliphist"
+msgstr "Popout flotante (Super+Shift+V) con cliphist"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "History size"
+msgstr "Tamaño del historial"
+
+#: modules/nexus/pages/ServicesPage.qml
+msgid "Maximum number of clipboard entries to keep"
+msgstr "Número máximo de entradas del portapapeles a conservar"

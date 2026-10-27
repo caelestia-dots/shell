@@ -51,9 +51,16 @@ class UtilitiesVpn : public settings::ObjectNode {
 class UtilitiesCards : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesCards, settings::ObjectNode)
 
-    CONFIG_PROPERTY(bool, keepAwake, true)
+    CONFIG_PROPERTY(bool, keepAwake, false)
     CONFIG_PROPERTY(bool, recorder, true)
     CONFIG_PROPERTY(bool, quickToggles, true)
+};
+
+class UtilitiesClipboard : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesClipboard, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(int, maxItems, 50)
 };
 
 class UtilitiesConfig : public settings::ObjectNode {
@@ -64,12 +71,14 @@ class UtilitiesConfig : public settings::ObjectNode {
     CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesVpn, vpn)
+    CONFIG_GLOBAL_SUBOBJECT(UtilitiesClipboard, clipboard)
     CONFIG_LIST(EntryList, quickToggles,
         DEFAULT_ARG({
             LIST_ENTRY(wifi, true),
             LIST_ENTRY(bluetooth, true),
             LIST_ENTRY(mic, true),
             LIST_ENTRY(settings, true),
+            LIST_ENTRY(keepAwake, true),
             LIST_ENTRY(gameMode, true),
             LIST_ENTRY(wallpaperPlaying, true),
             LIST_ENTRY(dnd, true),

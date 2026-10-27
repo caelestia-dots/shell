@@ -119,6 +119,14 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.tr("Keep awake")
+            subtext: Tr.tr("Prevent sleep / idle suspend")
+            disabled: !Config.utilities.cards.quickToggles
+            checked: root.isToggleOn("keepAwake")
+            onToggled: root.setToggleOn("keepAwake", checked)
+        }
+
+        ToggleRow {
             text: Tr.tr("Game mode")
             subtext: Tr.tr("Toggle game mode")
             disabled: !Config.utilities.cards.quickToggles

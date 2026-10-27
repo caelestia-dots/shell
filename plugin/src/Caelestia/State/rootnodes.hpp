@@ -22,7 +22,7 @@ class RStateRoot : public settings::RootNode {
     QML_ANONYMOUS
 
     STATE_GLOBAL_PROPERTY(bool, gameMode, false)
-    STATE_GLOBAL_PROPERTY(bool, inhibitIdle, false)
+    STATE_GLOBAL_PROPERTY(bool, inhibitIdle, true)
     STATE_GLOBAL_PROPERTY(qreal, inhibitingIdleSince, -1)
 
 public:

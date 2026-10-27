@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.Config
 import Caelestia.I18n
 import qs.utils
 
@@ -333,7 +334,8 @@ Singleton {
             label: () => Tr.tr("File manager"),
             description: () => Tr.tr("Open the file manager"),
             defaultBind: "SUPER + E",
-            dispatch: "hl.dsp.exec_cmd(\"dolphin\")",
+            // Resolved at apply-time from GlobalConfig.general.apps.explorer
+            dispatch: "hl.dsp.exec_cmd(\"thunar\")",
             category: "apps"
         },
         {
@@ -526,6 +528,14 @@ Singleton {
             defaultBind: "SUPER + SHIFT + Print",
             global: "caelestia:screenshotFreezeClip",
             category: "capture"
+        },
+        {
+            id: "clipboard",
+            label: () => Tr.tr("Clipboard history"),
+            description: () => Tr.tr("Open clipboard history and paste into the focused window"),
+            defaultBind: "SUPER + SHIFT + V",
+            global: "caelestia:clipboard",
+            category: "shell"
         }
     ]
 
@@ -648,6 +658,10 @@ Singleton {
     function dispatcherLua(action: var): string {
         if (action.global)
             return `hl.dsp.global("${root.escapeLuaString(action.global)}")`;
+        if (action.id === "openFiles") {
+            const bin = GlobalConfig.general.apps.explorer[0] || "thunar";
+            return `hl.dsp.exec_cmd("${root.escapeLuaString(bin)}")`;
+        }
         if (action.dispatch)
             return action.dispatch;
         return "hl.dsp.no_op()";

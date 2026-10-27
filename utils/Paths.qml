@@ -20,7 +20,8 @@ Singleton {
     readonly property string imagecache: `${cache}/imagecache`
     readonly property string notifimagecache: `${imagecache}/notifs`
     readonly property string wallsdir: Quickshell.env("CAELESTIA_WALLPAPERS_DIR") || absolutePath(GlobalConfig.paths.wallpaperDir)
-    readonly property string recsdir: Quickshell.env("CAELESTIA_RECORDINGS_DIR") || `${videos}/Recordings`
+    // Spanish XDG videos folder + system Screenshots-style name (override with CAELESTIA_RECORDINGS_DIR)
+    readonly property string recsdir: Quickshell.env("CAELESTIA_RECORDINGS_DIR") || `${home}/Vídeos/Videocapturas de pantalla`
     readonly property string libdir: Quickshell.env("CAELESTIA_LIB_DIR") || "/usr/lib/caelestia"
 
     function toLocalFile(path: url): string {

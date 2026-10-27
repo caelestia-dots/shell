@@ -122,6 +122,14 @@ StyledRect {
                     }
                 }
                 DelegateChoice {
+                    roleValue: "keepAwake"
+                    delegate: Toggle {
+                        icon: "coffee"
+                        checked: RuntimeState.inhibitIdle
+                        onClicked: RuntimeState.inhibitIdle = !RuntimeState.inhibitIdle
+                    }
+                }
+                DelegateChoice {
                     roleValue: "gameMode"
                     delegate: Toggle {
                         icon: "gamepad"

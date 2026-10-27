@@ -15,6 +15,7 @@ Singleton {
     property bool arming
 
     readonly property string startScript: `${Quickshell.shellDir}/scripts/record-start.sh`
+    readonly property string recordScript: `${Quickshell.shellDir}/scripts/record.sh`
 
     function start(extraArgs = []): void {
         if (props.running || root.arming)
@@ -36,7 +37,7 @@ Singleton {
         if (!props.running && !root.arming)
             return;
         root.arming = false;
-        Quickshell.execDetached(["caelestia", "record"]);
+        Quickshell.execDetached([root.recordScript]);
         props.running = false;
         props.paused = false;
         checkTimer.restart();
@@ -45,7 +46,7 @@ Singleton {
     function togglePause(): void {
         if (!props.running)
             return;
-        Quickshell.execDetached(["caelestia", "record", "-p"]);
+        Quickshell.execDetached([root.recordScript, "-p"]);
         props.paused = !props.paused;
     }
 

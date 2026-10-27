@@ -157,8 +157,12 @@ Singleton {
         if (root.pendingLightApps >= 0) {
             const want = root.pendingLightApps > 0;
             // Scheme already applied with the activity mode — do not re-set mode.
+            // Always run setLightApps when enabling so prefer-light / Qt skip apply
+            // even if the flag was already true from a previous activity.
             if (want !== Colours.lightApps || !Colours.lightAppsLoaded)
                 Colours.setLightApps(want, false);
+            else if (want)
+                Colours.applyAppTheme();
             root.pendingLightApps = -1;
         }
         if (root.pendingTransparency >= 0) {

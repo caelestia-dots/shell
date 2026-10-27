@@ -13,13 +13,15 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Activities** | Espacios de trabajo agrupados (Casa / Trabajo / Juegos…), overview, estilo por actividad |
 | **Barra** | Pills de actividades, iconos de apps en workspaces, indicador **REC**, tray y status más claros |
 | **Reloj** | Popout con calendario + temporizadores (con sonido y persistencia) |
-| **Grabación** | Captura de pantalla estable (no se corta al salir del panel); indicador en la barra |
+| **Grabación** | Estable (no se corta al salir del panel); guarda en `~/Vídeos/Videocapturas de pantalla` |
 | **Notificaciones** | Clic → enfoca la app / ventana relacionada |
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
-| **Launcher** | Hover inferior, clic derecho para editar `.desktop` (nombre / descripción / icono) |
-| **Kitty** | Paleta alineada con la activity activa (plantilla + recarga en vivo) |
-| **Madison VPN** | Icono bajo Bluetooth: conectar (OTP en diálogo) / desconectar |
-| **Atajos** | Remapeables desde Nexus; atajos de activities incluidos |
+| **Launcher** | Hover inferior, edición de `.desktop`, iconos Papirus |
+| **Kitty / GTK** | Paleta alineada a la activity (Kitty + Thunar/Material) |
+| **Madison VPN** | Icono bajo Bluetooth: OTP / desconectar; limpia túnel zombie tras sleep |
+| **Utilities** | Mantener activo (café) en interruptores rápidos, ON por defecto |
+| **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
+| **Atajos** | Remapeables desde Nexus; Super+E → Thunar; atajos de activities |
 
 ---
 
@@ -55,9 +57,11 @@ Al cambiar de actividad puedes aplicar (y recordar) de forma independiente:
 - Esquema / colores
 - Modo claro / oscuro
 - Transparencia
-- “Light apps”
+- “Light apps” (apps Adwaita/Qt en claro aunque el shell esté oscuro)
 
 Las actividades que no son la principal pueden **heredar** el look de Home o definir el suyo.
+
+El apply es **un solo proceso** (`scripts/apply-activity-style.py`): evita carreras light/dark y respeta el modo de la activity aunque `smartScheme` esté activo. GTK/Thunar se actualizan con la paleta Material (recarga en vivo vía `colors.css` + `colorreload-gtk-module`).
 
 ### Apps ancladas a un desktop
 
@@ -104,10 +108,12 @@ require("caelestia-activity-rules")  -- reglas de activities / pins (Nexus → S
 ## Grabación de pantalla
 
 - Card de **Screen recorder** en el panel de utilities (fullscreen / región, con o sin audio).
-- El arranque va **desacoplado** del ciclo de vida del panel (`scripts/record-start.sh`), así la captura **no se aborta** al sacar el ratón del panel o al cambiar de desktop.
+- El arranque va **desacoplado** del ciclo de vida del panel (`scripts/record-start.sh` / `record.sh`), así la captura **no se aborta** al sacar el ratón del panel o al cambiar de desktop.
 - Mientras grabas, utilities/sidebar **permanecen abiertos** al salir el puntero (evita teardowns mid-capture).
 - Indicador **REC** / **PAUSE** bajo el reloj en la barra mientras hay grabación activa.
 - El chip principal del recorder no re-dispara start mientras ya está grabando (evita toggle-stop accidental).
+- Archivos en **`~/Vídeos/Videocapturas de pantalla`** (override: env `CAELESTIA_RECORDINGS_DIR`).
+- Desde la lista: reproducir, abrir carpeta (Thunar) o borrar.
 
 ---
 
@@ -117,7 +123,8 @@ Icono en la pastilla de status (debajo de Bluetooth):
 
 - Clic desconectado → diálogo OTP integrado → conecta
 - Clic conectado → desconecta
-- Estado con poll (`~/.local/share/madison-vpn/status_vpn.sh`)
+- Estado con poll (`~/.local/share/madison-vpn/status_vpn.sh`); exige que la intranet responda (no basta con `ppp0` vivo)
+- Tras **suspender el PC**: al reanudar se ejecuta `heal` (limpia túnel zombie + DNS/`hosts`) y el icono refleja la realidad
 
 Scripts e install: repo privado [madison_vpn_widget](https://github.com/iMacnucintosh/madison_vpn_widget) → carpeta `hyprland/`:
 
@@ -126,6 +133,23 @@ cd madison_vpn_widget/hyprland && ./install.sh
 ```
 
 Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN».
+
+---
+
+## Utilities / mantener activo
+
+- En **interruptores rápidos**: icono de café (**Keep awake**), a la izquierda del gamepad.
+- **Activado por defecto** (bloquea idle/suspend del compositor vía idle inhibitor).
+- La card grande «Mantener activo» está oculta por defecto (se puede volver a mostrar en Nexus → Panels → Utilities → Cards).
+
+---
+
+## Explorador y theming GTK
+
+- Explorador por defecto: **Thunar** (`general.apps.explorer` + Super+E + `xdg-mime` para carpetas).
+- Para que Thunar/GTK sigan el esquema de Caelestia: `adw-gtk-theme`, `papirus-icon-theme`, y `GTK_MODULES=colorreload-gtk-module` (Hyprland).
+- Iconos de apps en el launcher: tema **Papirus** (sincronizado en `~/.config/kdeglobals` al aplicar el esquema).
+- Diálogos `pkexec` (Timeshift, VPN helper, etc.): activa `hyprpolkitagent.service` (`systemctl --user enable --now hyprpolkitagent`).
 
 ---
 
@@ -201,6 +225,20 @@ Ya presentes en este fork respecto a un Caelestia “vanilla” típico:
 
 ---
 
+## Clipboard (historial)
+
+Popout flotante junto al cursor (estilo Caelestia), respaldado por **cliphist** + `wl-clipboard`:
+
+- Atajo por defecto: **Super + Shift + V** (Super+V sigue siendo float de ventana; remapeable en Nexus).
+- Buscar, favoritos persistentes (estrella a la derecha; vacía solo al hover), borrar entradas o limpiar historial.
+- Al elegir un ítem: se copia y se pega con **Ctrl+V** en la ventana que tenía el foco (`wtype`).
+- Texto, imágenes del portapapeles (miniatura) y rutas/`file://` a imagen copiadas desde el explorador (también con preview).
+- Fondo igual que el panel izquierdo (`m3surface` + blur de Hyprland).
+- Límite de historial configurable (por defecto **50**) en **Nexus → Services → Clipboard**.
+- Dependencias: `cliphist`, `wl-clipboard`, `wtype`.
+
+---
+
 ## Atajos por defecto (activities)
 
 | Acción | Atajo por defecto |
@@ -208,6 +246,7 @@ Ya presentes en este fork respecto a un Caelestia “vanilla” típico:
 | Overview de activities | Super + Tab |
 | Activity anterior | Super + Ctrl + ← |
 | Activity siguiente | Super + Ctrl + → |
+| Historial del clipboard | Super + Shift + V |
 
 Cámbialos en **Nexus → Keyboard & mouse**.
 
@@ -218,4 +257,5 @@ Cámbialos en **Nexus → Keyboard & mouse**.
 - Esto es un **fork**: no sustituye la documentación de instalación de upstream ([README](./README.md)).
 - Historial de cambios recientes: [CHANGELOG.md](./CHANGELOG.md).
 - Algunas piezas siguen en evolución; si algo no aparece tras actualizar, reinicia la shell (`caelestia shell -r`) y comprueba los `require(...)` de Hyprland.
-- `scripts/caelestia-quiet.py` evita spamear OSC a todos los PTY al cambiar el tema (y recarga Kitty); lo usa la shell al aplicar wallpaper/esquema por activity.
+- `scripts/caelestia-quiet.py` evita spamear OSC a todos los PTY al cambiar el tema (recarga Kitty, sync Papirus/kdeglobals, GTK/`colors.css`).
+- `scripts/apply-activity-style.py` aplica wallpaper + esquema de la activity en un solo proceso.

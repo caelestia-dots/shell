@@ -4,11 +4,49 @@ Cambios relevantes de este fork respecto a releases internas. El detalle de uso 
 
 ## 2026-10-27
 
+### Clipboard
+
+- Historial flotante estilo Plasma/Caelestia (`cliphist`): **Super+Shift+V** (remapeable).
+- Pegado directo en la ventana enfocada (`wtype` Ctrl+V).
+- Favoritos persistentes, búsqueda, miniaturas de imagen.
+- Rutas/`file://` a imagen desde el explorador se muestran y pegan como imagen.
+- Misma superficie/blur que el panel izquierdo; límite configurable (default 50) en Nexus → Services.
+
 ### Madison VPN
 
 - Icono VPN en la pastilla de status (bajo Bluetooth).
 - Clic = conectar (diálogo OTP Caelestia) / desconectar.
 - Scripts en `madison_vpn_widget` (`hyprland/`) instalados a `~/.local/share/madison-vpn/`.
+- Tras **suspender/reanudar**: health-check (ping a intranet); si el túnel está zombie se limpia y el icono pasa a desconectado (toast). Comando `madison-vpn heal` + `heal_vpn.sh`.
+
+### Activities / tema
+
+- Apply de look **atómico y fiable**: `scripts/apply-activity-style.py` (wallpaper + un solo `scheme set`, sin carrera light/dark).
+- Modo/variant de la activity tienen prioridad sobre `smartScheme` (luminancia del wallpaper).
+- Verify + reintento si el modo no cuadra tras el apply.
+- **GTK/Thunar** siguen el esquema dinámico de la activity (`enableGtk` siempre on; `colors.css` para `colorreload`).
+- **Apps claras** de la activity: `prefer-light` + sin motor Qt oscuro; Thunar puede seguir el CSS del esquema.
+- Iconos del launcher vía tema KDE: sync **Papirus** en `kdeglobals` desde `caelestia-quiet.py` (ya no depende solo de Breeze).
+
+### Grabación de pantalla
+
+- Carpeta por defecto: `~/Vídeos/Videocapturas de pantalla` (`CAELESTIA_RECORDINGS_DIR` / `Paths.recsdir`).
+- Wrappers `record-start.sh` / `record.sh` fijan esa ruta al start/stop/pause.
+- Abrir carpeta desde la lista usa el explorador configurado (`thunar` por defecto).
+
+### Explorador / Hyprland
+
+- **Thunar** como file manager por defecto (`xdg-mime` + Super+E vía `apps.explorer`).
+- Dependencias recomendadas para theming: `adw-gtk-theme`, `papirus-icon-theme`, `hyprpolkitagent` (diálogos pkexec).
+
+### Utilities
+
+- **Mantener activo** pasa a interruptor rápido (icono café, a la izquierda del gamepad); la card grande queda desactivada por defecto.
+- Idle inhibit **activado por defecto** (`RuntimeState.inhibitIdle`) para no suspender por inactividad.
+
+### Capturas
+
+- Captura a portapapeles (picker) **sin notificación**.
 
 ## 2026-10-26
 

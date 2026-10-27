@@ -81,6 +81,30 @@ PageBase {
             onClicked: root.nState.openSubPage(1)
         }
 
+        // Clipboard
+        SectionHeader {
+            text: Tr.tr("Clipboard")
+        }
+
+        ToggleRow {
+            first: true
+            text: Tr.tr("Clipboard history")
+            subtext: Tr.tr("Floating popout (Super+Shift+V) backed by cliphist")
+            checked: GlobalConfig.utilities.clipboard.enabled
+            onToggled: GlobalConfig.utilities.clipboard.enabled = checked
+        }
+
+        StepperRow {
+            last: true
+            label: Tr.tr("History size")
+            subtext: Tr.tr("Maximum number of clipboard entries to keep")
+            value: GlobalConfig.utilities.clipboard.maxItems
+            from: 10
+            to: 200
+            stepSize: 10
+            onMoved: v => GlobalConfig.utilities.clipboard.maxItems = Math.round(v)
+        }
+
         // Polling
         SectionHeader {
             text: Tr.tr("Polling")

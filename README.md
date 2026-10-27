@@ -14,10 +14,12 @@ https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
 > [!IMPORTANT]
 > **Este repositorio es un fork** de [caelestia-dots/shell](https://github.com/caelestia-dots/shell) con extras
-> (activities + overview drag&drop, launcher con edición de `.desktop`, grabación estable con indicador REC,
-> timers en el reloj, focus desde notificaciones, Kitty alineado al esquema de la activity, página Shell en Nexus, etc.).
+> (activities + look atómico por activity, Madison VPN con heal tras sleep, historial de portapapeles,
+> grabación a Videocapturas, Thunar/GTK alineados al esquema, mantener activo en quick toggles,
+> launcher/Papirus, Kitty, timers, etc.).
 >
-> Para usuarios finales: **[FEATURES.md](./FEATURES.md)** (qué incluye y cómo usarlo) y **[CHANGELOG.md](./CHANGELOG.md)** (cambios recientes).
+> Documentación del fork (visible en GitHub, no dentro de la shell):
+> **[FEATURES.md](./FEATURES.md)** (qué incluye y cómo usarlo) y **[CHANGELOG.md](./CHANGELOG.md)** (cambios recientes).
 > La instalación y la configuración base siguen documentadas abajo (upstream).
 
 ## Components
@@ -102,6 +104,9 @@ Dependencies:
 - [`swappy`](https://github.com/jtheoof/swappy)
 - [`fish`](https://github.com/fish-shell/fish-shell)
 - [`bash`](https://www.gnu.org/software/bash)
+- [`cliphist`](https://github.com/sentriz/cliphist) — clipboard history (fork)
+- [`wl-clipboard`](https://github.com/bugaevc/wl-clipboard) — Wayland clipboard (fork)
+- [`wtype`](https://github.com/atx/wtype) — paste into the focused window (fork)
 
 Build dependencies:
 
@@ -1057,8 +1062,8 @@ caelestia scheme set -n dynamic
 ```
 
 In this fork, each **activity** can keep its own wallpaper/scheme. Switching activity (bar, keybinds, or overview)
-re-applies that look. For **Kitty** to follow the same palette (including open windows), see the Kitty section in
-[FEATURES.md](./FEATURES.md).
+re-applies that look via `scripts/apply-activity-style.py` (single process; activity mode wins over `smartScheme`).
+GTK/Thunar and Kitty follow the same palette — see [FEATURES.md](./FEATURES.md) (Activities, Kitty, Explorador GTK).
 
 ### My wallpapers aren't showing up in the launcher!
 

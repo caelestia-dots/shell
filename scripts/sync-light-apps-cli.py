@@ -7,7 +7,9 @@ import argparse
 import json
 from pathlib import Path
 
-# Keep Kitty live-reload when syncing light-apps (do not wipe this hook).
+# After colours apply, restore prefer-light when the shell asked for light apps.
+# GTK/Thunar CSS still updates (enableGtk stays on) so the file manager follows
+# the activity scheme; color-scheme prefer-light covers Adwaita/Qt apps.
 POST_HOOK = (
     'test -f "${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/force-apps-light" '
     '&& dconf write /org/gnome/desktop/interface/color-scheme "\'prefer-light\'"'
@@ -30,7 +32,9 @@ def main() -> None:
 
     theme = cfg.setdefault("theme", {})
     theme["postHook"] = POST_HOOK
-    theme["enableGtk"] = not args.light_apps
+    # Thunar/Material GTK CSS always tracks the activity scheme.
+    theme["enableGtk"] = True
+    # Skip Qt colour engine while apps should stay light.
     theme["enableQt"] = not args.light_apps
 
     path.parent.mkdir(parents=True, exist_ok=True)
