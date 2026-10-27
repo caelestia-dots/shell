@@ -138,7 +138,7 @@ Página **Nexus → Complementos** (sustituye el placeholder de Plugins):
 - Lista de features opcionales del fork, con icono identificativo por fila.
 - **Madison VPN**: interruptor on/off. Al desactivar se oculta el icono, se para el poll y se ejecuta teardown (`disconnect` + `heal`) para matar `openfortivpn`/helper.
 - **Timers**: interruptor on/off. Al desactivar se limpian timers activos y se oculta la sección del popout del reloj (el calendario sigue).
-- **Hidratación**: interruptor on/off (opt-in). Al activar sustituye el calendario del dashboard Nexus (y del popout del reloj) por un depósito con waves, meta diaria (default 3000 ml), botones +20/+83/+250/+500 configurables, undo del último trago, y recordatorio con acciones si pasan N minutos (default 15) sin registrar un trago. Estado en `~/.local/state/caelestia/hydration.json`.
+- **Hidratación**: interruptor on/off (opt-in). Al activar sustituye el calendario del dashboard Nexus (solo ahí; el popout del reloj sigue con calendario) por un depósito con waves, meta diaria (default 3000 ml), botones +20/+83/+250/+500 configurables, undo del último trago, y recordatorio con acciones si pasan N minutos (default 15) sin registrar un trago. Estado en `~/.local/state/caelestia/hydration.json`.
 
 ## Madison VPN (FortiClient / openfortivpn)
 
