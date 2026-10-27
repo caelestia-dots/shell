@@ -205,7 +205,7 @@ AnimatedRepeater::PropertyList AnimatedRepeater::itemProperties(int index) const
         for (auto it = roleNames.constBegin(); it != roleNames.constEnd(); ++it) {
             const auto name = QString::fromUtf8(it.value());
             props.emplaceBack(name, m_itemModel->data(modelIndex, it.key()));
-            if (name == u"modelData"_s)
+            if (name == u"modelData")
                 hasModelData = true;
         }
 

@@ -62,31 +62,31 @@ QVariantHash HyprKeyboard::lastIpcObject() const {
 }
 
 QString HyprKeyboard::address() const {
-    return m_lastIpcObject.value(u"address"_s).toString();
+    return m_lastIpcObject.value(u"address").toString();
 }
 
 QString HyprKeyboard::name() const {
-    return m_lastIpcObject.value(u"name"_s).toString();
+    return m_lastIpcObject.value(u"name").toString();
 }
 
 QString HyprKeyboard::layout() const {
-    return m_lastIpcObject.value(u"layout"_s).toString();
+    return m_lastIpcObject.value(u"layout").toString();
 }
 
 QString HyprKeyboard::activeKeymap() const {
-    return m_lastIpcObject.value(u"active_keymap"_s).toString();
+    return m_lastIpcObject.value(u"active_keymap").toString();
 }
 
 bool HyprKeyboard::capsLock() const {
-    return m_lastIpcObject.value(u"capsLock"_s).toBool();
+    return m_lastIpcObject.value(u"capsLock").toBool();
 }
 
 bool HyprKeyboard::numLock() const {
-    return m_lastIpcObject.value(u"numLock"_s).toBool();
+    return m_lastIpcObject.value(u"numLock").toBool();
 }
 
 bool HyprKeyboard::main() const {
-    return m_lastIpcObject.value(u"main"_s).toBool();
+    return m_lastIpcObject.value(u"main").toBool();
 }
 
 bool HyprKeyboard::updateLastIpcObject(const QJsonObject& object) {
@@ -95,43 +95,43 @@ bool HyprKeyboard::updateLastIpcObject(const QJsonObject& object) {
     }
 
     const auto last = m_lastIpcObject;
-    const auto isMain = object.value(u"main"_s).toBool();
+    const auto isMain = object.value(u"main").toBool();
 
     m_lastIpcObject = object;
     emit lastIpcObjectChanged();
 
     bool dirty = false;
-    if (last.value(u"address"_s) != object.value(u"address"_s)) {
+    if (last.value(u"address") != object.value(u"address")) {
         dirty = true;
         emit addressChanged();
     }
-    if (last.value(u"name"_s) != object.value(u"name"_s)) {
+    if (last.value(u"name") != object.value(u"name")) {
         dirty = true;
         emit nameChanged();
     }
-    if (last.value(u"layout"_s) != object.value(u"layout"_s)) {
+    if (last.value(u"layout") != object.value(u"layout")) {
         dirty = true;
         emit layoutChanged();
     }
-    if (last.value(u"active_keymap"_s) != object.value(u"active_keymap"_s)) {
+    if (last.value(u"active_keymap") != object.value(u"active_keymap")) {
         dirty = true;
         emit activeKeymapChanged();
-        if (isMain && !last.value(u"active_keymap"_s).toString().isEmpty())
-            toastKbLayout(object.value(u"active_keymap"_s).toString());
+        if (isMain && !last.value(u"active_keymap").toString().isEmpty())
+            toastKbLayout(object.value(u"active_keymap").toString());
     }
-    if (last.value(u"capsLock"_s) != object.value(u"capsLock"_s)) {
+    if (last.value(u"capsLock") != object.value(u"capsLock")) {
         dirty = true;
         emit capsLockChanged();
         if (isMain)
-            toastCapsLock(object.value(u"capsLock"_s).toBool());
+            toastCapsLock(object.value(u"capsLock").toBool());
     }
-    if (last.value(u"numLock"_s) != object.value(u"numLock"_s)) {
+    if (last.value(u"numLock") != object.value(u"numLock")) {
         dirty = true;
         emit numLockChanged();
         if (isMain)
-            toastNumLock(object.value(u"numLock"_s).toBool());
+            toastNumLock(object.value(u"numLock").toBool());
     }
-    if (last.value(u"main"_s) != object.value(u"main"_s)) {
+    if (last.value(u"main") != object.value(u"main")) {
         dirty = true;
         emit mainChanged();
     }
@@ -146,13 +146,13 @@ QQmlListProperty<HyprKeyboard> HyprDevices::keyboards() {
 }
 
 bool HyprDevices::updateLastIpcObject(const QJsonObject& object) {
-    const auto val = object.value(u"keyboards"_s).toArray();
+    const auto val = object.value(u"keyboards").toArray();
     bool dirty = false;
 
     for (auto it = m_keyboards.begin(); it != m_keyboards.end();) {
         auto* const keyboard = *it;
         const auto inNewValues = std::ranges::any_of(val, [keyboard](const QJsonValue& o) {
-            return o.toObject().value(u"address"_s).toString() == keyboard->address();
+            return o.toObject().value(u"address").toString() == keyboard->address();
         });
 
         if (!inNewValues) {
@@ -166,7 +166,7 @@ bool HyprDevices::updateLastIpcObject(const QJsonObject& object) {
 
     for (const auto& o : val) {
         const auto obj = o.toObject();
-        const auto addr = obj.value(u"address"_s).toString();
+        const auto addr = obj.value(u"address").toString();
 
         const auto it = std::ranges::find_if(m_keyboards, [addr](const HyprKeyboard* kb) {
             return kb->address() == addr;
