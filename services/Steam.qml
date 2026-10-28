@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
@@ -14,6 +15,7 @@ Singleton {
     readonly property bool enabled: GlobalConfig.addons.steam.enabled
     readonly property string apiKey: GlobalConfig.addons.steam.apiKey
     readonly property string steamIdInput: GlobalConfig.addons.steam.steamId
+    readonly property int refreshMinutes: Math.max(1, GlobalConfig.addons.steam.refreshMinutes || 10)
     readonly property bool configured: apiKey.length > 0 && steamIdInput.length > 0
 
     property bool loading: false
@@ -22,13 +24,30 @@ Singleton {
     property int steamLevel: 0
     property var profile: null
     property list<var> recentGames: []
+    property list<var> nonSteamGames: [] // experimental: local shortcuts.vdf
+    property list<string> hiddenAppIds: [] // Steam "Hidden" collection (local)
     property string focusAppId: ""
     property string focusGameName: ""
-    property list<var> recentAchievements: []
-    property list<var> rareAchievements: []
+    property list<var> focusAchievements: [] // unlocked rarest first, then locked most common first
+    readonly property list<int> focusUnlockTimes: focusAchievements.map(a => a.unlockTime).filter(t => t > 0)
+    property var activity: ({}) // { days, sessions, active } from steam-activity.py
+    property real activityNow: Date.now() / 1000
+    readonly property var dailyPlaytime: activity.days ?? {}
+    readonly property var focusSessions: {
+        const list = (activity.sessions ?? {})[focusAppId] ?? [];
+        const liveStart = (activity.active ?? {})[focusAppId];
+        return liveStart ? [{
+                start: liveStart,
+                end: Math.max(liveStart, activityNow),
+                live: true
+            }, ...list] : list;
+    }
+    readonly property string activityScript: Quickshell.shellPath("scripts/steam-activity.py")
     property var focusProgress: null
-    readonly property var focusGame: recentGames.find(g => g.appId === focusAppId) ?? topGamesByPlaytime.find(g => g.appId === focusAppId) ?? null
+    readonly property var focusGame: recentGames.find(g => g.appId === focusAppId) ?? topGamesByPlaytime.find(g => g.appId === focusAppId) ?? nonSteamGames.find(g => g.appId === focusAppId) ?? null
     readonly property bool focusPlayingNow: !!profile?.gameId && profile.gameId === focusAppId
+    readonly property bool focusNonSteam: !!focusGame?.nonSteam
+    readonly property string nonSteamScript: Quickshell.shellPath("scripts/steam-nonsteam.py")
     property bool focusLoading: false
     property string focusError: ""
     property real libraryAvgProgress: -1
@@ -38,7 +57,61 @@ Singleton {
     property int totalPlaytimeMinutes: 0
     property int recentPlaytimeMinutes: 0
     property list<var> topGamesByPlaytime: []
+    property list<var> topGamesByRecency: [] // owned games with lastPlayed, newest first
     property list<string> achievementCandidates: [] // played games with community stats, by playtime
+
+    function isHiddenApp(appId: string): bool {
+        return root.hiddenAppIds.indexOf(String(appId)) >= 0;
+    }
+
+    function applyHiddenFilter(): void {
+        if (root.hiddenAppIds.length === 0)
+            return;
+        root.recentGames = root.recentGames.filter(g => !root.isHiddenApp(g.appId));
+        root.topGamesByPlaytime = root.topGamesByPlaytime.filter(g => !root.isHiddenApp(g.appId));
+        root.topGamesByRecency = root.topGamesByRecency.filter(g => !root.isHiddenApp(g.appId));
+        root.achievementCandidates = root.achievementCandidates.filter(id => !root.isHiddenApp(id));
+        if (root.isHiddenApp(root.focusAppId)) {
+            const next = root.pickerGames[0];
+            if (next)
+                root.setFocusApp(next.appId, next.name);
+        }
+    }
+
+    // Cover picker: Steam + Non-Steam, sorted by last played (playing now first)
+    readonly property var pickerGames: {
+        const map = {};
+        const bump = Math.floor(Date.now() / 1000) + 10;
+
+        function put(game, fallbackLast) {
+            if (!game?.appId || root.isHiddenApp(game.appId))
+                return;
+            const prev = map[game.appId] || {};
+            const lastPlayed = Math.max(prev.lastPlayed || 0, game.lastPlayed || 0, fallbackLast || 0);
+            map[game.appId] = Object.assign({}, prev, game, {
+                lastPlayed: lastPlayed,
+                headerUrl: game.headerUrl || prev.headerUrl || "",
+                capsuleUrl: game.capsuleUrl || prev.capsuleUrl || ""
+            });
+        }
+
+        for (const g of root.topGamesByRecency)
+            put(g, 0);
+        for (const g of root.topGamesByPlaytime)
+            put(g, 0);
+        // Recently played from Steam may lack rtime; keep their relative order near "now"
+        for (let i = 0; i < root.recentGames.length; i++)
+            put(root.recentGames[i], bump - 1 - i);
+        for (const g of root.nonSteamGames)
+            put(g, 0);
+
+        if (root.profile?.gameId && map[root.profile.gameId])
+            map[root.profile.gameId] = Object.assign({}, map[root.profile.gameId], {
+                lastPlayed: bump + 1
+            });
+
+        return Object.values(map).sort((a, b) => (b.lastPlayed || 0) - (a.lastPlayed || 0));
+    }
     property int friendsTotal: -1
     property int friendsOnline: -1
     property int friendsInGame: -1
@@ -99,6 +172,13 @@ Singleton {
         GlobalConfig.addons.steam.steamId = (id || "").trim();
     }
 
+    function setRefreshMinutes(mins: int): void {
+        const v = Math.max(1, Math.min(180, Math.round(mins || 10)));
+        if (GlobalConfig.addons.steam.refreshMinutes === v)
+            return;
+        GlobalConfig.addons.steam.refreshMinutes = v;
+    }
+
     function steamLang(): string {
         const name = Tr.locale.name || "en_US";
         const [lang, region] = name.split("_");
@@ -123,13 +203,29 @@ Singleton {
     function capsuleUrl(appId: string): string {
         if (!appId)
             return "";
+        const local = root.nonSteamGames.find(g => g.appId === appId);
+        if (local?.capsuleUrl)
+            return local.capsuleUrl;
         return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_184x69.jpg`;
     }
 
     function headerUrl(appId: string): string {
         if (!appId)
             return "";
+        const local = root.nonSteamGames.find(g => g.appId === appId);
+        if (local?.headerUrl)
+            return local.headerUrl;
         return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`;
+    }
+
+    function loadNonSteam(): void {
+        if (!root.enabled)
+            return;
+        const args = ["python3", root.nonSteamScript];
+        if (root.resolvedSteamId)
+            args.push("--steamid", root.resolvedSteamId);
+        nonSteamProc.command = args;
+        nonSteamProc.running = true;
     }
 
     function formatPlaytime(minutes: int): string {
@@ -153,22 +249,6 @@ Singleton {
         if (hours >= 1000)
             return `${Math.round(hours / 100) / 10}k`;
         return String(hours);
-    }
-
-    function formatUnlockAge(unlockTime: int): string {
-        if (!unlockTime)
-            return "";
-        const secs = Math.max(0, Math.floor(Date.now() / 1000) - unlockTime);
-        if (secs < 60)
-            return Tr.tr("Just now");
-        if (secs < 3600)
-            return Tr.tr("%1 min ago").arg(Math.floor(secs / 60));
-        if (secs < 86400)
-            return Tr.tr("%1 h ago").arg(Math.floor(secs / 3600));
-        const days = Math.floor(secs / 86400);
-        if (days < 30)
-            return Tr.tr("%1 d ago").arg(days);
-        return Tr.formatDateTime(new Date(unlockTime * 1000), "MMM d");
     }
 
     function extractSteamIdOrVanity(raw: string): var {
@@ -209,6 +289,21 @@ Singleton {
         });
     }
 
+    function logPlaytime(games: var): void {
+        const rows = games.filter(game => game.playtimeForever > 0).map(game => [game.appId, game.playtimeForever, game.lastPlayed]);
+        snapshotProc.command = ["python3", root.activityScript, "snapshot", JSON.stringify(rows)];
+        snapshotProc.running = true;
+    }
+
+    function applyActivity(text: string): void {
+        try {
+            root.activity = JSON.parse(text || "{}");
+            root.activityNow = Date.now() / 1000;
+        } catch (e) {
+            console.warn(`Steam activity parse failed: ${e}`);
+        }
+    }
+
     function setFocusApp(appId: string, name: string): void {
         if (!appId || String(appId) === root.focusAppId)
             return;
@@ -222,10 +317,11 @@ Singleton {
         root.steamLevel = 0;
         root.profile = null;
         root.recentGames = [];
+        root.nonSteamGames = [];
+        root.hiddenAppIds = [];
         root.focusAppId = "";
         root.focusGameName = "";
-        root.recentAchievements = [];
-        root.rareAchievements = [];
+        root.focusAchievements = [];
         root.focusProgress = null;
         root.focusLoading = false;
         root.focusError = "";
@@ -234,12 +330,14 @@ Singleton {
         root.totalPlaytimeMinutes = 0;
         root.recentPlaytimeMinutes = 0;
         root.topGamesByPlaytime = [];
+        root.topGamesByRecency = [];
         root.achievementCandidates = [];
         root.friendsTotal = -1;
         root.friendsOnline = -1;
         root.friendsInGame = -1;
         root.friendsError = "";
         root.friendsPreview = [];
+        root.activity = ({});
         root.libraryAchievements = null;
         root.libraryAchievementsLoading = false;
         root.error = "";
@@ -307,6 +405,7 @@ Singleton {
             if (g !== root.gen)
                 return;
             if (!failed) {
+                root.loadNonSteam();
                 root.pickInitialFocus(g);
                 root.sampleLibraryAchievements(g);
             } else {
@@ -408,10 +507,13 @@ Singleton {
                     capsuleUrl: root.capsuleUrl(String(game.appid))
                 };
             });
-            ranked.sort((a, b) => b.playtimeForever - a.playtimeForever);
+            const visible = ranked.filter(r => !root.isHiddenApp(r.appId));
+            visible.sort((a, b) => b.playtimeForever - a.playtimeForever);
             root.totalPlaytimeMinutes = total;
-            root.topGamesByPlaytime = ranked.slice(0, 5);
-            root.achievementCandidates = ranked.filter(r => r.hasStats && r.playtimeForever > 0).map(r => r.appId);
+            root.topGamesByPlaytime = visible.slice(0, 5);
+            root.topGamesByRecency = visible.filter(r => r.lastPlayed > 0).sort((a, b) => b.lastPlayed - a.lastPlayed).slice(0, 20);
+            root.achievementCandidates = visible.filter(r => r.hasStats && r.playtimeForever > 0).map(r => r.appId);
+            root.logPlaytime(ranked);
             done();
         }, () => {
             if (g !== root.gen)
@@ -419,6 +521,7 @@ Singleton {
             root.gameCount = 0;
             root.totalPlaytimeMinutes = 0;
             root.topGamesByPlaytime = [];
+            root.topGamesByRecency = [];
             root.achievementCandidates = [];
             done();
         });
@@ -619,8 +722,7 @@ Singleton {
             root.loadFocusAchievements(g);
         else {
             root.loading = false;
-            root.recentAchievements = [];
-            root.rareAchievements = [];
+            root.focusAchievements = [];
             root.focusProgress = null;
         }
     }
@@ -629,6 +731,16 @@ Singleton {
         const appId = root.focusAppId;
         if (!appId || !root.resolvedSteamId) {
             root.loading = false;
+            return;
+        }
+
+        const localGame = root.nonSteamGames.find(g => g.appId === appId);
+        if (localGame) {
+            root.loading = false;
+            root.focusLoading = false;
+            root.focusError = localGame.tracked ? Tr.tr("Playtime tracked by Millennium") : Tr.tr("Non-Steam game — no Steam achievements");
+            root.focusAchievements = [];
+            root.focusProgress = null;
             return;
         }
 
@@ -650,8 +762,7 @@ Singleton {
             root.focusLoading = false;
             if (privateProfile || !playerAchievements) {
                 root.focusError = privateProfile ? Tr.tr("Steam achievements are private for this profile") : Tr.tr("This game has no achievements");
-                root.recentAchievements = [];
-                root.rareAchievements = [];
+                root.focusAchievements = [];
                 root.focusProgress = null;
                 return;
             }
@@ -788,14 +899,12 @@ Singleton {
             appId: appId
         };
 
-        const unlockedList = enriched.filter(a => a.unlocked && a.unlockTime > 0);
-        unlockedList.sort((a, b) => b.unlockTime - a.unlockTime);
-        root.recentAchievements = unlockedList.slice(0, 6);
-
-        const rareSource = unlockedList.length > 0 ? unlockedList : enriched.filter(a => a.unlocked);
-        const withPct = rareSource.filter(a => a.globalPercent >= 0);
-        withPct.sort((a, b) => a.globalPercent - b.globalPercent);
-        root.rareAchievements = withPct.slice(0, 5);
+        const pctOf = a => a.globalPercent >= 0 ? a.globalPercent : -1;
+        const unlockedList = enriched.filter(a => a.unlocked);
+        unlockedList.sort((a, b) => (pctOf(a) < 0 ? 101 : pctOf(a)) - (pctOf(b) < 0 ? 101 : pctOf(b)));
+        const lockedList = enriched.filter(a => !a.unlocked);
+        lockedList.sort((a, b) => pctOf(b) - pctOf(a));
+        root.focusAchievements = unlockedList.concat(lockedList);
 
         // Soft library average: average completion of recent games that we already cached
         let sum = root.focusProgress.percent;
@@ -847,10 +956,81 @@ Singleton {
     }
 
     Timer {
-        interval: 20 * 60 * 1000
+        interval: root.refreshMinutes * 60 * 1000
         running: root.enabled && root.configured
         repeat: true
         onTriggered: root.reload()
+    }
+
+    Process {
+        id: nonSteamProc
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const data = JSON.parse(text || "{}");
+                    // Back-compat if script still returns a bare array
+                    if (Array.isArray(data)) {
+                        root.nonSteamGames = data;
+                        root.hiddenAppIds = [];
+                    } else {
+                        root.nonSteamGames = Array.isArray(data.nonSteam) ? data.nonSteam : [];
+                        root.hiddenAppIds = (data.hiddenAppIds || []).map(id => String(id));
+                        root.applyHiddenFilter();
+                    }
+                } catch (e) {
+                    console.warn(`Steam local library parse failed: ${e}`);
+                    root.nonSteamGames = [];
+                    root.hiddenAppIds = [];
+                }
+            }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text && text.trim().length)
+                    console.warn(`steam-nonsteam.py: ${text.trim()}`);
+            }
+        }
+    }
+
+    Timer {
+        interval: 60 * 1000
+        running: root.enabled && root.configured
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!pollProc.running)
+                pollProc.running = true;
+        }
+    }
+
+    Process {
+        id: pollProc
+
+        command: ["python3", root.activityScript, "poll"]
+        stdout: StdioCollector {
+            onStreamFinished: root.applyActivity(text)
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text && text.trim().length)
+                    console.warn(`steam-activity.py: ${text.trim()}`);
+            }
+        }
+    }
+
+    Process {
+        id: snapshotProc
+
+        stdout: StdioCollector {
+            onStreamFinished: root.applyActivity(text)
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text && text.trim().length)
+                    console.warn(`steam-activity.py: ${text.trim()}`);
+            }
+        }
     }
 
     Component.onCompleted: {

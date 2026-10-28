@@ -16,6 +16,7 @@ Item {
 
     readonly property bool hasProfile: !!Steam.profile
     readonly property real achPercent: Steam.libraryAchievements?.percent ?? 0
+    property bool steamShowsSessions
 
     implicitWidth: 840
     implicitHeight: layout.implicitHeight
@@ -218,7 +219,7 @@ Item {
         RecentGamesRow {
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.extraSmall
-            visible: root.hasProfile && (Steam.recentGames.length + Steam.topGamesByPlaytime.length) > 1
+            visible: root.hasProfile && Steam.pickerGames.length > 1
         }
 
         RowLayout {
@@ -226,27 +227,36 @@ Item {
             visible: root.hasProfile
             spacing: Tokens.spacing.medium
 
-            AchievementList {
+            SessionList {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.alignment: Qt.AlignTop
-                title: Tr.tr("Recent achievements")
-                icon: "history"
-                accent: Colours.palette.m3primary
-                emptyText: Steam.focusLoading ? Tr.tr("Loading…") : Tr.tr("No recent unlocks")
-                model: Steam.recentAchievements
+                visible: Steam.focusNonSteam || root.steamShowsSessions
+                sessions: Steam.focusNonSteam ? (Steam.focusGame?.sessions ?? []) : Steam.focusSessions
+                tracked: !Steam.focusNonSteam || !!Steam.focusGame?.tracked
+                switchIcon: Steam.focusNonSteam ? "" : "trophy"
+                onSwitchRequested: root.steamShowsSessions = false
             }
 
             AchievementList {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.alignment: Qt.AlignTop
-                title: Tr.tr("Rarest unlocks")
-                icon: "diamond"
-                accent: Colours.palette.m3tertiary
-                emptyText: Steam.focusLoading ? Tr.tr("Loading…") : Tr.tr("No rarity data yet")
-                model: Steam.rareAchievements
-                showRarity: true
+                visible: !Steam.focusNonSteam && !root.steamShowsSessions
+                emptyText: Steam.focusLoading ? Tr.tr("Loading…") : Steam.focusError || Tr.tr("No achievements unlocked yet")
+                model: Steam.focusAchievements
+                switchIcon: "history"
+                onSwitchRequested: root.steamShowsSessions = true
+            }
+
+            ActivityCard {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                gameKey: Steam.focusAppId
+                sessions: Steam.focusNonSteam ? (Steam.focusGame?.sessions ?? []) : Steam.focusSessions
+                dailyMinutes: Steam.focusNonSteam ? ({}) : (Steam.dailyPlaytime[Steam.focusAppId] ?? {})
+                markerTimes: Steam.focusNonSteam ? [] : Steam.focusUnlockTimes
             }
         }
     }

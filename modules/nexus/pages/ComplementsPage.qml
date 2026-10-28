@@ -17,6 +17,46 @@ PageBase {
 
     title: Tr.tr("Complements")
 
+    component SettingRow: RowLayout {
+        property alias label: settingLabel.text
+        property alias subtext: settingSub.text
+        property alias value: spin.value
+        property alias from: spin.from
+        property alias to: spin.to
+        property alias stepSize: spin.stepSize
+        signal moved(value: real)
+
+        Layout.fillWidth: true
+        spacing: Tokens.spacing.medium
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 0
+
+            StyledText {
+                id: settingLabel
+                Layout.fillWidth: true
+                font: Tokens.font.body.small
+                elide: Text.ElideRight
+            }
+
+            StyledText {
+                id: settingSub
+                Layout.fillWidth: true
+                visible: text.length > 0
+                color: Colours.palette.m3outline
+                font: Tokens.font.label.small
+                elide: Text.ElideRight
+            }
+        }
+
+        StyledSpinBox {
+            id: spin
+            cLayer: 2
+            onValueModified: parent.moved(value)
+        }
+    }
+
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -130,46 +170,6 @@ PageBase {
                     Layout.fillWidth: true
                     visible: Hydration.enabled && root.hydrationSettingsOpen
                     spacing: Tokens.spacing.small
-
-                    component SettingRow: RowLayout {
-                        property alias label: settingLabel.text
-                        property alias subtext: settingSub.text
-                        property alias value: spin.value
-                        property alias from: spin.from
-                        property alias to: spin.to
-                        property alias stepSize: spin.stepSize
-                        signal moved(value: real)
-
-                        Layout.fillWidth: true
-                        spacing: Tokens.spacing.medium
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 0
-
-                            StyledText {
-                                id: settingLabel
-                                Layout.fillWidth: true
-                                font: Tokens.font.body.small
-                                elide: Text.ElideRight
-                            }
-
-                            StyledText {
-                                id: settingSub
-                                Layout.fillWidth: true
-                                visible: text.length > 0
-                                color: Colours.palette.m3outline
-                                font: Tokens.font.label.small
-                                elide: Text.ElideRight
-                            }
-                        }
-
-                        StyledSpinBox {
-                            id: spin
-                            cLayer: 2
-                            onValueModified: parent.moved(value)
-                        }
-                    }
 
                     SettingRow {
                         label: Tr.tr("Daily goal")
@@ -379,6 +379,16 @@ PageBase {
                             placeholderText: Tr.tr("Steam ID or vanity")
                             onEditingFinished: Steam.setSteamId(text)
                         }
+                    }
+
+                    SettingRow {
+                        label: Tr.tr("Auto refresh")
+                        subtext: Tr.tr("Minutes between automatic Steam updates")
+                        value: GlobalConfig.addons.steam.refreshMinutes
+                        from: 1
+                        to: 180
+                        stepSize: 1
+                        onMoved: v => Steam.setRefreshMinutes(v)
                     }
 
                     RowLayout {

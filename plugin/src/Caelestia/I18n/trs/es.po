@@ -5623,3 +5623,51 @@ msgstr "Última partida: %1"
 #: modules/dashboard/games/FocusHero.qml
 msgid "From your library"
 msgstr "De tu biblioteca"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Auto refresh"
+msgstr "Actualización automática"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Minutes between automatic Steam updates"
+msgstr "Minutos entre actualizaciones automáticas de Steam"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "Non-Steam"
+msgstr "No Steam"
+
+#: services/Steam.qml
+msgid "Non-Steam game — no Steam achievements"
+msgstr "Juego no Steam — sin logros de Steam"
+
+msgid "Recent sessions"
+msgstr "Sesiones recientes"
+
+msgid "No sessions recorded yet"
+msgstr "Aún no hay sesiones registradas"
+
+msgid "Install Non-Steam Playtimes (Millennium) to track sessions"
+msgstr "Instala Non-Steam Playtimes (Millennium) para registrar sesiones"
+
+msgid "Activity in %1"
+msgstr "Actividad en %1"
+
+msgid "No achievements unlocked yet"
+msgstr "Aún no has desbloqueado logros"
+
+msgid "Less"
+msgstr "Menos"
+
+msgid "More"
+msgstr "Más"
+
+msgid "Sessions"
+msgstr "Sesiones"
+msgid "Longest"
+msgstr "Más larga"
+
+msgid "Playtime tracked by Millennium"
+msgstr "Tiempo de juego registrado por Millennium"
+
+msgid "Locked · %1"
+msgstr "Bloqueados · %1"

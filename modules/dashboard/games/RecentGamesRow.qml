@@ -8,21 +8,12 @@ import qs.services
 RowLayout {
     id: root
 
-    property int maxGames: 5
+    property int maxGames: 5 + Math.min(3, Steam.nonSteamGames.length)
 
     spacing: Tokens.spacing.small
 
     Repeater {
-        model: {
-            const games = Steam.recentGames.slice(0, root.maxGames);
-            for (const g of Steam.topGamesByPlaytime) {
-                if (games.length >= root.maxGames)
-                    break;
-                if (!games.some(r => r.appId === g.appId))
-                    games.push(g);
-            }
-            return games;
-        }
+        model: Steam.pickerGames.slice(0, root.maxGames)
 
         Item {
             id: card
