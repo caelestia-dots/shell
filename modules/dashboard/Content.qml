@@ -189,13 +189,13 @@ Item {
 
     Shortcut {
         sequences: ["Right", "Ctrl+L"]
-        enabled: root.screenState.dashboard && !root.screenState.launcher && !root.screenState.session
+        enabled: Config.dashboard.enabled && root.screenState.dashboard && !root.screenState.launcher && !root.screenState.session
         onActivated: root.screenState.dashboardTab = Math.min(root.screenState.dashboardTab + 1, tabs.count - 1)
     }
 
     Shortcut {
         sequences: ["Left", "Ctrl+H"]
-        enabled: root.screenState.dashboard && !root.screenState.launcher && !root.screenState.session
+        enabled: Config.dashboard.enabled && root.screenState.dashboard && !root.screenState.launcher && !root.screenState.session
         onActivated: root.screenState.dashboardTab = Math.max(root.screenState.dashboardTab - 1, 0)
     }
 
