@@ -7,6 +7,9 @@ import Caelestia.State
 Scope {
     id: root
 
+    // Always enable keep-awake when the shell starts (reboot or shell restart).
+    Component.onCompleted: RuntimeState.inhibitIdle = true
+
     Connections {
         function onInhibitIdleChanged(): void {
             if (RuntimeState.inhibitIdle)

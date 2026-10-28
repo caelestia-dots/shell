@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.Services
+import Caelestia.State
 import qs.services
 import qs.modules.lock
 
@@ -16,6 +17,9 @@ Scope {
     readonly property bool hasPlayer: Players.list.some(p => p.isPlaying)
     readonly property bool isCharging: !UPower.onBattery
     readonly property bool enabled: {
+        // Coffee / keep-awake toggle — also hard-disable shell idle actions
+        if (RuntimeState.inhibitIdle)
+            return false;
         if (GlobalConfig.general.idle.inhibitWhenAudio && hasPlayer)
             return false;
         if (GlobalConfig.general.idle.inhibitWhenCharging && isCharging)
