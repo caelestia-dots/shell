@@ -24,6 +24,7 @@ Singleton {
     property list<var> searchResults
     property bool searching: false
     property int searchToken: 0
+    property int weatherRetryAttempt: 0
 
     readonly property bool isManualLocation: !!GlobalConfig.services.weatherLocation
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
@@ -318,15 +319,38 @@ Singleton {
             reload();
     }
 
+    function scheduleWeatherRetry(): void {
+        // Boot often races DNS ("host not found"); retry with backoff instead of waiting the hourly poll
+        const delays = [2000, 5000, 10000, 20000, 45000, 60000];
+        const idx = Math.min(weatherRetryAttempt, delays.length - 1);
+        weatherRetryAttempt++;
+        weatherRetryTimer.interval = delays[idx];
+        weatherRetryTimer.restart();
+    }
+
     function fetchWeatherData(): void {
         const url = getWeatherUrl();
         if (url === "")
             return;
 
         Requests.get(url, text => {
-            const json = JSON.parse(text);
-            if (!json.current || !json.daily)
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (error) {
+                console.warn(lc, `Unable to parse weather forecast: ${error}`);
+                root.scheduleWeatherRetry();
                 return;
+            }
+
+            if (!json.current || !json.daily) {
+                console.warn(lc, "Weather forecast response missing current/daily");
+                root.scheduleWeatherRetry();
+                return;
+            }
+
+            root.weatherRetryAttempt = 0;
+            weatherRetryTimer.stop();
 
             cc = {
                 weatherCode: json.current.weather_code,
@@ -368,6 +392,9 @@ Singleton {
                 });
             }
             hourlyForecast = hourlyList;
+        }, error => {
+            console.warn(lc, `Weather forecast request failed: ${error}`);
+            root.scheduleWeatherRetry();
         });
     }
 
@@ -439,6 +466,13 @@ Singleton {
         running: true
         repeat: true
         onTriggered: fetchWeatherData()
+    }
+
+    Timer {
+        id: weatherRetryTimer
+
+        repeat: false
+        onTriggered: root.fetchWeatherData()
     }
 
     Timer {
