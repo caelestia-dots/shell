@@ -32,6 +32,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "sidebar-show-on-hover"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
             checked: Config.sidebar.showOnHover
