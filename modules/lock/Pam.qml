@@ -23,14 +23,6 @@ Scope {
     readonly property alias passwd: passwd
     readonly property alias fprint: fprint
     readonly property alias face: face
-    // Backward-compatible alias for UI / IPC that still says howdy
-    readonly property alias howdy: face
-
-    // Prefer generic face unlock keys; fall back to deprecated Howdy keys.
-    readonly property bool faceEnabled: GlobalConfig.lock.enableFaceUnlock || GlobalConfig.lock.enableHowdy
-    readonly property string faceProvider: GlobalConfig.lock.enableFaceUnlock ? GlobalConfig.lock.faceAuthProvider : "howdy"
-    readonly property int faceMaxTries: GlobalConfig.lock.enableFaceUnlock ? GlobalConfig.lock.maxFaceAuthTries : GlobalConfig.lock.maxHowdyTries
-    readonly property bool faceOnWake: GlobalConfig.lock.enableFaceUnlock ? GlobalConfig.lock.triggerFaceAuthOnWake : GlobalConfig.lock.triggerHowdyOnWake
 
     property string lockMessage
     property int state
@@ -149,19 +141,19 @@ Scope {
         onAvailProcExited: root.restartFprint()
     }
 
-    // Pluggable face PAM: assets/pam.d/<faceAuthProvider> + matching pam_*.so
+    // Pluggable face PAM: assets/pam.d/<faceProvider> + matching pam_*.so
     ManualPamContext {
         id: face
 
-        config: root.faceProvider
-        availCommand: root.faceAvailCommand(root.faceProvider)
-        enabled: root.faceEnabled
-        maxTries: root.faceMaxTries
+        config: GlobalConfig.lock.faceProvider
+        availCommand: root.faceAvailCommand(GlobalConfig.lock.faceProvider)
+        enabled: GlobalConfig.lock.enableFace
+        maxTries: GlobalConfig.lock.maxFaceTries
     }
 
     Connections {
         function onResumed(): void {
-            if (face.canAttempt && !face.active && root.faceOnWake)
+            if (face.canAttempt && !face.active && GlobalConfig.lock.triggerFaceOnWake)
                 face.start();
         }
 
@@ -195,21 +187,14 @@ Scope {
             root.restartFprint();
         }
 
-        function onEnableFaceUnlockChanged(): void {
-            if (!root.faceEnabled && face.active)
+        function onEnableFaceChanged(): void {
+            if (!GlobalConfig.lock.enableFace && face.active)
                 face.abort();
             else if (root.lock.secure)
                 face.checkAvailable();
         }
 
-        function onEnableHowdyChanged(): void {
-            if (!root.faceEnabled && face.active)
-                face.abort();
-            else if (root.lock.secure)
-                face.checkAvailable();
-        }
-
-        function onFaceAuthProviderChanged(): void {
+        function onFaceProviderChanged(): void {
             if (face.active)
                 face.abort();
             if (root.lock.secure)
