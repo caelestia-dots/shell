@@ -39,7 +39,7 @@ Singleton {
     property list<string> logLines: []
     property bool logVisible: false
     property int lastExitCode: 0
-    // Ephemeral; cleared immediately after writing to sudo -S
+    // Ephemeral; cleared after writing to the update script stdin
     property string _authPw: ""
 
     readonly property int count: packages.length
@@ -48,6 +48,7 @@ Singleton {
     readonly property string downloadSizeLabel: root.humanize(downloadSizeMb)
 
     readonly property string scriptPath: `${Quickshell.shellDir}/scripts/check-system-updates.py`
+    readonly property string updateScriptPath: `${Quickshell.shellDir}/scripts/run-system-update.sh`
 
     function humanize(mib: real): string {
         if (!mib || mib <= 0)
@@ -121,17 +122,25 @@ Singleton {
         refreshTimer.restart();
     }
 
-    function buildUpdateCommand(): string {
-        const parts = [];
-        if (root.checkAur)
-            parts.push(`${root.aurWrapper} -Syu --noconfirm ${root.cfg.aurFlags || ""}`.trim());
-        else if (root.checkArch)
-            parts.push("sudo -n pacman -Syu --noconfirm");
-        if (root.checkFlatpak)
-            parts.push(`flatpak update -y ${root.cfg.flatpakFlags || ""}`.trim());
-        if (parts.length === 0)
-            parts.push("sudo -n pacman -Syu --noconfirm");
-        return parts.join(" && ");
+    function buildUpdateArgs(): var {
+        const args = [root.updateScriptPath];
+        if (root.checkAur) {
+            args.push("--aur", root.aurWrapper);
+            const flags = `${root.cfg.aurFlags || ""}`.trim().split(/\s+/).filter(f => f.length);
+            for (let i = 0; i < flags.length; i++)
+                args.push("--aur-flag", flags[i]);
+        } else if (root.checkArch) {
+            args.push("--arch");
+        }
+        if (root.checkFlatpak) {
+            args.push("--flatpak");
+            const flags = `${root.cfg.flatpakFlags || ""}`.trim().split(/\s+/).filter(f => f.length);
+            for (let i = 0; i < flags.length; i++)
+                args.push("--flatpak-flag", flags[i]);
+        }
+        if (!root.checkAur && !root.checkArch && !root.checkFlatpak)
+            args.push("--arch");
+        return args;
     }
 
     function appendLog(line: string): void {
@@ -178,15 +187,21 @@ Singleton {
         root.appendLog(Tr.tr("Authenticating…"));
 
         root._authPw = pw;
+        // Ensure stdin is open for this attempt (closed after writing so sudo cannot hang)
+        authProc.stdinEnabled = true;
         authProc.command = ["sudo", "-S", "-v"];
+        authTimeout.restart();
         authProc.running = true;
     }
 
     function stopInstall(): void {
+        authTimeout.stop();
+        installTimeout.stop();
         if (authProc.running)
             authProc.running = false;
         if (installProc.running)
             installProc.running = false;
+        root._authPw = "";
         root.installing = false;
         root.installMode = "";
         root.pendingMode = "";
@@ -196,26 +211,36 @@ Singleton {
     }
 
     function onAuthFinished(code: int): void {
+        authTimeout.stop();
         if (code !== 0) {
+            root._authPw = "";
             root.installing = false;
             root.installMode = "";
-            root.authError = Tr.tr("Incorrect password");
+            const locked = `${authErrCollector.text}`.toLowerCase().includes("locked");
+            root.authError = locked
+                ? Tr.tr("Too many failed attempts. Wait a minute and try again.")
+                : Tr.tr("Incorrect password");
             root.statusMessage = root.hasUpdates ? root.summaryText() : "";
             root.statusIcon = root.hasUpdates ? root.glyph : "check_circle";
             Toaster.toast(Tr.tr("Authentication failed"), root.authError, "gpp_bad", Toast.Error);
             // Keep pendingMode so the password UI stays open for retry
             return;
         }
-        // Auth OK — dismiss password UI
+        // Auth OK — hand password to the update script over stdin (creates askpass itself)
         root.pendingMode = "";
         root.appendLog(Tr.tr("Starting system update…"));
         if (root.installMode === "background")
             Toaster.toast(Tr.tr("Updating system"), Tr.tr("Running in the background…"), "install_desktop");
-        installProc.command = ["bash", "-c", root.buildUpdateCommand()];
+        installProc.stdinEnabled = true;
+        installProc.command = root.buildUpdateArgs();
+        installTimeout.restart();
         installProc.running = true;
     }
 
     function onInstallFinished(code: int): void {
+        installTimeout.stop();
+        const wasBackground = root.installMode === "background";
+        root._authPw = "";
         root.lastExitCode = code;
         root.installing = false;
         root.installMode = "";
@@ -224,7 +249,14 @@ Singleton {
             Toaster.toast(Tr.tr("System updated"), Tr.tr("All updates were installed."), "check_circle");
         } else {
             root.appendLog(Tr.tr("Update failed (exit %1).").arg(code));
-            Toaster.toast(Tr.tr("Update failed"), Tr.tr("See the log for details."), "error", Toast.Error);
+            // Background has no Nexus log panel — surface the last stderr lines in the toast
+            let detail = Tr.tr("See the log for details.");
+            if (wasBackground && root.logLines.length) {
+                const tail = root.logLines.slice(-4).join("\n").trim();
+                if (tail.length)
+                    detail = tail;
+            }
+            Toaster.toast(Tr.tr("Update failed"), detail, "error", Toast.Error);
         }
         root.statusIcon = root.glyph;
         root.refresh();
@@ -414,25 +446,64 @@ Singleton {
         id: authProc
         stdinEnabled: true
         stdout: StdioCollector {}
-        stderr: StdioCollector {}
+        stderr: StdioCollector {
+            id: authErrCollector
+        }
         onStarted: {
             authProc.write(root._authPw + "\n");
-            root._authPw = "";
+            // Close stdin so sudo -S cannot hang waiting for another password attempt
+            authProc.stdinEnabled = false;
         }
-        onExited: code => {
-            root._authPw = "";
-            root.onAuthFinished(code);
-        }
+        onExited: code => root.onAuthFinished(code)
     }
 
     Process {
         id: installProc
+        stdinEnabled: true
         stdout: SplitParser {
             onRead: data => root.appendLog(data)
         }
         stderr: SplitParser {
             onRead: data => root.appendLog(data)
         }
+        onStarted: {
+            installProc.write(root._authPw + "\n");
+            root._authPw = "";
+            installProc.stdinEnabled = false;
+        }
         onExited: code => root.onInstallFinished(code)
+    }
+
+    Timer {
+        id: authTimeout
+        interval: 20000
+        repeat: false
+        onTriggered: {
+            if (!authProc.running)
+                return;
+            root.appendLog(Tr.tr("Authentication timed out."));
+            authProc.running = false;
+            root._authPw = "";
+            root.installing = false;
+            root.installMode = "";
+            root.authError = Tr.tr("Authentication timed out. Wait a minute if the account was locked, then try again.");
+            root.statusMessage = root.hasUpdates ? root.summaryText() : "";
+            root.statusIcon = root.hasUpdates ? root.glyph : "check_circle";
+            Toaster.toast(Tr.tr("Authentication failed"), root.authError, "gpp_bad", Toast.Error);
+        }
+    }
+
+    // Safety net: AUR builds can be long, but a hung sudo must not stick forever
+    Timer {
+        id: installTimeout
+        interval: 45 * 60 * 1000
+        repeat: false
+        onTriggered: {
+            if (!root.installing)
+                return;
+            root.appendLog(Tr.tr("Update timed out."));
+            root.stopInstall();
+            Toaster.toast(Tr.tr("Update failed"), Tr.tr("Timed out waiting for the package manager."), "error", Toast.Error);
+        }
     }
 }

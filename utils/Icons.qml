@@ -107,7 +107,9 @@ Singleton {
         [["update"], "update"],
         [["unable to"], "deployed_code_alert"],
         [["profile"], "person"],
-        [["file"], "folder_copy"]
+        [["file"], "folder_copy"],
+        // Hydration reminders (EN/ES summary text)
+        [["drink", "water", "beber", "agua", "hydrat", "hidrat"], "water_drop"]
     ]
     // qmlformat on
 
