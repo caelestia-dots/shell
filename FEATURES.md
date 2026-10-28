@@ -19,7 +19,7 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Launcher** | Hover inferior, edición de `.desktop`, iconos Papirus |
 | **Kitty / GTK** | Paleta alineada a la activity (Kitty + Thunar/Material) |
 | **Madison VPN** | Complemento on/off en Nexus; icono OTP / desconectar; engranaje config; limpia túnel tras sleep |
-| **Complementos** | Nexus → Complementos: Madison VPN + Timers + Hidratación (on/off) con iconos |
+| **Complementos** | Nexus → Complementos: Madison VPN + Timers + Hidratación + Juegos/Steam (on/off) |
 | **Utilities** | Mantener activo (café) en interruptores rápidos, ON por defecto |
 | **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
 | **Updates** | Arch / AUR / Flatpak: icono+badge, popout, Nexus; update en fondo (panel) o con logs (Nexus) |
@@ -140,6 +140,7 @@ Página **Nexus → Complementos** (sustituye el placeholder de Plugins):
 - **Madison VPN**: interruptor on/off. Al desactivar se oculta el icono, se para el poll y se ejecuta teardown (`disconnect` + `heal`) para matar `openfortivpn`/helper.
 - **Timers**: interruptor on/off. Al desactivar se limpian timers activos y se oculta la sección del popout del reloj (el calendario sigue).
 - **Hidratación**: interruptor on/off (opt-in). Al activar sustituye el calendario del dashboard Nexus (solo ahí; el popout del reloj sigue con calendario) por un depósito con waves, meta diaria (default 3000 ml), botones +20/+83/+250/+500 configurables, undo del último trago, y recordatorio con acciones si pasan N minutos (default 15) sin registrar un trago. Estado en `~/.local/state/caelestia/hydration.json`.
+- **Juegos (Steam)**: interruptor on/off (opt-in). Al activar añade la pestaña **Juegos** en el dashboard (a la derecha de Tiempo). Configura API key + Steam ID / vanity / URL de perfil. Muestra perfil y nivel, estadísticas globales en shapes Material You (juegos, horas, compleción media de logros estilo Steam y juegos al 100 %, amigos en línea), tarjeta del juego destacado con portada y progreso, selector de portadas, últimos desbloqueos y logros más raros con insignia de rareza. Nombres y descripciones de logros en el idioma de la UI (vía API). Los logros del perfil deben ser públicos.
 
 ## Madison VPN (FortiClient / openfortivpn)
 

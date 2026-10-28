@@ -31,12 +31,21 @@ class AddonsHydration : public settings::ObjectNode {
     CONFIG_PROPERTY(int, presetMl3, 500)
 };
 
+class AddonsSteam : public settings::ObjectNode {
+    CONFIG_NODE(AddonsSteam, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, false)
+    CONFIG_PROPERTY(QString, apiKey, {})
+    CONFIG_PROPERTY(QString, steamId, {})
+};
+
 class AddonsConfig : public settings::ObjectNode {
     CONFIG_NODE(AddonsConfig, settings::ObjectNode)
 
     CONFIG_GLOBAL_SUBOBJECT(AddonsMadisonVpn, madisonVpn)
     CONFIG_GLOBAL_SUBOBJECT(AddonsTimers, timers)
     CONFIG_GLOBAL_SUBOBJECT(AddonsHydration, hydration)
+    CONFIG_GLOBAL_SUBOBJECT(AddonsSteam, steam)
 };
 
 } // namespace caelestia::shell::config

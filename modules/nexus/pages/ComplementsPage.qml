@@ -13,6 +13,7 @@ PageBase {
     id: root
 
     property bool hydrationSettingsOpen: false
+    property bool steamSettingsOpen: false
 
     title: Tr.tr("Complements")
 
@@ -52,7 +53,6 @@ PageBase {
             id: hydrationCard
 
             Layout.fillWidth: true
-            last: true
             implicitHeight: hydrationCol.implicitHeight + Tokens.padding.medium * 2
 
             ColumnLayout {
@@ -226,6 +226,184 @@ PageBase {
                         to: 1000
                         stepSize: 1
                         onMoved: v => Hydration.setPreset(3, v)
+                    }
+                }
+            }
+        }
+
+        ConnectedRect {
+            id: steamCard
+
+            Layout.fillWidth: true
+            last: true
+            implicitHeight: steamCol.implicitHeight + Tokens.padding.medium * 2
+
+            ColumnLayout {
+                id: steamCol
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Tokens.padding.medium
+                anchors.leftMargin: Tokens.padding.largeIncreased
+                anchors.rightMargin: Tokens.padding.largeIncreased
+                spacing: Tokens.spacing.medium
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.spacing.medium
+
+                    MaterialIcon {
+                        text: "sports_esports"
+                        color: Colours.palette.m3onSurfaceVariant
+                        fontStyle: Tokens.font.icon.medium
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Tr.tr("Games (Steam)")
+                            font: Tokens.font.body.small
+                            elide: Text.ElideRight
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Steam.statusText
+                            color: Colours.palette.m3outline
+                            font: Tokens.font.label.small
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+                        }
+                    }
+
+                    IconButton {
+                        visible: Steam.enabled
+                        isRound: true
+                        icon: root.steamSettingsOpen ? "expand_less" : "expand_more"
+                        type: IconButton.Text
+                        font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
+                        padding: Tokens.padding.small
+                        Layout.alignment: Qt.AlignVCenter
+                        onClicked: root.steamSettingsOpen = !root.steamSettingsOpen
+                    }
+
+                    StyledSwitch {
+                        Layout.alignment: Qt.AlignVCenter
+                        checked: GlobalConfig.addons.steam.enabled
+                        onToggled: {
+                            Steam.setEnabled(checked);
+                            if (!checked)
+                                root.steamSettingsOpen = false;
+                            else
+                                root.steamSettingsOpen = true;
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: Steam.enabled && root.steamSettingsOpen
+                    spacing: Tokens.spacing.small
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.medium
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: Tr.tr("Steam API key")
+                                font: Tokens.font.body.small
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: Tr.tr("From steamcommunity.com/dev/apikey")
+                                color: Colours.palette.m3outline
+                                font: Tokens.font.label.small
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        StyledTextField {
+                            Layout.preferredWidth: Tokens.sizes.nexus.textFieldWidth
+                            Layout.maximumWidth: steamCol.width / 2
+                            Layout.alignment: Qt.AlignVCenter
+                            verticalPadding: Tokens.padding.small
+                            echoMode: TextInput.Password
+                            text: GlobalConfig.addons.steam.apiKey
+                            placeholderText: Tr.tr("API key")
+                            onEditingFinished: Steam.setApiKey(text)
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.medium
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: Tr.tr("Steam ID")
+                                font: Tokens.font.body.small
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: Tr.tr("SteamID64, vanity name, or profile URL")
+                                color: Colours.palette.m3outline
+                                font: Tokens.font.label.small
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        StyledTextField {
+                            Layout.preferredWidth: Tokens.sizes.nexus.textFieldWidth
+                            Layout.maximumWidth: steamCol.width / 2
+                            Layout.alignment: Qt.AlignVCenter
+                            verticalPadding: Tokens.padding.small
+                            text: GlobalConfig.addons.steam.steamId
+                            placeholderText: Tr.tr("Steam ID or vanity")
+                            onEditingFinished: Steam.setSteamId(text)
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.small
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        IconButton {
+                            isRound: true
+                            icon: "refresh"
+                            type: IconButton.Text
+                            font: Tokens.font.icon.builders.small.weight(Font.Bold).build()
+                            padding: Tokens.padding.small
+                            enabled: Steam.configured
+                            onClicked: Steam.reload()
+                        }
+
+                        StyledText {
+                            text: Tr.tr("Refresh now")
+                            font: Tokens.font.label.small
+                            color: Colours.palette.m3outline
+                        }
                     }
                 }
             }

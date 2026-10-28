@@ -34,6 +34,7 @@ ShellRoot {
         Updates;
         MadisonVpn;
         Hydration;
+        Steam;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)

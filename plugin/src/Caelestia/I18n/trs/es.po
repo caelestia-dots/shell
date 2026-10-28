@@ -4617,16 +4617,16 @@ msgstr[1] "%n minutos"
 #, c-format, qt-plural-format
 msgid "Config loaded with %n issue."
 msgid_plural "Config loaded with %n issues."
-msgstr[0] "Configuración cargada con %n problema."
-msgstr[1] "Configuración cargada con %n problemas."
+msgstr[0] "UI recargada con %n problema."
+msgstr[1] "UI recargada con %n problemas."
 
 #: plugin/src/Caelestia/Config/rootnodes.cpp
 msgid "Config loaded successfully!"
-msgstr "¡Configuración cargada correctamente!"
+msgstr "Configuración aplicada correctamente"
 
 #: plugin/src/Caelestia/Config/rootnodes.cpp
 msgid "Config loaded"
-msgstr "Configuración cargada"
+msgstr "UI recargada"
 
 #: plugin/src/Caelestia/Config/rootnodes.cpp
 msgid "Failed to parse token config"
@@ -5251,3 +5251,375 @@ msgstr "%1 / %2 ml — toca una cantidad para registrarla"
 msgid "%1 / %2 ml"
 msgstr "%1 / %2 ml"
 
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Games (Steam)"
+msgstr "Juegos (Steam)"
+
+#: modules/nexus/pages/ComplementsPage.qml
+#: services/Steam.qml
+msgid "Needs API key and Steam ID"
+msgstr "Necesita API key y Steam ID"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Steam API key"
+msgstr "API key de Steam"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "From steamcommunity.com/dev/apikey"
+msgstr "En steamcommunity.com/dev/apikey"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "API key"
+msgstr "API key"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Steam ID"
+msgstr "Steam ID"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "SteamID64, vanity name, or profile URL"
+msgstr "SteamID64, vanity o URL de perfil"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Steam ID or vanity"
+msgstr "Steam ID o vanity"
+
+#: modules/nexus/pages/ComplementsPage.qml
+msgid "Refresh now"
+msgstr "Actualizar ahora"
+
+#: services/Steam.qml
+msgid "Disabled — Games tab is hidden"
+msgstr "Desactivado: la pestaña Juegos está oculta"
+
+#: services/Steam.qml
+msgid "Loading Steam data…"
+msgstr "Cargando datos de Steam…"
+
+#: services/Steam.qml
+msgid "Connected as %1"
+msgstr "Conectado como %1"
+
+#: services/Steam.qml
+msgid "Ready"
+msgstr "Listo"
+
+#: services/Steam.qml
+msgid "In-game"
+msgstr "En partida"
+
+#: services/Steam.qml
+msgid "Online"
+msgstr "En línea"
+
+#: services/Steam.qml
+msgid "Busy"
+msgstr "Ocupado"
+
+#: services/Steam.qml
+msgid "Away"
+msgstr "Ausente"
+
+#: services/Steam.qml
+msgid "Snooze"
+msgstr "Descansando"
+
+#: services/Steam.qml
+msgid "Looking to trade"
+msgstr "Buscando intercambio"
+
+#: services/Steam.qml
+msgid "Looking to play"
+msgstr "Buscando partida"
+
+#: services/Steam.qml
+msgid "Offline"
+msgstr "Desconectado"
+
+#: services/Steam.qml
+msgid "No playtime"
+msgstr "Sin tiempo de juego"
+
+#: services/Steam.qml
+msgid "%1 min"
+msgstr "%1 min"
+
+#: services/Steam.qml
+msgid "%1 h %2 min"
+msgstr "%1 h %2 min"
+
+#: services/Steam.qml
+msgid "%1 h"
+msgstr "%1 h"
+
+#: services/Steam.qml
+msgid "Just now"
+msgstr "Ahora mismo"
+
+#: services/Steam.qml
+msgid "%1 min ago"
+msgstr "Hace %1 min"
+
+#: services/Steam.qml
+msgid "%1 h ago"
+msgstr "Hace %1 h"
+
+#: services/Steam.qml
+msgid "%1 d ago"
+msgstr "Hace %1 d"
+
+#: services/Steam.qml
+msgid "Invalid Steam API response"
+msgstr "Respuesta inválida de la API de Steam"
+
+#: services/Steam.qml
+msgid "Steam request failed"
+msgstr "Falló la petición a Steam"
+
+#: services/Steam.qml
+msgid "Could not resolve Steam vanity URL"
+msgstr "No se pudo resolver el vanity de Steam"
+
+#: services/Steam.qml
+msgid "Steam profile not found"
+msgstr "Perfil de Steam no encontrado"
+
+#: services/Steam.qml
+msgid "Unknown game"
+msgstr "Juego desconocido"
+
+#: services/Steam.qml
+msgid "Steam achievements are private for this profile"
+msgstr "Los logros de Steam son privados en este perfil"
+
+#: services/Steam.qml
+msgid "No achievement data for this game"
+msgstr "No hay datos de logros para este juego"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Configure Steam"
+msgstr "Configura Steam"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Could not load Steam data"
+msgstr "No se pudieron cargar los datos de Steam"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Add your API key and Steam ID in Nexus → Complements."
+msgstr "Añade tu API key y Steam ID en Nexus → Complementos."
+
+#: modules/dashboard/GamesTab.qml
+msgid "Recently played"
+msgstr "Jugados recientemente"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Recent achievements"
+msgstr "Logros recientes"
+
+#: modules/dashboard/GamesTab.qml
+msgid "No recent unlocks"
+msgstr "Sin desbloqueos recientes"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Rarest unlocks"
+msgstr "Más raros"
+
+#: modules/dashboard/GamesTab.qml
+msgid "No rarity data yet"
+msgstr "Aún no hay datos de rareza"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Loading…"
+msgstr "Cargando…"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Updating achievements…"
+msgstr "Actualizando logros…"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Level %1"
+msgstr "Nivel %1"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Playing %1"
+msgstr "Jugando a %1"
+
+#: modules/dashboard/games/ProgressCard.qml
+msgid "%1 / %2"
+msgstr "%1 / %2"
+
+#: modules/dashboard/games/ProgressCard.qml
+msgid "No achievements"
+msgstr "Sin logros"
+
+#: modules/dashboard/games/ProgressCard.qml
+msgid "Recent avg %1%"
+msgstr "Media reciente %1%"
+
+#: modules/dashboard/games/AchievementList.qml
+msgid "%1 · %2% of players"
+msgstr "%1 · %2% de jugadores"
+
+#: modules/dashboard/games/AchievementList.qml
+msgid "%1% of players"
+msgstr "%1% de jugadores"
+
+#: modules/dashboard/GamesTab.qml
+msgid "No recently played games"
+msgstr "Sin juegos recientes"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "No owned games data"
+msgstr "Sin datos de juegos en propiedad"
+#: modules/dashboard/games/ProfileCard.qml
+msgid "%1 games in your library"
+msgstr "%1 juegos en tu biblioteca"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Most played: %1"
+msgstr "Más jugados: %1"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Playtime"
+msgstr "Tiempo de juego"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "h"
+msgstr "h"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "All-time hours"
+msgstr "Horas totales"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Last 2 weeks: %1"
+msgstr "Últimas 2 semanas: %1"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "No playtime in the last 2 weeks"
+msgstr "Sin tiempo de juego en las últimas 2 semanas"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Achievements"
+msgstr "Logros"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Library completion"
+msgstr "Progreso de biblioteca"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Sampling your most played games…"
+msgstr "Muestreando tus juegos más jugados…"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "No achievement data yet"
+msgstr "Aún no hay datos de logros"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "%1 / %2 unlocked · %3 games · %4 perfect"
+msgstr "%1 / %2 desbloqueados · %3 juegos · %4 perfectos"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Friends"
+msgstr "Amigos"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "online"
+msgstr "en línea"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Friends online"
+msgstr "Amigos en línea"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "Friends data unavailable"
+msgstr "Datos de amigos no disponibles"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "%1 in-game"
+msgstr "%1 en partida"
+
+#: modules/dashboard/games/ProfileCard.qml
+msgid "%1 online · %2 friends%3"
+msgstr "%1 en línea · %2 amigos%3"
+
+#: services/Steam.qml
+msgid "Could not load friend status"
+msgstr "No se pudo cargar el estado de amigos"
+
+#: services/Steam.qml
+msgid "Friends list is private"
+msgstr "La lista de amigos es privada"
+
+
+#: modules/dashboard/games/ProfileHeader.qml
+msgid "Level"
+msgstr "Nivel"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "Playing now"
+msgstr "Jugando ahora"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "%1 in 2 weeks"
+msgstr "%1 en 2 semanas"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "%1 of %2 achievements"
+msgstr "%1 de %2 logros"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "Perfect!"
+msgstr "¡Perfecto!"
+
+#: services/Steam.qml
+msgid "This game has no achievements"
+msgstr "Este juego no tiene logros"
+
+#: modules/dashboard/GamesTab.qml
+msgid "in your library"
+msgstr "en tu biblioteca"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Hours"
+msgstr "Horas"
+
+#: modules/dashboard/GamesTab.qml
+msgid "+%1 h in 2 weeks"
+msgstr "+%1 h en 2 semanas"
+
+#: modules/dashboard/GamesTab.qml
+msgid "played in total"
+msgstr "jugadas en total"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Top: %1"
+msgstr "Top: %1"
+
+#: modules/dashboard/GamesTab.qml
+msgid "%1 / %2 unlocked"
+msgstr "%1 de %2"
+
+#: modules/dashboard/GamesTab.qml
+msgid "%1 perfect games"
+msgstr "Al 100 %: %1"
+
+#: modules/dashboard/GamesTab.qml
+msgid "online · %1 in game"
+msgstr "en línea · %1 jugando"
+
+#: modules/dashboard/GamesTab.qml
+msgid "Private"
+msgstr "Privado"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "Played recently"
+msgstr "Jugado recientemente"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "Last played %1"
+msgstr "Última partida: %1"
+
+#: modules/dashboard/games/FocusHero.qml
+msgid "From your library"
+msgstr "De tu biblioteca"

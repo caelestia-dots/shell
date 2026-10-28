@@ -40,6 +40,12 @@ Item {
                 iconName: "cloud",
                 text: Tr.tr("Weather"),
                 enabled: Config.dashboard.showWeather
+            },
+            {
+                component: gamesComponent,
+                iconName: "sports_esports",
+                text: Tr.tr("Games"),
+                enabled: GlobalConfig.addons.steam.enabled
             }
         ];
         return allTabs.filter(tab => tab.enabled);
@@ -179,6 +185,12 @@ Item {
                 id: weatherComponent
 
                 WeatherTab {}
+            }
+
+            Component {
+                id: gamesComponent
+
+                GamesTab {}
             }
 
             Behavior on contentX {
