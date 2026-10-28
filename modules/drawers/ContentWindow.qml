@@ -34,7 +34,7 @@ StyledWindow {
         }
         return hasFullscreenOnNormalWs;
     }
-    readonly property bool dashboardFocusable: screenState.dashboard && contentItem.Config.dashboard.enabled && (!contentItem.Config.dashboard.showOnHover || interactions.dashboardShortcutActive);
+    readonly property bool dashboardFocusable: screenState.dashboard && contentItem.Config.dashboard.enabled && (!contentItem.Config.dashboard.showOnHover || interactions.dashboardShortcutActive)
 
     property real fsTransitionProg: hasFullscreen ? 1 : 0
     readonly property real sdfBorderOffset: 2 * fsTransitionProg // SDFs joins are not exact, so offset by 2px to ensure nothing shows
