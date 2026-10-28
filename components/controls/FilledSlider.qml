@@ -11,6 +11,37 @@ Slider {
     required property string icon
     property real oldValue
     property bool initialized
+    property bool handleTapEnabled: false
+    property string transitionIcon: ""
+    property string stationaryIcon: ""
+    readonly property bool thumbDragging: thumbInput.dragging
+    readonly property real displayedValue: thumbDragging ? thumbInput.previewValue : value
+    property string lastIcon: ""
+    property string displayedIcon: ""
+
+    signal handleTapped
+    signal handlePressed
+    signal handleDragged(real nextValue)
+
+    function updateIcon(): void {
+        const previous = lastIcon;
+        lastIcon = root.icon;
+        if (!stationaryIcon || !transitionIcon || handle.moving || !previous || (previous !== transitionIcon && root.icon !== transitionIcon)) {
+            iconSwap.stop();
+            iconVisual.scale = 1;
+            displayedIcon = root.icon;
+            return;
+        }
+        iconReturn.stop();
+        iconSwap.restart();
+    }
+
+    Component.onCompleted: {
+        displayedIcon = root.icon;
+        lastIcon = root.icon;
+    }
+
+    onIconChanged: root.updateIcon()
 
     orientation: Qt.Vertical
 
@@ -35,14 +66,14 @@ Slider {
 
         property alias moving: icon.moving
 
-        y: root.visualPosition * (root.availableHeight - height)
+        y: (root.thumbDragging && root.to !== root.from ? 1 - (root.displayedValue - root.from) / (root.to - root.from) : root.visualPosition) * (root.availableHeight - height)
         implicitWidth: root.width
         implicitHeight: root.width
 
         Elevation {
             anchors.fill: parent
             radius: rect.radius
-            level: handleInteraction.containsMouse ? 2 : 1
+            level: (root.handleTapEnabled && thumbInput.containsMouse) || handleInteraction.containsMouse ? 2 : 1
         }
 
         StyledRect {
@@ -62,43 +93,196 @@ Slider {
                 acceptedButtons: Qt.NoButton
             }
 
-            MaterialIcon {
-                id: icon
+            Item {
+                id: iconVisual
 
-                property bool moving
+                anchors.fill: parent
+                transformOrigin: Item.Center
 
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: 1
-                text: moving ? Math.round(root.value * 100) : root.icon
-                color: Colours.palette.m3inverseOnSurface
-                font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
+                MaterialIcon {
+                    id: icon
 
-                Behavior on moving {
-                    SequentialAnimation {
-                        Anim {
-                            target: icon
-                            property: "scale"
-                            to: 0.3
-                            duration: Tokens.anim.durations.small / 2
-                            easing: Tokens.anim.standardAccel
-                        }
-                        PropertyAction {}
-                        Anim {
-                            target: icon
-                            property: "scale"
-                            to: 1
-                            duration: Tokens.anim.durations.normal / 2
-                            easing: Tokens.anim.standardDecel
+                    property bool moving: false
+
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: 1
+                    visible: !root.stationaryIcon || moving
+                    text: moving ? Math.round(root.displayedValue * 100) : root.displayedIcon
+                    color: Colours.palette.m3inverseOnSurface
+                    font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
+
+                    onMovingChanged: {
+                        if (!root.handleTapEnabled)
+                            return;
+                        if (moving) {
+                            iconSwap.stop();
+                            iconReturn.stop();
+                            iconVisual.scale = 1;
+                            changingPart.scale = 1;
+                            root.displayedIcon = root.icon;
+                        } else {
+                            iconSwap.stop();
+                            changingPart.scale = 0.80;
+                            iconReturn.restart();
                         }
                     }
+
+                    Behavior on moving {
+                        enabled: !root.handleTapEnabled
+
+                        SequentialAnimation {
+                            Anim {
+                                target: icon
+                                property: "scale"
+                                to: 0.3
+                                duration: Tokens.anim.durations.small / 2
+                                easing: Tokens.anim.standardAccel
+                            }
+                            PropertyAction {}
+                            Anim {
+                                target: icon
+                                property: "scale"
+                                to: 1
+                                duration: Tokens.anim.durations.normal / 2
+                                easing: Tokens.anim.standardDecel
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    id: fixedIcon
+
+                    anchors.centerIn: parent
+                    width: speakerGlyph.implicitWidth
+                    height: speakerGlyph.implicitHeight
+                    visible: !!root.stationaryIcon && !icon.moving
+
+                    Item {
+                        width: parent.width / 2
+                        height: parent.height
+                        clip: true
+
+                        MaterialIcon {
+                            id: speakerGlyph
+
+                            text: root.stationaryIcon
+                            color: Colours.palette.m3inverseOnSurface
+                            font: Tokens.font.icon.medium
+                        }
+                    }
+
+                    Item {
+                        id: changingPart
+
+                        x: parent.width / 2
+                        width: parent.width / 2
+                        height: parent.height
+                        clip: true
+
+                        MaterialIcon {
+                            x: -fixedIcon.width / 2 + fixedMetrics.tightBoundingRect.x - currentMetrics.tightBoundingRect.x
+                            text: root.displayedIcon
+                            color: Colours.palette.m3inverseOnSurface
+                            font: Tokens.font.icon.medium
+                        }
+                    }
+                }
+
+                TextMetrics {
+                    id: fixedMetrics
+
+                    font: Tokens.font.icon.medium
+                    text: root.stationaryIcon
+                }
+
+                TextMetrics {
+                    id: currentMetrics
+
+                    font: Tokens.font.icon.medium
+                    text: root.displayedIcon
+                }
+            }
+
+            SequentialAnimation {
+                id: iconSwap
+
+                Anim {
+                    target: iconVisual
+                    property: "scale"
+                    to: 0.65
+                    duration: Tokens.anim.durations.small / 2
+                    easing: Tokens.anim.standardAccel
+                }
+                ScriptAction {
+                    script: root.displayedIcon = root.icon
+                }
+                Anim {
+                    target: iconVisual
+                    property: "scale"
+                    to: 1
+                    duration: Tokens.anim.durations.normal / 2
+                    easing: Tokens.anim.standardDecel
+                }
+            }
+
+            Anim {
+                id: iconReturn
+
+                target: changingPart
+                property: "scale"
+                to: 1
+                duration: Tokens.anim.durations.expressiveSlowEffects / 2
+                easing: Tokens.anim.standardDecel
+            }
+
+            ThumbInputArea {
+                id: thumbInput
+
+                anchors.fill: parent
+                enabled: root.handleTapEnabled
+                slider: root
+
+                onInteractionStarted: {
+                    stateChangeDelay.stop();
+                    handle.moving = false;
+                    root.handlePressed();
+                }
+                onTapped: {
+                    stateChangeDelay.stop();
+                    handle.moving = false;
+                    root.handleTapped();
+                }
+                onDragStarted: {
+                    handle.moving = true;
+                    stateChangeDelay.stop();
+                }
+                onDragMoved: nextValue => root.handleDragged(nextValue)
+                onDragEnded: {
+                    handle.moving = true;
+                    stateChangeDelay.restart();
                 }
             }
         }
     }
 
-    onPressedChanged: handle.moving = pressed
+    onPressedChanged: {
+        if (!root.handleTapEnabled) {
+            handle.moving = pressed;
+        } else if (pressed) {
+            stateChangeDelay.stop();
+            handle.moving = false;
+        } else if (handle.moving) {
+            stateChangeDelay.restart();
+        }
+    }
 
     onValueChanged: {
+        if (thumbDragging) {
+            oldValue = value;
+            return;
+        }
+
         if (!initialized) {
             initialized = true;
             return;
@@ -121,6 +305,8 @@ Slider {
     }
 
     Behavior on value {
+        enabled: !root.handleTapEnabled || (!root.pressed && !root.thumbDragging)
+
         Anim {
             type: Anim.StandardLarge
         }

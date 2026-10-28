@@ -21,6 +21,8 @@ Item {
     required property bool sourceMuted
     required property real brightness
 
+    property var thumbPressSink: null
+
     implicitWidth: layout.implicitWidth + Tokens.padding.large + layout.anchors.horizontalCenterOffset * 2
     implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
 
@@ -47,9 +49,24 @@ Item {
                 anchors.fill: parent
 
                 icon: Icons.getVolumeIcon(value, root.muted)
+                handleTapEnabled: true
+                transitionIcon: "no_sound"
+                stationaryIcon: "volume_up"
                 value: root.volume
                 to: GlobalConfig.services.maxVolume
                 onMoved: Audio.setVolume(value)
+                onHandlePressed: {
+                    root.thumbPressSink = Audio.sink;
+                }
+                onHandleDragged: nextValue => {
+                    if (root.thumbPressSink === Audio.sink)
+                        Audio.setVolume(nextValue);
+                }
+                onHandleTapped: {
+                    const sink = root.thumbPressSink;
+                    if (sink && sink === Audio.sink && sink.ready && sink.audio)
+                        Audio.setStreamMuted(sink, !Audio.getStreamMuted(sink));
+                }
             }
         }
 
