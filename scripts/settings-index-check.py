@@ -7,7 +7,6 @@ out of search, with nothing to tell anyone. This catches that before merge.
 
 Errors:
   - a settings row with neither a settingAnchor nor `searchable: false`
-  - a settingAnchor or label further into its row than the indexer reads
   - a settingAnchor used twice, or not in kebab-case
   - a setting without an icon in the indexer's SETTING_ICONS, or an icon left
     behind for an anchor that no longer exists
@@ -43,14 +42,11 @@ ERROR = "error"
 WARNING = "warning"
 LEVEL_COLOURS = {ERROR: RED, WARNING: YELLOW}
 
-# Kept in step with the indexer: the row types it reads, and how many lines
-# after a row's opening line it looks at for the anchor and label.
+# Kept in step with the indexer: the row types it reads
 ROW_TYPES = r"ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|RowButton|InfoRow|PopupRow|DefaultRow|TextFieldRow"
 ROW_RE = re.compile(rf"^\s*({ROW_TYPES})\s*\{{")
-ROW_WINDOW = 11
 
 ANCHOR_RE = re.compile(r'^\s*settingAnchor:\s*"([^"]*)"')
-LABEL_RE = re.compile(r"^\s*(?:label|text):\s*Tr\.")
 SEARCHABLE_RE = re.compile(r"^\s*searchable:\s*false\s*$")
 SECTION_RE = re.compile(r"^\s*SectionHeader\s*\{")
 TRANSLATORS_RE = re.compile(r"^\s*//\s*TRANSLATORS:")
@@ -101,7 +97,6 @@ class Row:
         self.section = section
         self.anchor: str | None = None
         self.anchor_line = 0
-        self.label_line = 0
         self.searchable = True
 
 
@@ -111,7 +106,7 @@ def column(text: str) -> int:
 
 def braces(text: str) -> int:
     """Net brace depth change of a line, ignoring strings and line comments."""
-    text = re.sub(r'"(?:\\.|[^"\\])*"', '""', text)
+    text = re.sub(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'', '""', text)
     text = text.split("//", 1)[0]
     return text.count("{") - text.count("}")
 
@@ -139,8 +134,6 @@ def parse_rows(lines: list[str]) -> list[Row]:
                 if a and row.anchor is None:
                     row.anchor = a.group(1)
                     row.anchor_line = j + 1
-                if LABEL_RE.match(text) and not row.label_line:
-                    row.label_line = j + 1
                 if SEARCHABLE_RE.match(text):
                     row.searchable = False
             depth += braces(text)
@@ -260,20 +253,6 @@ def check() -> tuple[list[Issue], int]:
                 )
             else:
                 anchors[row.anchor] = (rel, row.anchor_line)
-
-            for what, line in (("settingAnchor", row.anchor_line), ("label", row.label_line)):
-                if line - row.line > ROW_WINDOW:
-                    issues.append(
-                        Issue(
-                            rel,
-                            line,
-                            column(lines[line - 1]),
-                            ERROR,
-                            "outside-window",
-                            f"the indexer only reads {ROW_WINDOW} lines past a row's opening line, "
-                            f"move the {what} closer to the top",
-                        )
-                    )
 
             if row.kind == "InfoRow" and row.section:
                 if row.section in info_sections:

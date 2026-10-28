@@ -85,6 +85,7 @@ const SETTING_ICONS = {
     "launcher-variants": "contrast",
     "launcher-wallpapers": "wallpaper",
     "sidebar-enabled": "toggle_on",
+    "sidebar-show-on-hover": "mouse",
     "sidebar-drag-threshold": "drag_pan",
     "apps-default-terminal": "terminal",
     "apps-default-audio": "music_note",
@@ -474,6 +475,20 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
     return nav;
 }
 
+// How a line changes the brace depth, leaving out braces in strings and in a
+// trailing comment.
+function braceDelta(line) {
+    const code = line.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '""').replace(/\/\/.*$/, "");
+    let delta = 0;
+    for (const c of code) {
+        if (c === "{")
+            delta++;
+        else if (c === "}")
+            delta--;
+    }
+    return delta;
+}
+
 function extractSettings(files, nav, readLines) {
     const entries = [];
     for (const comp in nav) {
@@ -504,7 +519,13 @@ function extractSettings(files, nav, readLines) {
             let checkedRoot = null;
             let checkedPath = null;
             let toggledPath = null;
-            for (let j = i + 1; j < Math.min(i + 12, lines.length); j++) {
+            // Only the row's own bindings: the scan stops at its closing brace
+            // and skips nested objects, so a row never takes a property from
+            // the row after it or from one of its children.
+            let depth = braceDelta(lines[i]);
+            for (let j = i + 1; j < lines.length && depth > 0; depth += braceDelta(lines[j]), j++) {
+                if (depth > 1)
+                    continue;
                 if (label === null) {
                     const m = LABEL_RE.exec(lines[j]);
                     if (m)
