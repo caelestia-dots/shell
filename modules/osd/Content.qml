@@ -51,7 +51,6 @@ Item {
                 icon: Icons.getVolumeIcon(value, root.muted)
                 handleTapEnabled: true
                 transitionIcon: "no_sound"
-                stationaryIcon: "volume_up"
                 value: root.volume
                 to: GlobalConfig.services.maxVolume
                 onMoved: Audio.setVolume(value)

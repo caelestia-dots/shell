@@ -13,7 +13,6 @@ Slider {
     property bool initialized
     property bool handleTapEnabled: false
     property string transitionIcon: ""
-    property string stationaryIcon: ""
     readonly property bool thumbDragging: thumbInput.dragging
     readonly property real displayedValue: thumbDragging ? thumbInput.previewValue : value
     property string lastIcon: ""
@@ -26,13 +25,12 @@ Slider {
     function updateIcon(): void {
         const previous = lastIcon;
         lastIcon = root.icon;
-        if (!stationaryIcon || !transitionIcon || handle.moving || !previous || (previous !== transitionIcon && root.icon !== transitionIcon)) {
+        if (!handleTapEnabled || !transitionIcon || handle.moving || !previous || (previous !== transitionIcon && root.icon !== transitionIcon)) {
             iconSwap.stop();
             iconVisual.scale = 1;
             displayedIcon = root.icon;
             return;
         }
-        iconReturn.stop();
         iconSwap.restart();
     }
 
@@ -106,30 +104,19 @@ Slider {
 
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: 1
-                    visible: !root.stationaryIcon || moving
                     text: moving ? Math.round(root.displayedValue * 100) : root.displayedIcon
                     color: Colours.palette.m3inverseOnSurface
                     font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
 
                     onMovingChanged: {
-                        if (!root.handleTapEnabled)
-                            return;
-                        if (moving) {
+                        if (root.handleTapEnabled && moving) {
                             iconSwap.stop();
-                            iconReturn.stop();
                             iconVisual.scale = 1;
-                            changingPart.scale = 1;
                             root.displayedIcon = root.icon;
-                        } else {
-                            iconSwap.stop();
-                            changingPart.scale = 0.80;
-                            iconReturn.restart();
                         }
                     }
 
                     Behavior on moving {
-                        enabled: !root.handleTapEnabled
-
                         SequentialAnimation {
                             Anim {
                                 target: icon
@@ -148,59 +135,6 @@ Slider {
                             }
                         }
                     }
-                }
-
-                Item {
-                    id: fixedIcon
-
-                    anchors.centerIn: parent
-                    width: speakerGlyph.implicitWidth
-                    height: speakerGlyph.implicitHeight
-                    visible: !!root.stationaryIcon && !icon.moving
-
-                    Item {
-                        width: parent.width / 2
-                        height: parent.height
-                        clip: true
-
-                        MaterialIcon {
-                            id: speakerGlyph
-
-                            text: root.stationaryIcon
-                            color: Colours.palette.m3inverseOnSurface
-                            font: Tokens.font.icon.medium
-                        }
-                    }
-
-                    Item {
-                        id: changingPart
-
-                        x: parent.width / 2
-                        width: parent.width / 2
-                        height: parent.height
-                        clip: true
-
-                        MaterialIcon {
-                            x: -fixedIcon.width / 2 + fixedMetrics.tightBoundingRect.x - currentMetrics.tightBoundingRect.x
-                            text: root.displayedIcon
-                            color: Colours.palette.m3inverseOnSurface
-                            font: Tokens.font.icon.medium
-                        }
-                    }
-                }
-
-                TextMetrics {
-                    id: fixedMetrics
-
-                    font: Tokens.font.icon.medium
-                    text: root.stationaryIcon
-                }
-
-                TextMetrics {
-                    id: currentMetrics
-
-                    font: Tokens.font.icon.medium
-                    text: root.displayedIcon
                 }
             }
 
@@ -224,16 +158,6 @@ Slider {
                     duration: Tokens.anim.durations.normal / 2
                     easing: Tokens.anim.standardDecel
                 }
-            }
-
-            Anim {
-                id: iconReturn
-
-                target: changingPart
-                property: "scale"
-                to: 1
-                duration: Tokens.anim.durations.expressiveSlowEffects / 2
-                easing: Tokens.anim.standardDecel
             }
 
             ThumbInputArea {
