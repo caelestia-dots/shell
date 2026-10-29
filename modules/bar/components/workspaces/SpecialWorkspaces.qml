@@ -165,6 +165,7 @@ Item {
             activeWsId: root.activeSpecialId
             ws: modelData
             monitor: root.monitor
+            appIconLayer: appIcons
             offMonitorColour: Colours.palette.m3outline
             displayType: Config.bar.workspaces.specialDisplayType
             showWindows: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
@@ -194,6 +195,14 @@ Item {
             color: Colours.palette.m3tertiary
             contentColour: Colours.palette.m3onTertiary
         }
+    }
+
+    // Share the scrolling coordinates while preserving the original image colours.
+    Item {
+        id: appIcons
+
+        z: 1
+        anchors.fill: view
     }
 
     MouseArea {
