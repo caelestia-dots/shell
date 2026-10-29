@@ -136,7 +136,24 @@ QQmlListProperty<NotifData> NotifStore::notifs() {
         } };
 }
 
-NotifData* NotifStore::add(QObject* backer) {
+QQmlListProperty<NotifData> NotifStore::popups() {
+    return { this, nullptr,
+        [](auto* p) -> qsizetype {
+            qsizetype count = 0;
+            for (const auto* notif : std::as_const(static_cast<NotifStore*>(p->object)->m_notifs))
+                if (notif->m_popup)
+                    ++count;
+            return count;
+        },
+        [](auto* p, qsizetype i) -> NotifData* {
+            for (auto* const notif : std::as_const(static_cast<NotifStore*>(p->object)->m_notifs))
+                if (notif->m_popup && i-- == 0)
+                    return notif;
+            return nullptr;
+        } };
+}
+
+NotifData* NotifStore::add(QObject* backer, bool popup) {
     if (!backer) {
         qCWarning(lcNotifStore) << "Attempted to add null backer";
         return nullptr;
@@ -146,7 +163,15 @@ NotifData* NotifStore::add(QObject* backer) {
     m_notifs.prepend(notif);
     track(notif);
     markDirty(notif);
+
     emit notifsChanged();
+    if (popup) {
+        notif->m_popup = true;
+        QObject::connect(notif, &NotifData::popupClosed, this, &NotifStore::popupsChanged);
+        notif->startPopupTimer();
+        emit popupsChanged();
+    }
+
     enforceLimits({ notif->m_appName });
     return notif;
 }
@@ -241,8 +266,12 @@ void NotifStore::remove(NotifData* notif) {
     if (!query.exec())
         qCWarning(lcNotifStore) << "Failed to remove" << notif->m_id << query.lastError().text();
 
-    if (m_notifs.removeOne(notif))
+    if (m_notifs.removeOne(notif)) {
         emit notifsChanged();
+        if (notif->m_popup)
+            emit popupsChanged();
+    }
+
     notif->deleteLater();
 }
 
@@ -266,7 +295,7 @@ void NotifStore::loadNotifs() {
         notif->m_appIcon = query.value(4).toString();
         notif->m_appName = query.value(5).toString();
         notif->m_image = query.value(6).toString();
-        notif->m_expireTimeout = query.value(7).toReal();
+        notif->m_expireTimeout = query.value(7).toInt();
         notif->m_urgency = static_cast<NotifData::Urgency>(query.value(8).toInt());
         notif->m_resident = query.value(9).toBool();
         notif->m_hasActionIcons = query.value(10).toBool();
@@ -276,6 +305,7 @@ void NotifStore::loadNotifs() {
     }
 
     emit notifsChanged();
+    emit popupsChanged();
 
     QSet<QString> groups;
     for (const auto* notif : std::as_const(m_notifs))

@@ -47,7 +47,7 @@ class NotifData : public QObject {
     Q_PROPERTY(QString appName READ appName NOTIFY appNameChanged)
     Q_PROPERTY(QString image READ image NOTIFY imageChanged)
     Q_PROPERTY(QVariantMap hints READ hints NOTIFY hintsChanged)
-    Q_PROPERTY(qreal expireTimeout READ expireTimeout NOTIFY expireTimeoutChanged)
+    Q_PROPERTY(int expireTimeout READ expireTimeout NOTIFY expireTimeoutChanged)
     Q_PROPERTY(caelestia::shell::models::NotifData::Urgency urgency READ urgency NOTIFY urgencyChanged)
     Q_PROPERTY(bool resident READ resident NOTIFY residentChanged)
     Q_PROPERTY(bool hasActionIcons READ hasActionIcons NOTIFY hasActionIconsChanged)
@@ -71,7 +71,7 @@ public:
     [[nodiscard]] QString appName() const;
     [[nodiscard]] QString image() const;
     [[nodiscard]] QVariantMap hints() const;
-    [[nodiscard]] qreal expireTimeout() const;
+    [[nodiscard]] int expireTimeout() const;
     [[nodiscard]] Urgency urgency() const;
     [[nodiscard]] bool resident() const;
     [[nodiscard]] bool hasActionIcons() const;
@@ -93,6 +93,7 @@ signals:
     void hasActionIconsChanged();
     void actionsChanged();
 
+    void popupClosed();
     void changed();
     void closed();
 
@@ -104,7 +105,7 @@ private:
     bool m_popup = false;
     bool m_closed = false;
     qint64 m_createdAt;
-    QTimer* m_timer = nullptr;
+    QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
 
     QString m_id;
@@ -114,11 +115,13 @@ private:
     QString m_appName;
     QString m_image;
     QVariantMap m_hints;
-    qreal m_expireTimeout;
+    int m_expireTimeout;
     Urgency m_urgency = Urgency::Normal;
     bool m_resident = false;
     bool m_hasActionIcons = false;
     QList<NotifAction> m_actions;
+
+    void startPopupTimer();
 
     void connectBacker();
     [[nodiscard]] QList<NotifAction> readBackerActions();
