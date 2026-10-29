@@ -176,6 +176,12 @@ NotifData* NotifStore::add(QObject* backer, bool popup) {
     return notif;
 }
 
+void NotifStore::clear() {
+    const auto notifs = m_notifs;
+    for (auto* const notif : notifs)
+        notif->dismiss();
+}
+
 void NotifStore::enforceLimits(const QSet<QString>& groups) {
     for (const auto& group : groups) {
         evict(k_maxPerGroup, [&group](const NotifData* n) {
