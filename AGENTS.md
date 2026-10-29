@@ -18,8 +18,10 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 ## 2. Entorno del usuario (Manu)
 
 - Arch Linux + **Hyprland 0.57**, sobremesa (sin batería), monitor MSI 1440p @ **144 Hz** por HDMI (`HDMI-A-1`).
+- Login: **greetd + tuigreet** (autologin a `start-hyprland`; plasmalogin instalado pero disabled). Cursor **Adwaita** en GTK/Qt/Hyprland.
 - Locale `es_ES.UTF-8`; **todo lo nuevo va con i18n**: cadenas vía `Tr.tr` / `Tr.trN` / `Tr.trCtx` → `es.po` → recompilar el plugin I18n e instalarlo en `~/.local`.
-- Apps por defecto: **kitty** (terminal), **thunar** (explorador, `Super+E`), **VLC** (vídeo), tema de iconos **Papirus(-Dark)**.
+- Apps por defecto: **kitty** (terminal), **thunar** (explorador, `Super+E`, sirve `FileManager1` vía override D-Bus), **VLC** (vídeo), tema de iconos **Papirus(-Dark)**.
+- Qt platform theme: **qt6ct** (`~/.config/qt6ct`, paleta + Papirus los empuja `caelestia-quiet` en cada esquema). Plasma en proceso de aislamiento (fase 1 hecha; fase 2 = desinstalar).
 - VPN del trabajo: openfortivpn (credenciales **solo** en `~/.config/openfortivpn/config`, jamás en el repo).
 - Steam: API key **solo en config local** (nunca commitearla; grep del diff antes de push). Perfil/logros públicos.
 - OpenCode TUI: plugin sidebar file-tree es un **fork local** en `~/.config/opencode/plugins/opencode-file-tree` (colores git en el árbol; rebuild con `bun run build`, no npm; verificación en su `test.md`). El tema del TUI (`caelestia` + gemela `caelestia-alt` para el hot-reload por flip de nombre) lo genera `scripts/generate-opencode-theme.py` y lo engancha `caelestia-quiet.py`.
@@ -86,7 +88,16 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 - La caché HTTP/schema/logros de `Steam.qml` es solo en memoria (ver pendientes).
 - `hyprctl` reporta un booleano de VRR: la **política** vive en el Lua, no la pises con el estado.
 
+### Aislamiento de Plasma (aprendizajes fase 1)
+
+- `QT_QPA_PLATFORMTHEME` tiene **3 fuentes** (pragma de `shell.qml`, `hyprland.lua`, `environment.d`): las tres a la vez o nada; el env de Hyprland y `environment.d` solo normalizan al relogin, el pragma al restart de la shell.
+- `_sync_qt6ct` escribe el esquema con **22 roles** (orden del enum `QPalette::ColorRole` de Qt ≥6.6, `Accent` al final — qt6ct mapea índice→rol literal). Escritura atómica temp+rename: el watcher de qt6ct es dir-scoped con debounce.
+- `libcolorreload-gtk-module.so` vive vendorizado en `~/.local/share/gtk-3.0/modules/` (GTK resuelve módulos por nombre ahí); **no existe build GTK4 del módulo** (kde-gtk-config solo compila GTK3).
+- D-Bus service duplicates: dbus-broker escanea dirs y **el primero que registra gana** (alfabético dentro del dir) — los overrides de usuario van en `~/.local/share/dbus-1/services/` y ganan a `/usr/share`. Tras crear uno, dbus-broker-launch *nota* el cambio y re-escanea (journal: "Noticed file-system modification, trigger reload").
+
 ## 7. Pendiente / roadmap
+
+- [ ] **Fase 2 — desinstalar Plasma (~237 paquetes, ~1379 MiB)**: validar de nuevo `pacman -Rs` con la lista; keep-set primero a `--asexplicit` (`plasma-integration kde-gtk-config bluez bluez-utils noto-fonts-emoji ttf-hack`); retirar el dual-write de `kdeglobals [Icons]` tras desinstalar `plasma-integration`; limpiar configs/caches/estado KDE (`~/.config/{KDE,kdedefaults,kwin*,plasma-*,baloo*,kwalletrc}`, `~/.cache/plasmashell`, `~/.local/share/{baloo,plasma,kactivitymanagerd,kwalletd}`); revisar portales (el portal de KDE queda muerto) y kwallet.
 
 - [ ] **Caché de logros de Steam en disco** (TTL ~1 día) para no re-pedir la biblioteca al arrancar.
 - [ ] **Partir `services/Steam.qml`** por capas si se crece (API / librería / sesiones / formateo).
@@ -98,4 +109,4 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 
 ---
 
-*Última actualización: 2026-10-29 (repaso integral: Clipboard argv/verificación de paths, VPN busy guard, Activities verify cap, Requests 15 s + plugin build user-local, Updates askpass en RAM + heartbeat, Displays hotplug, Steam cap/gate del reload). Mantener este fichero al día con cada feature grande o aprendizaje nuevo.*
+*Última actualización: 2026-10-29 (repaso integral: Clipboard argv/verificación de paths, VPN busy guard, Activities verify cap, Requests 15 s + plugin build user-local, Updates askpass en RAM + heartbeat, Displays hotplug, Steam cap/gate del reload; aislamiento de Plasma fase 1: greetd+tuigreet, theme Qt6ct con paleta Material, module GTK vendorizado, FileManager1 → Thunar, cursor Adwaita). Mantener este fichero al día con cada feature grande o aprendizaje nuevo.*

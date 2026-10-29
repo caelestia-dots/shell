@@ -192,9 +192,33 @@ require("caelestia-monitors")
 ## Explorador y theming GTK
 
 - Explorador por defecto: **Thunar** (`general.apps.explorer` + Super+E + `xdg-mime` para carpetas).
-- Para que Thunar/GTK sigan el esquema de Caelestia: `adw-gtk-theme`, `papirus-icon-theme`, y `GTK_MODULES=colorreload-gtk-module` (Hyprland).
-- Iconos de apps en el launcher: tema **Papirus** (sincronizado en `~/.config/kdeglobals` al aplicar el esquema).
+- Para que Thunar/GTK sigan el esquema de Caelestia: `adw-gtk-theme`, `papirus-icon-theme`, y `GTK_MODULES=colorreload-gtk-module` (Hyprland + `settings.ini`; el módulo está **vendorizado** en `~/.local/share/gtk-3.0/modules/`, ver abajo).
+- Iconos de apps en el launcher: tema **Papirus** (sincronizado en `~/.config/qt6ct/qt6ct.conf [Appearance] icon_theme` al aplicar el esquema).
 - Diálogos `pkexec` (Timeshift, VPN helper, etc.): activa `hyprpolkitagent.service` (`systemctl --user enable --now hyprpolkitagent`).
+
+---
+
+## Aislamiento de Plasma (fase 1)
+
+Wiring para que Hyprland + Caelestia vivan sin depender de Plasma sin desinstalarlo todavía (la desinstalación es fase 2).
+
+- **Login**: **greetd + tuigreet** con autologin a `/usr/bin/start-hyprland` (`[initial_session]`/`[default_session]` en `/etc/greetd/config.toml`). plasmalogin queda instalado pero deshabilitado (rollback = `systemctl enable plasmalogin`).
+- **Plataforma Qt**: cambio en 3 sitios de `QT_QPA_PLATFORMTHEME=kde` a `qt6ct`
+  (pragma `Env` en `shell.qml`, env en `hyprland.lua`, `~/.config/environment.d/99-qt-platformtheme.conf`)
+  — aplica a processes nuevos; la sesión completa se normaliza al relogin. Los apps Qt ya no dependen de
+  `plasma-integration` (estilo Breeze → Fusion). `scripts/caelestia-quiet.py` empuja en cada cambio de esquema (`_sync_qt6ct`), de forma atómica (temp+rename, lo pilla el QFileSystemWatcher de qt6ct):
+  - `~/.config/qt6ct/colors/caelestia.conf`: paleta Qt (22 roles de `QPalette`) mapeada desde los tokens Material de la activity
+  - `~/.config/qt6ct/qt6ct.conf`: `icon_theme=Papirus-{Mode}`, `custom_palette=true`, `style=Fusion`
+- **Cursor**: alineado GTK/Qt/Hyprland a **Adwaita** (`gsettings cursor-theme`, `gtk-cursor-theme-name` de `settings.ini`, env `XCURSOR_THEME`/`HYPRCURSOR_THEME`).
+- **módulo `colorreload-gtk-module`** vendorizado: copia a `~/.local/share/gtk-3.0/modules/`. Sobrevive la desinstalación de `kde-gtk-config` en fase 2 (GTK resuelve el módulo por nombre en la ruta `$XDG_DATA_HOME`). Es un build solo de GTK3 (no existe módulo GTK4).
+- **`org.freedesktop.FileManager1`**: Thunar lo sirve. Override a nivel usuario en
+  `~/.local/share/dbus-1/services/org.freedesktop.FileManager1.service` (→ `thunar.service`; dbus-broker ignora los duplicados `/usr/share/dbus-1/services/org.kde.dolphin.*`).
+- **Servicios de KDE enmascarados**: `systemctl --user mask plasma-dolphin plasma-kactivitymanagerd`
+  (el asistente de Dolphin ya no ocupa `FileManager1` ni se levanta al arrancar; la fase 2 los borra).
+- **Dual-write de transición**: `_sync_kde_icon_theme` sigue escribiendo `~/.config/kdeglobals [Icons]`,
+  por si cualquier elemento de Plasma residual sigue leyéndolo (kernel de config, `plasma-integration`).
+- La fase 2 (desinstalación de ~237 paquetes Plasma) retirará además: el dual-write de kdeglobals, el
+  keep-set explícito (`pacman -D --asexplicit plasma-integration kde-gtk-config bluez bluez-utils noto-fonts-emoji ttf-hack`) y los configs/caches de KDE (`~/.config/{KDE,kdedefaults,kwin*,plasma-*,baloo*…}`, `~/.cache/plasmashell*`, `~/.local/share/{baloo,plasma,kactivitymanagerd,kwalletd}`).
 
 ---
 
