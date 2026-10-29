@@ -166,7 +166,8 @@ Item {
                 }
             }
         }
-    }
+}
+// Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
     Connections {
         target: Hyprland
 
@@ -174,6 +175,8 @@ Item {
             const triggers = ["openwindow", "closewindow", "movewindow", "workspace", "activespecial", "createworkspace", "destroyworkspace", "fullscreen", "changefloatingmode"];
 
             if (triggers.includes(event.name)) {
+                Hyprland.refreshToplevels();
+                WorkspaceData.updateAll();
                 updateTimer.restart();
             }
         }
