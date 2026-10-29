@@ -33,6 +33,12 @@ Region {
         height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
     }
 
+    // Bind overview Region to Panel Height of Launcher
+    R {
+        panel: root.panels.overview
+        y: 0
+        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
+    }
     R {
         id: sessionRegion
 

@@ -17,6 +17,7 @@ qml_module(caelestia-config
         dashboardconfig.hpp
         generalconfig.hpp
         launcherconfig.hpp
+        overviewconfig.hpp
         lockconfig.hpp
         nexusconfig.hpp
         notifsconfig.hpp

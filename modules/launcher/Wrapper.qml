@@ -5,13 +5,15 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.modules.launcher.services
+import qs.modules.drawers
+import qs.components.containers
 
 Item {
     id: root
 
     required property ShellScreen screen
     required property ScreenState screenState
-    required property var panels
+    required property Panels panels
 
     readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled
 
@@ -32,6 +34,8 @@ Item {
     }
 
     visible: offsetScale < 1
+
+    // Move Launcher out of screen
     anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
     implicitHeight: content.implicitHeight
     implicitWidth: content.implicitWidth || 630 // Hard coded fallback for first open

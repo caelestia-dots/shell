@@ -24,6 +24,7 @@ ShellRoot {
         Notifs;
         Players;
         Brightness;
+        WorkspaceData;
         Weather.reload();
 
         if (GlobalConfig.utilities.vpn.enabled)
@@ -44,6 +45,7 @@ ShellRoot {
     Background {}
     Drawers {}
     AreaPicker {}
+
     Lock {
         id: lock
     }

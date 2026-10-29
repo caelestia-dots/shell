@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.I18n
+import Quickshell.Networking
 
 Singleton {
     id: root
