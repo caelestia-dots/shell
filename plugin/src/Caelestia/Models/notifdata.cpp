@@ -1,20 +1,56 @@
 #include "notifdata.hpp"
 
+#include <qbuffer.h>
+#include <qcryptographichash.h>
 #include <qdatetime.h>
+#include <qfile.h>
+#include <qimage.h>
 #include <qmetaobject.h>
+#include <qqml.h>
+#include <qquickimageprovider.h>
 #include <quuid.h>
 
 #include "config/rootnodes.hpp"
 
 namespace caelestia::shell::models {
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
+
+constexpr int k_cacheVersion = 1;
+constexpr QSize k_providerCacheSize(64, 64);
 
 template <typename T> bool assign(T& field, const T& value) {
     if (field == value)
         return false;
     field = value;
     return true;
+}
+
+utils::FileCache& imageCache() {
+    static utils::FileCache s_cache(u"notifs/images"_s, 512ll * 1024 * 1024, {}, k_cacheVersion);
+    return s_cache;
+}
+
+QString keyForImage(const QImage& image) {
+    if (image.isNull())
+        return {};
+
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    hash.addData(u"%1x%2|%3|"_s
+            .arg(QString::number(image.width()), QString::number(image.height()), QString::number(image.format()))
+            .toUtf8());
+    hash.addData(QByteArrayView(reinterpret_cast<const char*>(image.constBits()), image.sizeInBytes()));
+    return QString::fromLatin1(hash.result().toHex());
+}
+
+QByteArray encodeImage(const QImage& image) {
+    QByteArray bytes;
+    QBuffer buffer(&bytes);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    return bytes;
 }
 
 } // namespace
@@ -141,6 +177,7 @@ void NotifData::syncFromBacker() {
     }
     if (assign(m_image, m_backer->property("image").toString())) {
         dirty = true;
+        cacheImage();
         emit imageChanged();
     }
     if (assign(m_hints, m_backer->property("hints").toMap()))
@@ -216,6 +253,75 @@ QList<NotifAction> NotifData::readBackerActions() {
     }
 
     return actions;
+}
+
+void NotifData::cacheImage() {
+    if (m_image.isEmpty() || m_image.startsWith(imageCache().dir()))
+        return;
+
+    const QUrl url(m_image);
+    if (url.scheme() != u"image") {
+        storeImage(utils::Cache::keyForPath(m_image), [path = m_image] {
+            return QFile(path).readAll();
+        });
+        return;
+    }
+
+    auto* const engine = qmlEngine(this);
+    if (!engine)
+        return;
+
+    auto* const base = engine->imageProvider(url.host());
+    if (!base)
+        return;
+
+    // Keep the ?path= / ?fallback= query, drop only scheme, host and leading slash
+    const auto id = url.toString(QUrl::RemoveScheme | QUrl::RemoveAuthority).mid(1);
+
+    QFuture<QImage> image;
+    if (base->imageType() == QQmlImageProviderBase::Image) {
+        auto* const provider = static_cast<QQuickImageProvider*>(base);
+        image = QtFuture::makeReadyValueFuture(provider).then(QtFuture::Launch::Async, [id](QQuickImageProvider* p) {
+            return p->requestImage(id, nullptr, k_providerCacheSize);
+        });
+    } else if (base->imageType() == QQmlImageProviderBase::Pixmap) {
+        auto* const provider = static_cast<QQuickImageProvider*>(base);
+        image = QtFuture::makeReadyValueFuture(provider->requestPixmap(id, nullptr, k_providerCacheSize).toImage());
+    } else {
+        return;
+    }
+
+    image
+        .then(QtFuture::Launch::Async,
+            [](const QImage& img) {
+                return std::pair{ keyForImage(img), img };
+            })
+        .then(this, [this](const std::pair<QString, QImage>& result) {
+            storeImage(result.first, [img = result.second] {
+                return encodeImage(img);
+            });
+        });
+}
+
+void NotifData::storeImage(const QString& key, utils::Cache::Producer producer) {
+    if (key.isEmpty())
+        return;
+
+    imageCache().lookup(key).then(this, [this, key, producer = std::move(producer)](const QUrl& cached) {
+        if (!cached.isEmpty()) {
+            m_image = cached.toLocalFile();
+            emit changed();
+            return;
+        }
+
+        imageCache().store(key, producer).then(this, [this, key](bool ok) {
+            if (!ok)
+                return;
+
+            m_image = imageCache().pathFor(key);
+            emit changed();
+        });
+    });
 }
 
 } // namespace caelestia::shell::models
