@@ -332,8 +332,12 @@ el theming de GTK/iconos) invoca `scripts/generate-opencode-theme.py` + escribe 
   (bins de hue asignados por cercanía: red/orange/yellow/green/cyan/blue/purple + gray anclada a
   onSurface/outline/background) y overrides con los colores del esquema (background/surface
   containers, diff containers, syntax/markdown via keys catppuccin `k*`/`term*`).
-- Hot-reload: OpenCode observa `cli.json`, así que cambiar de activity re-tematiza los TUI
-  abiertos en vivo. La paleta del otro modo se conserva entre runs.
+- Hot-reload: OpenCode **solo** re-aplica el tema cuando cambia `theme.name` en `cli.json`
+  (ni el contenido del theme file ni el resto de settings externos se re-leen en caliente, bugs
+  conocidos upstream: issues #815/#37423). Por eso el tema vive en **dos gemelas idénticas**
+  (`caelestia.json` y `caelestia-alt.json`): cada apply con paleta o modo nuevo flipea `cli.json`
+  al otro nombre, lo que fuerza la recarga en los TUI abiertos. Si la paleta no cambió se salta
+  (no-op, sin churn). La paleta del otro modo se conserva en la gemela entre runs.
 - Peculiaridad del format: los hex DEBEN llevar `#` y **no se aceptan referencias entre tokens**
   (`$text.*`/`$background.*`) en temas de usuario — solo refs `$hue.<nombre>.<step>`; los
   built-in evitan esa validación, los nuestros no (lecciones del debug en este script).

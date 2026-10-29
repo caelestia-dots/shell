@@ -185,13 +185,33 @@ def _patch_theme() -> None:
 
 
 def _sync_opencode_theme(colours: dict[str, str], mode: str) -> None:
-    """Push the activity scheme into OpenCode's TUI theme file and point
-    cli.json at it. cli.json edits hot-reload in running TUIs, so switching
-    activity mode re-themes open OpenCode windows live.
+    """Push the activity scheme into OpenCode's TUI theme files and point
+    cli.json at them.
+
+    OpenCode hot-reloads cli.json keywords (theme *name*) but NOT theme file
+    contents, so the theme lives under two names (caelestia / caelestia-alt)
+    with identical content; each real palette change flips cli.json to the
+    other name, which forces running TUIs to re-read and re-apply the theme.
+    A no-op (same palette + same mode) is skipped to avoid reload churn.
     """
     import json as _json
 
     gen = Path(__file__).resolve().parent / "generate-opencode-theme.py"
+    themes_dir = Path.home() / ".config/opencode/themes"
+    canonical = themes_dir / "caelestia.json"
+    naming = {"caelestia": "caelestia.json", "caelestia-alt": "caelestia-alt.json"}
+    cli_path = Path.home() / ".config/opencode/cli.json"
+    cli, current_name, current_payload = {}, None, ""
+    try:
+        cli = _json.loads(cli_path.read_text() or "{}") if cli_path.is_file() else {}
+        if not isinstance(cli, dict):
+            cli = {}
+        theme = cli.setdefault("theme", {})
+        current_name = theme.get("name") if isinstance(theme, dict) else None
+        if current_name in naming:
+            current_payload = (themes_dir / naming[current_name]).read_text()
+    except (OSError, ValueError):
+        return
     try:
         subprocess.run(
             [sys.executable, str(gen), mode],
@@ -201,17 +221,20 @@ def _sync_opencode_theme(colours: dict[str, str], mode: str) -> None:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-    except OSError:
+        payload = canonical.read_text()
+    except (OSError, ValueError):
         return
 
-    cli_path = Path.home() / ".config/opencode/cli.json"
     try:
-        cli = _json.loads(cli_path.read_text() or "{}") if cli_path.is_file() else {}
-        if not isinstance(cli, dict):
-            return
         theme = cli.setdefault("theme", {})
-        if theme.get("name") != "caelestia":
-            theme["name"] = "caelestia"
+        if current_payload == payload and theme.get("mode") == mode:
+            return  # nothing changed; do not churn running TUIs
+        if current_name == "caelestia":
+            # The TUI shows the canonical; the twin gets the new palette first
+            (themes_dir / naming["caelestia-alt"]).write_text(payload)
+        # current_name == "caelestia-alt" (or not ours): canonical already holds
+        # the new payload because the generator writes it directly.
+        theme["name"] = "caelestia-alt" if current_name == "caelestia" else "caelestia"
         theme["mode"] = mode
         cli_path.write_text(_json.dumps(cli, indent=2) + "\n")
     except (OSError, ValueError):
