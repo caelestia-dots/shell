@@ -79,8 +79,12 @@ void NotifAction::invoke() {
 NotifData::NotifData(QObject* parent)
     : QObject(parent)
     , m_createdAt(QDateTime::currentMSecsSinceEpoch())
+    , m_popupTimer(new QTimer(this))
     , m_id(QUuid::createUuid().toString(QUuid::WithoutBraces))
-    , m_expireTimeout(config::ConfigSingleton::instance()->notifs()->defaultExpireTimeout()) {}
+    , m_expireTimeout(config::ConfigSingleton::instance()->notifs()->defaultExpireTimeout()) {
+    m_popupTimer->setSingleShot(true);
+    QObject::connect(m_popupTimer, &QTimer::timeout, this, &NotifData::popupClosed);
+}
 
 NotifData::NotifData(QObject* backer, QObject* parent)
     : NotifData(parent) {
@@ -123,7 +127,7 @@ QVariantMap NotifData::hints() const {
     return m_hints;
 }
 
-qreal NotifData::expireTimeout() const {
+int NotifData::expireTimeout() const {
     return m_expireTimeout;
 }
 
@@ -151,6 +155,11 @@ void NotifData::dismiss() {
         QMetaObject::invokeMethod(m_backer, "dismiss");
     else
         onBackerClosed();
+}
+
+void NotifData::startPopupTimer() {
+    m_popupTimer->setInterval(m_expireTimeout);
+    m_popupTimer->start();
 }
 
 void NotifData::syncFromBacker() {
@@ -182,7 +191,7 @@ void NotifData::syncFromBacker() {
     }
     if (assign(m_hints, m_backer->property("hints").toMap()))
         emit hintsChanged();
-    if (const auto timeout = m_backer->property("expireTimeout").toReal();
+    if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000);
         !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
         dirty = true;
         m_expireTimeout = timeout;
