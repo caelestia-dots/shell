@@ -41,14 +41,16 @@ Singleton {
     }
 
     readonly property Timer dayTimer: Timer {
-        interval: 30000
+        // Midnight rollover; no need to wake every 30s
+        interval: 5 * 60 * 1000
         running: root.enabled
         repeat: true
         onTriggered: root.ensureToday()
     }
 
     readonly property Timer reminderTimer: Timer {
-        interval: 15000
+        // Reminder cadence is minutes; checking once a minute is enough
+        interval: 60 * 1000
         running: root.enabled && root.loaded && !root.goalReached
         repeat: true
         onTriggered: root.maybeRemind()
@@ -112,7 +114,8 @@ Singleton {
                     dateKey: root.dateKey,
                     drunkMl: root.drunkMl,
                     lastAddAt: root.lastAddAt,
-                    lastAddedMl: root.lastAddedMl
+                    lastAddedMl: root.lastAddedMl,
+                    lastRemindAt: root.lastRemindAt
                 }));
     }
 
@@ -243,11 +246,13 @@ Singleton {
             root.drunkMl = Math.max(0, Number(data.drunkMl) || 0);
             root.lastAddAt = Number(data.lastAddAt) || Date.now();
             root.lastAddedMl = Math.max(0, Number(data.lastAddedMl) || 0);
+            root.lastRemindAt = Number(data.lastRemindAt) || 0;
         } else {
             root.dateKey = key;
             root.drunkMl = 0;
             root.lastAddedMl = 0;
             root.lastAddAt = Date.now();
+            root.lastRemindAt = 0;
         }
         root.loaded = true;
         root.schedulePersist();

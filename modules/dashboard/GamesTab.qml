@@ -16,6 +16,8 @@ Item {
 
     readonly property bool hasProfile: !!Steam.profile
     readonly property real achPercent: Steam.libraryAchievements?.percent ?? 0
+    property bool steamShowsSessions
+    property string lastFocusAppId
 
     implicitWidth: 840
     implicitHeight: layout.implicitHeight
@@ -23,6 +25,15 @@ Item {
     Component.onCompleted: {
         if (Steam.enabled && Steam.configured && !Steam.profile && !Steam.loading)
             Steam.reload();
+    }
+
+    Connections {
+        target: Steam
+        function onFocusAppIdChanged(): void {
+            if (root.lastFocusAppId && root.lastFocusAppId !== Steam.focusAppId)
+                root.steamShowsSessions = false;
+            root.lastFocusAppId = Steam.focusAppId;
+        }
     }
 
     ColumnLayout {
@@ -112,7 +123,7 @@ Item {
                 revealDelay: 60
                 icon: "schedule"
                 label: Tr.tr("Hours")
-                caption: Steam.recentPlaytimeMinutes > 0 ? Tr.tr("+%1 h in 2 weeks").arg(Steam.formatHoursCompact(Steam.recentPlaytimeMinutes)) : Tr.tr("played in total")
+                caption: Steam.recentPlaytimeMinutes > 0 ? Tr.tr("+%1 in 2 weeks").arg(Steam.formatPlaytime(Steam.recentPlaytimeMinutes)) : Tr.tr("played in total")
                 value: Steam.totalPlaytimeMinutes > 0 ? Steam.totalPlaytimeMinutes / 60 : -1
                 formatter: v => String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, Tr.locale.groupSeparator)
                 shape: MaterialShape.Clover4Leaf
@@ -218,7 +229,7 @@ Item {
         RecentGamesRow {
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.extraSmall
-            visible: root.hasProfile && (Steam.recentGames.length + Steam.topGamesByPlaytime.length) > 1
+            visible: root.hasProfile && Steam.pickerGames.length > 1
         }
 
         RowLayout {
@@ -226,27 +237,36 @@ Item {
             visible: root.hasProfile
             spacing: Tokens.spacing.medium
 
-            AchievementList {
+            SessionList {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.alignment: Qt.AlignTop
-                title: Tr.tr("Recent achievements")
-                icon: "history"
-                accent: Colours.palette.m3primary
-                emptyText: Steam.focusLoading ? Tr.tr("Loading…") : Tr.tr("No recent unlocks")
-                model: Steam.recentAchievements
+                visible: Steam.focusNonSteam || root.steamShowsSessions
+                sessions: Steam.focusNonSteam ? (Steam.focusGame?.sessions ?? []) : Steam.focusSessions
+                tracked: !Steam.focusNonSteam || !!Steam.focusGame?.tracked
+                switchIcon: Steam.focusNonSteam ? "" : "trophy"
+                onSwitchRequested: root.steamShowsSessions = false
             }
 
             AchievementList {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.alignment: Qt.AlignTop
-                title: Tr.tr("Rarest unlocks")
-                icon: "diamond"
-                accent: Colours.palette.m3tertiary
-                emptyText: Steam.focusLoading ? Tr.tr("Loading…") : Tr.tr("No rarity data yet")
-                model: Steam.rareAchievements
-                showRarity: true
+                visible: !Steam.focusNonSteam && !root.steamShowsSessions
+                emptyText: Steam.focusLoading ? Tr.tr("Loading…") : Steam.focusError || Tr.tr("No achievements unlocked yet")
+                model: Steam.focusAchievements
+                switchIcon: "history"
+                onSwitchRequested: root.steamShowsSessions = true
+            }
+
+            ActivityCard {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                gameKey: Steam.focusAppId
+                sessions: Steam.focusNonSteam ? (Steam.focusGame?.sessions ?? []) : Steam.focusSessions
+                dailyMinutes: Steam.focusNonSteam ? ({}) : (Steam.dailyPlaytime[Steam.focusAppId] ?? {})
+                markerTimes: Steam.focusNonSteam ? [] : Steam.focusUnlockTimes
             }
         }
     }

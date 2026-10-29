@@ -37,6 +37,7 @@ class AddonsSteam : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, enabled, false)
     CONFIG_PROPERTY(QString, apiKey, {})
     CONFIG_PROPERTY(QString, steamId, {})
+    CONFIG_PROPERTY(int, refreshMinutes, 10)
 };
 
 class AddonsConfig : public settings::ObjectNode {

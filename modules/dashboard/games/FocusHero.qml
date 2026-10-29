@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -33,7 +35,7 @@ StyledRect {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: height * 460 / 215
-            source: Steam.headerUrl(Steam.focusAppId)
+            source: root.game?.headerUrl || Steam.headerUrl(Steam.focusAppId)
 
             layer.enabled: true
             layer.effect: Mask {
@@ -85,7 +87,13 @@ StyledRect {
             implicitWidth: chipRow.implicitWidth + Tokens.padding.medium * 2
             implicitHeight: chipRow.implicitHeight + Tokens.padding.extraSmall * 2
             radius: Tokens.rounding.full
-            color: Steam.focusPlayingNow ? Colours.palette.m3tertiaryContainer : Colours.palette.m3secondaryContainer
+            color: {
+                if (Steam.focusPlayingNow)
+                    return Colours.palette.m3tertiaryContainer;
+                if (Steam.focusNonSteam)
+                    return Colours.palette.m3primaryContainer;
+                return Colours.palette.m3secondaryContainer;
+            }
 
             RowLayout {
                 id: chipRow
@@ -97,19 +105,29 @@ StyledRect {
                     text: {
                         if (Steam.focusPlayingNow)
                             return "play_circle";
+                        if (Steam.focusNonSteam)
+                            return "videogame_asset";
                         if (root.recent)
                             return "history";
                         return (root.game?.lastPlayed ?? 0) > 0 ? "event" : "library_books";
                     }
                     fill: 1
                     fontStyle: Tokens.font.icon.small
-                    color: Steam.focusPlayingNow ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSecondaryContainer
+                    color: {
+                        if (Steam.focusPlayingNow)
+                            return Colours.palette.m3onTertiaryContainer;
+                        if (Steam.focusNonSteam)
+                            return Colours.palette.m3onPrimaryContainer;
+                        return Colours.palette.m3onSecondaryContainer;
+                    }
                 }
 
                 StyledText {
                     text: {
                         if (Steam.focusPlayingNow)
                             return Tr.tr("Playing now");
+                        if (Steam.focusNonSteam)
+                            return Tr.tr("Non-Steam");
                         if (root.recent)
                             return Tr.tr("Played recently");
                         if ((root.game?.lastPlayed ?? 0) > 0)
@@ -117,7 +135,13 @@ StyledRect {
                         return Tr.tr("From your library");
                     }
                     font: Tokens.font.label.builders.small.weight(Font.DemiBold).build()
-                    color: Steam.focusPlayingNow ? Colours.palette.m3onTertiaryContainer : Colours.palette.m3onSecondaryContainer
+                    color: {
+                        if (Steam.focusPlayingNow)
+                            return Colours.palette.m3onTertiaryContainer;
+                        if (Steam.focusNonSteam)
+                            return Colours.palette.m3onPrimaryContainer;
+                        return Colours.palette.m3onSecondaryContainer;
+                    }
                 }
             }
         }

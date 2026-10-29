@@ -14,7 +14,7 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Barra** | Pills de actividades, iconos de apps en workspaces, indicador **REC**, tray y status más claros |
 | **Reloj** | Popout con calendario (o hidratación) + temporizadores (con sonido y persistencia) |
 | **Grabación** | Estable (no se corta al salir del panel); guarda en `~/Vídeos/Videocapturas de pantalla` |
-| **Notificaciones** | Clic → enfoca la app / ventana relacionada |
+| **Notificaciones** | Clic → enfoca la app; hover en la esquina superior derecha abre la sidebar |
 | **Nexus** | Página **Shell** para configurar activities y aspecto |
 | **Launcher** | Hover inferior, edición de `.desktop`, iconos Papirus |
 | **Kitty / GTK** | Paleta alineada a la activity (Kitty + Thunar/Material) |
@@ -140,7 +140,7 @@ Página **Nexus → Complementos** (sustituye el placeholder de Plugins):
 - **Madison VPN**: interruptor on/off. Al desactivar se oculta el icono, se para el poll y se ejecuta teardown (`disconnect` + `heal`) para matar `openfortivpn`/helper.
 - **Timers**: interruptor on/off. Al desactivar se limpian timers activos y se oculta la sección del popout del reloj (el calendario sigue).
 - **Hidratación**: interruptor on/off (opt-in). Al activar sustituye el calendario del dashboard Nexus (solo ahí; el popout del reloj sigue con calendario) por un depósito con waves, meta diaria (default 3000 ml), botones +20/+83/+250/+500 configurables, undo del último trago, y recordatorio con acciones si pasan N minutos (default 15) sin registrar un trago. Estado en `~/.local/state/caelestia/hydration.json`.
-- **Juegos (Steam)**: interruptor on/off (opt-in). Al activar añade la pestaña **Juegos** en el dashboard (a la derecha de Tiempo). Configura API key + Steam ID / vanity / URL de perfil. Muestra perfil y nivel, estadísticas globales en shapes Material You (juegos, horas, compleción media de logros estilo Steam y juegos al 100 %, amigos en línea), tarjeta del juego destacado con portada y progreso, selector de portadas, últimos desbloqueos y logros más raros con insignia de rareza. Nombres y descripciones de logros en el idioma de la UI (vía API). Los logros del perfil deben ser públicos.
+- **Juegos (Steam)**: interruptor on/off (opt-in). Al activar añade la pestaña **Juegos** en el dashboard (a la derecha de Tiempo). Configura API key (oculta por defecto) + Steam ID / vanity / URL de perfil, y el intervalo de refresco (default 10 min). Muestra perfil y nivel, estadísticas globales en shapes Material You (juegos visibles — sin la colección Hidden —, horas, compleción media de logros y juegos al 100 %, amigos en línea), tarjeta del juego destacado con portada y progreso, y un selector de portadas ordenado por última partida. Logros en una lista con scroll: desbloqueados por rareza y bloqueados de más común a más raro, con insignia y descripción. Mapa de calor mensual (puntos = días con logros; el tiempo por día se registra con el shell en marcha). Juegos no Steam desde `shortcuts.vdf`, con horas de Millennium si está instalado. Los logros del perfil deben ser públicos.
 
 ## Madison VPN (FortiClient / openfortivpn)
 
@@ -223,6 +223,7 @@ El reloj lleva siempre la pastilla de fondo; al hover se resalta como el resto d
 ## Notificaciones
 
 - **Clic izquierdo** en un popup o en la card de la **sidebar**: enfoca/abre la app (workspace, tray o `.desktop`) y cierra la notificación. No hay botón aparte de “abrir”.
+- **Hover en la esquina superior derecha** (y la inferior derecha) abre la **sidebar** de notificaciones, no solo utilities.
 - Botones de la card: cerrar, acciones de la app (si tienen texto/icono útil) y copiar; se ocultan acciones vacías (p. ej. Teams).
 - Compatible con `actionOnClick` cuando hay una sola acción de notificación.
 
@@ -243,7 +244,7 @@ El reloj lleva siempre la pastilla de fondo; al hover se resalta como el resto d
 
 Ya presentes en este fork respecto a un Caelestia “vanilla” típico:
 
-- **Atajos de Hyprland remapeables** desde Nexus (genera `caelestia-binds.lua`).
+- **Atajos de Hyprland remapeables** desde Nexus (genera `caelestia-binds.lua`), incluyendo teclas **F13+**.
 - Categoría **Activities** en el mapa de teclas (siguiente / anterior / overview).
 - Página **Shell** (activities + opciones de barra relacionadas).
 - UI de colores / wallpapers acoplada al look de la activity en edición.

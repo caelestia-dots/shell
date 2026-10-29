@@ -262,11 +262,6 @@ Singleton {
         root.refresh();
     }
 
-    // Kept for callers that still expect the old entry point (opens password flow as background)
-    function updateSystem(): void {
-        root.requestUpdateSystem("background");
-    }
-
     function updatePackage(pkg: var): void {
         if (!pkg)
             return;
@@ -405,7 +400,7 @@ Singleton {
         id: poll
         interval: root.pollIntervalMinutes * 60 * 1000
         repeat: true
-        running: true
+        running: root.checkArch || root.checkAur || root.checkFlatpak
         onTriggered: root.refresh()
     }
 

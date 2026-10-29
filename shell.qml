@@ -34,8 +34,9 @@ ShellRoot {
         Updates;
         MadisonVpn;
         Hydration;
+        // Steam: activity poll only; library/API loads when Games tab opens
         Steam;
-        Weather.reload();
+        // Weather: first Dash/Weather UI calls Weather.reload() — skip boot network hit
 
         if (GlobalConfig.utilities.vpn.enabled)
             VPN;

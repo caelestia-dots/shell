@@ -130,9 +130,10 @@ Singleton {
     }
 
     function applyAppTheme(): void {
-        // lightApps: keep portal/libadwaita/Qt apps on a light palette even if the
-        // shell/scheme (and Thunar CSS) follow a dark activity look.
-        const prefer = root.lightApps || root.currentLight ? "prefer-light" : "prefer-dark";
+        // Only lightApps forces prefer-light. Shell light mode alone must not flip
+        // the portal scheme — Electron apps (Cursor, etc.) inherit it and their
+        // integrated terminals go white while the editor theme stays dark.
+        const prefer = root.lightApps ? "prefer-light" : "prefer-dark";
         Quickshell.execDetached(["dconf", "write", "/org/gnome/desktop/interface/color-scheme", `'${prefer}'`]);
     }
 

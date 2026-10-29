@@ -337,7 +337,8 @@ Singleton {
     Timer {
         id: poll
 
-        interval: 8000
+        // Connected/busy: catch drops quickly; idle disconnect: cheap heartbeat
+        interval: root.connected || root.busy || root.tearingDown ? 8000 : 30000
         running: root.enabled
         repeat: true
         triggeredOnStart: true
