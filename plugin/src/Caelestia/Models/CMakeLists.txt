@@ -7,7 +7,9 @@ qml_module(caelestia-models
         notifdata.cpp
     LIBRARIES
         caelestia-config
+        caelestia::caelestia
         Qt::Gui
+        Qt::Quick
         Qt::Multimedia
         Qt::Concurrent
         Qt::Sql
