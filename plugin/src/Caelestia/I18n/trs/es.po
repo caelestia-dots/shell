@@ -5567,3 +5567,54 @@ msgstr "Tiempo de juego registrado por Millennium"
 
 msgid "Locked · %1"
 msgstr "Bloqueados · %1"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/DisplayPage.qml
+msgctxt "monitor settings"
+msgid "Display"
+msgstr "Pantalla"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Output configuration"
+msgstr "Configuración de salidas"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "No displays detected"
+msgstr "No se detectaron pantallas"
+
+#: services/Displays.qml
+msgid "Could not read monitor list"
+msgstr "No se pudo leer la lista de monitores"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Resolution & refresh rate"
+msgstr "Resolución y frecuencia"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Scale"
+msgstr "Escala"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Variable refresh rate"
+msgstr "Frecuencia variable (VRR)"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "Off"
+msgstr "Desactivado"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "On"
+msgstr "Activado"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "Fullscreen only"
+msgstr "Solo pantalla completa"
+
+#: services/Displays.qml
+#, qt-format
+msgid "%1×%2 · %3 Hz"
+msgstr "%1×%2 · %3 Hz"
+
+#: modules/nexus/pages/DisplayPage.qml
+#, qt-format
+msgid "This connection tops out at %1 Hz. The panel may support a higher rate over DisplayPort."
+msgstr "Esta conexión llega como máximo a %1 Hz. El panel puede admitir más por DisplayPort."
