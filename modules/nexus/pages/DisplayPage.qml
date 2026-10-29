@@ -57,6 +57,7 @@ PageBase {
                     return p ? p.hz : (Number(mon.refreshRate) || 0);
                 }
                 readonly property bool connectorLimited: monCol.maxHz > 0 && monCol.maxHz < 200 && monCol.currentHz >= 100
+                readonly property int vrrPolicy: Displays.normalizeVrr(Number(mon.vrr) || 0)
 
                 Layout.fillWidth: true
                 Layout.topMargin: index === 0 ? 0 : Tokens.spacing.large - parent.spacing
@@ -82,7 +83,7 @@ PageBase {
                     first: true
                     label: Tr.tr("Resolution & refresh rate")
                     subtext: Displays.formatModeLabel(mon.mode)
-                    active: modeItems.instances.find(i => i.modelData === mon.mode) ?? null
+                    active: modeItems.instances.find(i => Displays.modeForHypr(i.modelData) === Displays.modeForHypr(mon.mode)) ?? null
                     fallbackText: Displays.formatModeLabel(mon.mode)
                     onSelected: item => Displays.setMode(mon.name, item.modelData)
 
@@ -129,41 +130,60 @@ PageBase {
                     id: vrrRow
 
                     last: true
-                    label: Tr.tr("Variable refresh rate")
-                    subtext: Displays.vrrLabel(Number(mon.vrr) || 0)
+                    label: Tr.tr("Adaptive Sync")
+                    subtext: Displays.vrrLabel(monCol.vrrPolicy)
                     active: {
-                        const v = Number(mon.vrr) || 0;
-                        if (v === 1)
-                            return vrrOn;
-                        if (v === 2)
-                            return vrrFs;
-                        return vrrOff;
+                        if (monCol.vrrPolicy === 1)
+                            return vrrAlways;
+                        if (monCol.vrrPolicy === 2)
+                            return vrrAuto;
+                        return vrrNever;
                     }
-                    fallbackText: Displays.vrrLabel(Number(mon.vrr) || 0)
+                    fallbackText: Displays.vrrLabel(monCol.vrrPolicy)
                     onSelected: item => Displays.setVrr(mon.name, item.modelData)
 
-                    menuItems: [vrrOff, vrrOn, vrrFs]
+                    // Plasma order: Never → Automatic → Always
+                    menuItems: [vrrNever, vrrAuto, vrrAlways]
 
                     MenuItem {
-                        id: vrrOff
+                        id: vrrNever
 
-                        text: Tr.tr("Off")
+                        text: Tr.tr("Never")
                         property int modelData: 0
                     }
 
                     MenuItem {
-                        id: vrrOn
+                        id: vrrAuto
 
-                        text: Tr.tr("On")
-                        property int modelData: 1
+                        text: Tr.tr("Automatic")
+                        property int modelData: 2
                     }
 
                     MenuItem {
-                        id: vrrFs
+                        id: vrrAlways
 
-                        text: Tr.tr("Fullscreen only")
-                        property int modelData: 2
+                        text: Tr.tr("Always")
+                        property int modelData: 1
                     }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Tokens.padding.small
+                    text: Displays.vrrHint(monCol.vrrPolicy)
+                    color: Colours.palette.m3outline
+                    font: Tokens.font.label.small
+                    wrapMode: Text.Wrap
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Tokens.padding.small
+                    visible: monCol.vrrPolicy !== 0
+                    text: mon.vrrActive ? Tr.tr("Currently active on this output") : Tr.tr("Currently inactive on this output")
+                    color: Colours.palette.m3outline
+                    font: Tokens.font.label.small
+                    wrapMode: Text.Wrap
                 }
 
                 StyledText {

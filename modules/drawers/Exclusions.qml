@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.State
 import qs.components.containers
 import qs.modules.bar as Bar
 
@@ -12,6 +13,8 @@ Scope {
     required property ShellScreen screen
     required property Bar.BarWrapper bar
 
+    readonly property int frameZone: RuntimeState.gameMode ? 0 : Config.border.thickness
+
     ExclusionZone {
         anchors.left: true
         exclusiveZone: root.bar.exclusiveZone
@@ -19,14 +22,17 @@ Scope {
 
     ExclusionZone {
         anchors.top: true
+        exclusiveZone: root.frameZone
     }
 
     ExclusionZone {
         anchors.right: true
+        exclusiveZone: root.frameZone
     }
 
     ExclusionZone {
         anchors.bottom: true
+        exclusiveZone: root.frameZone
     }
 
     component ExclusionZone: StyledWindow {

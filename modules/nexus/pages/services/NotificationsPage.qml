@@ -135,7 +135,7 @@ PageBase {
         }
 
         ToggleRow {
-            text: Tr.tr("Game mode changes")
+            text: Tr.tr("Compact layout changes")
             checked: GlobalConfig.utilities.toasts.gameModeChanged
             onToggled: GlobalConfig.utilities.toasts.gameModeChanged = checked
         }

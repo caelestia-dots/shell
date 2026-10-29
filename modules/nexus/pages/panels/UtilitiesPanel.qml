@@ -127,8 +127,8 @@ PageBase {
         }
 
         ToggleRow {
-            text: Tr.tr("Game mode")
-            subtext: Tr.tr("Toggle game mode")
+            text: Tr.tr("Compact layout")
+            subtext: Tr.tr("Maximise screen use: no frame or gaps")
             disabled: !Config.utilities.cards.quickToggles
             checked: root.isToggleOn("gameMode")
             onToggled: root.setToggleOn("gameMode", checked)
