@@ -93,6 +93,11 @@ QList<NotifAction> deserialiseActions(NotifData* parent, const QString& json) {
     return actions;
 }
 
+// null QString binds as SQL NULL, which violates NOT NULL
+QString text(const QString& value) {
+    return value.isNull() ? u""_s : value;
+}
+
 } // namespace
 
 NotifStore::NotifStore(QObject* parent)
@@ -249,11 +254,11 @@ void NotifStore::save(const NotifData* notif) {
     query.prepare(k_upsert.toString());
     query.bindValue(u":id"_s, notif->m_id);
     query.bindValue(u":time"_s, notif->m_createdAt);
-    query.bindValue(u":summary"_s, notif->m_summary);
-    query.bindValue(u":body"_s, notif->m_body);
-    query.bindValue(u":app_icon"_s, notif->m_appIcon);
-    query.bindValue(u":app_name"_s, notif->m_appName);
-    query.bindValue(u":image"_s, notif->m_image);
+    query.bindValue(u":summary"_s, text(notif->m_summary));
+    query.bindValue(u":body"_s, text(notif->m_body));
+    query.bindValue(u":app_icon"_s, text(notif->m_appIcon));
+    query.bindValue(u":app_name"_s, text(notif->m_appName));
+    query.bindValue(u":image"_s, text(notif->m_image));
     query.bindValue(u":expire_timeout"_s, notif->m_expireTimeout);
     query.bindValue(u":urgency"_s, static_cast<int>(notif->m_urgency));
     query.bindValue(u":resident"_s, notif->m_resident);

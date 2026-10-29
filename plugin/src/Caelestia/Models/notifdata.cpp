@@ -192,7 +192,7 @@ void NotifData::syncFromBacker() {
     if (assign(m_hints, m_backer->property("hints").toMap()))
         emit hintsChanged();
     if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000);
-        !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
+        timeout > 0 && !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
         dirty = true;
         m_expireTimeout = timeout;
         emit expireTimeoutChanged();
