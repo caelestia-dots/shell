@@ -444,34 +444,34 @@ Singleton {
         if (isSecure) {
             const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
             listWifiProfiles(existing => connectWireless(ssid, "", bssid, result => {
-                if (!result.success) {
-                    root.probeCleanupSsid = ssid;
-                    root.probeCleanupProfiles = existing.map(profile => profile.uuid);
-                    probeCleanupTimer.restart();
-                }
-                if (result.success) {
-                    if (callback)
-                        callback({
-                            success: true,
-                            usedSavedPassword: true,
-                            output: result.output,
-                            error: "",
-                            exitCode: 0
-                        });
-                } else if (result.needsPassword) {
-                    if (callback)
-                        callback({
-                            success: false,
-                            needsPassword: true,
-                            output: result.output,
-                            error: result.error,
-                            exitCode: result.exitCode
-                        });
-                } else {
-                    if (callback)
-                        callback(result);
-                }
-            }));
+                    if (!result.success) {
+                        root.probeCleanupSsid = ssid;
+                        root.probeCleanupProfiles = existing.map(profile => profile.uuid);
+                        probeCleanupTimer.restart();
+                    }
+                    if (result.success) {
+                        if (callback)
+                            callback({
+                                success: true,
+                                usedSavedPassword: true,
+                                output: result.output,
+                                error: "",
+                                exitCode: 0
+                            });
+                    } else if (result.needsPassword) {
+                        if (callback)
+                            callback({
+                                success: false,
+                                needsPassword: true,
+                                output: result.output,
+                                error: result.error,
+                                exitCode: result.exitCode
+                            });
+                    } else {
+                        if (callback)
+                            callback(result);
+                    }
+                }));
         } else {
             connectWireless(ssid, "", bssid, callback);
         }
