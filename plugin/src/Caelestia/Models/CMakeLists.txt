@@ -4,7 +4,9 @@ qml_module(caelestia-models
     SOURCES
         filesystemmodel.cpp
         appdb.cpp
+        notifdata.cpp
     LIBRARIES
+        caelestia-config
         Qt::Gui
         Qt::Multimedia
         Qt::Concurrent
