@@ -5,6 +5,7 @@ qml_module(caelestia-models
         filesystemmodel.cpp
         appdb.cpp
         notifdata.cpp
+        notifstore.cpp
     LIBRARIES
         caelestia-config
         caelestia::caelestia
