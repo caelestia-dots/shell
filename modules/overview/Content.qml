@@ -6,11 +6,11 @@ import Caelestia.Config
 import Caelestia.Multimedia
 import qs.components
 import qs.services
-import qs.modules.drawers
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import Caelestia.State
+import qs.modules.drawers
 
 Item {
     id: root
@@ -40,7 +40,6 @@ Item {
 
     // Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
     Connections {
-
         function onRawEvent(event) {
             const triggers = ["openwindow", "closewindow", "movewindow", "workspace", "activespecial", "createworkspace", "destroyworkspace", "fullscreen", "changefloatingmode"];
 
