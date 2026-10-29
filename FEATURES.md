@@ -130,6 +130,7 @@ Inspirado en [arch-update-checker](https://github.com/iMacnucintosh/arch-update-
 - Icono en status (junto a Madison VPN) **solo si hay paquetes**; badge con el número; popout rápido.
 - Poll cada **30 min**; toast al detectar paquetes nuevos (default on).
 - **Actualizar sistema**: popup de contraseña → en **panel** corre en segundo plano; en **Nexus** muestra log en vivo. Notificación al terminar + rechequeo. Paquete suelto / orphans siguen en terminal.
+- **Seguridad del install**: la contraseña vive **solo en memoria** (`run-system-update.sh` no escribe fichero de askpass; hace `sudo -S -v` antes de cada paso elevado para refrescar el timestamp). El timeout de instalación (45 min) tiene *heartbeat*: solo corta si el instalador lleva 45 min **sin imprimir nada** — nunca mata un `pacman` en mitad de una transacción.
 
 ---
 
@@ -141,7 +142,7 @@ Página **Nexus → Complementos** (sustituye el placeholder de Plugins):
 - **Madison VPN**: interruptor on/off. Al desactivar se oculta el icono, se para el poll y se ejecuta teardown (`disconnect` + `heal`) para matar `openfortivpn`/helper.
 - **Timers**: interruptor on/off. Al desactivar se limpian timers activos y se oculta la sección del popout del reloj (el calendario sigue).
 - **Hidratación**: interruptor on/off (opt-in). Al activar sustituye el calendario del dashboard Nexus (solo ahí; el popout del reloj sigue con calendario) por un depósito con waves, meta diaria (default 3000 ml), botones +20/+83/+250/+500 configurables, undo del último trago, y recordatorio con acciones si pasan N minutos (default 15) sin registrar un trago. Estado en `~/.local/state/caelestia/hydration.json`.
-- **Juegos (Steam)**: interruptor on/off (opt-in). Al activar añade la pestaña **Juegos** en el dashboard (a la derecha de Tiempo). Configura API key (oculta por defecto) + Steam ID / vanity / URL de perfil, y el intervalo de refresco (default 10 min). Muestra perfil y nivel, estadísticas globales en shapes Material You (juegos visibles — sin la colección Hidden —, horas, compleción media de logros y juegos al 100 %, amigos en línea), tarjeta del juego destacado con portada y progreso, y un selector de portadas ordenado por última partida. Logros en una lista con scroll: desbloqueados por rareza y bloqueados de más común a más raro, con insignia y descripción. Mapa de calor mensual (puntos = días con logros; el tiempo por día se registra con el shell en marcha). Juegos no Steam desde `shortcuts.vdf`, con horas de Millennium si está instalado. Los logros del perfil deben ser públicos.
+- **Juegos (Steam)**: interruptor on/off (opt-in). Al activar añade la pestaña **Juegos** en el dashboard (a la derecha de Tiempo). Configura API key (oculta por defecto) + Steam ID / vanity / URL de perfil, y el intervalo de refresco (default 10 min). Muestra perfil y nivel, estadísticas globales en shapes Material You (juegos visibles — sin la colección Hidden —, horas, compleción media de logros y juegos al 100 %, amigos en línea), tarjeta del juego destacado con portada y progreso, y un selector de portadas ordenado por última partida. Logros en una lista con scroll: desbloqueados por rareza y bloqueados de más común a más raro, con insignia y descripción. Mapa de calor mensual (puntos = días con logros; el tiempo por día se registra con el shell en marcha). Juegos no Steam desde `shortcuts.vdf`, con horas de Millennium si está instalado. Los logros del perfil deben ser públicos. El muestreo de logros para la compleción media está **capado a 60 juegos** (los más jugados, por orden de playtime) y el refresco periódico **solo corre mientras el dashboard muestra la pestaña Juegos** (no quema API en segundo plano).
 
 ## Madison VPN (FortiClient / openfortivpn)
 
@@ -276,7 +277,9 @@ Popout flotante junto al cursor (estilo Caelestia), respaldado por **cliphist** 
 - Atajo por defecto: **Super + Shift + V** (Super+V sigue siendo float de ventana; remapeable en Nexus).
 - Buscar, favoritos persistentes (estrella a la derecha; vacía solo al hover), borrar entradas o limpiar historial.
 - Al elegir un ítem: se copia y se pega con **Ctrl+V** en la ventana que tenía el foco (`wtype`).
-- Texto, imágenes del portapapeles (miniatura) y rutas/`file://` a imagen copiadas desde el explorador (también con preview).
+- Texto, imágenes del portapapeles (miniatura) y rutas/`file://` a imagen copiadas desde el explorador (también con preview). Un `preview` que acaba en `.jpg` solo se trata como imagen **si el fichero existe** (comprobado en lote tras cada parse; si no, queda como texto).
+- Miniaturas decodificadas **al tamaño del thumb** (`sourceSize`), no al del fichero completo; los favoritos de imágenes binarias se emparejan por el **id de cliphist** de origen (el preview genérico `[[ binary data… ]]` ya no provoca estrellas cruzadas).
+- Todos los comandos (`delete`, `wl-copy`, `cliphist decode`…) pasan el contenido del portapapeles **como argv (`"$1"`)**, nunca interpolado en la cadena del shell (lección de inyección: `JSON.stringify` es quoting de JS, no de shell).
 - Fondo igual que el panel izquierdo (`m3surface` + blur de Hyprland).
 - Límite de historial configurable (por defecto **50**) en **Nexus → Services → Clipboard**.
 - Dependencias: `cliphist`, `wl-clipboard`, `wtype`.
@@ -341,6 +344,21 @@ el theming de GTK/iconos) invoca `scripts/generate-opencode-theme.py` + escribe 
 - Peculiaridad del format: los hex DEBEN llevar `#` y **no se aceptan referencias entre tokens**
   (`$text.*`/`$background.*`) en temas de usuario — solo refs `$hue.<nombre>.<step>`; los
   built-in evitan esa validación, los nuestros no (lecciones del debug en este script).
+
+## Plugin C++ (build user-local)
+
+La shell **carga el plugin compilado en `~/.local`**, no el del paquete AUR (que vive en
+`/usr/lib/qt6/qml` y no lo pisamos):
+
+- Build **desde la raíz del repo** (`~/.config/quickshell/caelestia`, su `CMakeLists.txt` ya trae
+  `cmake_minimum_required`): `cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_MODULES=plugin
+  -DCMAKE_INSTALL_PREFIX=$HOME/.local` → `cmake --build build` → `cmake --install build`.
+  Con `ENABLE_MODULES=plugin` no se sobrescribe `shell.qml` (la trampa del install solo aplica al
+  módulo `shell`); `build/` está gitignored.
+- La shell lo engancha con el pragma `//@ pragma Env QT_ADDITIONAL_PACKAGES_PREFIX_PATH=/home/manu/.local/lib/qt6/qml`
+  en `shell.qml` — verificar tras un restart: el proceso debe mapear `~/.local/lib/qt6/qml/Caelestia/…/*.so`.
+- Cambios C++ concretos: `Requests.get` con **transfer timeout de 15 s** (sin él, una conexión
+  colgada dejaba el contador `pending` a 1 para siempre y el spinner de Steam no paraba).
 
 ## Notas
 

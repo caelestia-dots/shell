@@ -9,6 +9,17 @@ Cambios relevantes de este fork respecto a releases internas. El detalle de uso 
 - Merge de `upstream/main` (PR #1: `feat(lock): clear password with Ctrl+U`). El fork lleva remote `upstream` (caelestia-dots/shell); las actualizaciones de base se hacen mergeando upstream y pasando PR a `main`.
 - `.cursor-tmp/` añadido a `.gitignore`.
 
+### Repaso integral de calidad (fixes)
+
+- **Clipboard**: el contenido del portapapeles ya no se interpola en cadenas `sh -c` (va por argv `"$1"`, era inyección); verificación en lote de que el fichero de una imagen existe (texto que acaba en `.jpg` ya no aparece como imagen rota); miniaturas decodificadas al tamaño del thumb (`sourceSize`); favoritos binarios emparejados por id de cliphist.
+- **Madison VPN**: el status en cola ya no resetea `busy` en mitad de un connect/disconnect (antes re-habilitaba el botón y un segundo intento mataba el túnel); el script local `disconnect_vpn.sh` ya no duplica la notificación.
+- **Activities**: verificación de inicial del look capada a 3 reintentos (un esquema corrupto ya no relanza el apply python sin fin) y `lastAppliedStyleKey` solo se confirma con exit 0.
+- **Requests (plugin C++)**: `get` con transfer timeout de 15 s; el plugin se compila a `~/.local` y `shell.qml` lo carga con `QT_ADDITIONAL_PACKAGES_PREFIX_PATH` (sin sudo).
+- **Updates**: la contraseña del sudo vive solo en RAM (`sudo -S -v` por paso en `run-system-update.sh`, sin fichero de askpass); el timeout de instalación solo corta si lleva 45 min sin imprimir nada (heartbeat por línea de log).
+- **Pantalla**: refresh automático en `monitoradded`/`monitorremoved` y `persist()` conserva las políticas VRR de outputs desenchufados.
+- **Juegos (Steam)**: muestreo de logros capado a 60 juegos (los más jugados) y refresco periódico solo con la pestaña Juegos visible.
+- **OpenCode**: tema `caelestia` con gemelas `caelestia`/`caelestia-alt` para el hot-reload por flip de nombre; `generate-opencode-theme.py` calcula `pick_sources()` una sola vez.
+
 ### Nexus → Pantalla (Display)
 
 - Nueva página en Connectivity (encima de Audio): una tarjeta por monitor con **modo (Hz)**, **escala** y **VRR / Adaptive Sync**.
