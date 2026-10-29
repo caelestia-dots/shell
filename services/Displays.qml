@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 import Caelestia.I18n
 import qs.utils
 
@@ -232,8 +233,42 @@ Singleton {
         return out;
     }
 
+    function removedMonitorBlocks(existingText: string, currentNames: list<string>): list<var> {
+        // Blocks for outputs hyprctl no longer reports (hot-unplug) must
+        // survive a persist(): their remembered policy only lives in this
+        // generated file. Regenerating from scratch used to lose them.
+        const blocks = [];
+        const rx = /hl\.monitor\(\{[^}]*\}\)/g;
+        let m;
+        while ((m = rx.exec(String(existingText || ""))) !== null) {
+            const nameMatch = m[0].match(/output\s*=\s*"([^"]+)"/);
+            const name = nameMatch ? nameMatch[1] : "";
+            if (name.length === 0 || currentNames.includes(name))
+                continue;
+            blocks.push({
+                    name: name,
+                    block: m[0]
+                });
+        }
+        return blocks;
+    }
+
     function persist(): void {
-        luaFile.setText(root.generateLua());
+        let text = root.generateLua();
+        const currentNames = [];
+        for (let i = 0; i < root.monitors.length; i++)
+            currentNames.push(String(root.monitors[i].name));
+        // Re-append blocks for outputs that are currently unplugged so their
+        // VRR policy is not forgotten; fresh data (re-attach) wins later.
+        const keep = root.removedMonitorBlocks(luaFile.text() ?? "", currentNames);
+        if (keep.length > 0) {
+            if (!text.endsWith("\n"))
+                text += "\n";
+            text += "\n-- Hot-unplugged outputs: blocks kept so their remembered policy survives\n";
+            for (let i = 0; i < keep.length; i++)
+                text += keep[i].block + "\n\n";
+        }
+        luaFile.setText(text);
     }
 
     function setMode(name: string, modeStr: string): void {
@@ -350,6 +385,20 @@ Singleton {
         }
         onLoadFailed: err => {
             if (err === FileViewError.FileNotFound)
+                root.refresh();
+        }
+    }
+
+    Connections {
+        target: Hyprland
+
+        // Hot-attach/removal must refresh the parsed list so the Nexus page
+        // (and persist's merge) see the new/old output without a manual open.
+        function onRawEvent(event: HyprlandEvent): void {
+            const n = event.name || "";
+            if (n.endsWith("v2"))
+                return;
+            if (n === "monitoradded" || n === "monitorremoved")
                 root.refresh();
         }
     }
