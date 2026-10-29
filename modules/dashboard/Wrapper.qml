@@ -31,10 +31,17 @@ Item {
     readonly property bool shouldBeActive: screenState.dashboard && Config.dashboard.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
-    visible: offsetScale < 1
-    anchors.topMargin: (-implicitHeight - 5) * offsetScale
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: content.implicitWidth || 854 // Hard coded fallback for first open
+
+    visible: offsetScale < 1 && !layoutHidden
+    anchors.topMargin: (-implicitHeight - 5) * offsetScale + layoutShiftY
     implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth || 854 // Hard coded fallback for first open
+    implicitWidth: naturalWidth
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
