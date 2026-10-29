@@ -39,7 +39,6 @@ Item {
     implicitWidth: columns * (previewWidth + spacing + root.previewScaleX * (spacing - root.panels.bar.width)) + spacing + 10
     implicitHeight: rows * (previewHeight + spacing) + 30
 
-    // Main 10-workspace overview grid
     Grid {
         id: workspaceGrid
         anchors.fill: parent
