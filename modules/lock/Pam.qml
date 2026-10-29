@@ -25,6 +25,7 @@ Scope {
     readonly property alias howdy: howdy
 
     property string lockMessage
+    property string passwordErrorMessage: ""
     property int state
     property string buffer
 
@@ -107,6 +108,15 @@ Scope {
 
             root.flashMsg();
             pwdStateReset.restart();
+        }
+
+        onActiveChanged: {
+            if (active)
+                root.passwordErrorMessage = "";
+        }
+
+        onError: error => {
+            root.passwordErrorMessage = PamError.toString(error);
         }
     }
 
@@ -200,7 +210,8 @@ Scope {
         readonly property bool canAttempt: available && enabled && root.lock.secure && tries < maxTries
 
         readonly property alias active: pam.active
-        readonly property alias message: pam.message
+        property string message: ""
+        property string errorMessage: ""
 
         signal availProcExited(code: int)
 
@@ -257,6 +268,22 @@ Scope {
 
                 root.flashMsg();
                 stateReset.restart();
+            }
+
+            onActiveChanged: {
+                if (active) {
+                    ctx.message = "";
+                    ctx.errorMessage = "";
+                }
+            }
+
+            onPamMessage: {
+                if (!responseRequired && message)
+                    ctx.message = ctx.message ? `${ctx.message}\n${message}` : message;
+            }
+
+            onError: error => {
+                ctx.errorMessage = PamError.toString(error);
             }
         }
 
