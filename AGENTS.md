@@ -28,7 +28,8 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 - Tras cualquier cambio de QML/script: **reiniciar la shell** (`caelestia shell -r`, en background `-r -d`) y verificar que carga sin errores.
 - Estilo **Material You estricto**: tokens, `MaterialShape`, blur/transparencia; los detalles visuales (padding, tamaños, sombras, centrados) se afinan con el usuario tras cada versión — espera feedback visual.
 - Commits: **conventional commits** (`feat:` / `fix:` / `docs:`), a nombre del usuario. **NUNCA** dejar trailer `Co-authored-by: Cursor/agent`.
-- `main` está **protegida**: feature grande → rama `feature/*` + PR; docs/fixes pequeños pueden ir directos. Push por SSH (token HTTPS de `gh` inválido).
+- Commits **locales por defecto**: el agente commitea a menudo, en commits agrupados, ordenados y bien explicados, pero **NO pushea a `origin`** — el usuario indica cuándo hacer push.
+- `main` está **protegida** (toda escritura exige PR). Flujo: rama `feature/*` o `docs/*` + PR (vía `gh`, HTTPS), y merge de la PR. El push directo a `main` lo rechazan las rules del repo (GH013).
 - `.gitignore` cubre `__pycache__/` y `.cursor-tmp/`.
 - Opciones nuevas: nodo en config (GlobalConfig) si hace falta rebuild del plugin, exposición en Nexus, y **documentación en FEATURES.md**.
 
