@@ -55,15 +55,6 @@ Item {
                 CAnim {}
             }
 
-            // Hover target while dragging (DropArea is unreliable once the item is reparented)
-            MouseArea {
-                id: dropProbe
-
-                anchors.fill: parent
-                enabled: false
-                hoverEnabled: false
-            }
-
             ClipRect {
                 id: card
 

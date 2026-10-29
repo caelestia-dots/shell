@@ -89,7 +89,7 @@ def pick_sources(colours: dict[str, str]) -> dict[str, str]:
     return sources
 
 
-def build_hue_scales(colours: dict[str, str], mode: str) -> dict[str, dict[str, str] | str]:
+def build_hue_scales(colours: dict[str, str], mode: str, sources: dict[str, str]) -> dict[str, dict[str, str] | str]:
     tones = TONES_DARK if mode == "dark" else TONES_LIGHT
     text_hex = colours.get("onSurface") or colours.get("text") or "ffffff"
     bg_hex = colours.get("background") or colours.get("base") or "000000"
@@ -137,7 +137,6 @@ def build_hue_scales(colours: dict[str, str], mode: str) -> dict[str, dict[str, 
     gray_scale = fixed
 
     hue: dict[str, object] = {"gray": gray_scale}
-    sources = pick_sources(colours)
     max_chroma = {"gray": 6, "cyan": 24, "blue": 40, "purple": 40, "red": 44, "orange": 44, "yellow": 36, "green": 36}
     for name in ("red", "orange", "yellow", "green", "cyan", "blue", "purple"):
         src = sources.get(name, colours.get("primaryPaletteKeyColor", colours.get("primary", "#888888")))
@@ -364,8 +363,8 @@ def hash_leaves(obj) -> dict:
 
 
 def generate(mode: str, colours: dict[str, str]) -> dict:
-    hue_section = hash_leaves(build_hue_scales(colours, mode))
-    sources = pick_sources(colours)
+    sources = pick_sources(colours)  # computed once, shared by hue scales and aliases
+    hue_section = hash_leaves(build_hue_scales(colours, mode, sources))
     finalize_aliases(hue_section, sources, colours, mode)
     overrides = hash_leaves(prune_missing(scheme_overrides(colours, mode)))
     section: dict = {"hue": hue_section}
