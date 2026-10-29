@@ -27,6 +27,7 @@ public:
     [[nodiscard]] QQmlListProperty<NotifData> popups();
 
     Q_INVOKABLE caelestia::shell::models::NotifData* add(QObject* backer, bool popup = true);
+    Q_INVOKABLE void clear();
 
 signals:
     void notifsChanged();
