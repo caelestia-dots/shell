@@ -296,6 +296,30 @@ Cámbialos en **Nexus → Keyboard & mouse**.
 
 ---
 
+## OpenCode — plugin file-tree con estados git
+
+**Fuera de la shell** (entorno de agente, no QML): el plugin TUI de OpenCode que muestra el
+sidebar de ficheros usa en esta máquina un **fork local** en
+`~/.config/opencode/plugins/opencode-file-tree` (se autodescubre; el paquete npm
+`opencodev2-file-tree` está fuera de la config).
+
+Extra sobre upstream (`Muyuu-wml/opencode-file-tree` v0.1.3): **colorea carpetas y ficheros
+según el estado git**, con glifo delante del nombre:
+
+| Glifo | Estado | Color |
+| --- | --- | --- |
+| `A` | añadido (staged / nuevo) | verde `diff.text.added` |
+| `M` | modificado | ámbar `text.feedback.warning` |
+| `D` | borrado | rojo `diff.text.removed` |
+| `R` | renombrado/copiado | info `text.feedback.info` |
+| `?` | sin seguimiento | verde `diff.text.added` |
+
+- Las **carpetas agregan** el estado de su contenido, prioridad *deleted > modified > added > renamed > untracked* (como los IDEs).
+- Un solo `git status --porcelain=v1 -z` por refresco (botón **Refresh**); rutas rebaseadas si el árbol arranca en un subdirectorio; fuera de un repo, árbol normal.
+- La fila seleccionada conserva el color primario del tema.
+- Cambios en los fuentes posteriormente: `bun run typecheck && bun run build` (bun, no npm) y `opencode service restart`.
+- Verificación manual: `test.md` dentro del directorio del plugin. Pendiente de proponer upstream (PR/issue) tras validar.
+
 ## Notas
 
 - Esto es un **fork**: no sustituye la documentación de instalación de upstream ([README](./README.md)).
