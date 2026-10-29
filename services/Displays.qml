@@ -13,6 +13,8 @@ Singleton {
     property list<var> monitors: []
     property bool loading: false
     property string lastError: ""
+    // hyprctl only exposes a boolean "vrr active"; keep the user/policy value separately.
+    property var vrrPolicies: ({})
 
     readonly property string luaPath: `${Quickshell.env("HOME")}/.config/hypr/caelestia-monitors.lua`
 
@@ -23,6 +25,36 @@ Singleton {
             return;
         root.loading = true;
         fetchProc.running = true;
+    }
+
+    function rememberVrr(name: string, vrr: int): void {
+        if (!name)
+            return;
+        const next = Object.assign({}, root.vrrPolicies);
+        next[name] = vrr;
+        root.vrrPolicies = next;
+    }
+
+    function policyVrr(name: string, fallback: int): int {
+        if (name && root.vrrPolicies[name] !== undefined)
+            return Number(root.vrrPolicies[name]);
+        return fallback;
+    }
+
+    function ingestLuaPolicies(text: string): void {
+        const blocks = String(text || "").split(/hl\.monitor\s*\(/);
+        const next = Object.assign({}, root.vrrPolicies);
+        for (let i = 1; i < blocks.length; i++) {
+            const block = blocks[i];
+            const nameMatch = block.match(/output\s*=\s*"([^"]+)"/);
+            const vrrMatch = block.match(/vrr\s*=\s*(-?\d+)/);
+            if (!nameMatch || !vrrMatch)
+                continue;
+            const v = Number(vrrMatch[1]);
+            if (v >= 0 && v <= 3)
+                next[nameMatch[1]] = v;
+        }
+        root.vrrPolicies = next;
     }
 
     function parseMode(modeStr: string): var {
@@ -161,8 +193,9 @@ Singleton {
     }
 
     function persist(): void {
+        // Live apply already ran via hyprctl eval; only rewrite the Lua seed.
+        // Avoid hyprctl reload here — it modesets and can flash the panel.
         luaFile.setText(root.generateLua());
-        Quickshell.execDetached(["hyprctl", "reload"]);
     }
 
     function setMode(name: string, modeStr: string): void {
@@ -184,12 +217,13 @@ Singleton {
     }
 
     function setVrr(name: string, vrr: int): void {
+        root.rememberVrr(name, vrr);
         const mon = root.patchMonitor(name, {
                 vrr: vrr
             });
         root.applyLive(mon);
         root.persist();
-        Qt.callLater(() => root.refresh());
+        // Do not refresh immediately: hyprctl's boolean VRR would clobber Off / fullscreen-only.
     }
 
     function ingestJson(raw: string): void {
@@ -208,13 +242,15 @@ Singleton {
                     continue;
                 const modes = Array.isArray(m.availableModes) ? m.availableModes.slice() : [];
                 const mode = root.matchCurrentMode(m.width, m.height, m.refreshRate, modes);
-                const prev = root.findMonitor(m.name || "");
-                // hyprctl only reports boolean VRR; keep fullscreen-only (2) if we set it.
-                let vrr = m.vrr ? 1 : 0;
-                if (prev && prev.vrr === 2 && m.vrr)
-                    vrr = 2;
+                const name = m.name || "";
+                const prev = root.findMonitor(name);
+                // Prefer saved policy; hyprctl only reports whether Adaptive Sync is currently asserted.
+                const fallback = prev && prev.vrr !== undefined ? Number(prev.vrr) : (m.vrr ? 1 : 0);
+                const vrr = root.policyVrr(name, fallback);
+                if (name && root.vrrPolicies[name] === undefined)
+                    root.rememberVrr(name, vrr);
                 next.push({
-                        name: m.name || "",
+                        name: name,
                         description: m.description || m.model || m.name || "",
                         make: m.make || "",
                         model: m.model || "",
@@ -235,8 +271,6 @@ Singleton {
             console.warn("[Displays] parse failed", e);
         }
     }
-
-    Component.onCompleted: root.refresh()
 
     Process {
         id: fetchProc
@@ -260,5 +294,13 @@ Singleton {
 
         printErrors: false
         path: root.luaPath
+        onLoaded: {
+            root.ingestLuaPolicies(text());
+            root.refresh();
+        }
+        onLoadFailed: err => {
+            if (err === FileViewError.FileNotFound)
+                root.refresh();
+        }
     }
 }
