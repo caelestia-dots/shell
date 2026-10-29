@@ -165,7 +165,7 @@ StyledWindow {
             smoothing: root.contentItem.Config.border.smoothing
         }
 
-BlobInvertedRect {
+        BlobInvertedRect {
             anchors.fill: parent
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
