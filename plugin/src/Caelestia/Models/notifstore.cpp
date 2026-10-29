@@ -11,6 +11,8 @@
 #include <qstandardpaths.h>
 #include <quuid.h>
 
+#include <algorithm>
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcNotifStore, "caelestia.notifs.store", QtInfoMsg)
@@ -22,6 +24,9 @@ namespace caelestia::shell::models {
 using Qt::StringLiterals::operator""_s;
 
 namespace {
+
+constexpr qsizetype k_maxPerGroup = 30;
+constexpr qsizetype k_maxTotal = 300;
 
 constexpr QStringView k_createTable = uR"(
     CREATE TABLE IF NOT EXISTS notifications (
@@ -142,7 +147,39 @@ NotifData* NotifStore::add(QObject* backer) {
     track(notif);
     markDirty(notif);
     emit notifsChanged();
+    enforceLimits({ notif->m_appName });
     return notif;
+}
+
+void NotifStore::enforceLimits(const QSet<QString>& groups) {
+    for (const auto& group : groups) {
+        evict(k_maxPerGroup, [&group](const NotifData* n) {
+            return n->m_appName == group;
+        });
+    }
+    evict(k_maxTotal, [](const NotifData*) {
+        return true;
+    });
+}
+
+void NotifStore::evict(qsizetype limit, const std::function<bool(const NotifData*)>& inScope) {
+    const auto weaker = [](const NotifData* a, const NotifData* b) {
+        return a->m_urgency < b->m_urgency || (a->m_urgency == b->m_urgency && a->m_createdAt < b->m_createdAt);
+    };
+
+    auto excess = std::ranges::count_if(m_notifs, inScope) - limit;
+    while (excess-- > 0) {
+        NotifData* victim = nullptr;
+        for (auto* const n : std::as_const(m_notifs)) {
+            if (!n->m_closed && inScope(n) && (!victim || weaker(n, victim)))
+                victim = n;
+        }
+
+        if (!victim)
+            return;
+
+        victim->dismiss();
+    }
 }
 
 void NotifStore::track(NotifData* notif) {
@@ -239,6 +276,11 @@ void NotifStore::loadNotifs() {
     }
 
     emit notifsChanged();
+
+    QSet<QString> groups;
+    for (const auto* notif : std::as_const(m_notifs))
+        groups << notif->m_appName;
+    enforceLimits(groups);
 }
 
 } // namespace caelestia::shell::models
