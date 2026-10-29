@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.components
-import qs.modules.launcher.services
 import qs.modules.drawers
+import qs.modules.launcher.services
 
 Item {
     id: root

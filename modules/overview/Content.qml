@@ -33,9 +33,41 @@ Item {
     implicitWidth: columns * (previewWidth + spacing + root.previewScaleX * (spacing - root.panels.bar.width)) + spacing + 10
     implicitHeight: rows * (previewHeight + spacing) + 30
 
+    Component.onCompleted: {
+        Hyprland.refreshToplevels();
+        WorkspaceData.updateAll();
+    }
+    // Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
+    Connections {
+
+        function onRawEvent(event) {
+            const triggers = ["openwindow", "closewindow", "movewindow", "workspace", "activespecial", "createworkspace", "destroyworkspace", "fullscreen", "changefloatingmode"];
+
+            if (triggers.includes(event.name)) {
+                Hyprland.refreshToplevels();
+                WorkspaceData.updateAll();
+                updateTimer.restart();
+            }
+        }
+
+        target: Hyprland
+    }
+    // DO NOT REMOVE: After maxmizing a window, setting Windows as not Visible may take a while
+    Timer {
+        id: updateTimer
+
+        interval: 500 // 500 milliseconds is usually enough for the compositor to settle
+        repeat: false
+        onTriggered: {
+            Hyprland.refreshToplevels();
+            WorkspaceData.updateAll();
+        }
+    }
+
     // Grid of all Workspaces with 2 rows
     Grid {
         id: workspaceGrid
+
         anchors.fill: parent
         columns: root.columns
         rows: root.rows
@@ -47,6 +79,7 @@ Item {
 
             delegate: ClippingWrapperRectangle {
                 id: workspaceCard
+
                 required property int index
                 readonly property int workspaceId: index + 1
 
@@ -59,10 +92,10 @@ Item {
 
                 child: Item {
                     id: previewBackground
-                    anchors.fill: parent
 
                     property bool isUsed: Hyprland.toplevels.values.filter(window => window.workspace && window.workspace.id === workspaceCard.workspaceId).length > 0
 
+                    anchors.fill: parent
                     // Wallpaper Background
                     Visual {
                         anchors.fill: parent
@@ -90,6 +123,7 @@ Item {
                     // Nested Repeater for windows belonging specifically to this workspace
                     Repeater {
                         id: previewRepeater
+
                         model: ScriptModel {
                             values: Hyprland.toplevels.values.filter(toplevel => {
                                 const _rev = WorkspaceData.clientsRevision;
@@ -101,19 +135,12 @@ Item {
                             id: previewDisplay
 
                             required property var modelData
+
                             property var window: WorkspaceData.windowByAddress["0x" + modelData.address]
                             property var monitor: window ? WorkspaceData.monitorById[window.monitor] : null
                             property int xOffset_l: root.panels.bar.width
-                            x: {
-                                if (!window || !monitor)
-                                    return 0;
-                                return (window.at[0] - monitor.x - xOffset_l / monitor.scale) / (monitor.width) * root.previewWidth * monitor.scale;
-                            }
-                            y: {
-                                if (!window || !monitor)
-                                    return 0;
-                                return (window.at[1] - monitor.y) / monitor.height * root.previewHeight * monitor.scale;
-                            }
+                            property int tick: root.refreshTick
+
                             property int should_height: {
                                 if (!window || !monitor)
                                     return 100;
@@ -129,6 +156,17 @@ Item {
                                     return sol;
                                 }
                                 return sol2;
+                            }
+
+                            x: {
+                                if (!window || !monitor)
+                                    return 0;
+                                return (window.at[0] - monitor.x - xOffset_l / monitor.scale) / (monitor.width) * root.previewWidth * monitor.scale;
+                            }
+                            y: {
+                                if (!window || !monitor)
+                                    return 0;
+                                return (window.at[1] - monitor.y) / monitor.height * root.previewHeight * monitor.scale;
                             }
                             implicitHeight: should_height
                             implicitWidth: should_width
@@ -149,9 +187,9 @@ Item {
                             }
                             clip: true
                             color: "transparent"
-                            property int tick: root.refreshTick
                             child: ScreencopyView {
                                 id: preview
+
                                 anchors.fill: parent
                                 anchors.horizontalCenter: workspaceCard.horizontalCenter
                                 captureSource: modelData.wayland
@@ -177,33 +215,5 @@ Item {
                 }
             }
         }
-    }
-    // Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
-    Connections {
-        target: Hyprland
-
-        function onRawEvent(event) {
-            const triggers = ["openwindow", "closewindow", "movewindow", "workspace", "activespecial", "createworkspace", "destroyworkspace", "fullscreen", "changefloatingmode"];
-
-            if (triggers.includes(event.name)) {
-                Hyprland.refreshToplevels();
-                WorkspaceData.updateAll();
-                updateTimer.restart();
-            }
-        }
-    }
-    // DO NOT REMOVE: After maxmizing a window, setting Windows as not Visible may take a while
-    Timer {
-        id: updateTimer
-        interval: 500 // 500 milliseconds is usually enough for the compositor to settle
-        repeat: false
-        onTriggered: {
-            Hyprland.refreshToplevels();
-            WorkspaceData.updateAll();
-        }
-    }
-    Component.onCompleted: {
-        Hyprland.refreshToplevels();
-        WorkspaceData.updateAll();
     }
 }

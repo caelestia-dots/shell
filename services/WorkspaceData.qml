@@ -19,6 +19,10 @@ Singleton {
     property var windowList
     property var monitorList
 
+    Component.onCompleted: {
+        updateAll();
+    }
+
     function updateWindowList() {
         getClients.running = true;
     }
@@ -34,9 +38,11 @@ Singleton {
     // Get Window Data from hypctl
     Process {
         id: getClients
+
         command: ["hyprctl", "clients", "-j"]
         stdout: StdioCollector {
             id: clientsCollector
+
             onStreamFinished: {
                 let parsed;
                 try {
@@ -60,9 +66,11 @@ Singleton {
     //  Get Monitordata from hyprctl
     Process {
         id: getMonitors
+
         command: ["hyprctl", "monitors", "-j"]
         stdout: StdioCollector {
             id: monitorCollector
+
             onStreamFinished: {
                 let parsed;
                 try {
@@ -81,8 +89,5 @@ Singleton {
                 root.clientsRevision += 1;
             }
         }
-    }
-    Component.onCompleted: {
-        updateAll();
     }
 }

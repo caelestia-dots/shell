@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.components
-
 import qs.modules.drawers
 
 Item {
