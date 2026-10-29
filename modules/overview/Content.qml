@@ -31,10 +31,13 @@ Item {
 
     property int previewHeight: Math.floor(Screen.height * previewScale / rows)
     property int previewWidth: previewHeight * Screen.width / Screen.height
-    property int spacing: 15
 
-    implicitWidth: columns * (previewWidth + spacing) - spacing + 40
-    implicitHeight: rows * (previewHeight + spacing) - spacing + 40
+    property real previewScaleX: previewWidth / Screen.width
+    property int spacing: 15
+    property int padding: 40
+
+    implicitWidth: columns * (previewWidth + spacing) - spacing + padding
+    implicitHeight: rows * (previewHeight + spacing) - spacing + padding
 
     // Main 10-workspace overview grid
     Grid {
@@ -53,8 +56,8 @@ Item {
                 required property int index
                 readonly property int workspaceId: index + 1
 
-                width: root.previewWidth
-                height: root.previewHeight
+                width: root.previewWidth + (root.spacing - root.panels.bar.width) * root.previewScaleX
+                height: root.previewHeight + (root.spacing - 5) * root.previewScale
                 border.color: Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === workspaceId ? "#cba6f7" : "#313244"
                 border.width: 2
                 radius: 8
@@ -100,54 +103,67 @@ Item {
                             })
                         }
 
-                        delegate: Item {
+                        delegate: ClippingWrapperRectangle {
                             id: previewDisplay
 
                             property var window: WorkspaceData.windowByAddress["0x" + modelData.address]
                             property var monitor: window ? WorkspaceData.monitorById[window.monitor] : null
-                            property int xOffset: root.panels.bar.width
-
+                            property int xOffset_l: root.panels.bar.width
                             x: {
                                 if (!window || !monitor)
                                     return 0;
-                                return (window.at[0] - monitor.x - xOffset) / (monitor.width - previewDisplay.xOffset) * root.previewWidth * monitor.scale * 0.99;
+                                return (window.at[0] - monitor.x - xOffset_l / monitor.scale) / (monitor.width) * root.previewWidth * monitor.scale;
                             }
                             y: {
                                 if (!window || !monitor)
                                     return 0;
-                                return (window.at[1] - monitor.y) / monitor.height * root.previewHeight * monitor.scale * 0.98;
+                                return (window.at[1] - monitor.y) / monitor.height * root.previewHeight * monitor.scale;
                             }
-                            width: {
+                            property int should_height: {
                                 if (!window || !monitor)
-                                    return 0;
-                                return window.size[0] / (monitor.width - previewDisplay.xOffset) * root.previewWidth * monitor.scale * 0.99;
+                                    return 100;
+                                return (window.size[1]) / (monitor.height) * root.previewHeight * monitor.scale;
                             }
-                            height: {
+                            property int should_width: {
                                 if (!window || !monitor)
-                                    return 0;
-                                return window.size[1] / monitor.height * root.previewHeight * monitor.scale * 0.98;
+                                    return 100;
+                                let sol = (window.size[0]) / (monitor.width) * root.previewWidth * monitor.scale;
+                                let sol2 = should_height / window.size[1] * window.size[0];
+                                if (sol2 > sol) {
+                                    should_height = sol / window.size[0] * window.size[1];
+                                    return sol;
+                                }
+                                return sol2;
                             }
-
-                            ClippingWrapperRectangle {
+                            implicitHeight: should_height
+                            implicitWidth: should_width
+                            radius: 6
+                            opacity: {
+                                if (!previewDisplay.window) {
+                                    console.warn("Window couldn't be displayed because there is no Window Object");
+                                    return 0;
+                                }
+                                if (!previewDisplay.monitor) {
+                                    console.warn("Window couldn't be displayed because there is no Monitor Object");
+                                    return 0;
+                                }
+                                if (!previewDisplay.window.visible)
+                                    return 0;
+                                else
+                                    return 1;
+                            }
+                            clip: true
+                            color: "transparent"
+                            property int tick: root.refreshTick
+                            child: ScreencopyView {
+                                id: preview
                                 anchors.fill: parent
-                                radius: 6
-                                opacity: {
-                                    if (!previewDisplay.window || !previewDisplay.monitor || !previewDisplay.window.visible)
-                                        return 0;
-                                    else
-                                        return 1;
-                                }
-                                color: "transparent"
-                                property int tick: root.refreshTick
-                                child: ScreencopyView {
-                                    anchors.fill: parent
-                                    anchors.horizontalCenter: workspaceCard.horizontalCenter
-                                    captureSource: modelData.wayland
-                                    live: true
-                                    layer.enabled: true
-                                    layer.smooth: true
-                                    opacity: 1
-                                }
+                                anchors.horizontalCenter: workspaceCard.horizontalCenter
+                                captureSource: modelData.wayland
+                                live: true
+                                layer.enabled: true
+                                layer.smooth: true
+                                opacity: 1
                             }
                         }
                     }
@@ -166,8 +182,8 @@ Item {
                 }
             }
         }
-}
-// Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
+    }
+    // Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
     Connections {
         target: Hyprland
 

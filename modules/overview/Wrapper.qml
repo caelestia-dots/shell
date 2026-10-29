@@ -40,8 +40,6 @@ Item {
     implicitHeight: content.implicitHeight
     implicitWidth: content.implicitWidth || 630
 
-    Component.onCompleted: Qt.callLater(() => Apps) // Load apps on init
-
     Behavior on offsetScale {
         Anim {}
     }

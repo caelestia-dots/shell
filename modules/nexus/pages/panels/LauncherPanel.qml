@@ -30,6 +30,11 @@ PageBase {
             checked: Config.launcher.enabled
             onToggled: GlobalConfig.launcher.enabled = checked
         }
+        ToggleRow {
+            text: Tr.trCtx("Enable workspace preview", "toggle label")
+            checked: Config.overview.enabled
+            onToggled: GlobalConfig.overview.enabled = checked
+        }
 
         ToggleRow {
             text: Tr.tr("Show on hover")

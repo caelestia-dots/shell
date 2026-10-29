@@ -53,7 +53,6 @@ Singleton {
                 root.windowByAddress = tempWinByAddress;
                 root.addresses = root.windowList.map(win => win.address);
                 root.clientsRevision += 1;
-                console.log("Wrote: ClientRevision: " + clientsRevision);
             }
         }
     }
