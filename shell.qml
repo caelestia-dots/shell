@@ -5,6 +5,9 @@
 //@ pragma DefaultEnv QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
 // Use KDE platform theme so QIcon reads kdeglobals [Icons] (Papirus, kept in sync by caelestia-quiet)
 //@ pragma Env QT_QPA_PLATFORMTHEME=kde
+// Load the locally built plugin (in ~/.local) instead of the system package's:
+// it carries fork-side C++ changes (Requests transfer timeout, config nodes).
+//@ pragma Env QT_ADDITIONAL_PACKAGES_PREFIX_PATH=/home/manu/.local/lib/qt6/qml
 
 import QtQuick
 import Quickshell
