@@ -179,7 +179,9 @@ Singleton {
         if (!item.id)
             return;
         const line = `${item.id}\t${item.preview}`;
-        Quickshell.execDetached(["sh", "-c", `printf '%s\\n' ${JSON.stringify(line)} | cliphist delete`]);
+        // Note: user text must travel as argv ($1), never interpolated into the
+        // shell string — cliphist previews are arbitrary clipboard content.
+        Quickshell.execDetached(["sh", "-c", `printf '%s\\n' "$1" | cliphist delete`, "_", line]);
         Qt.callLater(() => root.reloadHistory());
     }
 
@@ -336,16 +338,16 @@ Singleton {
         if (!item)
             return;
         if (item.uid && item.kind === "text" && item.text !== undefined) {
-            Quickshell.execDetached(["sh", "-c", `printf '%s' ${JSON.stringify(item.text)} | wl-copy`]);
+            Quickshell.execDetached(["sh", "-c", `printf '%s' "$1" | wl-copy`, "_", item.text]);
             return;
         }
         if (item.path && item.kind === "image") {
             const mime = root.mimeForImagePath(item.path);
-            Quickshell.execDetached(["sh", "-c", `wl-copy --type ${JSON.stringify(mime)} < ${JSON.stringify(item.path)}`]);
+            Quickshell.execDetached(["sh", "-c", `wl-copy --type "$1" < "$2"`, "_", mime, item.path]);
             return;
         }
         if (item.id)
-            Quickshell.execDetached(["sh", "-c", `cliphist decode ${JSON.stringify(String(item.id))} | wl-copy`]);
+            Quickshell.execDetached(["sh", "-c", `cliphist decode "$1" | wl-copy`, "_", String(item.id)]);
     }
 
     function pasteItem(item: var): void {
@@ -450,7 +452,7 @@ Singleton {
     Process {
         id: syncConfigProc
 
-        command: ["sh", "-c", `mkdir -p \"$HOME/.config/cliphist\" \"$HOME/.cache/cliphist\" ${JSON.stringify(root.favoritesDir)} ${JSON.stringify(root.thumbsDir)} && printf 'max-items %d\\n' '${root.maxItems}' > \"$HOME/.config/cliphist/config\"`]
+        command: ["bash", "-c", `mkdir -p \"$1\" \"$2\" \"$3\" \"$4\" && printf 'max-items %d\\n' '$5' > \"$1/config\"`, "_", Quickshell.env("HOME") + "/.config/cliphist", Quickshell.env("HOME") + "/.cache/cliphist", root.favoritesDir, root.thumbsDir, root.maxItems]
     }
 
     Process {
