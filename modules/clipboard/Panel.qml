@@ -281,6 +281,10 @@ StyledWindow {
                                         asynchronous: true
                                         cache: true
                                         fillMode: Image.PreserveAspectCrop
+                                        // Decode to the on-screen thumb size, not the full
+                                        // 1440p file (each history row would otherwise ship
+                                        // a multi-megapixel texture into VRAM).
+                                        sourceSize: Qt.size(Math.max(1, width), Math.max(1, height))
                                         source: leading.thumbReady && leading.thumbPath.length ? Qt.resolvedUrl(leading.thumbPath) : ""
                                         visible: status === Image.Ready
                                     }

@@ -30,6 +30,9 @@ Singleton {
 
     property list<var> history: []
     property list<var> favorites: []
+    // Paths queued for existence verification (see verifyImagePaths).
+    property list<string> _existCands: []
+    property bool _existQueued: false
 
     readonly property list<var> filteredFavorites: {
         const q = root.search.trim().toLowerCase();
@@ -131,6 +134,11 @@ Singleton {
             return root.favorites.some(f => f.uid === item.uid);
         if (item.kind === "text")
             return root.favorites.some(f => f.kind === "text" && (f.text === item.preview || f.preview === item.preview));
+        // Binary entries all share a generic preview; match by source cliphist
+        // id first, falling back to preview for favourites created before this
+        // carried a clipId.
+        if (item.id)
+            return root.favorites.some(f => f.clipId !== undefined && f.clipId === item.id) || root.favorites.some(f => (f.clipId === undefined || f.clipId === null) && f.preview === item.preview && f.kind === item.kind);
         return root.favorites.some(f => f.preview === item.preview && f.kind === item.kind);
     }
 
@@ -138,7 +146,13 @@ Singleton {
         if (!item)
             return;
         if (item.section === "favorite" || item.uid || root.isFavorite(item)) {
-            const uid = item.uid || root.favorites.find(f => f.kind === item.kind && (f.text === item.preview || f.preview === item.preview))?.uid;
+            const uid = item.uid || root.favorites.find(f => {
+                if (f.kind !== item.kind)
+                    return false;
+                if (item.kind === "text")
+                    return f.text === item.preview || f.preview === item.preview;
+                return (item.id !== undefined && f.clipId === item.id) || (f.clipId === undefined && f.preview === item.preview);
+            })?.uid;
             const removed = root.favorites.find(f => f.uid === uid);
             root.favorites = root.favorites.filter(f => f.uid !== uid);
             if (removed?.path)
@@ -411,9 +425,76 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.history = root.parseHistory(text);
+                root.verifyImagePaths();
                 if (root.currentIndex >= root.flatItems.length)
                     root.currentIndex = Math.max(0, root.flatItems.length - 1);
             }
+        }
+    }
+
+    // Data-file "image" entries are only images if the referenced file really
+    // exists: previews of ordinary text that merely ends in ".jpg" must stay
+    // text instead of showing a broken thumb and stealing the image icon.
+    function verifyImagePaths(): void {
+        const cands = [];
+        for (let i = 0; i < root.history.length; i++) {
+            const e = root.history[i];
+            if (e.kind === "image" && e.path)
+                cands.push(e.path);
+        }
+        // Favorites point at our own copies, pinned at creation — never verify them.
+        if (cands.length === 0) {
+            root._existCands = [];
+            root._existQueued = false;
+            return;
+        }
+        if (existProc.running) {
+            // A history reload raced with a running check — re-run with fresh
+            // data right after the current one instead of cross-matching.
+            root._existQueued = true;
+            return;
+        }
+        root._existCands = cands;
+        existProc.command = ["bash", "-c", `for f; do [ -f \"$f\" ] && printf '%s\\n' \"$f\"; done`, "sh"].concat(cands);
+        existProc.running = true;
+    }
+
+    function applyExistResults(existingText: string): void {
+        if (root._existQueued) {
+            root._existQueued = false;
+            root.verifyImagePaths();
+            return;
+        }
+        const cands = root._existCands;
+        root._existCands = [];
+        if (cands.length === 0)
+            return;
+        const existing = new Set((existingText || "").split("\n"));
+        const missing = {};
+        for (const c of cands)
+            if (!existing.has(c))
+                missing[c] = true;
+        let changed = false;
+        const updated = root.history.map(e => {
+            if (e.kind === "image" && e.path && missing[e.path]) {
+                changed = true;
+                const ne = Object.assign({}, e);
+                ne.kind = "text";
+                ne.label = root.displayPreview(e.preview, "text", "");
+                ne.path = "";
+                return ne;
+            }
+            return e;
+        });
+        if (changed)
+            root.history = updated;
+    }
+
+    Process {
+        id: existProc
+
+        stdout: StdioCollector {
+            onStreamFinished: root.applyExistResults(text)
         }
     }
 
@@ -501,6 +582,10 @@ Singleton {
                     root.favorites = [{
                             uid,
                             preview: it.preview,
+                            // cliphist-wide unique id so two binary entries sharing
+                            // the generic "[[ binary data … ]]" preview don't
+                            // both read as favourited (id survives reloads).
+                            clipId: it.id || undefined,
                             kind: it.kind,
                             label: root.displayPreview(it.preview, it.kind, finalPath),
                             path: finalPath
