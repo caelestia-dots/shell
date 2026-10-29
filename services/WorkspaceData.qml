@@ -31,6 +31,7 @@ Singleton {
         updateMonitors();
     }
 
+    // Get Window Data from hypctl
     Process {
         id: getClients
         command: ["hyprctl", "clients", "-j"]
@@ -56,6 +57,7 @@ Singleton {
             }
         }
     }
+    //  Get Monitordata from hyprctl
     Process {
         id: getMonitors
         command: ["hyprctl", "monitors", "-j"]
