@@ -23,6 +23,7 @@ Repositorio: [iMacnucintosh/hyprland-shell](https://github.com/iMacnucintosh/hyp
 | **Utilities** | Mantener activo (café) en interruptores rápidos, ON por defecto |
 | **Clipboard** | Historial estilo Plasma (cliphist): Super+Shift+V, pegar en la ventana enfocada, favoritos |
 | **Updates** | Arch / AUR / Flatpak: icono+badge, popout, Nexus; update en fondo (panel) o con logs (Nexus) |
+| **Pantalla** | Nexus → Pantalla: modo (Hz), escala y VRR por monitor (Nunca / Automático / Siempre) |
 | **Atajos** | Remapeables desde Nexus; Super+E → Thunar; atajos de activities |
 | **Tiempo** | Buscar ciudad en Nexus → Idioma y región, o ubicación automática por IP |
 
@@ -160,6 +161,22 @@ cd madison_vpn_widget/hyprland && ./install.sh
 ```
 
 Credenciales en `~/.config/openfortivpn/config` (las mismas que Plasma; **no** van en este repo). Engranaje en el popout VPN para editar host/puerto/usuario/`set-dns`/`trusted-cert` (password/OTP no se muestran). En Nexus → Panels → Status icons puedes mostrar/ocultar «Madison VPN» cuando el complemento está activo.
+
+---
+
+## Pantalla (modos, escala, VRR)
+
+Página **Nexus → Pantalla** (en Connectivity, encima de Audio), una tarjeta por monitor:
+
+- **Modo**: resolución + Hz (deduplicados y ordenados).
+- **Escala**.
+- **VRR / Adaptive Sync** con política estilo Plasma: **Nunca / Automático / Siempre** (Automático = solo mientras haya algo a pantalla completa).
+
+Persistencia por conector en `~/.config/hypr/caelestia-monitors.lua`; al aplicar se ejecuta `hyprctl reload`, que es lo que hace que el apagado de VRR llegue de verdad al CRTC. La política vive en el Lua y el estado "activo" que reporta `hyprctl` no pisa tu elección. Requiere en tu config de Hyprland:
+
+```lua
+require("caelestia-monitors")
+```
 
 ---
 
