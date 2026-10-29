@@ -19,10 +19,6 @@ Singleton {
     property var windowList
     property var monitorList
 
-    Component.onCompleted: {
-        updateAll();
-    }
-
     function updateWindowList() {
         getClients.running = true;
     }
@@ -33,6 +29,10 @@ Singleton {
         console.log("Reloading Monitor and Window Information");
         updateWindowList();
         updateMonitors();
+    }
+
+    Component.onCompleted: {
+        updateAll();
     }
 
     // Get Window Data from hypctl
@@ -63,6 +63,7 @@ Singleton {
             }
         }
     }
+
     //  Get Monitordata from hyprctl
     Process {
         id: getMonitors

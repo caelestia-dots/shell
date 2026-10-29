@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Caelestia.Config
 import Caelestia.Multimedia
 import qs.components
 import qs.services
 import qs.modules.drawers
-import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
@@ -37,6 +37,7 @@ Item {
         Hyprland.refreshToplevels();
         WorkspaceData.updateAll();
     }
+
     // Trigger two times. First time fresh after reload, for responsiveness and second time for completeness
     Connections {
 
@@ -52,6 +53,7 @@ Item {
 
         target: Hyprland
     }
+
     // DO NOT REMOVE: After maxmizing a window, setting Windows as not Visible may take a while
     Timer {
         id: updateTimer
@@ -96,6 +98,7 @@ Item {
                     property bool isUsed: Hyprland.toplevels.values.filter(window => window.workspace && window.workspace.id === workspaceCard.workspaceId).length > 0
 
                     anchors.fill: parent
+
                     // Wallpaper Background
                     Visual {
                         anchors.fill: parent
