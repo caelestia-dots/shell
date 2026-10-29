@@ -17,17 +17,20 @@ class NotifStore : public QObject {
     QML_ELEMENT
 
     Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifData> notifs READ notifs NOTIFY notifsChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifData> popups READ popups NOTIFY popupsChanged)
 
 public:
     explicit NotifStore(QObject* parent = nullptr);
     ~NotifStore() override;
 
     [[nodiscard]] QQmlListProperty<NotifData> notifs();
+    [[nodiscard]] QQmlListProperty<NotifData> popups();
 
-    Q_INVOKABLE caelestia::shell::models::NotifData* add(QObject* backer);
+    Q_INVOKABLE caelestia::shell::models::NotifData* add(QObject* backer, bool popup = true);
 
 signals:
     void notifsChanged();
+    void popupsChanged();
 
 private:
     QString m_connectionName;
