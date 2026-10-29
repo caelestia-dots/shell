@@ -23,6 +23,7 @@ PageBase {
         SliderRow {
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
+            settingAnchor: "audio-output"
             label: Tr.trCtx("Output", "audio output")
             valueLabel: Strings.percentOne(value)
             value: Audio.volume
@@ -32,6 +33,7 @@ PageBase {
 
         ToggleRow {
             text: Tr.trCtx("Muted", "audio output muted")
+            searchable: false
             checked: Audio.muted
             onToggled: Audio.setStreamMuted(Audio.sink, checked)
         }
@@ -50,6 +52,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
+            settingAnchor: "audio-input"
             label: Tr.trCtx("Input", "audio input")
             valueLabel: Strings.percentOne(value)
             value: Audio.sourceVolume
@@ -59,6 +62,7 @@ PageBase {
 
         ToggleRow {
             text: Tr.trCtx("Muted", "audio input muted")
+            searchable: false
             checked: Audio.sourceMuted
             onToggled: Audio.setStreamMuted(Audio.source, checked)
         }
@@ -79,6 +83,7 @@ PageBase {
             last: true
 
             icon: "tune"
+            settingAnchor: "audio-app-volumes"
             text: Tr.tr("App volumes")
             subtext: Audio.streams.length === 0 ? Tr.tr("No apps playing audio") : Tr.trN("%n app playing audio", "%n apps playing audio", Audio.streams.length)
             onClicked: root.nState.openSubPage(1)
