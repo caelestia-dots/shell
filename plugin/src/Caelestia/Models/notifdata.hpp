@@ -4,6 +4,8 @@
 #include <qqmlintegration.h>
 #include <qtimer.h>
 
+#include <caelestia/utils/cache.hpp>
+
 namespace caelestia::shell::models {
 
 class NotifData;
@@ -120,6 +122,9 @@ private:
 
     void connectBacker();
     [[nodiscard]] QList<NotifAction> readBackerActions();
+
+    void cacheImage();
+    void storeImage(const QString& key, utils::Cache::Producer producer);
 
     friend class NotifStore;
 };
