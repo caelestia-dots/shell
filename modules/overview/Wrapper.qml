@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.components
-import qs.modules.launcher.services
 
 import qs.modules.drawers
 
@@ -13,7 +12,7 @@ Item {
 
     required property ShellScreen screen
     required property ScreenState screenState
-    required property Panels panels
+    required property var panels
 
     readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled && Config.overview.enabled
 

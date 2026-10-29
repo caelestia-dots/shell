@@ -1,17 +1,11 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import M3Shapes
 import Caelestia.Config
-import Caelestia.I18n
 import Caelestia.Multimedia
 import qs.components
-import qs.components.effects
-import qs.components.filedialog
 import qs.services
 import qs.modules.drawers
-import qs.modules.drawers
-import qs.utils
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
@@ -106,6 +100,7 @@ Item {
                         delegate: ClippingWrapperRectangle {
                             id: previewDisplay
 
+                            required property var modelData
                             property var window: WorkspaceData.windowByAddress["0x" + modelData.address]
                             property var monitor: window ? WorkspaceData.monitorById[window.monitor] : null
                             property int xOffset_l: root.panels.bar.width

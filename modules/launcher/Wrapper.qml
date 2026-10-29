@@ -6,14 +6,13 @@ import Caelestia.Config
 import qs.components
 import qs.modules.launcher.services
 import qs.modules.drawers
-import qs.components.containers
 
 Item {
     id: root
 
     required property ShellScreen screen
     required property ScreenState screenState
-    required property Panels panels
+    required property var panels
 
     readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled
 
