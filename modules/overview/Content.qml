@@ -36,7 +36,7 @@ Item {
     property int spacing: 15
     property int padding: 40
 
-    implicitWidth: columns * (previewWidth + spacing) - spacing + padding
+    implicitWidth: columns * (previewWidth + spacing) - spacing
     implicitHeight: rows * (previewHeight + spacing) - spacing + padding
 
     // Main 10-workspace overview grid
