@@ -16,13 +16,6 @@ QtObject {
         },
 
         // Connectivity
-        // TODO
-        // {
-        //     label: Tr.tr("Display"),
-        //     icon: "monitor",
-        //     description: Tr.tr("Output configuration"),
-        //     category: "connectivity"
-        // },
         {
             label: Tr.tr("Network"),
             icon: "wifi",
@@ -35,6 +28,12 @@ QtObject {
             description: Tr.tr("Bluetooth, pairing"),
             category: "connectivity",
             noFill: true
+        },
+        {
+            label: Tr.trCtx("Display", "monitor settings"),
+            icon: "monitor",
+            description: Tr.tr("Output configuration"),
+            category: "connectivity"
         },
         {
             label: Tr.tr("Audio"),

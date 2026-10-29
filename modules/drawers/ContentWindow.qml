@@ -8,6 +8,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.State
 import qs.components
 import qs.components.containers
 import qs.services
@@ -35,13 +36,18 @@ StyledWindow {
         }
         return hasFullscreenOnNormalWs;
     }
+    // Compact layout (RuntimeState.gameMode): edge-to-edge content, keep left bar.
+    readonly property bool gameMode: RuntimeState.gameMode
+    readonly property bool collapseBorder: hasFullscreen || gameMode
 
-    property real fsTransitionProg: hasFullscreen ? 1 : 0
-    readonly property real sdfBorderOffset: 2 * fsTransitionProg // SDFs joins are not exact, so offset by 2px to ensure nothing shows
+    property real fsTransitionProg: collapseBorder ? 1 : 0
+    // SDF join fudge is only needed when the bar hides for real fullscreen.
+    // In compact layout it opens a wallpaper strip between the left bar and clients.
+    readonly property real sdfBorderOffset: hasFullscreen ? 2 * fsTransitionProg : 0
     readonly property real borderThickness: contentItem.Config.border.thickness * (1 - fsTransitionProg)
     readonly property real borderRounding: contentItem.Config.border.rounding * (1 - fsTransitionProg)
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
-    readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
+    readonly property real borderLayoutThickness: collapseBorder ? 0 : contentItem.Config.border.thickness
 
     property color surfaceColour: Colours.tPalette.m3surface
 
@@ -59,11 +65,17 @@ StyledWindow {
         return Math.max(...thresholds);
     }
 
-    onHasFullscreenChanged: {
+    function closeTransientPanels(): void {
         screenState.launcher = false;
         screenState.session = false;
         screenState.dashboard = false;
         panels.popouts.close();
+    }
+
+    onHasFullscreenChanged: root.closeTransientPanels()
+    onGameModeChanged: {
+        if (gameMode)
+            root.closeTransientPanels();
     }
 
     name: "drawers"
@@ -163,7 +175,8 @@ StyledWindow {
             id: blobGroup
 
             color: root.surfaceColour
-            smoothing: root.contentItem.Config.border.smoothing
+            // Soft SDF edges leave a wallpaper fringe beside the bar in game mode.
+            smoothing: root.gameMode ? 0 : root.contentItem.Config.border.smoothing
         }
 
         BlobInvertedRect {
@@ -171,7 +184,8 @@ StyledWindow {
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
             radius: root.borderRounding
-            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
+            // Nudge 1px into client area in game mode so the bar meets windows flush.
+            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset + (root.gameMode ? 1 : 0)
             borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
             borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
             borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
@@ -309,6 +323,7 @@ StyledWindow {
             screenState: root.screenState
             popouts: panels.popouts
 
+            // Hide bar for real fullscreen apps, but keep it in game mode.
             fullscreen: root.hasFullscreen
         }
     }

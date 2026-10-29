@@ -109,16 +109,16 @@ msgid "Battery is charging"
 msgstr "La batería se está cargando"
 
 #: daemons/GameMode.qml
-msgid "Game mode enabled"
-msgstr "Modo juego activado"
+msgid "Compact layout enabled"
+msgstr "Diseño compacto activado"
 
 #: daemons/GameMode.qml
-msgid "Disabled Hyprland animations, blur, gaps and shadows"
-msgstr "Se han desactivado las animaciones, el desenfoque, los huecos y las sombras de Hyprland"
+msgid "Left bar only; no frame, gaps or window rounding"
+msgstr "Solo barra izquierda; sin marco, huecos ni redondeo de ventanas"
 
 #: daemons/GameMode.qml
-msgid "Game mode disabled"
-msgstr "Modo juego desactivado"
+msgid "Compact layout disabled"
+msgstr "Diseño compacto desactivado"
 
 #: daemons/GameMode.qml
 msgid "Hyprland settings restored"
@@ -2669,12 +2669,12 @@ msgid "Prevent sleep / idle suspend"
 msgstr "Impidiendo el modo de suspensión"
 
 #: modules/nexus/pages/panels/UtilitiesPanel.qml
-msgid "Game mode"
-msgstr "Modo juego"
+msgid "Compact layout"
+msgstr "Diseño compacto"
 
 #: modules/nexus/pages/panels/UtilitiesPanel.qml
-msgid "Toggle game mode"
-msgstr "Activar o desactivar el modo juego"
+msgid "Maximise screen use: no frame or gaps"
+msgstr "Aprovechar la pantalla: sin marco ni huecos"
 
 #: modules/nexus/pages/panels/UtilitiesPanel.qml services/Keybinds.qml
 msgid "Do not disturb"
@@ -2801,8 +2801,8 @@ msgid "Charging changes"
 msgstr "Cambios de carga"
 
 #: modules/nexus/pages/services/NotificationsPage.qml
-msgid "Game mode changes"
-msgstr "Cambios del modo juego"
+msgid "Compact layout changes"
+msgstr "Cambios del diseño compacto"
 
 #: modules/nexus/pages/services/NotificationsPage.qml
 msgid "Do not disturb changes"
@@ -5567,3 +5567,74 @@ msgstr "Tiempo de juego registrado por Millennium"
 
 msgid "Locked · %1"
 msgstr "Bloqueados · %1"
+
+#: modules/nexus/PageRegistry.qml modules/nexus/pages/DisplayPage.qml
+msgctxt "monitor settings"
+msgid "Display"
+msgstr "Pantalla"
+
+#: modules/nexus/PageRegistry.qml
+msgid "Output configuration"
+msgstr "Configuración de salidas"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "No displays detected"
+msgstr "No se detectaron pantallas"
+
+#: services/Displays.qml
+msgid "Could not read monitor list"
+msgstr "No se pudo leer la lista de monitores"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Resolution & refresh rate"
+msgstr "Resolución y frecuencia"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Scale"
+msgstr "Escala"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Adaptive Sync"
+msgstr "Sincronización adaptativa"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "Never"
+msgstr "Nunca"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "Automatic"
+msgstr "Automático"
+
+#: modules/nexus/pages/DisplayPage.qml services/Displays.qml
+msgid "Always"
+msgstr "Siempre"
+
+#: services/Displays.qml
+msgid "Adaptive Sync stays on, including the desktop"
+msgstr "La sincronización adaptativa permanece activa, también en el escritorio"
+
+#: services/Displays.qml
+msgid "Adaptive Sync only while a window is fullscreen"
+msgstr "Sincronización adaptativa solo con una ventana a pantalla completa"
+
+#: services/Displays.qml
+msgid "Fixed refresh rate; least flicker on flaky HDMI FreeSync"
+msgstr "Frecuencia fija; menos parpadeo con FreeSync inestable por HDMI"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Currently active on this output"
+msgstr "Activa ahora en esta salida"
+
+#: modules/nexus/pages/DisplayPage.qml
+msgid "Currently inactive on this output"
+msgstr "Inactiva ahora en esta salida"
+
+#: services/Displays.qml
+#, qt-format
+msgid "%1×%2 · %3 Hz"
+msgstr "%1×%2 · %3 Hz"
+
+#: modules/nexus/pages/DisplayPage.qml
+#, qt-format
+msgid "This connection tops out at %1 Hz. The panel may support a higher rate over DisplayPort."
+msgstr "Esta conexión llega como máximo a %1 Hz. El panel puede admitir más por DisplayPort."

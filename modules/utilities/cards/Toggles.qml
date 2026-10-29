@@ -132,7 +132,7 @@ StyledRect {
                 DelegateChoice {
                     roleValue: "gameMode"
                     delegate: Toggle {
-                        icon: "gamepad"
+                        icon: "fit_screen"
                         checked: RuntimeState.gameMode
                         onClicked: RuntimeState.gameMode = !RuntimeState.gameMode
                     }
