@@ -3,8 +3,9 @@
 //@ pragma DefaultEnv QS_DROP_EXPENSIVE_FONTS=1
 //@ pragma DefaultEnv QSG_RENDER_LOOP=threaded
 //@ pragma DefaultEnv QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
-// Use KDE platform theme so QIcon reads kdeglobals [Icons] (Papirus, kept in sync by caelestia-quiet)
-//@ pragma Env QT_QPA_PLATFORMTHEME=kde
+// Use qt6ct platform theme so QIcon reads qt6ct.conf [Appearance] icon_theme (Papirus) and the
+// Material palette is applied to Qt widgets; kept in sync by caelestia-quiet (see _sync_qt6ct)
+//@ pragma Env QT_QPA_PLATFORMTHEME=qt6ct
 // Load the locally built plugin (in ~/.local) instead of the system package's:
 // it carries fork-side C++ changes (Requests transfer timeout, config nodes).
 //@ pragma Env QT_ADDITIONAL_PACKAGES_PREFIX_PATH=/home/manu/.local/lib/qt6/qml

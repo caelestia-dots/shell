@@ -11,10 +11,20 @@ palette into open Kitty windows via remote control.
 
 from __future__ import annotations
 
+import os
 import runpy
 import subprocess
 import sys
 from pathlib import Path
+
+
+def _atomic_write(path: Path, text: str) -> None:
+    """Temp-file + os.replace: readers never see a half-written file, and the
+    rename is what qt6ct's directory-scoped QFileSystemWatcher picks up live."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text)
+    os.replace(tmp, path)
 
 
 def _reload_kitty() -> None:
@@ -28,10 +38,11 @@ def _reload_kitty() -> None:
 
 
 def _sync_kde_icon_theme(mode: str) -> None:
-    """Quickshell uses QT_QPA_PLATFORMTHEME=kde → QIcon reads kdeglobals [Icons].
+    """kdeglobals [Icons] → Papirus-{mode}.
 
-    Caelestia sets Papirus via gsettings for GTK; keep KDE/Qt in sync so the
-    launcher resolves the same icon set (not leftover Breeze/hicolor).
+    Transitional: plasma-integration is still installed (QT_QPA_PLATFORMTHEME
+    no longer targets it, but any stray KDE config reader does). Phase 2
+    (Plasma uninstall) removes this dual-write.
     """
     import re
 
@@ -56,6 +67,101 @@ def _sync_kde_icon_theme(mode: str) -> None:
         pass
 
 
+# QPalette::ColorRole enum order (Qt ≥ 6.6: 22 roles, Accent at 21). qt6ct maps
+# scheme list index i → ColorRole(i), so this order is the file format.
+_QT_ROLE_KEYS = (
+    ("WindowText", "onSurface"),
+    ("Button", "surfaceContainer"),
+    ("Light", "surfaceBright"),
+    ("Midlight", "surfaceContainerHigh"),
+    ("Dark", "surfaceContainerLowest"),
+    ("Mid", "surfaceContainerLow"),
+    ("Text", "onSurface"),
+    ("BrightText", "onSurface"),
+    ("ButtonText", "onSurface"),
+    ("Base", "surfaceContainerLowest"),
+    ("Window", "surface"),
+    ("Shadow", "shadow"),
+    ("Highlight", "primary"),
+    ("HighlightedText", "onPrimary"),
+    ("Link", "primary"),
+    ("LinkVisited", "tertiary"),
+    ("AlternateBase", "surfaceContainer"),
+    ("NoRole", "surface"),
+    ("ToolTipBase", "surfaceContainerHighest"),
+    ("ToolTipText", "onSurfaceVariant"),
+    ("PlaceholderText", "outline"),
+    ("Accent", "primary"),
+)
+# Disabled-state roles that read as text/selection get a muted tone instead.
+_QT_DISABLED_MUTED = {
+    "WindowText": "outline",
+    "Text": "outline",
+    "ButtonText": "outline",
+    "PlaceholderText": "outlineVariant",
+    "HighlightedText": "onSurface",
+    "Highlight": "outlineVariant",
+    "Accent": "outlineVariant",
+}
+
+
+def _qt6ct_scheme_body(colours: dict[str, str], mode: str) -> str:
+    """Build the [ColorScheme] block from the scheme's Material tokens."""
+
+    def token(key: str) -> str:
+        # All roles are defined by the scheme generator; the fallback only
+        # exists as a guard against scheme drift.
+        return f"#{colours.get(key) or colours.get('surface') or '000000'}"
+
+    active = [token(key) for _, key in _QT_ROLE_KEYS]
+    inactive = list(active)
+    disabled = [
+        token(_QT_DISABLED_MUTED.get(role, fallback_key))
+        for role, fallback_key in _QT_ROLE_KEYS
+    ]
+
+    def line(name: str, values: list[str]) -> str:
+        return f"{name}=" + ", ".join(values)
+
+    rows = (line("active_colors", active), line("inactive_colors", inactive), line("disabled_colors", disabled))
+    return "[ColorScheme]\n" + "\n".join(rows) + "\n"
+
+
+def _sync_qt6ct(colours: dict[str, str], mode: str) -> None:
+    """Write the qt6ct scheme + config from the scheme's Material tokens.
+
+    qt6ct is our Qt platform theme since leaving QT_QPA_PLATFORMTHEME=kde:
+    icon_theme + custom palette live in ~/.config/qt6ct/qt6ct.conf, the palette
+    itself in colors/caelestia.conf. Both files are replaced atomically so
+    qt6ct's directory watcher applies icon and colour changes to running Qt
+    apps (VLC, transmission-qt, …) without restart.
+    """
+    import configparser
+
+    colors_dir = Path.home() / ".config/qt6ct/colors"
+    scheme_path = colors_dir / "caelestia.conf"
+    _atomic_write(scheme_path, _qt6ct_scheme_body(colours, mode))
+
+    icon_theme = f"Papirus-{mode.capitalize()}" if mode in ("dark", "light") else "Papirus-Dark"
+    conf = Path.home() / ".config/qt6ct/qt6ct.conf"
+    parser = configparser.ConfigParser(interpolation=None, strict=False)
+    try:
+        parser.read(conf, encoding="utf-8")
+    except (OSError, configparser.Error):
+        parser = configparser.ConfigParser(interpolation=None, strict=False)
+    if not parser.has_section("Appearance"):
+        parser.add_section("Appearance")
+    parser.set("Appearance", "icon_theme", icon_theme)
+    parser.set("Appearance", "custom_palette", "true")
+    parser.set("Appearance", "color_scheme_path", str(scheme_path))
+    parser.set("Appearance", "style", "Fusion")
+    import io
+
+    buf = io.StringIO()
+    parser.write(buf)
+    _atomic_write(conf, buf.getvalue())
+
+
 def _sync_gtk_settings(mode: str) -> None:
     """Point GTK at the correct adw-gtk3 variant and enable live CSS reload."""
     dark = mode == "dark"
@@ -67,7 +173,7 @@ def _sync_gtk_settings(mode: str) -> None:
         f"gtk-theme-name={gtk_theme}\n"
         f"gtk-application-prefer-dark-theme={prefer}\n"
         f"gtk-icon-theme-name={icon_theme}\n"
-        "gtk-cursor-theme-name=breeze_cursors\n"
+        "gtk-cursor-theme-name=Adwaita\n"
         "gtk-cursor-theme-size=24\n"
         "gtk-font-name=Noto Sans 10\n"
         "gtk-modules=colorreload-gtk-module\n"
@@ -175,6 +281,7 @@ def _patch_theme() -> None:
         except Exception:
             pass
         _sync_kde_icon_theme(mode)
+        _sync_qt6ct(colours, mode)
         # OpenCode TUI: theme file + cli.json mode follow the activity scheme.
         _sync_opencode_theme(colours, mode)
         # Templates land inside apply_colours; refresh Kitty after that.
