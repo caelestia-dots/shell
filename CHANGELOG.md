@@ -2,6 +2,24 @@
 
 Cambios relevantes de este fork respecto a releases internas. El detalle de uso está en [FEATURES.md](./FEATURES.md).
 
+## 2026-10-29
+
+### Sync upstream
+
+- Merge de `upstream/main` (PR #1: `feat(lock): clear password with Ctrl+U`). El fork lleva remote `upstream` (caelestia-dots/shell); las actualizaciones de base se hacen mergeando upstream y pasando PR a `main`.
+- `.cursor-tmp/` añadido a `.gitignore`.
+
+### Nexus → Pantalla (Display)
+
+- Nueva página en Connectivity (encima de Audio): una tarjeta por monitor con **modo (Hz)**, **escala** y **VRR / Adaptive Sync**.
+- Política VRR estilo Plasma: **Nunca / Automático / Siempre** (Automático = solo a pantalla completa).
+- Persistencia por conector en `~/.config/hypr/caelestia-monitors.lua` + `hyprctl reload` al aplicar; la política guardada ya no la pisa el booleano de `hyprctl` (fix del parpadeo con Adaptive Sync pegado en el CRTC). Requiere `require("caelestia-monitors")` en `hyprland.lua`.
+
+### Layout compacto (ex game mode)
+
+- Redefinido como layout que aprovecha la pantalla al máximo: sin marco de Caelestia (solo barra izquierda, `reserved: 60 0 0 0`), gaps 0, `rounding`/`border_size` 0 y sin hueco entre barra y ventanas (smoothing 0 + solape 1px).
+- Ya **no** toca animaciones, blur, sombras, wobble ni tearing. El id interno sigue siendo `gameMode` (IPC / quick toggle `fit_screen`).
+
 ## 2026-10-28
 
 ### Juegos (Steam)

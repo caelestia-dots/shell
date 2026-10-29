@@ -13,10 +13,17 @@
 https://github.com/user-attachments/assets/0840f496-575c-4ca6-83a8-87bb01a85c5f
 
 > [!IMPORTANT]
-> **Este repositorio es un fork** de [caelestia-dots/shell](https://github.com/caelestia-dots/shell) con extras
-> (activities + look atómico por activity, Madison VPN con heal tras sleep, historial de portapapeles,
-> grabación a Videocapturas, Thunar/GTK alineados al esquema, mantener activo en quick toggles,
-> launcher/Papirus, Kitty, timers, etc.).
+> **Este repositorio es un fork** de [caelestia-dots/shell](https://github.com/caelestia-dots/shell). Resumen de extras:
+>
+> - **Activities**: escritorios agrupados (Principal/Juegos/Trabajo), overview (`Super+Tab`), look por actividad (wallpaper, esquema, modo, transparencia, light apps) y apps ancladas por desktop
+> - **Panel Juegos (Steam)**: complemento opt-in con stats Material You, logros por rareza, mapa de calor mensual y juegos no Steam (Millennium)
+> - **System updates**: página Nexus + icono/badge en la barra + popout; actualización con password popup y proceso en segundo plano
+> - **Historial de portapapeles** (cliphist): `Super+Shift+V`, pegar en la ventana enfocada, favoritos
+> - **Madison VPN**: icono en la barra, diálogo OTP integrado, configuración local, heal tras suspender
+> - **Complementos** (Nexus): VPN, Timers e Hidratación on/off con limpieza al desactivar
+> - **Timers** del reloj (persistentes), **grabación** estable en `~/Vídeos/Videocapturas de pantalla` con chip REC
+> - **Atajos remapeables** desde Nexus (incluye F13–F35), página **Pantalla** (modo/escala/VRR por monitor), modo **layout compacto**
+> - Thunar/GTK/Papirus y **Kitty** alineados al esquema de la actividad; **i18n español** completo; launcher con edición de `.desktop`
 >
 > Documentación del fork (visible en GitHub, no dentro de la shell):
 > **[FEATURES.md](./FEATURES.md)** (qué incluye y cómo usarlo) y **[CHANGELOG.md](./CHANGELOG.md)** (cambios recientes).

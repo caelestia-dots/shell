@@ -1,0 +1,97 @@
+# AGENTS.md — Referencia del fork
+
+Punto de referencia para cualquier agente/IDE/modelo que entre sin contexto. Si cambias algo respecto
+a este fichero, **actualízalo en el mismo commit**. Detalle de uso en [FEATURES.md](./FEATURES.md),
+cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream en [README.md](./README.md).
+
+---
+
+## 1. Qué es
+
+- Fork de **caelestia-dots/shell** (shell Quickshell/QML para **Hyprland**, config en **Lua**).
+- Repo GitHub: **iMacnucintosh/hyprland-shell**. Remote `origin` = tu fork; `upstream` = caelestia-dots/shell (las actualizaciones de base se hacen **mergeando upstream** y pasando PR a `main`).
+- El código que **corre** es este checkout: `~/.config/quickshell/caelestia` (no el paquete AUR de `/etc/xdg`). El plugin C++ de config puede necesitar `cmake --build && cmake --install` cuando se cambian nodos de config.
+- Runtime de la shell: `~/.config/caelestia/` (`shell.json`, `keybinds.json`, `cli.json`, `templates/`).
+- Estado persistente: `~/.local/state/caelestia/` (`timers.json`, `hydration.json`, `light-apps.json`, `nonsteam-sessions.json`, `steam-activity.json`, `sequences.txt`, `theme/kitty.conf`).
+- Generados por el fork en Hyprland (todos via `require(...)` desde `hyprland.lua`): `caelestia-binds.lua`, `caelestia-activity-rules.lua`, `caelestia-monitors.lua`.
+
+## 2. Entorno del usuario (Manu)
+
+- Arch Linux + **Hyprland 0.57**, sobremesa (sin batería), monitor MSI 1440p @ **144 Hz** por HDMI (`HDMI-A-1`).
+- Locale `es_ES.UTF-8`; **todo lo nuevo va con i18n**: cadenas vía `Tr.tr` / `Tr.trN` / `Tr.trCtx` → `es.po` → recompilar el plugin I18n e instalarlo en `~/.local`.
+- Apps por defecto: **kitty** (terminal), **thunar** (explorador, `Super+E`), **VLC** (vídeo), tema de iconos **Papirus(-Dark)**.
+- VPN del trabajo: openfortivpn (credenciales **solo** en `~/.config/openfortivpn/config`, jamás en el repo).
+- Steam: API key **solo en config local** (nunca commitearla; grep del diff antes de push). Perfil/logros públicos.
+
+## 3. Convenciones de trabajo
+
+- Tras cualquier cambio de QML/script: **reiniciar la shell** (`caelestia shell -r`, en background `-r -d`) y verificar que carga sin errores.
+- Estilo **Material You estricto**: tokens, `MaterialShape`, blur/transparencia; los detalles visuales (padding, tamaños, sombras, centrados) se afinan con el usuario tras cada versión — espera feedback visual.
+- Commits: **conventional commits** (`feat:` / `fix:` / `docs:`), a nombre del usuario. **NUNCA** dejar trailer `Co-authored-by: Cursor/agent`.
+- `main` está **protegida**: feature grande → rama `feature/*` + PR; docs/fixes pequeños pueden ir directos. Push por SSH (token HTTPS de `gh` inválido).
+- `.gitignore` cubre `__pycache__/` y `.cursor-tmp/`.
+- Opciones nuevas: nodo en config (GlobalConfig) si hace falta rebuild del plugin, exposición en Nexus, y **documentación en FEATURES.md**.
+
+## 4. Mapa del código
+
+### Servicios (`services/`, singletons QML)
+| Servicio | Qué hace |
+| --- | --- |
+| `Activities` | Core del fork: pills en la barra, look por activity, apply atómico vía `scripts/apply-activity-style.py` (wallpaper + un solo `scheme set`; el modo de la activity gana a `smartScheme`; verify + reintentos). El apply es **serial**: lanzar en paralelo = carrera light/dark |
+| `Colours` | Paleta, modo light/dark, `lightApps` (portal `prefer-light`; theming GTK off con light apps sin que pierda el CSS del esquema) |
+| `Steam` | ~1040 líneas (deuda técnica). Web API + logros + no-Steam (VDF/Millennium) + sesiones (`reaper`). Al refrescar **conserva el juego seleccionado** |
+| `Updates` | Poll 30 min (Arch/AUR/Flatpak); update: password popup → `sudo -S -v` + askpass síncrono → proceso en bg. Nunca `yay --sudoloop` (bloquea con faillock); en bg pasará `--sudoflags=-n` |
+| `Clipboard` | cliphist + `wl-clipboard`; paste con foco restaurado (~220 ms) + `send_shortcut` / `wtype` |
+| `MadisonVpn` | Status exige ping a intranet (no basta `ppp0`); teardown/heal tras suspender; popout OTP + settings |
+| `Displays` | `hyprctl monitors -j`; VRR **por conector** (Nunca/Automático/Siempre) → `caelestia-monitors.lua` + `hyprctl reload` (sin reload VRR off no llega al CRTC) |
+| `Hydration` / `Timers` | Complementos on/off; al off limpian estado/procesos y ocultan su UI |
+| `Keybinds` | Grabación de teclas con submap vacío de Hyprland (inhibe binds), soporte F13–F35, diálogo de conflicto → `caelestia-binds.lua` |
+| `Hypr` | Bridge de eventos de Hyprland; conectar directos cuando el `rawEvent` no se re-emite |
+
+### UI
+- `modules/nexus/pages/`: `DisplayPage`, `UpdatesPage`(+`UpdatesSettings`), `ComplementsPage`, `ShellPage` (activities + look), `KeybindsPage`, `LanguageAndRegion` (tiempo/ubicación)…
+- Barra/popouts en `modules/bar/`; panel Juegos en `modules/dashboard/games/`.
+- Trampas QML de este codebase: `PageBase` admite **un solo hijo**; no existe `IconButton.Standard`; `HoverHandler` usa `hovered` (no `containsMouse`); para drop de arrastres no fiarse de `DropArea` con reparent al drag-layer — detectar el target bajo el cursor; `ClipRect` no recorta por `radius` sin máscara; un `Process` con stdin heredado cuelga (usar `DEVNULL`); QML no permite anotaciones de tipo en parámetros con valor por defecto; `Row` no acepta asignar `implicitHeight`.
+
+### Scripts (`scripts/`)
+- `apply-activity-style.py` — apply de look completo en un solo proceso (~0,38 s).
+- `caelestia-quiet.py` — aplica tema sin volcar secuencias OSC a los PTYs; recarga Kitty, sync Papirus/kdeglobals, GTK/colors.css.
+- `sync-light-apps-cli.py` — reescrituras de `cli.json` **deben conservar** el postHook de Kitty.
+- `steam-nonsteam.py` — VDF + IDs ocultos + sesiones Millennium + caché de historial.
+- `steam-activity.py` — poll de procesos `reaper` (sesiones reales) + delta de `playtime_forever` como respaldo.
+- `check-system-updates.py` / `run-system-update.sh` — chequeo (stdin `DEVNULL` + timeout) y update.
+- `record.sh` / `record-start.sh` — grabación desacoplada del panel; `CAELESTIA_RECORDINGS_DIR`.
+
+## 5. Features del fork (resumen)
+
+1. **Activities** — Principal (no eliminable; las demás heredan su look), Juegos, Trabajo. Look por activity: wallpaper + esquema + modo + transparencia + light apps. Apps ancladas por desktop (reglas regex **RE2** con `(?i)`, sin `silent` para que el foco siga la ventana, reintento ~700 ms). Overview `Super+Tab` con drag & drop de ventanas (pins no arrastran). Atajos `Super+Ctrl+←/→` y toggle "saltar entre actividades".
+2. **Pantalla** — modo/escala/VRR por monitor con política Nunca/Automático/Siempre.
+3. **Juegos (Steam)** — complemento opt-in: stats en shapes M3, hero con portada, carrusel por `lastPlayed`, logros (rareza + bloqueados, descripción siempre visible), heatmap mensual navegable, juegos no Steam + Millennium + sesiones reales Steam.
+4. **Updates** — página Nexus + icono/badge en la barra (solo si hay paquetes) + popout; password popup → update en bg con logs en vivo en Nexus.
+5. **Clipboard** — popout estilo Caelestia (`m3surface` + blur), favoritos, búsqueda, previews de imágenes/rutas, pegar en la ventana enfocada.
+6. **Madison VPN** — icono en status, dropdown al hover, OTP integrado, settings (host/puerto/user/pass), heal tras sleep.
+7. **Complementos** — VPN, Timers, Hidratación (+ Juegos) con icono por fila y limpieza al desactivar. Hidratación: depósito con waves en el dashboard (el calendario del popout del reloj sigue), meta 3000 ml, presets +20/+83/+250/+500, recordatorio con acciones.
+8. **Varios** — timers del reloj persistentes, grabación estable + chip REC, capturas sin notificación, clic en notificación → enfoca/abre la app en su workspace, launcher con edición de `.desktop` (hover inferior para abrirlo, se cierra al salir el puntero), tray/status con pastilla al hover unificada, recoloreado forzado a claro de tray sin contraste (Steam/Cursor), Keep-awake (café) activado por defecto, **layout compacto** (ex game mode: solo barra izquierda, gaps/rounding/border 0, sin tocar animaciones/blur/wobble), i18n ES completo, docs README/FEATURES/CHANGELOG.
+
+## 6. Trampas / aprendizajes
+
+- `cmake --install` **sobrescribe `shell.qml`**: revisar `git status` tras cada install y restaurar.
+- Regex de reglas Hyprland = **RE2** (`(?i)`, `\.`, patrones Lua `%%` no).
+- Tras cambiar monitor/VRR: siempre `hyprctl reload`.
+- El CLI volcaba secuencias OSC a todos los `/dev/pts`; el fork lo parchea vía `scripts/caelestia-quiet.py` — no quitar el wrapper.
+- La caché HTTP/schema/logros de `Steam.qml` es solo en memoria (ver pendientes).
+- `hyprctl` reporta un booleano de VRR: la **política** vive en el Lua, no la pises con el estado.
+
+## 7. Pendiente / roadmap
+
+- [ ] **Caché de logros de Steam en disco** (TTL ~1 día) para no re-pedir la biblioteca al arrancar.
+- [ ] **Partir `services/Steam.qml`** por capas si se crece (API / librería / sesiones / formateo).
+- [ ] `steam-activity.py`: mandar el snapshot **por stdin** en vez de argv (riesgo `ARG_MAX`).
+- [ ] Tests pytest ligeros: parser VDF, merge de sesiones Millennium, residual delta/sesión.
+- [ ] Keep-awake se reactiva siempre al arrancar la shell: persistir su estado.
+- [ ] Heatmap de Steam vacío: pie explicativo ya existe; considerar rellenar cifras del mes con logros cuando no hay tiempo.
+- [ ] A futuro: si upstream monta plugins de verdad, mover Madison VPN y Timers como plugins.
+
+---
+
+*Última actualización: 2026-10-29. Mantener este fichero al día con cada feature grande o aprendizaje nuevo.*
