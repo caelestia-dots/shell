@@ -16,6 +16,12 @@ Singleton {
     readonly property string steamIdInput: GlobalConfig.addons.steam.steamId
     readonly property int refreshMinutes: Math.max(1, GlobalConfig.addons.steam.refreshMinutes || 10)
     readonly property bool configured: apiKey.length > 0 && steamIdInput.length > 0
+    // Cap the achievements sampling GETs (1 per candidate game) — a big
+    // library otherwise fires hundreds of requests on the first reload.
+    readonly property int achievementSampleLimit: 60
+    // The periodic reload only runs while the dashboard shows the Games tab
+    // (fetched data is irrelevant while hidden).
+    property bool gamesTabVisible: false
 
     property bool loading: false
     property string error: ""
@@ -81,7 +87,7 @@ Singleton {
         const byTime = visible.slice().sort((a, b) => b.playtimeForever - a.playtimeForever);
         root.topGamesByPlaytime = byTime.slice(0, 5);
         root.topGamesByRecency = visible.filter(g => g.lastPlayed > 0).sort((a, b) => b.lastPlayed - a.lastPlayed).slice(0, 20);
-        root.achievementCandidates = visible.filter(g => g.hasStats && g.playtimeForever > 0).map(g => g.appId);
+        root.achievementCandidates = visible.filter(g => g.hasStats && g.playtimeForever > 0).sort((a, b) => b.playtimeForever - a.playtimeForever).map(g => g.appId);
     }
 
     // Cover picker: Steam + Non-Steam, sorted by last played (playing now first)
@@ -599,7 +605,9 @@ Singleton {
 
     // Steam's "average completion" only counts games with at least one unlock
     function sampleLibraryAchievements(g: int): void {
-        const sample = root.achievementCandidates.slice();
+        // Candidates are sorted by playtime (see addGames) so the cap keeps
+        // the most played games; the tail is unmeasured by design.
+        const sample = root.achievementCandidates.slice(0, root.achievementSampleLimit);
         if (sample.length === 0) {
             root.libraryAchievements = null;
             root.libraryAchievementsLoading = false;
@@ -932,7 +940,7 @@ Singleton {
 
     Timer {
         interval: root.refreshMinutes * 60 * 1000
-        running: root.enabled && root.configured
+        running: root.enabled && root.configured && root.gamesTabVisible
         repeat: true
         onTriggered: root.reload()
     }

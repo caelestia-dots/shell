@@ -456,10 +456,19 @@ Singleton {
         id: installProc
         stdinEnabled: true
         stdout: SplitParser {
-            onRead: data => root.appendLog(data)
+            onRead: data => {
+                // Heartbeat: the 45-min timer only fires when the install is
+                // genuinely hung (no output for 45 min), not for long installs
+                // — killing a live pacman mid-transaction could break the system.
+                root.appendLog(data);
+                installTimeout.restart();
+            }
         }
         stderr: SplitParser {
-            onRead: data => root.appendLog(data)
+            onRead: data => {
+                root.appendLog(data);
+                installTimeout.restart();
+            }
         }
         onStarted: {
             installProc.write(root._authPw + "\n");
@@ -488,7 +497,10 @@ Singleton {
         }
     }
 
-    // Safety net: AUR builds can be long, but a hung sudo must not stick forever
+    // Safety net: AUR builds can be long — only kill when the install is
+    // genuinely hung (registering no output for 45 min). Killing a live
+    // elevated pacman mid-transaction could leave the system broken, so the
+    // timer is restarted on every log line (see installProc readers).
     Timer {
         id: installTimeout
         interval: 45 * 60 * 1000

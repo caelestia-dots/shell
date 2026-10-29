@@ -43,6 +43,12 @@ Singleton {
     }
 
     function refreshStatus(): void {
+        // While connect/disconnect is in flight the piped status is stale by
+        // definition; the process onExited handler refreshes at the end.
+        // Previously poll here reset `busy` mid-connect (UI flicker + a second
+        // connectWithOtp could kill the first tunnel attempt).
+        if (connectProc.running || disconnectProc.running)
+            return;
         if (!root.enabled || statusProc.running)
             return;
         statusProc.running = true;
@@ -233,6 +239,10 @@ Singleton {
         const state = parts[0] || "disconnected";
         const ip = parts[1] || "";
         const nowConnected = state === "connected";
+        // A transition is owned by its process; ignore piped status that raced
+        // with it (would stamp "Disconnected" over "Connecting…" and clear busy).
+        if (connectProc.running || disconnectProc.running)
+            return;
         const dropped = root.wasConnected && !nowConnected && !root.busy;
 
         root.connected = nowConnected;

@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 # Noninteractive system update for the bar/Nexus installers.
-# Reads the sudo password from stdin (first line), then elevates via SUDO_ASKPASS.
+# The sudo password arrives via stdin (first line) and is kept ONLY in this
+# process' memory: every elevated step refreshes the timestamp with
+# `sudo -S -v` first. No password file is ever written to disk here — the
+# previous askpass temp file lived for the whole installation, which is
+# recoverable from memory dumps on crash.
 set -euo pipefail
-
-ASKPASS="${XDG_RUNTIME_DIR:-/tmp}/caelestia-updates-askpass"
-PWFILE="${ASKPASS}.pw"
-
-cleanup() {
-    rm -f "$ASKPASS" "$PWFILE"
-}
-trap cleanup EXIT
 
 IFS= read -r PASSWORD || true
 if [[ -z "${PASSWORD}" ]]; then
@@ -17,16 +13,14 @@ if [[ -z "${PASSWORD}" ]]; then
     exit 2
 fi
 
-umask 077
-printf '%s\n' "$PASSWORD" >"$PWFILE"
-cat >"$ASKPASS" <<EOF
-#!/bin/sh
-exec cat "$PWFILE"
-EOF
-chmod 700 "$ASKPASS"
-chmod 600 "$PWFILE"
-export SUDO_ASKPASS="$ASKPASS"
-PASSWORD=""
+refresh_sudo() {
+    # Re-validate so later `sudo -A` calls ride on the fresh timestamp; if it
+    # lapsed again mid-step, that step fails visibly in the install log.
+    printf '%s\n' "$PASSWORD" | sudo -S -v 2>/dev/null || {
+        echo "Authentication failed" >&2
+        exit 2
+    }
+}
 
 do_aur=0
 do_arch=0
@@ -65,9 +59,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "$do_aur" -eq 1 ]]; then
+    refresh_sudo
     echo "→ ${wrapper} -Syu --noconfirm --sudoflags=-A ${aur_flags[*]-}"
     "$wrapper" -Syu --noconfirm --sudoflags=-A ${aur_flags[@]+"${aur_flags[@]}"}
-elif [[ "$do_arch" -eq 1 ]]; then
+fi
+
+if [[ "$do_arch" -eq 1 ]]; then
+    refresh_sudo
     echo "→ sudo -A pacman -Syu --noconfirm"
     sudo -A pacman -Syu --noconfirm
 fi

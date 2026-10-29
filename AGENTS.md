@@ -10,7 +10,7 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 
 - Fork de **caelestia-dots/shell** (shell Quickshell/QML para **Hyprland**, config en **Lua**).
 - Repo GitHub: **iMacnucintosh/hyprland-shell**. Remote `origin` = tu fork; `upstream` = caelestia-dots/shell (las actualizaciones de base se hacen **mergeando upstream** y pasando PR a `main`).
-- El código que **corre** es este checkout: `~/.config/quickshell/caelestia` (no el paquete AUR de `/etc/xdg`). El plugin C++ de config puede necesitar `cmake --build && cmake --install` cuando se cambian nodos de config.
+- El código que **corre** es este checkout: `~/.config/quickshell/caelestia` (no el paquete AUR de `/etc/xdg`). El plugin C++ de config se compila **desde la raíz del repo** e instala en `~/.local` (sin sudo); `shell.qml` lo carga vía pragma `QT_ADDITIONAL_PACKAGES_PREFIX_PATH` — ver "Plugin C++ (build user-local)" en FEATURES.md.
 - Runtime de la shell: `~/.config/caelestia/` (`shell.json`, `keybinds.json`, `cli.json`, `templates/`).
 - Estado persistente: `~/.local/state/caelestia/` (`timers.json`, `hydration.json`, `light-apps.json`, `nonsteam-sessions.json`, `steam-activity.json`, `sequences.txt`, `theme/kitty.conf`).
 - Generados por el fork en Hyprland (todos via `require(...)` desde `hyprland.lua`): `caelestia-binds.lua`, `caelestia-activity-rules.lua`, `caelestia-monitors.lua`.
@@ -22,13 +22,16 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 - Apps por defecto: **kitty** (terminal), **thunar** (explorador, `Super+E`), **VLC** (vídeo), tema de iconos **Papirus(-Dark)**.
 - VPN del trabajo: openfortivpn (credenciales **solo** en `~/.config/openfortivpn/config`, jamás en el repo).
 - Steam: API key **solo en config local** (nunca commitearla; grep del diff antes de push). Perfil/logros públicos.
+- OpenCode TUI: plugin sidebar file-tree es un **fork local** en `~/.config/opencode/plugins/opencode-file-tree` (colores git en el árbol; rebuild con `bun run build`, no npm; verificación en su `test.md`). El tema del TUI (`caelestia` + gemela `caelestia-alt` para el hot-reload por flip de nombre) lo genera `scripts/generate-opencode-theme.py` y lo engancha `caelestia-quiet.py`.
 
 ## 3. Convenciones de trabajo
 
 - Tras cualquier cambio de QML/script: **reiniciar la shell** (`caelestia shell -r`, en background `-r -d`) y verificar que carga sin errores.
+- Cualquier `sh -c`/`bash -c` que lleve contenido de usuario va **por argv (`"$1"`)**: `JSON.stringify` es quoting de JS, no de shell (lección: inyección en Clipboard). Contraseñas/secretos nunca a fichero: en RAM con `sudo -S -v` por paso (ver `scripts/run-system-update.sh`).
 - Estilo **Material You estricto**: tokens, `MaterialShape`, blur/transparencia; los detalles visuales (padding, tamaños, sombras, centrados) se afinan con el usuario tras cada versión — espera feedback visual.
 - Commits: **conventional commits** (`feat:` / `fix:` / `docs:`), a nombre del usuario. **NUNCA** dejar trailer `Co-authored-by: Cursor/agent`.
-- `main` está **protegida**: feature grande → rama `feature/*` + PR; docs/fixes pequeños pueden ir directos. Push por SSH (token HTTPS de `gh` inválido).
+- Commits **locales por defecto**: el agente commitea a menudo, en commits agrupados, ordenados y bien explicados, pero **NO pushea a `origin`** — el usuario indica cuándo hacer push.
+- `main` está **protegida** (toda escritura exige PR). Flujo: rama `feature/*` o `docs/*` + PR (vía `gh`, HTTPS), y merge de la PR. El push directo a `main` lo rechazan las rules del repo (GH013).
 - `.gitignore` cubre `__pycache__/` y `.cursor-tmp/`.
 - Opciones nuevas: nodo en config (GlobalConfig) si hace falta rebuild del plugin, exposición en Nexus, y **documentación en FEATURES.md**.
 
@@ -75,10 +78,11 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 
 ## 6. Trampas / aprendizajes
 
-- `cmake --install` **sobrescribe `shell.qml`**: revisar `git status` tras cada install y restaurar.
+- `cmake --install` **sobrescribe `shell.qml`**: revisar `git status` tras cada install y restaurar. (Con `ENABLE_MODULES=plugin` no pasa; la trampa solo aplica al módulo `shell`.)
 - Regex de reglas Hyprland = **RE2** (`(?i)`, `\.`, patrones Lua `%%` no).
 - Tras cambiar monitor/VRR: siempre `hyprctl reload`.
 - El CLI volcaba secuencias OSC a todos los `/dev/pts`; el fork lo parchea vía `scripts/caelestia-quiet.py` — no quitar el wrapper.
+- `Requests.get` ya lleva transfer timeout de 15 s (plugin C++, `~/.local`) — no quitarlo al tocar `requests.cpp`; sin él un hang deja `pending` > 0 para siempre.
 - La caché HTTP/schema/logros de `Steam.qml` es solo en memoria (ver pendientes).
 - `hyprctl` reporta un booleano de VRR: la **política** vive en el Lua, no la pises con el estado.
 
@@ -94,4 +98,4 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 
 ---
 
-*Última actualización: 2026-10-29. Mantener este fichero al día con cada feature grande o aprendizaje nuevo.*
+*Última actualización: 2026-10-29 (repaso integral: Clipboard argv/verificación de paths, VPN busy guard, Activities verify cap, Requests 15 s + plugin build user-local, Updates askpass en RAM + heartbeat, Displays hotplug, Steam cap/gate del reload). Mantener este fichero al día con cada feature grande o aprendizaje nuevo.*

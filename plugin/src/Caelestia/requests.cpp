@@ -63,6 +63,10 @@ void Requests::get(const QUrl& url, const QJSValue& onSuccess, const QJSValue& o
         }
     }
 
+    // A hung connection otherwise leaves `pending` > 0 forever (Steam spinner
+    // until the next dashboard tick).
+    request.setTransferTimeout(15000);
+
     auto* reply = m_manager->get(request);
 
     QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, onSuccess, onError] {
