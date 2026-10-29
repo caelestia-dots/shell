@@ -23,9 +23,13 @@ Item {
     implicitHeight: layout.implicitHeight
 
     Component.onCompleted: {
+        Steam.gamesTabVisible = Qt.binding(() => root.visible && Steam.enabled);
         if (Steam.enabled && Steam.configured && !Steam.profile && !Steam.loading)
             Steam.reload();
     }
+
+    // Leave no stale "visible" flag behind us when the loader deactivates.
+    Component.onDestruction: Steam.gamesTabVisible = false
 
     Connections {
         target: Steam
