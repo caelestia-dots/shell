@@ -197,12 +197,16 @@ Singleton {
     }
 
     function ensureWatchers(): void {
-        if (!root.enabled)
+        if (!root.enabled) {
+            textWatch.running = false;
+            imageWatch.running = false;
             return;
-        if (!textWatch.running)
-            textWatch.running = true;
-        if (!imageWatch.running)
-            imageWatch.running = true;
+        }
+        if (textWatch.running && imageWatch.running)
+            return;
+        // Shell reloads leave previous wl-paste --watch orphans under init; reap then start ours
+        if (!reapWatchersProc.running)
+            reapWatchersProc.running = true;
     }
 
     function localImagePath(preview: string): string {
@@ -412,6 +416,18 @@ Singleton {
     }
 
     Process {
+        id: reapWatchersProc
+
+        command: ["pkill", "-f", "wl-paste --type .+ --watch cliphist store"]
+        onExited: {
+            if (!root.enabled)
+                return;
+            textWatch.running = true;
+            imageWatch.running = true;
+        }
+    }
+
+    Process {
         id: textWatch
 
         command: ["wl-paste", "--type", "text", "--watch", "cliphist", "store"]
@@ -423,15 +439,12 @@ Singleton {
         command: ["wl-paste", "--type", "image", "--watch", "cliphist", "store"]
     }
 
-    // cliphist store does not print; poll while open / periodically
+    // cliphist store does not print; only refresh the list while the panel is open
     Timer {
         interval: 1500
-        running: root.enabled
+        running: root.enabled && root.open
         repeat: true
-        onTriggered: {
-            if (root.open || root.history.length === 0)
-                root.reloadHistory();
-        }
+        onTriggered: root.reloadHistory()
     }
 
     Process {

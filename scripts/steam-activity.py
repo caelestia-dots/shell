@@ -40,7 +40,22 @@ def state_dir() -> Path:
     return Path(base) / "caelestia"
 
 
+def steam_likely_running() -> bool:
+    """Cheap gate so idle polls skip a full /proc walk when Steam is closed."""
+    for rel in (".steam/steam.pid", ".steam/steam.pid.bak", ".local/share/Steam/steam.pid"):
+        pid_path = Path.home() / rel
+        try:
+            pid = int(pid_path.read_text().strip().splitlines()[0])
+        except (OSError, ValueError, IndexError):
+            continue
+        if pid > 0 and (Path("/proc") / str(pid)).exists():
+            return True
+    return False
+
+
 def running_app_ids() -> set[str]:
+    if not steam_likely_running():
+        return set()
     ids: set[str] = set()
     for proc in Path("/proc").iterdir():
         if not proc.name.isdigit():
@@ -159,9 +174,16 @@ def main() -> int:
             poll(state, now)
         prune(state, now)
 
-        tmp = path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(state), encoding="utf-8")
-        tmp.replace(path)
+        dumped = json.dumps(state)
+        previous = ""
+        try:
+            previous = path.read_text(encoding="utf-8")
+        except OSError:
+            pass
+        if dumped != previous:
+            tmp = path.with_suffix(".tmp")
+            tmp.write_text(dumped, encoding="utf-8")
+            tmp.replace(path)
 
     out_sessions = {k: sorted(v, key=lambda s: s["start"], reverse=True) for k, v in state["sessions"].items()}
     out_active = {k: v["start"] for k, v in state["active"].items()}

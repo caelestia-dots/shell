@@ -215,7 +215,7 @@ StyledRect {
                         centerY: progressIndicator.height / 2
 
                         startAngle: -90
-                        sweepAngle: ((root.modelData.hints.value ?? 0) / 100) * 360
+                        sweepAngle: ((root.modelData.hints?.value ?? 0) / 100) * 360
 
                         Behavior on sweepAngle {
                             Anim {

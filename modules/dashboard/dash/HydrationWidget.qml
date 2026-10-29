@@ -43,10 +43,13 @@ ClipRect {
         }
     }
 
-    FrameAnimation {
+    // ~60fps while Dash is visible
+    Timer {
+        interval: 16
         running: root.visible
+        repeat: true
         onTriggered: {
-            root.wavePhase = (root.wavePhase + frameTime * 1.6) % (Math.PI * 2);
+            root.wavePhase = (root.wavePhase + 0.016 * 1.6) % (Math.PI * 2);
             tankCanvas.requestPaint();
         }
     }

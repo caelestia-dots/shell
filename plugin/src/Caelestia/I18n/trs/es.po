@@ -5409,36 +5409,8 @@ msgid "Add your API key and Steam ID in Nexus → Complements."
 msgstr "Añade tu API key y Steam ID en Nexus → Complementos."
 
 #: modules/dashboard/GamesTab.qml
-msgid "Recently played"
-msgstr "Jugados recientemente"
-
-#: modules/dashboard/GamesTab.qml
-msgid "Recent achievements"
-msgstr "Logros recientes"
-
-#: modules/dashboard/GamesTab.qml
-msgid "No recent unlocks"
-msgstr "Sin desbloqueos recientes"
-
-#: modules/dashboard/GamesTab.qml
-msgid "Rarest unlocks"
-msgstr "Más raros"
-
-#: modules/dashboard/GamesTab.qml
-msgid "No rarity data yet"
-msgstr "Aún no hay datos de rareza"
-
-#: modules/dashboard/GamesTab.qml
 msgid "Loading…"
 msgstr "Cargando…"
-
-#: modules/dashboard/GamesTab.qml
-msgid "Updating achievements…"
-msgstr "Actualizando logros…"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Level %1"
-msgstr "Nivel %1"
 
 #: modules/dashboard/games/ProfileCard.qml
 msgid "Playing %1"
@@ -5448,100 +5420,17 @@ msgstr "Jugando a %1"
 msgid "%1 / %2"
 msgstr "%1 / %2"
 
-#: modules/dashboard/games/ProgressCard.qml
-msgid "No achievements"
-msgstr "Sin logros"
-
-#: modules/dashboard/games/ProgressCard.qml
-msgid "Recent avg %1%"
-msgstr "Media reciente %1%"
-
-#: modules/dashboard/games/AchievementList.qml
-msgid "%1 · %2% of players"
-msgstr "%1 · %2% de jugadores"
-
-#: modules/dashboard/games/AchievementList.qml
-msgid "%1% of players"
-msgstr "%1% de jugadores"
-
 #: modules/dashboard/GamesTab.qml
 msgid "No recently played games"
 msgstr "Sin juegos recientes"
 
-#: modules/dashboard/games/ProfileCard.qml
-msgid "No owned games data"
-msgstr "Sin datos de juegos en propiedad"
-#: modules/dashboard/games/ProfileCard.qml
-msgid "%1 games in your library"
-msgstr "%1 juegos en tu biblioteca"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Most played: %1"
-msgstr "Más jugados: %1"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Playtime"
-msgstr "Tiempo de juego"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "h"
-msgstr "h"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "All-time hours"
-msgstr "Horas totales"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Last 2 weeks: %1"
-msgstr "Últimas 2 semanas: %1"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "No playtime in the last 2 weeks"
-msgstr "Sin tiempo de juego en las últimas 2 semanas"
-
-#: modules/dashboard/games/ProfileCard.qml
+#: modules/dashboard/games/AchievementList.qml
 msgid "Achievements"
 msgstr "Logros"
 
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Library completion"
-msgstr "Progreso de biblioteca"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Sampling your most played games…"
-msgstr "Muestreando tus juegos más jugados…"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "No achievement data yet"
-msgstr "Aún no hay datos de logros"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "%1 / %2 unlocked · %3 games · %4 perfect"
-msgstr "%1 / %2 desbloqueados · %3 juegos · %4 perfectos"
-
-#: modules/dashboard/games/ProfileCard.qml
+#: modules/dashboard/GamesTab.qml
 msgid "Friends"
 msgstr "Amigos"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "online"
-msgstr "en línea"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Friends online"
-msgstr "Amigos en línea"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "Friends data unavailable"
-msgstr "Datos de amigos no disponibles"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "%1 in-game"
-msgstr "%1 en partida"
-
-#: modules/dashboard/games/ProfileCard.qml
-msgid "%1 online · %2 friends%3"
-msgstr "%1 en línea · %2 amigos%3"
 
 #: services/Steam.qml
 msgid "Could not load friend status"
@@ -5585,8 +5474,8 @@ msgid "Hours"
 msgstr "Horas"
 
 #: modules/dashboard/GamesTab.qml
-msgid "+%1 h in 2 weeks"
-msgstr "+%1 h en 2 semanas"
+msgid "+%1 in 2 weeks"
+msgstr "+%1 en 2 semanas"
 
 #: modules/dashboard/GamesTab.qml
 msgid "played in total"
@@ -5663,8 +5552,15 @@ msgstr "Más"
 
 msgid "Sessions"
 msgstr "Sesiones"
+
 msgid "Longest"
 msgstr "Más larga"
+
+msgid "Dots mark achievement days. Playtime is recorded from now on."
+msgstr "Los puntos marcan días con logros. El tiempo de juego se registra a partir de ahora."
+
+msgid "Playtime is recorded while the shell is running."
+msgstr "El tiempo de juego se registra mientras el shell está en marcha."
 
 msgid "Playtime tracked by Millennium"
 msgstr "Tiempo de juego registrado por Millennium"

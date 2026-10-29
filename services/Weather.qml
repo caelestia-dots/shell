@@ -33,8 +33,8 @@ Singleton {
     readonly property string feelsLike: formatTemp(cc?.feelsLikeC)
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0
-    readonly property string sunrise: cc ? Tr.formatDateTime(new Date(cc.sunrise), Units.twelveHourClock ? "h:mm A" : "h:mm") : "--:--"
-    readonly property string sunset: cc ? Tr.formatDateTime(new Date(cc.sunset), Units.twelveHourClock ? "h:mm A" : "h:mm") : "--:--"
+    readonly property string sunrise: cc ? Tr.formatDateTime(new Date(cc.sunrise), Units.twelveHourClock ? "h:mm A" : "HH:mm") : "--:--"
+    readonly property string sunset: cc ? Tr.formatDateTime(new Date(cc.sunset), Units.twelveHourClock ? "h:mm A" : "HH:mm") : "--:--"
 
     readonly property var cachedCities: new Map()
 

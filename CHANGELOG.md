@@ -2,6 +2,28 @@
 
 Cambios relevantes de este fork respecto a releases internas. El detalle de uso está en [FEATURES.md](./FEATURES.md).
 
+## 2026-10-28
+
+### Juegos (Steam)
+
+- Pestaña **Juegos** en el dashboard (complemento opt-in): perfil, stats Material You, hero, selector por última partida.
+- Lista única de logros (scroll): desbloqueados por rareza, luego bloqueados; descripciones siempre visibles.
+- Mapa de calor mensual con navegación entre meses; puntos en días con logros.
+- Juegos no Steam (`shortcuts.vdf` + arte local); filtra la colección Hidden de Steam.
+- Horas no Steam vía plugin Millennium; sesiones Steam vía `reaper` + delta de playtime.
+- Refresco automático configurable en Nexus (default 10 min); la API key va oculta, con botón de mostrar.
+- Al refrescar se conserva el juego seleccionado.
+
+### Notificaciones / hidratación / tiempo
+
+- Hover en las esquinas derecha abre la sidebar de notificaciones.
+- Hidratación: persistencia del último recordatorio para no repetirlo al reiniciar la shell.
+- Amanecer/atardecer en 24 h usan `HH:mm` (antes se mostraban en ciclo 1–12).
+
+### Higiene
+
+- `.gitignore` cubre `__pycache__/` de los scripts Python.
+
 ## 2026-10-27
 
 ### System updates

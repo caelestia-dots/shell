@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
@@ -67,6 +69,8 @@ StyledRect {
 
     readonly property int totalMinutes: dayMinutes.reduce((a, m) => a + m, 0)
     readonly property int longestMinutes: monthSessions.reduce((m, s) => Math.max(m, Math.round((s.end - s.start) / 60)), 0)
+    readonly property int monthMarkers: dayMarkers.reduce((a, n) => a + n, 0)
+    readonly property bool hasPlay: totalMinutes > 0 || monthSessions.length > 0
 
     onGameKeyChanged: monthOffset = 0
 
@@ -298,6 +302,16 @@ StyledRect {
                         font: Tokens.font.label.small
                         color: Colours.palette.m3outline
                     }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: !root.hasPlay
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.monthMarkers > 0 ? Tr.tr("Dots mark achievement days. Playtime is recorded from now on.") : Tr.tr("Playtime is recorded while the shell is running.")
+                    font: Tokens.font.label.small
+                    color: Colours.palette.m3outline
+                    wrapMode: Text.WordWrap
                 }
             }
         }

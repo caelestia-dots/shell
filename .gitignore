@@ -4,3 +4,6 @@
 build/
 .cache/
 logs
+__pycache__/
+*.pyc
+*.pyo

@@ -14,6 +14,7 @@ PageBase {
 
     property bool hydrationSettingsOpen: false
     property bool steamSettingsOpen: false
+    property bool steamKeyVisible: false
 
     title: Tr.tr("Complements")
 
@@ -339,10 +340,18 @@ PageBase {
                             Layout.maximumWidth: steamCol.width / 2
                             Layout.alignment: Qt.AlignVCenter
                             verticalPadding: Tokens.padding.small
-                            echoMode: TextInput.Password
+                            echoMode: root.steamKeyVisible ? TextInput.Normal : TextInput.Password
                             text: GlobalConfig.addons.steam.apiKey
                             placeholderText: Tr.tr("API key")
                             onEditingFinished: Steam.setApiKey(text)
+                        }
+
+                        IconButton {
+                            Layout.alignment: Qt.AlignVCenter
+                            icon: root.steamKeyVisible ? "visibility_off" : "visibility"
+                            type: IconButton.Text
+                            isRound: true
+                            onClicked: root.steamKeyVisible = !root.steamKeyVisible
                         }
                     }
 

@@ -17,6 +17,7 @@ Item {
     readonly property bool hasProfile: !!Steam.profile
     readonly property real achPercent: Steam.libraryAchievements?.percent ?? 0
     property bool steamShowsSessions
+    property string lastFocusAppId
 
     implicitWidth: 840
     implicitHeight: layout.implicitHeight
@@ -24,6 +25,15 @@ Item {
     Component.onCompleted: {
         if (Steam.enabled && Steam.configured && !Steam.profile && !Steam.loading)
             Steam.reload();
+    }
+
+    Connections {
+        target: Steam
+        function onFocusAppIdChanged(): void {
+            if (root.lastFocusAppId && root.lastFocusAppId !== Steam.focusAppId)
+                root.steamShowsSessions = false;
+            root.lastFocusAppId = Steam.focusAppId;
+        }
     }
 
     ColumnLayout {
@@ -113,7 +123,7 @@ Item {
                 revealDelay: 60
                 icon: "schedule"
                 label: Tr.tr("Hours")
-                caption: Steam.recentPlaytimeMinutes > 0 ? Tr.tr("+%1 h in 2 weeks").arg(Steam.formatHoursCompact(Steam.recentPlaytimeMinutes)) : Tr.tr("played in total")
+                caption: Steam.recentPlaytimeMinutes > 0 ? Tr.tr("+%1 in 2 weeks").arg(Steam.formatPlaytime(Steam.recentPlaytimeMinutes)) : Tr.tr("played in total")
                 value: Steam.totalPlaytimeMinutes > 0 ? Steam.totalPlaytimeMinutes / 60 : -1
                 formatter: v => String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, Tr.locale.groupSeparator)
                 shape: MaterialShape.Clover4Leaf

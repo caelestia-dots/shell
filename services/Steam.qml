@@ -7,7 +7,6 @@ import Quickshell.Io
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
-import qs.services
 
 Singleton {
     id: root
@@ -31,6 +30,7 @@ Singleton {
     property list<var> focusAchievements: [] // unlocked rarest first, then locked most common first
     readonly property list<int> focusUnlockTimes: focusAchievements.map(a => a.unlockTime).filter(t => t > 0)
     property var activity: ({}) // { days, sessions, active } from steam-activity.py
+    property string lastActivityJson: ""
     property real activityNow: Date.now() / 1000
     readonly property var dailyPlaytime: activity.days ?? {}
     readonly property var focusSessions: {
@@ -50,12 +50,11 @@ Singleton {
     readonly property string nonSteamScript: Quickshell.shellPath("scripts/steam-nonsteam.py")
     property bool focusLoading: false
     property string focusError: ""
-    property real libraryAvgProgress: -1
-
     // Generic library / social stats (header)
     property int gameCount: 0
     property int totalPlaytimeMinutes: 0
     property int recentPlaytimeMinutes: 0
+    property list<var> ownedGames: [] // full owned list; derived stats skip hidden
     property list<var> topGamesByPlaytime: []
     property list<var> topGamesByRecency: [] // owned games with lastPlayed, newest first
     property list<string> achievementCandidates: [] // played games with community stats, by playtime
@@ -65,17 +64,24 @@ Singleton {
     }
 
     function applyHiddenFilter(): void {
-        if (root.hiddenAppIds.length === 0)
-            return;
         root.recentGames = root.recentGames.filter(g => !root.isHiddenApp(g.appId));
-        root.topGamesByPlaytime = root.topGamesByPlaytime.filter(g => !root.isHiddenApp(g.appId));
-        root.topGamesByRecency = root.topGamesByRecency.filter(g => !root.isHiddenApp(g.appId));
-        root.achievementCandidates = root.achievementCandidates.filter(id => !root.isHiddenApp(id));
+        root.recentPlaytimeMinutes = root.recentGames.reduce((a, g) => a + (g.playtime2Weeks || 0), 0);
+        root.refreshOwnedDerived();
         if (root.isHiddenApp(root.focusAppId)) {
             const next = root.pickerGames[0];
             if (next)
                 root.setFocusApp(next.appId, next.name);
         }
+    }
+
+    function refreshOwnedDerived(): void {
+        const visible = root.ownedGames.filter(g => !root.isHiddenApp(g.appId));
+        root.gameCount = visible.length;
+        root.totalPlaytimeMinutes = visible.reduce((a, g) => a + (g.playtimeForever || 0), 0);
+        const byTime = visible.slice().sort((a, b) => b.playtimeForever - a.playtimeForever);
+        root.topGamesByPlaytime = byTime.slice(0, 5);
+        root.topGamesByRecency = visible.filter(g => g.lastPlayed > 0).sort((a, b) => b.lastPlayed - a.lastPlayed).slice(0, 20);
+        root.achievementCandidates = visible.filter(g => g.hasStats && g.playtimeForever > 0).map(g => g.appId);
     }
 
     // Cover picker: Steam + Non-Steam, sorted by last played (playing now first)
@@ -240,17 +246,6 @@ Singleton {
         return Tr.tr("%1 h").arg(hours);
     }
 
-    function formatHoursCompact(minutes: int): string {
-        if (!minutes || minutes <= 0)
-            return "0";
-        const hours = Math.round(minutes / 60);
-        if (hours >= 10000)
-            return `${(hours / 1000).toFixed(1)}k`;
-        if (hours >= 1000)
-            return `${Math.round(hours / 100) / 10}k`;
-        return String(hours);
-    }
-
     function extractSteamIdOrVanity(raw: string): var {
         const s = (raw || "").trim();
         if (!s)
@@ -296,8 +291,14 @@ Singleton {
     }
 
     function applyActivity(text: string): void {
+        const raw = text || "{}";
+        if (raw === root.lastActivityJson) {
+            root.activityNow = Date.now() / 1000;
+            return;
+        }
         try {
-            root.activity = JSON.parse(text || "{}");
+            root.activity = JSON.parse(raw);
+            root.lastActivityJson = raw;
             root.activityNow = Date.now() / 1000;
         } catch (e) {
             console.warn(`Steam activity parse failed: ${e}`);
@@ -325,10 +326,10 @@ Singleton {
         root.focusProgress = null;
         root.focusLoading = false;
         root.focusError = "";
-        root.libraryAvgProgress = -1;
         root.gameCount = 0;
         root.totalPlaytimeMinutes = 0;
         root.recentPlaytimeMinutes = 0;
+        root.ownedGames = [];
         root.topGamesByPlaytime = [];
         root.topGamesByRecency = [];
         root.achievementCandidates = [];
@@ -338,6 +339,7 @@ Singleton {
         root.friendsError = "";
         root.friendsPreview = [];
         root.activity = ({});
+        root.lastActivityJson = "";
         root.libraryAchievements = null;
         root.libraryAchievementsLoading = false;
         root.error = "";
@@ -493,36 +495,23 @@ Singleton {
                 return;
             const resp = json?.response || {};
             const games = resp.games || [];
-            root.gameCount = resp.game_count || games.length || 0;
-            let total = 0;
-            const ranked = games.map(game => {
-                const mins = game.playtime_forever || 0;
-                total += mins;
-                return {
+            const ranked = games.map(game => ({
                     appId: String(game.appid),
                     name: game.name || Tr.tr("Unknown game"),
-                    playtimeForever: mins,
+                    playtimeForever: game.playtime_forever || 0,
                     lastPlayed: game.rtime_last_played || 0,
                     hasStats: !!game.has_community_visible_stats,
                     capsuleUrl: root.capsuleUrl(String(game.appid))
-                };
-            });
-            const visible = ranked.filter(r => !root.isHiddenApp(r.appId));
-            visible.sort((a, b) => b.playtimeForever - a.playtimeForever);
-            root.totalPlaytimeMinutes = total;
-            root.topGamesByPlaytime = visible.slice(0, 5);
-            root.topGamesByRecency = visible.filter(r => r.lastPlayed > 0).sort((a, b) => b.lastPlayed - a.lastPlayed).slice(0, 20);
-            root.achievementCandidates = visible.filter(r => r.hasStats && r.playtimeForever > 0).map(r => r.appId);
+                }));
+            root.ownedGames = ranked;
+            root.refreshOwnedDerived();
             root.logPlaytime(ranked);
             done();
         }, () => {
             if (g !== root.gen)
                 return;
-            root.gameCount = 0;
-            root.totalPlaytimeMinutes = 0;
-            root.topGamesByPlaytime = [];
-            root.topGamesByRecency = [];
-            root.achievementCandidates = [];
+            root.ownedGames = [];
+            root.refreshOwnedDerived();
             done();
         });
 
@@ -645,7 +634,6 @@ Singleton {
                 if (--active === 0) {
                     root.libraryAchievementsLoading = false;
                     publish();
-                    root.recomputeLibraryAvg();
                 }
                 return;
             }
@@ -686,7 +674,7 @@ Singleton {
                     started++;
                     completionSum += u / list.length;
                 }
-                if (u === list.length)
+                    if (u === list.length)
                     perfect++;
             }
             if (processed % 8 === 0)
@@ -697,14 +685,23 @@ Singleton {
             next();
     }
 
-    function recomputeLibraryAvg(): void {
-        if (root.libraryAchievements && root.libraryAchievements.total > 0)
-            root.libraryAvgProgress = root.libraryAchievements.percent;
-    }
-
     function pickInitialFocus(g: int): void {
         if (g !== root.gen)
             return;
+
+        if (root.focusAppId) {
+            const still = root.pickerGames.find(game => game.appId === root.focusAppId);
+            if (still) {
+                root.focusGameName = still.name || root.focusGameName;
+                if (!still.nonSteam) {
+                    const cache = Object.assign({}, root.achievementsCache);
+                    delete cache[still.appId];
+                    root.achievementsCache = cache;
+                }
+                root.loadFocusAchievements(g);
+                return;
+            }
+        }
 
         let appId = "";
         let name = "";
@@ -905,28 +902,6 @@ Singleton {
         const lockedList = enriched.filter(a => !a.unlocked);
         lockedList.sort((a, b) => pctOf(b) - pctOf(a));
         root.focusAchievements = unlockedList.concat(lockedList);
-
-        // Soft library average: average completion of recent games that we already cached
-        let sum = root.focusProgress.percent;
-        let count = 1;
-        for (let i = 0; i < root.recentGames.length; i++) {
-            const id = root.recentGames[i].appId;
-            if (id === appId)
-                continue;
-            const cached = root.achievementsCache[id];
-            if (!cached)
-                continue;
-            let u = 0;
-            for (let j = 0; j < cached.length; j++) {
-                if (cached[j].achieved === 1 || cached[j].achieved === true)
-                    u++;
-            }
-            if (cached.length > 0) {
-                sum += u / cached.length;
-                count++;
-            }
-        }
-        root.libraryAvgProgress = count > 0 ? sum / count : -1;
     }
 
     function maybeReloadOnConfig(): void {
@@ -994,7 +969,8 @@ Singleton {
     }
 
     Timer {
-        interval: 60 * 1000
+        // Active sessions: 45s; otherwise 2 min (python skips /proc walk if Steam is down)
+        interval: Object.keys(root.activity.active ?? {}).length > 0 ? 45 * 1000 : 120 * 1000
         running: root.enabled && root.configured
         repeat: true
         triggeredOnStart: true
@@ -1002,6 +978,13 @@ Singleton {
             if (!pollProc.running)
                 pollProc.running = true;
         }
+    }
+
+    Timer {
+        interval: 30 * 1000
+        running: root.enabled && Object.keys(root.activity.active ?? {}).length > 0
+        repeat: true
+        onTriggered: root.activityNow = Date.now() / 1000
     }
 
     Process {
@@ -1034,7 +1017,8 @@ Singleton {
     }
 
     Component.onCompleted: {
-        if (root.enabled && root.configured)
-            root.reload();
+        // Defer full library/API reload until Games tab asks; still start activity poll
+        if (root.enabled && root.configured && !pollProc.running)
+            pollProc.running = true;
     }
 }

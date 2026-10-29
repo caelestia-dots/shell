@@ -71,6 +71,8 @@ Singleton {
     property int pendingLightApps: -1
     property int pendingTransparency: -1
     property string pendingVerifyMode: ""
+    // On openwindow, only follow this address home — never every pinned app
+    property string enforceFollowAddress: ""
     readonly property string styleCli: Quickshell.shellPath("scripts/apply-activity-style.py")
 
     function bumpStyleRevision(): void {
@@ -344,7 +346,7 @@ Singleton {
             return false;
         if (m.startsWith("^")) {
             try {
-                return new RegExp(m).test(cls);
+                return new RegExp(m, "i").test(cls);
             } catch (e) {
                 return false;
             }
@@ -367,43 +369,56 @@ Singleton {
         return !!root.ruleForWindowClass(cls);
     }
 
-    function moveWindowToWorkspace(toplevel: var, ws: int): void {
+    function normalizeAddress(addr: string): string {
+        let s = String(addr || "");
+        if (s.startsWith("0x") || s.startsWith("0X"))
+            s = s.slice(2);
+        return s.toLowerCase();
+    }
+
+    function moveWindowToWorkspace(toplevel: var, ws: int, force = false, follow = false): void {
         if (!toplevel || !ws)
             return;
-        if (root.isWindowPinned(toplevel))
+        // Overview drag must not move pins; rule enforcement may force them home
+        if (!force && root.isWindowPinned(toplevel))
             return;
         const cur = toplevel.workspace?.id ?? -1;
+        // Already home: never steal focus (opening Steam used to yank back to Cursor)
         if (cur === ws)
             return;
         const addr = toplevel.address;
         if (!addr)
             return;
-        Hyprland.dispatch(`hl.dsp.window.move({ window = "address:0x${addr}", workspace = "${ws}", follow = false })`);
+        Hyprland.dispatch(`hl.dsp.window.move({ window = "address:0x${addr}", workspace = "${ws}", follow = ${follow} })`);
+        if (follow)
+            Qt.callLater(() => root.focusWorkspace(ws));
     }
 
-    function moveOpenWindowsForRule(rule: var): void {
+    function moveOpenWindowsForRule(rule: var, followAddress = ""): void {
         if (!root.enabled || !rule)
             return;
         const match = (rule.classMatch || "").trim();
         if (!match)
             return;
         const ws = root.workspaceForRule(rule);
+        const followNorm = root.normalizeAddress(followAddress);
         const tops = Hyprland.toplevels.values;
         for (let i = 0; i < tops.length; i++) {
             const t = tops[i];
             const cls = t.lastIpcObject?.class ?? "";
             if (!root.classMatches(cls, match))
                 continue;
-            root.moveWindowToWorkspace(t, ws);
+            const follow = followNorm.length > 0 && root.normalizeAddress(t.address) === followNorm;
+            root.moveWindowToWorkspace(t, ws, true, follow);
         }
     }
 
-    function enforceOpenWindows(): void {
+    function enforceOpenWindows(followAddress = ""): void {
         if (!root.enabled)
             return;
         const rules = GlobalConfig.activities.appRules.values;
         for (let i = 0; i < rules.length; i++)
-            root.moveOpenWindowsForRule(rules[i]);
+            root.moveOpenWindowsForRule(rules[i], followAddress);
     }
 
     function focusActivityByOffset(offset: int): void {
@@ -528,13 +543,14 @@ Singleton {
         return (s || "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     }
 
-    function escapeLuaPattern(s: string): string {
-        // Treat classMatch as literal class unless user starts with ^
+    function escapeClassRegex(s: string): string {
+        // Hyprland window_rule class match is RE2 regex (not Lua patterns).
+        // Literals become (?i)^…$ so Cursor/cursor both match; user ^regex is kept as-is.
         const raw = s || "";
         if (raw.startsWith("^"))
             return root.escapeLuaString(raw);
-        const escaped = raw.replace(/([%^$()%.\[\]*+\-?])/g, "%%%1");
-        return root.escapeLuaString(`^${escaped}$`);
+        const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return root.escapeLuaString(`(?i)^${escaped}$`);
     }
 
     function generateRulesLua(): string {
@@ -554,9 +570,10 @@ Singleton {
                 continue;
             const ws = root.workspaceForRule(rule);
             const name = `caelestia-activity-${i}-${root.escapeLuaString(cls).replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+            // No "silent": opening a pinned app also focuses its workspace
             out += `hl.window_rule({\n`;
             out += `    name = "${name}",\n`;
-            out += `    match = { class = "${root.escapeLuaPattern(cls)}" },\n`;
+            out += `    match = { class = "${root.escapeClassRegex(cls)}" },\n`;
             out += `    workspace = "${ws}",\n`;
             out += `})\n`;
         }
@@ -605,7 +622,41 @@ Singleton {
         id: enforceTimer
 
         interval: 250
-        onTriggered: root.enforceOpenWindows()
+        onTriggered: {
+            const addr = root.enforceFollowAddress;
+            root.enforceFollowAddress = "";
+            root.enforceOpenWindows(addr);
+        }
+    }
+
+    // Apps often set class after map; a short retry catches late titles/classes
+    Timer {
+        id: enforceRetryTimer
+
+        interval: 700
+        onTriggered: root.enforceOpenWindows("")
+    }
+
+    Connections {
+        target: Hyprland
+
+        function onRawEvent(event: HyprlandEvent): void {
+            if (!root.enabled)
+                return;
+            const n = event.name || "";
+            if (n.endsWith("v2"))
+                return;
+            if (n === "openwindow") {
+                // openwindow>>ADDRESS,workspace,class,title — follow only this window
+                const addr = String(event.data || "").split(",")[0] || "";
+                root.enforceFollowAddress = addr;
+                enforceTimer.restart();
+                enforceRetryTimer.restart();
+            } else if (n === "movewindow") {
+                enforceTimer.restart();
+                enforceRetryTimer.restart();
+            }
+        }
     }
 
     Timer {
