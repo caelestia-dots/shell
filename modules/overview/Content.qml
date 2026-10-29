@@ -36,8 +36,8 @@ Item {
     property int spacing: 15
     property int padding: 40
 
-    implicitWidth: columns * (previewWidth + spacing) - spacing
-    implicitHeight: rows * (previewHeight + spacing) - spacing + padding
+    implicitWidth: columns * (previewWidth + spacing + root.previewScaleX * (spacing - root.panels.bar.width)) + spacing + 10
+    implicitHeight: rows * (previewHeight + spacing) + 30
 
     // Main 10-workspace overview grid
     Grid {
