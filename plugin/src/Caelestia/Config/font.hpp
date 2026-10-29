@@ -73,10 +73,15 @@ protected:
     static QFont buildFont(const settings::ObjectNode* cfg, const QString& fallbackFamily, qreal scale);
 
     settings::ObjectNode* m_cfg = nullptr;
+    QList<QMetaObject::Connection> m_conns;
     qreal m_scale = 1;
-    QFont m_large;
-    QFont m_medium;
-    QFont m_small;
+    virtual void buildFonts() const;
+    void ensureBuilt() const;
+
+    mutable bool m_dirty = true;
+    mutable QFont m_large;
+    mutable QFont m_medium;
+    mutable QFont m_small;
 };
 
 class FontStyle : public FontStyleBase {
@@ -112,10 +117,10 @@ public:
     [[nodiscard]] IconFontBuilders* builders() const;
 
 protected:
-    void rebuild() override;
+    void buildFonts() const override;
 
 private:
-    QFont m_extraLarge;
+    mutable QFont m_extraLarge;
     IconFontBuilders* m_builders;
 };
 
@@ -155,6 +160,7 @@ private:
     void rebuildScale();
 
     AppearanceFont* m_font = nullptr;
+    QList<QMetaObject::Connection> m_fontConns;
     FontStyle* m_headline;
     FontStyle* m_title;
     FontStyle* m_body;
