@@ -6,6 +6,8 @@
 #include <qset.h>
 #include <qtimer.h>
 
+#include <functional>
+
 #include "notifdata.hpp"
 
 namespace caelestia::shell::models {
@@ -38,6 +40,8 @@ private:
     void flush();
     void save(const NotifData* notif);
     void remove(NotifData* notif);
+    void enforceLimits(const QSet<QString>& groups);
+    void evict(qsizetype limit, const std::function<bool(const NotifData*)>& inScope);
     void loadNotifs();
 };
 
