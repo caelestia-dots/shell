@@ -63,6 +63,11 @@ Singleton {
     readonly property string principalId: "principal"
     property string lastStyleActivityId: ""
     property string lastAppliedStyleKey: ""
+    // Key of the style the last spawned apply targeted (even if it failed) +
+    // how many times the verify timer re-kicked a non-converged mode, so a
+    // bad persisted scheme cannot respawn the python apply forever.
+    property string lastAttemptStyleKey: ""
+    property int styleRetries: 0
     // Bumped when any activity look field changes so UI bindings refresh
     property int styleRevision: 0
     // Serial style apply: wallpaper then scheme set must not race (wallpaper
@@ -180,6 +185,15 @@ Singleton {
         // have been bumped for the replacement run).
         if (gen !== root.styleApplyGen || styleApplyProc.running)
             return;
+        if (styleApplyProc.exitCode !== 0) {
+            // Failed apply: release the key so a later trigger can retry —
+            // lastAppliedStyleKey must only pin looks that actually applied
+            // (a stuck key made every retrigger short-circuit silently).
+            console.warn("Activities: style apply exited with code", styleApplyProc.exitCode);
+            root.lastAppliedStyleKey = "";
+        } else {
+            root.lastAppliedStyleKey = root.lastAttemptStyleKey;
+        }
         root.finishPendingStyleExtras();
         styleVerifyTimer.restart();
     }
@@ -191,6 +205,12 @@ Singleton {
         const key = root.styleKey(style);
         if (key === root.lastAppliedStyleKey)
             return;
+        // A genuinely new style resets the retry budget; a re-kick of the same
+        // style (verify retry) keeps counting toward the cap.
+        if (key !== root.lastAttemptStyleKey) {
+            root.styleRetries = 0;
+            root.lastAttemptStyleKey = key;
+        }
         root.lastAppliedStyleKey = key;
         root.lastStyleActivityId = id;
 
@@ -677,6 +697,15 @@ Singleton {
             const wantLight = want === "light";
             if (wantLight === Colours.currentLight)
                 return;
+            // Give up instead of respawning the apply python forever: a bad
+            // persisted scheme will never converge and silently burn CPU.
+            if (root.styleRetries >= 3) {
+                root.styleRetries = 0;
+                root.pendingVerifyMode = "";
+                console.warn("Activities: style mode did not converge after retries; verify aborted");
+                return;
+            }
+            root.styleRetries++;
             // scheme.json lost a race or FileView lagged — force another apply
             root.lastAppliedStyleKey = "";
             root.applyStyleForActivity(root.styleTargetId());
