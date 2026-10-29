@@ -175,11 +175,47 @@ def _patch_theme() -> None:
         except Exception:
             pass
         _sync_kde_icon_theme(mode)
+        # OpenCode TUI: theme file + cli.json mode follow the activity scheme.
+        _sync_opencode_theme(colours, mode)
         # Templates land inside apply_colours; refresh Kitty after that.
         _reload_kitty()
 
     theme.apply_terms = apply_terms_quiet
     theme.apply_colours = apply_colours_quiet
+
+
+def _sync_opencode_theme(colours: dict[str, str], mode: str) -> None:
+    """Push the activity scheme into OpenCode's TUI theme file and point
+    cli.json at it. cli.json edits hot-reload in running TUIs, so switching
+    activity mode re-themes open OpenCode windows live.
+    """
+    import json as _json
+
+    gen = Path(__file__).resolve().parent / "generate-opencode-theme.py"
+    try:
+        subprocess.run(
+            [sys.executable, str(gen), mode],
+            input=_json.dumps(colours),
+            text=True,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        return
+
+    cli_path = Path.home() / ".config/opencode/cli.json"
+    try:
+        cli = _json.loads(cli_path.read_text() or "{}") if cli_path.is_file() else {}
+        if not isinstance(cli, dict):
+            return
+        theme = cli.setdefault("theme", {})
+        if theme.get("name") != "caelestia":
+            theme["name"] = "caelestia"
+        theme["mode"] = mode
+        cli_path.write_text(_json.dumps(cli, indent=2) + "\n")
+    except (OSError, ValueError):
+        pass
 
 
 def main() -> None:

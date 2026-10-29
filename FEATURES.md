@@ -320,6 +320,24 @@ según el estado git**, con glifo delante del nombre:
 - Cambios en los fuentes posteriormente: `bun run typecheck && bun run build` (bun, no npm) y `opencode service restart`.
 - Verificación manual: `test.md` dentro del directorio del plugin. Pendiente de proponer upstream (PR/issue) tras validar.
 
+## OpenCode — tema sincronizado con el esquema
+
+**Fuera de la shell**: el TUI de OpenCode usa un tema `caelestia` generado desde el esquema
+M3 de la activity activa. `scripts/caelestia-quiet.py` (paso `_sync_opencode_theme`, justo tras
+el theming de GTK/iconos) invoca `scripts/generate-opencode-theme.py` + escribe `cli.json`.
+
+- Salida: `~/.config/opencode/themes/caelestia.json` (formato hue de OpenCode V2, `$schema`
+  `https://opencode.ai/theme.json`) + `~/.config/opencode/cli.json` → `{"theme":{"name":"caelestia","mode":...}}`.
+- Genera la paleta del modo que llega (dark/light): gradas tonales M3 vía `materialyoucolor.hct`
+  (bins de hue asignados por cercanía: red/orange/yellow/green/cyan/blue/purple + gray anclada a
+  onSurface/outline/background) y overrides con los colores del esquema (background/surface
+  containers, diff containers, syntax/markdown via keys catppuccin `k*`/`term*`).
+- Hot-reload: OpenCode observa `cli.json`, así que cambiar de activity re-tematiza los TUI
+  abiertos en vivo. La paleta del otro modo se conserva entre runs.
+- Peculiaridad del format: los hex DEBEN llevar `#` y **no se aceptan referencias entre tokens**
+  (`$text.*`/`$background.*`) en temas de usuario — solo refs `$hue.<nombre>.<step>`; los
+  built-in evitan esa validación, los nuestros no (lecciones del debug en este script).
+
 ## Notas
 
 - Esto es un **fork**: no sustituye la documentación de instalación de upstream ([README](./README.md)).

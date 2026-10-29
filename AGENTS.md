@@ -22,7 +22,7 @@ cambio a cambio en [CHANGELOG.md](./CHANGELOG.md), instalación/config upstream 
 - Apps por defecto: **kitty** (terminal), **thunar** (explorador, `Super+E`), **VLC** (vídeo), tema de iconos **Papirus(-Dark)**.
 - VPN del trabajo: openfortivpn (credenciales **solo** en `~/.config/openfortivpn/config`, jamás en el repo).
 - Steam: API key **solo en config local** (nunca commitearla; grep del diff antes de push). Perfil/logros públicos.
-- OpenCode TUI: plugin sidebar file-tree es un **fork local** en `~/.config/opencode/plugins/opencode-file-tree` (colores git en el árbol; rebuild con `bun run build`, no npm; verificación en su `test.md`).
+- OpenCode TUI: plugin sidebar file-tree es un **fork local** en `~/.config/opencode/plugins/opencode-file-tree` (colores git en el árbol; rebuild con `bun run build`, no npm; verificación en su `test.md`). El tema del TUI (`caelestia`) lo genera `scripts/generate-opencode-theme.py` y lo engancha `caelestia-quiet.py`.
 
 ## 3. Convenciones de trabajo
 
