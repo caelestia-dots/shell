@@ -93,6 +93,9 @@ QList<NotifAction> deserialiseActions(NotifData* parent, const QString& json) {
 NotifStore::NotifStore(QObject* parent)
     : QObject(parent)
     , m_connectionName(QUuid::createUuid().toString()) {
+    m_flushTimer.setSingleShot(true);
+    QObject::connect(&m_flushTimer, &QTimer::timeout, this, &NotifStore::flush);
+
     const auto dir = QStandardPaths::writableLocation(QStandardPaths::GenericStateLocation) + u"/caelestia"_s;
     QDir().mkpath(dir);
 
@@ -113,6 +116,7 @@ NotifStore::NotifStore(QObject* parent)
 }
 
 NotifStore::~NotifStore() {
+    flush();
     QSqlDatabase::database(m_connectionName, false).close();
     QSqlDatabase::removeDatabase(m_connectionName);
 }
@@ -136,18 +140,40 @@ NotifData* NotifStore::add(QObject* backer) {
     auto* const notif = new NotifData(backer, this);
     m_notifs.prepend(notif);
     track(notif);
-    save(notif);
+    markDirty(notif);
     emit notifsChanged();
     return notif;
 }
 
 void NotifStore::track(NotifData* notif) {
     QObject::connect(notif, &NotifData::changed, this, [this, notif] {
-        save(notif);
+        markDirty(notif);
     });
     QObject::connect(notif, &NotifData::closed, this, [this, notif] {
         remove(notif);
     });
+}
+
+void NotifStore::markDirty(NotifData* notif) {
+    m_dirty.insert(notif);
+    m_flushTimer.start();
+}
+
+void NotifStore::flush() {
+    m_flushTimer.stop();
+    if (m_dirty.isEmpty())
+        return;
+
+    auto db = QSqlDatabase::database(m_connectionName);
+    if (!db.transaction())
+        qCWarning(lcNotifStore) << "Flush transaction failed" << db.lastError().text();
+
+    for (const auto* notif : std::as_const(m_dirty))
+        save(notif);
+    m_dirty.clear();
+
+    if (!db.commit())
+        qCWarning(lcNotifStore) << "Flush commit failed" << db.lastError().text();
 }
 
 void NotifStore::save(const NotifData* notif) {
@@ -171,6 +197,7 @@ void NotifStore::save(const NotifData* notif) {
 }
 
 void NotifStore::remove(NotifData* notif) {
+    m_dirty.remove(notif);
     QSqlQuery query(QSqlDatabase::database(m_connectionName));
     query.prepare(u"DELETE FROM notifications WHERE id = :id"_s);
     query.bindValue(u":id"_s, notif->m_id);
