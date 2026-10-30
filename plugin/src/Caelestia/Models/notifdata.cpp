@@ -78,12 +78,14 @@ void NotifAction::invoke() {
 
 NotifData::NotifData(QObject* parent)
     : QObject(parent)
+    , m_expirePopup(config::ConfigSingleton::instance()->notifs()->expire())
     , m_createdAt(QDateTime::currentMSecsSinceEpoch())
     , m_popupTimer(new QTimer(this))
     , m_id(QUuid::createUuid().toString(QUuid::WithoutBraces))
     , m_expireTimeout(config::ConfigSingleton::instance()->notifs()->defaultExpireTimeout()) {
     m_popupTimer->setSingleShot(true);
-    QObject::connect(m_popupTimer, &QTimer::timeout, this, &NotifData::dismissPopup);
+    if (m_expirePopup)
+        QObject::connect(m_popupTimer, &QTimer::timeout, this, &NotifData::dismissPopup);
 }
 
 NotifData::NotifData(QObject* backer, QObject* parent)
@@ -166,7 +168,7 @@ void NotifData::dismissPopup() {
 }
 
 void NotifData::holdPopup() {
-    if (!m_popup || !m_popupTimer->isActive())
+    if (!m_popup || !m_expirePopup || !m_popupTimer->isActive())
         return;
 
     m_timeUntilExpire = m_popupTimer->remainingTime();
@@ -174,13 +176,16 @@ void NotifData::holdPopup() {
 }
 
 void NotifData::releasePopup() {
-    if (!m_popup || m_popupTimer->isActive() || m_timeUntilExpire <= 0)
+    if (!m_popup || !m_expirePopup || m_popupTimer->isActive() || m_timeUntilExpire <= 0)
         return;
 
     m_popupTimer->start(m_timeUntilExpire);
 }
 
 void NotifData::startPopupTimer() {
+    if (!m_expirePopup)
+        return;
+
     m_popupTimer->setInterval(m_expireTimeout);
     m_popupTimer->start();
 }

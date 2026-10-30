@@ -107,6 +107,7 @@ private slots:
 
 private:
     bool m_popup = false;
+    bool m_expirePopup = true;
     bool m_closed = false;
     qint64 m_createdAt;
     QTimer* m_popupTimer = nullptr;
