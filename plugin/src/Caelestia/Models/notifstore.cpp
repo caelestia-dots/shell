@@ -12,6 +12,7 @@
 #include <quuid.h>
 
 #include <algorithm>
+#include <limits>
 #include <utility>
 
 namespace {
@@ -106,6 +107,8 @@ NotifStore::NotifStore(QObject* parent)
     , m_connectionName(QUuid::createUuid().toString()) {
     m_flushTimer.setSingleShot(true);
     QObject::connect(&m_flushTimer, &QTimer::timeout, this, &NotifStore::flush);
+    m_timeStrTimer.setSingleShot(true);
+    QObject::connect(&m_timeStrTimer, &QTimer::timeout, this, &NotifStore::refreshTimeStrs);
 
     const auto dir = QStandardPaths::writableLocation(QStandardPaths::GenericStateLocation) + u"/caelestia"_s;
     QDir().mkpath(dir);
@@ -246,6 +249,23 @@ void NotifStore::track(NotifData* notif) {
     QObject::connect(notif, &NotifData::imageChanged, this, syncGroup);
     QObject::connect(notif, &NotifData::appIconChanged, this, syncGroup);
     QObject::connect(notif, &NotifData::urgencyChanged, this, syncGroup);
+
+    notif->refreshTimeStr();
+    const auto interval = notif->timeStrInterval();
+    if (!m_timeStrTimer.isActive() || m_timeStrTimer.remainingTime() > interval)
+        m_timeStrTimer.start(interval);
+}
+
+void NotifStore::refreshTimeStrs() {
+    if (m_notifs.isEmpty())
+        return;
+
+    auto interval = std::numeric_limits<int>::max();
+    for (auto* notif : std::as_const(m_notifs)) {
+        notif->refreshTimeStr();
+        interval = std::min(interval, notif->timeStrInterval());
+    }
+    m_timeStrTimer.start(interval);
 }
 
 void NotifStore::addToGroup(NotifData* notif) {
