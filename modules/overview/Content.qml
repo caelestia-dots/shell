@@ -2,10 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Caelestia.Config
 import Quickshell.Wayland
-import Caelestia.Multimedia
 import Quickshell.Hyprland
+import Caelestia.Config
+import Caelestia.Multimedia
 import Quickshell.Widgets
 import Caelestia.State
 import qs.components
