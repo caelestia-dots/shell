@@ -2,16 +2,15 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Caelestia.Config
 import Caelestia.Multimedia
-import qs.components
-import qs.services
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import Caelestia.State
 import qs.modules.drawers
+import qs.components
+import qs.services
 
 Item {
     id: root
@@ -69,7 +68,7 @@ Item {
 
     // DO NOT REMOVE: ScreencopyView in Grid renders only after different screencopyView was rendered
     ScreencopyView {
-        id: preview
+        id: previewFirst
 
         captureSource: Hypr.activeToplevel?.wayland ?? null
         live: false
@@ -205,15 +204,6 @@ Item {
                                 anchors.fill: parent
                                 captureSource: previewDisplay.modelData?.wayland ?? null
                                 live: visible
-
-                                function tryCapture() {
-                                    if (captureSource && visible)
-                                        captureFrame();
-                                    console.log(captureSource);
-                                }
-
-                                onCaptureSourceChanged: tryCapture()
-                                Component.onCompleted: tryCapture()
                             }
                         }
                     }
