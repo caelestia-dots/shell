@@ -21,6 +21,7 @@ class Config : public QQuickAttachedPropertyPropagator, public QQmlParserStatus 
     Q_PROPERTY(const caelestia::shell::config::BorderConfig* border READ border NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::DashboardConfig* dashboard READ dashboard NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::LauncherConfig* launcher READ launcher NOTIFY sourceChanged)
+    Q_PROPERTY(const caelestia::shell::config::OverviewConfig* overview READ overview NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::LockConfig* lock READ lock NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::NexusConfig* nexus READ nexus NOTIFY sourceChanged)
     Q_PROPERTY(const caelestia::shell::config::NotifsConfig* notifs READ notifs NOTIFY sourceChanged)
@@ -47,6 +48,7 @@ public:
     [[nodiscard]] const LockConfig* lock() const;
     [[nodiscard]] const NexusConfig* nexus() const;
     [[nodiscard]] const NotifsConfig* notifs() const;
+    [[nodiscard]] const OverviewConfig* overview() const;
     [[nodiscard]] const OsdConfig* osd() const;
     [[nodiscard]] const ServiceConfig* services() const;
     [[nodiscard]] const SessionConfig* session() const;
