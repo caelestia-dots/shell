@@ -238,6 +238,14 @@ void NotifStore::track(NotifData* notif) {
         removeFromGroup(notif);
         addToGroup(notif);
     });
+
+    const auto syncGroup = [notif] {
+        if (notif->m_group)
+            notif->m_group->sync();
+    };
+    QObject::connect(notif, &NotifData::imageChanged, this, syncGroup);
+    QObject::connect(notif, &NotifData::appIconChanged, this, syncGroup);
+    QObject::connect(notif, &NotifData::urgencyChanged, this, syncGroup);
 }
 
 void NotifStore::addToGroup(NotifData* notif) {
@@ -251,6 +259,7 @@ void NotifStore::addToGroup(NotifData* notif) {
 
     notif->m_group = group;
     group->m_notifs.prepend(notif);
+    group->sync();
     emit group->notifsChanged();
     emit groupsChanged();
 }
@@ -262,6 +271,7 @@ void NotifStore::removeFromGroup(NotifData* notif) {
 
     group->m_notifs.removeOne(notif);
     if (!group->m_notifs.isEmpty()) {
+        group->sync();
         emit group->notifsChanged();
         return;
     }
