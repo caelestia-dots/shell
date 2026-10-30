@@ -282,8 +282,6 @@ void NotifStore::remove(NotifData* notif) {
         if (notif->m_popup)
             emit popupsChanged();
     }
-
-    notif->deleteLater();
 }
 
 void NotifStore::loadNotifs() {
