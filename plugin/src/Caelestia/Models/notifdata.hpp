@@ -78,6 +78,10 @@ public:
     [[nodiscard]] QList<NotifAction> actions() const;
 
     Q_INVOKABLE void dismiss();
+    Q_INVOKABLE void dismissPopup();
+
+    Q_INVOKABLE void holdPopup();
+    Q_INVOKABLE void releasePopup();
 
 signals:
     void idChanged();
@@ -116,6 +120,7 @@ private:
     QString m_image;
     QVariantMap m_hints;
     int m_expireTimeout;
+    int m_timeUntilExpire = -1;
     Urgency m_urgency = Urgency::Normal;
     bool m_resident = false;
     bool m_hasActionIcons = false;
