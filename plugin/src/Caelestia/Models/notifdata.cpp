@@ -83,7 +83,7 @@ NotifData::NotifData(QObject* parent)
     , m_id(QUuid::createUuid().toString(QUuid::WithoutBraces))
     , m_expireTimeout(config::ConfigSingleton::instance()->notifs()->defaultExpireTimeout()) {
     m_popupTimer->setSingleShot(true);
-    QObject::connect(m_popupTimer, &QTimer::timeout, this, &NotifData::popupClosed);
+    QObject::connect(m_popupTimer, &QTimer::timeout, this, &NotifData::dismissPopup);
 }
 
 NotifData::NotifData(QObject* backer, QObject* parent)
@@ -155,6 +155,29 @@ void NotifData::dismiss() {
         QMetaObject::invokeMethod(m_backer, "dismiss");
     else
         onBackerClosed();
+}
+
+void NotifData::dismissPopup() {
+    if (m_closed || !m_popup)
+        return;
+
+    m_popup = false;
+    emit popupClosed();
+}
+
+void NotifData::holdPopup() {
+    if (!m_popup || !m_popupTimer->isActive())
+        return;
+
+    m_timeUntilExpire = m_popupTimer->remainingTime();
+    m_popupTimer->stop();
+}
+
+void NotifData::releasePopup() {
+    if (!m_popup || m_popupTimer->isActive() || m_timeUntilExpire <= 0)
+        return;
+
+    m_popupTimer->start(m_timeUntilExpire);
 }
 
 void NotifData::startPopupTimer() {
