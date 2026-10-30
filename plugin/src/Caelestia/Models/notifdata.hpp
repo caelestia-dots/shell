@@ -55,6 +55,7 @@ class NotifData : public util::RefGated {
     Q_PROPERTY(bool resident READ resident NOTIFY residentChanged)
     Q_PROPERTY(bool hasActionIcons READ hasActionIcons NOTIFY hasActionIconsChanged)
     Q_PROPERTY(QList<caelestia::shell::models::NotifAction> actions READ actions NOTIFY actionsChanged)
+    Q_PROPERTY(QString timeStr READ timeStr NOTIFY timeStrChanged)
 
 public:
     enum class Urgency : quint8 {
@@ -79,6 +80,7 @@ public:
     [[nodiscard]] bool resident() const;
     [[nodiscard]] bool hasActionIcons() const;
     [[nodiscard]] QList<NotifAction> actions() const;
+    [[nodiscard]] QString timeStr() const;
 
     Q_INVOKABLE void dismiss();
     Q_INVOKABLE void dismissPopup();
@@ -99,6 +101,7 @@ signals:
     void residentChanged();
     void hasActionIconsChanged();
     void actionsChanged();
+    void timeStrChanged();
 
     void popupClosed();
     void changed();
@@ -129,8 +132,12 @@ private:
     bool m_resident = false;
     bool m_hasActionIcons = false;
     QList<NotifAction> m_actions;
+    QString m_timeStr;
 
     void startPopupTimer();
+
+    void refreshTimeStr();
+    [[nodiscard]] int timeStrInterval() const;
 
     void connectBacker();
     [[nodiscard]] QList<NotifAction> readBackerActions();
