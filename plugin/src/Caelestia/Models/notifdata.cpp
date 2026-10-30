@@ -11,6 +11,7 @@
 #include <quuid.h>
 
 #include "config/rootnodes.hpp"
+#include "util/i18n.hpp"
 
 namespace caelestia::shell::models {
 
@@ -149,6 +150,10 @@ QList<NotifAction> NotifData::actions() const {
     return m_actions;
 }
 
+QString NotifData::timeStr() const {
+    return m_timeStr;
+}
+
 void NotifData::dismiss() {
     if (released())
         return;
@@ -188,6 +193,36 @@ void NotifData::startPopupTimer() {
 
     m_popupTimer->setInterval(m_expireTimeout);
     m_popupTimer->start();
+}
+
+void NotifData::refreshTimeStr() {
+    const auto mins = (QDateTime::currentMSecsSinceEpoch() - m_createdAt) / 60000;
+    const auto hours = mins / 60;
+    const auto days = hours / 24;
+
+    QString str;
+    if (mins < 1)
+        str = util::i18n::mark(u"now"_s);
+    else if (days > 0)
+        str = util::i18n::markCtx(u"%1d"_s, u"abbreviated notification age, days"_s, { QString::number(days) });
+    else if (hours > 0)
+        str = util::i18n::markCtx(u"%1h"_s, u"abbreviated notification age, hours"_s, { QString::number(hours) });
+    else
+        str = util::i18n::markCtx(u"%1m"_s, u"abbreviated notification age, minutes"_s, { QString::number(mins) });
+
+    if (assign(m_timeStr, str))
+        emit timeStrChanged();
+}
+
+int NotifData::timeStrInterval() const {
+    const auto mins = (QDateTime::currentMSecsSinceEpoch() - m_createdAt) / 60000;
+    if (mins < 1)
+        return 5000;
+    if (mins >= 1440)
+        return 3600000;
+    if (mins >= 60)
+        return 300000;
+    return mins < 10 ? 30000 : 60000;
 }
 
 void NotifData::syncFromBacker() {

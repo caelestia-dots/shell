@@ -46,6 +46,7 @@ private:
     QHash<QString, NotifGroup*> m_groupsByName;
     QSet<NotifData*> m_dirty;
     QTimer m_flushTimer;
+    QTimer m_timeStrTimer;
 
     void track(NotifData* notif);
     void addToGroup(NotifData* notif);
@@ -57,6 +58,7 @@ private:
     void enforceLimits(const QSet<QString>& groups);
     void evict(qsizetype limit, const std::function<bool(const NotifData*)>& inScope);
     void loadNotifs();
+    void refreshTimeStrs();
 };
 
 } // namespace caelestia::shell::models
