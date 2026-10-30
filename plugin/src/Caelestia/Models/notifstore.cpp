@@ -204,7 +204,7 @@ void NotifStore::evict(qsizetype limit, const std::function<bool(const NotifData
     while (excess-- > 0) {
         NotifData* victim = nullptr;
         for (auto* const n : std::as_const(m_notifs)) {
-            if (!n->m_closed && inScope(n) && (!victim || weaker(n, victim)))
+            if (inScope(n) && (!victim || weaker(n, victim)))
                 victim = n;
         }
 

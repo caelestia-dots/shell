@@ -2,10 +2,11 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
-#include <qset.h>
 #include <qtimer.h>
 
 #include <caelestia/utils/cache.hpp>
+
+#include "util/refgated.hpp"
 
 namespace caelestia::shell::models {
 
@@ -36,7 +37,7 @@ private:
     QString m_text;
 };
 
-class NotifData : public QObject {
+class NotifData : public util::RefGated {
     Q_OBJECT
     QML_NAMED_ELEMENT(NotifData)
     QML_UNCREATABLE("NotifData instances can only be retrieved from a NotifStore")
@@ -78,8 +79,6 @@ public:
     [[nodiscard]] bool hasActionIcons() const;
     [[nodiscard]] QList<NotifAction> actions() const;
 
-    Q_INVOKABLE void ref(QObject* ref);
-
     Q_INVOKABLE void dismiss();
     Q_INVOKABLE void dismissPopup();
 
@@ -112,7 +111,6 @@ private:
     bool m_popup = false;
     bool m_expirePopup = true;
     bool m_closed = false;
-    QSet<QObject*> m_refs;
     qint64 m_createdAt;
     QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
