@@ -149,6 +149,14 @@ QList<NotifAction> NotifData::actions() const {
     return m_actions;
 }
 
+void NotifData::ref(QObject* ref) {
+    QObject::connect(ref, &QObject::destroyed, this, [this, ref] {
+        if (m_refs.remove(ref) && m_closed && m_refs.isEmpty())
+            deleteLater();
+    });
+    m_refs << ref;
+}
+
 void NotifData::dismiss() {
     if (m_closed)
         return;
@@ -249,6 +257,9 @@ void NotifData::syncFromBacker() {
 void NotifData::onBackerClosed() {
     m_closed = true;
     emit closed();
+
+    if (m_refs.isEmpty())
+        deleteLater();
 }
 
 void NotifData::connectBacker() {
