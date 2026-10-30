@@ -5,6 +5,7 @@ import qs.components
 import qs.modules.bar as Bar
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
+import qs.modules.overview as Overview
 import qs.modules.notifications as Notifications
 import qs.modules.osd as Osd
 import qs.modules.session as Session
@@ -31,6 +32,7 @@ Item {
     readonly property alias popouts: popoutsWrapper.content
     readonly property alias popoutsWrapper: popoutsWrapper
     readonly property alias utilities: utilities
+    readonly property alias overview: overview
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
 
@@ -105,6 +107,17 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+    }
+
+    Overview.Wrapper {
+        id: overview
+
+        screen: root.screen
+        screenState: root.screenState
+        panels: root
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
     }
 
     Dashboard.Wrapper {
