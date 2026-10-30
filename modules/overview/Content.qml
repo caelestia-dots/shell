@@ -4,9 +4,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.Multimedia
-import Quickshell.Widgets
 import Caelestia.State
 import qs.components
 import qs.services
