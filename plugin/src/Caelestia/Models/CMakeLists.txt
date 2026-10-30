@@ -7,6 +7,7 @@ qml_module(caelestia-models
         notifdata.cpp
         notifstore.cpp
     LIBRARIES
+        caelestia-util
         caelestia-config
         caelestia::caelestia
         Qt::Gui
