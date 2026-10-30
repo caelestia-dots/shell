@@ -12,6 +12,7 @@
 #include <quuid.h>
 
 #include <algorithm>
+#include <utility>
 
 namespace {
 
@@ -70,7 +71,7 @@ constexpr QStringView k_selectAll = uR"(
     SELECT id, time, summary, body, app_icon, app_name, image,
            expire_timeout, urgency, resident, has_action_icons, actions
     FROM notifications
-    ORDER BY time DESC
+    ORDER BY time ASC
 )";
 
 QString serialiseActions(const QList<NotifAction>& actions) {
@@ -151,6 +152,16 @@ QQmlListProperty<NotifData> NotifStore::popups() {
         } };
 }
 
+QQmlListProperty<NotifGroup> NotifStore::groups() {
+    return { this, nullptr,
+        [](auto* p) {
+            return static_cast<NotifStore*>(p->object)->m_groups.size();
+        },
+        [](auto* p, qsizetype i) {
+            return static_cast<NotifStore*>(p->object)->m_groups.at(i);
+        } };
+}
+
 NotifData* NotifStore::add(QObject* backer, bool popup) {
     if (!backer) {
         qCWarning(lcNotifStore) << "Attempted to add null backer";
@@ -160,6 +171,7 @@ NotifData* NotifStore::add(QObject* backer, bool popup) {
     auto* const notif = new NotifData(backer, this);
     m_notifs.prepend(notif);
     track(notif);
+    addToGroup(notif);
     markDirty(notif);
 
     emit notifsChanged();
@@ -222,6 +234,42 @@ void NotifStore::track(NotifData* notif) {
     QObject::connect(notif, &NotifData::closed, this, [this, notif] {
         remove(notif);
     });
+    QObject::connect(notif, &NotifData::appNameChanged, this, [this, notif] {
+        removeFromGroup(notif);
+        addToGroup(notif);
+    });
+}
+
+void NotifStore::addToGroup(NotifData* notif) {
+    auto*& group = m_groupsByName[notif->m_appName];
+    if (!group) {
+        group = new NotifGroup(notif->m_appName, this);
+        m_groups.prepend(group);
+    } else if (const auto index = m_groups.indexOf(group); index > 0) {
+        m_groups.move(index, 0);
+    }
+
+    notif->m_group = group;
+    group->m_notifs.prepend(notif);
+    emit group->notifsChanged();
+    emit groupsChanged();
+}
+
+void NotifStore::removeFromGroup(NotifData* notif) {
+    auto* const group = std::exchange(notif->m_group, nullptr);
+    if (!group)
+        return;
+
+    group->m_notifs.removeOne(notif);
+    if (!group->m_notifs.isEmpty()) {
+        emit group->notifsChanged();
+        return;
+    }
+
+    m_groups.removeOne(group);
+    m_groupsByName.remove(group->m_appName);
+    emit groupsChanged();
+    group->release();
 }
 
 void NotifStore::markDirty(NotifData* notif) {
@@ -278,6 +326,7 @@ void NotifStore::remove(NotifData* notif) {
         emit notifsChanged();
     if (m_popups.removeOne(notif))
         emit popupsChanged();
+    removeFromGroup(notif);
 }
 
 void NotifStore::loadNotifs() {
@@ -305,8 +354,9 @@ void NotifStore::loadNotifs() {
         notif->m_resident = query.value(9).toBool();
         notif->m_hasActionIcons = query.value(10).toBool();
         notif->m_actions = deserialiseActions(notif, query.value(11).toString());
-        m_notifs << notif;
+        m_notifs.prepend(notif);
         track(notif);
+        addToGroup(notif);
     }
 
     emit notifsChanged();
