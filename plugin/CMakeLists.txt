@@ -24,7 +24,11 @@ include(cmake/pch.cmake)
 include(cmake/qml-module.cmake)
 
 # Shared helpers
-add_library(caelestia-util STATIC src/util/refgated.cpp)
+add_library(caelestia-util STATIC
+    src/util/i18n.cpp
+    src/util/metaenum.cpp
+    src/util/refgated.cpp
+)
 qt_extract_metatypes(caelestia-util)
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include")
 file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/src/util" "${CMAKE_CURRENT_BINARY_DIR}/include/util" SYMBOLIC)

@@ -43,7 +43,7 @@ RESET = "\033[0m"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # The helpers implementing the marking themselves, whose own signatures look like calls
-SKIPPED = ("plugin/src/Caelestia/I18n", "plugin/include/util/i18n.hpp")
+SKIPPED = ("plugin/src/Caelestia/I18n", "plugin/src/util/i18n")
 
 ERROR = "error"
 WARNING = "warning"
