@@ -150,10 +150,13 @@ QList<NotifAction> NotifData::actions() const {
 }
 
 void NotifData::ref(QObject* ref) {
-    QObject::connect(ref, &QObject::destroyed, this, [this, ref] {
-        if (m_refs.remove(ref) && m_closed && m_refs.isEmpty())
-            deleteLater();
-    });
+    QObject::connect(
+        ref, &QObject::destroyed, this,
+        [this, ref] {
+            if (m_refs.remove(ref) && m_closed && m_refs.isEmpty())
+                deleteLater();
+        },
+        Qt::SingleShotConnection);
     m_refs << ref;
 }
 

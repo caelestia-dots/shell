@@ -143,18 +143,11 @@ QQmlListProperty<NotifData> NotifStore::notifs() {
 
 QQmlListProperty<NotifData> NotifStore::popups() {
     return { this, nullptr,
-        [](auto* p) -> qsizetype {
-            qsizetype count = 0;
-            for (const auto* notif : std::as_const(static_cast<NotifStore*>(p->object)->m_notifs))
-                if (notif->m_popup)
-                    ++count;
-            return count;
+        [](auto* p) {
+            return static_cast<NotifStore*>(p->object)->m_popups.size();
         },
-        [](auto* p, qsizetype i) -> NotifData* {
-            for (auto* const notif : std::as_const(static_cast<NotifStore*>(p->object)->m_notifs))
-                if (notif->m_popup && i-- == 0)
-                    return notif;
-            return nullptr;
+        [](auto* p, qsizetype i) {
+            return static_cast<NotifStore*>(p->object)->m_popups.at(i);
         } };
 }
 
@@ -172,7 +165,11 @@ NotifData* NotifStore::add(QObject* backer, bool popup) {
     emit notifsChanged();
     if (popup) {
         notif->m_popup = true;
-        QObject::connect(notif, &NotifData::popupClosed, this, &NotifStore::popupsChanged);
+        m_popups.prepend(notif);
+        QObject::connect(notif, &NotifData::popupClosed, this, [this, notif] {
+            m_popups.removeOne(notif);
+            emit popupsChanged();
+        });
         notif->startPopupTimer();
         emit popupsChanged();
     }
@@ -277,11 +274,10 @@ void NotifStore::remove(NotifData* notif) {
     if (!query.exec())
         qCWarning(lcNotifStore) << "Failed to remove" << notif->m_id << query.lastError().text();
 
-    if (m_notifs.removeOne(notif)) {
+    if (m_notifs.removeOne(notif))
         emit notifsChanged();
-        if (notif->m_popup)
-            emit popupsChanged();
-    }
+    if (m_popups.removeOne(notif))
+        emit popupsChanged();
 }
 
 void NotifStore::loadNotifs() {
