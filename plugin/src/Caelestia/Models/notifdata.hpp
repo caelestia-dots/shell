@@ -11,6 +11,7 @@
 namespace caelestia::shell::models {
 
 class NotifData;
+class NotifGroup;
 
 struct NotifAction {
     Q_GADGET
@@ -110,7 +111,7 @@ private slots:
 private:
     bool m_popup = false;
     bool m_expirePopup = true;
-    bool m_closed = false;
+    NotifGroup* m_group = nullptr;
     qint64 m_createdAt;
     QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
