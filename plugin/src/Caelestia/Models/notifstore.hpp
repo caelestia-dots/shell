@@ -36,6 +36,7 @@ signals:
 private:
     QString m_connectionName;
     QList<NotifData*> m_notifs;
+    QList<NotifData*> m_popups;
     QSet<NotifData*> m_dirty;
     QTimer m_flushTimer;
 
