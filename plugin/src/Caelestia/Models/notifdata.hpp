@@ -2,6 +2,7 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
+#include <qset.h>
 #include <qtimer.h>
 
 #include <caelestia/utils/cache.hpp>
@@ -77,6 +78,8 @@ public:
     [[nodiscard]] bool hasActionIcons() const;
     [[nodiscard]] QList<NotifAction> actions() const;
 
+    Q_INVOKABLE void ref(QObject* ref);
+
     Q_INVOKABLE void dismiss();
     Q_INVOKABLE void dismissPopup();
 
@@ -109,6 +112,7 @@ private:
     bool m_popup = false;
     bool m_expirePopup = true;
     bool m_closed = false;
+    QSet<QObject*> m_refs;
     qint64 m_createdAt;
     QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
