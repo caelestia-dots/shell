@@ -3,14 +3,14 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
-import Caelestia.Multimedia
 import Quickshell.Wayland
+import Caelestia.Multimedia
 import Quickshell.Hyprland
 import Quickshell.Widgets
 import Caelestia.State
-import qs.modules.drawers
 import qs.components
 import qs.services
+import qs.modules.drawers
 
 Item {
     id: root
