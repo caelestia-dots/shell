@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Caelestia.Config
 import Caelestia.Multimedia
 import qs.components
@@ -62,7 +63,16 @@ Item {
         onTriggered: {
             Hyprland.refreshToplevels();
             WorkspaceData.updateAll();
+            root.refreshTicks++;
         }
+    }
+
+    // DO NOT REMOVE: ScreencopyView in Grid renders only after different screencopyView was rendered
+    ScreencopyView {
+        id: preview
+
+        captureSource: Hypr.activeToplevel?.wayland ?? null
+        live: false
     }
 
     // Grid of all Workspaces with 2 rows
@@ -193,12 +203,17 @@ Item {
                                 id: preview
 
                                 anchors.fill: parent
-                                anchors.horizontalCenter: workspaceCard.horizontalCenter
-                                captureSource: modelData.wayland
-                                live: true
-                                layer.enabled: true
-                                layer.smooth: true
-                                opacity: 1
+                                captureSource: previewDisplay.modelData?.wayland ?? null
+                                live: visible
+
+                                function tryCapture() {
+                                    if (captureSource && visible)
+                                        captureFrame();
+                                    console.log(captureSource);
+                                }
+
+                                onCaptureSourceChanged: tryCapture()
+                                Component.onCompleted: tryCapture()
                             }
                         }
                     }
