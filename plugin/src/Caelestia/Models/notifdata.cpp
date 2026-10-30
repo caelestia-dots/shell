@@ -77,7 +77,7 @@ void NotifAction::invoke() {
 }
 
 NotifData::NotifData(QObject* parent)
-    : QObject(parent)
+    : util::RefGated(parent)
     , m_expirePopup(config::ConfigSingleton::instance()->notifs()->expire())
     , m_createdAt(QDateTime::currentMSecsSinceEpoch())
     , m_popupTimer(new QTimer(this))
@@ -149,19 +149,8 @@ QList<NotifAction> NotifData::actions() const {
     return m_actions;
 }
 
-void NotifData::ref(QObject* ref) {
-    QObject::connect(
-        ref, &QObject::destroyed, this,
-        [this, ref] {
-            if (m_refs.remove(ref) && m_closed && m_refs.isEmpty())
-                deleteLater();
-        },
-        Qt::SingleShotConnection);
-    m_refs << ref;
-}
-
 void NotifData::dismiss() {
-    if (m_closed)
+    if (released())
         return;
 
     if (m_backer)
@@ -171,7 +160,7 @@ void NotifData::dismiss() {
 }
 
 void NotifData::dismissPopup() {
-    if (m_closed || !m_popup)
+    if (released() || !m_popup)
         return;
 
     m_popup = false;
@@ -258,11 +247,8 @@ void NotifData::syncFromBacker() {
 }
 
 void NotifData::onBackerClosed() {
-    m_closed = true;
+    release();
     emit closed();
-
-    if (m_refs.isEmpty())
-        deleteLater();
 }
 
 void NotifData::connectBacker() {
