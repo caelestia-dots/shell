@@ -14,7 +14,7 @@ import qs.services
 Item {
     id: root
 
-    required property Panels panels
+    required property var panels
     property int refreshTick: 1
 
     property int workspaces: Math.max(1, Config.bar.workspaces.shown)
@@ -171,7 +171,7 @@ Item {
                             x: {
                                 if (!window || !monitor)
                                     return 0;
-                                return (window.at[0] - monitor.x - xOffset_l / monitor.scale) / (monitor.width) * root.previewWidth * monitor.scale;
+                                return (window.at[0] - monitor.x - xOffset_l) / (monitor.width - xOffset_l) * root.previewWidth * monitor.scale;
                             }
                             y: {
                                 if (!window || !monitor)
