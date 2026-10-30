@@ -10,7 +10,6 @@ import Caelestia.Multimedia
 import Caelestia.State
 import qs.components
 import qs.services
-import qs.modules.drawers
 
 Item {
     id: root
@@ -62,7 +61,7 @@ Item {
         onTriggered: {
             Hyprland.refreshToplevels();
             WorkspaceData.updateAll();
-            root.refreshTicks++;
+            root.refreshTick++;
         }
     }
 
