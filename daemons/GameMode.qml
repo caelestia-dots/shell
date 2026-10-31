@@ -10,8 +10,16 @@ import qs.services
 Scope {
     id: root
 
+    FileView {
+        id: shellJson
+        path: Quickshell.env("HOME") + "/.config/caelestia/shell.json"
+        blockLoading: true
+        watchChanges: true
+        onFileChanged: reload()
+    }
+
     function applyGameMode(): void {
-        Hypr.extras.applyOptions({
+        const defaults = {
             "animations:enabled": 0,
             "decoration:shadow:enabled": 0,
             "decoration:blur:enabled": 0,
@@ -20,7 +28,29 @@ Scope {
             "general:border_size": 1,
             "decoration:rounding": 0,
             "general:allow_tearing": 1
-        });
+        };
+
+        let config = {};
+        try {
+            const json = JSON.parse(shellJson.text());
+            config = json?.utilities?.gameMode?.options ?? {};
+        } catch (e) {}
+
+        const filtered = {};
+        for (const key in defaults) {
+            if (key in config) {
+                if (config[key] === null)
+                    continue;
+                if (typeof config[key] === "boolean")
+                    filtered[key] = config[key] ? 1 : 0;
+                else
+                    filtered[key] = config[key];
+            } else {
+                filtered[key] = defaults[key];
+            }
+        }
+
+        Hypr.extras.applyOptions(filtered);
     }
 
     function syncState(enableDisable: bool): void {
