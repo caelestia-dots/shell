@@ -10,13 +10,7 @@ import qs.services
 Scope {
     id: root
 
-    FileView {
-        id: shellJson
-        path: Quickshell.env("HOME") + "/.config/caelestia/shell.json"
-        blockLoading: true
-        watchChanges: true
-        onFileChanged: reload()
-    }
+    Component.onCompleted: syncState(false)
 
     function applyGameMode(): void {
         const defaults = {
@@ -65,7 +59,14 @@ Scope {
         }
     }
 
-    Component.onCompleted: syncState(false)
+    FileView {
+        id: shellJson
+
+        path: Quickshell.env("HOME") + "/.config/caelestia/shell.json"
+        blockLoading: true
+        watchChanges: true
+        onFileChanged: reload()
+    }
 
     Connections {
         function onGameModeChanged(): void {
