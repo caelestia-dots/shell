@@ -4,8 +4,8 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -67,7 +67,7 @@ PageBase {
                     Layout.fillWidth: true
                     visible: text
                     text: (root.app?.comment || root.app?.genericName) ?? ""
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.body.small
                     wrapMode: Text.WordWrap
                 }
@@ -163,7 +163,7 @@ PageBase {
 
                 Layout.fillWidth: true
                 Layout.maximumWidth: implicitWidth + 1 // Whyyyyyyyyy
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.body.small
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }

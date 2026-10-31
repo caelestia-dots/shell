@@ -7,6 +7,7 @@ import Quickshell.Hyprland
 import M3Shapes
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -33,7 +34,7 @@ Item {
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
 
-    property color offMonitorColour: Colours.palette.m3outlineVariant
+    property color offMonitorColour: Colours.palette.outlineVariant
     readonly property bool onOtherMonitor: {
         if (Config.bar.workspaces.perMonitor)
             return false;
@@ -44,8 +45,8 @@ Item {
         if (onOtherMonitor)
             return offMonitorColour;
         if (focused || isOccupied || Config.bar.workspaces.occupiedBg)
-            return Colours.palette.m3onSurface;
-        return Colours.layer(Colours.palette.m3outlineVariant, 2);
+            return Colours.palette.onSurface;
+        return Colours.layer(Colours.palette.outlineVariant, 2);
     }
 
     function updateShape(): void {
@@ -229,7 +230,7 @@ Item {
                     grade: 0
                     horizontalAlignment: Text.AlignHCenter
                     text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
+                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.onSurfaceVariant
 
                     opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
 

@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.controls
@@ -44,7 +45,7 @@ Item {
             opacity: root.notifCount > 0 ? 1 : 0
 
             text: root.notifCount
-            color: Colours.palette.m3outline
+            color: Colours.palette.outline
             font: Tokens.font.label.large
 
             Behavior on anchors.leftMargin {
@@ -68,7 +69,7 @@ Item {
 
             // TRANSLATORS: the count itself is rendered separately, immediately to the left
             text: root.notifCount > 0 ? Tr.trCtxN("notification", "notifications", root.notifCount, "notification count label, number shown separately") : Tr.tr("Notifications")
-            color: Colours.palette.m3outline
+            color: Colours.palette.outline
             font: Tokens.font.label.large
             elide: Text.ElideRight
         }
@@ -103,7 +104,7 @@ Item {
 
                     layer.enabled: true
                     layer.effect: Colouriser {
-                        colorizationColor: Colours.palette.m3outlineVariant
+                        colorizationColor: Colours.palette.outlineVariant
                         brightness: 1
                     }
                 }
@@ -111,7 +112,7 @@ Item {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.tr("All up to date!")
-                    color: Colours.palette.m3outlineVariant
+                    color: Colours.palette.outlineVariant
                     font: Tokens.font.headline.builders.small.width(90).build()
                 }
             }

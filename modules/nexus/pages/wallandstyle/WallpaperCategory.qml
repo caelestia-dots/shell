@@ -4,7 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.Models
-import qs.services
+import Caelestia.Scheme
+import qs.utils
 import qs.modules.nexus.common
 
 PageBase {
@@ -27,7 +28,10 @@ PageBase {
 
         Repeater {
             model: {
-                const walls = Wallpapers.list.filter(w => Wallpapers.getCategoryFor(w) === root.nState.selectedWallpaperCategory).sort((a, b) => a.name.localeCompare(b.name));
+                const walls = Wallpapers.model.entries.filter(w => {
+                    return Wallpapers.categoryFor(w) === root.nState.selectedWallpaperCategory;
+                }).sort((a, b) => a.name.localeCompare(b.name));
+
                 while (walls.length < Config.nexus.wallpapersPerRow)
                     walls.push(null);
                 return walls;

@@ -5,9 +5,9 @@ import QtQuick.Effects
 import Quickshell.Wayland
 import Caelestia.Config
 import Caelestia.Multimedia
+import Caelestia.Scheme
 import Caelestia.State
 import qs.components
-import qs.services
 
 WlSessionLockSurface {
     id: root
@@ -212,15 +212,15 @@ WlSessionLockSurface {
             id: lockBg
 
             anchors.fill: parent
-            color: Colours.palette.m3surface
+            color: Colours.palette.surface
             radius: parent.radius
-            opacity: Colours.transparency.enabled ? Colours.transparency.base : 1
+            opacity: Tokens.transparency.enabled ? Tokens.transparency.base : 1
 
             layer.enabled: true
             layer.effect: MultiEffect {
                 shadowEnabled: true
                 blurMax: 15
-                shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.7)
+                shadowColor: Qt.alpha("black", 0.7)
             }
         }
 

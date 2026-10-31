@@ -4,6 +4,7 @@ import QtQuick
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -65,12 +66,10 @@ Item {
             const currentItem = list.currentList?.currentItem;
             if (currentItem) {
                 if (list.showWallpapers) {
-                    if (Colours.scheme === "dynamic" && currentItem.modelData.path !== Wallpapers.actualCurrent)
-                        Wallpapers.previewColourLock = true;
                     Wallpapers.setWallpaper(currentItem.modelData.path);
                     root.screenState.launcher = false;
                 } else if (text.startsWith(GlobalConfig.launcher.actionPrefix)) {
-                    if (text.startsWith(`${GlobalConfig.launcher.actionPrefix}calc `))
+                    if (typeof currentItem.onClicked === "function")
                         currentItem.onClicked();
                     else
                         currentItem.modelData.onClicked(list.currentList);

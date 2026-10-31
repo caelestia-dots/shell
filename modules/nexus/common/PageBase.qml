@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.services
 import qs.modules.nexus
 
 ColumnLayout {
@@ -43,8 +43,8 @@ ColumnLayout {
                     font: Tokens.font.icon.medium
                     type: IconButton.Tonal
                     isRound: true
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
-                    inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                    inactiveColour: Colours.tPalette.surfaceContainerHigh
+                    inactiveOnColour: Colours.palette.onSurfaceVariant
                     onClicked: root.nState.closeSubPage()
                 }
             }

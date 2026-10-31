@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -32,13 +33,13 @@ Item {
                 StyledText {
                     text: Weather.city || Tr.tr("Loading...")
                     font: Tokens.font.body.builders.large.size(28).weight(Font.DemiBold).build()
-                    color: Colours.palette.m3onSurface
+                    color: Colours.palette.onSurface
                 }
 
                 StyledText {
                     text: Tr.formatDateTime(new Date(), "dddd, MMMM d")
                     font: Tokens.font.body.small
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                 }
             }
 
@@ -53,14 +54,14 @@ Item {
                     icon: "wb_twilight"
                     label: Tr.tr("Sunrise")
                     value: Weather.sunrise
-                    colour: Colours.palette.m3tertiary
+                    colour: Colours.palette.tertiary
                 }
 
                 WeatherStat {
                     icon: "bedtime"
                     label: Tr.tr("Sunset")
                     value: Weather.sunset
-                    colour: Colours.palette.m3tertiary
+                    colour: Colours.palette.tertiary
                 }
             }
         }
@@ -70,7 +71,7 @@ Item {
             implicitHeight: bigInfoRow.implicitHeight + Tokens.padding.small
 
             radius: Tokens.rounding.extraLarge * 2
-            color: Colours.tPalette.m3surfaceContainer
+            color: Colours.tPalette.surfaceContainer
 
             RowLayout {
                 id: bigInfoRow
@@ -82,7 +83,7 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                     text: Weather.icon
                     fontStyle: Tokens.font.icon.builders.extraLarge.scale(3).build()
-                    color: Colours.palette.m3secondary
+                    color: Colours.palette.secondary
                     animate: true
                 }
 
@@ -93,14 +94,14 @@ Item {
                     StyledText {
                         text: Weather.temp
                         font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Medium).build()
-                        color: Colours.palette.m3primary
+                        color: Colours.palette.primary
                     }
 
                     StyledText {
                         Layout.leftMargin: Tokens.padding.extraSmall
                         text: Weather.description
                         font: Tokens.font.body.medium
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                     }
                 }
             }
@@ -114,19 +115,19 @@ Item {
                 icon: "water_drop"
                 label: Tr.tr("Humidity")
                 value: Strings.percent(Weather.humidity)
-                colour: Colours.palette.m3secondary
+                colour: Colours.palette.secondary
             }
             DetailCard {
                 icon: "thermostat"
                 label: Tr.trCtx("Feels like", "apparent temperature")
                 value: Weather.feelsLike
-                colour: Colours.palette.m3primary
+                colour: Colours.palette.primary
             }
             DetailCard {
                 icon: "air"
                 label: Tr.tr("Wind")
                 value: Weather.windSpeed ? Tr.tr("%1 km/h").arg(Weather.windSpeed) : "--"
-                colour: Colours.palette.m3tertiary
+                colour: Colours.palette.tertiary
             }
         }
 
@@ -136,7 +137,7 @@ Item {
             visible: forecastRepeater.count > 0
             text: Tr.tr("7-day forecast")
             font: Tokens.font.body.builders.medium.weight(Font.DemiBold).build()
-            color: Colours.palette.m3onSurface
+            color: Colours.palette.onSurface
         }
 
         RowLayout {
@@ -158,7 +159,7 @@ Item {
                     implicitHeight: forecastItemColumn.implicitHeight + Tokens.padding.medium * 2
 
                     radius: Tokens.rounding.large
-                    color: Colours.tPalette.m3surfaceContainer
+                    color: Colours.tPalette.surfaceContainer
 
                     ColumnLayout {
                         id: forecastItemColumn
@@ -170,7 +171,7 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             text: forecastItem.index === 0 ? Tr.trCtx("Today", "forecast column") : Tr.formatDateTime(new Date(forecastItem.modelData.date), "ddd")
                             font: Tokens.font.body.builders.medium.weight(Font.DemiBold).build()
-                            color: Colours.palette.m3primary
+                            color: Colours.palette.primary
                         }
 
                         StyledText {
@@ -179,14 +180,14 @@ Item {
                             text: Tr.formatDateTime(new Date(forecastItem.modelData.date), "MMM d")
                             font: Tokens.font.body.small
                             opacity: 0.7
-                            color: Colours.palette.m3onSurfaceVariant
+                            color: Colours.palette.onSurfaceVariant
                         }
 
                         MaterialIcon {
                             Layout.alignment: Qt.AlignHCenter
                             text: forecastItem.modelData.icon
                             fontStyle: Tokens.font.icon.extraLarge
-                            color: Colours.palette.m3secondary
+                            color: Colours.palette.secondary
                         }
 
                         StyledText {
@@ -197,7 +198,7 @@ Item {
                                 return Tr.trCtx("%1 / %2", "min/max temperature").arg(min).arg(max);
                             }
                             font: Tokens.font.body.builders.small.weight(Font.DemiBold).build()
-                            color: Colours.palette.m3tertiary
+                            color: Colours.palette.tertiary
                         }
                     }
                 }
@@ -216,7 +217,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 60
         radius: Tokens.rounding.medium
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.tPalette.surfaceContainer
 
         Row {
             anchors.centerIn: parent
@@ -268,12 +269,12 @@ Item {
             StyledText {
                 text: weatherStat.label
                 font: Tokens.font.body.small
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
             }
             StyledText {
                 text: weatherStat.value
                 font: Tokens.font.body.builders.small.weight(Font.DemiBold).build()
-                color: Colours.palette.m3onSurface
+                color: Colours.palette.onSurface
             }
         }
     }

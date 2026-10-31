@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -12,7 +13,7 @@ Item {
 
     required property var bar
     required property Brightness.Monitor monitor
-    property color colour: Colours.palette.m3primary
+    property color colour: Colours.palette.primary
 
     readonly property string windowTitle: {
         const title = Hypr.activeToplevel?.title;

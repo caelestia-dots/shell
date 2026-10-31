@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import M3Shapes
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 
 StyledRect {
     id: root
@@ -21,7 +21,7 @@ StyledRect {
     }
     implicitHeight: input.implicitHeight + Tokens.padding.small
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.full
 
     focus: true
@@ -88,7 +88,7 @@ StyledRect {
                             return "face";
                         return "lock";
                     }
-                    color: !root.lock.pam.howdy.canAttempt && root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+                    color: !root.lock.pam.howdy.canAttempt && root.lock.pam.fprint.tries >= GlobalConfig.lock.maxFprintTries ? Colours.palette.error : Colours.palette.onSurfaceVariant
                     fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale).build()
                     fill: text === "face" || text === "visibility"
 
@@ -142,7 +142,7 @@ StyledRect {
             MaterialShape {
                 anchors.fill: parent
 
-                color: root.lock.pam.buffer ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+                color: root.lock.pam.buffer ? Colours.palette.primary : Colours.layer(Colours.palette.surfaceContainerHigh, 2)
                 shape: root.lock.pam.buffer ? MaterialShape.Arrow : MaterialShape.Circle
                 scale: !root.lock.pam.buffer ? 1 : mouse.pressed ? 0.6 : mouse.containsMouse ? 0.8 : 0.7
                 rotation: 90
@@ -172,7 +172,7 @@ StyledRect {
 
                 anchors.centerIn: parent
                 text: "arrow_forward"
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.builders.medium.scale(root.centerScale * 1.2).build()
                 opacity: root.lock.pam.buffer ? 0 : 1
 

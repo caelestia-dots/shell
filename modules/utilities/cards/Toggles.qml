@@ -6,6 +6,7 @@ import Quickshell.Bluetooth
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.State
 import qs.components
 import qs.components.controls
@@ -41,7 +42,7 @@ StyledRect {
     implicitHeight: layout.implicitHeight + Tokens.padding.extraLargeIncreased
 
     radius: Tokens.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     ColumnLayout {
         id: layout
@@ -113,7 +114,7 @@ StyledRect {
                     roleValue: "settings"
                     delegate: Toggle {
                         icon: "settings"
-                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                        inactiveOnColour: Colours.palette.onSurfaceVariant
                         isToggle: false
                         onClicked: {
                             root.screenState.utilities = false;
@@ -152,7 +153,7 @@ StyledRect {
                         checked: VPN.connected && VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
                         enabled: !VPN.connecting && !VPN.disconnecting
                         isToggle: VPN.status.state !== "needs-auth" && VPN.status.state !== "error"
-                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                        inactiveOnColour: Colours.palette.onSurfaceVariant
                         onClicked: VPN.toggle()
                     }
                 }
@@ -161,7 +162,7 @@ StyledRect {
     }
 
     component Toggle: IconButton {
-        inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+        inactiveColour: Colours.layer(Colours.palette.surfaceContainerHighest, 2)
         fillWidth: true
         isToggle: true
         isRound: true

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ShapePath {
     id: root
@@ -13,7 +13,7 @@ ShapePath {
     readonly property real roundingY: flatten ? wrapper.height / 2 : rounding
 
     strokeWidth: -1
-    fillColor: Colours.palette.m3surface
+    fillColor: Colours.palette.surface
 
     PathLine {
         relativeX: -(root.wrapper.width + root.rounding)

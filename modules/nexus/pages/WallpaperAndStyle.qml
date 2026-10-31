@@ -5,10 +5,10 @@ import QtQuick.Layouts
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.widgets
-import qs.services
 import qs.modules.nexus.common
 
 PageBase {
@@ -36,7 +36,7 @@ PageBase {
                 return Math.min(Math.round(cWidth * 0.4), cWidth / screen.width * screen.height);
             }
 
-            color: Colours.tPalette.m3surfaceContainer
+            color: Colours.tPalette.surfaceContainer
             radius: Tokens.rounding.large
 
             Loader {
@@ -50,14 +50,14 @@ PageBase {
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
                         text: "hide_image"
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                         fontStyle: Tokens.font.icon.extraLarge
                     }
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
                         text: Tr.tr("Wallpaper disabled")
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                         font: Tokens.font.body.large
                     }
                 }
@@ -123,9 +123,19 @@ PageBase {
 
             text: Tr.tr("Transparency")
             // TRANSLATORS: %1/%2 = opacity values from 0 to 1 for the base surface and layered surfaces
-            subtext: Tr.tr("Base %1, layers %2").arg(Colours.transparency.base).arg(Colours.transparency.layers)
-            checked: Colours.transparency.enabled
+            subtext: Tr.tr("Base %1, layers %2").arg(Tokens.transparency.base).arg(Tokens.transparency.layers)
+            checked: Tokens.transparency.enabled
             onToggled: GlobalConfig.appearance.transparency.enabled = checked
+        }
+
+        ToggleRow {
+            Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
+
+            text: Tr.tr("Blur")
+            subtext: Tr.tr("Blur shell surfaces")
+            disabled: !Tokens.transparency.enabled
+            checked: Tokens.transparency.blurEnabled
+            onToggled: GlobalConfig.appearance.transparency.blurEnabled = checked
         }
 
         ToggleRow {
@@ -133,8 +143,8 @@ PageBase {
 
             last: true
             text: Tr.tr("Dark theme")
-            checked: !Colours.light
-            onToggled: Colours.setMode(checked ? "dark" : "light")
+            checked: Colours.mode === ColoursImpl.Dark
+            onToggled: Colours.setMode(checked ? ColoursImpl.Dark : ColoursImpl.Light)
         }
     }
 }

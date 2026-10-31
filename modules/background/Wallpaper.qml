@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.filedialog
 import qs.components.widgets
-import qs.services
 import qs.utils
 
 Item {
@@ -23,7 +23,7 @@ Item {
         active: root.completed && !impl.source
 
         sourceComponent: StyledRect {
-            color: Colours.palette.m3surfaceContainer
+            color: Colours.palette.surfaceContainer
 
             Row {
                 anchors.centerIn: parent
@@ -31,7 +31,7 @@ Item {
 
                 MaterialIcon {
                     text: "sentiment_stressed"
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     fontStyle: Tokens.font.icon.builders.extraLarge.scale(5).build()
                 }
 
@@ -41,7 +41,7 @@ Item {
 
                     StyledText {
                         text: Tr.tr("Wallpaper missing?")
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                         font: Tokens.font.body.builders.large.size(28 * 2).weight(Font.Bold).build()
                     }
 
@@ -50,7 +50,7 @@ Item {
                         implicitHeight: selectWallText.implicitHeight + Tokens.padding.small
 
                         radius: Tokens.rounding.full
-                        color: Colours.palette.m3primary
+                        color: Colours.palette.primary
 
                         FileDialog {
                             id: dialog
@@ -63,7 +63,7 @@ Item {
 
                         StateLayer {
                             radius: parent.radius
-                            color: Colours.palette.m3onPrimary
+                            color: Colours.palette.onPrimary
                             onClicked: dialog.open()
                         }
 
@@ -73,7 +73,7 @@ Item {
                             anchors.centerIn: parent
 
                             text: Tr.tr("Set it now!")
-                            color: Colours.palette.m3onPrimary
+                            color: Colours.palette.onPrimary
                             font: Tokens.font.body.large
                         }
                     }

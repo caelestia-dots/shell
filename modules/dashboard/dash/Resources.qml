@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.controls
-import qs.services
 
 Item {
     id: root
@@ -43,13 +43,13 @@ Item {
         Resource {
             icon: "memory_alt"
             value: Memory.percentage
-            fgColour: Colours.palette.m3tertiary
+            fgColour: Colours.palette.tertiary
         }
 
         Resource {
             icon: "hard_disk"
             value: Storage.percentage
-            fgColour: Colours.palette.m3secondary
+            fgColour: Colours.palette.secondary
         }
     }
     component Resource: CircularProgress {

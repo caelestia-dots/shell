@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -27,7 +27,7 @@ Item {
         anchors.centerIn: parent
 
         text: "power_settings_new"
-        color: Colours.palette.m3error
+        color: Colours.palette.error
         fontStyle: Tokens.font.icon.builders.small.weight(Font.Bold).build()
     }
 }

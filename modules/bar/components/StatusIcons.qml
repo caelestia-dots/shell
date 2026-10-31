@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -12,7 +13,7 @@ import qs.modules.bar.components.status
 StyledRect {
     id: root
 
-    property color colour: Colours.palette.m3secondary
+    property color colour: Colours.palette.secondary
     readonly property alias items: iconColumn
 
     readonly property int spacing: Tokens.spacing.medium / 2
@@ -40,7 +41,7 @@ StyledRect {
         return false;
     }
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.full
 
     clip: true

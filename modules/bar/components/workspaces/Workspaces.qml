@@ -7,6 +7,7 @@ import Quickshell.Hyprland
 import Caelestia
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -68,7 +69,7 @@ ClipRect {
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: workspaces.layoutHeight + workspaces.anchors.margins * 2
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.full
 
     Item {
@@ -206,7 +207,7 @@ ClipRect {
             StyledRect {
                 anchors.fill: parent
                 radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.m3scrim, Colours.light ? 0 : 0.2)
+                color: Qt.alpha("black", Colours.mode === ColoursImpl.Light ? 0 : 0.2)
             }
 
             SpecialWorkspaces {

@@ -69,7 +69,8 @@ void ConfigRoot::bindTokens() {
     m_appearance->rounding()->bindTokens(tokens->rounding());
     m_appearance->spacing()->bindTokens(tokens->spacing());
     m_appearance->padding()->bindTokens(tokens->padding());
-    m_appearance->anim()->durations()->bindTokens(tokens->animDurations());
+    if (!fallbackNode())
+        m_appearance->anim()->durations()->bindTokens(tokens->animDurations());
 
     m_fontTokens->bindFont(m_appearance->font());
 }

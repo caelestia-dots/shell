@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 TextFieldBase {
     id: root
@@ -24,7 +24,7 @@ TextFieldBase {
         id: bg
 
         anchors.fill: parent
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.tPalette.surfaceContainer
         radius: Tokens.rounding.full
 
         StateLayer {
@@ -65,7 +65,7 @@ TextFieldBase {
         anchors.leftMargin: Tokens.padding.large
 
         text: "search"
-        color: Colours.palette.m3onSurfaceVariant
+        color: Colours.palette.onSurfaceVariant
         fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
     }
 

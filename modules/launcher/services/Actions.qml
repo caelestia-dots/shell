@@ -1,13 +1,13 @@
 pragma Singleton
 
-import ".."
 import QtQuick
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
-import qs.services
 import qs.utils
+import qs.modules.launcher
 
 Searcher {
     id: root
@@ -47,7 +47,7 @@ Searcher {
                 list.search.text = `${GlobalConfig.launcher.actionPrefix}${command[1]} `;
             } else if (command[0] === "setMode" && command.length > 1) {
                 list.screenState.launcher = false;
-                Colours.setMode(command[1]);
+                Colours.setMode(command[1] === "light" ? ColoursImpl.Light : ColoursImpl.Dark);
             } else {
                 list.screenState.launcher = false;
                 if (!SessionManager.exec(command))

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -72,7 +73,7 @@ PageBase {
 
                     MaterialIcon {
                         text: saved.ap ? Icons.getNetworkIcon(saved.ap.strength, !["", "none"].includes(Nmcli.savedSecurityFor(saved.modelData))) : "signal_wifi_off"
-                        color: saved.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                        color: saved.isActive ? Colours.palette.primary : Colours.palette.onSurfaceVariant
                         fontStyle: Tokens.font.icon.medium
                     }
 
@@ -100,7 +101,7 @@ PageBase {
                                     return Tr.trCtx("Connected • %1", "network connected with security").arg(security);
                                 return security;
                             }
-                            color: saved.isActive ? Colours.palette.m3primary : Colours.palette.m3outline
+                            color: saved.isActive ? Colours.palette.primary : Colours.palette.outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                         }
@@ -108,7 +109,7 @@ PageBase {
 
                     MaterialIcon {
                         text: "chevron_right"
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                         fontStyle: Tokens.font.icon.medium
                     }
                 }

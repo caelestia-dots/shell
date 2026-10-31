@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.modules.nexus.common
 
 ConnectedRect {
@@ -63,7 +63,7 @@ ConnectedRect {
                 Layout.fillWidth: true
                 visible: root.subtext
                 text: input.isError && root.errorText ? root.errorText : root.subtext
-                color: input.isError && root.errorText ? Colours.palette.m3error : Colours.palette.m3outline
+                color: input.isError && root.errorText ? Colours.palette.error : Colours.palette.outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
                 animate: root.errorText
