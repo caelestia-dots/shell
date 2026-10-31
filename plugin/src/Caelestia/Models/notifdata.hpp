@@ -115,6 +115,7 @@ private:
     bool m_popup = false;
     bool m_expirePopup = true;
     NotifGroup* m_group = nullptr;
+    NotifGroup* m_popupGroup = nullptr;
     qint64 m_createdAt;
     QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
