@@ -61,9 +61,9 @@ LazyListView {
 
             expanded: root.expanded
             expandable: root.expandable
-            dragExpand: root.expandable && !root.expanded
+            dragExpand: false
             hoveringLink: !!notifInner.body?.hoveredLink
-            enabled: root.expandable && !LazyListView.removing
+            enabled: root.expandable && root.expanded && !LazyListView.removing
 
             onRequestExpand: expand => root.requestExpand(expand)
             onSwiped: root.swiped(modelData)
