@@ -57,6 +57,7 @@ private:
     void track(NotifData* notif);
     void addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
     static bool removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
+    static bool repositionGroup(GroupIndex& index, NotifGroup* group, bool tiesFirst);
     void regroup(NotifData* notif);
     void markDirty(NotifData* notif);
     void flush();

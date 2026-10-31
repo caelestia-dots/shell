@@ -36,7 +36,10 @@ QQmlListProperty<NotifData> NotifGroup::notifs() {
 }
 
 void NotifGroup::add(NotifData* notif) {
-    m_notifs.prepend(notif);
+    const auto pos = std::ranges::find_if(m_notifs, [notif](const NotifData* n) {
+        return n->createdAt() <= notif->createdAt();
+    });
+    m_notifs.insert(pos, notif);
     QObject::connect(notif, &NotifData::imageChanged, this, &NotifGroup::sync);
     QObject::connect(notif, &NotifData::appIconChanged, this, &NotifGroup::sync);
     QObject::connect(notif, &NotifData::urgencyChanged, this, &NotifGroup::sync);

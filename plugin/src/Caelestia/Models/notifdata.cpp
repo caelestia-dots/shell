@@ -154,6 +154,10 @@ QString NotifData::timeStr() const {
     return m_timeStr;
 }
 
+qint64 NotifData::createdAt() const {
+    return m_createdAt;
+}
+
 void NotifData::dismiss() {
     if (released())
         return;
