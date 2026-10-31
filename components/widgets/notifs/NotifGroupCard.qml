@@ -17,10 +17,11 @@ StyledRect {
     property int baseSurface: 0
 
     readonly property list<var> notifs: [...group.notifs]
+    readonly property bool single: notifs.length === 1
     readonly property alias rowPressed: notifList.rowPressed
     readonly property list<color> surfaces: [Colours.palette.surfaceContainer, Colours.palette.surfaceContainerHigh, Colours.palette.surfaceContainerHighest]
     readonly property int nonAnimHeight: {
-        const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0);
+        const headerHeight = header.implicitHeight + (expanded ? Tokens.spacing.extraSmall : 0);
         const columnHeight = headerHeight + notifList.layoutHeight;
         return Math.round(Math.max(TokenConfig.sizes.notifs.image, columnHeight) + Tokens.padding.medium * 2);
     }
@@ -57,7 +58,7 @@ StyledRect {
 
         NotifAvatar {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.topMargin: root.expanded ? header.implicitHeight + Math.round(Tokens.spacing.extraSmall) + Tokens.padding.extraSmall : 0
+            Layout.topMargin: root.expanded && !root.single ? header.implicitHeight + Tokens.spacing.extraSmall + Tokens.padding.extraSmall : 0
             image: root.expanded ? root.notifs[0]?.image ?? "" : root.group.image
             icon: root.expanded ? root.notifs[0]?.appIcon ?? "" : root.group.icon
             urgency: root.group.urgency
@@ -72,7 +73,7 @@ StyledRect {
 
         Column {
             Layout.fillWidth: true
-            spacing: root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0
+            spacing: root.expanded ? Tokens.spacing.extraSmall : 0
 
             Behavior on spacing {
                 Anim {}
@@ -84,6 +85,7 @@ StyledRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 appName: root.group.appName
+                single: root.single
                 timeStr: root.notifs[0]?.timeStr ?? ""
                 count: root.notifs.length
                 urgency: root.group.urgency
@@ -98,6 +100,9 @@ StyledRect {
 
                 notifs: root.notifs
                 expanded: root.expanded
+                single: root.single
+                headerHeight: header.implicitHeight
+                headerTitleWidth: header.titleWidth
                 expandable: root.expandable
                 container: root.container
                 itemColour: root.surface(1, 3)
