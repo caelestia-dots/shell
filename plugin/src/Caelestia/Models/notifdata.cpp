@@ -339,7 +339,7 @@ void NotifData::cacheImage() {
         return;
     }
 
-    auto* const engine = qmlEngine(this);
+    const auto* engine = qmlEngine(this);
     if (!engine)
         return;
 
