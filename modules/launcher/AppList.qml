@@ -29,7 +29,7 @@ StyledListView {
     function stateForText(text: string): string {
         const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
+            for (const action of ["calc", "scheme"])
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
 
@@ -47,8 +47,6 @@ StyledListView {
             return [0];
         case "scheme":
             return Schemes.query(text);
-        case "variant":
-            return M3Variants.query(text);
         default:
             return Apps.search(text);
         }
@@ -113,13 +111,6 @@ StyledListView {
 
             PropertyChanges {
                 root.delegate: schemeItem
-            }
-        },
-        State {
-            name: "variant"
-
-            PropertyChanges {
-                root.delegate: variantItem
             }
         }
     ]
@@ -270,14 +261,6 @@ StyledListView {
         id: schemeItem
 
         SchemeItem {
-            list: root
-        }
-    }
-
-    Component {
-        id: variantItem
-
-        VariantItem {
             list: root
         }
     }
