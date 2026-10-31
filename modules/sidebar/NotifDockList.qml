@@ -6,6 +6,7 @@ import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Models
 import qs.components
+import qs.components.widgets.notifs
 import qs.services
 
 LazyListView {
@@ -41,58 +42,46 @@ LazyListView {
     }
 
     delegate: Component {
-        MouseArea {
+        NotifSwipeArea {
             id: notif
 
             required property int index
             required property NotifGroup modelData
 
-            readonly property bool closed: notifInner.notifs.length === 0
-            property int startY
+            readonly property bool closed: card.notifs.length === 0
+
+            function toggleExpand(expand: bool): void {
+                if (expand) {
+                    if (!expanded)
+                        root.props.expandedNotifs.push(modelData.appName);
+                } else if (expanded) {
+                    root.props.expandedNotifs.splice(root.props.expandedNotifs.indexOf(modelData.appName), 1);
+                }
+            }
 
             function closeAll(): void {
                 clearTimer.start();
             }
 
-            Component.onCompleted: modelData.ref(this)
+            Component.onDestruction: {
+                if (closed && expanded)
+                    toggleExpand(false);
+            }
 
-            LazyListView.trackViewport: !notifInner.expanded && notifInner.nonAnimHeight < notifInner.implicitHeight
-            LazyListView.preferredHeight: closed ? 0 : notifInner.nonAnimHeight
-            LazyListView.visibleHeight: notifInner.implicitHeight
-            implicitHeight: notifInner.implicitHeight
+            LazyListView.trackViewport: !expanded && card.nonAnimHeight < card.implicitHeight
+            LazyListView.preferredHeight: closed ? 0 : card.nonAnimHeight
+            LazyListView.visibleHeight: card.implicitHeight
+            implicitHeight: card.implicitHeight
 
             opacity: LazyListView.removing || closed || LazyListView.adding ? 0 : 1
             scale: LazyListView.removing || closed ? 0.6 : LazyListView.adding ? 0 : 1
 
-            hoverEnabled: true
-            cursorShape: pressed ? Qt.ClosedHandCursor : undefined
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            preventStealing: true
+            expanded: root.props.expandedNotifs.includes(modelData.appName)
             enabled: !closed
 
-            drag.target: this
-            drag.axis: Drag.XAxis
-
-            onPressed: event => {
-                startY = event.y;
-                if (event.button === Qt.RightButton)
-                    notifInner.toggleExpand(!notifInner.expanded);
-                else if (event.button === Qt.MiddleButton)
-                    closeAll();
-            }
-            onPositionChanged: event => {
-                if (pressed) {
-                    const diffY = event.y - startY;
-                    if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                        notifInner.toggleExpand(diffY > 0);
-                }
-            }
-            onReleased: event => {
-                if (Math.abs(x) < width * Config.notifs.clearThreshold)
-                    x = 0;
-                else
-                    closeAll();
-            }
+            onRequestExpand: expand => toggleExpand(expand)
+            onSwiped: closeAll()
+            onDismissed: closeAll()
 
             Timer {
                 id: clearTimer
@@ -112,13 +101,14 @@ LazyListView {
                 }
             }
 
-            NotifGroupItem {
-                id: notifInner
+            NotifGroupCard {
+                id: card
 
-                modelData: notif.modelData
-                props: root.props
+                group: notif.modelData
                 container: root.container
-                screenState: root.screenState
+                expanded: notif.expanded
+                onRequestExpand: expand => notif.toggleExpand(expand)
+                onLinkActivated: root.screenState.sidebar = false
             }
 
             Behavior on y {
@@ -134,10 +124,6 @@ LazyListView {
             }
 
             Behavior on scale {
-                Anim {}
-            }
-
-            Behavior on x {
                 Anim {}
             }
         }

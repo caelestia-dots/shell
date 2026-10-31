@@ -6,9 +6,11 @@ import Quickshell.Widgets
 import Caelestia
 import Caelestia.Config
 import Caelestia.Models
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.widgets
+import qs.components.widgets.notifs
 import qs.services
 import qs.modules.utilities as Utilities
 
@@ -70,7 +72,7 @@ Item {
             id: list
 
             model: ScriptModel {
-                values: [...Notifs.popups]
+                values: [...Notifs.popupGroups]
             }
 
             anchors.fill: parent
@@ -144,18 +146,24 @@ Item {
     component NotifWrapper: Item {
         id: wrapper
 
-        required property NotifData modelData
+        required property NotifGroup modelData
         required property int index
-        readonly property alias nonAnimHeight: notif.nonAnimHeight
+        readonly property alias nonAnimHeight: card.nonAnimHeight
         property int idx
+        property bool expanded: Config.notifs.openExpanded
+
+        function forEachPopup(fn: var): void {
+            for (const n of card.notifs)
+                fn(n);
+        }
 
         onIndexChanged: {
             if (index !== -1)
                 idx = index;
         }
 
-        implicitWidth: notif.implicitWidth
-        implicitHeight: notif.implicitHeight + (idx === 0 ? 0 : Tokens.spacing.medium)
+        implicitWidth: area.implicitWidth
+        implicitHeight: card.implicitHeight + (idx === 0 ? 0 : Tokens.spacing.medium)
 
         ListView.onRemove: removeAnim.start()
 
@@ -183,9 +191,9 @@ Item {
                 value: 1
             }
             Anim {
-                target: notif
+                target: area
                 property: "x"
-                to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
+                to: (area.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
                 duration: Tokens.anim.durations.normal
                 easing: Tokens.anim.emphasized
             }
@@ -201,15 +209,54 @@ Item {
             anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.medium
 
             color: "transparent"
-            radius: notif.radius
-            implicitWidth: notif.implicitWidth
-            implicitHeight: notif.implicitHeight
+            radius: card.radius
+            implicitWidth: area.implicitWidth
+            implicitHeight: card.implicitHeight
 
-            Notification {
-                id: notif
+            NotifSwipeArea {
+                id: area
 
-                modelData: wrapper.modelData
                 implicitWidth: root.implicitWidth - root.padding - root.clampedPadding
+                implicitHeight: card.implicitHeight
+                x: area.implicitWidth
+
+                expanded: wrapper.expanded
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+
+                Component.onCompleted: area.x = 0
+
+                onEntered: wrapper.forEachPopup(n => n.holdPopup())
+                onExited: {
+                    if (!area.pressed)
+                        wrapper.forEachPopup(n => n.releasePopup());
+                }
+                onPressed: wrapper.forEachPopup(n => n.holdPopup())
+                onReleased: {
+                    if (!area.containsMouse)
+                        wrapper.forEachPopup(n => n.releasePopup());
+                }
+                onRequestExpand: expand => wrapper.expanded = expand
+                onSwiped: wrapper.forEachPopup(n => n.dismissPopup())
+                onDismissed: wrapper.forEachPopup(n => n.dismiss())
+                onClicked: event => {
+                    if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton || card.notifs.length !== 1)
+                        return;
+
+                    const actions = card.notifs[0].actions;
+                    if (actions.length === 1)
+                        actions[0].invoke();
+                }
+
+                NotifGroupCard {
+                    id: card
+
+                    group: wrapper.modelData
+                    container: list
+                    expanded: wrapper.expanded
+                    color: card.group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : Colours.tPalette.surfaceContainer
+                    onRequestExpand: expand => wrapper.expanded = expand
+                    onLinkActivated: notif => notif.dismissPopup()
+                }
             }
         }
     }
