@@ -74,14 +74,26 @@ LazyListView {
             implicitHeight: card.implicitHeight
 
             opacity: LazyListView.removing || closed || LazyListView.adding ? 0 : 1
-            scale: LazyListView.removing || closed ? 0.6 : LazyListView.adding ? 0 : 1
+            scale: LazyListView.adding ? 0 : 1
 
             expanded: root.props.expandedNotifs.includes(modelData.appName)
             enabled: !closed
 
+            onClosedChanged: {
+                if (closed)
+                    slideOut.start();
+            }
             onRequestExpand: expand => toggleExpand(expand)
             onSwiped: closeAll()
             onDismissed: closeAll()
+
+            Anim {
+                id: slideOut
+
+                target: notif
+                property: "x"
+                to: notif.x >= 0 ? notif.width : -notif.width
+            }
 
             Timer {
                 id: clearTimer
