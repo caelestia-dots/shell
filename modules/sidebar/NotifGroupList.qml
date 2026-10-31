@@ -5,8 +5,8 @@ import Quickshell
 import Caelestia
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Models
 import qs.components
-import qs.services
 
 LazyListView {
     id: root
@@ -37,21 +37,7 @@ LazyListView {
     }
 
     model: ScriptModel {
-        values: {
-            if (root.expanded)
-                return root.notifs as Array;
-
-            let count = 0;
-            let i = 0;
-            const previewNum = root.Config.notifs.groupPreviewNum;
-            while (i < root.notifs.length && count < previewNum) {
-                if (!(root.notifs[i]?.closed ?? true))
-                    count++;
-                i++;
-            }
-
-            return root.notifs.slice(0, i) as Array;
-        }
+        values: root.expanded ? root.notifs as Array : root.notifs.slice(0, root.Config.notifs.groupPreviewNum) as Array
     }
 
     delegate: Component {
@@ -63,11 +49,10 @@ LazyListView {
 
             property int startY
 
-            Component.onCompleted: modelData?.lock(this)
-            Component.onDestruction: modelData?.unlock(this)
+            Component.onCompleted: modelData?.ref(this)
 
-            LazyListView.preferredHeight: modelData?.closed || LazyListView.removing ? 0 : notifInner.nonAnimHeight
-            LazyListView.visibleHeight: modelData?.closed || LazyListView.removing ? 0 : notifInner.implicitHeight
+            LazyListView.preferredHeight: LazyListView.removing ? 0 : notifInner.nonAnimHeight
+            LazyListView.visibleHeight: LazyListView.removing ? 0 : notifInner.implicitHeight
             implicitHeight: notifInner.implicitHeight
 
             opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
@@ -77,7 +62,7 @@ LazyListView {
             cursorShape: notifInner.body?.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             preventStealing: !root.expanded
-            enabled: !(modelData?.closed ?? true)
+            enabled: !LazyListView.removing
 
             drag.target: this
             drag.axis: Drag.XAxis
@@ -87,7 +72,7 @@ LazyListView {
                 if (event.button === Qt.RightButton)
                     root.requestToggleExpand(!root.expanded);
                 else if (event.button === Qt.MiddleButton)
-                    modelData?.close();
+                    modelData?.dismiss();
             }
             onPositionChanged: event => {
                 if (pressed && !root.expanded) {
@@ -100,12 +85,19 @@ LazyListView {
                 if (Math.abs(x) < width * Config.notifs.clearThreshold)
                     x = 0;
                 else
-                    modelData?.close();
+                    modelData?.dismiss();
+            }
+
+            Connections {
+                function onClosed(): void {
+                    closeAnim.start();
+                }
+
+                target: notif.modelData
             }
 
             ParallelAnimation {
-                running: notif.modelData?.closed ?? false
-                onFinished: notif.modelData?.unlock(notif)
+                id: closeAnim
 
                 Anim {
                     type: Anim.DefaultEffects

@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia
 import Caelestia.Config
+import Caelestia.Models
 import qs.components
 import qs.components.containers
 import qs.components.widgets
@@ -69,7 +70,7 @@ Item {
             id: list
 
             model: ScriptModel {
-                values: Notifs.popups.filter(n => !n.closed)
+                values: [...Notifs.popups]
             }
 
             anchors.fill: parent

@@ -4,9 +4,9 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
-import qs.services
 
 StyledRect {
     id: root
@@ -105,7 +105,7 @@ StyledRect {
 
         sourceComponent: StyledText {
             animate: true
-            text: root.modelData?.timeStr ?? ""
+            text: Tr.trMarked(root.modelData?.timeStr ?? "")
             color: Colours.palette.outline
             font: Tokens.font.body.small
         }

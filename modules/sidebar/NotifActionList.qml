@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
+import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
 import qs.components.containers
@@ -138,7 +139,7 @@ Item {
 
                         onClicked: {
                             if (action.modelData.isClose) {
-                                root.notif.close();
+                                root.notif.dismiss();
                             } else if (action.modelData.isCopy) {
                                 Quickshell.clipboardText = root.notif.body;
                                 (actionInner.item as MaterialIcon).text = "inventory";
@@ -146,7 +147,7 @@ Item {
                             } else if (action.modelData.invoke) {
                                 action.modelData.invoke();
                             } else if (!root.notif.resident) {
-                                root.notif.close();
+                                root.notif.dismiss();
                             }
                         }
                     }
