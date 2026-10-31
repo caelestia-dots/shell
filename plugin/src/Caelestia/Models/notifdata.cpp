@@ -350,6 +350,10 @@ void NotifData::cacheImage() {
         return;
     }
 
+    // Don't cache named icons
+    if (url.host() == u"icon" && !url.path().mid(1).contains(u'/'))
+        return;
+
     const auto* engine = qmlEngine(parent());
     if (!engine) {
         qCWarning(lcNotifData) << "Failed to cache image from provider - no QML engine";
