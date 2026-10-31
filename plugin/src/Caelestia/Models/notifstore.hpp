@@ -56,7 +56,7 @@ private:
 
     void track(NotifData* notif);
     void addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
-    bool removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
+    static bool removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
     void regroup(NotifData* notif);
     void markDirty(NotifData* notif);
     void flush();
