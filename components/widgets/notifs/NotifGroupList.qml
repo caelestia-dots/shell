@@ -74,6 +74,7 @@ LazyListView {
             dragExpand: false
             hoveringLink: !!notifInner.body?.hoveredLink
             enabled: root.expandable && root.expanded && !LazyListView.removing
+            acceptedButtons: root.single ? Qt.NoButton : Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
             onPressedChanged: root.pressedRows += pressed ? 1 : -1
             onRequestExpand: expand => root.requestExpand(expand)
