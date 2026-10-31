@@ -689,7 +689,6 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "apps": false,
             "actions": false,
             "schemes": false,
-            "variants": false,
             "wallpapers": false
         },
         "actions": [
@@ -714,14 +713,6 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "icon": "image",
                 "description": "Change the current wallpaper",
                 "command": ["autocomplete", "wallpaper"],
-                "enabled": true,
-                "dangerous": false
-            },
-            {
-                "name": "Variant",
-                "icon": "colors",
-                "description": "Change the current scheme variant",
-                "command": ["autocomplete", "variant"],
                 "enabled": true,
                 "dangerous": false
             },

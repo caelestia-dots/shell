@@ -1,6 +1,5 @@
 pragma Singleton
 
-import ".."
 import QtQuick
 import Quickshell
 import Caelestia.Config
@@ -8,6 +7,7 @@ import Caelestia.I18n
 import Caelestia.Scheme
 import Caelestia.Services
 import qs.utils
+import qs.modules.launcher
 
 Searcher {
     id: root
