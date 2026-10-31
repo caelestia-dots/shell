@@ -50,7 +50,7 @@ LazyListView {
             required property int index
             required property NotifData modelData
 
-            Component.onCompleted: modelData?.ref(this)
+            Component.onCompleted: modelData.ref(this)
 
             LazyListView.preferredHeight: LazyListView.removing ? 0 : notifInner.nonAnimHeight
             LazyListView.visibleHeight: LazyListView.removing ? 0 : notifInner.implicitHeight
@@ -67,7 +67,7 @@ LazyListView {
 
             onRequestExpand: expand => root.requestExpand(expand)
             onSwiped: root.swiped(modelData)
-            onDismissed: modelData?.dismiss()
+            onDismissed: modelData.dismiss()
 
             Connections {
                 function onClosed(): void {
