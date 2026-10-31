@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Models
 import qs.components
 import qs.services
 
@@ -36,14 +37,7 @@ LazyListView {
     removeDuration: Tokens.anim.durations.normal
 
     model: ScriptModel {
-        values: {
-            const map = new Map();
-            for (const n of Notifs.notClosed)
-                map.set(n.appName, null);
-            for (const n of Notifs.list)
-                map.set(n.appName, null);
-            return [...map.keys()];
-        }
+        values: [...Notifs.groups]
     }
 
     delegate: Component {
@@ -51,14 +45,16 @@ LazyListView {
             id: notif
 
             required property int index
-            required property string modelData
+            required property NotifGroup modelData
 
-            readonly property bool closed: notifInner.notifCount === 0
+            readonly property bool closed: notifInner.notifs.length === 0
             property int startY
 
             function closeAll(): void {
                 clearTimer.start();
             }
+
+            Component.onCompleted: modelData.ref(this)
 
             LazyListView.trackViewport: !notifInner.expanded && notifInner.nonAnimHeight < notifInner.implicitHeight
             LazyListView.preferredHeight: closed ? 0 : notifInner.nonAnimHeight
@@ -105,18 +101,18 @@ LazyListView {
                 repeat: true
                 triggeredOnStart: true
                 onTriggered: {
-                    const notifs = Notifs.notClosed.filter(n => n.appName === notif.modelData);
+                    const notifs = [...notif.modelData.notifs];
                     if (notifs.length === 0) {
                         stop();
                         return;
                     }
 
                     for (const n of notifs.slice(0, 30))
-                        n.close();
+                        n.dismiss();
                 }
             }
 
-            NotifGroup {
+            NotifGroupItem {
                 id: notifInner
 
                 modelData: notif.modelData

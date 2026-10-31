@@ -84,13 +84,10 @@ ColumnLayout {
             clip: true
 
             model: ScriptModel {
-                values: {
-                    const list = Notifs.notClosed.map(n => [n.appName, null]);
-                    return [...new Map(list).keys()];
-                }
+                values: [...Notifs.groups]
             }
 
-            delegate: NotifGroup {}
+            delegate: NotifGroupItem {}
 
             add: Transition {
                 Anim {

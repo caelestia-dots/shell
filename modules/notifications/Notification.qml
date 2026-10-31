@@ -3,14 +3,14 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import Quickshell
-import Quickshell.Services.Notifications
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.I18n
+import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
-import qs.services
 import qs.utils
 
 StyledRect {
@@ -23,7 +23,7 @@ StyledRect {
     readonly property int nonAnimHeight: summary.implicitHeight + (root.expanded ? Tokens.spacing.extraSmall * 2 + appName.height + body.height + actions.height + actions.anchors.topMargin : bodyPreview.height) + inner.anchors.margins * 2
     property bool expanded: Config.notifs.openExpanded
 
-    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.secondaryContainer : Colours.tPalette.surfaceContainer
+    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.large
 
     implicitHeight: inner.implicitHeight
@@ -31,9 +31,8 @@ StyledRect {
     x: implicitWidth
     Component.onCompleted: {
         x = 0;
-        modelData.lock(this);
+        modelData.ref(this);
     }
-    Component.onDestruction: modelData.unlock(this)
 
     Behavior on x {
         Anim {
@@ -50,29 +49,29 @@ StyledRect {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         preventStealing: true
 
-        onEntered: root.modelData.timer.stop()
+        onEntered: root.modelData.holdPopup()
         onExited: {
             if (!pressed)
-                root.modelData.timer.start();
+                root.modelData.releasePopup();
         }
 
         drag.target: parent
         drag.axis: Drag.XAxis
 
         onPressed: event => {
-            root.modelData.timer.stop();
+            root.modelData.holdPopup();
             startY = event.y;
             if (event.button === Qt.MiddleButton)
-                root.modelData.close();
+                root.modelData.dismiss();
         }
         onReleased: event => {
             if (!containsMouse)
-                root.modelData.timer.start();
+                root.modelData.releasePopup();
 
             if (Math.abs(root.x) < root.implicitWidth * Config.notifs.clearThreshold)
                 root.x = 0;
             else
-                root.modelData.popup = false;
+                root.modelData.dismissPopup();
         }
         onPositionChanged: event => {
             if (pressed) {
@@ -118,7 +117,7 @@ StyledRect {
 
                 sourceComponent: ClipRect {
                     radius: Tokens.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.surfaceContainerHighest, 2) : Colours.palette.secondaryContainer
+                    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.error : root.modelData.urgency === NotifData.Low ? Colours.layer(Colours.palette.surfaceContainerHighest, 2) : Colours.palette.secondaryContainer
                     implicitWidth: TokenConfig.sizes.notifs.image
                     implicitHeight: TokenConfig.sizes.notifs.image
 
@@ -149,7 +148,7 @@ StyledRect {
 
                 sourceComponent: StyledRect {
                     radius: Tokens.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.surfaceContainerHighest, 2) : Colours.palette.secondaryContainer
+                    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.error : root.modelData.urgency === NotifData.Low ? Colours.layer(Colours.palette.surfaceContainerHighest, 2) : Colours.palette.secondaryContainer
                     implicitWidth: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
                     implicitHeight: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
 
@@ -167,7 +166,7 @@ StyledRect {
                         sourceComponent: ColouredIcon {
                             anchors.fill: parent
                             source: Quickshell.iconPath(root.modelData.appIcon)
-                            colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
+                            colour: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : root.modelData.urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
                             layer.enabled: root.modelData.appIcon.endsWith("symbolic")
                         }
                     }
@@ -180,7 +179,7 @@ StyledRect {
 
                         sourceComponent: MaterialIcon {
                             text: Icons.getNotifIcon(root.modelData.summary, root.modelData.urgency)
-                            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
+                            color: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : root.modelData.urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
                             fontStyle: Tokens.font.icon.medium
                         }
                     }
@@ -343,7 +342,7 @@ StyledRect {
 
                 animate: true
                 horizontalAlignment: Text.AlignLeft
-                text: root.modelData.timeStr
+                text: Tr.trMarked(root.modelData.timeStr)
                 color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.body.small
             }
@@ -360,7 +359,7 @@ StyledRect {
 
                 StateLayer {
                     radius: Tokens.rounding.full
-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+                    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
                     onClicked: root.expanded = !root.expanded
                 }
 
@@ -436,7 +435,7 @@ StyledRect {
                         return;
 
                     Qt.openUrlExternally(link);
-                    root.modelData.popup = false;
+                    root.modelData.dismissPopup();
                 }
 
                 opacity: root.expanded ? 1 : 0
@@ -469,11 +468,11 @@ StyledRect {
                     isRound: true
                     shapeMorph: true
                     fillWidth: root.modelData.actions.length === 0
-                    inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
-                    inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
+                    inactiveColour: root.modelData.urgency === NotifData.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
+                    inactiveOnColour: root.modelData.urgency === NotifData.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
                     icon: "close"
                     padding: Tokens.padding.extraSmall
-                    onClicked: root.modelData.close()
+                    onClicked: root.modelData.dismiss()
                 }
 
                 Repeater {
@@ -485,8 +484,8 @@ StyledRect {
                         isRound: true
                         shapeMorph: true
                         fillWidth: true
-                        inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
-                        inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
+                        inactiveColour: root.modelData.urgency === NotifData.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
+                        inactiveOnColour: root.modelData.urgency === NotifData.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
                         text: modelData.text
                         onClicked: modelData.invoke()
 
@@ -504,8 +503,8 @@ StyledRect {
                     isRound: true
                     shapeMorph: true
                     fillWidth: root.modelData.actions.length === 0
-                    inactiveColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
-                    inactiveOnColour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
+                    inactiveColour: root.modelData.urgency === NotifData.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
+                    inactiveOnColour: root.modelData.urgency === NotifData.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
                     icon: copyTimer.running ? "inventory" : "content_copy"
                     padding: Tokens.padding.extraSmall
                     onClicked: {
