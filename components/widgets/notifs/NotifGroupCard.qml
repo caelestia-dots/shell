@@ -42,7 +42,7 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : surface(0, 2)
+    color: !expanded && group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : surface(0, 2)
 
     Behavior on implicitHeight {
         Anim {}
@@ -61,7 +61,7 @@ StyledRect {
             Layout.topMargin: root.expanded && !root.single ? header.implicitHeight + Tokens.spacing.extraSmall + Tokens.padding.extraSmall : 0
             image: root.expanded ? root.notifs[0]?.image ?? "" : root.group.image
             icon: root.expanded ? root.notifs[0]?.appIcon ?? "" : root.group.icon
-            urgency: root.group.urgency
+            urgency: root.expanded ? root.notifs[0]?.urgency ?? NotifData.Normal : root.group.urgency
             lowFillColour: root.surface(1, 3)
             summary: root.notifs[0]?.summary ?? ""
             progress: (root.notifs[0]?.hints.value ?? 0) / 100
