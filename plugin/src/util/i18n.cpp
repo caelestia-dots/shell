@@ -1,31 +1,11 @@
-#pragma once
-
-#include <qstring.h>
-#include <qstringlist.h>
+#include "util/i18n.hpp"
 
 namespace util::i18n {
 
-inline constexpr QChar k_markChar = u'\x01';
-inline constexpr QChar k_argSep = u'\x02';
-inline constexpr QChar k_pluralSep = u'\x03';
-inline constexpr QChar k_contextSep = u'\x04';
+namespace {
 
-// A marked string split back into its parts
-struct MarkedString {
-    QString text;
-    QString plural;
-    QString context;
-    QStringList args;
-    int n = -1; // Negative when the string has no plural forms
-};
-
-namespace detail {
-
-// Marks a string with the given plural forms, context and args.
-// Args can be marked, however they must not carry args themselves.
 // The marked format is `markChar {<arg> argSep} [<context> contextSep] <text> [pluralSep <plural> pluralSep <n>]`
-inline QString doMark(
-    const QString& text, const QString& plural, int n, const QString& context, const QStringList& args) {
+QString doMark(const QString& text, const QString& plural, int n, const QString& context, const QStringList& args) {
     auto len = 1 + text.size();
     if (n >= 0)
         len += plural.size() + 2 + 11; // Two separators + the widest int
@@ -60,26 +40,25 @@ inline QString doMark(
     return result;
 }
 
-} // namespace detail
+} // namespace
 
-inline QString mark(const QString& text, const QStringList& args = {}) {
-    return detail::doMark(text, {}, -1, {}, args);
+QString mark(const QString& text, const QStringList& args) {
+    return doMark(text, {}, -1, {}, args);
 }
 
-inline QString markCtx(const QString& text, const QString& context, const QStringList& args = {}) {
-    return detail::doMark(text, {}, -1, context, args);
+QString markCtx(const QString& text, const QString& context, const QStringList& args) {
+    return doMark(text, {}, -1, context, args);
 }
 
-inline QString markN(const QString& text, const QString& plural, int n, const QStringList& args = {}) {
-    return detail::doMark(text, plural, n, {}, args);
+QString markN(const QString& text, const QString& plural, int n, const QStringList& args) {
+    return doMark(text, plural, n, {}, args);
 }
 
-inline QString markCtxN(
-    const QString& text, const QString& plural, int n, const QString& context, const QStringList& args = {}) {
-    return detail::doMark(text, plural, n, context, args);
+QString markCtxN(const QString& text, const QString& plural, int n, const QString& context, const QStringList& args) {
+    return doMark(text, plural, n, context, args);
 }
 
-inline MarkedString parseMarked(const QString& text) {
+MarkedString parseMarked(const QString& text) {
     MarkedString marked;
     auto body = text.sliced(1);
 
@@ -105,11 +84,11 @@ inline MarkedString parseMarked(const QString& text) {
     return marked;
 }
 
-inline bool isMarked(const QString& text) {
+bool isMarked(const QString& text) {
     return text.startsWith(k_markChar);
 }
 
-inline QString unmark(const QString& text) {
+QString unmark(const QString& text) {
     if (!isMarked(text))
         return text;
 

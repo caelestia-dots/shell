@@ -22,6 +22,8 @@ function(qml_module arg_TARGET)
         TARGET_PATH module_target_path
         QMLDIR module_qmldir
         TYPEINFO module_typeinfo
+        QML_FILES module_qml_files
+        QML_FILES_DEPLOY_PATHS module_qml_deploy_paths
     )
 
     message(STATUS "Created QML module: ${module_uri}")
@@ -44,6 +46,11 @@ function(qml_module arg_TARGET)
     )
     install(FILES "${module_qmldir}" DESTINATION "${module_dir}")
     install(FILES "${module_typeinfo}" DESTINATION "${module_dir}")
+
+    foreach(qml_file deploy_path IN ZIP_LISTS module_qml_files module_qml_deploy_paths)
+        cmake_path(GET deploy_path PARENT_PATH deploy_subdir)
+        install(FILES "${qml_file}" DESTINATION "${module_dir}/${deploy_subdir}")
+    endforeach()
 
     target_link_libraries(${arg_TARGET} PRIVATE caelestia-pch Qt::Core Qt::Qml ${arg_LIBRARIES})
 
