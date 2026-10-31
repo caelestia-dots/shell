@@ -17,6 +17,8 @@ LazyListView {
     required property Flickable container
     required property color itemColour
     required property color buttonColour
+    readonly property bool rowPressed: pressedRows > 0
+    property int pressedRows
 
     signal requestExpand(expand: bool)
     signal swiped(notif: NotifData)
@@ -51,6 +53,10 @@ LazyListView {
             required property NotifData modelData
 
             Component.onCompleted: modelData.ref(this)
+            Component.onDestruction: {
+                if (pressed)
+                    root.pressedRows--;
+            }
 
             LazyListView.preferredHeight: LazyListView.removing ? 0 : notifInner.nonAnimHeight
             LazyListView.visibleHeight: LazyListView.removing ? 0 : notifInner.implicitHeight
@@ -65,6 +71,7 @@ LazyListView {
             hoveringLink: !!notifInner.body?.hoveredLink
             enabled: root.expandable && root.expanded && !LazyListView.removing
 
+            onPressedChanged: root.pressedRows += pressed ? 1 : -1
             onRequestExpand: expand => root.requestExpand(expand)
             onSwiped: root.swiped(modelData)
             onDismissed: modelData.dismiss()
