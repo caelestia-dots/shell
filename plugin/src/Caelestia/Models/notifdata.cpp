@@ -5,6 +5,7 @@
 #include <qdatetime.h>
 #include <qfile.h>
 #include <qimage.h>
+#include <qloggingcategory.h>
 #include <qmetaobject.h>
 #include <qqml.h>
 #include <qquickimageprovider.h>
@@ -12,6 +13,12 @@
 
 #include "config/rootnodes.hpp"
 #include "util/i18n.hpp"
+
+namespace {
+
+Q_LOGGING_CATEGORY(lcNotifData, "caelestia.notifs.data", QtInfoMsg)
+
+}
 
 namespace caelestia::shell::models {
 
@@ -343,13 +350,17 @@ void NotifData::cacheImage() {
         return;
     }
 
-    const auto* engine = qmlEngine(this);
-    if (!engine)
+    const auto* engine = qmlEngine(parent());
+    if (!engine) {
+        qCWarning(lcNotifData) << "Failed to cache image from provider - no QML engine";
         return;
+    }
 
     auto* const base = engine->imageProvider(url.host());
-    if (!base)
+    if (!base) {
+        qCWarning(lcNotifData) << "Failed to cache image from provider - no image provider";
         return;
+    }
 
     // Keep the ?path= / ?fallback= query, drop only scheme, host and leading slash
     const auto id = url.toString(QUrl::RemoveScheme | QUrl::RemoveAuthority).mid(1);
@@ -364,6 +375,7 @@ void NotifData::cacheImage() {
         auto* const provider = static_cast<QQuickImageProvider*>(base);
         image = QtFuture::makeReadyValueFuture(provider->requestPixmap(id, nullptr, k_providerCacheSize).toImage());
     } else {
+        qCWarning(lcNotifData) << "Failed to cache image from provider - unsupported image type";
         return;
     }
 
