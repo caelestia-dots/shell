@@ -121,8 +121,9 @@ ClipRect {
             }
 
             delegate: Workspace {
-                activeWsId: root.activeWsId
                 ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
+                workspace: Hypr.workspaces.values.find(w => w.id === ws) ?? null
+                focused: ws === root.activeWsId
                 monitor: root.monitor
 
                 displayType: Config.bar.workspaces.displayType
