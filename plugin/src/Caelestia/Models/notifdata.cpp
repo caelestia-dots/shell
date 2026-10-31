@@ -36,6 +36,11 @@ template <typename T> bool assign(T& field, const T& value) {
     return true;
 }
 
+QString normaliseAppIcon(const QString& icon) {
+    const QUrl url(icon);
+    return url.isLocalFile() ? url.toLocalFile() : icon;
+}
+
 utils::FileCache& imageCache() {
     static utils::FileCache s_cache(u"notifs/images"_s, 512ll * 1024 * 1024, {}, k_cacheVersion);
     return s_cache;
@@ -250,7 +255,7 @@ void NotifData::syncFromBacker() {
         dirty = true;
         emit bodyChanged();
     }
-    if (assign(m_appIcon, m_backer->property("appIcon").toString())) {
+    if (assign(m_appIcon, normaliseAppIcon(m_backer->property("appIcon").toString()))) {
         dirty = true;
         cacheIcon();
         emit appIconChanged();
