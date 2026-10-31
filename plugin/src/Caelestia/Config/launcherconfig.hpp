@@ -21,7 +21,6 @@ class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, apps, false)
     CONFIG_PROPERTY(bool, actions, false)
     CONFIG_PROPERTY(bool, schemes, false)
-    CONFIG_PROPERTY(bool, variants, false)
     CONFIG_PROPERTY(bool, wallpapers, false)
 };
 
@@ -71,12 +70,6 @@ class LauncherConfig : public settings::ObjectNode {
                 { u"icon"_s, u"image"_s },
                 { u"description"_s, mark(u"Change the current wallpaper"_s) },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"wallpaper"_s } },
-            }),
-            vmap({
-                { u"name"_s, markCtx(u"Variant"_s, u"launcher action"_s) },
-                { u"icon"_s, u"colors"_s },
-                { u"description"_s, mark(u"Change the current scheme variant"_s) },
-                { u"command"_s, QStringList{ u"autocomplete"_s, u"variant"_s } },
             }),
             vmap({
                 { u"name"_s, markCtx(u"Random"_s, u"launcher action"_s) },

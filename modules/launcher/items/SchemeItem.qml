@@ -2,7 +2,7 @@ import QtQuick
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
-import qs.modules.launcher.services
+import qs.modules.launcher.services // qmllint disable unused-imports
 
 Item {
     id: root
