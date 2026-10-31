@@ -14,7 +14,10 @@ LazyListView {
     required property list<var> notifs
     required property bool expanded
     required property bool expandable
+    required property bool single
     required property Flickable container
+    property real headerHeight
+    property real headerTitleWidth
     required property color itemColour
     required property color buttonColour
     readonly property bool rowPressed: pressedRows > 0
@@ -106,6 +109,9 @@ LazyListView {
                 anchors.fill: parent
                 modelData: notif.modelData
                 expanded: root.expanded
+                single: root.single
+                headerHeight: root.headerHeight
+                headerTitleWidth: root.headerTitleWidth
                 showAvatar: notif.index > 0
                 expandedColour: root.itemColour
                 buttonColour: root.buttonColour
