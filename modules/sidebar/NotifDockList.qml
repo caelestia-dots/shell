@@ -107,7 +107,9 @@ LazyListView {
                 group: notif.modelData
                 container: root.container
                 expanded: notif.expanded
+                baseSurface: 1
                 onRequestExpand: expand => notif.toggleExpand(expand)
+                onSwiped: notif => notif.dismiss()
                 onLinkActivated: root.screenState.sidebar = false
             }
 
