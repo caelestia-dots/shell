@@ -15,6 +15,7 @@ StyledRect {
     required property bool expanded
     property bool expandable: true
     property int baseSurface: 0
+    property int baseLayer: baseSurface
 
     readonly property list<var> notifs: [...group.notifs]
     readonly property bool single: notifs.length === 1
@@ -31,7 +32,7 @@ StyledRect {
     signal linkActivated(notif: NotifData)
 
     function surface(offset: int, layer: int): color {
-        return Colours.layer(surfaces[Math.min(baseSurface + offset, surfaces.length - 1)], layer);
+        return Colours.layer(surfaces[Math.min(baseSurface + offset, surfaces.length - 1)], baseLayer + layer);
     }
 
     Component.onCompleted: group.ref(this)
@@ -42,7 +43,7 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: !expanded && group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : surface(0, 2)
+    color: !expanded && group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : surface(0, 1)
 
     Behavior on implicitHeight {
         Anim {}
@@ -62,7 +63,7 @@ StyledRect {
             image: root.expanded ? root.notifs[0]?.image ?? "" : root.group.image
             icon: root.expanded ? root.notifs[0]?.appIcon ?? "" : root.group.icon
             urgency: root.expanded ? root.notifs[0]?.urgency ?? NotifData.Normal : root.group.urgency
-            lowFillColour: root.surface(1, 3)
+            lowFillColour: root.surface(1, 2)
             summary: root.notifs[0]?.summary ?? ""
             progress: (root.notifs[0]?.hints.value ?? 0) / 100
 
@@ -89,7 +90,7 @@ StyledRect {
                 timeStr: root.notifs[0]?.timeStr ?? ""
                 count: root.notifs.length
                 urgency: root.group.urgency
-                pillColour: root.surface(1, 3)
+                pillColour: root.surface(1, 2)
                 expandable: root.expandable
                 expanded: root.expanded
                 onToggle: root.requestExpand(!root.expanded)
@@ -105,8 +106,8 @@ StyledRect {
                 headerTitleWidth: header.titleWidth
                 expandable: root.expandable
                 container: root.container
-                itemColour: root.surface(1, 3)
-                buttonColour: root.surface(2, 4)
+                itemColour: root.surface(1, 2)
+                buttonColour: root.surface(2, 3)
                 onRequestExpand: expand => root.requestExpand(expand)
                 onSwiped: notif => root.swiped(notif)
                 onLinkActivated: notif => root.linkActivated(notif)
