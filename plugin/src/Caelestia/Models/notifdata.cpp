@@ -252,6 +252,7 @@ void NotifData::syncFromBacker() {
     }
     if (assign(m_appIcon, m_backer->property("appIcon").toString())) {
         dirty = true;
+        cacheIcon();
         emit appIconChanged();
     }
     if (assign(m_appName, m_backer->property("appName").toString())) {
@@ -338,13 +339,28 @@ QList<NotifAction> NotifData::readBackerActions() {
     return actions;
 }
 
+void NotifData::cacheIcon() {
+    if (m_appIcon.isEmpty() || m_appIcon.startsWith(imageCache().dir()))
+        return;
+
+    const QUrl url(m_appIcon);
+    const auto path = url.isLocalFile() ? url.toLocalFile() : m_appIcon;
+    if (!path.startsWith(u'/'))
+        return;
+
+    storeImage(m_appIcon, utils::Cache::keyForPath(path), [path] {
+        return QFile(path).readAll();
+    });
+}
+
 void NotifData::cacheImage() {
     if (m_image.isEmpty() || m_image.startsWith(imageCache().dir()))
         return;
 
     const QUrl url(m_image);
     if (url.scheme() != u"image") {
-        storeImage(utils::Cache::keyForPath(m_image), [path = m_image] {
+        const auto path = url.isLocalFile() ? url.toLocalFile() : m_image;
+        storeImage(m_image, utils::Cache::keyForPath(path), [path] {
             return QFile(path).readAll();
         });
         return;
@@ -389,28 +405,28 @@ void NotifData::cacheImage() {
                 return std::pair{ keyForImage(img), img };
             })
         .then(this, [this](const std::pair<QString, QImage>& result) {
-            storeImage(result.first, [img = result.second] {
+            storeImage(m_image, result.first, [img = result.second] {
                 return encodeImage(img);
             });
         });
 }
 
-void NotifData::storeImage(const QString& key, utils::Cache::Producer producer) {
+void NotifData::storeImage(QString& target, const QString& key, utils::Cache::Producer producer) {
     if (key.isEmpty())
         return;
 
-    imageCache().lookup(key).then(this, [this, key, producer = std::move(producer)](const QUrl& cached) {
+    imageCache().lookup(key).then(this, [this, &target, key, producer = std::move(producer)](const QUrl& cached) {
         if (!cached.isEmpty()) {
-            m_image = cached.toLocalFile();
+            target = cached.toLocalFile();
             emit changed();
             return;
         }
 
-        imageCache().store(key, producer).then(this, [this, key](bool ok) {
+        imageCache().store(key, producer).then(this, [this, &target, key](bool ok) {
             if (!ok)
                 return;
 
-            m_image = imageCache().pathFor(key);
+            target = imageCache().pathFor(key);
             emit changed();
         });
     });

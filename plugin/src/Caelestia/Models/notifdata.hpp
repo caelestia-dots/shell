@@ -144,8 +144,9 @@ private:
     void connectBacker();
     [[nodiscard]] QList<NotifAction> readBackerActions();
 
+    void cacheIcon();
     void cacheImage();
-    void storeImage(const QString& key, utils::Cache::Producer producer);
+    void storeImage(QString& target, const QString& key, utils::Cache::Producer producer);
 
     friend class NotifStore;
 };
