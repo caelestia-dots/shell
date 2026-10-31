@@ -58,7 +58,6 @@ private:
     void addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
     bool removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
     void regroup(NotifData* notif);
-    void syncGroups(const NotifData* notif);
     void markDirty(NotifData* notif);
     void flush();
     void save(const NotifData* notif);

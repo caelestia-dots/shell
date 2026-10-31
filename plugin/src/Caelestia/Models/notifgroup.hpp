@@ -42,6 +42,8 @@ private:
     NotifData::Urgency m_urgency = NotifData::Urgency::Normal;
     QList<NotifData*> m_notifs;
 
+    void add(NotifData* notif);
+    void remove(NotifData* notif);
     void sync();
 
     friend class NotifStore;
