@@ -18,6 +18,8 @@ Item {
     required property bool expanded
     readonly property alias titleWidth: appName.width
 
+    readonly property color expandBtnTextColour: urgency === NotifData.Critical && !single ? Colours.palette.onError : Colours.palette.onSurfaceVariant
+
     signal toggle
 
     implicitHeight: Math.max(appName.implicitHeight, time.implicitHeight, pill.implicitHeight)
@@ -52,7 +54,10 @@ Item {
 
         animate: true
         text: Tr.trMarked(root.timeStr)
-        color: Colours.palette.outline
+        color: {
+            const col = !root.expanded && root.urgency === NotifData.Critical ? Colours.palette.secondary : Colours.palette.outline;
+            return root.expanded ? Qt.alpha(col, 0) : col;
+        }
         font: Tokens.font.body.small
     }
 
@@ -76,7 +81,7 @@ Item {
         radius: Tokens.rounding.full
 
         StateLayer {
-            color: root.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.onSurface
+            color: root.expandBtnTextColour
             disabled: !root.expandable
             onClicked: root.toggle()
         }
@@ -95,7 +100,7 @@ Item {
 
                 animate: true
                 text: root.count
-                color: root.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.onSurfaceVariant
+                color: root.expandBtnTextColour
                 font: Tokens.font.body.small
             }
 
@@ -116,7 +121,7 @@ Item {
 
             visible: root.expandable
             text: "expand_more"
-            color: root.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.onSurfaceVariant
+            color: root.expandBtnTextColour
             rotation: root.expanded ? 180 : 0
 
             Behavior on rotation {
