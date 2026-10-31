@@ -6,10 +6,12 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.effects
+import qs.components.widgets.notifs
 import qs.services
 import qs.utils
 
@@ -78,6 +80,8 @@ ColumnLayout {
         }
 
         StyledListView {
+            id: list
+
             anchors.fill: parent
             visible: !Config.lock.hideNotifs
             spacing: Tokens.spacing.small
@@ -87,7 +91,17 @@ ColumnLayout {
                 values: [...Notifs.groups]
             }
 
-            delegate: NotifGroupItem {}
+            delegate: NotifGroupCard {
+                id: card
+
+                required property NotifGroup modelData
+
+                group: modelData
+                container: list
+                expanded: false
+                expandable: false
+                color: card.group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2)
+            }
 
             add: Transition {
                 Anim {

@@ -11,13 +11,13 @@ import qs.components
 LazyListView {
     id: root
 
-    required property Props props
     required property list<var> notifs
     required property bool expanded
+    required property bool expandable
     required property Flickable container
-    required property ScreenState screenState
 
-    signal requestToggleExpand(expand: bool)
+    signal requestExpand(expand: bool)
+    signal linkActivated(notif: NotifData)
 
     anchors.left: parent.left
     anchors.right: parent.right
@@ -41,13 +41,11 @@ LazyListView {
     }
 
     delegate: Component {
-        MouseArea {
+        NotifSwipeArea {
             id: notif
 
             required property int index
             required property NotifData modelData
-
-            property int startY
 
             Component.onCompleted: modelData?.ref(this)
 
@@ -58,35 +56,15 @@ LazyListView {
             opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
             scale: LazyListView.removing || LazyListView.adding ? 0.7 : 1
 
-            hoverEnabled: true
-            cursorShape: notifInner.body?.hoveredLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            preventStealing: !root.expanded
-            enabled: !LazyListView.removing
+            expanded: root.expanded
+            expandable: root.expandable
+            dragExpand: root.expandable && !root.expanded
+            hoveringLink: !!notifInner.body?.hoveredLink
+            enabled: root.expandable && !LazyListView.removing
 
-            drag.target: this
-            drag.axis: Drag.XAxis
-
-            onPressed: event => {
-                startY = event.y;
-                if (event.button === Qt.RightButton)
-                    root.requestToggleExpand(!root.expanded);
-                else if (event.button === Qt.MiddleButton)
-                    modelData?.dismiss();
-            }
-            onPositionChanged: event => {
-                if (pressed && !root.expanded) {
-                    const diffY = event.y - startY;
-                    if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                        root.requestToggleExpand(diffY > 0);
-                }
-            }
-            onReleased: event => {
-                if (Math.abs(x) < width * Config.notifs.clearThreshold)
-                    x = 0;
-                else
-                    modelData?.dismiss();
-            }
+            onRequestExpand: expand => root.requestExpand(expand)
+            onSwiped: modelData?.dismiss()
+            onDismissed: modelData?.dismiss()
 
             Connections {
                 function onClosed(): void {
@@ -112,14 +90,13 @@ LazyListView {
                 }
             }
 
-            Notif {
+            NotifItem {
                 id: notifInner
 
                 anchors.fill: parent
                 modelData: notif.modelData
-                props: root.props
                 expanded: root.expanded
-                screenState: root.screenState
+                onLinkActivated: root.linkActivated(notif.modelData)
             }
 
             Behavior on y {
@@ -135,10 +112,6 @@ LazyListView {
             }
 
             Behavior on scale {
-                Anim {}
-            }
-
-            Behavior on x {
                 Anim {}
             }
         }
