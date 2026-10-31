@@ -19,6 +19,7 @@ LazyListView {
     property real headerHeight
     property real headerTitleWidth
     required property color itemColour
+    required property color avatarColour
     required property color buttonColour
     readonly property bool rowPressed: pressedRows > 0
     property int pressedRows
@@ -115,6 +116,7 @@ LazyListView {
                 headerTitleWidth: root.headerTitleWidth
                 showAvatar: notif.index > 0
                 expandedColour: root.itemColour
+                avatarColour: root.avatarColour
                 buttonColour: root.buttonColour
                 onLinkActivated: root.linkActivated(notif.modelData)
             }
