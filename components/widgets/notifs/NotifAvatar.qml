@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import Quickshell
+import M3Shapes
 import Caelestia.Config
 import Caelestia.Models
 import Caelestia.Multimedia
@@ -25,7 +26,7 @@ Item {
     property string shownIcon
 
     readonly property color fillColour: urgency === NotifData.Critical ? Colours.palette.error : urgency === NotifData.Low ? lowFillColour : Colours.palette.secondaryContainer
-    readonly property color iconColour: urgency === NotifData.Critical ? Colours.palette.onError : urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
+    readonly property color iconColour: urgency === NotifData.Critical ? Colours.palette.onError : urgency === NotifData.Low ? Colours.palette.onSurfaceVariant : Colours.palette.onSecondaryContainer
 
     implicitWidth: TokenConfig.sizes.notifs.image
     implicitHeight: TokenConfig.sizes.notifs.image
@@ -73,12 +74,36 @@ Item {
         }
     }
 
-    ClipRect {
+    MaterialShape {
+        id: bgShape
+
         anchors.fill: parent
-        color: root.fillColour
-        radius: Tokens.rounding.full
+        shape: contentLoader.sourceComponent === materialIconComp && root.urgency === NotifData.Critical ? MaterialShape.SoftBurst : MaterialShape.Circle
+        color: Qt.alpha(root.fillColour, 1)
+        layer.enabled: true
+        opacity: root.fillColour.a
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.SlowEffects
+            }
+        }
+    }
+
+    Item {
+        anchors.fill: parent
+        layer.enabled: true
+        layer.effect: Mask {
+            maskSource: bgShape
+        }
 
         AnimLoader {
+            id: contentLoader
+
             anchors.centerIn: parent
             anchors.verticalCenterOffset: sourceComponent === materialIconComp ? 1 : 0
             sourceComp: root.image ? imageComp : root.icon ? appIconComp : materialIconComp
