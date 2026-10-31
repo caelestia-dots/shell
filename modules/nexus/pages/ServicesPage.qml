@@ -51,6 +51,26 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
+        SectionHeader {
+            first: true
+            text: Tr.tr("Display")
+        }
+
+        SliderRow {
+            first: true
+            last: true
+            icon: `brightness_${(Math.round(value * 6) + 1)}`
+            nightLightActive: NightLight.active
+            iconTapEnabled: NightLight.available
+            label: Tr.tr("Brightness")
+            valueLabel: Math.round(value * 100) + "%"
+            value: Brightness.getMonitor("active")?.brightness ?? 0
+            sliderEnabled: !!Brightness.getMonitor("active")
+            wheelStep: GlobalConfig.services.brightnessIncrement
+            onIconTapped: NightLight.toggle()
+            onMoved: v => Brightness.getMonitor("active")?.setBrightness(v)
+        }
+
         // Detected running players, used as default-player options
         Variants {
             id: playerVariants
