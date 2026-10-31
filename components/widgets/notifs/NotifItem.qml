@@ -17,6 +17,7 @@ StyledRect {
     required property color buttonColour
     property bool showAvatar: true
     property bool single: false
+    property bool ready: true
     property real headerHeight
     property real headerTitleWidth
 
@@ -88,7 +89,7 @@ StyledRect {
         anchors.topMargin: root.summaryOffset
 
         sourceComponent: StyledText {
-            animate: true
+            animate: root.ready
             text: summaryMetrics.elidedText
             color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
         }
