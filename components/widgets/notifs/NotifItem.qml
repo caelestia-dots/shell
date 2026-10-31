@@ -13,6 +13,8 @@ StyledRect {
 
     required property NotifData modelData
     required property bool expanded
+    required property color expandedColour
+    required property color buttonColour
 
     readonly property bool critical: modelData.urgency === NotifData.Critical
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
@@ -24,7 +26,7 @@ StyledRect {
 
     radius: Tokens.rounding.medium
     color: {
-        const c = root.critical ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2);
+        const c = root.critical ? Colours.palette.secondaryContainer : root.expandedColour;
         return expanded ? c : Qt.alpha(c, 0);
     }
 
@@ -151,6 +153,7 @@ StyledRect {
         NotifActions {
             Layout.fillWidth: true
             notif: root.modelData
+            buttonColour: root.buttonColour
         }
     }
 

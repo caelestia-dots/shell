@@ -13,6 +13,7 @@ RowLayout {
     required property string timeStr
     required property int count
     required property int urgency
+    required property color pillColour
     required property bool expandable
     required property bool expanded
 
@@ -39,7 +40,7 @@ RowLayout {
         implicitWidth: pill.implicitWidth + Tokens.padding.large
         implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
-        color: root.urgency === NotifData.Critical ? Colours.palette.error : Colours.layer(Colours.palette.surfaceContainerHigh, 3)
+        color: root.urgency === NotifData.Critical ? Colours.palette.error : root.pillColour
         radius: Tokens.rounding.full
 
         StateLayer {

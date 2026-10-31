@@ -13,8 +13,9 @@ ButtonRow {
     id: root
 
     required property NotifData notif
+    required property color buttonColour
 
-    readonly property color buttonColour: notif.urgency === NotifData.Critical ? Colours.palette.secondary : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
+    readonly property color fillColour: notif.urgency === NotifData.Critical ? Colours.palette.secondary : buttonColour
     readonly property color buttonTextColour: notif.urgency === NotifData.Critical ? Colours.palette.onSecondary : Colours.palette.onSurfaceVariant
 
     function invoke(action: var): void {
@@ -29,7 +30,7 @@ ButtonRow {
         isRound: true
         shapeMorph: true
         fillWidth: root.notif.actions.length === 0
-        inactiveColour: root.buttonColour
+        inactiveColour: root.fillColour
         inactiveOnColour: root.buttonTextColour
         icon: "close"
         padding: Tokens.padding.extraSmall
@@ -46,7 +47,7 @@ ButtonRow {
         isRound: true
         shapeMorph: true
         fillWidth: root.notif.actions.length === 0
-        inactiveColour: root.buttonColour
+        inactiveColour: root.fillColour
         inactiveOnColour: root.buttonTextColour
         icon: copyTimer.running ? "inventory" : "content_copy"
         padding: Tokens.padding.extraSmall
@@ -72,7 +73,7 @@ ButtonRow {
             isRound: true
             shapeMorph: true
             fillWidth: true
-            inactiveColour: root.buttonColour
+            inactiveColour: root.fillColour
             inactiveOnColour: root.buttonTextColour
             text: modelData.text
             onClicked: root.invoke(modelData)
@@ -99,7 +100,7 @@ ButtonRow {
             shapeMorph: true
             fillWidth: true
             padding: Tokens.padding.extraSmall
-            inactiveColour: root.buttonColour
+            inactiveColour: root.fillColour
             inactiveOnColour: root.buttonTextColour
             implicitWidth: implicitHeight
             implicitHeight: icon.implicitHeight + padding * 2

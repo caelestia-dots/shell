@@ -15,8 +15,11 @@ LazyListView {
     required property bool expanded
     required property bool expandable
     required property Flickable container
+    required property color itemColour
+    required property color buttonColour
 
     signal requestExpand(expand: bool)
+    signal swiped(notif: NotifData)
     signal linkActivated(notif: NotifData)
 
     anchors.left: parent.left
@@ -63,7 +66,7 @@ LazyListView {
             enabled: root.expandable && !LazyListView.removing
 
             onRequestExpand: expand => root.requestExpand(expand)
-            onSwiped: modelData?.dismiss()
+            onSwiped: root.swiped(modelData)
             onDismissed: modelData?.dismiss()
 
             Connections {
@@ -96,6 +99,8 @@ LazyListView {
                 anchors.fill: parent
                 modelData: notif.modelData
                 expanded: root.expanded
+                expandedColour: root.itemColour
+                buttonColour: root.buttonColour
                 onLinkActivated: root.linkActivated(notif.modelData)
             }
 
