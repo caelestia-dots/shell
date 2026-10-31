@@ -10,7 +10,6 @@ import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
 import qs.components.containers
-import qs.components.widgets
 import qs.components.widgets.notifs
 import qs.services
 import qs.modules.utilities as Utilities
@@ -112,50 +111,6 @@ Item {
                     property: "contentY"
                 }
             }
-
-            ExtraIndicator {
-                parent: view
-                anchors.top: parent.top
-                extra: {
-                    const count = list.count;
-                    if (count === 0)
-                        return 0;
-
-                    const scrollY = view.contentY;
-
-                    let height = 0;
-                    for (let i = 0; i < count; i++) {
-                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + list.spacing;
-
-                        if (height - list.spacing >= scrollY)
-                            return i;
-                    }
-
-                    return count;
-                }
-            }
-
-            ExtraIndicator {
-                parent: view
-                anchors.bottom: parent.bottom
-                extra: {
-                    const count = list.count;
-                    if (count === 0)
-                        return 0;
-
-                    const scrollY = list.contentHeight - (view.contentY + view.height);
-
-                    let height = 0;
-                    for (let i = count - 1; i >= 0; i--) {
-                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + list.spacing;
-
-                        if (height - list.spacing >= scrollY)
-                            return count - i - 1;
-                    }
-
-                    return 0;
-                }
-            }
         }
     }
 
@@ -167,7 +122,6 @@ Item {
         id: wrapper
 
         required property NotifGroup modelData
-        readonly property alias nonAnimHeight: card.nonAnimHeight
         property bool expanded: Config.notifs.openExpanded
         readonly property bool holding: area.containsMouse || area.pressed || card.rowPressed
 
