@@ -4,10 +4,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Widgets
 import Caelestia
+import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Models
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
-import qs.components.widgets
+import qs.components.widgets.notifs
 import qs.services
 import qs.modules.utilities as Utilities
 
@@ -27,13 +30,10 @@ Item {
 
     implicitWidth: Tokens.sizes.notifs.width
     implicitHeight: {
-        const count = list.count;
-        if (count === 0)
+        if (list.count === 0)
             return 0;
 
-        let height = (count - 1) * Tokens.spacing.medium;
-        for (let i = 0; i < count; i++)
-            height += (list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0;
+        let height = list.layoutHeight;
 
         if (screenState.osd) {
             const h = osdPanel.y - clampedPadding;
@@ -65,72 +65,50 @@ Item {
         color: "transparent"
         radius: Tokens.rounding.large
 
-        StyledListView {
-            id: list
-
-            model: ScriptModel {
-                values: Notifs.popups.filter(n => !n.closed)
-            }
+        StyledFlickable {
+            id: view
 
             anchors.fill: parent
 
-            orientation: Qt.Vertical
-            spacing: 0
-            cacheBuffer: (QsWindow.window as QsWindow)?.screen.height ?? 0
+            flickableDirection: Flickable.VerticalFlick
+            contentWidth: width
+            contentHeight: list.implicitHeight
 
-            delegate: NotifWrapper {}
+            LazyListView {
+                id: list
 
-            move: Transition {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                implicitHeight: contentHeight
+
+                spacing: Tokens.spacing.medium
+                readyDelay: 1
+                cacheBuffer: (QsWindow.window as QsWindow)?.screen.height ?? 0
+                removeDuration: Tokens.anim.durations.normal
+
+                useCustomViewport: true
+                viewport: Qt.rect(0, view.contentY, width, view.height)
+
+                model: ScriptModel {
+                    values: [...Notifs.popupGroups]
+                }
+
+                delegate: Component {
+                    NotifWrapper {}
+                }
+
+                onViewportAdjustNeeded: d => {
+                    if (contentYAnim.running)
+                        contentYAnim.complete();
+                    contentYAnim.to = Math.max(0, view.contentY + d);
+                    contentYAnim.start();
+                }
+
                 Anim {
-                    property: "y"
-                }
-            }
+                    id: contentYAnim
 
-            displaced: Transition {
-                Anim {
-                    property: "y"
-                }
-            }
-
-            ExtraIndicator {
-                anchors.top: parent.top
-                extra: {
-                    const count = list.count;
-                    if (count === 0)
-                        return 0;
-
-                    const scrollY = list.contentY;
-
-                    let height = 0;
-                    for (let i = 0; i < count; i++) {
-                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + Tokens.spacing.medium;
-
-                        if (height - Tokens.spacing.medium >= scrollY)
-                            return i;
-                    }
-
-                    return count;
-                }
-            }
-
-            ExtraIndicator {
-                anchors.bottom: parent.bottom
-                extra: {
-                    const count = list.count;
-                    if (count === 0)
-                        return 0;
-
-                    const scrollY = list.contentHeight - (list.contentY + list.height);
-
-                    let height = 0;
-                    for (let i = count - 1; i >= 0; i--) {
-                        height += ((list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0) + Tokens.spacing.medium;
-
-                        if (height - Tokens.spacing.medium >= scrollY)
-                            return count - i - 1;
-                    }
-
-                    return 0;
+                    target: view
+                    property: "contentY"
                 }
             }
         }
@@ -143,73 +121,109 @@ Item {
     component NotifWrapper: Item {
         id: wrapper
 
-        required property NotifData modelData
-        required property int index
-        readonly property alias nonAnimHeight: notif.nonAnimHeight
-        property int idx
+        required property NotifGroup modelData
+        property bool expanded: Config.notifs.openExpanded
+        readonly property bool holding: area.containsMouse || area.pressed || card.rowPressed
 
-        onIndexChanged: {
-            if (index !== -1)
-                idx = index;
+        function forEachPopup(fn: var): void {
+            for (const n of [...card.notifs])
+                fn(n);
         }
 
-        implicitWidth: notif.implicitWidth
-        implicitHeight: notif.implicitHeight + (idx === 0 ? 0 : Tokens.spacing.medium)
+        function holdPopups(): void {
+            forEachPopup(n => n.holdPopup());
+        }
 
-        ListView.onRemove: removeAnim.start()
+        LazyListView.trackViewport: !expanded && card.nonAnimHeight < card.implicitHeight
+        LazyListView.preferredHeight: LazyListView.removing ? 0 : card.nonAnimHeight
+        LazyListView.visibleHeight: LazyListView.removing ? 0 : card.implicitHeight
+        LazyListView.onRemovingChanged: {
+            if (!wrapper.LazyListView.removing)
+                return;
 
-        SequentialAnimation {
-            id: removeAnim
+            slideOut.to = (area.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2;
+            slideOut.start();
+        }
 
-            PropertyAction {
-                target: wrapper
-                property: "ListView.delayRemove"
-                value: true
+        implicitWidth: area.implicitWidth
+        implicitHeight: card.implicitHeight
+
+        enabled: !LazyListView.removing
+        z: LazyListView.removing ? 1 : 0
+
+        onHoldingChanged: {
+            if (holding)
+                holdPopups();
+            else
+                forEachPopup(n => n.releasePopup());
+        }
+
+        Connections {
+            function onNotifsChanged(): void {
+                if (wrapper.holding)
+                    wrapper.holdPopups();
             }
-            PropertyAction {
-                target: wrapper
-                property: "enabled"
-                value: false
-            }
-            PropertyAction {
-                target: wrapper
-                property: "implicitHeight"
-                value: 0
-            }
-            PropertyAction {
-                target: wrapper
-                property: "z"
-                value: 1
-            }
-            Anim {
-                target: notif
-                property: "x"
-                to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
-                duration: Tokens.anim.durations.normal
-                easing: Tokens.anim.emphasized
-            }
-            PropertyAction {
-                target: wrapper
-                property: "ListView.delayRemove"
-                value: false
-            }
+
+            target: wrapper.modelData
+        }
+
+        Anim {
+            id: slideOut
+
+            target: area
+            property: "x"
+            duration: Tokens.anim.durations.normal
+            easing: Tokens.anim.emphasized
         }
 
         ClipRect {
             anchors.top: parent.top
-            anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.medium
 
             color: "transparent"
-            radius: notif.radius
-            implicitWidth: notif.implicitWidth
-            implicitHeight: notif.implicitHeight
+            radius: card.radius
+            implicitWidth: area.implicitWidth
+            implicitHeight: card.implicitHeight
 
-            Notification {
-                id: notif
+            NotifSwipeArea {
+                id: area
 
-                modelData: wrapper.modelData
                 implicitWidth: root.implicitWidth - root.padding - root.clampedPadding
+                implicitHeight: card.implicitHeight
+                x: wrapper.LazyListView.adding ? implicitWidth : 0
+
+                expanded: wrapper.expanded
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+
+                onRequestExpand: expand => wrapper.expanded = expand
+                onSwiped: wrapper.forEachPopup(n => n.dismissPopup())
+                onDismissed: wrapper.forEachPopup(n => n.dismiss())
+                onClicked: event => {
+                    if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton || card.notifs.length !== 1)
+                        return;
+
+                    const actions = card.notifs[0].actions;
+                    if (actions.length === 1)
+                        actions[0].invoke();
+                }
+
+                NotifGroupCard {
+                    id: card
+
+                    group: wrapper.modelData
+                    container: view
+                    expanded: wrapper.expanded
+                    color: card.group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : Colours.tPalette.surfaceContainer
+                    onRequestExpand: expand => wrapper.expanded = expand
+                    onSwiped: notif => notif.dismissPopup()
+                    onLinkActivated: notif => notif.dismissPopup()
+                }
             }
+        }
+
+        Behavior on y {
+            enabled: wrapper.LazyListView.ready
+
+            Anim {}
         }
     }
 

@@ -64,7 +64,7 @@ void VisualAnalyser::analyse(const QString& path) {
 }
 
 void VisualAnalyser::analyseProvider(const QUrl& url) {
-    auto* const engine = qmlEngine(this);
+    const auto* engine = qmlEngine(this);
     if (!engine)
         return;
 

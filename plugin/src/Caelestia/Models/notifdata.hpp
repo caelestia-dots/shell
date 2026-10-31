@@ -81,6 +81,7 @@ public:
     [[nodiscard]] bool hasActionIcons() const;
     [[nodiscard]] QList<NotifAction> actions() const;
     [[nodiscard]] QString timeStr() const;
+    [[nodiscard]] qint64 createdAt() const;
 
     Q_INVOKABLE void dismiss();
     Q_INVOKABLE void dismissPopup();
@@ -115,6 +116,7 @@ private:
     bool m_popup = false;
     bool m_expirePopup = true;
     NotifGroup* m_group = nullptr;
+    NotifGroup* m_popupGroup = nullptr;
     qint64 m_createdAt;
     QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
@@ -142,8 +144,9 @@ private:
     void connectBacker();
     [[nodiscard]] QList<NotifAction> readBackerActions();
 
+    void cacheIcon();
     void cacheImage();
-    void storeImage(const QString& key, utils::Cache::Producer producer);
+    void storeImage(QString& target, const QString& key, utils::Cache::Producer producer);
 
     friend class NotifStore;
 };

@@ -19,38 +19,46 @@ class NotifStore : public QObject {
     QML_ELEMENT
 
     Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifData> notifs READ notifs NOTIFY notifsChanged)
-    Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifData> popups READ popups NOTIFY popupsChanged)
     Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifGroup> groups READ groups NOTIFY groupsChanged)
+    Q_PROPERTY(
+        QQmlListProperty<caelestia::shell::models::NotifGroup> popupGroups READ popupGroups NOTIFY popupGroupsChanged)
 
 public:
     explicit NotifStore(QObject* parent = nullptr);
     ~NotifStore() override;
 
     [[nodiscard]] QQmlListProperty<NotifData> notifs();
-    [[nodiscard]] QQmlListProperty<NotifData> popups();
     [[nodiscard]] QQmlListProperty<NotifGroup> groups();
+    [[nodiscard]] QQmlListProperty<NotifGroup> popupGroups();
 
     Q_INVOKABLE caelestia::shell::models::NotifData* add(QObject* backer, bool popup = true);
     Q_INVOKABLE void clear();
 
 signals:
     void notifsChanged();
-    void popupsChanged();
     void groupsChanged();
+    void popupGroupsChanged();
 
 private:
     QString m_connectionName;
+
+    struct GroupIndex {
+        QList<NotifGroup*> list;
+        QHash<QString, NotifGroup*> byName;
+    };
+
     QList<NotifData*> m_notifs;
-    QList<NotifData*> m_popups;
-    QList<NotifGroup*> m_groups;
-    QHash<QString, NotifGroup*> m_groupsByName;
+    GroupIndex m_groups;
+    GroupIndex m_popupGroups;
     QSet<NotifData*> m_dirty;
     QTimer m_flushTimer;
     QTimer m_timeStrTimer;
 
     void track(NotifData* notif);
-    void addToGroup(NotifData* notif);
-    void removeFromGroup(NotifData* notif);
+    void addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
+    static bool removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
+    static bool repositionGroup(GroupIndex& index, NotifGroup* group, bool tiesFirst);
+    void regroup(NotifData* notif);
     void markDirty(NotifData* notif);
     void flush();
     void save(const NotifData* notif);

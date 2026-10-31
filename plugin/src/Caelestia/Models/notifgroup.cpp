@@ -35,6 +35,26 @@ QQmlListProperty<NotifData> NotifGroup::notifs() {
         } };
 }
 
+void NotifGroup::add(NotifData* notif) {
+    const auto pos = std::ranges::find_if(m_notifs, [notif](const NotifData* n) {
+        return n->createdAt() <= notif->createdAt();
+    });
+    m_notifs.insert(pos, notif);
+    QObject::connect(notif, &NotifData::imageChanged, this, &NotifGroup::sync);
+    QObject::connect(notif, &NotifData::appIconChanged, this, &NotifGroup::sync);
+    QObject::connect(notif, &NotifData::urgencyChanged, this, &NotifGroup::sync);
+    sync();
+    emit notifsChanged();
+}
+
+void NotifGroup::remove(NotifData* notif) {
+    m_notifs.removeOne(notif);
+    QObject::disconnect(notif, nullptr, this, nullptr);
+    if (!m_notifs.isEmpty())
+        sync();
+    emit notifsChanged();
+}
+
 void NotifGroup::sync() {
     QString image;
     QString icon;
