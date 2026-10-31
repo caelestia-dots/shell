@@ -125,7 +125,7 @@ StyledRect {
 
         sourceComponent: StyledText {
             text: root.modelData.body.replace(/\n/g, " ")
-            color: root.critical ? Colours.palette.secondary : Colours.palette.outline
+            color: root.critical ? Colours.palette.secondary : root.single ? Colours.palette.onSurfaceVariant : Colours.palette.outline
             elide: Text.ElideRight
         }
 
@@ -215,7 +215,7 @@ StyledRect {
             Layout.fillWidth: true
             textFormat: Text.MarkdownText
             text: root.modelData.body.replace(/(.)\n(?!\n)/g, "$1\n\n") || Tr.tr("No body here! :/")
-            color: root.critical ? Colours.palette.secondary : Colours.palette.outline
+            color: root.critical ? Colours.palette.secondary : root.single ? Colours.palette.onSurfaceVariant : Colours.palette.outline
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {
