@@ -29,13 +29,6 @@ MouseArea {
     signal dragMoved(real nextValue)
     signal dragEnded
 
-    function hitCircle(localX: real, localY: real): bool {
-        const dx = localX - width / 2;
-        const dy = localY - height / 2;
-        const radius = Math.min(width, height) / 2;
-        return dx * dx + dy * dy <= radius * radius;
-    }
-
     function movePointer(globalX: real, globalY: real): void {
         if (gesture === ThumbInputArea.GestureState.Idle || gesture === ThumbInputArea.GestureState.Canceled)
             return;
@@ -75,7 +68,7 @@ MouseArea {
     cursorShape: Qt.PointingHandCursor
 
     onPressed: mouse => {
-        if (gesture !== ThumbInputArea.GestureState.Idle || !hitCircle(mouse.x, mouse.y)) {
+        if (gesture !== ThumbInputArea.GestureState.Idle) {
             mouse.accepted = false;
             return;
         }

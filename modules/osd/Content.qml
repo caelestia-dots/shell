@@ -22,6 +22,8 @@ Item {
     required property real brightness
 
     property var thumbPressSink: null
+    property var thumbPressSource: null
+    property var thumbPressMonitor: null
 
     implicitWidth: layout.implicitWidth + Tokens.padding.large + layout.anchors.horizontalCenterOffset * 2
     implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
@@ -88,9 +90,21 @@ Item {
                     anchors.fill: parent
 
                     icon: Icons.getMicVolumeIcon(value, root.sourceMuted)
+                    handleTapEnabled: true
+                    transitionIcon: "mic_off"
                     value: root.sourceVolume
                     to: GlobalConfig.services.maxVolume
                     onMoved: Audio.setSourceVolume(value)
+                    onHandlePressed: root.thumbPressSource = Audio.source
+                    onHandleDragged: nextValue => {
+                        if (root.thumbPressSource === Audio.source)
+                            Audio.setSourceVolume(nextValue);
+                    }
+                    onHandleTapped: {
+                        const source = root.thumbPressSource;
+                        if (source && source === Audio.source && source.ready && source.audio)
+                            Audio.setStreamMuted(source, !Audio.getStreamMuted(source));
+                    }
                 }
             }
         }
@@ -117,7 +131,17 @@ Item {
                     anchors.fill: parent
 
                     icon: `brightness_${(Math.round(value * 6) + 1)}`
+                    nightLightActive: NightLight.active
+                    handleTapEnabled: NightLight.available
+                    thumbHitPadding: 6
                     value: root.brightness
+                    onHandlePressed: root.thumbPressMonitor = root.monitor
+                    onHandleTapped: NightLight.toggle()
+                    onHandleDragged: nextValue => {
+                        const monitor = root.thumbPressMonitor;
+                        if (monitor && monitor === root.monitor)
+                            monitor.setBrightness(nextValue);
+                    }
                     onMoved: root.monitor?.setBrightness(value)
                 }
             }

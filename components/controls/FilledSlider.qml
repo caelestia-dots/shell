@@ -12,6 +12,8 @@ Slider {
     property real oldValue
     property bool initialized
     property bool handleTapEnabled: false
+    property bool nightLightActive: false
+    property int thumbHitPadding: 0
     property string transitionIcon: ""
     readonly property bool thumbDragging: thumbInput.dragging
     readonly property real displayedValue: thumbDragging ? thumbInput.previewValue : value
@@ -68,6 +70,14 @@ Slider {
         implicitWidth: root.width
         implicitHeight: root.width
 
+        scale: root.handleTapEnabled && thumbInput.pressed && !thumbInput.dragging ? 0.94 : 1
+
+        Behavior on scale {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
         Elevation {
             anchors.fill: parent
             radius: rect.radius
@@ -105,9 +115,9 @@ Slider {
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: 1
                     text: moving ? Math.round(root.displayedValue * 100) : root.displayedIcon
-                    color: Colours.palette.m3inverseOnSurface
-                    font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
+                    color: root.nightLightActive ? Qt.tint(Colours.palette.m3inverseOnSurface, Qt.rgba(0.77, 0.63, 0.49, 0.34)) : Colours.palette.m3inverseOnSurface
 
+                    font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
                     onMovingChanged: {
                         if (root.handleTapEnabled && moving) {
                             iconSwap.stop();
@@ -159,34 +169,6 @@ Slider {
                     easing: Tokens.anim.standardDecel
                 }
             }
-
-            ThumbInputArea {
-                id: thumbInput
-
-                anchors.fill: parent
-                enabled: root.handleTapEnabled
-                slider: root
-
-                onInteractionStarted: {
-                    stateChangeDelay.stop();
-                    handle.moving = false;
-                    root.handlePressed();
-                }
-                onTapped: {
-                    stateChangeDelay.stop();
-                    handle.moving = false;
-                    root.handleTapped();
-                }
-                onDragStarted: {
-                    handle.moving = true;
-                    stateChangeDelay.stop();
-                }
-                onDragMoved: nextValue => root.handleDragged(nextValue)
-                onDragEnded: {
-                    handle.moving = true;
-                    stateChangeDelay.restart();
-                }
-            }
         }
     }
 
@@ -233,6 +215,39 @@ Slider {
 
         Anim {
             type: Anim.StandardLarge
+        }
+    }
+
+    ThumbInputArea {
+        id: thumbInput
+
+        x: handle.x - root.thumbHitPadding
+        y: handle.y - root.thumbHitPadding
+        z: 1
+        width: handle.width + root.thumbHitPadding * 2
+        height: handle.height + root.thumbHitPadding * 2
+
+        enabled: root.handleTapEnabled
+        slider: root
+
+        onInteractionStarted: {
+            stateChangeDelay.stop();
+            handle.moving = false;
+            root.handlePressed();
+        }
+        onTapped: {
+            stateChangeDelay.stop();
+            handle.moving = false;
+            root.handleTapped();
+        }
+        onDragStarted: {
+            handle.moving = true;
+            stateChangeDelay.stop();
+        }
+        onDragMoved: nextValue => root.handleDragged(nextValue)
+        onDragEnded: {
+            handle.moving = true;
+            stateChangeDelay.restart();
         }
     }
 }

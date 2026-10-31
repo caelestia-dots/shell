@@ -60,10 +60,13 @@ PageBase {
                 last: index === streamList.list.count - 1
 
                 icon: Icons.getVolumeIcon(stream.modelData?.audio?.volume ?? 0, stream.modelData?.audio?.muted ?? false)
+                transitionIcon: "no_sound"
+                iconTapEnabled: !!stream.modelData?.ready && !!stream.modelData?.audio
                 label: Audio.getStreamName(stream.modelData)
                 valueLabel: Strings.percentOne(value)
                 value: stream.modelData?.audio?.volume ?? 0
-                enabled: !stream.modelData?.audio?.muted
+                sliderEnabled: !stream.modelData?.audio?.muted
+                onIconTapped: Audio.setStreamMuted(stream.modelData, !Audio.getStreamMuted(stream.modelData))
                 onMoved: v => Audio.setStreamVolume(stream.modelData, v)
             }
         }
