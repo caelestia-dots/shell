@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Caelestia.Config
-import Caelestia.Multimedia
 import qs.services
 
 Scope {
