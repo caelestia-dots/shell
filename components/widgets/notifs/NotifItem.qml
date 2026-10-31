@@ -12,18 +12,19 @@ StyledRect {
     id: root
 
     required property NotifData modelData
-    required property Props props
     required property bool expanded
-    required property ScreenState screenState
 
+    readonly property bool critical: modelData.urgency === NotifData.Critical
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
     readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
+
+    signal linkActivated
 
     implicitHeight: nonAnimHeight
 
     radius: Tokens.rounding.medium
     color: {
-        const c = root.modelData?.urgency === "critical" ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2);
+        const c = root.critical ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2);
         return expanded ? c : Qt.alpha(c, 0);
     }
 
@@ -63,8 +64,8 @@ StyledRect {
         anchors.left: parent.left
 
         width: parent.width
-        text: root.modelData?.summary ?? ""
-        color: root.modelData?.urgency === "critical" ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+        text: root.modelData.summary
+        color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
         elide: Text.ElideRight
         wrapMode: Text.WordWrap
         maximumLineCount: 1
@@ -77,7 +78,7 @@ StyledRect {
         anchors.left: parent.left
 
         visible: false
-        text: root.modelData?.summary ?? ""
+        text: root.modelData.summary
     }
 
     WrappedLoader {
@@ -90,8 +91,8 @@ StyledRect {
         anchors.leftMargin: Tokens.spacing.small
 
         sourceComponent: StyledText {
-            text: String(root.modelData?.body ?? "").replace(/\n/g, " ")
-            color: root.modelData?.urgency === "critical" ? Colours.palette.secondary : Colours.palette.outline
+            text: root.modelData.body.replace(/\n/g, " ")
+            color: root.critical ? Colours.palette.secondary : Colours.palette.outline
             elide: Text.ElideRight
         }
     }
@@ -105,7 +106,7 @@ StyledRect {
 
         sourceComponent: StyledText {
             animate: true
-            text: Tr.trMarked(root.modelData?.timeStr ?? "")
+            text: Tr.trMarked(root.modelData.timeStr)
             color: Colours.palette.outline
             font: Tokens.font.body.small
         }
@@ -137,17 +138,18 @@ StyledRect {
 
             Layout.fillWidth: true
             textFormat: Text.MarkdownText
-            text: String(root.modelData?.body ?? "").replace(/(.)\n(?!\n)/g, "$1\n\n") || Tr.tr("No body here! :/")
-            color: root.modelData?.urgency === "critical" ? Colours.palette.secondary : Colours.palette.outline
+            text: root.modelData.body.replace(/(.)\n(?!\n)/g, "$1\n\n") || Tr.tr("No body here! :/")
+            color: root.critical ? Colours.palette.secondary : Colours.palette.outline
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {
                 Qt.openUrlExternally(link);
-                root.screenState.sidebar = false;
+                root.linkActivated();
             }
         }
 
-        NotifActionList {
+        NotifActions {
+            Layout.fillWidth: true
             notif: root.modelData
         }
     }

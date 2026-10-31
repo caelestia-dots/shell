@@ -18,8 +18,8 @@ Singleton {
     id: root
 
     readonly property alias list: store.notifs
-    readonly property alias popups: store.popups
     readonly property alias groups: store.groups
+    readonly property alias popupGroups: store.popupGroups
 
     function hasFullscreen(): bool {
         for (const monitor of Hypr.monitors.values) {
