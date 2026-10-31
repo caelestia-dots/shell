@@ -11,8 +11,8 @@ import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.services
-import qs.daemons
 import qs.modules.bar
+import qs.daemons
 
 StyledWindow {
     id: root
