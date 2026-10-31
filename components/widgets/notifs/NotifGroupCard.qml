@@ -17,6 +17,7 @@ StyledRect {
     property int baseSurface: 0
 
     readonly property list<var> notifs: [...group.notifs]
+    readonly property alias rowPressed: notifList.rowPressed
     readonly property list<color> surfaces: [Colours.palette.surfaceContainer, Colours.palette.surfaceContainerHigh, Colours.palette.surfaceContainerHighest]
     readonly property int nonAnimHeight: {
         const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0);

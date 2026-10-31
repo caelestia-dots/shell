@@ -151,21 +151,41 @@ Item {
         readonly property alias nonAnimHeight: card.nonAnimHeight
         property int idx
         property bool expanded: Config.notifs.openExpanded
+        readonly property bool holding: area.containsMouse || area.pressed || card.rowPressed
 
         function forEachPopup(fn: var): void {
             for (const n of [...card.notifs])
                 fn(n);
         }
 
+        function holdPopups(): void {
+            forEachPopup(n => n.holdPopup());
+        }
+
         onIndexChanged: {
             if (index !== -1)
                 idx = index;
+        }
+        onHoldingChanged: {
+            if (holding)
+                holdPopups();
+            else
+                forEachPopup(n => n.releasePopup());
         }
 
         implicitWidth: area.implicitWidth
         implicitHeight: card.implicitHeight + (idx === 0 ? 0 : Tokens.spacing.medium)
 
         ListView.onRemove: removeAnim.start()
+
+        Connections {
+            function onNotifsChanged(): void {
+                if (wrapper.holding)
+                    wrapper.holdPopups();
+            }
+
+            target: wrapper.modelData
+        }
 
         SequentialAnimation {
             id: removeAnim
@@ -225,16 +245,6 @@ Item {
 
                 Component.onCompleted: area.x = 0
 
-                onEntered: wrapper.forEachPopup(n => n.holdPopup())
-                onExited: {
-                    if (!area.pressed)
-                        wrapper.forEachPopup(n => n.releasePopup());
-                }
-                onPressed: wrapper.forEachPopup(n => n.holdPopup())
-                onReleased: {
-                    if (!area.containsMouse)
-                        wrapper.forEachPopup(n => n.releasePopup());
-                }
                 onRequestExpand: expand => wrapper.expanded = expand
                 onSwiped: wrapper.forEachPopup(n => n.dismissPopup())
                 onDismissed: wrapper.forEachPopup(n => n.dismiss())
