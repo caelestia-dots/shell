@@ -153,7 +153,7 @@ Item {
         property bool expanded: Config.notifs.openExpanded
 
         function forEachPopup(fn: var): void {
-            for (const n of card.notifs)
+            for (const n of [...card.notifs])
                 fn(n);
         }
 
