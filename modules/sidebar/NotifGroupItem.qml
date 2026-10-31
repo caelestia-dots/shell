@@ -3,54 +3,43 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Services.Notifications
 import Caelestia.Config
+import Caelestia.I18n
+import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
 import qs.components.effects
-import qs.services
 import qs.utils
 
 StyledRect {
     id: root
 
-    required property string modelData
+    required property NotifGroup modelData
     required property Props props
     required property Flickable container
     required property ScreenState screenState
 
-    readonly property list<var> notifs: Notifs.list.filter(n => n.appName === modelData)
-    readonly property list<var> activeNotifs: notifs.filter(n => !n.closed)
-    readonly property int notifCount: activeNotifs.length
-    readonly property string image: activeNotifs.find(n => n.image.length > 0)?.image ?? ""
-    readonly property string appIcon: activeNotifs.find(n => n.appIcon.length > 0)?.appIcon ?? ""
-    readonly property int urgency: {
-        if (activeNotifs.find(n => n.urgency === NotificationUrgency.Critical))
-            return NotificationUrgency.Critical;
-        if (activeNotifs.find(n => n.urgency === NotificationUrgency.Normal))
-            return NotificationUrgency.Normal;
-        return NotificationUrgency.Low;
-    }
+    readonly property list<var> notifs: [...modelData.notifs]
 
     readonly property int nonAnimHeight: {
         const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Tokens.spacing.extraSmall) : 0);
         const columnHeight = headerHeight + notifList.layoutHeight;
         return Math.round(Math.max(TokenConfig.sizes.notifs.image, columnHeight) + Tokens.padding.medium * 2);
     }
-    readonly property bool expanded: props.expandedNotifs.includes(modelData)
+    readonly property bool expanded: props.expandedNotifs.includes(modelData.appName)
 
     function toggleExpand(expand: bool): void {
         if (expand) {
             if (!expanded)
-                props.expandedNotifs.push(modelData);
+                props.expandedNotifs.push(modelData.appName);
         } else if (expanded) {
-            props.expandedNotifs.splice(props.expandedNotifs.indexOf(modelData), 1);
+            props.expandedNotifs.splice(props.expandedNotifs.indexOf(modelData.appName), 1);
         }
     }
 
     Component.onDestruction: {
-        if (notifCount === 0 && expanded)
-            props.expandedNotifs.splice(props.expandedNotifs.indexOf(modelData), 1);
+        if (notifs.length === 0 && expanded)
+            props.expandedNotifs.splice(props.expandedNotifs.indexOf(modelData.appName), 1);
     }
 
     anchors.left: parent?.left
@@ -84,7 +73,7 @@ StyledRect {
                 id: imageComp
 
                 Image {
-                    source: Qt.resolvedUrl(root.image)
+                    source: Qt.resolvedUrl(root.modelData.image)
                     fillMode: Image.PreserveAspectCrop
                     sourceSize: {
                         const size = TokenConfig.sizes.notifs.image * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1);
@@ -102,9 +91,9 @@ StyledRect {
 
                 ColouredIcon {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
-                    source: Quickshell.iconPath(root.appIcon)
-                    colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.onError : root.urgency === NotificationUrgency.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
-                    layer.enabled: root.appIcon.endsWith("symbolic")
+                    source: Quickshell.iconPath(root.modelData.icon)
+                    colour: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : root.modelData.urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
+                    layer.enabled: root.modelData.icon.endsWith("symbolic")
                 }
             }
 
@@ -112,22 +101,22 @@ StyledRect {
                 id: materialIconComp
 
                 MaterialIcon {
-                    text: Icons.getNotifIcon(root.activeNotifs[0]?.summary, root.urgency)
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.onError : root.urgency === NotificationUrgency.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
+                    text: Icons.getNotifIcon(root.notifs[0]?.summary, root.modelData.urgency)
+                    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : root.modelData.urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
                     fontStyle: Tokens.font.icon.medium
                 }
             }
 
             ClipRect {
                 anchors.fill: parent
-                color: root.urgency === NotificationUrgency.Critical ? Colours.palette.error : root.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.surfaceContainerHigh, 3) : Colours.palette.secondaryContainer
+                color: root.modelData.urgency === NotifData.Critical ? Colours.palette.error : root.modelData.urgency === NotifData.Low ? Colours.layer(Colours.palette.surfaceContainerHigh, 3) : Colours.palette.secondaryContainer
                 radius: Tokens.rounding.full
 
                 Loader {
                     asynchronous: true
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: sourceComponent === materialIconComp ? 1 : 0
-                    sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
+                    sourceComponent: root.modelData.image ? imageComp : root.modelData.icon ? appIconComp : materialIconComp
                 }
             }
 
@@ -135,21 +124,21 @@ StyledRect {
                 asynchronous: true
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                active: root.appIcon && root.image
+                active: root.modelData.icon && root.modelData.image
 
                 sourceComponent: StyledRect {
                     implicitWidth: Tokens.sizes.notifs.badge
                     implicitHeight: Tokens.sizes.notifs.badge
 
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.error : root.urgency === NotificationUrgency.Low ? Colours.palette.surfaceContainerHigh : Colours.palette.secondaryContainer
+                    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.error : root.modelData.urgency === NotifData.Low ? Colours.palette.surfaceContainerHigh : Colours.palette.secondaryContainer
                     radius: Tokens.rounding.full
 
                     ColouredIcon {
                         anchors.centerIn: parent
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
-                        source: Quickshell.iconPath(root.appIcon)
-                        colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.onError : root.urgency === NotificationUrgency.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
-                        layer.enabled: root.appIcon.endsWith("symbolic")
+                        source: Quickshell.iconPath(root.modelData.icon)
+                        colour: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : root.modelData.urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
+                        layer.enabled: root.modelData.icon.endsWith("symbolic")
                     }
                 }
             }
@@ -174,7 +163,7 @@ StyledRect {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: root.modelData
+                    text: root.modelData.appName
                     color: Colours.palette.onSurfaceVariant
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
@@ -182,7 +171,7 @@ StyledRect {
 
                 StyledText {
                     animate: true
-                    text: root.activeNotifs[0]?.timeStr ?? ""
+                    text: Tr.trMarked(root.notifs[0]?.timeStr ?? "")
                     color: Colours.palette.outline
                     font: Tokens.font.body.small
                 }
@@ -191,11 +180,11 @@ StyledRect {
                     implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
                     implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.error : Colours.layer(Colours.palette.surfaceContainerHigh, 3)
+                    color: root.modelData.urgency === NotifData.Critical ? Colours.palette.error : Colours.layer(Colours.palette.surfaceContainerHigh, 3)
                     radius: Tokens.rounding.full
 
                     StateLayer {
-                        color: root.urgency === NotificationUrgency.Critical ? Colours.palette.onError : Colours.palette.onSurface
+                        color: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.onSurface
                         onClicked: root.toggleExpand(!root.expanded)
                     }
 
@@ -210,15 +199,15 @@ StyledRect {
 
                             Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
-                            text: root.notifCount
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.onError : Colours.palette.onSurfaceVariant
+                            text: root.notifs.length
+                            color: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.onSurfaceVariant
                             font: Tokens.font.body.small
                         }
 
                         MaterialIcon {
                             Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             text: "expand_more"
-                            color: root.urgency === NotificationUrgency.Critical ? Colours.palette.onError : Colours.palette.onSurfaceVariant
+                            color: root.modelData.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.onSurfaceVariant
                             rotation: root.expanded ? 180 : 0
                             Layout.topMargin: root.expanded ? -Math.floor(Tokens.padding.extraSmall) : 0
 

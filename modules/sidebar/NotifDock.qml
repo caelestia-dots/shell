@@ -19,12 +19,12 @@ Item {
 
     required property Props props
     required property ScreenState screenState
-    readonly property int notifCount: Notifs.list.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
+    readonly property int notifCount: Notifs.list.length
 
     anchors.fill: parent
     anchors.margins: Tokens.padding.medium
 
-    Component.onCompleted: Notifs.list.forEach(n => n.popup = false)
+    Component.onCompleted: Notifs.list.forEach(n => n.dismissPopup())
 
     Item {
         id: title
@@ -152,18 +152,17 @@ Item {
 
         repeat: true
         triggeredOnStart: true
-        interval: Math.max(15, Math.min(80, 69.8 - 12.3 * Math.log(Notifs.notClosed.length)))
+        interval: Math.max(15, Math.min(80, 69.8 - 12.3 * Math.log(Notifs.list.length)))
         onTriggered: {
-            const first = Notifs.notClosed[0];
-            if (!first) {
+            const group = Notifs.groups[0];
+            if (!group) {
                 stop();
                 return;
             }
 
-            const appName = first.appName;
             let cleared = 0;
-            for (const n of Notifs.notClosed.filter(n => n.appName === appName)) {
-                n.close();
+            for (const n of [...group.notifs]) {
+                n.dismiss();
                 cleared++;
                 if (cleared > 30) {
                     interval = 5;
