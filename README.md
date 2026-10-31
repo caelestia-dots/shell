@@ -810,6 +810,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "defaultExpireTimeout": 5000,
         "fullscreenExpireTimeout": 2000,
         "clearThreshold": 0.3,
+        "clearVelocity": 1000,
         "expandThreshold": 20,
         "actionOnClick": false,
         "groupPreviewNum": 3,
