@@ -24,6 +24,8 @@ StyledRect {
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
     readonly property real padding: single ? 0 : Tokens.padding.medium
     readonly property real headerSummaryOffset: -(headerHeight + summaryHeightMetrics.height) / 2
+    readonly property real inset: expanded ? padding : 0
+    readonly property real summaryOffset: single && !expanded ? headerSummaryOffset : inset
     readonly property real nonAnimHeight: {
         if (!expanded)
             return summaryHeightMetrics.height;
@@ -82,12 +84,17 @@ StyledRect {
         shouldBeActive: !root.expanded
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: root.single && !root.expanded ? root.headerSummaryOffset : 0
+        anchors.leftMargin: root.inset
+        anchors.topMargin: root.summaryOffset
 
         sourceComponent: StyledText {
             animate: true
             text: summaryMetrics.elidedText
             color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+        }
+
+        Behavior on anchors.leftMargin {
+            Anim {}
         }
 
         Behavior on anchors.topMargin {
@@ -112,8 +119,8 @@ StyledRect {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: root.single ? 0 : dummySummary.width + Tokens.spacing.small
-        anchors.topMargin: root.single && root.expanded ? summary.implicitHeight + expandedContent.anchors.topMargin : 0
+        anchors.leftMargin: root.inset + (root.single ? 0 : dummySummary.width + Tokens.spacing.small)
+        anchors.topMargin: root.single && root.expanded ? summary.implicitHeight + expandedContent.anchors.topMargin : root.inset
 
         sourceComponent: StyledText {
             text: root.modelData.body.replace(/\n/g, " ")
@@ -136,14 +143,18 @@ StyledRect {
         shouldBeActive: root.expanded
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.leftMargin: root.padding
-        anchors.topMargin: root.single && !root.expanded ? root.headerSummaryOffset : root.padding
+        anchors.leftMargin: root.inset
+        anchors.topMargin: root.summaryOffset
         width: root.width - root.padding * 2 - timeStr.implicitWidth - Tokens.spacing.small
 
         sourceComponent: StyledText {
             text: root.modelData.summary
             color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
             wrapMode: Text.WordWrap
+        }
+
+        Behavior on anchors.leftMargin {
+            Anim {}
         }
 
         Behavior on anchors.topMargin {
@@ -157,13 +168,17 @@ StyledRect {
         shouldBeActive: root.expanded && !root.single
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.margins: root.padding
+        anchors.margins: root.inset
 
         sourceComponent: StyledText {
             animate: true
             text: Tr.trMarked(root.modelData.timeStr)
             color: Colours.palette.outline
             font: Tokens.font.body.small
+        }
+
+        Behavior on anchors.margins {
+            Anim {}
         }
     }
 
@@ -174,10 +189,14 @@ StyledRect {
         anchors.top: summary.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: root.padding
+        anchors.margins: root.inset
         anchors.topMargin: Tokens.spacing.extraSmall
 
         sourceComponent: ExpandedBody {}
+
+        Behavior on anchors.margins {
+            Anim {}
+        }
     }
 
     Behavior on implicitHeight {
