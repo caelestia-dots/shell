@@ -58,6 +58,13 @@ QString keyForImage(const QImage& image) {
     return QString::fromLatin1(hash.result().toHex());
 }
 
+QByteArray readFile(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return {};
+    return file.readAll();
+}
+
 QByteArray encodeImage(const QImage& image) {
     QByteArray bytes;
     QBuffer buffer(&bytes);
@@ -354,7 +361,7 @@ void NotifData::cacheIcon() {
         return;
 
     storeImage(m_appIcon, utils::Cache::keyForPath(path), [path] {
-        return QFile(path).readAll();
+        return readFile(path);
     });
 }
 
@@ -366,7 +373,7 @@ void NotifData::cacheImage() {
     if (url.scheme() != u"image") {
         const auto path = url.isLocalFile() ? url.toLocalFile() : m_image;
         storeImage(m_image, utils::Cache::keyForPath(path), [path] {
-            return QFile(path).readAll();
+            return readFile(path);
         });
         return;
     }
