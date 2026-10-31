@@ -14,6 +14,7 @@ StyledRect {
     required property NotifData modelData
     required property bool expanded
     required property color expandedColour
+    required property color avatarColour
     required property color buttonColour
     property bool showAvatar: true
     property bool single: false
@@ -74,7 +75,7 @@ StyledRect {
             image: root.modelData.image
             icon: root.modelData.appIcon
             urgency: root.modelData.urgency
-            lowFillColour: root.buttonColour
+            lowFillColour: root.avatarColour
             summary: root.modelData.summary
             progress: (root.modelData.hints.value ?? 0) / 100
         }
