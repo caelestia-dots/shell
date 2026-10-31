@@ -242,13 +242,6 @@ void NotifStore::track(NotifData* notif) {
         regroup(notif);
     });
 
-    const auto syncGroups = [this, notif] {
-        this->syncGroups(notif);
-    };
-    QObject::connect(notif, &NotifData::imageChanged, this, syncGroups);
-    QObject::connect(notif, &NotifData::appIconChanged, this, syncGroups);
-    QObject::connect(notif, &NotifData::urgencyChanged, this, syncGroups);
-
     notif->refreshTimeStr();
     const auto interval = notif->timeStrInterval();
     if (!m_timeStrTimer.isActive() || m_timeStrTimer.remainingTime() > interval)
@@ -277,9 +270,7 @@ void NotifStore::addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* not
     }
 
     slot = group;
-    group->m_notifs.prepend(notif);
-    group->sync();
-    emit group->notifsChanged();
+    group->add(notif);
 }
 
 bool NotifStore::removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif) {
@@ -287,12 +278,9 @@ bool NotifStore::removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData
     if (!group)
         return false;
 
-    group->m_notifs.removeOne(notif);
-    if (!group->m_notifs.isEmpty()) {
-        group->sync();
-        emit group->notifsChanged();
+    group->remove(notif);
+    if (!group->m_notifs.isEmpty())
         return false;
-    }
 
     index.list.removeOne(group);
     index.byName.remove(group->m_appName);
@@ -311,13 +299,6 @@ void NotifStore::regroup(NotifData* notif) {
     removeFromGroup(m_popupGroups, notif->m_popupGroup, notif);
     addToGroup(m_popupGroups, notif->m_popupGroup, notif);
     emit popupGroupsChanged();
-}
-
-void NotifStore::syncGroups(const NotifData* notif) {
-    if (notif->m_group)
-        notif->m_group->sync();
-    if (notif->m_popupGroup)
-        notif->m_popupGroup->sync();
 }
 
 void NotifStore::markDirty(NotifData* notif) {
