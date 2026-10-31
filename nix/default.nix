@@ -68,24 +68,6 @@
     (lib.cmakeFeature "DISTRIBUTOR" "nix-flake")
   ];
 
-  extras = stdenv.mkDerivation {
-    inherit cmakeBuildType;
-    name = "caelestia-extras${lib.optionalString debug "-debug"}";
-    src = lib.fileset.toSource {
-      root = ./..;
-      fileset = lib.fileset.union ./../CMakeLists.txt ./../extras;
-    };
-
-    nativeBuildInputs = [cmake ninja];
-
-    cmakeFlags =
-      [
-        (lib.cmakeFeature "ENABLE_MODULES" "extras")
-        (lib.cmakeFeature "INSTALL_LIBDIR" "${placeholder "out"}/lib")
-      ]
-      ++ cmakeVersionFlags;
-  };
-
   plugin = stdenv.mkDerivation {
     inherit cmakeBuildType;
     name = "caelestia-qml-plugin${lib.optionalString debug "-debug"}";
@@ -112,7 +94,7 @@ in
     src = ./..;
 
     nativeBuildInputs = [cmake ninja makeWrapper qt6.wrapQtAppsHook];
-    buildInputs = [qs extras plugin xkeyboard-config qt6.qtbase];
+    buildInputs = [qs plugin xkeyboard-config qt6.qtbase];
     propagatedBuildInputs = runtimeDeps;
 
     cmakeFlags =
@@ -135,16 +117,12 @@ in
       makeWrapper ${qs}/bin/qs $out/bin/caelestia-shell \
         --prefix PATH : "${lib.makeBinPath runtimeDeps}" \
         --set FONTCONFIG_FILE "${fontconfig}" \
-        --set CAELESTIA_LIB_DIR ${extras}/lib \
         --set CAELESTIA_XKB_RULES_PATH ${xkeyboard-config}/share/xkeyboard-config-2/rules/base.lst \
         --add-flags "-p $out/share/caelestia-shell"
-
-      mkdir -p $out/lib
-      ln -s ${extras}/lib/* $out/lib/
     '';
 
     passthru = {
-      inherit plugin extras;
+      inherit plugin;
     };
 
     meta = {

@@ -129,8 +129,8 @@ void HyprExtras::refreshOptions() {
 
         for (const auto& o : std::as_const(options)) {
             const auto obj = o.toObject();
-            const auto key = obj.value(u"value"_s).toString();
-            const auto value = obj.value(u"data"_s).toObject().value(u"current"_s).toVariant();
+            const auto key = obj.value(u"value").toString();
+            const auto value = obj.value(u"data").toObject().value(u"current").toVariant();
             if (m_options.value(key) != value) {
                 dirty = true;
                 m_options.insert(key, value);
@@ -189,9 +189,9 @@ void HyprExtras::readEvent() {
 }
 
 void HyprExtras::handleEvent(const QString& event) {
-    if (event == u"configreloaded"_s) {
+    if (event == u"configreloaded") {
         refreshOptions();
-    } else if (event == u"activelayout"_s) {
+    } else if (event == u"activelayout") {
         refreshDevices();
     }
 }
