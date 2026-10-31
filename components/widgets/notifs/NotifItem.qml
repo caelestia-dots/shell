@@ -22,6 +22,7 @@ StyledRect {
     property real headerTitleWidth
 
     readonly property bool critical: modelData.urgency === NotifData.Critical
+    readonly property bool low: modelData.urgency === NotifData.Low
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
     readonly property real padding: single ? 0 : Tokens.padding.medium
     readonly property real headerSummaryOffset: -(headerHeight + summaryHeightMetrics.height) / 2
@@ -91,7 +92,7 @@ StyledRect {
         sourceComponent: StyledText {
             animate: root.ready
             text: summaryMetrics.elidedText
-            color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+            color: root.critical ? Colours.palette.onSecondaryContainer : root.low ? Colours.palette.onSurfaceVariant : Colours.palette.onSurface
         }
 
         Behavior on anchors.leftMargin {
@@ -125,7 +126,7 @@ StyledRect {
 
         sourceComponent: StyledText {
             text: root.modelData.body.replace(/\n/g, " ")
-            color: root.critical ? Colours.palette.secondary : root.single ? Colours.palette.onSurfaceVariant : Colours.palette.outline
+            color: root.critical ? Colours.palette.secondary : root.low ? Colours.palette.outline : Colours.palette.onSurfaceVariant
             elide: Text.ElideRight
         }
 
@@ -150,7 +151,7 @@ StyledRect {
 
         sourceComponent: StyledText {
             text: root.modelData.summary
-            color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+            color: root.critical ? Colours.palette.onSecondaryContainer : root.low ? Colours.palette.onSurfaceVariant : Colours.palette.onSurface
             wrapMode: Text.WordWrap
         }
 
@@ -174,7 +175,7 @@ StyledRect {
         sourceComponent: StyledText {
             animate: true
             text: Tr.trMarked(root.modelData.timeStr)
-            color: Colours.palette.outline
+            color: root.critical ? Colours.palette.secondary : Colours.palette.outline
             font: Tokens.font.body.small
         }
 
@@ -215,7 +216,7 @@ StyledRect {
             Layout.fillWidth: true
             textFormat: Text.MarkdownText
             text: root.modelData.body.replace(/(.)\n(?!\n)/g, "$1\n\n") || Tr.tr("No body here! :/")
-            color: root.critical ? Colours.palette.secondary : root.single ? Colours.palette.onSurfaceVariant : Colours.palette.outline
+            color: root.critical ? Colours.palette.secondary : root.low ? Colours.palette.outline : Colours.palette.onSurfaceVariant
             wrapMode: Text.WordWrap
 
             onLinkActivated: link => {
