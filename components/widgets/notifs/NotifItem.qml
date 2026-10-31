@@ -16,10 +16,20 @@ StyledRect {
     required property color expandedColour
     required property color buttonColour
     property bool showAvatar: true
+    property bool single: false
+    property real headerHeight
+    property real headerTitleWidth
 
     readonly property bool critical: modelData.urgency === NotifData.Critical
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
-    readonly property real nonAnimHeight: expanded ? Math.max(summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2, TokenConfig.sizes.notifs.image + Tokens.padding.extraSmall * 2) : summaryHeightMetrics.height
+    readonly property real padding: single ? 0 : Tokens.padding.medium
+    readonly property real headerSummaryOffset: -(headerHeight + summaryHeightMetrics.height) / 2
+    readonly property real nonAnimHeight: {
+        if (!expanded)
+            return summaryHeightMetrics.height;
+        const contentHeight = summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + padding * 2;
+        return single ? contentHeight : Math.max(contentHeight, TokenConfig.sizes.notifs.image + Tokens.padding.extraSmall * 2);
+    }
 
     signal linkActivated
 
@@ -28,37 +38,23 @@ StyledRect {
     radius: Tokens.rounding.medium
     color: {
         const c = root.critical ? Colours.palette.secondaryContainer : root.expandedColour;
-        return expanded ? c : Qt.alpha(c, 0);
-    }
-
-    state: expanded ? "expanded" : ""
-
-    states: State {
-        name: "expanded"
-
-        PropertyChanges {
-            avatar.anchors.topMargin: root.Tokens.padding.extraSmall
-            summary.anchors.margins: root.Tokens.padding.medium
-            dummySummary.anchors.margins: root.Tokens.padding.medium
-            compactBody.anchors.margins: root.Tokens.padding.medium
-            timeStr.anchors.margins: root.Tokens.padding.medium
-            expandedContent.anchors.margins: root.Tokens.padding.medium
-            summary.width: root.width - root.Tokens.padding.medium * 2 - timeStr.implicitWidth - root.Tokens.spacing.small
-            summary.maximumLineCount: Number.MAX_SAFE_INTEGER
-        }
-    }
-
-    transitions: Transition {
-        Anim {
-            properties: "margins,topMargin,width,maximumLineCount"
-        }
+        return expanded && !single ? c : Qt.alpha(c, 0);
     }
 
     TextMetrics {
         id: summaryHeightMetrics
 
-        font: summary.font
+        font: dummySummary.font
         text: " " // Use this height to prevent weird characters from changing the line height
+    }
+
+    TextMetrics {
+        id: summaryMetrics
+
+        font: dummySummary.font
+        text: root.modelData.summary
+        elide: Text.ElideRight
+        elideWidth: root.single ? root.headerTitleWidth : root.width
     }
 
     WrappedLoader {
@@ -67,6 +63,7 @@ StyledRect {
         shouldBeActive: root.expanded && root.showAvatar
         anchors.top: parent.top
         anchors.left: parent.left
+        anchors.topMargin: Tokens.padding.extraSmall
         anchors.leftMargin: -(TokenConfig.sizes.notifs.image + Tokens.spacing.medium)
 
         sourceComponent: NotifAvatar {
@@ -79,18 +76,23 @@ StyledRect {
         }
     }
 
-    StyledText {
-        id: summary
+    WrappedLoader {
+        id: compactSummary
 
+        shouldBeActive: !root.expanded
         anchors.top: parent.top
         anchors.left: parent.left
+        anchors.topMargin: root.single && !root.expanded ? root.headerSummaryOffset : 0
 
-        width: parent.width
-        text: root.modelData.summary
-        color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
-        elide: Text.ElideRight
-        wrapMode: Text.WordWrap
-        maximumLineCount: 1
+        sourceComponent: StyledText {
+            animate: true
+            text: summaryMetrics.elidedText
+            color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+        }
+
+        Behavior on anchors.topMargin {
+            Anim {}
+        }
     }
 
     StyledText {
@@ -108,23 +110,54 @@ StyledRect {
 
         shouldBeActive: !root.expanded
         anchors.top: parent.top
-        anchors.left: dummySummary.right
+        anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: Tokens.spacing.small
+        anchors.leftMargin: root.single ? 0 : dummySummary.width + Tokens.spacing.small
+        anchors.topMargin: root.single && root.expanded ? summary.implicitHeight + expandedContent.anchors.topMargin : 0
 
         sourceComponent: StyledText {
             text: root.modelData.body.replace(/\n/g, " ")
             color: root.critical ? Colours.palette.secondary : Colours.palette.outline
             elide: Text.ElideRight
         }
+
+        Behavior on anchors.leftMargin {
+            Anim {}
+        }
+
+        Behavior on anchors.topMargin {
+            Anim {}
+        }
+    }
+
+    WrappedLoader {
+        id: summary
+
+        shouldBeActive: root.expanded
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.leftMargin: root.padding
+        anchors.topMargin: root.single && !root.expanded ? root.headerSummaryOffset : root.padding
+        width: root.width - root.padding * 2 - timeStr.implicitWidth - Tokens.spacing.small
+
+        sourceComponent: StyledText {
+            text: root.modelData.summary
+            color: root.critical ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+            wrapMode: Text.WordWrap
+        }
+
+        Behavior on anchors.topMargin {
+            Anim {}
+        }
     }
 
     WrappedLoader {
         id: timeStr
 
-        shouldBeActive: root.expanded
+        shouldBeActive: root.expanded && !root.single
         anchors.top: parent.top
         anchors.right: parent.right
+        anchors.margins: root.padding
 
         sourceComponent: StyledText {
             animate: true
@@ -141,6 +174,7 @@ StyledRect {
         anchors.top: summary.bottom
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.margins: root.padding
         anchors.topMargin: Tokens.spacing.extraSmall
 
         sourceComponent: ExpandedBody {}
