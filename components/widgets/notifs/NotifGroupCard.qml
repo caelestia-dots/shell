@@ -57,12 +57,17 @@ StyledRect {
 
         NotifAvatar {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            image: root.group.image
-            icon: root.group.icon
+            Layout.topMargin: root.expanded ? header.implicitHeight + Math.round(Tokens.spacing.extraSmall) + Tokens.padding.extraSmall : 0
+            image: root.expanded ? root.notifs[0]?.image ?? "" : root.group.image
+            icon: root.expanded ? root.notifs[0]?.appIcon ?? "" : root.group.icon
             urgency: root.group.urgency
             lowFillColour: root.surface(1, 3)
             summary: root.notifs[0]?.summary ?? ""
             progress: (root.notifs[0]?.hints.value ?? 0) / 100
+
+            Behavior on Layout.topMargin {
+                Anim {}
+            }
         }
 
         Column {

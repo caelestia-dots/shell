@@ -106,6 +106,7 @@ LazyListView {
                 anchors.fill: parent
                 modelData: notif.modelData
                 expanded: root.expanded
+                showAvatar: notif.index > 0
                 expandedColour: root.itemColour
                 buttonColour: root.buttonColour
                 onLinkActivated: root.linkActivated(notif.modelData)
