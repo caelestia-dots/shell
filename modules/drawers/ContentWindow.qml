@@ -38,7 +38,7 @@ StyledWindow {
     property real fsTransitionProg: hasFullscreen ? 1 : 0
     readonly property real sdfBorderOffset: 2 * fsTransitionProg // SDFs joins are not exact, so offset by 2px to ensure nothing shows
     readonly property real borderThickness: contentItem.Config.border.thickness * (1 - fsTransitionProg)
-    readonly property real borderRounding: contentItem.Config.border.rounding * (1 - fsTransitionProg)
+    readonly property real borderRounding: (GameMode.enabled ? 0 : contentItem.Config.border.rounding) * (1 - fsTransitionProg)
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
 
@@ -167,7 +167,7 @@ StyledWindow {
             anchors.fill: parent
             anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
             group: blobGroup
-            radius: GameMode.enabled ? 0 : root.borderRounding
+            radius: root.borderRounding
             borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
             borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
             borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
