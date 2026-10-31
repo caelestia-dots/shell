@@ -7,7 +7,6 @@ import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.modules.launcher.services
 
 Item {
