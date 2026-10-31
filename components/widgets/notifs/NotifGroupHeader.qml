@@ -56,7 +56,7 @@ Item {
         text: Tr.trMarked(root.timeStr)
         color: {
             const col = !root.expanded && root.urgency === NotifData.Critical ? Colours.palette.secondary : Colours.palette.outline;
-            return root.expanded ? Qt.alpha(col, 0) : col;
+            return root.expanded && !root.single ? Qt.alpha(col, 0) : col;
         }
         font: Tokens.font.body.small
     }
