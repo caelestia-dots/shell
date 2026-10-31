@@ -15,10 +15,11 @@ StyledRect {
     required property bool expanded
     required property color expandedColour
     required property color buttonColour
+    property bool showAvatar: true
 
     readonly property bool critical: modelData.urgency === NotifData.Critical
     readonly property StyledText body: (expandedContent.item as ExpandedBody)?.body ?? null
-    readonly property real nonAnimHeight: expanded ? summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2 : summaryHeightMetrics.height
+    readonly property real nonAnimHeight: expanded ? Math.max(summary.implicitHeight + expandedContent.implicitHeight + expandedContent.anchors.topMargin + Tokens.padding.medium * 2, TokenConfig.sizes.notifs.image + Tokens.padding.extraSmall * 2) : summaryHeightMetrics.height
 
     signal linkActivated
 
@@ -36,6 +37,7 @@ StyledRect {
         name: "expanded"
 
         PropertyChanges {
+            avatar.anchors.topMargin: root.Tokens.padding.extraSmall
             summary.anchors.margins: root.Tokens.padding.medium
             dummySummary.anchors.margins: root.Tokens.padding.medium
             compactBody.anchors.margins: root.Tokens.padding.medium
@@ -48,7 +50,7 @@ StyledRect {
 
     transitions: Transition {
         Anim {
-            properties: "margins,width,maximumLineCount"
+            properties: "margins,topMargin,width,maximumLineCount"
         }
     }
 
@@ -57,6 +59,24 @@ StyledRect {
 
         font: summary.font
         text: " " // Use this height to prevent weird characters from changing the line height
+    }
+
+    WrappedLoader {
+        id: avatar
+
+        shouldBeActive: root.expanded && root.showAvatar
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.leftMargin: -(TokenConfig.sizes.notifs.image + Tokens.spacing.medium)
+
+        sourceComponent: NotifAvatar {
+            image: root.modelData.image
+            icon: root.modelData.appIcon
+            urgency: root.modelData.urgency
+            lowFillColour: root.buttonColour
+            summary: root.modelData.summary
+            progress: (root.modelData.hints.value ?? 0) / 100
+        }
     }
 
     StyledText {
