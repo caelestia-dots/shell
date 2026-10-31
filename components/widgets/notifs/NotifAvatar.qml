@@ -5,9 +5,11 @@ import QtQuick.Shapes
 import Quickshell
 import Caelestia.Config
 import Caelestia.Models
+import Caelestia.Multimedia
 import Caelestia.Scheme
 import qs.components
 import qs.components.effects
+import qs.components.widgets
 import qs.utils
 
 Item {
@@ -19,6 +21,8 @@ Item {
     required property string summary
     required property color lowFillColour
     property real progress: 0
+    property string shownImage
+    property string shownIcon
 
     readonly property color fillColour: urgency === NotifData.Critical ? Colours.palette.error : urgency === NotifData.Low ? lowFillColour : Colours.palette.secondaryContainer
     readonly property color iconColour: urgency === NotifData.Critical ? Colours.palette.onError : urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
@@ -26,31 +30,35 @@ Item {
     implicitWidth: TokenConfig.sizes.notifs.image
     implicitHeight: TokenConfig.sizes.notifs.image
 
+    onImageChanged: {
+        if (image)
+            shownImage = image;
+    }
+    onIconChanged: {
+        if (icon)
+            shownIcon = icon;
+    }
+    Component.onCompleted: {
+        shownImage = image;
+        shownIcon = icon;
+    }
+
     Component {
         id: imageComp
 
-        Image {
-            source: Qt.resolvedUrl(root.image)
-            fillMode: Image.PreserveAspectCrop
-            sourceSize: {
-                const size = TokenConfig.sizes.notifs.image * ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1);
-                return Qt.size(size, size);
-            }
-            cache: false
-            asynchronous: true
+        FadeImage {
+            source: Qt.resolvedUrl(root.shownImage)
             width: TokenConfig.sizes.notifs.image
             height: TokenConfig.sizes.notifs.image
+            fadeInLargeAnim: Anim.DefaultEffects
         }
     }
 
     Component {
         id: appIconComp
 
-        ColouredIcon {
-            implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
-            source: Quickshell.iconPath(root.icon)
-            colour: root.iconColour
-            layer.enabled: root.icon.endsWith("symbolic")
+        FadeIcon {
+            size: Math.round(TokenConfig.sizes.notifs.image * 0.6)
         }
     }
 
@@ -58,6 +66,7 @@ Item {
         id: materialIconComp
 
         MaterialIcon {
+            animate: true
             text: Icons.getNotifIcon(root.summary, root.urgency)
             color: root.iconColour
             fontStyle: Tokens.font.icon.medium
@@ -69,11 +78,10 @@ Item {
         color: root.fillColour
         radius: Tokens.rounding.full
 
-        Loader {
-            asynchronous: true
+        AnimLoader {
             anchors.centerIn: parent
             anchors.verticalCenterOffset: sourceComponent === materialIconComp ? 1 : 0
-            sourceComponent: root.image ? imageComp : root.icon ? appIconComp : materialIconComp
+            sourceComp: root.image ? imageComp : root.icon ? appIconComp : materialIconComp
         }
     }
 
@@ -81,7 +89,8 @@ Item {
         asynchronous: true
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        active: root.icon && root.image
+        active: opacity > 0
+        opacity: root.icon && root.image ? 1 : 0
 
         sourceComponent: StyledRect {
             implicitWidth: Tokens.sizes.notifs.badge
@@ -90,12 +99,15 @@ Item {
             color: root.fillColour
             radius: Tokens.rounding.full
 
-            ColouredIcon {
+            FadeIcon {
                 anchors.centerIn: parent
-                implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
-                source: Quickshell.iconPath(root.icon)
-                colour: root.iconColour
-                layer.enabled: root.icon.endsWith("symbolic")
+                size: Math.round(Tokens.sizes.notifs.badge * 0.6)
+            }
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: root.icon && root.image ? Anim.DefaultEffects : Anim.FastEffects
             }
         }
     }
@@ -135,6 +147,30 @@ Item {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    component FadeIcon: FadeImage {
+        id: fadeIcon
+
+        required property int size
+
+        width: size
+        height: size
+        source: Quickshell.iconPath(root.shownIcon)
+        fillMode: Image.PreserveAspectFit
+        fadeInLargeAnim: Anim.DefaultEffects
+
+        layer.enabled: root.shownIcon.endsWith("symbolic")
+        layer.effect: Colouriser {
+            sourceColor: analyser.dominantColour
+            colorizationColor: root.iconColour
+
+            VisualAnalyser {
+                id: analyser
+
+                source: fadeIcon.source
             }
         }
     }
