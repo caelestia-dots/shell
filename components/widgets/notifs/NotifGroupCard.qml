@@ -63,7 +63,7 @@ StyledRect {
             image: root.expanded ? root.notifs[0]?.image ?? "" : root.group.image
             icon: root.expanded ? root.notifs[0]?.appIcon ?? "" : root.group.icon
             urgency: root.expanded ? root.notifs[0]?.urgency ?? NotifData.Normal : root.group.urgency
-            lowFillColour: root.surface(1, 2)
+            lowFillColour: root.surface(2, 2)
             summary: root.notifs[0]?.summary ?? ""
             progress: (root.notifs[0]?.hints.value ?? 0) / 100
 
@@ -107,6 +107,7 @@ StyledRect {
                 expandable: root.expandable
                 container: root.container
                 itemColour: root.surface(1, 2)
+                avatarColour: root.surface(2, 2)
                 buttonColour: root.surface(2, 3)
                 onRequestExpand: expand => root.requestExpand(expand)
                 onSwiped: notif => root.swiped(notif)
