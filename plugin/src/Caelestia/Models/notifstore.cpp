@@ -265,12 +265,11 @@ void NotifStore::addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* not
     if (!group) {
         group = new NotifGroup(notif->m_appName, this);
         index.list.prepend(group);
-    } else if (const auto i = index.list.indexOf(group); i > 0) {
-        index.list.move(i, 0);
     }
 
     slot = group;
     group->add(notif);
+    repositionGroup(index, group, true);
 }
 
 bool NotifStore::removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif) {
@@ -280,11 +279,33 @@ bool NotifStore::removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData
 
     group->remove(notif);
     if (!group->m_notifs.isEmpty())
-        return false;
+        return repositionGroup(index, group, false);
 
     index.list.removeOne(group);
     index.byName.remove(group->m_appName);
     group->release();
+    return true;
+}
+
+bool NotifStore::repositionGroup(GroupIndex& index, NotifGroup* group, bool tiesFirst) {
+    const auto from = index.list.indexOf(group);
+    const auto newest = group->m_notifs.first()->m_createdAt;
+
+    qsizetype to = 0;
+    for (; to < index.list.size(); ++to) {
+        auto* const other = index.list.at(to);
+        if (other == group)
+            continue;
+        const auto otherNewest = other->m_notifs.first()->m_createdAt;
+        if (otherNewest < newest || (tiesFirst && otherNewest == newest))
+            break;
+    }
+    if (to > from)
+        --to;
+
+    if (to == from)
+        return false;
+    index.list.move(from, to);
     return true;
 }
 

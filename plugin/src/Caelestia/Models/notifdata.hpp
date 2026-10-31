@@ -81,6 +81,7 @@ public:
     [[nodiscard]] bool hasActionIcons() const;
     [[nodiscard]] QList<NotifAction> actions() const;
     [[nodiscard]] QString timeStr() const;
+    [[nodiscard]] qint64 createdAt() const;
 
     Q_INVOKABLE void dismiss();
     Q_INVOKABLE void dismissPopup();
