@@ -110,6 +110,7 @@ LazyListView {
                 modelData: notif.modelData
                 expanded: root.expanded
                 single: root.single
+                ready: notif.LazyListView.ready
                 headerHeight: root.headerHeight
                 headerTitleWidth: root.headerTitleWidth
                 showAvatar: notif.index > 0
