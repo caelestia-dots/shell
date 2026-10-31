@@ -14,6 +14,7 @@ class NotifsConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(int, defaultExpireTimeout, 5000)
     CONFIG_GLOBAL_PROPERTY(int, fullscreenExpireTimeout, 2000)
     CONFIG_PROPERTY(qreal, clearThreshold, 0.3)
+    CONFIG_PROPERTY(int, clearVelocity, 1000)
     CONFIG_PROPERTY(int, expandThreshold, 20)
     CONFIG_GLOBAL_PROPERTY(bool, actionOnClick, false)
     CONFIG_PROPERTY(int, groupPreviewNum, 3)
