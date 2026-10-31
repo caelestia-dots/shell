@@ -92,15 +92,13 @@ ColumnLayout {
             }
 
             delegate: NotifGroupCard {
-                id: card
-
                 required property NotifGroup modelData
 
                 group: modelData
                 container: list
                 expanded: false
                 expandable: false
-                color: card.group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2)
+                baseSurface: 1
             }
 
             add: Transition {

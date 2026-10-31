@@ -17,9 +17,10 @@ Item {
     required property string icon
     required property int urgency
     required property string summary
+    required property color lowFillColour
     property real progress: 0
 
-    readonly property color fillColour: urgency === NotifData.Critical ? Colours.palette.error : urgency === NotifData.Low ? Colours.layer(Colours.palette.surfaceContainerHighest, 2) : Colours.palette.secondaryContainer
+    readonly property color fillColour: urgency === NotifData.Critical ? Colours.palette.error : urgency === NotifData.Low ? lowFillColour : Colours.palette.secondaryContainer
     readonly property color iconColour: urgency === NotifData.Critical ? Colours.palette.onError : urgency === NotifData.Low ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
 
     implicitWidth: TokenConfig.sizes.notifs.image
