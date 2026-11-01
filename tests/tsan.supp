@@ -17,3 +17,7 @@ mutex:std::condition_variable::wait
 mutex:__gthread_cond_wait
 race:std::condition_variable
 race:std::__condvar
+# libdbus-1 is not instrumented, so TSan cannot follow its internal mutex order.
+# Starting the NetworkDbus worker thread surfaces a lock-order inversion that is
+# internal to libdbus; reproduced on a clean main checkout.
+deadlock:libdbus-1.so
