@@ -18,6 +18,7 @@ Item {
     id: root
 
     required property ScreenState screenState
+    required property bool fullscreen
     required property Item osdPanel
     required property Item sessionPanel
     required property Item utilitiesPanel
@@ -56,6 +57,13 @@ Item {
         return Math.min(((QsWindow.window as QsWindow)?.screen?.height ?? 0) + padding - clampedPadding * 2 - Config.border.thickness, height + padding + clampedPadding);
     }
 
+    NotifPopups {
+        id: popups
+
+        store: Notifs.store
+        fullscreen: root.fullscreen
+    }
+
     ClippingWrapperRectangle {
         anchors.fill: parent
         anchors.margins: root.padding
@@ -90,7 +98,7 @@ Item {
                 viewport: Qt.rect(0, view.contentY, width, view.height)
 
                 model: ScriptModel {
-                    values: [...Notifs.popupGroups]
+                    values: [...popups.groups]
                 }
 
                 delegate: Component {
@@ -131,7 +139,7 @@ Item {
         }
 
         function holdPopups(): void {
-            forEachPopup(n => n.holdPopup());
+            forEachPopup(n => popups.hold(n));
         }
 
         LazyListView.trackViewport: !expanded && card.nonAnimHeight < card.implicitHeight
@@ -155,7 +163,7 @@ Item {
             if (holding)
                 holdPopups();
             else
-                forEachPopup(n => n.releasePopup());
+                forEachPopup(n => popups.release(n));
         }
 
         Connections {
@@ -194,7 +202,7 @@ Item {
                 expanded: wrapper.expanded
 
                 onRequestExpand: expand => wrapper.expanded = expand
-                onSwiped: wrapper.forEachPopup(n => n.dismissPopup())
+                onSwiped: wrapper.forEachPopup(n => popups.dismiss(n))
                 onDismissed: wrapper.forEachPopup(n => n.dismiss())
                 onClicked: event => {
                     if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton || card.notifs.length !== 1)
@@ -212,8 +220,8 @@ Item {
                     container: view
                     expanded: wrapper.expanded
                     onRequestExpand: expand => wrapper.expanded = expand
-                    onSwiped: notif => notif.dismissPopup()
-                    onLinkActivated: notif => notif.dismissPopup()
+                    onSwiped: notif => popups.dismiss(notif)
+                    onLinkActivated: notif => popups.dismiss(notif)
                 }
             }
         }

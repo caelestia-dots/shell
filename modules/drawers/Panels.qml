@@ -20,6 +20,7 @@ Item {
     required property ScreenState screenState
     required property Bar.BarWrapper bar
     required property real borderThickness
+    required property bool fullscreen
 
     readonly property alias osd: osd
     readonly property alias osdWrapper: osdWrapper
@@ -65,6 +66,7 @@ Item {
         id: notifications
 
         screenState: root.screenState
+        fullscreen: root.fullscreen
         sidebarPanel: sidebar
         osdPanel: osdWrapper
         sessionPanel: sessionWrapper
