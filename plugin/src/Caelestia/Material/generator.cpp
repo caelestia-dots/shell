@@ -228,8 +228,8 @@ int sanitizeIntDegrees(int degrees) {
 } // namespace
 
 // Kept in the order of the CLI's gen_scheme, which it's checked against step by step
-Colours generateScheme(
-    const GeneratorOptions& options, const Hct& primary) { // NOLINT(readability-function-cognitive-complexity)
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+Colours generateScheme(const GeneratorOptions& options, const Hct& primary) {
     const bool isLight = options.light;
     const bool isMonochrome = options.variant == "monochrome";
     const bool isNeutral = options.variant == "neutral";

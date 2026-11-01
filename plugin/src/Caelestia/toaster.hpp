@@ -26,7 +26,7 @@ public:
         Info = 0,
         Success,
         Warning,
-        Error
+        Error,
     };
     Q_ENUM(Type)
 
