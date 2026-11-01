@@ -13,16 +13,17 @@ bool NotifGroupIndex::contains(const NotifData* notif) const {
     return m_byNotif.contains(notif);
 }
 
-void NotifGroupIndex::add(NotifData* notif) {
+bool NotifGroupIndex::add(NotifData* notif) {
     auto*& group = m_byName[notif->appName()];
-    if (!group) {
+    const auto created = !group;
+    if (created) {
         group = new NotifGroup(notif->appName(), m_owner);
         m_list.prepend(group);
     }
 
     m_byNotif.insert(notif, group);
     group->add(notif);
-    reposition(group, true);
+    return reposition(group, true) || created;
 }
 
 bool NotifGroupIndex::remove(NotifData* notif) {

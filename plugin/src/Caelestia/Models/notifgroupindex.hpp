@@ -16,8 +16,8 @@ public:
     [[nodiscard]] const QList<NotifGroup*>& list() const;
     [[nodiscard]] bool contains(const NotifData* notif) const;
 
-    void add(NotifData* notif);
-    // Returns whether the group list itself changed
+    // Both return whether the group list itself changed
+    bool add(NotifData* notif);
     bool remove(NotifData* notif);
 
 private:
