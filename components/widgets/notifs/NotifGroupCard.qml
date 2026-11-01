@@ -43,7 +43,7 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: !expanded && group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : surface(0, 1)
+    color: group.urgency === NotifData.Critical && (single || !expanded) ? Colours.palette.secondaryContainer : surface(0, 1)
 
     Behavior on implicitHeight {
         Anim {}
