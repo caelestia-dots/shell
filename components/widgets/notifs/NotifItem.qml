@@ -78,7 +78,7 @@ StyledRect {
             urgency: root.modelData.urgency
             lowFillColour: root.avatarColour
             summary: root.modelData.summary
-            progress: (root.modelData.hints.value ?? 0) / 100
+            progress: root.modelData.progress / 100
         }
     }
 
