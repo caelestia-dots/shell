@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Shapes
 import Quickshell
 import M3Shapes
+import Caelestia
 import Caelestia.Config
 import Caelestia.Models
 import Caelestia.Multimedia
@@ -140,38 +141,47 @@ Item {
 
     Loader {
         asynchronous: true
-        anchors.centerIn: parent
+        anchors.fill: parent
         active: root.progress > 0
 
         sourceComponent: Shape {
-            id: progressIndicator
-
-            width: root.width + progressShape.strokeWidth * 2
-            height: root.height + progressShape.strokeWidth * 2
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
                 id: progressShape
 
+                property real sweep: root.progress * 360
+
                 capStyle: ShapePath.RoundCap
                 fillColor: "transparent"
                 strokeWidth: 2
-                strokeColor: Colours.palette.primary
+                strokeColor: root.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.primary
 
-                PathAngleArc {
-                    radiusX: progressIndicator.width / 2 - root.Tokens.padding.extraSmall / 2
-                    centerX: progressIndicator.width / 2
-                    radiusY: progressIndicator.height / 2 - root.Tokens.padding.extraSmall / 2
-                    centerY: progressIndicator.height / 2
-
-                    startAngle: -90
-                    sweepAngle: root.progress * 360
-
-                    Behavior on sweepAngle {
-                        Anim {
-                            easing: Tokens.anim.emphasizedDecel
-                        }
+                PathPolyline {
+                    function pointAt(angle: real): point {
+                        const dist = bgShape.distanceAtAngle(angle) + progressShape.strokeWidth / 2;
+                        const rad = angle * Math.PI / 180;
+                        return Qt.point(root.width / 2 + dist * Math.sin(rad), root.height / 2 - dist * Math.cos(rad));
                     }
+
+                    path: {
+                        CUtils.dependency(bgShape.morphProgress);
+                        const points = [];
+                        for (let angle = 0; angle < progressShape.sweep; angle += 3)
+                            points.push(pointAt(angle));
+                        points.push(pointAt(progressShape.sweep));
+                        return points;
+                    }
+                }
+
+                Behavior on sweep {
+                    Anim {
+                        easing: Tokens.anim.emphasizedDecel
+                    }
+                }
+
+                Behavior on strokeColor {
+                    CAnim {}
                 }
             }
         }
