@@ -57,7 +57,7 @@ class UtilitiesCards : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, quickToggles, true)
 };
 
-inline const QVariantMap kGameModeDefaultOptions = {
+inline const QVariantMap k_kGameModeDefaultOptions = {
     {u"animations:enabled"_s, 0},
     {u"decoration:shadow:enabled"_s, 0},
     {u"decoration:blur:enabled"_s, 0},
@@ -71,7 +71,7 @@ inline const QVariantMap kGameModeDefaultOptions = {
 class UtilitiesGameMode : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesGameMode, settings::ObjectNode)
 
-    CONFIG_PROPERTY(QVariantMap, options, kGameModeDefaultOptions)
+    CONFIG_PROPERTY(QVariantMap, options, k_kGameModeDefaultOptions)
 };
 
 class UtilitiesConfig : public settings::ObjectNode {
