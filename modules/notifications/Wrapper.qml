@@ -5,14 +5,20 @@ Item {
     id: root
 
     required property ScreenState screenState
-    required property Item sidebarPanel
-    property alias osdPanel: content.osdPanel
-    property alias sessionPanel: content.sessionPanel
-    property alias utilitiesPanel: content.utilitiesPanel
+    required property PanelGeometry osdGeometry
+    required property PanelGeometry sessionGeometry
+    required property real sidebarWidth
+    required property real utilitiesHeight
+
+    readonly property PanelGeometry geometry: PanelGeometry {
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+    }
 
     visible: height > 0
-    anchors.topMargin: -5
-    implicitWidth: Math.max(sidebarPanel.width, content.implicitWidth)
+    implicitWidth: Math.max(sidebarWidth, content.implicitWidth)
     implicitHeight: content.implicitHeight
 
     Content {
@@ -20,5 +26,8 @@ Item {
 
         anchors.topMargin: -root.anchors.topMargin
         screenState: root.screenState
+        osdGeometry: root.osdGeometry
+        sessionGeometry: root.sessionGeometry
+        utilitiesHeight: root.utilitiesHeight
     }
 }

@@ -88,15 +88,15 @@ StyledWindow {
     Region {
         id: emptyRegion
 
-        x: panels.notifications.x + bar.implicitWidth
-        y: panels.notifications.y + root.borderThickness
-        width: panels.notifications.width
-        height: panels.notifications.height
+        x: panels.notifications.geometry.x + bar.implicitWidth
+        y: panels.notifications.geometry.y + root.borderThickness
+        width: panels.notifications.geometry.width
+        height: panels.notifications.geometry.height
 
         Region {
             x: root.width - width
-            y: panels.osdWrapper.y + root.borderThickness
-            width: panels.osdWrapper.width * (1 - panels.osd.offsetScale) + root.borderThickness
+            y: panels.osdWrapper.geometry.y + root.borderThickness
+            width: panels.osdWrapper.geometry.visibleWidth + root.borderThickness
             height: panels.osd.height
         }
     }

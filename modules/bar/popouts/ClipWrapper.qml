@@ -12,6 +12,17 @@ Item {
     required property real borderThickness
 
     readonly property alias content: content
+
+    readonly property PanelGeometry geometry: PanelGeometry {
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+        offsetScale: root.offsetScale
+        nonAnimWidth: content.nonAnimWidth
+        nonAnimHeight: content.nonAnimHeight
+    }
+
     property real offsetScale: x > 0 || content.hasCurrent ? 0 : 1
 
     visible: width > 0 && height > 0

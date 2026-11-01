@@ -13,6 +13,16 @@ Item {
     id: root
 
     required property ScreenState screenState
+
+    readonly property PanelGeometry geometry: PanelGeometry {
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+        offsetScale: root.offsetScale
+        nonAnimHeight: root.nonAnimHeight
+    }
+
     readonly property FileDialog facePicker: FileDialog {
         title: Tr.tr("Select a profile picture")
         filterLabel: Tr.tr("Image files")

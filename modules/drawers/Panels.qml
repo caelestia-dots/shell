@@ -21,6 +21,12 @@ Item {
     required property Bar.BarWrapper bar
     required property real borderThickness
 
+    // Geometry contract shared by the drawer panels. The coordinator stacks the
+    // right column from these values instead of reading panel internals.
+    readonly property real panelTopOverlap: -5
+    readonly property real rightColumnInset: sidebar.geometry.visibleWidth
+    readonly property real osdInset: rightColumnInset + sessionWrapper.geometry.width
+
     readonly property alias osd: osd
     readonly property alias osdWrapper: osdWrapper
     readonly property alias notifications: notifications
@@ -41,9 +47,19 @@ Item {
     Item {
         id: osdWrapper
 
+        readonly property PanelGeometry geometry: PanelGeometry {
+            x: osdWrapper.x
+            y: osdWrapper.y
+            width: osdWrapper.width
+            height: osdWrapper.height
+            offsetScale: osd.offsetScale
+            nonAnimWidth: osd.width
+            nonAnimHeight: osd.height
+        }
+
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
+        anchors.rightMargin: root.osdInset
         clip: sidebar.visible || session.visible
 
         implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
@@ -65,21 +81,32 @@ Item {
         id: notifications
 
         screenState: root.screenState
-        sidebarPanel: sidebar
-        osdPanel: osdWrapper
-        sessionPanel: sessionWrapper
-        utilitiesPanel: utilities
+        osdGeometry: osdWrapper.geometry
+        sessionGeometry: sessionWrapper.geometry
+        sidebarWidth: sidebar.width
+        utilitiesHeight: utilities.nonAnimHeight
 
         anchors.top: parent.top
+        anchors.topMargin: root.panelTopOverlap
         anchors.right: parent.right
     }
 
     Item {
         id: sessionWrapper
 
+        readonly property PanelGeometry geometry: PanelGeometry {
+            x: sessionWrapper.x
+            y: sessionWrapper.y
+            width: sessionWrapper.width
+            height: sessionWrapper.height
+            offsetScale: session.offsetScale
+            nonAnimWidth: session.nonAnimWidth
+            nonAnimHeight: session.height
+        }
+
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: sidebar.width * (1 - sidebar.offsetScale)
+        anchors.rightMargin: root.rightColumnInset
         clip: sidebar.visible
 
         implicitWidth: session.implicitWidth * (1 - session.offsetScale)
@@ -150,6 +177,6 @@ Item {
         anchors.top: notifications.bottom
         anchors.bottom: utilities.top
         anchors.right: parent.right
-        anchors.topMargin: -notifications.anchors.topMargin
+        anchors.topMargin: -root.panelTopOverlap
     }
 }

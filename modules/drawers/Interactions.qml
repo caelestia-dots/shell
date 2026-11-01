@@ -117,7 +117,7 @@ CustomMouseArea {
                 screenState.bar = false;
         }
 
-        if (panels.sidebar.offsetScale === 1) {
+        if (panels.sidebar.geometry.offsetScale === 1) {
             // Show osd on hover
             const showOsd = inRightPanel(panels.osdWrapper, x, y);
 
@@ -131,12 +131,12 @@ CustomMouseArea {
                 root.panels.osd.hovered = true;
             }
 
-            const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x);
+            const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.geometry.x);
 
             // Show sidebar on hover (top-right corner, bounded by notification panel height)
             if (Config.sidebar.showOnHover) {
-                const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.y + panels.notifications.height + borderThickness);
-                const showSidebarHover = x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x) && y <= sidebarTriggerY;
+                const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.geometry.y + panels.notifications.geometry.height + borderThickness);
+                const showSidebarHover = x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.geometry.x) && y <= sidebarTriggerY;
                 if (showSidebarHover && !screenState.sidebar)
                     screenState.sidebar = true;
             }
@@ -149,14 +149,14 @@ CustomMouseArea {
                     screenState.session = false;
 
                 // Show sidebar on drag if in session area and session is nearly fully visible
-                if (showSidebar && panels.session.offsetScale <= 0 && dragX < -Config.sidebar.dragThreshold)
+                if (showSidebar && panels.sessionWrapper.geometry.offsetScale <= 0 && dragX < -Config.sidebar.dragThreshold)
                     screenState.sidebar = true;
             } else if (showSidebar && dragX < -Config.sidebar.dragThreshold) {
                 // Show sidebar on drag if not in session area
                 screenState.sidebar = true;
             }
         } else {
-            const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
+            const outOfSidebar = x < width - panels.sidebar.geometry.visibleWidth;
             // Show osd on hover
             const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
 
@@ -180,8 +180,8 @@ CustomMouseArea {
 
             // Show/hide sidebar on hover
             if (Config.sidebar.showOnHover && !pressed) {
-                const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.y + panels.notifications.height + borderThickness);
-                const showSidebarHover = x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x) && y <= sidebarTriggerY;
+                const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.geometry.y + panels.notifications.geometry.height + borderThickness);
+                const showSidebarHover = x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.geometry.x) && y <= sidebarTriggerY;
                 if (showSidebarHover && !screenState.sidebar) {
                     screenState.sidebar = true;
                 } else {

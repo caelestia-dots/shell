@@ -13,6 +13,14 @@ Item {
     required property ScreenState screenState
     required property var panels
 
+    readonly property PanelGeometry geometry: PanelGeometry {
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+        offsetScale: root.offsetScale
+    }
+
     readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled
 
     readonly property real maxHeight: {

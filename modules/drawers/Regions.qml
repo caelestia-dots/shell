@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import qs.components
 import qs.modules.bar as Bar
 
 Region {
@@ -22,58 +23,58 @@ Region {
     intersection: Intersection.Xor
 
     R {
-        panel: root.panels.dashboard
+        panel: root.panels.dashboard.geometry
         y: 0
-        height: panel.height * (1 - root.panels.dashboard.offsetScale) + root.borderThickness
+        height: panel.visibleHeight + root.borderThickness
     }
 
     R {
-        panel: root.panels.launcher
+        panel: root.panels.launcher.geometry
         y: root.win.height - height
-        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
+        height: panel.visibleHeight + root.borderThickness
     }
 
     R {
         id: sessionRegion
 
-        panel: root.panels.sessionWrapper
+        panel: root.panels.sessionWrapper.geometry
         x: root.win.width - width
-        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
+        width: panel.visibleWidth + root.borderThickness + sidebarRegion.width
     }
 
     R {
         id: sidebarRegion
 
-        panel: root.panels.sidebar
+        panel: root.panels.sidebar.geometry
         x: root.win.width - width
-        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
+        width: panel.visibleWidth + root.borderThickness
     }
 
     R {
-        panel: root.panels.osdWrapper
+        panel: root.panels.osdWrapper.geometry
         x: root.win.width - width
-        width: panel.width * (1 - root.panels.osd.offsetScale) + root.borderThickness + sessionRegion.width
+        width: panel.visibleWidth + root.borderThickness + sessionRegion.width
     }
 
     R {
-        panel: root.panels.notifications
+        panel: root.panels.notifications.geometry
         y: 0
         height: panel.height + root.borderThickness
     }
 
     R {
-        panel: root.panels.utilities
+        panel: root.panels.utilities.geometry
         y: root.win.height - height
-        height: panel.height * (1 - root.panels.utilities.offsetScale) + root.borderThickness
+        height: panel.visibleHeight + root.borderThickness
     }
 
     R {
-        panel: root.panels.popoutsWrapper
-        width: panel.width * (1 - root.panels.popoutsWrapper.offsetScale)
+        panel: root.panels.popoutsWrapper.geometry
+        width: panel.visibleWidth
     }
 
     component R: Region {
-        required property Item panel
+        required property PanelGeometry panel
 
         x: panel.x + root.bar.implicitWidth
         y: panel.y + root.borderThickness

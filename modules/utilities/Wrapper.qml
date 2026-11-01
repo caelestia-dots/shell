@@ -17,6 +17,15 @@ Item {
     property real horizontalStretch
     property matrix4x4 deformMatrix
 
+    readonly property PanelGeometry geometry: PanelGeometry {
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+        offsetScale: root.offsetScale
+        nonAnimHeight: root.nonAnimHeight
+    }
+
     readonly property PersistentProperties props: PersistentProperties {
         property bool recordingListExpanded: false
         property string recordingConfirmDelete

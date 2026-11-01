@@ -9,6 +9,15 @@ Item {
     id: root
 
     required property ScreenState screenState
+
+    readonly property PanelGeometry geometry: PanelGeometry {
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+        offsetScale: root.offsetScale
+    }
+
     readonly property Props props: Props {}
 
     readonly property bool shouldBeActive: screenState.sidebar && Config.sidebar.enabled

@@ -9,15 +9,14 @@ import qs.components
 import qs.components.containers
 import qs.components.widgets
 import qs.services
-import qs.modules.utilities as Utilities
 
 Item {
     id: root
 
     required property ScreenState screenState
-    required property Item osdPanel
-    required property Item sessionPanel
-    required property Item utilitiesPanel
+    required property PanelGeometry osdGeometry
+    required property PanelGeometry sessionGeometry
+    required property real utilitiesHeight
     readonly property int padding: Tokens.padding.large
     readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
 
@@ -36,19 +35,19 @@ Item {
             height += (list.itemAtIndex(i) as NotifWrapper)?.nonAnimHeight ?? 0;
 
         if (screenState.osd) {
-            const h = osdPanel.y - clampedPadding;
+            const h = osdGeometry.y - clampedPadding;
             if (height > h)
                 height = h;
         }
 
         if (screenState.session) {
-            const h = sessionPanel.y - clampedPadding;
+            const h = sessionGeometry.y - clampedPadding;
             if (height > h)
                 height = h;
         }
 
         if (screenState.utilities) {
-            const h = ((QsWindow.window as QsWindow)?.screen.height ?? 0) - (utilitiesPanel as Utilities.Wrapper).nonAnimHeight - Config.border.thickness * 2 - padding * 2 - Tokens.spacing.extraLarge;
+            const h = ((QsWindow.window as QsWindow)?.screen.height ?? 0) - utilitiesHeight - Config.border.thickness * 2 - padding * 2 - Tokens.spacing.extraLarge;
             if (height > h)
                 height = h;
         }
