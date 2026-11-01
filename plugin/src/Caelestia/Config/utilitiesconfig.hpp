@@ -2,6 +2,7 @@
 
 #include <qstring.h>
 #include <qvariantlist.h>
+#include <qvariantmap.h>
 
 #include "settings/objectnode.hpp"
 #include "common.hpp"
@@ -56,6 +57,12 @@ class UtilitiesCards : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, quickToggles, true)
 };
 
+class UtilitiesGameMode : public settings::ObjectNode {
+    CONFIG_NODE(UtilitiesGameMode, settings::ObjectNode)
+
+    CONFIG_PROPERTY(QVariantMap, options, {})
+};
+
 class UtilitiesConfig : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesConfig, settings::ObjectNode)
 
@@ -64,6 +71,7 @@ class UtilitiesConfig : public settings::ObjectNode {
     CONFIG_SUBOBJECT(UtilitiesCards, cards)
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesToasts, toasts)
     CONFIG_GLOBAL_SUBOBJECT(UtilitiesVpn, vpn)
+    CONFIG_GLOBAL_SUBOBJECT(UtilitiesGameMode, gameMode)
     CONFIG_LIST(EntryList, quickToggles,
         DEFAULT_ARG({
             LIST_ENTRY(wifi, true),
