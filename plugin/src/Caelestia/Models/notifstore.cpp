@@ -265,9 +265,10 @@ void NotifStore::refreshTimeStrs() {
 }
 
 void NotifStore::regroup(NotifData* notif) {
-    m_groups.remove(notif);
-    m_groups.add(notif);
-    emit groupsChanged();
+    const auto removed = m_groups.remove(notif);
+    const auto added = m_groups.add(notif);
+    if (removed || added)
+        emit groupsChanged();
 
     for (auto* const popups : std::as_const(m_popups))
         popups->regroup(notif);
