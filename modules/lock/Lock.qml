@@ -14,6 +14,20 @@ Scope {
 
         signal unlock
 
+        // The surfaces release the lock at the end of their unlock animation. If there is
+        // no surface (e.g. no monitors connected) or the animation never finishes (e.g. the
+        // render loop is paused while the outputs are off), release it directly instead.
+        onUnlock: {
+            if (Quickshell.screens.length === 0)
+                locked = false;
+            else
+                unlockFallback.restart();
+        }
+        onLockedChanged: {
+            if (!locked)
+                unlockFallback.stop();
+        }
+
         LockSurface {
             lock: lock
             pam: pam
@@ -24,6 +38,13 @@ Scope {
         id: pam
 
         lock: lock
+    }
+
+    Timer {
+        id: unlockFallback
+
+        interval: 3000
+        onTriggered: lock.locked = false
     }
 
     Loader {
@@ -48,21 +69,12 @@ Scope {
         onPressed: lock.locked = true
     }
 
-    // qmllint disable unresolved-type
-    CustomShortcut {
-        // qmllint enable unresolved-type
-        name: "unlock"
-        description: "Unlock the current session"
-        onPressed: lock.unlock()
-    }
-
+    // There is deliberately no unlock shortcut or IPC call: those would let anyone at the
+    // keyboard (or any local process) skip authentication. Unlocking only happens through
+    // PAM or a logind Unlock request (e.g. `loginctl unlock-session`).
     IpcHandler {
         function lock(): void {
             lock.locked = true;
-        }
-
-        function unlock(): void {
-            lock.unlock();
         }
 
         function isLocked(): bool {

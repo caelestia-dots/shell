@@ -188,55 +188,61 @@ AudioCollector& AudioCollector::instance() {
 }
 
 void AudioCollector::clearBuffer() {
-    auto* writeBuffer = m_writeBuffer.load(std::memory_order_relaxed);
-    std::ranges::fill(*writeBuffer, 0.0f);
-
-    auto* oldRead = m_readBuffer.exchange(writeBuffer, std::memory_order_acq_rel);
-    m_writeBuffer.store(oldRead, std::memory_order_release);
+    loadChunk(nullptr, 0);
 }
 
 void AudioCollector::loadChunk(const qint16* samples, quint32 count) {
     count = std::min(count, ac::k_chunkSize);
 
-    auto* writeBuffer = m_writeBuffer.load(std::memory_order_relaxed);
-    std::transform(samples, samples + count, writeBuffer->begin(), [](qint16 sample) {
-        return static_cast<float>(sample) / 32768.0f;
-    });
+    // Odd sequence = write in progress. The fence keeps the sample stores after it.
+    const auto seq = m_seq.load(std::memory_order_relaxed);
+    m_seq.store(seq + 1, std::memory_order_relaxed);
+    std::atomic_thread_fence(std::memory_order_release);
 
-    auto* oldRead = m_readBuffer.exchange(writeBuffer, std::memory_order_acq_rel);
-    m_writeBuffer.store(oldRead, std::memory_order_release);
+    for (quint32 i = 0; i < count; ++i)
+        m_samples[i].store(static_cast<float>(samples[i]) / 32768.0f, std::memory_order_relaxed);
+    // Don't leave samples from an older, longer chunk behind
+    for (quint32 i = count; i < ac::k_chunkSize; ++i)
+        m_samples[i].store(0.0f, std::memory_order_relaxed);
+
+    m_seq.store(seq + 2, std::memory_order_release);
+}
+
+template <typename T> quint32 AudioCollector::readChunkImpl(T* out, quint32 count) {
+    if (count == 0 || count > ac::k_chunkSize) {
+        count = ac::k_chunkSize;
+    }
+
+    while (true) {
+        const auto before = m_seq.load(std::memory_order_acquire);
+        if (before & 1U) {
+            std::this_thread::yield(); // Writer is mid-chunk, it only takes a moment
+            continue;
+        }
+
+        for (quint32 i = 0; i < count; ++i)
+            out[i] = static_cast<T>(m_samples[i].load(std::memory_order_relaxed));
+
+        std::atomic_thread_fence(std::memory_order_acquire);
+        if (m_seq.load(std::memory_order_relaxed) == before)
+            return count;
+    }
 }
 
 quint32 AudioCollector::readChunk(float* out, quint32 count) {
-    if (count == 0 || count > ac::k_chunkSize) {
-        count = ac::k_chunkSize;
-    }
-
-    auto* readBuffer = m_readBuffer.load(std::memory_order_acquire);
-    std::memcpy(out, readBuffer->data(), count * sizeof(float));
-
-    return count;
+    return readChunkImpl(out, count);
 }
 
 quint32 AudioCollector::readChunk(double* out, quint32 count) {
-    if (count == 0 || count > ac::k_chunkSize) {
-        count = ac::k_chunkSize;
-    }
-
-    auto* readBuffer = m_readBuffer.load(std::memory_order_acquire);
-    std::transform(readBuffer->begin(), readBuffer->begin() + count, out, [](float sample) {
-        return static_cast<double>(sample);
-    });
-
-    return count;
+    return readChunkImpl(out, count);
 }
 
 AudioCollector::AudioCollector(QObject* parent)
     : Service(parent)
-    , m_buffer1(ac::k_chunkSize)
-    , m_buffer2(ac::k_chunkSize)
-    , m_readBuffer(&m_buffer1)
-    , m_writeBuffer(&m_buffer2) {}
+    , m_seq(0) {
+    for (auto& sample : m_samples)
+        sample.store(0.0f, std::memory_order_relaxed);
+}
 
 AudioCollector::~AudioCollector() {
     AudioCollector::stop();

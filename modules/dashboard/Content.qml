@@ -140,6 +140,9 @@ Item {
 
                         Layout.alignment: Qt.AlignTop
 
+                        // Start inactive, otherwise every tab is created on load before the
+                        // binding below gets a chance to keep only the visible ones
+                        active: false
                         sourceComponent: modelData.component
 
                         Component.onCompleted: active = Qt.binding(() => {

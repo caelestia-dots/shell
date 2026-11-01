@@ -230,12 +230,13 @@ Singleton {
             return;
         const iface = active.interface;
         if (iface.length > 0) {
-            statsProc.command = ["sh", "-c", `cat /sys/class/net/${iface}/statistics/rx_bytes /sys/class/net/${iface}/statistics/tx_bytes 2>/dev/null`];
+            // The interface name is passed as an argument, never interpolated into the script
+            statsProc.command = ["sh", "-c", 'cat "/sys/class/net/$1/statistics/rx_bytes" "/sys/class/net/$1/statistics/tx_bytes" 2>/dev/null', "sh", iface];
             statsProc.running = true;
             // Measure latency over the tunnel by binding the ping to the VPN
             // interface (-I), so the result reflects the VPN path, not the LAN.
             if (!pingProc.running) {
-                pingProc.command = ["sh", "-c", `ping -c1 -W2 -I ${iface} 1.1.1.1 2>/dev/null || ping -c1 -W2 1.1.1.1 2>/dev/null`];
+                pingProc.command = ["sh", "-c", 'ping -c1 -W2 -I "$1" 1.1.1.1 2>/dev/null || ping -c1 -W2 1.1.1.1 2>/dev/null', "sh", iface];
                 pingProc.running = true;
             }
         }

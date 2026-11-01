@@ -8,6 +8,9 @@ namespace caelestia::blobs {
 
 // Max rects the shader smins over; must match the loop bounds in blob.frag
 inline constexpr int k_maxRects = 16;
+// Uniform block layout (bytes): header and inverted rect up to 160, then rects of 7 vec4s each
+inline constexpr int k_rectStride = 112;
+inline constexpr int k_uniformSize = 160 + k_maxRects * k_rectStride;
 
 struct BlobRectData {
     float cx = 0, cy = 0, hw = 0, hh = 0;

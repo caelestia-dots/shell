@@ -1,0 +1,19 @@
+# ThreadSanitizer suppressions for the unit tests.
+# The distro's Qt isn't built with TSan, so synchronisation inside it is invisible and shows up as
+# races (e.g. between QtTest's watchdog thread and the main thread). Only Qt-internal frames are
+# suppressed here; races in Caelestia's own code are still reported.
+race:libQt6Core.so
+race:libQt6Test.so
+race:libQt6Gui.so
+race:libQt6Qml.so
+race:libQt6Sql.so
+race:libQt6Network.so
+called_from_lib:libQt6Core.so
+called_from_lib:libQt6Test.so
+called_from_lib:libqalculate.so
+# libstdc++'s condition_variable (used by QtTest's watchdog) isn't instrumented either, so TSan
+# can't follow the mutex hand-off inside pthread_cond_wait
+mutex:std::condition_variable::wait
+mutex:__gthread_cond_wait
+race:std::condition_variable
+race:std::__condvar

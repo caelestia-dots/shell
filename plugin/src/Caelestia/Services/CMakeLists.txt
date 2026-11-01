@@ -11,6 +11,7 @@ qml_module(caelestia-services
         sensorslib.cpp
         cpu.cpp
         gpu.cpp
+        nvml.cpp
         memory.cpp
         diskinfo.cpp
         storage.cpp
@@ -18,8 +19,10 @@ qml_module(caelestia-services
         lyrics.cpp
         sessionmanager.cpp
         networkusage.cpp
+        networkdbus.cpp
         hyprdevices.cpp
         hyprextras.cpp
+        ddc.cpp
     LIBRARIES
         Qt::Concurrent
         Qt::DBus
@@ -35,3 +38,10 @@ qml_module(caelestia-services
         Caelestia
         Caelestia.Config
 )
+
+# DDC/CI brightness uses libddcutil when it's installed; without it the shell runs the ddcutil
+# command instead (see services/Brightness.qml)
+if(Ddcutil_FOUND)
+    target_compile_definitions(caelestia-services PRIVATE CAELESTIA_HAS_DDCUTIL)
+    target_link_libraries(caelestia-services PRIVATE PkgConfig::Ddcutil)
+endif()

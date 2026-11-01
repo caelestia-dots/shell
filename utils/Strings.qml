@@ -15,6 +15,12 @@ Singleton {
         return percent(Math.round(value * 100));
     }
 
+    // Links from untrusted sources (e.g. notification bodies) may only open web/mail URLs,
+    // not local files or arbitrary scheme handlers
+    function isSafeExternalUrl(link: string): bool {
+        return /^(https?|mailto):/i.test(link);
+    }
+
     function testRegexList(filterList: list<string>, target: string): bool {
         const regexChecker = /^\^.*\$$/;
         for (const filter of filterList) {

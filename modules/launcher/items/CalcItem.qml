@@ -14,7 +14,7 @@ Item {
     readonly property string math: list.search.text.slice(`${GlobalConfig.launcher.actionPrefix}calc `.length)
 
     function onClicked(): void {
-        Quickshell.execDetached(["wl-copy", Qalculator.rawResult]);
+        Quickshell.execDetached(["wl-copy", "--", Qalculator.rawResult]);
         root.list.screenState.launcher = false;
     }
 
@@ -79,7 +79,8 @@ Item {
                 id: stateLayer
 
                 onClicked: {
-                    Quickshell.execDetached([...GlobalConfig.general.apps.terminal, "fish", "-C", `exec qalc -i '${root.math}'`]);
+                    // Pass the expression as its own argument, never through a shell
+                    Quickshell.execDetached([...GlobalConfig.general.apps.terminal, "qalc", "-i", "--", root.math]);
                     root.list.screenState.launcher = false;
                 }
 

@@ -1,5 +1,7 @@
 #include "tokensattached.hpp"
 
+#include <qhash.h>
+#include <qqmlengine.h>
 #include <qquickitem.h>
 
 #include "common.hpp"
@@ -16,13 +18,44 @@ const AppearanceConfig* resolveAppearance(ConfigRoot* config, bool complete, con
     return ConfigSingleton::instance()->appearance();
 }
 
+// Anim tokens only depend on the global config, so every attached Tokens (one per item that
+// uses it, often thousands) shares one instead of each building its own set of curves
+AnimTokens* sharedAnimTokens() {
+    static AnimTokens* const k_anim = [] {
+        auto* const anim = new AnimTokens(TokensSingleton::instance());
+        anim->bindDurations(ConfigSingleton::instance()->appearance()->anim()->durations());
+        anim->bindCurves(TokensSingleton::instance()->appearance()->curves());
+        QQmlEngine::setObjectOwnership(anim, QQmlEngine::CppOwnership);
+        return anim;
+    }();
+    return k_anim;
+}
+
+// Font tokens only depend on the font config (one per screen config plus the global one), so
+// attached Tokens share one set per config instead of each owning a FontTokens and its styles
+FontTokens* sharedFontTokens(AppearanceFont* font) {
+    static QHash<const AppearanceFont*, FontTokens*> s_tokens;
+
+    if (auto* const tokens = s_tokens.value(font))
+        return tokens;
+
+    // Not parented to the config node (nodes are walked as settings), freed along with it instead
+    auto* const tokens = new FontTokens();
+    tokens->bindFont(font);
+    QQmlEngine::setObjectOwnership(tokens, QQmlEngine::CppOwnership);
+    s_tokens.insert(font, tokens);
+    QObject::connect(font, &QObject::destroyed, tokens, [font, tokens] {
+        s_tokens.remove(font);
+        tokens->deleteLater();
+    });
+    return tokens;
+}
+
 } // namespace
 
 Tokens::Tokens(QObject* parent)
     : QQuickAttachedPropertyPropagator(parent)
-    , m_font(new FontTokens(this))
-    , m_anim(new AnimTokens(this)) {
-    bindAnim();
+    , m_anim(sharedAnimTokens()) {
     bindFont();
     initialize();
 }
@@ -73,14 +106,9 @@ void Tokens::attachedParentChange(
         inheritScreen(tokens->screen());
 }
 
-void Tokens::bindAnim() {
-    m_anim->bindDurations(ConfigSingleton::instance()->appearance()->anim()->durations());
-    m_anim->bindCurves(TokensSingleton::instance()->appearance()->curves());
-}
-
 void Tokens::bindFont() {
     auto* appearance = m_config ? m_config->appearance() : ConfigSingleton::instance()->appearance();
-    m_font->bindFont(appearance->font());
+    m_font = sharedFontTokens(appearance->font());
 }
 
 #define TOKENS_ATTACHED_GETTER(Type, name)                                                                             \
@@ -108,7 +136,10 @@ const SizeTokens* Tokens::sizes() const {
 }
 
 const FontTokens* Tokens::font() const {
-    return m_font;
+    // The shared tokens go away with their screen's config; fall back to the global ones
+    if (m_font)
+        return m_font;
+    return sharedFontTokens(ConfigSingleton::instance()->appearance()->font());
 }
 
 const AnimTokens* Tokens::anim() const {

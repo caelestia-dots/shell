@@ -160,15 +160,11 @@ Item {
             }
 
             const appName = first.appName;
-            let cleared = 0;
-            for (const n of Notifs.notClosed.filter(n => n.appName === appName)) {
-                n.close();
-                cleared++;
-                if (cleared > 30) {
-                    interval = 5;
-                    return;
-                }
-            }
+            const notifs = Notifs.notClosed.filter(n => n.appName === appName);
+            // Clear in batches of 31, as before, so large groups still animate out
+            Notifs.closeAll(notifs.slice(0, 31));
+            if (notifs.length >= 31)
+                interval = 5;
         }
     }
 

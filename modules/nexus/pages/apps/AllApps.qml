@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -17,24 +18,34 @@ PageBase {
     title: Tr.tr("All apps")
     isSubPage: true
 
-    ColumnLayout {
+    // Only creates the rows near the visible part of the page (there can be hundreds of apps)
+    LazyListView {
+        id: list
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         width: root.cappedWidth
+        implicitHeight: contentHeight
         spacing: Tokens.spacing.extraSmall / 2
 
-        Repeater {
-            id: list
+        cacheBuffer: 400
+        useCustomViewport: true
+        viewport: {
+            tWatcher.transform; // mapToItem is not reactive so use this to trigger updates
+            return Qt.rect(0, root.flickable.contentY - mapToItem(root.flickable.contentItem, 0, 0).y, width, root.flickable.height);
+        }
 
-            model: [...DesktopEntries.applications.values].sort((a, b) => a.name.localeCompare(b.name))
+        model: ScriptModel {
+            values: [...DesktopEntries.applications.values].sort((a, b) => a.name.localeCompare(b.name))
+        }
 
+        delegate: Component {
             ConnectedRect {
                 id: appItem
 
                 required property DesktopEntry modelData
                 required property int index
 
-                Layout.fillWidth: true
                 first: index === 0
                 last: index === list.count - 1
                 implicitHeight: appRow.implicitHeight + appRow.anchors.margins * 2
@@ -42,7 +53,7 @@ PageBase {
                 StateLayer {
                     onClicked: {
                         root.nState.selectedApp = appItem.modelData;
-                        root.nState.openSubPage(2);
+                        root.nState.openSubPage(SubPage.AppInfo);
                     }
                 }
 
@@ -97,6 +108,13 @@ PageBase {
                     }
                 }
             }
+        }
+
+        TransformWatcher {
+            id: tWatcher
+
+            a: root.flickable.contentItem
+            b: list
         }
     }
 }

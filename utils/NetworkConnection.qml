@@ -76,12 +76,8 @@ QtObject {
                 Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
                     if (result.needsPassword) {
                         // Clear pending connection if exists
-                        if (Nmcli.pendingConnection) {
-                            Nmcli.connectionCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.checkCount = 0;
+                        if (Nmcli.pendingConnection)
                             Nmcli.pendingConnection = null;
-                        }
 
                         // Handle password dialog - use session if available, otherwise use callback
                         if (session && session.network) {

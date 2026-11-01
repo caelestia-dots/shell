@@ -44,12 +44,18 @@ Singleton {
         Hyprland.dispatch(request);
     }
 
+    // Quotes a value as a Lua string literal, so names can't break out of the generated code
+    function luaString(value: var): string {
+        const escaped = String(value).replace(/[\\"]/g, "\\$&").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/[\x00-\x1F\x7F]/g, "");
+        return `"${escaped}"`;
+    }
+
     function focusWorkspace(ws: var): void {
-        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
+        dispatch(usingLua ? `hl.dsp.focus({ workspace = ${luaString(ws)} })` : `workspace ${ws}`);
     }
 
     function toggleSpecial(name: string): void {
-        dispatch(usingLua ? `hl.dsp.workspace.toggle_special("${name}")` : `togglespecialworkspace ${name}`);
+        dispatch(usingLua ? `hl.dsp.workspace.toggle_special(${luaString(name)})` : `togglespecialworkspace ${name}`);
     }
 
     function cycleSpecialWorkspace(direction: string): void {

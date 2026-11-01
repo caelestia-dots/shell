@@ -76,8 +76,8 @@ Scope {
     PamContext {
         id: passwd
 
-        config: "passwd"
-        configDirectory: Quickshell.shellPath("assets/pam.d")
+        config: GlobalConfig.lock.pamService || "passwd"
+        configDirectory: GlobalConfig.lock.pamService ? "/etc/pam.d" : Quickshell.shellPath("assets/pam.d")
 
         onMessageChanged: {
             if (message.startsWith("The account is locked"))
@@ -168,6 +168,8 @@ Scope {
             fprint.abort();
             howdy.abort();
             passwd.abort();
+            // Don't keep a partially typed password around after a biometric unlock
+            root.buffer = "";
         }
 
         target: root.lock

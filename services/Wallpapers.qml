@@ -41,9 +41,23 @@ Searcher {
     function preview(path: string): void {
         previewPath = path;
         showPreview = true;
+        pendingPreviewClear = false;
 
+        // Generating a scheme spawns the CLI, so wait until the pointer settles on a wallpaper
         if (Colours.scheme === "dynamic")
-            getPreviewColoursProc.running = true;
+            previewColoursDebounce.restart();
+    }
+
+    function runPreviewColours(): void {
+        if (!showPreview)
+            return;
+        // One at a time; try again once the current one is done (its result is dropped if stale)
+        if (getPreviewColoursProc.running) {
+            previewColoursDebounce.restart();
+            return;
+        }
+        getPreviewColoursProc.path = previewPath;
+        getPreviewColoursProc.running = true;
     }
 
     function stopPreview(): void {
@@ -55,8 +69,10 @@ Searcher {
     }
 
     onPreviewColourLockChanged: {
-        if (!previewColourLock && pendingPreviewClear)
+        if (!previewColourLock && pendingPreviewClear) {
+            pendingPreviewClear = false;
             Colours.showPreview = false;
+        }
     }
 
     list: wallpapers.entries
@@ -111,12 +127,24 @@ Searcher {
         filter: FileSystemModel.Images
     }
 
+    Timer {
+        id: previewColoursDebounce
+
+        interval: 150
+        onTriggered: root.runPreviewColours()
+    }
+
     Process {
         id: getPreviewColoursProc
 
-        command: ["caelestia", "wallpaper", "-p", root.previewPath, ...root.smartArg]
+        property string path
+
+        command: ["caelestia", "wallpaper", "-p", path, ...root.smartArg]
         stdout: StdioCollector {
             onStreamFinished: {
+                // The preview may have ended or moved to another wallpaper meanwhile
+                if (!root.showPreview || getPreviewColoursProc.path !== root.previewPath)
+                    return;
                 Colours.load(text, true);
                 Colours.showPreview = true;
             }

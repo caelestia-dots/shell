@@ -116,10 +116,17 @@ void CachingImageResponse::process() {
         }
     }
 
-    // Schedule cache job (this call will return the original image, but later ones will use cache)
+    // Schedule cache job (later requests will use the cache)
     ImageCacher::instance()->schedule(path, cachePath, size, m_fillMode);
 
-    m_image = QImage(path);
+    // Meanwhile decode the source straight to (at least) the requested size instead of at
+    // full resolution: much faster for JPEGs (DCT scaling) and avoids huge textures for
+    // small thumbnails. Covering the size in both dimensions keeps every fill mode sharp.
+    QImageReader reader(path);
+    const QSize sourceSize = reader.size();
+    if (sourceSize.isValid() && sourceSize.width() > size.width() && sourceSize.height() > size.height())
+        reader.setScaledSize(sourceSize.scaled(size, Qt::KeepAspectRatioByExpanding));
+    m_image = reader.read();
     if (m_image.isNull()) {
         m_error = u"Failed to decode source: "_s + path;
         qCWarning(lcCProv).noquote() << m_error;

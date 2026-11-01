@@ -153,6 +153,12 @@ void AppDb::setPath(const QString& path) {
     db.open();
 
     QSqlQuery query(db);
+    if (newPath != u":memory:"_s) {
+        // Launches write on the GUI thread; WAL with normal sync avoids an fsync per write
+        // while staying crash-safe (at worst the last write is lost on power failure)
+        query.exec(u"PRAGMA journal_mode = WAL"_s);
+        query.exec(u"PRAGMA synchronous = NORMAL"_s);
+    }
     query.exec(u"CREATE TABLE IF NOT EXISTS frequencies (id TEXT PRIMARY KEY, frequency INTEGER)"_s);
 
     updateAppFrequencies();
@@ -195,6 +201,7 @@ void AppDb::setFavouriteApps(const QStringList& favApps) {
         }
     }
 
+    getSortedApps();
     emit appsChanged();
 }
 
@@ -207,7 +214,8 @@ QString AppDb::regexifyString(const QString& original) {
 }
 
 QQmlListProperty<AppEntry> AppDb::apps() {
-    return { this, &getSortedApps() };
+    // Sorted whenever the order can change (right before appsChanged), not on every read
+    return { this, &m_sortedApps };
 }
 
 void AppDb::incrementFrequency(const QString& id) {
@@ -222,7 +230,7 @@ void AppDb::incrementFrequency(const QString& id) {
 
     auto* app = m_apps.value(id);
     if (app) {
-        const auto before = getSortedApps();
+        const auto before = m_sortedApps; // Already up to date
         app->incrementFrequency();
         getSortedApps();
         if (before != m_sortedApps) {
@@ -278,7 +286,7 @@ quint32 AppDb::getFrequency(const QString& id) const {
 }
 
 void AppDb::updateAppFrequencies() {
-    const auto before = getSortedApps();
+    const auto before = m_sortedApps; // Already up to date
 
     for (auto* app : std::as_const(m_apps)) {
         app->setFrequency(getFrequency(app->id()));
@@ -300,6 +308,7 @@ void AppDb::updateApps() {
             auto* const newEntry = new AppEntry(entry, getFrequency(id), this);
             QObject::connect(newEntry, &QObject::destroyed, this, [id, this]() {
                 if (m_apps.remove(id)) {
+                    getSortedApps();
                     emit appsChanged();
                 }
             });
@@ -323,6 +332,7 @@ void AppDb::updateApps() {
     }
 
     if (dirty) {
+        getSortedApps();
         emit appsChanged();
     }
 }

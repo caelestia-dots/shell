@@ -52,7 +52,9 @@ Singleton {
         } else if ((!loc || timer.elapsed() > 900) && !ipApiRequestPending && Date.now() >= ipApiBlockedUntil) {
             ipApiRequestPending = true;
 
-            Requests.get("http://ip-api.com/json?fields=status,message,city,lat,lon", (text, metadata) => {
+            // HTTPS so the location can't be tampered with on untrusted networks (ip-api's free
+            // tier, used previously, is HTTP only)
+            Requests.get("https://ipwho.is/?fields=success,message,city,latitude,longitude", (text, metadata) => {
                 ipApiRequestPending = false;
                 recordIpApiRateLimit(metadata);
 
@@ -65,15 +67,15 @@ Singleton {
                 try {
                     response = JSON.parse(text);
                 } catch (error) {
-                    console.warn(lc, `Unable to parse response from ip-api: ${error}`);
+                    console.warn(lc, `Unable to parse IP geolocation response: ${error}`);
                     return;
                 }
 
-                const lat = Number(response.lat);
-                const lon = Number(response.lon);
+                const lat = Number(response.latitude);
+                const lon = Number(response.longitude);
 
-                if (response.status !== "success" || !Number.isFinite(lat) || !Number.isFinite(lon)) {
-                    console.warn(lc, `ip-api lookup failed: ${response.message ?? "invalid response"}`);
+                if (response.success !== true || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+                    console.warn(lc, `IP geolocation lookup failed: ${response.message ?? "invalid response"}`);
                     return;
                 }
 
@@ -84,7 +86,7 @@ Singleton {
                 ipApiRequestPending = false;
 
                 if (!recordIpApiRateLimit(metadata))
-                    console.warn(lc, `ip-api request failed: ${error}`);
+                    console.warn(lc, `IP geolocation request failed: ${error}`);
             });
         }
     }

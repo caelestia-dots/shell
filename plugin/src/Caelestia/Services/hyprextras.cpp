@@ -4,7 +4,10 @@
 #include <qjsonarray.h>
 #include <qlocalsocket.h>
 #include <qloggingcategory.h>
+#include <qtimer.h>
 #include <qvariant.h>
+
+#include <memory>
 
 #include "hyprdevices.hpp"
 
@@ -115,6 +118,8 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
 
 void HyprExtras::refreshOptions() {
     if (!m_optionsRefresh.isNull()) {
+        // Abort the previous request without running its callback
+        m_optionsRefresh->disconnect();
         m_optionsRefresh->close();
     }
 
@@ -129,8 +134,14 @@ void HyprExtras::refreshOptions() {
 
         for (const auto& o : std::as_const(options)) {
             const auto obj = o.toObject();
-            const auto key = obj.value(u"value"_s).toString();
-            const auto value = obj.value(u"data"_s).toObject().value(u"current"_s).toVariant();
+            // Older Hyprland: { value: <name>, data: { current } }; newer: { name, current }
+            const auto data = obj.value(u"data"_s).toObject();
+            const auto key =
+                obj.contains(u"name"_s) ? obj.value(u"name"_s).toString() : obj.value(u"value"_s).toString();
+            const auto value =
+                (data.contains(u"current"_s) ? data.value(u"current"_s) : obj.value(u"current"_s)).toVariant();
+            if (key.isEmpty())
+                continue;
             if (m_options.value(key) != value) {
                 dirty = true;
                 m_options.insert(key, value);
@@ -145,6 +156,8 @@ void HyprExtras::refreshOptions() {
 
 void HyprExtras::refreshDevices() {
     if (!m_devicesRefresh.isNull()) {
+        // Abort the previous request without running its callback
+        m_devicesRefresh->disconnect();
         m_devicesRefresh->close();
     }
 
@@ -173,12 +186,10 @@ void HyprExtras::socketStateChanged(QLocalSocket::LocalSocketState state) {
 }
 
 void HyprExtras::readEvent() {
-    while (true) {
+    // Only consume complete lines, a partial event stays buffered until the rest arrives
+    while (m_socket->canReadLine()) {
         auto rawEvent = m_socket->readLine();
-        if (rawEvent.isEmpty()) {
-            break;
-        }
-        rawEvent.truncate(rawEvent.length() - 1); // Remove trailing \n
+        rawEvent.chop(1); // Remove trailing \n
         const auto sep = rawEvent.indexOf(">>");
         if (sep < 0) {
             qCWarning(lcHypr) << "readEvent: malformed event (no >> separator):" << rawEvent;
@@ -199,7 +210,8 @@ void HyprExtras::handleEvent(const QString& event) {
 HyprExtras::SocketPtr HyprExtras::makeRequestJson(
     const QString& request, const std::function<void(bool, QJsonDocument)>& callback) {
     return makeRequest(u"j/"_s + request, [callback](bool success, const QByteArray& response) {
-        callback(success, QJsonDocument::fromJson(response));
+        const auto doc = QJsonDocument::fromJson(response);
+        callback(success && !doc.isNull(), doc);
     });
 }
 
@@ -209,24 +221,53 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
         return {};
     }
 
-    auto socket = SocketPtr::create(this);
+    // Owned only by the shared pointer (not also by a QObject parent, which could delete it a
+    // second time on shutdown). deleteLater keeps it safe to drop the last reference while the
+    // socket is emitting.
+    auto socket = SocketPtr(new QLocalSocket(), &QObject::deleteLater);
 
-    QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this]() {
-        QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback]() {
-            auto response = socket->readAll();
-            callback(true, std::move(response));
-            socket->close();
+    // Hyprland closes the connection once the whole reply is written. Large replies (e.g.
+    // j/descriptions) arrive in several chunks, so collect everything until then.
+    const auto response = std::make_shared<QByteArray>();
+    const auto finished = std::make_shared<bool>(false);
+    const auto finish = [this, socket, callback, response, finished](bool success) {
+        if (*finished)
+            return;
+        *finished = true;
+        response->append(socket->readAll());
+        callback(success, success ? std::move(*response) : QByteArray());
+        socket->close();
+        // The handlers below keep the socket alive, drop them once it is done to break the
+        // cycle. Deferred so the handler running this isn't destroyed mid-call.
+        QTimer::singleShot(0, this, [socket] {
+            socket->disconnect();
         });
+    };
 
+    QObject::connect(socket.data(), &QLocalSocket::connected, this, [socket, request]() {
         socket->write(request.toUtf8());
         socket->flush();
     });
 
-    QObject::connect(socket.data(), &QLocalSocket::errorOccurred, this, [=](QLocalSocket::LocalSocketError err) {
-        qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
-        callback(false, {});
-        socket->close();
+    QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, response]() {
+        response->append(socket->readAll());
     });
+
+    QObject::connect(socket.data(), &QLocalSocket::disconnected, this, [finish]() {
+        finish(true);
+    });
+
+    QObject::connect(
+        socket.data(), &QLocalSocket::errorOccurred, this, [finish, request](QLocalSocket::LocalSocketError err) {
+            // The server closing the connection is how a reply ends, not a failure
+            if (err == QLocalSocket::PeerClosedError) {
+                finish(true);
+                return;
+            }
+
+            qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
+            finish(false);
+        });
 
     socket->connectToServer(m_requestSocket);
 

@@ -34,6 +34,7 @@ signals:
 private:
     static QMutex s_calculatorMutex;
 
+    static void ensureCalculator();
     [[nodiscard]] static QPair<QString, QString> evaluate(const QString& expr);
 
     void applyResult(quint64 gen, const QPair<QString, QString>& result);

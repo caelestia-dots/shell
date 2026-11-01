@@ -141,7 +141,7 @@ PageBase {
                     onClicked: {
                         if (modelData.parentDir !== Paths.wallsdir) {
                             root.nState.selectedWallpaperCategory = Wallpapers.getCategoryFor(modelData);
-                            root.nState.openSubPage(2); // Category page
+                            root.nState.openSubPage(SubPage.WallpaperCategory);
                         } else {
                             Wallpapers.setWallpaper(modelData.path);
                             root.nState.closeSubPage();

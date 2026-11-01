@@ -16,6 +16,9 @@ class LockConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(bool, enableHowdy, true)
     CONFIG_GLOBAL_PROPERTY(int, maxHowdyTries, 3)
     CONFIG_GLOBAL_PROPERTY(bool, triggerHowdyOnWake, true)
+    // System PAM service (from /etc/pam.d, e.g. "system-local-login") to check passwords with,
+    // for systemd-homed/SSSD/LDAP/etc. Empty uses the bundled pam_unix based config.
+    CONFIG_GLOBAL_PROPERTY(QString, pamService, {})
     CONFIG_PROPERTY(bool, hideNotifs, false)
     CONFIG_GLOBAL_PROPERTY(bool, enableSessionControls, false)
 };

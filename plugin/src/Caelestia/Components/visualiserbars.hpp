@@ -3,12 +3,14 @@
 #include <qcolor.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
-#include <qquickpainteditem.h>
+#include <qquickitem.h>
+#include <qsggeometry.h>
+#include <qsgnode.h>
 #include <qvector.h>
 
 namespace caelestia::components {
 
-class VisualiserBars : public QQuickPaintedItem {
+class VisualiserBars : public QQuickItem {
     Q_OBJECT
     QML_ELEMENT
 
@@ -23,7 +25,7 @@ class VisualiserBars : public QQuickPaintedItem {
 public:
     explicit VisualiserBars(QQuickItem* parent = nullptr);
 
-    void paint(QPainter* painter) override;
+    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
 
     Q_INVOKABLE void advance(qreal dt);
 
@@ -57,7 +59,10 @@ signals:
     void settledChanged();
 
 private:
-    void drawSide(QPainter* painter, bool rightSide);
+    // Appends the triangles of one bar (rounded top, flat bottom) to the vertex list
+    void appendBar(QSGGeometry::ColoredPoint2D* out, qsizetype& index, qreal x, qreal y, qreal barWidth,
+        qreal barHeight, qreal h) const;
+    [[nodiscard]] QSGGeometry::ColoredPoint2D colouredPoint(qreal x, qreal y, qreal h) const;
 
     QVector<double> m_targetValues;
     QVector<double> m_displayValues;

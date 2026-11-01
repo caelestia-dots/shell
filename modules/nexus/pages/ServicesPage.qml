@@ -78,7 +78,7 @@ PageBase {
             icon: "notifications"
             text: Tr.tr("Notifications")
             subtext: Tr.tr("Notifications, toasts, timeouts")
-            onClicked: root.nState.openSubPage(1)
+            onClicked: root.nState.openSubPage(SubPage.Notifications)
         }
 
         // Polling

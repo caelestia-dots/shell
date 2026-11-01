@@ -35,6 +35,7 @@ MaterialShape {
     }
     readonly property real springMaxVelocity: {
         const wn = Math.sqrt(stiffness);
+        const z = dampingRatio; // Not Item.z
         const factor = Math.exp(-z * Math.acos(z) / Math.sqrt(1 - z * z));
         return wn * factor;
     }

@@ -18,7 +18,9 @@ layout(std140, binding = 0) uniform buf {
     float invertedRadius;
     vec4 invertedOuter;
     vec4 invertedInner;
-    vec4 rectData[80];
+    // Per rect (7 vec4s): 0 centre/half-size, 1 mask/offset/minEig, 2 inverse deform,
+    // 3 screen half-extents, 4 corner radii, 5 border terms, 6 side pen terms (see blobmaterial.cpp)
+    vec4 rectData[112];
 };
 
 float sdRoundedBox(vec2 p, vec2 center, vec2 halfSize, float radius) {
@@ -74,11 +76,11 @@ void main() {
     float minDist = 1e10;
 
     for (int i = 0; i < rectCount; i++) {
-        vec4 rect = rectData[i * 5];         // cx, cy, hw, hh
-        vec4 props = rectData[i * 5 + 1];    // excludeMask(int bits), offsetX, offsetY, minEig
-        vec4 invDm = rectData[i * 5 + 2];    // inverse deform matrix
-        vec4 sh = rectData[i * 5 + 3];       // screenHalfX, screenHalfY, 0, 0
-        vec4 radii = rectData[i * 5 + 4];    // effective per-corner radii (tr, br, bl, tl)
+        vec4 rect = rectData[i * 7];         // cx, cy, hw, hh
+        vec4 props = rectData[i * 7 + 1];    // excludeMask(int bits), offsetX, offsetY, minEig
+        vec4 invDm = rectData[i * 7 + 2];    // inverse deform matrix
+        vec4 sh = rectData[i * 7 + 3];       // screenHalfX, screenHalfY, 0, 0
+        vec4 radii = rectData[i * 7 + 4];    // effective per-corner radii (tr, br, bl, tl)
 
         // Offset center for asymmetric deformation
         vec2 center = rect.xy + props.yz;
@@ -105,20 +107,9 @@ void main() {
         if (hasInverted != 0) {
             vec2 screenHalf = sh.xy;
 
-            float distY0 = (center.y + screenHalf.y) - (invertedInner.y - invertedInner.w);
-            float distY1 = (invertedInner.y + invertedInner.w) - (center.y - screenHalf.y);
-            float distX0 = (center.x + screenHalf.x) - (invertedInner.x - invertedInner.z);
-            float distX1 = (invertedInner.x + invertedInner.z) - (center.x - screenHalf.x);
-
-            // 0 = far from border, 1 = at border (max compression)
-            float yProx = 1.0 - min(
-                smoothstep(0.0, smoothFactor, distY0),
-                smoothstep(0.0, smoothFactor, distY1)
-            );
-            float xProx = 1.0 - min(
-                smoothstep(0.0, smoothFactor, distX0),
-                smoothstep(0.0, smoothFactor, distX1)
-            );
+            // Border proximity per axis, pixel-independent: precomputed on the CPU
+            float xProx = rectData[i * 7 + 5].x;
+            float yProx = rectData[i * 7 + 5].y;
 
             // Smooth axis weights: gradient-based at corners, face-based inside.
             vec2 q = abs(pixel - center) - screenHalf;
@@ -161,7 +152,7 @@ void main() {
     for (int i = 0; i < rectCount; i++) {
         if (dArr[i] >= 1e9)
             continue;
-        int excludeMask = floatBitsToInt(rectData[i * 5 + 1].x);
+        int excludeMask = floatBitsToInt(rectData[i * 7 + 1].x);
         for (int j = i + 1; j < rectCount; j++) {
             if (dArr[j] >= 1e9)
                 continue;
@@ -190,32 +181,18 @@ void main() {
 
         float sinkValue = 0.0;
         for (int i = 0; i < rectCount; i++) {
-            vec4 rect = rectData[i * 5];
-            vec4 sinkProps = rectData[i * 5 + 1];
-            vec2 sinkSh = rectData[i * 5 + 3].xy;
+            vec4 rect = rectData[i * 7];
+            vec4 sinkProps = rectData[i * 7 + 1];
+            vec2 sinkSh = rectData[i * 7 + 3].xy;
 
             // Screen-space center (with offset) and pre-computed AABB half-extents
             vec2 ctr = rect.xy + sinkProps.yz;
 
-            // Sink onset / residual overlap: how far a rect must penetrate the border before
-            // the inner wall recedes to form its pocket. Too low and the wall recedes faster
-            // than the junction can stay convex, denting the inner edge inward near the rect's
-            // (squared) corners; too high and the rect nestles too deep before the wall yields.
-            // Tuned between the old cubic blend depth (k/6, too shallow) and the circular blend
-            // depth ((sqrt2-1)k): half the circular smin gap-closing distance, (2-sqrt2)k/2.
-            float preOff = smoothFactor * (2.0 - sqrt(2.0)) * 0.5;
-
-            // Top border: track rect's BOTTOM edge, only within border thickness
-            float topPen = clamp(innerTop - (ctr.y + sinkSh.y) - preOff, 0.0, innerTop - outerTop);
-
-            // Bottom border: track rect's TOP edge
-            float botPen = clamp((ctr.y - sinkSh.y) - innerBot - preOff, 0.0, outerBot - innerBot);
-
-            // Left border: track rect's RIGHT edge
-            float leftPen = clamp(innerLeft - (ctr.x + sinkSh.x) - preOff, 0.0, innerLeft - outerLeft);
-
-            // Right border: track rect's LEFT edge
-            float rightPen = clamp((ctr.x - sinkSh.x) - innerRight - preOff, 0.0, outerRight - innerRight);
+            // Pen depths are pixel-independent: precomputed on the CPU (see blobmaterial.cpp)
+            float topPen = rectData[i * 7 + 5].z;
+            float botPen = rectData[i * 7 + 5].w;
+            float leftPen = rectData[i * 7 + 6].x;
+            float rightPen = rectData[i * 7 + 6].y;
 
             // Lateral distance from pixel to rect's extent along each edge
             float hLat = max(abs(pixel.x - ctr.x) - sinkSh.x, 0.0);
@@ -260,10 +237,13 @@ void main() {
     // blend zones to prevent gaps (mergedSdf < smoothFactor means in blend)
     // myIndex == -1: inverted rect renders border-owned pixels
     // myIndex >= 0: individual rect renders its owned pixels
+    // Derivatives must be taken before any discard: once neighbouring fragments in the
+    // 2x2 quad are discarded, fwidth() is undefined and seams can alias on some drivers
+    float fw = fwidth(mergedSdf);
+
     if (owner != myIndex && mergedSdf > smoothFactor)
         discard;
 
-    float fw = fwidth(mergedSdf);
     float alpha = 1.0 - smoothstep(-fw, fw, mergedSdf);
     fragColor = vec4(color.rgb * alpha, alpha) * qt_Opacity;
 }

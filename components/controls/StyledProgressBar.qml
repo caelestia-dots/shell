@@ -161,7 +161,7 @@ ProgressBar {
                 delegate: Line {
                     required property int index
                     readonly property LinearIndicatorSegment cur: manager.activeIndicators[index] // qmllint disable unresolved-type
-                    readonly property LinearIndicatorSegment next: manager.activeIndicators[index + 1 % manager.activeIndicators.length] // qmllint disable unresolved-type
+                    readonly property LinearIndicatorSegment next: manager.activeIndicators[(index + 1) % manager.activeIndicators.length] // qmllint disable unresolved-type
 
                     bounds: root.toBounds(cur.endFraction, next.startFraction, cur.gapSize / 2)
                 }

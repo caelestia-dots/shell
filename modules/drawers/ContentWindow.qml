@@ -149,7 +149,9 @@ StyledWindow {
     Item {
         anchors.fill: parent
         opacity: root.surfaceColour.a
-        layer.enabled: true
+        // The fullscreen layer is only needed for the shadow, or to fade overlapping blobs as
+        // one when transparent. Skip it otherwise (e.g. under fullscreen apps) to save VRAM/fill-rate.
+        layer.enabled: root.shadowOpacity > 0 || root.surfaceColour.a < 1
         layer.effect: MultiEffect {
             shadowEnabled: true
             blurMax: 15

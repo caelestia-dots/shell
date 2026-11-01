@@ -14,7 +14,10 @@ Singleton {
     property list<real> weights: [1]
 
     readonly property var fzf: useFuzzy ? [] : new Fzf.Finder(list, Object.assign({
-        selector
+        selector,
+        // Unused by fzf, but selector() may depend on keys (e.g. launcher prefixes),
+        // so referencing them here rebuilds the index when they change
+        keys
     }, extraOpts))
     readonly property list<var> fuzzyPrepped: useFuzzy ? list.map(e => {
         const obj = {
@@ -24,6 +27,14 @@ Singleton {
             obj[k] = Fuzzy.prepare(e[k]);
         return obj;
     }) : []
+
+    // Only reassign when different, since every change rebuilds the search index
+    function setKeys(newKeys: list<string>, newWeights: list<real>): void {
+        if (keys.join("\n") !== newKeys.join("\n"))
+            keys = newKeys;
+        if (weights.join() !== newWeights.join())
+            weights = newWeights;
+    }
 
     function transformSearch(search: string): string {
         return search;

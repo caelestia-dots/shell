@@ -1,15 +1,18 @@
 #include "imagecacher.hpp"
 
 #include <qcryptographichash.h>
+#include <qdatetime.h>
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qimage.h>
+#include <qimagereader.h>
 #include <qloggingcategory.h>
 #include <qmutex.h>
 #include <qpainter.h>
 #include <qsavefile.h>
 #include <qthreadpool.h>
+#include <qtimezone.h>
 
 namespace {
 
@@ -23,18 +26,19 @@ using Qt::StringLiterals::operator""_s;
 
 namespace {
 
-QString sha256sum(const QString& path) {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) {
-        qCWarning(lcCacher).noquote() << "sha256sum: failed to open" << path;
+// Cache key from the file's identity rather than its contents: hashing the whole file on
+// every lookup meant re-reading every (often multi-MB) source even when cached. Like
+// freedesktop thumbnails, a changed file gets a new key through its size and mtime.
+QString cacheKeyFor(const QString& path) {
+    const QFileInfo info(path);
+    if (!info.exists()) {
+        qCWarning(lcCacher).noquote() << "cacheKeyFor: file does not exist" << path;
         return {};
     }
 
-    QCryptographicHash hash(QCryptographicHash::Sha256);
-    hash.addData(&file);
-    file.close();
-
-    return QString::fromLatin1(hash.result().toHex());
+    const auto mtime = info.lastModified(QTimeZone::UTC).toMSecsSinceEpoch();
+    const auto id = u"%1\n%2\n%3"_s.arg(info.canonicalFilePath(), QString::number(info.size()), QString::number(mtime));
+    return QString::fromLatin1(QCryptographicHash::hash(id.toUtf8(), QCryptographicHash::Sha256).toHex());
 }
 
 QString fillSuffix(ImageCacher::FillMode fillMode) {
@@ -61,12 +65,12 @@ const QString& ImageCacher::cacheDir() {
 }
 
 QString ImageCacher::cachePathFor(const QString& sourcePath, const QSize& size, FillMode fillMode) {
-    const QString sha = sha256sum(sourcePath);
-    if (sha.isEmpty())
+    const QString key = cacheKeyFor(sourcePath);
+    if (key.isEmpty())
         return {};
 
     const QString filename = u"%1@%2x%3-%4.png"_s.arg(
-        sha, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
+        key, QString::number(size.width()), QString::number(size.height()), fillSuffix(fillMode));
 
     return cacheDir() + u'/' + filename;
 }
@@ -107,7 +111,14 @@ void ImageCacher::runJob(const QString& sourcePath, const QString& cachePath, co
         return;
     }
 
-    QImage image(sourcePath);
+    // Decode no larger than needed to cover the target (cheaper, and avoids holding a full
+    // 4K/8K image in memory), the smooth scale below then gives the exact size
+    QImageReader reader(sourcePath);
+    const QSize sourceSize = reader.size();
+    if (sourceSize.isValid() && sourceSize.width() > size.width() && sourceSize.height() > size.height())
+        reader.setScaledSize(sourceSize.scaled(size, Qt::KeepAspectRatioByExpanding));
+
+    QImage image = reader.read();
     if (image.isNull()) {
         qCWarning(lcCacher).noquote() << "Failed to decode source" << sourcePath;
         return;

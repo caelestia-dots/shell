@@ -1249,7 +1249,8 @@ const defaultOpts = {
 };
 class Finder {
   constructor(list, ...optionsTuple) {
-    this.opts = Object.assign(defaultOpts, optionsTuple[0]);
+    // Copy, so per-finder options don't leak into the shared defaults (and other finders)
+    this.opts = Object.assign({}, defaultOpts, optionsTuple[0]);
     this.items = list;
     this.runesList = list.map((item) => strToRunes(this.opts.selector(item).normalize()));
     this.algoFn = exactMatchNaive;

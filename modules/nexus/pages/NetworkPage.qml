@@ -88,7 +88,7 @@ PageBase {
             // TRANSLATORS: %1 = number of networks found
             text: Tr.tr("Show all networks (%1)").arg(Nmcli.networks.length)
             trailingIcon: "chevron_right"
-            onClicked: root.nState.openSubPage(5) // All networks sub-page
+            onClicked: root.nState.openSubPage(SubPage.AllNetworks)
 
             Behavior on Layout.preferredHeight {
                 Anim {
@@ -102,7 +102,7 @@ PageBase {
             icon: "bookmark"
             text: Tr.tr("Saved networks")
             trailingIcon: "chevron_right"
-            onClicked: root.nState.openSubPage(6) // Saved networks sub-page
+            onClicked: root.nState.openSubPage(SubPage.SavedNetworks)
         }
 
         RowButton {
@@ -110,7 +110,7 @@ PageBase {
             icon: "add"
             text: Tr.tr("Add network")
             disabled: !Nmcli.wifiEnabled
-            onClicked: root.nState.openSubPage(2) // Add network sub-page
+            onClicked: root.nState.openSubPage(SubPage.AddNetwork)
         }
 
         // ---- VPN -------------------------------------------------------------
@@ -333,7 +333,7 @@ PageBase {
                         icon: "edit"
                         onClicked: {
                             root.nState.editingVpnIndex = provider.index;
-                            root.nState.openSubPage(4); // Add/edit provider sub-page
+                            root.nState.openSubPage(SubPage.AddVpn);
                         }
                     }
                 }
@@ -347,7 +347,7 @@ PageBase {
             text: Tr.tr("Add provider")
             onClicked: {
                 root.nState.editingVpnIndex = -1;
-                root.nState.openSubPage(4); // Add/edit provider sub-page
+                root.nState.openSubPage(SubPage.AddVpn);
             }
         }
     }

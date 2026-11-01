@@ -762,7 +762,8 @@ QList<int> LazyListView::delegatesOutsideViewport(const QSet<int>& keep, const Q
             continue;
         }
 
-        const qreal itemTop = it->item->y();
+        // Delegates are positioned relative to contentY, the viewport is in content coordinates
+        const qreal itemTop = it->item->y() + m_contentY;
         const qreal itemBottom = itemTop + delegateVisibleHeight(it->item);
         if (itemBottom < viewport.top() || itemTop > viewport.bottom())
             outside.append(it.key());

@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.I18n
+import Caelestia.Services
 
 Singleton {
     id: root
@@ -17,13 +18,15 @@ Singleton {
     property string activeInterface: ""
     property string activeConnection: ""
     property bool wifiEnabled: true
-    readonly property bool scanning: rescanProc.running
+    property bool scanning
     readonly property list<AccessPoint> networks: []
     readonly property AccessPoint active: networks.find(n => n.active) ?? null
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
     // Map of saved Wi-Fi SSID (lowercased) -> security type
     property var savedConnectionSecurity: ({})
+    // Name of the saved Wi-Fi profile for each SSID (lowercased)
+    property var savedProfileNames: ({})
 
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
@@ -39,34 +42,19 @@ Singleton {
     // nmcli reports "unavailable" for ethernet NICs with no link, so we treat
     // anything other than that as a usable connection.
     readonly property bool hasAvailableEthernet: ethernetDevices.some(d => d.state !== "unavailable")
-    property list<var> activeProcesses: []
-
-    readonly property alias connectionCheckTimer: connectionCheckTimer
-    readonly property alias immediateCheckTimer: immediateCheckTimer
 
     // Constants
     readonly property string deviceTypeWifi: "wifi"
     readonly property string deviceTypeEthernet: "ethernet"
     readonly property string connectionTypeWireless: "802-11-wireless"
-    readonly property string nmcliCommandDevice: "device"
-    readonly property string nmcliCommandConnection: "connection"
-    readonly property string nmcliCommandWifi: "wifi"
-    readonly property string nmcliCommandRadio: "radio"
     readonly property string deviceStatusFields: "DEVICE,TYPE,STATE,CONNECTION"
     readonly property string connectionListFields: "NAME,TYPE"
     readonly property string wirelessSsidField: "802-11-wireless.ssid"
     readonly property string networkListFields: "SSID,SIGNAL,SECURITY"
     readonly property string networkDetailFields: "ACTIVE,SIGNAL,FREQ,SSID,BSSID,SECURITY"
     readonly property string securityKeyMgmt: "802-11-wireless-security.key-mgmt"
-    readonly property string securityPsk: "802-11-wireless-security.psk"
     readonly property string keyMgmtWpaPsk: "wpa-psk"
-    readonly property string connectionParamType: "type"
-    readonly property string connectionParamConName: "con-name"
     readonly property string connectionParamIfname: "ifname"
-    readonly property string connectionParamSsid: "ssid"
-    readonly property string connectionParamPassword: "password"
-    readonly property string connectionParamBssid: "802-11-wireless.bssid"
-    readonly property string connectionParamHidden: "802-11-wireless.hidden"
 
     signal connectionFailed(string ssid)
 
@@ -76,30 +64,6 @@ Singleton {
         }
 
         return (error.includes("Secrets were required") || error.includes("Secrets were required, but not provided") || error.includes("No secrets provided") || error.includes("802-11-wireless-security.psk") || error.includes("password for") || (error.includes("password") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("Secrets") && !error.includes("Connection activated") && !error.includes("successfully")) || (error.includes("802.11") && !error.includes("Connection activated") && !error.includes("successfully"))) && !error.includes("Connection activated") && !error.includes("successfully");
-    }
-
-    function parseNetworkOutput(output: string): list<var> {
-        if (!output || output.length === 0) {
-            return [];
-        }
-
-        const PLACEHOLDER = "STRINGWHICHHOPEFULLYWONTBEUSED";
-        const rep = new RegExp("\\\\:", "g");
-        const rep2 = new RegExp(PLACEHOLDER, "g");
-
-        const allNetworks = output.trim().split("\n").filter(line => line && line.length > 0).map(n => {
-            const net = n.replace(rep, PLACEHOLDER).split(":");
-            return {
-                active: net[0] === "yes",
-                strength: parseInt(net[1] || "0", 10) || 0,
-                frequency: parseInt(net[2] || "0", 10) || 0,
-                ssid: (net[3]?.replace(rep2, ":") ?? "").trim(),
-                bssid: (net[4]?.replace(rep2, ":") ?? "").trim(),
-                security: (net[5] ?? "").trim()
-            };
-        }).filter(n => n.ssid && n.ssid.length > 0);
-
-        return allNetworks;
     }
 
     function deduplicateNetworks(networks: list<var>): list<var> {
@@ -126,50 +90,6 @@ Singleton {
         return Array.from(networkMap.values());
     }
 
-    function isConnectionCommand(command: list<string>): bool {
-        if (!command || command.length === 0) {
-            return false;
-        }
-
-        return command.includes(root.nmcliCommandWifi) || command.includes(root.nmcliCommandConnection);
-    }
-
-    function parseDeviceStatusOutput(output: string, filterType: string): list<var> {
-        if (!output || output.length === 0) {
-            return [];
-        }
-
-        const interfaces = [];
-        const lines = output.trim().split("\n");
-
-        for (const line of lines) {
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const deviceType = parts[1];
-                let shouldInclude = false;
-
-                if (filterType === root.deviceTypeWifi && deviceType === root.deviceTypeWifi) {
-                    shouldInclude = true;
-                } else if (filterType === root.deviceTypeEthernet && deviceType === root.deviceTypeEthernet) {
-                    shouldInclude = true;
-                } else if (filterType === "both" && (deviceType === root.deviceTypeWifi || deviceType === root.deviceTypeEthernet)) {
-                    shouldInclude = true;
-                }
-
-                if (shouldInclude) {
-                    interfaces.push({
-                        device: parts[0] || "",
-                        type: parts[1] || "",
-                        state: parts[2] || "",
-                        connection: parts[3] || ""
-                    });
-                }
-            }
-        }
-
-        return interfaces;
-    }
-
     function isConnectedState(state: string): bool {
         if (!state || state.length === 0) {
             return false;
@@ -187,91 +107,24 @@ Singleton {
         return iface ? iface.connection : "";
     }
 
-    function executeCommand(args: list<string>, callback: var): void {
-        const proc = commandProc.createObject(root);
-        proc.cmdArgs = ["nmcli", ...args];
-        proc.callback = callback;
-
-        activeProcesses.push(proc);
-
-        proc.processFinished.connect(() => {
-            const index = activeProcesses.indexOf(proc);
-            if (index >= 0) {
-                activeProcesses.splice(index, 1);
-            }
-        });
-
-        Qt.callLater(() => {
-            proc.exec(proc.cmdArgs);
-        });
-    }
-
-    function getDeviceStatus(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            if (callback)
-                callback(result.output);
+    // Runs fn after ms milliseconds (Qt.callLater has no delay, its extra args go to fn)
+    function delay(fn: var, ms: int): void {
+        delayTimerComp.createObject(root, {
+            interval: ms,
+            fn
         });
     }
 
     function getWirelessInterfaces(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeWifi);
-            root.wirelessInterfaces = interfaces;
-            if (callback)
-                callback(interfaces);
-        });
+        refreshAll();
+        if (callback)
+            callback(root.wirelessInterfaces);
     }
 
     function getEthernetInterfaces(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            const interfaces = parseDeviceStatusOutput(result.output, root.deviceTypeEthernet);
-            const applyInterfaces = filtered => {
-                const devices = filtered.map(iface => ({
-                            interface: iface.device,
-                            type: iface.type,
-                            state: iface.state,
-                            connection: iface.connection,
-                            connected: isConnectedState(iface.state),
-                            ipAddress: "",
-                            gateway: "",
-                            dns: [],
-                            subnet: "",
-                            macAddress: "",
-                            speed: ""
-                        }));
-
-                root.ethernetInterfaces = filtered;
-                syncEthernetDevices(devices);
-                if (callback)
-                    callback(filtered);
-            };
-
-            if (interfaces.length === 0) {
-                applyInterfaces([]);
-                return;
-            }
-
-            // NetworkManager reports container/VM veth pairs (Docker, Podman,
-            // etc.) as type "ethernet" too, so they'd show up here like real
-            // connections. A physical NIC always has
-            // /sys/class/net/<iface>/device; veth/bridge/tun interfaces
-            // never do, so that's how we tell them apart.
-            const proc = physicalCheckProc.createObject(root);
-            proc.callback = result => {
-                if (!result.success) {
-                    console.warn(lc, `Failed to classify ethernet interfaces (exited: ${result.exitCode}); keeping the unfiltered list.`);
-                    applyInterfaces(interfaces);
-                    return;
-                }
-
-                const physicalSet = result.output.trim().split("\n").filter(l => l.length > 0);
-                const filtered = interfaces.filter(iface => physicalSet.includes(iface.device));
-
-                applyInterfaces(filtered);
-            };
-
-            proc.exec(["sh", "-c", 'test -d /sys/class/net || exit 1; for i do [ -e "/sys/class/net/$i/device" ] && printf "%s\\n" "$i"; done; exit 0', "sh", ...interfaces.map(iface => iface.device)]);
-        });
+        refreshAll();
+        if (callback)
+            callback(root.ethernetInterfaces);
     }
 
     // Sync a list of ethernet devices to the existing device list. Same logic as getNetworks
@@ -305,43 +158,22 @@ Singleton {
     }
 
     function connectEthernet(connectionName: string, interfaceName: string, callback: var): void {
-        if (connectionName && connectionName.length > 0) {
-            executeCommand([root.nmcliCommandConnection, "up", connectionName], result => {
-                if (result.success) {
-                    Qt.callLater(() => {
-                        getEthernetInterfaces(() => {});
-                        if (interfaceName && interfaceName.length > 0) {
-                            Qt.callLater(() => {
-                                getEthernetDeviceDetails(interfaceName, () => {});
-                            }, 1000);
-                        }
-                    }, 500);
-                }
-                if (callback)
-                    callback(result);
-            });
-        } else if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "connect", interfaceName], result => {
-                if (result.success) {
-                    Qt.callLater(() => {
-                        getEthernetInterfaces(() => {});
-                        Qt.callLater(() => {
-                            getEthernetDeviceDetails(interfaceName, () => {});
-                        }, 1000);
-                    }, 500);
-                }
-                if (callback)
-                    callback(result);
-            });
-        } else {
+        if (!connectionName || connectionName.length === 0) {
             if (callback)
                 callback({
                     success: false,
                     output: "",
-                    error: "No connection name or interface specified",
+                    error: "No connection name specified",
                     exitCode: -1
                 });
+            return;
         }
+
+        NetworkDbus.activate(connectionName, interfaceName ?? "", result => {
+            refreshAll();
+            if (callback)
+                callback(result);
+        });
     }
 
     function disconnectEthernet(connectionName: string, callback: var): void {
@@ -356,40 +188,11 @@ Singleton {
             return;
         }
 
-        executeCommand([root.nmcliCommandConnection, "down", connectionName], result => {
-            if (result.success) {
-                root.ethernetDeviceDetails = null;
-                Qt.callLater(() => {
-                    getEthernetInterfaces(() => {});
-                }, 500);
-            }
+        NetworkDbus.deactivate(connectionName, "", result => {
+            root.ethernetDeviceDetails = null;
+            refreshAll();
             if (callback)
                 callback(result);
-        });
-    }
-
-    function getAllInterfaces(callback: var): void {
-        executeCommand(["-t", "-f", root.deviceStatusFields, root.nmcliCommandDevice, "status"], result => {
-            const interfaces = parseDeviceStatusOutput(result.output, "both");
-            if (callback)
-                callback(interfaces);
-        });
-    }
-
-    function isInterfaceConnected(interfaceName: string, callback: var): void {
-        executeCommand([root.nmcliCommandDevice, "status"], result => {
-            const lines = result.output.trim().split("\n");
-            for (const line of lines) {
-                const parts = line.split(/\s+/);
-                if (parts.length >= 3 && parts[0] === interfaceName) {
-                    const connected = isConnectedState(parts[2]);
-                    if (callback)
-                        callback(connected);
-                    return;
-                }
-            }
-            if (callback)
-                callback(false);
         });
     }
 
@@ -430,198 +233,51 @@ Singleton {
     }
 
     function connectWireless(ssid: string, password: string, bssid: string, callback: var, retryCount: int): void {
-        const hasBssid = bssid !== undefined && bssid !== null && bssid.length > 0;
-        const retries = retryCount !== undefined ? retryCount : 0;
-        const maxRetries = 2;
+        const retries = retryCount ?? 0;
+        const pending = {
+            ssid: ssid,
+            bssid: bssid ?? "",
+            callback: callback,
+            retryCount: retries
+        };
+        root.pendingConnection = pending;
 
-        if (callback) {
-            root.pendingConnection = {
-                ssid: ssid,
-                bssid: hasBssid ? bssid : "",
-                callback: callback,
-                retryCount: retries
-            };
-            connectionCheckTimer.start();
-            immediateCheckTimer.checkCount = 0;
-            immediateCheckTimer.start();
-        }
-
-        if (password && password.length > 0 && hasBssid) {
-            const bssidUpper = bssid.toUpperCase();
-            createConnectionWithPassword(ssid, bssidUpper, password, callback);
-            return;
-        }
-
-        let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
-        if (password && password.length > 0) {
-            cmd.push(root.connectionParamPassword, password);
-        }
-        executeCommand(cmd, result => {
-            if (result.needsPassword && callback) {
-                if (callback)
-                    callback(result);
+        const finish = result => {
+            // A newer attempt replaced this one
+            if (root.pendingConnection !== pending)
                 return;
-            }
-
-            if (!result.success && root.pendingConnection && retries < maxRetries) {
-                console.warn(lc, "Connection failed, retrying... (attempt " + (retries + 1) + "/" + maxRetries + ")");
-                Qt.callLater(() => {
+            if (!result.success && !result.needsPassword && retries < 2) {
+                console.warn(lc, "Connection failed, retrying... (attempt " + (retries + 1) + "/2)");
+                root.delay(() => {
+                    root.pendingConnection = null;
                     connectWireless(ssid, password, bssid, callback, retries + 1);
                 }, 1000);
-            } else if (!result.success && root.pendingConnection) {} else if (result.success && callback) {} else if (!result.success && !root.pendingConnection) {
-                if (callback)
-                    callback(result);
+                return;
             }
-        });
-    }
-
-    function createConnectionWithPassword(ssid: string, bssidUpper: string, password: string, callback: var): void {
-        checkAndDeleteConnection(ssid, () => {
-            const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamBssid, bssidUpper, root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password];
-
-            executeCommand(cmd, result => {
-                if (result.success) {
-                    loadSavedConnections(() => {});
-                    activateConnection(ssid, callback);
-                } else {
-                    const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
-
-                    if (hasDuplicateWarning || (result.exitCode > 0 && result.exitCode < 10)) {
-                        loadSavedConnections(() => {});
-                        activateConnection(ssid, callback);
-                    } else {
-                        console.warn(lc, "Connection profile creation failed, trying fallback...");
-                        let fallbackCmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, root.connectionParamPassword, password];
-                        executeCommand(fallbackCmd, fallbackResult => {
-                            if (callback)
-                                callback(fallbackResult);
-                        });
-                    }
-                }
-            });
-        });
-    }
-
-    function checkAndDeleteConnection(ssid: string, callback: var): void {
-        executeCommand([root.nmcliCommandConnection, "show", ssid], result => {
-            if (result.success) {
-                executeCommand([root.nmcliCommandConnection, "delete", ssid], deleteResult => {
-                    Qt.callLater(() => {
-                        if (callback)
-                            callback();
-                    }, 300);
-                });
-            } else {
-                if (callback)
-                    callback();
-            }
-        });
-    }
-
-    function activateConnection(connectionName: string, callback: var): void {
-        executeCommand([root.nmcliCommandConnection, "up", connectionName], result => {
+            root.pendingConnection = null;
+            refreshAll();
             if (callback)
                 callback(result);
-        });
+        };
+
+        // A saved profile keeps its stored password, so it is simply brought up
+        const savedName = root.savedProfileNames[ssid.toLowerCase()];
+        if (!password && savedName)
+            NetworkDbus.activate(savedName, "", finish);
+        else
+            NetworkDbus.connectWifi(ssid, bssid ?? "", password ?? "", false, keyMgmtFor(ssid), finish);
+    }
+
+    // WPA3-only networks need SAE; anything that also offers WPA2/WPA1 works with a PSK
+    function keyMgmtFor(ssid: string): string {
+        const security = root.networks.find(n => n.ssid === ssid)?.security ?? "";
+        return security.includes("WPA3") && !/WPA[12]/.test(security) ? "sae" : root.keyMgmtWpaPsk;
     }
 
     function loadSavedConnections(callback: var): void {
-        executeCommand(["-t", "-f", root.connectionListFields, root.nmcliCommandConnection, "show"], result => {
-            if (!result.success) {
-                root.savedConnections = [];
-                root.savedConnectionSsids = [];
-                root.savedConnectionSecurity = {};
-                if (callback)
-                    callback([]);
-                return;
-            }
-
-            parseConnectionList(result.output, callback);
-        });
-    }
-
-    function parseConnectionList(output: string, callback: var): void {
-        const lines = output.trim().split("\n").filter(line => line.length > 0);
-        const wifiConnections = [];
-        const connections = [];
-
-        for (const line of lines) {
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const name = parts[0];
-                const type = parts[1];
-                connections.push(name);
-
-                if (type === root.connectionTypeWireless) {
-                    wifiConnections.push(name);
-                }
-            }
-        }
-
-        root.savedConnections = connections;
-
-        root.savedConnectionSecurity = {};
-
-        if (wifiConnections.length > 0) {
-            root.wifiConnectionQueue = wifiConnections;
-            root.currentSsidQueryIndex = 0;
-            root.savedConnectionSsids = [];
-            queryNextSsid(callback);
-        } else {
-            root.savedConnectionSsids = [];
-            root.wifiConnectionQueue = [];
-            if (callback)
-                callback(root.savedConnectionSsids);
-        }
-    }
-
-    function queryNextSsid(callback: var): void {
-        if (root.currentSsidQueryIndex < root.wifiConnectionQueue.length) {
-            const connectionName = root.wifiConnectionQueue[root.currentSsidQueryIndex];
-            root.currentSsidQueryIndex++;
-
-            executeCommand(["-t", "-f", `${root.wirelessSsidField},${root.securityKeyMgmt}`, root.nmcliCommandConnection, "show", connectionName], result => {
-                if (result.success) {
-                    processSsidOutput(result.output);
-                }
-                queryNextSsid(callback);
-            });
-        } else {
-            root.wifiConnectionQueue = [];
-            root.currentSsidQueryIndex = 0;
-            if (callback)
-                callback(root.savedConnectionSsids);
-        }
-    }
-
-    function processSsidOutput(output: string): void {
-        const ssidPrefix = "802-11-wireless.ssid:";
-        const keyMgmtPrefix = `${root.securityKeyMgmt}:`;
-
-        let ssid = "";
-        let keyMgmt = "";
-        for (const line of output.trim().split("\n")) {
-            if (line.startsWith(ssidPrefix))
-                ssid = line.substring(ssidPrefix.length).trim();
-            else if (line.startsWith(keyMgmtPrefix))
-                keyMgmt = line.substring(keyMgmtPrefix.length).trim();
-        }
-
-        if (!ssid || ssid.length === 0)
-            return;
-
-        const ssidLower = ssid.toLowerCase();
-
-        const exists = root.savedConnectionSsids.some(s => s && s.toLowerCase() === ssidLower);
-        if (!exists) {
-            const newList = root.savedConnectionSsids.slice();
-            newList.push(ssid);
-            root.savedConnectionSsids = newList;
-        }
-
-        const security = Object.assign({}, root.savedConnectionSecurity);
-        security[ssidLower] = keyMgmt;
-        root.savedConnectionSecurity = security;
+        refreshAll();
+        if (callback)
+            callback(root.savedConnectionSsids);
     }
 
     function securityLabel(keyMgmt: string): string {
@@ -679,6 +335,8 @@ Singleton {
     // Adds and connects to an SSID by name. When hidden is true the profile is
     // created with 802-11-wireless.hidden=yes so NetworkManager actively probes
     // for it.
+    // Adds and connects to an SSID by name. When hidden is true the profile is created with
+    // 802-11-wireless.hidden=yes so NetworkManager actively probes for it.
     function addHiddenNetwork(ssid: string, password: string, security: string, hidden: bool, callback: var): void {
         if (!ssid || ssid.length === 0) {
             if (callback)
@@ -692,51 +350,17 @@ Singleton {
         }
 
         const isSecure = security && security !== "none";
-
-        // Remove any stale profile with the same name first so we don't collide.
-        checkAndDeleteConnection(ssid, () => {
-            let cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamHidden, hidden ? "yes" : "no"];
-
-            if (isSecure) {
-                cmd.push(root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password);
-            }
-
-            executeCommand(cmd, result => {
-                if (result.success) {
-                    loadSavedConnections(() => {});
-                    activateConnection(ssid, callback);
-                } else {
-                    const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
-
-                    if (hasDuplicateWarning) {
-                        loadSavedConnections(() => {});
-                        activateConnection(ssid, callback);
-                    } else if (callback) {
-                        callback(result);
-                    }
-                }
-            });
+        NetworkDbus.connectWifi(ssid, "", isSecure ? password : "", hidden, "wpa-psk", result => {
+            refreshAll();
+            if (callback)
+                callback(result);
         });
     }
 
     // Reads whether a saved connection auto-connects.
     function getAutoconnect(connectionName: string, callback: var): void {
-        if (!connectionName || connectionName.length === 0) {
-            if (callback)
-                callback(true);
-            return;
-        }
-        executeCommand(["-t", "-f", "connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
-            let auto = true;
-            if (result.success) {
-                const line = result.output.trim();
-                const idx = line.indexOf(":");
-                if (idx >= 0)
-                    auto = line.slice(idx + 1).trim() !== "no";
-            }
-            if (callback)
-                callback(auto);
-        });
+        if (callback)
+            callback(connectionName ? NetworkDbus.autoconnect(connectionName) : true);
     }
 
     // Toggles auto-connect for a saved connection. When turned OFF, also makes
@@ -755,28 +379,16 @@ Singleton {
             return;
         }
 
-        let cmd = [root.nmcliCommandConnection, "modify", connectionName, "connection.autoconnect", enabled ? "yes" : "no"];
-
-        if (enabled) {
-            cmd.push("802-11-wireless-security.psk-flags", "0");
-        } else {
-            cmd.push("802-11-wireless-security.psk-flags", "2");
-            cmd.push("802-11-wireless-security.psk", "");
-        }
-
-        executeCommand(cmd, result => {
-            // For open networks the security fields don't exist; nmcli then
-            // errors. Retry with just the autoconnect change so it still works.
-            if (!result.success && result.error && (result.error.includes("802-11-wireless-security") || result.error.includes("is not a valid property") || result.error.includes("Error: invalid"))) {
-                executeCommand([root.nmcliCommandConnection, "modify", connectionName, "connection.autoconnect", enabled ? "yes" : "no"], retryResult => {
-                    if (callback)
-                        callback(retryResult);
-                });
-                return;
-            }
-            if (callback)
-                callback(result);
-        });
+        const ok = NetworkDbus.setAutoconnect(connectionName, enabled);
+        refreshAll();
+        if (callback)
+            callback({
+                success: ok,
+                output: "",
+                error: ok ? "" : "Could not change autoconnect for " + connectionName,
+                exitCode: ok ? 0 : 1,
+                needsPassword: false
+            });
     }
 
     function forgetNetwork(ssid: string, callback: var): void {
@@ -791,97 +403,38 @@ Singleton {
             return;
         }
 
-        const connectionName = root.savedConnections.find(conn => conn && conn.toLowerCase().trim() === ssid.toLowerCase().trim()) || ssid;
-
-        executeCommand([root.nmcliCommandConnection, "delete", connectionName], result => {
-            if (result.success) {
-                Qt.callLater(() => {
-                    loadSavedConnections(() => {});
-                }, 500);
-            }
+        const connectionName = root.savedProfileNames[ssid.toLowerCase().trim()] ?? ssid;
+        NetworkDbus.forget(connectionName, result => {
+            refreshAll();
             if (callback)
                 callback(result);
         });
     }
 
     function disconnect(interfaceName: string, callback: var): void {
-        if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "disconnect", interfaceName], result => {
-                if (callback)
-                    callback(result.success ? result.output : "");
-            });
-        } else {
-            executeCommand([root.nmcliCommandDevice, "disconnect", root.deviceTypeWifi], result => {
-                if (callback)
-                    callback(result.success ? result.output : "");
-            });
-        }
+        NetworkDbus.deactivate("", interfaceName ?? "", result => {
+            if (callback)
+                callback(result.success ? result.output : "");
+        });
     }
 
     function disconnectFromNetwork(): void {
-        if (active && active.ssid) {
-            executeCommand([root.nmcliCommandConnection, "down", active.ssid], result => {
-                if (result.success) {
-                    getNetworks(() => {});
-                }
-            });
-        } else {
-            executeCommand([root.nmcliCommandDevice, "disconnect", root.deviceTypeWifi], result => {
-                if (result.success) {
-                    getNetworks(() => {});
-                }
-            });
-        }
-    }
-
-    function getDeviceDetails(interfaceName: string, callback: var): void {
-        executeCommand([root.nmcliCommandDevice, "show", interfaceName], result => {
-            if (callback)
-                callback(result.output);
-        });
+        const iface = root.wirelessInterfaces.find(i => isConnectedState(i.state))?.device ?? "";
+        NetworkDbus.deactivate("", iface, () => refreshAll());
     }
 
     function refreshStatus(callback: var): void {
-        getDeviceStatus(output => {
-            const lines = output.trim().split("\n");
-            let connected = false;
-            let activeIf = "";
-            let activeConn = "";
-
-            for (const line of lines) {
-                const parts = line.split(":");
-                if (parts.length >= 4) {
-                    const state = parts[2] || "";
-                    if (isConnectedState(state)) {
-                        connected = true;
-                        activeIf = parts[0] || "";
-                        activeConn = parts[3] || "";
-                        break;
-                    }
-                }
-            }
-
-            root.isConnected = connected;
-            root.activeInterface = activeIf;
-            root.activeConnection = activeConn;
-
-            if (callback)
-                callback({
-                    connected,
-                    interface: activeIf,
-                    connection: activeConn
-                });
-        });
+        refreshAll();
+        if (callback)
+            callback({
+                connected: root.isConnected,
+                interface: root.activeInterface,
+                connection: root.activeConnection
+            });
     }
 
     function bringInterfaceUp(interfaceName: string, callback: var): void {
-        if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "connect", interfaceName], result => {
-                if (callback) {
-                    callback(result);
-                }
-            });
-        } else {
+        if (!interfaceName || interfaceName.length === 0) {
             if (callback)
                 callback({
                     success: false,
@@ -889,17 +442,17 @@ Singleton {
                     error: "No interface specified",
                     exitCode: -1
                 });
+            return;
         }
+        NetworkDbus.connectDevice(interfaceName, result => {
+            refreshAll();
+            if (callback)
+                callback(result);
+        });
     }
 
     function bringInterfaceDown(interfaceName: string, callback: var): void {
-        if (interfaceName && interfaceName.length > 0) {
-            executeCommand([root.nmcliCommandDevice, "disconnect", interfaceName], result => {
-                if (callback) {
-                    callback(result);
-                }
-            });
-        } else {
+        if (!interfaceName || interfaceName.length === 0) {
             if (callback)
                 callback({
                     success: false,
@@ -907,39 +460,181 @@ Singleton {
                     error: "No interface specified",
                     exitCode: -1
                 });
+            return;
         }
+        NetworkDbus.deactivate("", interfaceName, result => {
+            refreshAll();
+            if (callback)
+                callback(result);
+        });
+    }
+
+    // Re-reads the whole network state from NetworkManager over D-Bus and applies it
+    function refreshAll(): void {
+        const snap = NetworkDbus.snapshot();
+        if (snap.available)
+            applySnapshot(snap);
+    }
+
+    function applySnapshot(snap: var): void {
+        root.wifiEnabled = snap.wifiEnabled ?? root.wifiEnabled;
+
+        const wireless = (snap.wifiDevices ?? []).map(d => ({
+                    device: d.iface,
+                    type: root.deviceTypeWifi,
+                    state: d.state,
+                    connection: d.connection
+                }));
+        const ethernet = (snap.ethernetDevices ?? []).map(d => ({
+                    device: d.iface,
+                    type: root.deviceTypeEthernet,
+                    state: d.state,
+                    connection: d.connection
+                }));
+        root.wirelessInterfaces = wireless;
+        root.ethernetInterfaces = ethernet;
+        syncEthernetDevices(ethernet.map(iface => ({
+                    interface: iface.device,
+                    type: iface.type,
+                    state: iface.state,
+                    connection: iface.connection,
+                    connected: isConnectedState(iface.state),
+                    ipAddress: "",
+                    gateway: "",
+                    dns: [],
+                    subnet: "",
+                    macAddress: "",
+                    speed: ""
+                })));
+
+        const active = [...wireless, ...ethernet].find(i => isConnectedState(i.state));
+        root.isConnected = !!active;
+        root.activeInterface = active?.device ?? "";
+        root.activeConnection = active?.connection ?? "";
+
+        // Saved profiles: names of all, and the SSIDs and key management of Wi-Fi ones
+        const saved = snap.savedConnections ?? [];
+        root.savedConnections = saved.map(c => c.id);
+        const ssids = [];
+        const security = {};
+        for (const c of saved) {
+            if (c.type !== root.connectionTypeWireless || !c.ssid)
+                continue;
+            if (!ssids.some(x => x.toLowerCase() === c.ssid.toLowerCase()))
+                ssids.push(c.ssid);
+            security[c.ssid.toLowerCase()] = c.keyMgmt;
+        }
+        root.savedConnectionSsids = ssids;
+        root.savedConnectionSecurity = security;
+        const profileNames = {};
+        for (const c of saved)
+            if (c.type === root.connectionTypeWireless && c.ssid)
+                profileNames[c.ssid.toLowerCase().trim()] = c.id;
+        root.savedProfileNames = profileNames;
+
+        const aps = [];
+        for (const d of snap.wifiDevices ?? [])
+            for (const ap of d.aps ?? [])
+                aps.push({
+                    active: ap.active,
+                    strength: ap.strength,
+                    frequency: ap.frequency,
+                    ssid: ap.ssid,
+                    bssid: ap.bssid,
+                    security: ap.security
+                });
+        applyNetworks(deduplicateNetworks(aps));
+
+        refreshDetailsFor(wireless, ethernet);
+    }
+
+    // Reconciles the live Wi-Fi list with the new one, keeping existing objects so bindings and
+    // animations on unchanged networks don't restart
+    function applyNetworks(networks: list<var>): void {
+        const rNetworks = root.networks;
+        const newMap = new Map();
+        for (const n of networks)
+            newMap.set(`${n.frequency}:${n.ssid}:${n.bssid}`, n);
+
+        for (let i = rNetworks.length - 1; i >= 0; i--) {
+            const rn = rNetworks[i];
+            const key = `${rn.frequency}:${rn.ssid}:${rn.bssid}`;
+            if (!newMap.has(key)) {
+                rNetworks.splice(i, 1);
+                rn.destroy();
+            }
+        }
+
+        const existingMap = new Map();
+        for (const rn of rNetworks)
+            existingMap.set(`${rn.frequency}:${rn.ssid}:${rn.bssid}`, rn);
+
+        for (const [key, network] of newMap) {
+            const match = existingMap.get(key);
+            if (match) {
+                match.lastIpcObject = network;
+            } else {
+                rNetworks.push(apComp.createObject(root, {
+                    lastIpcObject: network
+                }));
+            }
+        }
+    }
+
+    // Address details of one device, in the shape the detail pages use
+    function detailsFor(iface: string): var {
+        const d = NetworkDbus.deviceDetails(iface);
+        return {
+            ipAddress: d.ip ?? "",
+            gateway: d.gateway ?? "",
+            dns: d.dns ?? [],
+            subnet: d.prefix !== undefined ? cidrToSubnetMask(String(d.prefix)) : "",
+            macAddress: d.mac ?? "",
+            speed: ""
+        };
+    }
+
+    function refreshDetailsFor(wireless: list<var>, ethernet: list<var>): void {
+        const w = wireless.find(i => isConnectedState(i.state));
+        root.wirelessDeviceDetails = w ? detailsFor(w.device) : null;
+        const e = ethernet.find(i => isConnectedState(i.state));
+        root.ethernetDeviceDetails = e ? detailsFor(e.device) : null;
+    }
+
+    function refreshDetails(): void {
+        refreshDetailsFor(root.wirelessInterfaces, root.ethernetInterfaces);
     }
 
     function scanWirelessNetworks(interfaceName: string, callback: var): void {
-        let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "rescan"];
-        if (interfaceName && interfaceName.length > 0) {
-            cmd.push(root.connectionParamIfname, interfaceName);
-        }
-        executeCommand(cmd, result => {
-            if (callback) {
-                callback(result);
-            }
-        });
+        NetworkDbus.requestScan(interfaceName || (root.wirelessInterfaces[0]?.device ?? ""));
+        if (callback)
+            callback({
+                success: true,
+                output: "",
+                error: "",
+                exitCode: 0,
+                needsPassword: false
+            });
     }
 
     function rescanWifi(): void {
-        rescanProc.running = true;
+        for (const iface of root.wirelessInterfaces)
+            NetworkDbus.requestScan(iface.device);
+        root.scanning = true;
+        scanDoneTimer.restart();
     }
 
     function enableWifi(enabled: bool, callback: var): void {
-        const cmd = enabled ? "on" : "off";
-        executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi, cmd], result => {
-            if (result.success) {
-                getWifiStatus(status => {
-                    root.wifiEnabled = status;
-                    if (callback)
-                        callback(result);
-                });
-            } else {
-                if (callback)
-                    callback(result);
-            }
-        });
+        NetworkDbus.setWifiEnabled(enabled);
+        refreshAll();
+        if (callback)
+            callback({
+                success: true,
+                output: "",
+                error: "",
+                exitCode: 0,
+                needsPassword: false
+            });
     }
 
     function toggleWifi(callback: var): void {
@@ -948,17 +643,9 @@ Singleton {
     }
 
     function getWifiStatus(callback: var): void {
-        executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi], result => {
-            if (result.success) {
-                const enabled = result.output.trim() === "enabled";
-                root.wifiEnabled = enabled;
-                if (callback)
-                    callback(enabled);
-            } else {
-                if (callback)
-                    callback(root.wifiEnabled);
-            }
-        });
+        refreshAll();
+        if (callback)
+            callback(root.wifiEnabled);
     }
 
     function findNetwork(ssid: string): var {
@@ -966,159 +653,9 @@ Singleton {
     }
 
     function getNetworks(callback: var): void {
-        executeCommand(["-g", root.networkDetailFields, "d", "w"], result => {
-            if (!result.success) {
-                if (callback)
-                    callback([]);
-                return;
-            }
-
-            const allNetworks = parseNetworkOutput(result.output);
-            const networks = deduplicateNetworks(allNetworks);
-            const rNetworks = root.networks;
-
-            const newMap = new Map();
-            for (const n of networks)
-                newMap.set(`${n.frequency}:${n.ssid}:${n.bssid}`, n);
-
-            for (let i = rNetworks.length - 1; i >= 0; i--) {
-                const rn = rNetworks[i];
-                const key = `${rn.frequency}:${rn.ssid}:${rn.bssid}`;
-                if (!newMap.has(key)) {
-                    rNetworks.splice(i, 1);
-                    rn.destroy();
-                }
-            }
-
-            const existingMap = new Map();
-            for (const rn of rNetworks)
-                existingMap.set(`${rn.frequency}:${rn.ssid}:${rn.bssid}`, rn);
-
-            for (const [key, network] of newMap) {
-                const match = existingMap.get(key);
-                if (match) {
-                    match.lastIpcObject = network;
-                } else {
-                    rNetworks.push(apComp.createObject(root, {
-                        lastIpcObject: network
-                    }));
-                }
-            }
-
-            if (callback)
-                callback(root.networks);
-            checkPendingConnection();
-        });
-    }
-
-    function getWirelessSSIDs(interfaceName: string, callback: var): void {
-        let cmd = ["-t", "-f", root.networkListFields, root.nmcliCommandDevice, root.nmcliCommandWifi, "list"];
-        if (interfaceName && interfaceName.length > 0) {
-            cmd.push(root.connectionParamIfname, interfaceName);
-        }
-        executeCommand(cmd, result => {
-            if (!result.success) {
-                if (callback)
-                    callback([]);
-                return;
-            }
-
-            const ssids = [];
-            const lines = result.output.trim().split("\n");
-            const seenSSIDs = new Set();
-
-            for (const line of lines) {
-                if (!line || line.length === 0)
-                    continue;
-
-                const parts = line.split(":");
-                if (parts.length >= 1) {
-                    const ssid = parts[0].trim();
-                    if (ssid && ssid.length > 0 && !seenSSIDs.has(ssid)) {
-                        seenSSIDs.add(ssid);
-                        const signalStr = parts.length >= 2 ? parts[1].trim() : "";
-                        const signal = signalStr ? parseInt(signalStr, 10) : 0;
-                        const security = parts.length >= 3 ? parts[2].trim() : "";
-                        ssids.push({
-                            ssid: ssid,
-                            signal: signalStr,
-                            signalValue: isNaN(signal) ? 0 : signal,
-                            security: security
-                        });
-                    }
-                }
-            }
-
-            ssids.sort((a, b) => {
-                return b.signalValue - a.signalValue;
-            });
-
-            if (callback)
-                callback(ssids);
-        });
-    }
-
-    function handlePasswordRequired(proc: var, error: string, output: string, exitCode: int): bool {
-        if (!proc || !error || error.length === 0) {
-            return false;
-        }
-
-        if (!isConnectionCommand(proc.cmdArgs) || !root.pendingConnection || !root.pendingConnection.callback) {
-            return false;
-        }
-
-        const needsPassword = detectPasswordRequired(error);
-
-        if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
-            connectionCheckTimer.stop();
-            immediateCheckTimer.stop();
-            immediateCheckTimer.checkCount = 0;
-            const pending = root.pendingConnection;
-            root.pendingConnection = null;
-            proc.callbackCalled = true;
-            const result = {
-                success: false,
-                output: output || "",
-                error: error,
-                exitCode: exitCode,
-                needsPassword: true
-            };
-            if (pending.callback) {
-                pending.callback(result);
-            }
-            if (proc.callback && proc.callback !== pending.callback) {
-                proc.callback(result);
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    function checkPendingConnection(): void {
-        if (root.pendingConnection) {
-            Qt.callLater(() => {
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-                if (connected) {
-                    connectionCheckTimer.stop();
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                    if (root.pendingConnection.callback) {
-                        root.pendingConnection.callback({
-                            success: true,
-                            output: "Connected",
-                            error: "",
-                            exitCode: 0
-                        });
-                    }
-                    root.pendingConnection = null;
-                } else {
-                    if (!immediateCheckTimer.running) {
-                        immediateCheckTimer.start();
-                    }
-                }
-            });
-        }
+        refreshAll();
+        if (callback)
+            callback(root.networks);
     }
 
     function cidrToSubnetMask(cidr: string): string {
@@ -1137,32 +674,11 @@ Singleton {
     }
 
     function getWirelessDeviceDetails(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            const activeInterface = root.wirelessInterfaces.find(iface => {
-                return isConnectedState(iface.state);
-            });
-            if (activeInterface && activeInterface.device) {
-                interfaceName = activeInterface.device;
-            } else {
-                if (callback)
-                    callback(null);
-                return;
-            }
-        }
-
-        executeCommand(["device", "show", interfaceName], result => {
-            if (!result.success || !result.output) {
-                root.wirelessDeviceDetails = null;
-                if (callback)
-                    callback(null);
-                return;
-            }
-
-            const details = parseDeviceDetails(result.output, false);
-            root.wirelessDeviceDetails = details;
-            if (callback)
-                callback(details);
-        });
+        const iface = interfaceName || (root.wirelessInterfaces.find(i => isConnectedState(i.state))?.device ?? "");
+        const details = iface ? detailsFor(iface) : null;
+        root.wirelessDeviceDetails = details;
+        if (callback)
+            callback(details);
     }
 
     // Reads the IPv4 configuration (method, address, gateway, DNS, autoconnect)
@@ -1173,56 +689,9 @@ Singleton {
                 callback(null);
             return;
         }
-
-        executeCommand(["-t", "-f", "ipv4.method,ipv4.addresses,ipv4.gateway,ipv4.dns,ipv4.ignore-auto-dns,connection.autoconnect", root.nmcliCommandConnection, "show", connectionName], result => {
-            if (!result.success) {
-                if (callback)
-                    callback(null);
-                return;
-            }
-
-            const cfg = {
-                method: "auto",
-                address: "",
-                gateway: "",
-                dns: "",
-                ignoreAutoDns: false,
-                autoconnect: true
-            };
-
-            const lines = result.output.trim().split("\n");
-            for (const line of lines) {
-                const idx = line.indexOf(":");
-                if (idx < 0)
-                    continue;
-                const key = line.slice(0, idx).trim();
-                const value = line.slice(idx + 1).trim();
-
-                if (key === "ipv4.ignore-auto-dns")
-                    cfg.ignoreAutoDns = value === "yes";
-                else if (key === "connection.autoconnect")
-                    cfg.autoconnect = value !== "no";
-
-                if (value === "" || value === "--")
-                    continue;
-
-                if (key === "ipv4.method")
-                    cfg.method = value;
-                else if (key === "ipv4.addresses")
-                    cfg.address = value.split(",")[0].trim();
-                else if (key === "ipv4.gateway")
-                    cfg.gateway = value;
-                else if (key === "ipv4.dns")
-                    cfg.dns = value.replace(/;\s*$/, "").split(/[;,]/).map(d => d.trim()).filter(d => d.length > 0).join(", ");
-            }
-
-            // Distinguish "automatic + custom DNS only" from plain DHCP.
-            if (cfg.method === "auto" && cfg.ignoreAutoDns)
-                cfg.method = "auto-dns";
-
-            if (callback)
-                callback(cfg);
-        });
+        const cfg = NetworkDbus.ipv4Config(connectionName);
+        if (callback)
+            callback(Object.keys(cfg).length > 0 ? cfg : null);
     }
 
     // Writes an IPv4 configuration to a connection profile and reactivates it so
@@ -1239,59 +708,35 @@ Singleton {
             return;
         }
 
-        const dnsList = (config.dns ?? "").split(",").map(d => d.trim()).filter(d => d.length > 0).join(" ");
-        let cmd = [root.nmcliCommandConnection, "modify", connectionName];
-
-        if (config.method === "manual") {
-            cmd.push("ipv4.method", "manual");
-            cmd.push("ipv4.addresses", config.address ?? "");
-            cmd.push("ipv4.gateway", config.gateway ?? "");
-            cmd.push("ipv4.dns", dnsList);
-            cmd.push("ipv4.ignore-auto-dns", "yes");
-        } else if (config.method === "auto-dns") {
-            // DHCP addressing, custom DNS only.
-            cmd.push("ipv4.method", "auto");
-            cmd.push("ipv4.addresses", "");
-            cmd.push("ipv4.gateway", "");
-            cmd.push("ipv4.dns", dnsList);
-            cmd.push("ipv4.ignore-auto-dns", "yes");
-        } else {
-            // Full DHCP: clear manual fields and re-enable auto DNS.
-            cmd.push("ipv4.method", "auto");
-            cmd.push("ipv4.addresses", "");
-            cmd.push("ipv4.gateway", "");
-            cmd.push("ipv4.dns", "");
-            cmd.push("ipv4.ignore-auto-dns", "no");
+        if (!NetworkDbus.setIpv4Config(connectionName, config)) {
+            if (callback)
+                callback({
+                    success: false,
+                    output: "",
+                    error: "Could not change the IPv4 settings of " + connectionName,
+                    exitCode: 1
+                });
+            return;
         }
 
-        executeCommand(cmd, result => {
-            if (!result.success) {
-                if (callback)
-                    callback(result);
-                return;
-            }
-            // Reactivate so changes take effect immediately.
-            executeCommand([root.nmcliCommandConnection, "up", connectionName], upResult => {
-                Qt.callLater(() => {
-                    refreshOnConnectionChange();
-                });
-                if (callback)
-                    callback(upResult);
-            });
+        // Reactivate so the change takes effect now
+        NetworkDbus.activate(connectionName, "", upResult => {
+            refreshAll();
+            if (callback)
+                callback(upResult);
         });
     }
 
     // Reads cumulative since-boot byte counters from sysfs for an interface and
     // returns a human-readable total via the callback.
     // Reads the negotiated link speed (Mbit/s) from sysfs and stores a
-    // human-readable form in ethernetSpeed. nmcli `device show` doesn't expose
-    // link speed, so sysfs is the root-free source.
+    // human-readable form in ethernetSpeed
     function getEthernetSpeed(interfaceName: string): void {
         if (!interfaceName || interfaceName.length === 0) {
             root.ethernetSpeed = "";
             return;
         }
-        speedProc.command = ["sh", "-c", `cat /sys/class/net/${interfaceName}/speed 2>/dev/null`];
+        speedProc.command = ["sh", "-c", 'cat "/sys/class/net/$1/speed" 2>/dev/null', "sh", interfaceName];
         speedProc.running = true;
     }
 
@@ -1303,160 +748,45 @@ Singleton {
         }
         dataUsageProc.iface = interfaceName;
         dataUsageProc.cb = callback;
-        dataUsageProc.command = ["sh", "-c", `cat /sys/class/net/${interfaceName}/statistics/rx_bytes /sys/class/net/${interfaceName}/statistics/tx_bytes 2>/dev/null`];
+        dataUsageProc.command = ["sh", "-c", 'cat "/sys/class/net/$1/statistics/rx_bytes" "/sys/class/net/$1/statistics/tx_bytes" 2>/dev/null', "sh", interfaceName];
         dataUsageProc.running = true;
     }
 
     function getEthernetDeviceDetails(interfaceName: string, callback: var): void {
-        if (!interfaceName || interfaceName.length === 0) {
-            const activeInterface = root.ethernetInterfaces.find(iface => {
-                return isConnectedState(iface.state);
-            });
-            if (activeInterface && activeInterface.device) {
-                interfaceName = activeInterface.device;
-            } else {
-                if (callback)
-                    callback(null);
-                return;
-            }
-        }
-
-        executeCommand(["device", "show", interfaceName], result => {
-            if (!result.success || !result.output) {
-                // Transient failure (e.g. nmcli busy during a toggle). Keep the
-                // previous details so dependent UI (gateway, IP/DNS) doesn't
-                // blink out and back.
-                if (callback)
-                    callback(root.ethernetDeviceDetails);
-                return;
-            }
-
-            const details = parseDeviceDetails(result.output, true);
-            root.ethernetDeviceDetails = details;
+        const iface = interfaceName || (root.ethernetInterfaces.find(i => isConnectedState(i.state))?.device ?? "");
+        if (!iface) {
+            root.ethernetDeviceDetails = null;
             if (callback)
-                callback(details);
-        });
-    }
-
-    function parseDeviceDetails(output: string, isEthernet: bool): var {
-        const details = {
-            ipAddress: "",
-            gateway: "",
-            dns: [],
-            subnet: "",
-            macAddress: "",
-            speed: ""
-        };
-
-        if (!output || output.length === 0) {
-            return details;
+                callback(null);
+            return;
         }
-
-        const lines = output.trim().split("\n");
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const parts = line.split(":");
-            if (parts.length >= 2) {
-                const key = parts[0].trim();
-                const value = parts.slice(1).join(":").trim();
-
-                if (key.startsWith("IP4.ADDRESS")) {
-                    const ipParts = value.split("/");
-                    details.ipAddress = ipParts[0] || "";
-                    if (ipParts[1]) {
-                        details.subnet = cidrToSubnetMask(ipParts[1]);
-                    } else {
-                        details.subnet = "";
-                    }
-                } else if (key === "IP4.GATEWAY") {
-                    if (value !== "--") {
-                        details.gateway = value;
-                    }
-                } else if (key.startsWith("IP4.DNS")) {
-                    if (value !== "--" && value.length > 0) {
-                        details.dns.push(value);
-                    }
-                } else if (key === "GENERAL.HWADDR") {
-                    details.macAddress = value;
-                }
-            }
-        }
-
-        return details;
+        const details = detailsFor(iface);
+        root.ethernetDeviceDetails = details;
+        if (callback)
+            callback(details);
     }
 
     function refreshOnConnectionChange(): void {
-        getNetworks(networks => {
-            const newActive = root.active;
-
-            if (newActive && newActive.active) {
-                Qt.callLater(() => {
-                    if (root.wirelessInterfaces.length > 0) {
-                        const activeWireless = root.wirelessInterfaces.find(iface => {
-                            return isConnectedState(iface.state);
-                        });
-                        if (activeWireless && activeWireless.device) {
-                            getWirelessDeviceDetails(activeWireless.device, () => {});
-                        }
-                    }
-
-                    if (root.ethernetInterfaces.length > 0) {
-                        const activeEthernet = root.ethernetInterfaces.find(iface => {
-                            return isConnectedState(iface.state);
-                        });
-                        if (activeEthernet && activeEthernet.device) {
-                            getEthernetDeviceDetails(activeEthernet.device, () => {});
-                        }
-                    }
-                }, 500);
-            } else {
-                root.wirelessDeviceDetails = null;
-                root.ethernetDeviceDetails = null;
-            }
-
-            getWirelessInterfaces(() => {});
-            getEthernetInterfaces(() => {
-                if (root.activeEthernet && root.activeEthernet.connected) {
-                    Qt.callLater(() => {
-                        getEthernetDeviceDetails(root.activeEthernet.iface, () => {});
-                    }, 500);
-                }
-            });
-        });
+        refreshAll();
+        refreshDetails();
     }
 
-    Component.onCompleted: {
-        getWifiStatus(() => {});
-        getNetworks(() => {});
-        loadSavedConnections(() => {});
-        getEthernetInterfaces(() => {});
-
-        Qt.callLater(() => {
-            if (root.wirelessInterfaces.length > 0) {
-                const activeWireless = root.wirelessInterfaces.find(iface => {
-                    return isConnectedState(iface.state);
-                });
-                if (activeWireless && activeWireless.device) {
-                    getWirelessDeviceDetails(activeWireless.device, () => {});
-                }
-            }
-
-            if (root.ethernetInterfaces.length > 0) {
-                const activeEthernet = root.ethernetInterfaces.find(iface => {
-                    return isConnectedState(iface.state);
-                });
-                if (activeEthernet && activeEthernet.device) {
-                    getEthernetDeviceDetails(activeEthernet.device, () => {});
-                }
-            }
-        }, 2000);
-    }
+    Component.onCompleted: root.refreshAll()
 
     Component {
-        id: commandProc
+        id: delayTimerComp
 
-        CommandProcess {}
+        Timer {
+            id: delayTimer
+
+            property var fn
+
+            running: true
+            onTriggered: {
+                fn();
+                delayTimer.destroy();
+            }
+        }
     }
 
     Component {
@@ -1469,183 +799,6 @@ Singleton {
         id: ethComp
 
         EthernetDevice {}
-    }
-
-    Component {
-        id: physicalCheckProc
-
-        Process {
-            id: proc
-
-            property var callback: null
-
-            stdout: StdioCollector {
-                id: stdoutCollector
-            }
-
-            stderr: StdioCollector {
-                id: stderrCollector
-            }
-
-            onExited: code => { // qmllint disable signal-handler-parameters
-                Qt.callLater(() => {
-                    const callback = proc.callback;
-                    const result = {
-                        success: code === 0,
-                        output: stdoutCollector.text ?? "",
-                        error: stderrCollector.text ?? "",
-                        exitCode: code
-                    };
-
-                    proc.destroy();
-                    callback?.(result);
-                });
-            }
-        }
-    }
-
-    Timer {
-        id: connectionCheckTimer
-
-        interval: 4000
-        onTriggered: {
-            if (root.pendingConnection) {
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-
-                if (!connected && root.pendingConnection.callback) {
-                    let foundPasswordError = false;
-                    for (let i = 0; i < root.activeProcesses.length; i++) {
-                        const proc = root.activeProcesses[i];
-                        if (proc && proc.stderr && proc.stderr.text) {
-                            const error = proc.stderr.text.trim();
-                            if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.cmdArgs)) {
-                                    const needsPassword = root.detectPasswordRequired(error);
-
-                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection) {
-                                        const pending = root.pendingConnection;
-                                        root.pendingConnection = null;
-                                        immediateCheckTimer.stop();
-                                        immediateCheckTimer.checkCount = 0;
-                                        proc.callbackCalled = true;
-                                        const result = {
-                                            success: false,
-                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
-                                            error: error,
-                                            exitCode: -1,
-                                            needsPassword: true
-                                        };
-                                        if (pending.callback) {
-                                            pending.callback(result);
-                                        }
-                                        if (proc.callback && proc.callback !== pending.callback) {
-                                            proc.callback(result);
-                                        }
-                                        foundPasswordError = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (!foundPasswordError) {
-                        const pending = root.pendingConnection;
-                        const failedSsid = pending.ssid;
-                        root.pendingConnection = null;
-                        immediateCheckTimer.stop();
-                        immediateCheckTimer.checkCount = 0;
-                        root.connectionFailed(failedSsid);
-                        pending.callback({
-                            success: false,
-                            output: "",
-                            error: "Connection timeout",
-                            exitCode: -1,
-                            needsPassword: false
-                        });
-                    }
-                } else if (connected) {
-                    root.pendingConnection = null;
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                }
-            }
-        }
-    }
-
-    Timer {
-        id: immediateCheckTimer
-
-        property int checkCount: 0
-
-        interval: 500
-        repeat: true
-        triggeredOnStart: false
-
-        onTriggered: {
-            if (root.pendingConnection) {
-                checkCount++;
-                const connected = root.active && root.active.ssid === root.pendingConnection.ssid;
-
-                if (connected) {
-                    connectionCheckTimer.stop();
-                    immediateCheckTimer.stop();
-                    immediateCheckTimer.checkCount = 0;
-                    if (root.pendingConnection.callback) {
-                        root.pendingConnection.callback({
-                            success: true,
-                            output: "Connected",
-                            error: "",
-                            exitCode: 0
-                        });
-                    }
-                    root.pendingConnection = null;
-                } else {
-                    for (let i = 0; i < root.activeProcesses.length; i++) {
-                        const proc = root.activeProcesses[i];
-                        if (proc && proc.stderr && proc.stderr.text) {
-                            const error = proc.stderr.text.trim();
-                            if (error && error.length > 0) {
-                                if (root.isConnectionCommand(proc.cmdArgs)) {
-                                    const needsPassword = root.detectPasswordRequired(error);
-
-                                    if (needsPassword && !proc.callbackCalled && root.pendingConnection && root.pendingConnection.callback) {
-                                        connectionCheckTimer.stop();
-                                        immediateCheckTimer.stop();
-                                        immediateCheckTimer.checkCount = 0;
-                                        const pending = root.pendingConnection;
-                                        root.pendingConnection = null;
-                                        proc.callbackCalled = true;
-                                        const result = {
-                                            success: false,
-                                            output: (proc.stdout && proc.stdout.text) ? proc.stdout.text : "",
-                                            error: error,
-                                            exitCode: -1,
-                                            needsPassword: true
-                                        };
-                                        if (pending.callback) {
-                                            pending.callback(result);
-                                        }
-                                        if (proc.callback && proc.callback !== pending.callback) {
-                                            proc.callback(result);
-                                        }
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (checkCount >= 6) {
-                        immediateCheckTimer.stop();
-                        immediateCheckTimer.checkCount = 0;
-                    }
-                }
-            } else {
-                immediateCheckTimer.stop();
-                immediateCheckTimer.checkCount = 0;
-            }
-        }
     }
 
     Process {
@@ -1691,34 +844,21 @@ Singleton {
         }
     }
 
-    Process {
-        id: rescanProc
-
-        command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
-        onExited: root.getNetworks() // qmllint disable signal-handler-parameters
-    }
-
-    Process {
-        id: monitorProc
-
-        running: true
-        command: ["nmcli", "monitor"]
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-        stdout: SplitParser {
-            onRead: root.refreshOnConnectionChange()
+    Connections {
+        function onChanged(): void {
+            root.refreshOnConnectionChange();
         }
-        onExited: monitorRestartTimer.start() // qmllint disable signal-handler-parameters
+
+        target: NetworkDbus
     }
 
     Timer {
-        id: monitorRestartTimer
+        id: scanDoneTimer
 
-        interval: 2000
+        interval: 3000
         onTriggered: {
-            monitorProc.running = true;
+            root.scanning = false;
+            root.refreshAll();
         }
     }
 
@@ -1727,80 +867,6 @@ Singleton {
 
         name: "caelestia.qml.services.nmcli"
         defaultLogLevel: LoggingCategory.Info
-    }
-
-    component CommandProcess: Process {
-        id: proc
-
-        property var callback: null
-        property list<string> cmdArgs: []
-        property bool callbackCalled: false
-        property int exitCode: 0
-
-        signal processFinished
-
-        environment: ({
-                LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
-            })
-
-        stdout: StdioCollector {
-            id: stdoutCollector
-        }
-
-        stderr: StdioCollector {
-            id: stderrCollector
-
-            onStreamFinished: {
-                const error = text.trim();
-                if (error && error.length > 0) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    root.handlePasswordRequired(proc, error, output, -1);
-                }
-            }
-        }
-
-        onExited: code => { // qmllint disable signal-handler-parameters
-            exitCode = code;
-
-            Qt.callLater(() => {
-                if (callbackCalled) {
-                    processFinished();
-                    return;
-                }
-
-                if (proc.callback) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
-                    const success = exitCode === 0;
-                    const cmdIsConnection = isConnectionCommand(proc.cmdArgs);
-
-                    if (root.handlePasswordRequired(proc, error, output, exitCode)) {
-                        processFinished();
-                        return;
-                    }
-
-                    const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
-
-                    if (!success && cmdIsConnection && root.pendingConnection) {
-                        const failedSsid = root.pendingConnection.ssid;
-                        root.connectionFailed(failedSsid);
-                    }
-
-                    callbackCalled = true;
-                    callback({
-                        success: success,
-                        output: output,
-                        error: error,
-                        exitCode: proc.exitCode,
-                        needsPassword: needsPassword || false
-                    });
-                    processFinished();
-                } else {
-                    processFinished();
-                }
-            });
-        }
     }
 
     component AccessPoint: QtObject {

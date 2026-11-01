@@ -58,6 +58,9 @@ public:
     Q_INVOKABLE void clearTrack();
     Q_INVOKABLE void refresh();
 
+    // Parses LRC text into time-sorted lines, dropping leading credit lines
+    [[nodiscard]] static QVector<LyricLine> parseLrc(const QString& text);
+
 signals:
     void lyricsChanged();
     void backendChanged();
@@ -114,7 +117,6 @@ private:
     [[nodiscard]] static QString readCachedLrc(LyricsBackend backend, const QString& id);
     static void writeCachedLrc(LyricsBackend backend, const QString& id, const QString& text);
 
-    [[nodiscard]] static QVector<LyricLine> parseLrc(const QString& text);
     [[nodiscard]] static QString tryReadLocalLrc(const QString& dir, const QString& artist, const QString& title);
     [[nodiscard]] static QString findLocalLrcRecursive(const QString& dir, const QString& artist, const QString& title);
 

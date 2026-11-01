@@ -5,9 +5,11 @@
 #include <qjsonarray.h>
 #include <qnetworkcookiejar.h>
 #include <qsavefile.h>
+#include <qtconcurrentrun.h>
 #include <qurlquery.h>
 
 #include <algorithm>
+#include <utility>
 
 #include "config/rootnodes.hpp"
 #include "config/serviceconfig.hpp"
@@ -477,29 +479,36 @@ void Lyrics::tryLocal(int reqId) {
         }
     }
 
-    const QString recursive = findLocalLrcRecursive(dir, m_artist, m_title);
-    if (!recursive.isEmpty()) {
-        QFile f(recursive);
-        if (f.open(QIODevice::ReadOnly)) {
-            const QString text = QString::fromUtf8(f.readAll());
-            const auto lines = parseLrc(text);
-            if (!lines.isEmpty()) {
-                setLines(lines, LyricsBackend::Local);
-                appendCandidates(
-                    { LyricCandidate(LyricsBackend::Local, recursive, m_title, m_artist, m_album, m_duration) });
-                m_selected = LyricCandidate(LyricsBackend::Local, recursive, m_title, m_artist, m_album, m_duration);
-                emit selectedCandidateChanged();
-                if (!m_settingFromPrefs) {
-                    persistTrackPrefs();
-                }
-                setLoading(false);
-                return;
-            }
-        }
-    }
+    // Walking a whole music library can take a while, so search off the GUI thread
+    QtConcurrent::run([dir, artist = m_artist, title = m_title]() -> std::pair<QString, QVector<LyricLine>> {
+        const QString path = findLocalLrcRecursive(dir, artist, title);
+        if (path.isEmpty())
+            return {};
 
-    qCDebug(lcLyrics) << "no local lrc for" << m_artist << "-" << m_title;
-    chainNext(LyricsBackend::Local, reqId);
+        QFile f(path);
+        if (!f.open(QIODevice::ReadOnly))
+            return {};
+        return { path, parseLrc(QString::fromUtf8(f.readAll())) };
+    }).then(this, [this, reqId](const std::pair<QString, QVector<LyricLine>>& found) {
+        if (reqId != m_currentRequestId)
+            return; // Track changed while searching
+
+        const auto& [path, lines] = found;
+        if (lines.isEmpty()) {
+            qCDebug(lcLyrics) << "no local lrc for" << m_artist << "-" << m_title;
+            chainNext(LyricsBackend::Local, reqId);
+            return;
+        }
+
+        setLines(lines, LyricsBackend::Local);
+        appendCandidates({ LyricCandidate(LyricsBackend::Local, path, m_title, m_artist, m_album, m_duration) });
+        m_selected = LyricCandidate(LyricsBackend::Local, path, m_title, m_artist, m_album, m_duration);
+        emit selectedCandidateChanged();
+        if (!m_settingFromPrefs) {
+            persistTrackPrefs();
+        }
+        setLoading(false);
+    });
 }
 
 void Lyrics::tryLrclib(int reqId) {

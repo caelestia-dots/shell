@@ -111,8 +111,7 @@ LazyListView {
                         return;
                     }
 
-                    for (const n of notifs.slice(0, 30))
-                        n.close();
+                    Notifs.closeAll(notifs.slice(0, 30));
                 }
             }
 

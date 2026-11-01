@@ -7,7 +7,6 @@ import Quickshell.Wayland
 import Caelestia
 import Caelestia.I18n
 import qs.components
-import qs.components.effects
 import qs.services
 
 MouseArea {
@@ -81,10 +80,13 @@ MouseArea {
     }
 
     function save(): void {
-        const tmpfile = Qt.resolvedUrl(`/tmp/caelestia-picker-${Quickshell.processId}-${Date.now()}.png`);
+        // Keep captures out of the world-readable /tmp: the runtime dir is private to the user
+        // (0700) and cleared on logout. The file is kept since the notification and swappy read it.
+        const runtimeDir = Quickshell.env("XDG_RUNTIME_DIR") || "/tmp";
+        const tmpfile = Qt.resolvedUrl(`${runtimeDir}/caelestia/picker-${Quickshell.processId}-${Date.now()}.png`);
         CUtils.saveItem(screencopy, tmpfile, Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)), path => {
             if (root.loader.clipboardOnly) {
-                Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
+                Quickshell.execDetached(["sh", "-c", 'wl-copy --type image/png < "$1"', "sh", path]);
                 Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, Tr.tr("Screenshot taken"), Tr.tr("Screenshot copied to clipboard")]);
             } else {
                 Quickshell.execDetached(["swappy", "-f", path]);
@@ -231,36 +233,33 @@ MouseArea {
         }
     }
 
-    StyledRect {
+    // Dims everything outside the selection without offscreen layers: a transparent rectangle
+    // whose screen-sized border surrounds the selection. Qt rounds the border's inner corners
+    // with `radius - border.width`, which gives the selection's rounding.
+    Rectangle {
         id: overlay
 
-        anchors.fill: parent
-        color: Colours.palette.m3secondaryContainer
-        opacity: 0.3
+        // Far enough that the border (and its huge outer corner arcs) covers the whole screen
+        readonly property real reach: Math.ceil(Math.hypot(root.width, root.height))
 
-        layer.enabled: true
-        layer.effect: Mask {
-            maskSource: selectionWrapper
-            maskInverted: true
-        }
+        x: root.rsx - reach
+        y: root.rsy - reach
+        implicitWidth: root.sw + reach * 2
+        implicitHeight: root.sh + reach * 2
+        radius: root.realRounding + reach
+        color: "transparent"
+        border.width: reach
+        border.color: Colours.palette.m3secondaryContainer
+        opacity: 0.3
     }
 
     Item {
-        id: selectionWrapper
+        id: selectionRect
 
-        anchors.fill: parent
-        layer.enabled: true
-        visible: false
-
-        Rectangle {
-            id: selectionRect
-
-            radius: root.realRounding
-            x: root.rsx
-            y: root.rsy
-            implicitWidth: root.sw
-            implicitHeight: root.sh
-        }
+        x: root.rsx
+        y: root.rsy
+        implicitWidth: root.sw
+        implicitHeight: root.sh
     }
 
     Rectangle {

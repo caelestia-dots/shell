@@ -58,7 +58,7 @@ PageBase {
                 onClicked: {
                     root.nState.selectedNetworkSsid = saved.modelData;
                     root.nState.networkDetailsFromSaved = true;
-                    root.nState.openSubPage(3); // Shared network detail/edit sub-page
+                    root.nState.openSubPage(SubPage.NetworkDetail);
                 }
 
                 RowLayout {

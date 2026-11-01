@@ -431,7 +431,7 @@ StyledRect {
                 height: text ? implicitHeight : 0
 
                 onLinkActivated: link => {
-                    if (!root.expanded)
+                    if (!root.expanded || !Strings.isSafeExternalUrl(link))
                         return;
 
                     Qt.openUrlExternally(link);

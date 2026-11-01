@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qpointer.h>
 #include <qqmlintegration.h>
 #include <qqmlparserstatus.h>
 #include <qquickattachedpropertypropagator.h>
@@ -57,14 +58,13 @@ protected:
 
 private:
     void propagateScreen();
-    void bindAnim();
     void bindFont();
 
     bool m_complete = false;
     QString m_screen;
     ConfigRoot* m_config = nullptr;
     TokensRoot* m_tokens = nullptr;
-    FontTokens* m_font = nullptr;
+    QPointer<FontTokens> m_font;
     AnimTokens* m_anim = nullptr;
 };
 

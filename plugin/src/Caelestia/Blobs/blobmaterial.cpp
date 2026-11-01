@@ -1,6 +1,9 @@
 #include "blobmaterial.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
+#include <functional>
 
 namespace caelestia::blobs {
 
@@ -20,9 +23,11 @@ QSGMaterialShader* BlobMaterial::createShader(QSGRendererInterface::RenderMode m
 }
 
 int BlobMaterial::compare(const QSGMaterial* other) const {
-    if (this < other)
+    // std::less gives a total order for unrelated pointers, the built-in < does not
+    const QSGMaterial* self = this;
+    if (std::less<>{}(self, other))
         return -1;
-    if (this > other)
+    if (std::less<>{}(other, self))
         return 1;
     return 0;
 }
@@ -32,11 +37,64 @@ BlobMaterialShader::BlobMaterialShader() {
     setShaderFileName(FragmentStage, u":/shaders/blob.frag.qsb"_s);
 }
 
+namespace {
+
+// GLSL smoothstep
+float smoothstepf(float edge0, float edge1, float x) {
+    if (std::abs(edge1 - edge0) < 1e-6f)
+        return x < edge0 ? 0.0f : 1.0f;
+    const float t = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+    return t * t * (3.0f - 2.0f * t);
+}
+
+// Border terms of one rect against the inverted border. They depend only on the rect and the
+// frame, never on the pixel, so they are computed once per frame here rather than per fragment
+// in blob.frag. The formulas mirror the shader's, which is what the reference images check.
+struct BorderTerms {
+    float xProx, yProx;                      // How close the rect is to the left/right and top/bottom border
+    float topPen, botPen, leftPen, rightPen; // How far the rect pushes into each border
+};
+
+BorderTerms borderTerms(const BlobRectData& r, const float inner[4], const float outer[4], float smoothFactor) {
+    const float cx = r.cx + r.offsetX;
+    const float cy = r.cy + r.offsetY;
+    const float shx = r.screenHalfX;
+    const float shy = r.screenHalfY;
+
+    const float innerLeft = inner[0] - inner[2];
+    const float innerRight = inner[0] + inner[2];
+    const float innerTop = inner[1] - inner[3];
+    const float innerBot = inner[1] + inner[3];
+    const float outerLeft = outer[0] - outer[2];
+    const float outerRight = outer[0] + outer[2];
+    const float outerTop = outer[1] - outer[3];
+    const float outerBot = outer[1] + outer[3];
+
+    const float distY0 = (cy + shy) - innerTop;
+    const float distY1 = innerBot - (cy - shy);
+    const float distX0 = (cx + shx) - innerLeft;
+    const float distX1 = innerRight - (cx - shx);
+
+    BorderTerms t{};
+    t.yProx = 1.0f - std::min(smoothstepf(0.0f, smoothFactor, distY0), smoothstepf(0.0f, smoothFactor, distY1));
+    t.xProx = 1.0f - std::min(smoothstepf(0.0f, smoothFactor, distX0), smoothstepf(0.0f, smoothFactor, distX1));
+
+    // Sink onset (see blob.frag): half the gap-closing distance of the circular blend
+    const float preOff = smoothFactor * (2.0f - std::sqrt(2.0f)) * 0.5f;
+    t.topPen = std::clamp(innerTop - (cy + shy) - preOff, 0.0f, innerTop - outerTop);
+    t.botPen = std::clamp((cy - shy) - innerBot - preOff, 0.0f, outerBot - innerBot);
+    t.leftPen = std::clamp(innerLeft - (cx + shx) - preOff, 0.0f, innerLeft - outerLeft);
+    t.rightPen = std::clamp((cx - shx) - innerRight - preOff, 0.0f, outerRight - innerRight);
+    return t;
+}
+
+} // namespace
+
 bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial* oldMaterial) {
     Q_UNUSED(oldMaterial);
     auto* mat = static_cast<BlobMaterial*>(newMaterial);
     QByteArray* buf = state.uniformData();
-    Q_ASSERT(buf->size() >= 1440);
+    Q_ASSERT(buf->size() >= k_uniformSize);
 
     if (state.isMatrixDirty()) {
         const QMatrix4x4 m = state.combinedMatrix();
@@ -85,11 +143,11 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
     // Inverted inner (offset 144, 16 bytes)
     memcpy(buf->data() + 144, mat->m_invertedInner, 16);
 
-    // Rect data (offset 160, each rect = 5 vec4s = 80 bytes)
+    // Rect data (offset 160, each rect = 7 vec4s = 112 bytes, see blob.frag)
     const int count = qMin(mat->m_rectCount, k_maxRects);
     for (int i = 0; i < count; ++i) {
         const auto& r = mat->m_rects[i];
-        const int base = 160 + i * 80;
+        const int base = 160 + i * k_rectStride;
         // Pack excludeMask into props.x via bit-cast (read in shader with floatBitsToInt)
         float maskAsFloat;
         memcpy(&maskAsFloat, &r.excludeMask, sizeof(float));
@@ -101,6 +159,12 @@ bool BlobMaterialShader::updateUniformData(RenderState& state, QSGMaterial* newM
         memcpy(buf->data() + base + 32, r.invDeform, 16);
         memcpy(buf->data() + base + 48, d3, 16);
         memcpy(buf->data() + base + 64, r.radius, 16);
+
+        const BorderTerms t = borderTerms(r, mat->m_invertedInner, mat->m_invertedOuter, mat->m_smoothFactor);
+        const float border[4] = { t.xProx, t.yProx, t.topPen, t.botPen };
+        const float sides[4] = { t.leftPen, t.rightPen, 0.0f, 0.0f };
+        memcpy(buf->data() + base + 80, border, 16);
+        memcpy(buf->data() + base + 96, sides, 16);
     }
 
     return true;

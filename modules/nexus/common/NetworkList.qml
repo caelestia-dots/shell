@@ -69,7 +69,7 @@ ItemList {
                 // Active network: open its detail/settings sub-page.
                 root.nState.selectedNetworkSsid = modelData.ssid;
                 root.nState.networkDetailsFromSaved = false;
-                root.nState.openSubPage(3);
+                root.nState.openSubPage(SubPage.NetworkDetail);
             }
         }
 

@@ -6,10 +6,10 @@
 #include <pipewire/pipewire.h>
 #include <spa/param/audio/format-utils.h>
 
+#include <array>
 #include <atomic>
 #include <stop_token>
 #include <thread>
-#include <vector>
 
 #include "service.hpp"
 
@@ -65,11 +65,14 @@ private:
     ~AudioCollector() override;
 
     std::jthread m_thread;
-    std::vector<float> m_buffer1;
-    std::vector<float> m_buffer2;
-    std::atomic<std::vector<float>*> m_readBuffer;
-    std::atomic<std::vector<float>*> m_writeBuffer;
-    quint32 m_sampleCount;
+
+    // Latest chunk, shared through a seqlock: the PipeWire thread (sole writer) never
+    // blocks, and readers retry if a write happened while they were copying. The samples
+    // are relaxed atomics so concurrent access is well defined (plain loads/stores in practice).
+    std::array<std::atomic<float>, ac::k_chunkSize> m_samples;
+    std::atomic<quint64> m_seq;
+
+    template <typename T> quint32 readChunkImpl(T* out, quint32 count);
 
     void reload();
     void start() override;

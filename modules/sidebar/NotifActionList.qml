@@ -18,7 +18,11 @@ Item {
     Layout.fillWidth: true
     implicitHeight: flickable.contentHeight
 
-    layer.enabled: true
+    // The edge covers make the mask fully opaque when not scrolled either way, so only pay
+    // for the two offscreen layers while a fade is actually showing. Clip to keep the bounds
+    // the layer used to impose.
+    clip: true
+    layer.enabled: leftCover.opacity < 1 || rightCover.opacity < 1
     layer.smooth: true
     layer.effect: Mask {
         maskSource: gradientMask
@@ -28,7 +32,7 @@ Item {
         id: gradientMask
 
         anchors.fill: parent
-        layer.enabled: true
+        layer.enabled: root.layer.enabled
         visible: false
 
         Rectangle {
@@ -57,6 +61,8 @@ Item {
         }
 
         Rectangle {
+            id: leftCover
+
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.left
@@ -72,6 +78,8 @@ Item {
         }
 
         Rectangle {
+            id: rightCover
+
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.right: parent.right

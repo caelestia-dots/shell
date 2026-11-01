@@ -5,8 +5,11 @@
 #include <qfile.h>
 #include <qregularexpression.h>
 
+#include <algorithm>
+
 #include "config/rootnodes.hpp"
 #include "config/serviceconfig.hpp"
+#include "nvml.hpp"
 #include "sensorslib.hpp"
 
 namespace caelestia::services {
@@ -31,6 +34,35 @@ QStringList gpuBusyFiles() {
         }
     }
     return files;
+}
+
+QByteArray readSysfs(const QString& path) {
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly))
+        return {};
+    return f.readAll().trimmed();
+}
+
+// True when every NVIDIA display controller is runtime suspended (e.g. an idle Optimus dGPU
+// in D3cold). Querying nvidia-smi would wake it and keep it awake, draining battery.
+bool nvidiaGpusSuspended() {
+    // Status files of NVIDIA display controllers (PCI class 0x03xxxx), found once
+    static const QStringList k_statusFiles = [] {
+        QStringList files;
+        QDirIterator it(u"/sys/bus/pci/devices"_s, QDir::Dirs | QDir::NoDotAndDotDot);
+        while (it.hasNext()) {
+            const QString path = it.next();
+            if (readSysfs(path + u"/vendor"_s) == "0x10de" && readSysfs(path + u"/class"_s).startsWith("0x03"))
+                files << path + u"/power/runtime_status"_s;
+        }
+        return files;
+    }();
+
+    if (k_statusFiles.isEmpty())
+        return false;
+    return std::ranges::all_of(k_statusFiles, [](const QString& file) {
+        return readSysfs(file) == "suspended";
+    });
 }
 
 QString cleanName(QString s) {
@@ -331,6 +363,18 @@ void Gpu::startNvidiaUsage() {
     if (m_nvidiaQuerying) {
         return;
     }
+    if (nvidiaGpusSuspended()) {
+        resetUsage(); // A suspended GPU is idle; don't wake it just to read that
+        return;
+    }
+
+    // NVML reads in-process, so there's no fork/exec every second. nvidia-smi is the fallback
+    // for systems where the library can't be loaded.
+    if (const auto sample = nvml::sample()) {
+        applyNvidiaUsage(sample->utilization / 100.0, sample->temperature);
+        return;
+    }
+
     m_nvidiaQuerying = true;
     const int generation = m_generation;
     runProcess(u"nvidia-smi"_s,
@@ -351,15 +395,21 @@ void Gpu::startNvidiaUsage() {
             bool ok2 = false;
             const qreal usage = parts.at(0).trimmed().toDouble(&ok1) / 100.0;
             const qreal temp = parts.at(1).trimmed().toDouble(&ok2);
-            if (ok1 && std::abs(usage - m_percentage) > 0.0001) {
-                m_percentage = usage;
-                emit percentageChanged();
-            }
-            if (ok2 && std::abs(temp - m_temperature) > 0.05) {
-                m_temperature = temp;
-                emit temperatureChanged();
+            if (ok1 && ok2) {
+                applyNvidiaUsage(usage, temp);
             }
         });
+}
+
+void Gpu::applyNvidiaUsage(qreal usage, qreal temperature) {
+    if (std::abs(usage - m_percentage) > 0.0001) {
+        m_percentage = usage;
+        emit percentageChanged();
+    }
+    if (std::abs(temperature - m_temperature) > 0.05) {
+        m_temperature = temperature;
+        emit temperatureChanged();
+    }
 }
 
 void Gpu::readGpuTemperature() {

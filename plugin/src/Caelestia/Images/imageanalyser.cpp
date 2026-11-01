@@ -7,6 +7,9 @@
 #include <qquickwindow.h>
 #include <qtconcurrentrun.h>
 
+#include <cstddef>
+#include <vector>
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcImageAnalyser, "caelestia.imageanalyser", QtInfoMsg)
@@ -185,27 +188,30 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
     const int height = img.height();
     const qsizetype bytesPerLine = img.bytesPerLine();
 
-    std::unordered_map<quint32, int> colours;
+    // Colours are quantised to 5 bits per channel, so a flat 32768 bucket histogram covers
+    // them all with one allocation instead of a hash map node per colour
+    constexpr std::size_t k_buckets = 1U << 15U;
+    std::vector<int> colours(k_buckets, 0);
     qreal totalLuminance = 0.0;
     int count = 0;
 
     for (int y = 0; y < height; ++y) {
+        if (promise.isCanceled()) {
+            return;
+        }
+
         const uchar* line = data + y * bytesPerLine;
         for (int x = 0; x < width; ++x) {
-            if (promise.isCanceled()) {
-                return;
-            }
-
             const uchar* pixel = line + (static_cast<qsizetype>(x) * 4);
 
             if (pixel[3] == 0) {
                 continue;
             }
 
-            const auto mr = static_cast<quint32>(pixel[2] & 0xF8);
-            const auto mg = static_cast<quint32>(pixel[1] & 0xF8);
-            const auto mb = static_cast<quint32>(pixel[0] & 0xF8);
-            ++colours[(mr << 16) | (mg << 8) | mb];
+            const auto qr = static_cast<quint32>(pixel[2]) >> 3U;
+            const auto qg = static_cast<quint32>(pixel[1]) >> 3U;
+            const auto qb = static_cast<quint32>(pixel[0]) >> 3U;
+            ++colours[(qr << 10U) | (qg << 5U) | qb];
 
             const qreal r = pixel[2] / 255.0;
             const qreal g = pixel[1] / 255.0;
@@ -215,18 +221,18 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
         }
     }
 
-    quint32 dominantColour = 0;
+    quint32 dominantBucket = 0;
     int maxCount = 0;
-    for (const auto& [colour, colourCount] : colours) {
-        if (promise.isCanceled()) {
-            return;
-        }
-
-        if (colourCount > maxCount) {
-            dominantColour = colour;
-            maxCount = colourCount;
+    for (std::size_t i = 0; i < k_buckets; ++i) {
+        if (colours[i] > maxCount) {
+            dominantBucket = static_cast<quint32>(i);
+            maxCount = colours[i];
         }
     }
+
+    // Back to 8 bits per channel, matching the previous 0xF8 masking
+    const quint32 dominantColour = (((dominantBucket >> 10U) & 0x1FU) << 19U) |
+                                   (((dominantBucket >> 5U) & 0x1FU) << 11U) | ((dominantBucket & 0x1FU) << 3U);
 
     promise.addResult(qMakePair(QColor((0xFFu << 24) | dominantColour), count == 0 ? 0.0 : totalLuminance / count));
 }

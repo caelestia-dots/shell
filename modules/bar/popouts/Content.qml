@@ -68,15 +68,22 @@ Item {
                             }
                         }
                         // Also try after a short delay in case networkPopout.item wasn't ready
-                        Qt.callLater(() => {
-                            if (passwordPopout.item && (networkPopout.item as Network)?.passwordNetwork) {
-                                (passwordPopout.item as WirelessPassword).network = (networkPopout.item as Network).passwordNetwork;
-                            }
-                        }, 100);
+                        passwordNetworkRetry.restart();
                     }
                 }
 
                 target: root.popouts
+            }
+
+            Timer {
+                id: passwordNetworkRetry
+
+                interval: 100
+                onTriggered: {
+                    if (passwordPopout.item && (networkPopout.item as Network)?.passwordNetwork) {
+                        (passwordPopout.item as WirelessPassword).network = (networkPopout.item as Network).passwordNetwork;
+                    }
+                }
             }
 
             Connections {

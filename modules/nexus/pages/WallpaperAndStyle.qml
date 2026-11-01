@@ -155,7 +155,7 @@ PageBase {
                 horizontalPadding: Tokens.padding.extraLarge
                 verticalPadding: Tokens.padding.medium
                 disabled: !Config.background.wallpaperEnabled
-                onClicked: root.nState.openSubPage(1) // Wallpaper page
+                onClicked: root.nState.openSubPage(SubPage.WallpaperSelect)
             }
 
             IconTextButton {
@@ -167,7 +167,7 @@ PageBase {
                 type: IconTextButton.Tonal
                 horizontalPadding: Tokens.padding.extraLarge
                 verticalPadding: Tokens.padding.medium
-                onClicked: root.nState.openSubPage(3) // Colours page
+                onClicked: root.nState.openSubPage(SubPage.ColourSelect)
             }
         }
 

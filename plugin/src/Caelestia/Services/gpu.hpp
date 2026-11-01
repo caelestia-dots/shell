@@ -54,6 +54,7 @@ private:
 
     void readGenericUsage();
     void startNvidiaUsage();
+    void applyNvidiaUsage(qreal usage, qreal temperature);
     void readGpuTemperature();
     void resetUsage();
 

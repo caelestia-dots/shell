@@ -24,7 +24,11 @@ StyledFlickable {
 
     flickableDirection: Flickable.VerticalFlick
 
-    layer.enabled: true
+    // With both ends unfaded the mask is fully opaque, so skip the two offscreen layers
+    // (e.g. whenever the content fits without scrolling). The layer also clipped to the
+    // bounds, which a scissor clip now does without an offscreen texture.
+    clip: true
+    layer.enabled: topFadeOpacity < 1 || bottomFadeOpacity < 1
     layer.effect: Mask {
         maskSource: mask
 

@@ -16,8 +16,6 @@ Toast::Toast(QString title, QString message, QString icon, Type type, int timeou
     , m_icon(std::move(icon))
     , m_type(type)
     , m_timeout(timeout) {
-    QTimer::singleShot(timeout, this, &Toast::close);
-
     if (m_icon.isEmpty()) {
         switch (m_type) {
         case Type::Success:
@@ -48,6 +46,9 @@ Toast::Toast(QString title, QString message, QString icon, Type type, int timeou
             break;
         }
     }
+
+    // Only start the timer once the default for non-positive timeouts has been applied
+    QTimer::singleShot(m_timeout, this, &Toast::close);
 }
 
 bool Toast::closed() const {

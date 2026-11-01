@@ -15,16 +15,22 @@ using util::i18n::mark;
 QMutex Qalculator::s_calculatorMutex;
 
 Qalculator::Qalculator(QObject* parent)
-    : QObject(parent) {
-    if (!CALCULATOR) {
-        // Calculator constructor sets the global `calculator` pointer (CALCULATOR macro),
-        // but we need to assign it to a var so compiler doesn't flag it as a leak
-        static const auto* s_instance = new Calculator();
-        Q_UNUSED(s_instance)
-        CALCULATOR->loadExchangeRates();
-        CALCULATOR->loadGlobalDefinitions();
-        CALCULATOR->loadLocalDefinitions();
-    }
+    : QObject(parent) {}
+
+// Loading the definitions and exchange rates takes a noticeable moment, so it happens on first
+// evaluation (on the worker thread for evalAsync) instead of blocking the GUI thread when the
+// singleton is created. Must be called with s_calculatorMutex held.
+void Qalculator::ensureCalculator() {
+    if (CALCULATOR)
+        return;
+
+    // Calculator constructor sets the global `calculator` pointer (CALCULATOR macro),
+    // but we need to assign it to a var so compiler doesn't flag it as a leak
+    static const auto* s_instance = new Calculator();
+    Q_UNUSED(s_instance)
+    CALCULATOR->loadExchangeRates();
+    CALCULATOR->loadGlobalDefinitions();
+    CALCULATOR->loadLocalDefinitions();
 }
 
 QString Qalculator::eval(const QString& expr, bool printExpr) {
@@ -68,6 +74,7 @@ bool Qalculator::busy() const {
 
 QPair<QString, QString> Qalculator::evaluate(const QString& expr) {
     const QMutexLocker locker(&s_calculatorMutex);
+    ensureCalculator();
 
     const EvaluationOptions eo;
     const PrintOptions po;

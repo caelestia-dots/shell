@@ -81,7 +81,7 @@ PageBase {
             icon: "tune"
             text: Tr.tr("App volumes")
             subtext: Audio.streams.length === 0 ? Tr.tr("No apps playing audio") : Tr.trN("%n app playing audio", "%n apps playing audio", Audio.streams.length)
-            onClicked: root.nState.openSubPage(1)
+            onClicked: root.nState.openSubPage(SubPage.AppVolumes)
         }
     }
 }

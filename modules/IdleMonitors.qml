@@ -22,15 +22,18 @@ Scope {
             return false;
         return true;
     }
+    property bool releaseSleepWhenSecure
 
     function handleIdleAction(action: var): void {
         if (!action)
             return;
 
+        // "unlock" is intentionally not supported: it would unlock without authentication
+        // as soon as the user returns from idle
         if (action === "lock")
             lock.lock.locked = true;
         else if (action === "unlock")
-            lock.lock.locked = false;
+            console.warn("Ignoring idle action \"unlock\": unlocking requires authentication");
         else if (typeof action === "string")
             Hypr.dispatch(Hypr.usingLua && ["dpms off", "dpms on"].includes(action) ? `hl.dsp.dpms({ action = "${action === "dpms off" ? "disable" : "enable"}" })` : action);
         else if (!SessionManager.exec(action))
@@ -39,8 +42,19 @@ Scope {
 
     Connections {
         function onAboutToSleep(): void {
-            if (GlobalConfig.general.idle.lockBeforeSleep)
-                root.lock.lock.locked = true;
+            if (!GlobalConfig.general.idle.lockBeforeSleep)
+                return SessionManager.releaseSleepInhibitor();
+
+            root.lock.lock.locked = true;
+            // Hold off sleep until the compositor confirms the lock (or the inhibitor times out)
+            if (root.lock.lock.secure)
+                SessionManager.releaseSleepInhibitor();
+            else
+                root.releaseSleepWhenSecure = true;
+        }
+
+        function onResumed(): void {
+            root.releaseSleepWhenSecure = false;
         }
 
         function onLockRequested(): void {
@@ -52,6 +66,17 @@ Scope {
         }
 
         target: SessionManager
+    }
+
+    Connections {
+        function onSecureChanged(): void {
+            if (root.releaseSleepWhenSecure && root.lock.lock.secure) {
+                root.releaseSleepWhenSecure = false;
+                SessionManager.releaseSleepInhibitor();
+            }
+        }
+
+        target: root.lock.lock
     }
 
     Variants {

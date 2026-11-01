@@ -1,0 +1,53 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "**"
+      - "!**/*.md"
+      - "!.github/**"
+      - ".github/workflows/test.yml"
+      - "!.vscode/**"
+      - "!assets/**"
+      - "!.gitignore"
+      - "!**/*.nix"
+      - "!**/flake.lock"
+
+jobs:
+  test:
+    name: test-${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: plain
+            sanitize: ""
+          - name: asan-ubsan
+            sanitize: address,undefined
+          - name: tsan
+            sanitize: thread
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: CMake build
+        run: |
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DVERSION= -DGIT_REVISION= -DCAELESTIA_BUILD_TESTS=ON -DCAELESTIA_SANITIZE="${{ matrix.sanitize }}"
+          cmake --build build
+
+      - name: Run tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+          ASAN_OPTIONS: detect_leaks=0
+          TSAN_OPTIONS: halt_on_error=1:report_thread_leaks=0
+        run: ctest --test-dir build --output-on-failure

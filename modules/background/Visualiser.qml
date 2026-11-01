@@ -40,7 +40,8 @@ Item {
         id: wrapper
 
         anchors.fill: parent
-        layer.enabled: true
+        // Only the blur uses this as a mask, so the offscreen layer is needed only then
+        layer.enabled: Config.background.visualiser.blur
 
         Loader {
             asynchronous: true

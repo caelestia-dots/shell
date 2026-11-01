@@ -30,6 +30,26 @@ Singleton {
         return false;
     }
 
+    // Closes many notifications with a single list update. Calling close() on each one
+    // refilters the whole list every time, which is quadratic when clearing everything.
+    function closeAll(notifs: list<NotifData>): void {
+        const toRemove = new Set();
+        for (const n of notifs) {
+            n.closed = true;
+            // Locked ones are removed by close() once their animations release them
+            if (n.locks.size === 0)
+                toRemove.add(n);
+        }
+        if (toRemove.size === 0)
+            return;
+
+        root.list = root.list.filter(n => !toRemove.has(n));
+        for (const n of toRemove) {
+            n.notification?.dismiss();
+            n.destroy();
+        }
+    }
+
     function shouldShowPopup(): bool {
         if (props.dnd || ShellState.anySidebarOpen())
             return false;
@@ -57,9 +77,11 @@ Singleton {
         id: saveTimer
 
         interval: 1000
+        // Actions aren't saved: they belong to the sending app's live notification and
+        // can't be invoked after a restart
         onTriggered: storage.setText(JSON.stringify(root.notClosed.map(n => ({
                     time: n.time,
-                    id: n.id,
+                    notificationId: n.notificationId,
                     summary: n.summary,
                     body: n.body,
                     appIcon: n.appIcon,
@@ -68,8 +90,7 @@ Singleton {
                     expireTimeout: n.expireTimeout,
                     urgency: n.urgency,
                     resident: n.resident,
-                    hasActionIcons: n.hasActionIcons,
-                    actions: n.actions
+                    hasActionIcons: n.hasActionIcons
                 }))))
     }
 
@@ -118,6 +139,8 @@ Singleton {
                     properties.notificationId = properties.id;
 
                 delete properties.id;
+                // Older saves included actions, which can no longer be invoked
+                delete properties.actions;
                 root.list.push(notifComp.createObject(root, properties));
             }
             root.list.sort((a, b) => b.time - a.time);
@@ -136,16 +159,12 @@ Singleton {
         // qmllint enable unresolved-type
         name: "clearNotifs"
         description: "Clear all notifications"
-        onPressed: {
-            for (const notif of root.list.slice())
-                notif.close();
-        }
+        onPressed: root.closeAll(root.list)
     }
 
     IpcHandler {
         function clear(): void {
-            for (const notif of root.list.slice())
-                notif.close();
+            root.closeAll(root.list);
         }
 
         function isDndEnabled(): bool {

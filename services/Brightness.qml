@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia.Config
+import Caelestia.Services
 import qs.components.misc
 
 Singleton {
@@ -61,7 +62,10 @@ Singleton {
 
     onMonitorsChanged: {
         ddcMonitors = [];
-        ddcProc.running = true;
+        if (Ddc.available)
+            ddcMonitors = Ddc.monitors();
+        else
+            ddcProc.running = true;
     }
 
     Variants {
@@ -186,8 +190,10 @@ Singleton {
             }
         }
 
+        // Rate limits brightness changes (e.g. while dragging a slider) so they don't spawn a
+        // process per step. DDC/CI is slow, so it gets a much longer interval.
         readonly property Timer timer: Timer {
-            interval: 500
+            interval: monitor.isDdc ? 500 : 50
             onTriggered: {
                 if (!isNaN(monitor.queuedBrightness)) {
                     monitor.setBrightness(monitor.queuedBrightness);
@@ -202,7 +208,7 @@ Singleton {
             if (Math.round(brightness * 100) === rounded)
                 return;
 
-            if (isDdc && timer.running) {
+            if (timer.running) {
                 queuedBrightness = value;
                 return;
             }
@@ -211,19 +217,26 @@ Singleton {
 
             if (isAppleDisplay)
                 Quickshell.execDetached(["asdbctl", "set", rounded]);
-            else if (isDdc)
-                Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
-            else
+            else if (isDdc) {
+                if (Ddc.available)
+                    Ddc.setBrightness(parseInt(busNum), rounded);
+                else
+                    Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
+            } else
                 Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
 
-            if (isDdc)
-                timer.restart();
+            timer.restart();
         }
 
         function initBrightness(): void {
             if (isAppleDisplay)
                 initProc.command = ["asdbctl", "get"];
-            else if (isDdc)
+            else if (isDdc && Ddc.available) {
+                const value = Ddc.brightness(parseInt(busNum));
+                if (value.max)
+                    monitor.brightness = value.current / value.max;
+                return;
+            } else if (isDdc)
                 initProc.command = ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"];
             else
                 initProc.command = ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];

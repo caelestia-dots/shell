@@ -47,8 +47,13 @@ Scope {
                     Toaster.toast(Tr.tr("Charger unplugged"), Tr.tr("Battery is discharging"), "power_off");
                 root.handleBatteryWarnings();
             } else {
-                if (GlobalConfig.utilities.toasts.chargingChanged)
+                // Plugging in during the critical battery countdown cancels the hibernation
+                if (hibernateTimer.running) {
+                    hibernateTimer.stop();
+                    Toaster.toast(Tr.tr("Hibernation cancelled"), Tr.tr("Charger plugged in"), "power");
+                } else if (GlobalConfig.utilities.toasts.chargingChanged) {
                     Toaster.toast(Tr.tr("Charger plugged in"), Tr.tr("Battery is charging"), "power");
+                }
                 root.lastPercentage = 100;
             }
         }
@@ -80,6 +85,9 @@ Scope {
         id: hibernateTimer
 
         interval: 5000
-        onTriggered: SessionManager.hibernate()
+        onTriggered: {
+            if (UPower.onBattery)
+                SessionManager.hibernate();
+        }
     }
 }

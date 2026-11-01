@@ -59,12 +59,26 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wunused-lambda-capture -Wno-nonportable-include-path)
 endif()
 
+# e.g. -DCAELESTIA_SANITIZE=address,undefined or -DCAELESTIA_SANITIZE=thread
+set(CAELESTIA_SANITIZE "" CACHE STRING "Sanitizers to build with")
+if(CAELESTIA_SANITIZE)
+    add_compile_options(-fsanitize=${CAELESTIA_SANITIZE} -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=${CAELESTIA_SANITIZE})
+endif()
+
+option(CAELESTIA_BUILD_TESTS "Build the unit tests (run with ctest)" OFF)
+
 if("extras" IN_LIST ENABLE_MODULES)
     add_subdirectory(extras)
 endif()
 
 if("plugin" IN_LIST ENABLE_MODULES)
     add_subdirectory(plugin)
+
+    if(CAELESTIA_BUILD_TESTS)
+        enable_testing()
+        add_subdirectory(tests)
+    endif()
 endif()
 
 if("shell" IN_LIST ENABLE_MODULES)

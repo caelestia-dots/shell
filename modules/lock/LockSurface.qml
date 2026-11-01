@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
+import Quickshell
 import Quickshell.Wayland
 import Caelestia.Config
 import qs.components
@@ -202,7 +203,9 @@ WlSessionLockSurface {
         implicitWidth: size
         implicitHeight: size
 
-        visible: Config.lock.enabled
+        // Hiding it on every screen would lock the session with no way to type the password,
+        // so show it everywhere when no screen has it enabled
+        visible: Config.lock.enabled || !Quickshell.screens.some(s => GlobalConfig.forScreen(s.name).lock.enabled)
         rotation: 180
         scale: 0
 

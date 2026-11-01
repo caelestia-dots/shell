@@ -71,7 +71,7 @@ PageBase {
             icon: "apps"
             text: Tr.tr("All apps")
             subtext: Tr.tr("Browse installed apps, set favourites and hidden")
-            onClicked: root.nState.openSubPage(1)
+            onClicked: root.nState.openSubPage(SubPage.AllApps)
         }
     }
 

@@ -29,10 +29,18 @@ const QString k_loginPath = u"/org/freedesktop/login1"_s;
 const QString k_loginIface = u"org.freedesktop.login1.Manager"_s;
 const QString k_sessionIface = u"org.freedesktop.login1.Session"_s;
 
+// How long sleep may be held back while the screen locks. logind caps this itself
+// (InhibitDelayMaxSec, 5s by default), so this only matters if nothing releases it.
+constexpr int k_sleepInhibitorTimeoutMs = 2000;
+
 } // namespace
 
 SessionManager::SessionManager(QObject* parent)
     : QObject(parent) {
+    m_sleepInhibitorTimeout.setSingleShot(true);
+    m_sleepInhibitorTimeout.setInterval(k_sleepInhibitorTimeoutMs);
+    connect(&m_sleepInhibitorTimeout, &QTimer::timeout, this, &SessionManager::releaseSleepInhibitor);
+
     auto bus = getSystemBus();
     if (!bus)
         return;
@@ -41,6 +49,8 @@ SessionManager::SessionManager(QObject* parent)
         k_loginService, k_loginPath, k_loginIface, u"PrepareForSleep"_s, this, SLOT(handlePrepareForSleep(bool)));
     if (!ok)
         qCWarning(lcSessionManager) << "Failed to connect to PrepareForSleep signal:" << bus->lastError().message();
+    else
+        acquireSleepInhibitor();
 
     auto sessionMsg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"GetSession"_s);
     sessionMsg.setArguments({ u"auto"_s });
@@ -187,10 +197,45 @@ void SessionManager::callSession(const QString& method) {
     call(m_sessionPath, k_sessionIface, method);
 }
 
+void SessionManager::acquireSleepInhibitor() {
+    if (m_sleepInhibitor.isValid())
+        return;
+
+    auto bus = getSystemBus();
+    if (!bus)
+        return;
+
+    // A delay lock makes logind wait (up to InhibitDelayMaxSec) before sleeping, so the
+    // lock screen can be up before the system suspends instead of racing with it
+    auto msg = QDBusMessage::createMethodCall(k_loginService, k_loginPath, k_loginIface, u"Inhibit"_s);
+    msg.setArguments({ u"sleep"_s, u"Caelestia Shell"_s, u"Locking the screen before sleep"_s, u"delay"_s });
+
+    const auto* const watcher = new QDBusPendingCallWatcher(bus->asyncCall(msg), this);
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher* self) {
+        const QDBusPendingReply<QDBusUnixFileDescriptor> reply = *self;
+        if (reply.isError())
+            qCWarning(lcSessionManager) << "Failed to take sleep inhibitor:" << reply.error().message();
+        else
+            m_sleepInhibitor = reply.value();
+        self->deleteLater();
+    });
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks) watcher is parented and self-deletes
+}
+
+void SessionManager::releaseSleepInhibitor() {
+    m_sleepInhibitorTimeout.stop();
+    // Dropping the last copy of the fd closes it, which releases the inhibitor
+    m_sleepInhibitor = QDBusUnixFileDescriptor();
+}
+
 void SessionManager::handlePrepareForSleep(bool sleep) {
     if (sleep) {
+        if (m_sleepInhibitor.isValid())
+            m_sleepInhibitorTimeout.start();
         emit aboutToSleep();
     } else {
+        releaseSleepInhibitor();
+        acquireSleepInhibitor();
         emit resumed();
     }
 }
