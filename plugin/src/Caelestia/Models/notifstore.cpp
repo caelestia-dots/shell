@@ -174,8 +174,8 @@ NotifData* NotifStore::add(QObject* backer, bool popup) {
     auto* const notif = new NotifData(backer, this);
     m_notifs.prepend(notif);
     track(notif);
-    m_groups.add(notif);
-    emit groupsChanged();
+    if (m_groups.add(notif))
+        emit groupsChanged();
     markDirty(notif);
 
     emit notifsChanged();
