@@ -22,12 +22,7 @@ Scope {
             "general:allow_tearing": 1
         };
 
-        let config = {};
-        try {
-            const json = JSON.parse(shellJson.text());
-            config = json?.utilities?.gameMode?.options ?? {};
-        } catch (e) {}
-
+        const config = GlobalConfig.utilities.gameMode?.options ?? {};
         const filtered = {};
         for (const key in defaults) {
             if (key in config) {
@@ -58,15 +53,6 @@ Scope {
     }
 
     Component.onCompleted: syncState(false)
-
-    FileView {
-        id: shellJson
-
-        path: Quickshell.env("HOME") + "/.config/caelestia/shell.json"
-        blockLoading: true
-        watchChanges: true
-        onFileChanged: reload()
-    }
 
     Connections {
         function onGameModeChanged(): void {
