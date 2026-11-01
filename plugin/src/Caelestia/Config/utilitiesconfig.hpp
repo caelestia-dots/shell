@@ -20,6 +20,7 @@ class UtilitiesToasts : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, gameModeChanged, true)
     CONFIG_PROPERTY(bool, dndChanged, true)
     CONFIG_PROPERTY(bool, audioOutputChanged, true)
+    CONFIG_PROPERTY(bool, audioInputChanged, true)
     CONFIG_PROPERTY(bool, capsLockChanged, true)
     CONFIG_PROPERTY(bool, numLockChanged, true)
     CONFIG_PROPERTY(bool, kbLayoutChanged, true)
@@ -56,7 +57,7 @@ class UtilitiesCards : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, quickToggles, true)
 };
 
-static const QVariantMap kGameModeDefaultOptions = {
+inline const QVariantMap kGameModeDefaultOptions = {
     {u"animations:enabled"_s, 0},
     {u"decoration:shadow:enabled"_s, 0},
     {u"decoration:blur:enabled"_s, 0},
@@ -64,7 +65,7 @@ static const QVariantMap kGameModeDefaultOptions = {
     {u"general:gaps_out"_s, 0},
     {u"general:border_size"_s, 1},
     {u"decoration:rounding"_s, 0},
-    {u"general:allow_tearing"_s, 1}
+    {u"general:allow_tearing"_s, 1},
 };
 
 class UtilitiesGameMode : public settings::ObjectNode {
