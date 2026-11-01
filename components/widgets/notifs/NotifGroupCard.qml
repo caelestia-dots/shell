@@ -60,6 +60,7 @@ StyledRect {
         NotifAvatar {
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.topMargin: root.expanded && !root.single ? header.implicitHeight + Tokens.spacing.extraSmall + Tokens.padding.extraSmall : 0
+            owner: root.expanded ? root.notifs[0] ?? root.group : root.group
             image: root.expanded ? root.notifs[0]?.image ?? "" : root.group.image
             icon: root.expanded ? root.notifs[0]?.appIcon ?? "" : root.group.icon
             urgency: root.expanded ? root.notifs[0]?.urgency ?? NotifData.Normal : root.group.urgency

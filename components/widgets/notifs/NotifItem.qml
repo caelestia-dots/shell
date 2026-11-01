@@ -72,6 +72,7 @@ StyledRect {
         anchors.leftMargin: -(TokenConfig.sizes.notifs.image + Tokens.spacing.medium)
 
         sourceComponent: NotifAvatar {
+            owner: root.modelData
             image: root.modelData.image
             icon: root.modelData.appIcon
             urgency: root.modelData.urgency

@@ -83,6 +83,9 @@ public:
     [[nodiscard]] QString timeStr() const;
     [[nodiscard]] qint64 createdAt() const;
 
+    [[nodiscard]] Q_INVOKABLE bool isSameImage(const QString& path) const;
+    [[nodiscard]] Q_INVOKABLE bool isSameAppIcon(const QString& path) const;
+
     Q_INVOKABLE void dismiss();
     Q_INVOKABLE void dismissPopup();
 
@@ -125,8 +128,10 @@ private:
     QString m_summary;
     QString m_body;
     QString m_appIcon;
+    QString m_originalAppIcon;
     QString m_appName;
     QString m_image;
+    QString m_originalImage;
     QVariantMap m_hints;
     int m_expireTimeout;
     int m_timeUntilExpire = -1;

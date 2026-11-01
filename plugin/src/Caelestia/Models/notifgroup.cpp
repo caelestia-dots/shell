@@ -35,6 +35,14 @@ QQmlListProperty<NotifData> NotifGroup::notifs() {
         } };
 }
 
+bool NotifGroup::isSameImage(const QString& path) const {
+    return m_imageSource && m_imageSource->isSameImage(path);
+}
+
+bool NotifGroup::isSameAppIcon(const QString& path) const {
+    return m_iconSource && m_iconSource->isSameAppIcon(path);
+}
+
 void NotifGroup::add(NotifData* notif) {
     const auto pos = std::ranges::find_if(m_notifs, [notif](const NotifData* n) {
         return n->createdAt() <= notif->createdAt();
