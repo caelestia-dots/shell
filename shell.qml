@@ -30,13 +30,13 @@ ShellRoot {
     Background {}
     Drawers {}
     AreaPicker {}
-    Lock {
-        id: lock
+    LockProcess {
+        id: lockController
     }
 
     Shortcuts {}
     BatteryMonitor {}
     IdleMonitors {
-        lock: lock
+        lock: lockController
     }
 }

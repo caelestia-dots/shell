@@ -12,7 +12,7 @@ import qs.services
 Scope {
     id: root
 
-    required property Lock lock
+    required property LockProcess lock
     readonly property bool hasPlayer: Players.list.some(p => p.isPlaying)
     readonly property bool isCharging: !UPower.onBattery
     readonly property bool enabled: {
@@ -31,7 +31,7 @@ Scope {
         // "unlock" is intentionally not supported: it would unlock without authentication
         // as soon as the user returns from idle
         if (action === "lock")
-            lock.lock.locked = true;
+            lock.locked = true;
         else if (action === "unlock")
             console.warn("Ignoring idle action \"unlock\": unlocking requires authentication");
         else if (typeof action === "string")
@@ -45,9 +45,9 @@ Scope {
             if (!GlobalConfig.general.idle.lockBeforeSleep)
                 return SessionManager.releaseSleepInhibitor();
 
-            root.lock.lock.locked = true;
+            root.lock.locked = true;
             // Hold off sleep until the compositor confirms the lock (or the inhibitor times out)
-            if (root.lock.lock.secure)
+            if (root.lock.secure)
                 SessionManager.releaseSleepInhibitor();
             else
                 root.releaseSleepWhenSecure = true;
@@ -58,11 +58,11 @@ Scope {
         }
 
         function onLockRequested(): void {
-            root.lock.lock.locked = true;
+            root.lock.locked = true;
         }
 
         function onUnlockRequested(): void {
-            root.lock.lock.unlock();
+            root.lock.unlock();
         }
 
         target: SessionManager
@@ -70,13 +70,13 @@ Scope {
 
     Connections {
         function onSecureChanged(): void {
-            if (root.releaseSleepWhenSecure && root.lock.lock.secure) {
+            if (root.releaseSleepWhenSecure && root.lock.secure) {
                 root.releaseSleepWhenSecure = false;
                 SessionManager.releaseSleepInhibitor();
             }
         }
 
-        target: root.lock.lock
+        target: root.lock
     }
 
     Variants {
