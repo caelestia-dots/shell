@@ -133,9 +133,10 @@ void NotifPopups::regroup(NotifData* notif) {
     if (!m_groups.contains(notif))
         return;
 
-    m_groups.remove(notif);
-    m_groups.add(notif);
-    emit groupsChanged();
+    const auto removed = m_groups.remove(notif);
+    const auto added = m_groups.add(notif);
+    if (removed || added)
+        emit groupsChanged();
 }
 
 } // namespace caelestia::shell::models
