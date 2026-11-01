@@ -37,8 +37,8 @@ signals:
 
 private:
     QString m_appName;
-    QString m_image;
-    QString m_icon;
+    NotifData* m_imageSource = nullptr;
+    NotifData* m_iconSource = nullptr;
     NotifData::Urgency m_urgency = NotifData::Urgency::Normal;
     QList<NotifData*> m_notifs;
 
