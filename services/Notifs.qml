@@ -17,9 +17,9 @@ import qs.utils
 Singleton {
     id: root
 
+    readonly property alias store: store
     readonly property alias list: store.notifs
     readonly property alias groups: store.groups
-    readonly property alias popupGroups: store.popupGroups
 
     function hasFullscreen(): bool {
         for (const monitor of Hypr.monitors.values) {
@@ -30,11 +30,7 @@ Singleton {
     }
 
     function shouldShowPopup(): bool {
-        if (PersistentState.doNotDisturb || ShellState.anySidebarOpen())
-            return false;
-        if (GlobalConfig.notifs.fullscreen === NotifsFullscreen.Off && hasFullscreen())
-            return false;
-        return true;
+        return !PersistentState.doNotDisturb && !ShellState.anySidebarOpen();
     }
 
     Connections {
