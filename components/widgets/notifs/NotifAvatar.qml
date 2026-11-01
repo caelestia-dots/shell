@@ -27,8 +27,8 @@ Item {
     property string shownImage
     property string shownIcon
 
-    readonly property color fillColour: urgency === NotifData.Critical ? Colours.palette.error : urgency === NotifData.Low ? lowFillColour : Colours.palette.secondaryContainer
-    readonly property color iconColour: urgency === NotifData.Critical ? Colours.palette.onError : urgency === NotifData.Low ? Colours.palette.onSurfaceVariant : Colours.palette.onSecondaryContainer
+    readonly property color fillColour: urgency === NotifData.Critical ? Colours.palette.primary : urgency === NotifData.Low ? lowFillColour : Colours.palette.secondaryContainer
+    readonly property color iconColour: urgency === NotifData.Critical ? Colours.palette.onPrimary : urgency === NotifData.Low ? Colours.palette.onSurfaceVariant : Colours.palette.onSecondaryContainer
 
     implicitWidth: TokenConfig.sizes.notifs.image
     implicitHeight: TokenConfig.sizes.notifs.image
@@ -151,15 +151,16 @@ Item {
                 id: progressShape
 
                 property real sweep: root.progress * 360
+                property real spacing: root.urgency === NotifData.Critical ? root.Tokens.spacing.extraSmall : 0
 
                 capStyle: ShapePath.RoundCap
                 fillColor: "transparent"
                 strokeWidth: 2
-                strokeColor: root.urgency === NotifData.Critical ? Colours.palette.onError : Colours.palette.primary
+                strokeColor: Colours.palette.primary
 
                 PathPolyline {
                     function pointAt(angle: real): point {
-                        const dist = bgShape.distanceAtAngle(angle) + progressShape.strokeWidth / 2;
+                        const dist = bgShape.distanceAtAngle(angle) + progressShape.strokeWidth / 2 + progressShape.spacing;
                         const rad = angle * Math.PI / 180;
                         return Qt.point(root.width / 2 + dist * Math.sin(rad), root.height / 2 - dist * Math.cos(rad));
                     }
@@ -178,6 +179,10 @@ Item {
                     Anim {
                         easing: Tokens.anim.emphasizedDecel
                     }
+                }
+
+                Behavior on spacing {
+                    Anim {}
                 }
 
                 Behavior on strokeColor {

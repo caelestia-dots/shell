@@ -18,7 +18,7 @@ Item {
     required property bool expanded
     readonly property alias titleWidth: appName.width
 
-    readonly property color expandBtnTextColour: urgency === NotifData.Critical && !single ? Colours.palette.onError : Colours.palette.onSurfaceVariant
+    readonly property color expandBtnTextColour: urgency === NotifData.Critical && !single ? Colours.palette.onPrimary : Colours.palette.onSurfaceVariant
 
     signal toggle
 
@@ -75,7 +75,7 @@ Item {
         implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
         color: {
-            const c = root.urgency === NotifData.Critical ? Colours.palette.error : root.pillColour;
+            const c = root.urgency === NotifData.Critical ? Colours.palette.primary : root.pillColour;
             return root.single ? Qt.alpha(c, 0) : c;
         }
         radius: Tokens.rounding.full
@@ -117,7 +117,7 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: pill.horizontalPadding / 2 - pill.iconInset
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: root.expanded && !root.single ? -Math.floor(Tokens.padding.extraSmall) / 2 : 0
+            anchors.verticalCenterOffset: root.expanded && !root.single ? -Tokens.padding.extraSmall / 2 : 0
 
             visible: root.expandable
             text: "expand_more"
