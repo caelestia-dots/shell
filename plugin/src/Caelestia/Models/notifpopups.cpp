@@ -75,8 +75,6 @@ void NotifPopups::release(NotifData* notif) {
 void NotifPopups::dismiss(NotifData* notif) {
     if (m_store)
         m_store->closePopup(notif);
-    else
-        close(notif);
 }
 
 void NotifPopups::offer(NotifData* notif) {
