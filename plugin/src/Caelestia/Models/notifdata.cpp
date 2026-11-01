@@ -187,6 +187,14 @@ void NotifData::dismiss() {
         onBackerClosed();
 }
 
+bool NotifData::isSameImage(const QString& path) const {
+    return path == m_image || path == m_originalImage;
+}
+
+bool NotifData::isSameAppIcon(const QString& path) const {
+    return path == m_appIcon || path == m_originalAppIcon;
+}
+
 void NotifData::dismissPopup() {
     if (released() || !m_popup)
         return;
@@ -262,7 +270,8 @@ void NotifData::syncFromBacker() {
         dirty = true;
         emit bodyChanged();
     }
-    if (assign(m_appIcon, normaliseAppIcon(m_backer->property("appIcon").toString()))) {
+    if (assign(m_originalAppIcon, normaliseAppIcon(m_backer->property("appIcon").toString()))) {
+        m_appIcon = m_originalAppIcon;
         dirty = true;
         cacheIcon();
         emit appIconChanged();
@@ -271,7 +280,8 @@ void NotifData::syncFromBacker() {
         dirty = true;
         emit appNameChanged();
     }
-    if (assign(m_image, m_backer->property("image").toString())) {
+    if (assign(m_originalImage, m_backer->property("image").toString())) {
+        m_image = m_originalImage;
         dirty = true;
         cacheImage();
         emit imageChanged();

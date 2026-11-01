@@ -29,6 +29,9 @@ public:
     [[nodiscard]] NotifData::Urgency urgency() const;
     [[nodiscard]] QQmlListProperty<NotifData> notifs();
 
+    [[nodiscard]] Q_INVOKABLE bool isSameImage(const QString& path) const;
+    [[nodiscard]] Q_INVOKABLE bool isSameAppIcon(const QString& path) const;
+
 signals:
     void imageChanged();
     void iconChanged();

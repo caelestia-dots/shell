@@ -16,6 +16,7 @@ import qs.utils
 Item {
     id: root
 
+    required property var owner
     required property string image
     required property string icon
     required property int urgency
@@ -32,11 +33,11 @@ Item {
     implicitHeight: TokenConfig.sizes.notifs.image
 
     onImageChanged: {
-        if (image)
+        if (image && !owner.isSameImage(shownImage))
             shownImage = image;
     }
     onIconChanged: {
-        if (icon)
+        if (icon && !owner.isSameAppIcon(shownIcon))
             shownIcon = icon;
     }
     Component.onCompleted: {
