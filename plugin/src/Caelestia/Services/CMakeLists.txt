@@ -23,6 +23,7 @@ qml_module(caelestia-services
         hyprdevices.cpp
         hyprextras.cpp
         ddc.cpp
+        materialscheme.cpp
     LIBRARIES
         Qt::Concurrent
         Qt::DBus
@@ -34,6 +35,7 @@ qml_module(caelestia-services
         caelestia-util
         caelestia-core
         caelestia-config
+        caelestia-material
     DEPENDENCIES
         Caelestia
         Caelestia.Config

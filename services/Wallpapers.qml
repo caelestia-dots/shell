@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Caelestia.Config
 import Caelestia.Models
+import Caelestia.Services
 import qs.services
 import qs.utils
 
@@ -51,6 +52,31 @@ Searcher {
     function runPreviewColours(): void {
         if (!showPreview)
             return;
+
+        const path = previewPath;
+
+        // Smart schemes need the CLI's analysis of the wallpaper, and GIFs go through its first frame
+        if (GlobalConfig.services.smartScheme || path.toLowerCase().endsWith(".gif")) {
+            runCliPreviewColours();
+            return;
+        }
+
+        // Made in process; the CLI does it if that fails
+        MaterialScheme.previewColours(path, (json, error) => {
+            // The preview may have ended or moved to another wallpaper meanwhile
+            if (!root.showPreview || path !== root.previewPath)
+                return;
+            if (json) {
+                Colours.load(json, true);
+                Colours.showPreview = true;
+            } else {
+                console.warn("Native wallpaper preview failed, using the CLI:", error);
+                runCliPreviewColours();
+            }
+        });
+    }
+
+    function runCliPreviewColours(): void {
         // One at a time; try again once the current one is done (its result is dropped if stale)
         if (getPreviewColoursProc.running) {
             previewColoursDebounce.restart();
