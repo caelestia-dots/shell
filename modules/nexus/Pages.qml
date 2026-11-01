@@ -16,7 +16,11 @@ Item {
         if (currentItem)
             currentItem.destroy();
 
-        const comp = PageCompRegistry.pageComps[idx] ?? PageCompRegistry.placeholderComp;
+        let comp = Qt.createComponent(PageCompRegistry.pageUrls[idx] ?? PageCompRegistry.placeholderUrl);
+        if (comp.status === Component.Error) {
+            console.error(`Failed to load Nexus page ${idx}: ${comp.errorString()}`);
+            comp = Qt.createComponent(PageCompRegistry.placeholderUrl);
+        }
         const incubator = comp.incubateObject(container, {
             nState
         });

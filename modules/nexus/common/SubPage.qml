@@ -1,8 +1,8 @@
 import QtQuick
 
-// Positions of the sub-pages inside each StackPage of PageCompRegistry (0 is the main page).
+// Positions of the sub-pages inside each section of PageCompRegistry (0 is the main page).
 // Pass these to NexusState.openSubPage() instead of bare numbers, and keep them in the same order
-// as PageCompRegistry when adding or moving pages.
+// as the sections in PageCompRegistry when adding or moving pages.
 QtObject {
     enum Index {
         // Wallpaper & style
