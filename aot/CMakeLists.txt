@@ -6,7 +6,7 @@ find_package(Qt6 REQUIRED COMPONENTS Qml Quick ShaderTools)
 qt_standard_project_setup(REQUIRES 6.9)
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml" CACHE STRING "QML output directory" FORCE)
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
 
 set(AOT_QML_DIR "${CMAKE_BINARY_DIR}/aot-qml")
 set(AOT_QML_MODULES "${AOT_QML_DIR}/modules.cmake")

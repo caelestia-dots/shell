@@ -1,6 +1,6 @@
 # AOT QML build
 
-`CAELESTIA_AOT_QML=ON` compiles the shell QML into the `Caelestia.Qml`
+`CAELESTIA_AOT_QML=ON` (Python 3.10+) compiles the shell QML into the `Caelestia.Qml`
 module tree with `qt_add_qml_module`/`qmlcachegen`. The normal source build
 stays the default; this option only changes the build and install output.
 
