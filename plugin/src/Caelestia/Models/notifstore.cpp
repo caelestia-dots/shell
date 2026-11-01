@@ -156,13 +156,7 @@ QQmlListProperty<NotifData> NotifStore::notifs() {
 }
 
 QQmlListProperty<NotifGroup> NotifStore::groups() {
-    return { this, nullptr,
-        [](auto* p) {
-            return static_cast<NotifStore*>(p->object)->m_groups.list().size();
-        },
-        [](auto* p, qsizetype i) {
-            return static_cast<NotifStore*>(p->object)->m_groups.list().at(i);
-        } };
+    return m_groups.qmlList();
 }
 
 NotifData* NotifStore::add(QObject* backer, bool popup) {
