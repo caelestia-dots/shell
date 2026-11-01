@@ -259,12 +259,12 @@ void NotifData::syncFromBacker() {
         dirty = true;
         emit progressChanged();
     }
-    if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000);
-        timeout > 0 && !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
-        dirty = true;
-        m_expireTimeout = timeout;
+    if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000); timeout > 0) {
         m_hasCustomTimeout = true;
-        emit expireTimeoutChanged();
+        if (assign(m_expireTimeout, timeout)) {
+            dirty = true;
+            emit expireTimeoutChanged();
+        }
     }
     if (assign(m_urgency, m_backer->property("urgency").value<Urgency>())) {
         dirty = true;
