@@ -25,7 +25,7 @@ ImageAnalyser::ImageAnalyser(QObject* parent)
     , m_rescaleSize(128)
     , m_dominantColour(0, 0, 0)
     , m_luminance(0) {
-    QObject::connect(m_futureWatcher, &QFutureWatcher<AnalyseResult>::finished, this, [this]() {
+    QObject::connect(m_futureWatcher, &QFutureWatcher<AnalyseResult>::finished, this, [this] {
         if (!m_futureWatcher->future().isResultReadyAt(0)) {
             return;
         }
@@ -148,7 +148,7 @@ void ImageAnalyser::update() {
                 Qt::SingleShotConnection);
             return;
         }
-        QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, this]() {
+        QObject::connect(grabResult.data(), &QQuickItemGrabResult::ready, this, [grabResult, this] {
             m_futureWatcher->setFuture(QtConcurrent::run(&ImageAnalyser::analyse, grabResult->image(), m_rescaleSize));
         });
     } else {
@@ -234,7 +234,7 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
     const quint32 dominantColour = (((dominantBucket >> 10U) & 0x1FU) << 19U) |
                                    (((dominantBucket >> 5U) & 0x1FU) << 11U) | ((dominantBucket & 0x1FU) << 3U);
 
-    promise.addResult(qMakePair(QColor((0xFFu << 24) | dominantColour), count == 0 ? 0.0 : totalLuminance / count));
+    promise.addResult(qMakePair(QColor((0xFFu << 24u) | dominantColour), count == 0 ? 0.0 : totalLuminance / count));
 }
 
 } // namespace caelestia::images

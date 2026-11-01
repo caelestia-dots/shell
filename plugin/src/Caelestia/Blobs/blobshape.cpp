@@ -304,14 +304,14 @@ void BlobShape::computeExcludeMasks(const ShapeList& rectShapes) {
     // The shader uses this to avoid smin between excluded pairs.
     const auto cachedCount = m_cachedRects.size();
     for (qsizetype i = 0; i < cachedCount; ++i) {
-        int mask = 0;
+        quint32 mask = 0;
         const BlobShape* si = rectShapes[i];
         for (qsizetype j = 0; j < cachedCount; ++j) {
             if (j == i)
                 continue;
             const BlobShape* sj = rectShapes[j];
             if (si->isExcluded(sj) || sj->isExcluded(si))
-                mask |= (1 << j);
+                mask |= (1U << static_cast<unsigned>(j));
         }
         m_cachedRects[i].excludeMask = mask;
     }
@@ -334,7 +334,7 @@ void BlobShape::cacheInvertedRect(float pad) {
     memset(m_cachedInvertedOuter, 0, sizeof(m_cachedInvertedOuter));
     memset(m_cachedInvertedInner, 0, sizeof(m_cachedInvertedInner));
 
-    auto* inv = m_group->invertedRect();
+    auto const* inv = m_group->invertedRect();
     if (!inv)
         return;
 
@@ -370,13 +370,13 @@ void BlobShape::cacheInvertedRect(float pad) {
 void BlobShape::accumulateNeighbourFill(qsizetype index, const ShapeList& rectShapes, const float cornerX[4],
     const float cornerY[4], float smoothFactor, float factors[4]) const {
     const auto rectCount = m_cachedRects.size();
-    const int excludeMask = m_cachedRects[index].excludeMask;
+    const quint32 excludeMask = m_cachedRects[index].excludeMask;
     const BlobShape* si = rectShapes[index];
 
     for (qsizetype j = 0; j < rectCount; ++j) {
         if (j == index)
             continue;
-        if (excludeMask & (1 << j))
+        if (excludeMask & (1U << static_cast<unsigned>(j)))
             continue;
 
         const BlobShape* sj = rectShapes[j];

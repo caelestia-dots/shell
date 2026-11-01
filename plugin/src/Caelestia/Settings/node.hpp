@@ -68,7 +68,7 @@ protected:
     [[nodiscard]] virtual QString keyOf(const Node* child) const;
 
     template <typename C, typename T>
-    [[nodiscard]] T fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const;
+    [[nodiscard]] T fallbackValue(T C::* member, const std::type_identity_t<T>& defaultValue) const;
 
 private:
     QSet<QString> m_overrides; // Overridden keys from file/qml writes
@@ -92,7 +92,8 @@ template <typename T> bool Node::rejectInvalidWrite(const QString& key, const T&
     return false; // Only QVariant unions can be given the wrong type
 }
 
-template <typename C, typename T> T Node::fallbackValue(T C::* member, std::type_identity_t<T> defaultValue) const {
+template <typename C, typename T>
+T Node::fallbackValue(T C::* member, const std::type_identity_t<T>& defaultValue) const {
     const auto* fallback = static_cast<const C*>(m_fallbackNode);
     return fallback ? fallback->*member : defaultValue;
 }

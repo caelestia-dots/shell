@@ -351,7 +351,7 @@ int Lyrics::newRequestId() {
 
 void Lyrics::cancelInFlight() {
     for (auto it = m_pendingReplies.begin(); it != m_pendingReplies.end(); ++it) {
-        for (auto& ptr : it.value()) {
+        for (auto const& ptr : it.value()) {
             if (auto* reply = ptr.data()) {
                 reply->abort();
                 reply->deleteLater();
@@ -480,7 +480,7 @@ void Lyrics::tryLocal(int reqId) {
     }
 
     // Walking a whole music library can take a while, so search off the GUI thread
-    QtConcurrent::run([dir, artist = m_artist, title = m_title]() -> std::pair<QString, QVector<LyricLine>> {
+    QtConcurrent::run([dir, artist = m_artist, title = m_title] -> std::pair<QString, QVector<LyricLine>> {
         const QString path = findLocalLrcRecursive(dir, artist, title);
         if (path.isEmpty())
             return {};

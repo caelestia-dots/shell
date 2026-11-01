@@ -1,12 +1,14 @@
 #include "font.hpp"
 
+#include <utility>
+
 #include "appearanceconfig.hpp"
 
 namespace caelestia::config {
 
 namespace {
 
-settings::ObjectNode* style(settings::ObjectNode* cfg, const QString& key) {
+settings::ObjectNode* style(settings::ObjectNode const* cfg, const QString& key) {
     return cfg->value(key).value<settings::ObjectNode*>();
 }
 
@@ -270,7 +272,7 @@ void FontTokens::rebuildClock() {
     QFont f;
     if (m_font)
         f.setFamily(m_font->clock());
-    m_clock = f;
+    m_clock = std::move(f);
     emit clockChanged();
 }
 

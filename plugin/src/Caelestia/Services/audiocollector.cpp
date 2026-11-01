@@ -87,8 +87,9 @@ PipeWireWorker::PipeWireWorker(std::stop_token token, AudioCollector* collector)
     }
 
     const int success = pw_stream_connect(m_stream, PW_DIRECTION_INPUT, PW_ID_ANY,
-        static_cast<pw_stream_flags>(
-            PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_MAP_BUFFERS | PW_STREAM_FLAG_RT_PROCESS),
+        static_cast<pw_stream_flags>(static_cast<unsigned>(PW_STREAM_FLAG_AUTOCONNECT) |
+                                     static_cast<unsigned>(PW_STREAM_FLAG_MAP_BUFFERS) |
+                                     static_cast<unsigned>(PW_STREAM_FLAG_RT_PROCESS)),
         params, 1);
     if (success < 0) {
         qCWarning(lcAcWorker) << "init: failed to connect stream";
@@ -172,11 +173,11 @@ unsigned int PipeWireWorker::nextPowerOf2(unsigned int n) {
     }
 
     n--;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
+    n |= n >> 1u;
+    n |= n >> 2u;
+    n |= n >> 4u;
+    n |= n >> 8u;
+    n |= n >> 16u;
     n++;
 
     return n;

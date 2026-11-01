@@ -30,7 +30,7 @@ private:
         Ne,
         And,
         Or,
-        Cond
+        Cond,
     };
 
     struct Node {

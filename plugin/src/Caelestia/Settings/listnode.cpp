@@ -3,6 +3,8 @@
 #include <qjsonarray.h>
 #include <qjsonobject.h>
 
+#include <numeric>
+
 #include "util/i18n.hpp"
 
 namespace caelestia::settings {
@@ -179,7 +181,7 @@ void ListNode::clear() {
     emit countChanged();
 
     NodeChanges removed(len);
-    std::iota(removed.begin(), removed.end(), 0);
+    std::ranges::iota(removed, 0);
     emit elementsChanged({}, removed, {});
 }
 
@@ -251,8 +253,8 @@ bool ListNode::setValue(const QString& key, const QVariant& value, QList<Diagnos
 
     NodeChanges added(m_elements.count());
     NodeChanges removed(len);
-    std::iota(added.begin(), added.end(), 0);
-    std::iota(removed.begin(), removed.end(), 0);
+    std::ranges::iota(added, 0);
+    std::ranges::iota(removed, 0);
     emit elementsChanged(added, removed, {});
 
     return true;
@@ -277,7 +279,7 @@ QJsonValue ListNode::toJson(bool sparse) const {
     Q_UNUSED(sparse) // Lists can't be sparse
 
     QJsonArray array;
-    for (auto* const element : m_elements)
+    for (auto const* const element : m_elements)
         array << element->toJson(false);
     return array;
 }

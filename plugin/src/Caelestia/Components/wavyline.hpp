@@ -26,7 +26,7 @@ class WavyLine : public QQuickPaintedItem {
 public:
     enum class PathType : quint8 {
         Linear,
-        Arc
+        Arc,
     };
     Q_ENUM(PathType)
 

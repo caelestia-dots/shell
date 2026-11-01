@@ -82,7 +82,7 @@ private:
         None,
         Count,
         List,
-        Model
+        Model,
     };
 
     // Delegate properties in the order they must be applied

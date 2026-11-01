@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <numbers>
 
 namespace caelestia::blobs {
 
@@ -80,7 +81,7 @@ BorderTerms borderTerms(const BlobRectData& r, const float inner[4], const float
     t.xProx = 1.0f - std::min(smoothstepf(0.0f, smoothFactor, distX0), smoothstepf(0.0f, smoothFactor, distX1));
 
     // Sink onset (see blob.frag): half the gap-closing distance of the circular blend
-    const float preOff = smoothFactor * (2.0f - std::sqrt(2.0f)) * 0.5f;
+    const float preOff = smoothFactor * (2.0f - std::numbers::sqrt2_v<float>)*0.5f;
     t.topPen = std::clamp(innerTop - (cy + shy) - preOff, 0.0f, innerTop - outerTop);
     t.botPen = std::clamp((cy - shy) - innerBot - preOff, 0.0f, outerBot - innerBot);
     t.leftPen = std::clamp(innerLeft - (cx + shx) - preOff, 0.0f, innerLeft - outerLeft);

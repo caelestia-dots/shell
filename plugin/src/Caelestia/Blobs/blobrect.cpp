@@ -36,7 +36,7 @@ void BlobRect::updatePolish() {
         } else {
             QMetaObject::invokeMethod(
                 this,
-                [this]() {
+                [this] {
                     if (m_physicsActive && m_group)
                         m_group->markDirty();
                 },
@@ -249,12 +249,12 @@ void BlobRect::excludeAppend(QQmlListProperty<BlobRect>* prop, BlobRect* rect) {
 }
 
 qsizetype BlobRect::excludeCount(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto const* self = static_cast<BlobRect*>(prop->object);
     return self->m_exclude.size();
 }
 
 BlobRect* BlobRect::excludeAt(QQmlListProperty<BlobRect>* prop, qsizetype index) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto const* self = static_cast<BlobRect*>(prop->object);
     return self->m_exclude.at(index);
 }
 
@@ -295,12 +295,12 @@ void BlobRect::excludeCornersAppend(QQmlListProperty<BlobRect>* prop, BlobRect* 
 }
 
 qsizetype BlobRect::excludeCornersCount(QQmlListProperty<BlobRect>* prop) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto const* self = static_cast<BlobRect*>(prop->object);
     return self->m_excludeCorners.size();
 }
 
 BlobRect* BlobRect::excludeCornersAt(QQmlListProperty<BlobRect>* prop, qsizetype index) {
-    auto* self = static_cast<BlobRect*>(prop->object);
+    auto const* self = static_cast<BlobRect*>(prop->object);
     return self->m_excludeCorners.at(index);
 }
 

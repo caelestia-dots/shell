@@ -2,6 +2,8 @@
 
 #include <qloggingcategory.h>
 
+#include <utility>
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcFontBuilder, "caelestia.fontbuilder", QtInfoMsg)
@@ -12,8 +14,8 @@ namespace caelestia::config {
 
 using Qt::StringLiterals::operator""_s;
 
-FontBuilder::FontBuilder(const QFont& font)
-    : m_font(font) {}
+FontBuilder::FontBuilder(QFont font)
+    : m_font(std::move(font)) {}
 
 FontBuilder FontBuilder::family(const QString& family) {
     m_font.setFamily(family);

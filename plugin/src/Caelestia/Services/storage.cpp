@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 namespace caelestia::services {
 
@@ -318,7 +319,7 @@ void Storage::applyDisks(const AccumHash& byDisk) {
 
     const auto listChanged = !sameOrder(m_disks, next);
     const auto* prevPrimary = primaryDisk();
-    m_disks = next;
+    m_disks = std::move(next);
 
     if (listChanged)
         emit disksChanged();

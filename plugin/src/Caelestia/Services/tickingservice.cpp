@@ -13,7 +13,7 @@ TickingService::TickingService(QObject* parent)
         tick();
     });
 
-    auto* dash = caelestia::config::ConfigSingleton::instance()->dashboard();
+    auto const* dash = caelestia::config::ConfigSingleton::instance()->dashboard();
     applyInterval(dash->resourceUpdateInterval());
     QObject::connect(dash, &caelestia::config::DashboardConfig::resourceUpdateIntervalChanged, this, [this, dash] {
         applyInterval(dash->resourceUpdateInterval());

@@ -25,8 +25,6 @@ class VisualiserBars : public QQuickItem {
 public:
     explicit VisualiserBars(QQuickItem* parent = nullptr);
 
-    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
-
     Q_INVOKABLE void advance(qreal dt);
 
     [[nodiscard]] QVector<double> values() const;
@@ -57,6 +55,9 @@ signals:
     void spacingChanged();
     void animationDurationChanged();
     void settledChanged();
+
+protected:
+    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
 
 private:
     // Appends the triangles of one bar (rounded top, flat bottom) to the vertex list
