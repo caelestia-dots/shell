@@ -180,6 +180,11 @@ def write_launcher(source_root: Path, out_root: Path) -> None:
     )
 
 
+def write_lock_launcher(source_root: Path, out_root: Path) -> None:
+    text = (source_root / "lock-shell.qml").read_text()
+    out_root.joinpath("lock-shell.qml").write_text(rewrite_imports(text, Path("lock-shell.qml"), source_root))
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         print("usage: prepare.py <source-root> <output-root>", file=sys.stderr)
@@ -192,8 +197,9 @@ def main() -> int:
     copy_tree(source_root, out_root)
     (out_root / "modules.cmake").write_text(generate_cmake(source_root, out_root))
     write_launcher(source_root, out_root)
+    write_lock_launcher(source_root, out_root)
 
-    for name in ("assets", "lock"):
+    for name in ("assets",):
         link = out_root / name
         if link.is_symlink() or link.is_file():
             link.unlink()

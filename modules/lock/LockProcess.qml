@@ -8,7 +8,7 @@ import qs.components.misc
 Scope {
     id: root
 
-    readonly property string lockPath: Quickshell.shellPath("lock")
+    readonly property string lockPath: Quickshell.shellPath("lock-shell.qml")
     readonly property string statePath: Quickshell.env("XDG_RUNTIME_DIR") + "/caelestia-lock.state"
     readonly property bool secure: locked && process.running && stateText === "locked"
 
