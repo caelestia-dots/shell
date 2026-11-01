@@ -6,6 +6,8 @@ qml_module(caelestia-models
         appdb.cpp
         notifdata.cpp
         notifgroup.cpp
+        notifgroupindex.cpp
+        notifpopups.cpp
         notifstore.cpp
     LIBRARIES
         caelestia-util

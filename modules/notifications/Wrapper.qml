@@ -5,6 +5,7 @@ Item {
     id: root
 
     required property ScreenState screenState
+    required property bool fullscreen
     required property Item sidebarPanel
     property alias osdPanel: content.osdPanel
     property alias sessionPanel: content.sessionPanel
@@ -20,6 +21,7 @@ Item {
 
         anchors.topMargin: -root.anchors.topMargin
         screenState: root.screenState
+        fullscreen: root.fullscreen
     }
 
     Behavior on anchors.topMargin {
