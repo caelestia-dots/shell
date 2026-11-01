@@ -19,11 +19,11 @@ MouseArea {
     signal requestExpand(expand: bool)
 
     hoverEnabled: true
-    cursorShape: hoveringLink ? Qt.PointingHandCursor : pressed ? Qt.ClosedHandCursor : undefined
+    cursorShape: hoveringLink ? Qt.PointingHandCursor : pressedButtons === Qt.LeftButton ? Qt.ClosedHandCursor : undefined
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
     preventStealing: dragExpand
 
-    drag.target: this
+    drag.target: pressedButtons === Qt.LeftButton ? this : null
     drag.axis: Drag.XAxis
 
     onPressed: event => {
@@ -37,7 +37,7 @@ MouseArea {
             dismissed();
     }
     onPositionChanged: event => {
-        if (!pressed)
+        if (pressedButtons !== Qt.LeftButton)
             return;
 
         const now = Date.now();

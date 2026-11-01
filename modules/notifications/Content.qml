@@ -192,7 +192,6 @@ Item {
                 x: wrapper.LazyListView.adding ? implicitWidth : 0
 
                 expanded: wrapper.expanded
-                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
 
                 onRequestExpand: expand => wrapper.expanded = expand
                 onSwiped: wrapper.forEachPopup(n => n.dismissPopup())
