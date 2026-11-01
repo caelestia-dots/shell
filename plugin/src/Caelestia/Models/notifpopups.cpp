@@ -52,13 +52,7 @@ void NotifPopups::setFullscreen(bool fullscreen) {
 }
 
 QQmlListProperty<NotifGroup> NotifPopups::groups() {
-    return { this, nullptr,
-        [](auto* p) {
-            return static_cast<NotifPopups*>(p->object)->m_groups.list().size();
-        },
-        [](auto* p, qsizetype i) {
-            return static_cast<NotifPopups*>(p->object)->m_groups.list().at(i);
-        } };
+    return m_groups.qmlList();
 }
 
 void NotifPopups::hold(NotifData* notif) {
