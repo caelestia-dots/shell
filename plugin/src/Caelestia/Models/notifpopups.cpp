@@ -103,8 +103,8 @@ void NotifPopups::offer(NotifData* notif) {
     if (!cfg->expire())
         return;
 
-    const auto useFullscreenTimeout = m_fullscreen && !notif->m_hasCustomTimeout;
-    timer->start(useFullscreenTimeout ? cfg->fullscreenExpireTimeout() : notif->m_expireTimeout);
+    const auto useFullscreenTimeout = m_fullscreen && !notif->hasCustomTimeout();
+    timer->start(useFullscreenTimeout ? cfg->fullscreenExpireTimeout() : notif->expireTimeout());
 }
 
 void NotifPopups::close(NotifData* notif) {
