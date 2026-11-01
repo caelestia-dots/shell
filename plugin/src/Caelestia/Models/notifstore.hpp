@@ -1,6 +1,5 @@
 #pragma once
 
-#include <qhash.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
@@ -11,8 +10,11 @@
 
 #include "notifdata.hpp"
 #include "notifgroup.hpp"
+#include "notifgroupindex.hpp"
 
 namespace caelestia::shell::models {
+
+class NotifPopups;
 
 class NotifStore : public QObject {
     Q_OBJECT
@@ -20,8 +22,6 @@ class NotifStore : public QObject {
 
     Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifData> notifs READ notifs NOTIFY notifsChanged)
     Q_PROPERTY(QQmlListProperty<caelestia::shell::models::NotifGroup> groups READ groups NOTIFY groupsChanged)
-    Q_PROPERTY(
-        QQmlListProperty<caelestia::shell::models::NotifGroup> popupGroups READ popupGroups NOTIFY popupGroupsChanged)
 
 public:
     explicit NotifStore(QObject* parent = nullptr);
@@ -29,35 +29,27 @@ public:
 
     [[nodiscard]] QQmlListProperty<NotifData> notifs();
     [[nodiscard]] QQmlListProperty<NotifGroup> groups();
-    [[nodiscard]] QQmlListProperty<NotifGroup> popupGroups();
 
     Q_INVOKABLE caelestia::shell::models::NotifData* add(QObject* backer, bool popup = true);
     Q_INVOKABLE void clear();
+    Q_INVOKABLE void closePopups();
 
 signals:
     void notifsChanged();
     void groupsChanged();
-    void popupGroupsChanged();
 
 private:
     QString m_connectionName;
 
-    struct GroupIndex {
-        QList<NotifGroup*> list;
-        QHash<QString, NotifGroup*> byName;
-    };
-
     QList<NotifData*> m_notifs;
-    GroupIndex m_groups;
-    GroupIndex m_popupGroups;
+    NotifGroupIndex m_groups;
+    QList<NotifPopups*> m_popups;
     QSet<NotifData*> m_dirty;
     QTimer m_flushTimer;
     QTimer m_timeStrTimer;
 
     void track(NotifData* notif);
-    void addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
-    static bool removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif);
-    static bool repositionGroup(GroupIndex& index, NotifGroup* group, bool tiesFirst);
+    void closePopup(NotifData* notif);
     void regroup(NotifData* notif);
     void markDirty(NotifData* notif);
     void flush();
@@ -67,6 +59,8 @@ private:
     void evict(qsizetype limit, const std::function<bool(const NotifData*)>& inScope);
     void loadNotifs();
     void refreshTimeStrs();
+
+    friend class NotifPopups;
 };
 
 } // namespace caelestia::shell::models
