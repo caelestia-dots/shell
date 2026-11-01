@@ -77,6 +77,7 @@ public:
     [[nodiscard]] QVariantMap hints() const;
     [[nodiscard]] int progress() const;
     [[nodiscard]] int expireTimeout() const;
+    [[nodiscard]] bool hasCustomTimeout() const;
     [[nodiscard]] Urgency urgency() const;
     [[nodiscard]] bool resident() const;
     [[nodiscard]] bool hasActionIcons() const;
@@ -145,7 +146,6 @@ private:
     void storeImage(QString& target, const QString& key, utils::Cache::Producer producer);
 
     friend class NotifStore;
-    friend class NotifPopups;
 };
 
 } // namespace caelestia::shell::models

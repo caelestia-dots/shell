@@ -151,6 +151,10 @@ int NotifData::expireTimeout() const {
     return m_expireTimeout;
 }
 
+bool NotifData::hasCustomTimeout() const {
+    return m_hasCustomTimeout;
+}
+
 NotifData::Urgency NotifData::urgency() const {
     return m_urgency;
 }
