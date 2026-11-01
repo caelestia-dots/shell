@@ -61,14 +61,9 @@ class UtilitiesGameMode : public settings::ObjectNode {
     CONFIG_NODE(UtilitiesGameMode, settings::ObjectNode)
 
     CONFIG_PROPERTY(QVariantMap, options, vmap({
-        {u"animations:enabled"_s, 0},
-        {u"decoration:shadow:enabled"_s, 0},
-        {u"decoration:blur:enabled"_s, 0},
-        {u"general:gaps_in"_s, 0},
-        {u"general:gaps_out"_s, 0},
-        {u"general:border_size"_s, 1},
-        {u"decoration:rounding"_s, 0},
-        {u"general:allow_tearing"_s, 1},
+        {u"animations:enabled"_s, 0}, {u"decoration:shadow:enabled"_s, 0}, {u"decoration:blur:enabled"_s, 0},
+        {u"general:gaps_in"_s, 0}, {u"general:gaps_out"_s, 0}, {u"general:border_size"_s, 1},
+        {u"decoration:rounding"_s, 0}, {u"general:allow_tearing"_s, 1},
     }))
 };
 
