@@ -149,6 +149,10 @@ QVariantMap NotifData::hints() const {
     return m_hints;
 }
 
+int NotifData::progress() const {
+    return m_progress;
+}
+
 int NotifData::expireTimeout() const {
     return m_expireTimeout;
 }
@@ -288,6 +292,10 @@ void NotifData::syncFromBacker() {
     }
     if (assign(m_hints, m_backer->property("hints").toMap()))
         emit hintsChanged();
+    if (const auto value = m_hints.value(u"value"_s); assign(m_progress, value.isValid() ? value.toInt() : -1)) {
+        dirty = true;
+        emit progressChanged();
+    }
     if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000);
         timeout > 0 && !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
         dirty = true;

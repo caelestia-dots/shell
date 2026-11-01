@@ -29,6 +29,7 @@ namespace {
 
 constexpr qsizetype k_maxPerGroup = 30;
 constexpr qsizetype k_maxTotal = 300;
+constexpr int k_schemaVersion = 1;
 
 constexpr QStringView k_createTable = uR"(
     CREATE TABLE IF NOT EXISTS notifications (
@@ -43,17 +44,18 @@ constexpr QStringView k_createTable = uR"(
         urgency          INTEGER NOT NULL,
         resident         INTEGER NOT NULL DEFAULT 0,
         has_action_icons INTEGER NOT NULL DEFAULT 0,
-        actions          TEXT    NOT NULL DEFAULT '[]'
+        actions          TEXT    NOT NULL DEFAULT '[]',
+        progress         INTEGER NOT NULL DEFAULT -1
     )
 )";
 
 constexpr QStringView k_upsert = uR"(
     INSERT INTO notifications (
         id, time, summary, body, app_icon, app_name, image,
-        expire_timeout, urgency, resident, has_action_icons, actions
+        expire_timeout, urgency, resident, has_action_icons, actions, progress
     ) VALUES (
         :id, :time, :summary, :body, :app_icon, :app_name, :image,
-        :expire_timeout, :urgency, :resident, :has_action_icons, :actions
+        :expire_timeout, :urgency, :resident, :has_action_icons, :actions, :progress
     )
     ON CONFLICT (id) DO UPDATE SET
         summary          = excluded.summary,
@@ -65,12 +67,13 @@ constexpr QStringView k_upsert = uR"(
         urgency          = excluded.urgency,
         resident         = excluded.resident,
         has_action_icons = excluded.has_action_icons,
-        actions          = excluded.actions
+        actions          = excluded.actions,
+        progress         = excluded.progress
 )";
 
 constexpr QStringView k_selectAll = uR"(
     SELECT id, time, summary, body, app_icon, app_name, image,
-           expire_timeout, urgency, resident, has_action_icons, actions
+           expire_timeout, urgency, resident, has_action_icons, actions, progress
     FROM notifications
     ORDER BY time ASC
 )";
@@ -123,6 +126,10 @@ NotifStore::NotifStore(QObject* parent)
     QSqlQuery query(db);
     query.exec(u"PRAGMA journal_mode = WAL"_s);
     query.exec(u"PRAGMA synchronous = NORMAL"_s);
+    if (query.exec(u"PRAGMA user_version"_s) && query.next() && query.value(0).toInt() != k_schemaVersion) {
+        query.exec(u"DROP TABLE IF EXISTS notifications"_s);
+        query.exec(u"PRAGMA user_version = %1"_s.arg(k_schemaVersion));
+    }
     if (!query.exec(k_createTable.toString()))
         qCWarning(lcNotifStore) << "Failed to create table" << query.lastError().text();
 
@@ -359,6 +366,7 @@ void NotifStore::save(const NotifData* notif) {
     query.bindValue(u":resident"_s, notif->m_resident);
     query.bindValue(u":has_action_icons"_s, notif->m_hasActionIcons);
     query.bindValue(u":actions"_s, serialiseActions(notif->m_actions));
+    query.bindValue(u":progress"_s, notif->m_progress);
 
     if (!query.exec())
         qCWarning(lcNotifStore) << "Failed to save" << notif->m_id << query.lastError().text();
@@ -405,6 +413,7 @@ void NotifStore::loadNotifs() {
         notif->m_resident = query.value(9).toBool();
         notif->m_hasActionIcons = query.value(10).toBool();
         notif->m_actions = deserialiseActions(notif, query.value(11).toString());
+        notif->m_progress = query.value(12).toInt();
         m_notifs.prepend(notif);
         track(notif);
         addToGroup(m_groups, notif->m_group, notif);

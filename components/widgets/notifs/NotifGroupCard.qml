@@ -66,7 +66,7 @@ StyledRect {
             urgency: root.expanded ? root.notifs[0]?.urgency ?? NotifData.Normal : root.group.urgency
             lowFillColour: root.surface(2, 2)
             summary: root.notifs[0]?.summary ?? ""
-            progress: (root.notifs[0]?.hints.value ?? 0) / 100
+            progress: (root.notifs[0]?.progress ?? -1) / 100
 
             Behavior on Layout.topMargin {
                 Anim {}
