@@ -212,7 +212,6 @@ Item {
                     group: wrapper.modelData
                     container: view
                     expanded: wrapper.expanded
-                    color: card.group.urgency === NotifData.Critical ? Colours.palette.secondaryContainer : Colours.tPalette.surfaceContainer
                     onRequestExpand: expand => wrapper.expanded = expand
                     onSwiped: notif => notif.dismissPopup()
                     onLinkActivated: notif => notif.dismissPopup()
