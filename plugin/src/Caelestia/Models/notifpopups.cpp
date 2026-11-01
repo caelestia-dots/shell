@@ -97,8 +97,8 @@ void NotifPopups::offer(NotifData* notif) {
     });
     m_popups.insert(notif, { timer });
 
-    m_groups.add(notif);
-    emit groupsChanged();
+    if (m_groups.add(notif))
+        emit groupsChanged();
 
     if (!cfg->expire())
         return;
