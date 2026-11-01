@@ -72,7 +72,7 @@ void NotifPopups::hold(NotifData* notif) {
 
 void NotifPopups::release(NotifData* notif) {
     const auto it = m_popups.find(notif);
-    if (it == m_popups.end() || it->timer->isActive() || it->remaining <= 0)
+    if (it == m_popups.end() || it->timer->isActive() || it->remaining < 0)
         return;
 
     it->timer->start(it->remaining);
