@@ -124,7 +124,7 @@ void ImageCacher::runJob(const QString& sourcePath, const QString& cachePath, co
         return;
     }
 
-    Qt::AspectRatioMode scaleMode;
+    Qt::AspectRatioMode scaleMode = Qt::IgnoreAspectRatio;
     switch (fillMode) {
     case FillMode::Crop:
         scaleMode = Qt::KeepAspectRatioByExpanding;
