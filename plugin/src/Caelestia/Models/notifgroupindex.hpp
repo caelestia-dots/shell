@@ -3,6 +3,7 @@
 #include <qhash.h>
 #include <qlist.h>
 #include <qobject.h>
+#include <qqmllist.h>
 
 #include "notifdata.hpp"
 #include "notifgroup.hpp"
@@ -14,6 +15,7 @@ public:
     explicit NotifGroupIndex(QObject* owner);
 
     [[nodiscard]] const QList<NotifGroup*>& list() const;
+    [[nodiscard]] QQmlListProperty<NotifGroup> qmlList();
     [[nodiscard]] bool contains(const NotifData* notif) const;
 
     // Both return whether the group list itself changed

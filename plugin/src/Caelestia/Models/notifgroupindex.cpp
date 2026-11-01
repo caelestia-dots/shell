@@ -9,6 +9,16 @@ const QList<NotifGroup*>& NotifGroupIndex::list() const {
     return m_list;
 }
 
+QQmlListProperty<NotifGroup> NotifGroupIndex::qmlList() {
+    return { m_owner, &m_list,
+        [](auto* p) {
+            return static_cast<const QList<NotifGroup*>*>(p->data)->size();
+        },
+        [](auto* p, qsizetype i) {
+            return static_cast<const QList<NotifGroup*>*>(p->data)->at(i);
+        } };
+}
+
 bool NotifGroupIndex::contains(const NotifData* notif) const {
     return m_byNotif.contains(notif);
 }
