@@ -7,6 +7,7 @@
 #include <qdbuspendingreply.h>
 #include <qdbusreply.h>
 #include <qloggingcategory.h>
+#include <qprocess.h>
 
 #include "core/toaster.hpp"
 #include "util/i18n.hpp"
@@ -104,6 +105,16 @@ bool SessionManager::exec(const QStringList& command) {
 }
 
 void SessionManager::logout() {
+    // Under uwsm the compositor runs as a systemd unit that uwsm stops itself. Terminating the logind
+    // session kills the processes under those units without stopping them, and the screen can be left
+    // black instead of showing the login screen. So ask uwsm to stop the session when it's the one
+    // running, and only fall back to logind otherwise.
+    if (QProcess::execute(u"uwsm"_s, { u"check"_s, u"is-active"_s }) == 0) {
+        if (QProcess::startDetached(u"uwsm"_s, { u"stop"_s }))
+            return;
+        qCWarning(lcSessionManager) << "Failed to run uwsm stop, terminating the session instead";
+    }
+
     callSession(u"Terminate"_s);
 }
 
