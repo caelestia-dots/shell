@@ -36,6 +36,24 @@ constexpr int k_sleepInhibitorTimeoutMs = 2000;
 
 } // namespace
 
+namespace {
+
+// `loginctl terminate-user <name>` or `loginctl terminate-session <id>` for the user or session the
+// shell is running in (an empty target counts as ours, as `terminate-user ''` always has)
+bool isOwnSessionTermination(const QStringList& command) {
+    if (command.size() != 3 || command.first() != u"loginctl"_s)
+        return false;
+
+    const QString& target = command.at(2);
+    if (command.at(1) == u"terminate-user"_s)
+        return target.isEmpty() || target == qEnvironmentVariable("USER");
+    if (command.at(1) == u"terminate-session"_s)
+        return target.isEmpty() || target == qEnvironmentVariable("XDG_SESSION_ID");
+    return false;
+}
+
+} // namespace
+
 SessionManager::SessionManager(QObject* parent)
     : QObject(parent) {
     m_sleepInhibitorTimeout.setSingleShot(true);
@@ -89,8 +107,10 @@ bool SessionManager::exec(const QStringList& command) {
     // Alias systemctl and loginctl to raw dbus calls (only match exact command)
     if ((cmd == u"systemctl"_s || cmd == u"loginctl"_s) && command.size() == 2)
         cmd = command.at(1);
-    if (cmd == u"loginctl"_s && command.size() == 3 && command.at(1) == u"terminate-user"_s && command.at(2).isEmpty())
-        cmd = u"logout"_s; // Manual alias `loginctl terminate-user ''` -> logout
+    // Terminating the shell's own user or session is a logout, so it goes through logout() and ends the
+    // session through uwsm. Calling loginctl directly would kill the session leader as well.
+    if (isOwnSessionTermination(command))
+        cmd = u"logout"_s;
 
     // Normalise command
     cmd = cmd.remove(u'-').remove(u'_').toLower();
