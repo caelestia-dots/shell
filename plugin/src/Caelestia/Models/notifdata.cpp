@@ -11,6 +11,8 @@
 #include <qquickimageprovider.h>
 #include <quuid.h>
 
+#include <caelestia/utils/process.hpp>
+
 #include "config/rootnodes.hpp"
 #include "util/i18n.hpp"
 
@@ -90,6 +92,14 @@ QString NotifAction::text() const {
 }
 
 void NotifAction::invoke() {
+    if (m_parent) {
+        const auto argv = m_parent->hints().value(u"x-caelestia-action-"_s + m_identifier).toStringList();
+        if (!argv.isEmpty()) {
+            utils::execDetached(argv.first(), argv.mid(1));
+            return;
+        }
+    }
+
     if (m_backer)
         QMetaObject::invokeMethod(m_backer, "invoke");
     else if (m_parent)
