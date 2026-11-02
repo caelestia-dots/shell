@@ -21,6 +21,13 @@ Item {
 
     readonly property real arcCoverGap: Tokens.spacing.extraSmall
 
+    readonly property real baseHeight: cover.y + cover.height
+    + title.height + album.height + artist.height + controls.height
+    + Tokens.spacing.medium * 2 + Tokens.spacing.small * 2
+    + Tokens.padding.large
+
+readonly property real extraGap: bongocat.visible ? 0 : Math.max(0, (height - baseHeight - 10) / 4)
+
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     implicitWidth: Tokens.sizes.dashboard.mediaWidth
@@ -76,7 +83,7 @@ Item {
 
         anchors.top: cover.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Tokens.spacing.medium
+        anchors.topMargin: Tokens.spacing.medium + root.extraGap
 
         animate: true
         horizontalAlignment: Text.AlignHCenter
@@ -93,7 +100,7 @@ Item {
 
         anchors.top: title.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Tokens.spacing.small
+        anchors.topMargin: Tokens.spacing.small + root.extraGap
 
         animate: true
         horizontalAlignment: Text.AlignHCenter
@@ -110,7 +117,7 @@ Item {
 
         anchors.top: album.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: Tokens.spacing.small
+        anchors.topMargin: Tokens.spacing.small + root.extraGap
 
         animate: true
         horizontalAlignment: Text.AlignHCenter
@@ -127,7 +134,8 @@ Item {
         anchors.top: artist.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: Tokens.spacing.medium
+        anchors.topMargin: Tokens.spacing.medium + root.extraGap
+
         anchors.margins: Tokens.padding.large
 
         spacing: Tokens.spacing.extraSmall
@@ -177,5 +185,6 @@ Item {
         source: Paths.absolutePath(Config.paths.mediaGif)
         asynchronous: true
         fillMode: AnimatedImage.PreserveAspectFit
+        visible: Config.dashboard.catAnimation
     }
 }

@@ -31,29 +31,37 @@ Item {
     implicitWidth: 128
     implicitHeight: 90.38
 
-    Item {
-        id: logo
+    Item{
+        id: fit
 
-        readonly property real designWidth: 128
-        readonly property real designHeight: 90.38
+        anchors.centerIn: parent
+        width: 128
+        height: 90.38
+        scale: Math.min(root.width / width, root.height / height)
 
-        property color topColour: Colours.palette.m3primary
-        property color bottomColour: Colours.palette.m3onSurface
+        Item {
+            id: logo
 
-        implicitWidth: designWidth
-        implicitHeight: designHeight
+            readonly property real designWidth: 128
+            readonly property real designHeight: 90.38
 
-        transformOrigin: Item.Center
-        scale: root.skipIntroAnimation ? 1.0 : 0.0
-        opacity: root.skipIntroAnimation ? 1.0 : 0.0
-        rotation: 0.0
+            property color topColour: Colours.palette.m3primary
+            property color bottomColour: Colours.palette.m3onSurface
 
-        layer.enabled: root.blurAmount > 0
-        layer.effect: MultiEffect {
-            blurEnabled: true
-            blur: root.blurAmount
-            blurMax: 60
-        }
+            implicitWidth: designWidth
+            implicitHeight: designHeight
+
+            transformOrigin: Item.Center
+            scale: root.skipIntroAnimation ? 1.0 : 0.0
+            opacity: root.skipIntroAnimation ? 1.0 : 0.0
+            rotation: 0.0
+
+            layer.enabled: root.blurAmount > 0
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blur: root.blurAmount
+                blurMax: 60
+            }
 
         Component.onCompleted: {
             root.star1.opacity = Qt.binding(() => root.star1Opacity);
@@ -159,7 +167,7 @@ Item {
             }
         }
     }
-
+}
     SequentialAnimation {
         running: !root.skipIntroAnimation
         onFinished: root.animationCompleted()
