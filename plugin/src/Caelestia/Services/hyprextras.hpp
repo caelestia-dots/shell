@@ -17,7 +17,6 @@ class HyprExtras : public QObject {
 
     Q_PROPERTY(QVariantHash options READ options NOTIFY optionsChanged)
     Q_PROPERTY(caelestia::shell::services::hypr::HyprDevices* devices READ devices CONSTANT)
-    Q_PROPERTY(bool usingLua MEMBER m_usingLua NOTIFY usingLuaChanged)
 
 public:
     explicit HyprExtras(QObject* parent = nullptr);
@@ -34,7 +33,6 @@ public:
 
 signals:
     void optionsChanged();
-    void usingLuaChanged();
 
 private:
     using SocketPtr = QSharedPointer<QLocalSocket>;
@@ -43,7 +41,6 @@ private:
     QString m_eventSocket;
     QLocalSocket* m_socket;
     bool m_socketValid;
-    bool m_usingLua = false;
 
     QVariantHash m_options;
     HyprDevices* const m_devices;
