@@ -2,7 +2,7 @@
 
 #include <qstandardpaths.h>
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -16,4 +16,4 @@ QString monitorConfigDir() {
     return configDir() + u"/monitors"_s;
 }
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

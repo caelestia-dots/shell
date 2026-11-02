@@ -2,7 +2,7 @@
 
 #include <qstandardpaths.h>
 
-namespace caelestia::state {
+namespace caelestia::shell::state {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -24,4 +24,4 @@ QString monitorRuntimeDir() {
     return runtimeDir() + u"/monitors"_s;
 }
 
-} // namespace caelestia::state
+} // namespace caelestia::shell::state

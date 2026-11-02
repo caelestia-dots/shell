@@ -4,7 +4,7 @@
 #include <qpainterpath.h>
 #include <qpen.h>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 SparklineItem::SparklineItem(QQuickItem* parent)
     : QQuickPaintedItem(parent) {
@@ -212,4 +212,4 @@ void SparklineItem::setLineWidth(qreal width) {
     update();
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

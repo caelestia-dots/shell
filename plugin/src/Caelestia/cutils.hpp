@@ -6,7 +6,7 @@
 #include <qquickitem.h>
 #include <qvariant.h>
 
-namespace caelestia {
+namespace caelestia::shell {
 
 class CUtils : public QObject {
     Q_OBJECT
@@ -41,4 +41,4 @@ public:
     [[nodiscard]] static QString qtVersion();
 };
 
-} // namespace caelestia
+} // namespace caelestia::shell

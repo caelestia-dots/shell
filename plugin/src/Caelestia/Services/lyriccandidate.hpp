@@ -5,7 +5,7 @@
 
 #include "config/enums.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using LyricsBackend = config::LyricsBackend::Enum;
 
@@ -13,7 +13,7 @@ class LyricCandidate {
     Q_GADGET
     QML_VALUE_TYPE(lyricCandidate)
 
-    Q_PROPERTY(caelestia::config::LyricsBackend::Enum backend READ backend)
+    Q_PROPERTY(caelestia::shell::config::LyricsBackend::Enum backend READ backend)
     Q_PROPERTY(QString id READ id)
     Q_PROPERTY(QString title READ title)
     Q_PROPERTY(QString artist READ artist)
@@ -45,4 +45,4 @@ private:
     qreal m_duration = 0.0;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

@@ -4,7 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class AnimCurves;
 class AnimDurations;
@@ -28,7 +28,7 @@ class AnimTokens : public QObject {
     Q_PROPERTY(QEasingCurve expressiveDefaultEffects READ expressiveDefaultEffects NOTIFY curvesChanged)
     Q_PROPERTY(QEasingCurve expressiveSlowEffects READ expressiveSlowEffects NOTIFY curvesChanged)
 
-    Q_PROPERTY(caelestia::config::AnimDurations* durations READ durations NOTIFY durationsChanged)
+    Q_PROPERTY(caelestia::shell::config::AnimDurations* durations READ durations NOTIFY durationsChanged)
 
 public:
     static AnimTokens* instance();
@@ -76,4 +76,4 @@ private:
     QEasingCurve m_expressiveSlowEffects;
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

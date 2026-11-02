@@ -1,6 +1,6 @@
 #include "diskinfo.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 namespace {
 
@@ -64,4 +64,4 @@ void DiskInfo::update(quint64 usedBytes, quint64 totalBytes, bool hasRoot) {
     }
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

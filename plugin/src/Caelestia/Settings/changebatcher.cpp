@@ -1,6 +1,6 @@
 #include "changebatcher.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 ChangeBatcher::ChangeBatcher(QObject* parent)
     : QObject(parent)
@@ -22,4 +22,4 @@ void ChangeBatcher::flush() {
     emit dirtied();
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

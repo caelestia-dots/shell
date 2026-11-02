@@ -13,7 +13,7 @@ Q_LOGGING_CATEGORY(lcImageAnalyser, "caelestia.imageanalyser", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::images {
+namespace caelestia::shell::images {
 
 ImageAnalyser::ImageAnalyser(QObject* parent)
     : QObject(parent)
@@ -231,4 +231,4 @@ void ImageAnalyser::analyse(QPromise<AnalyseResult>& promise, const QImage& imag
     promise.addResult(qMakePair(QColor((0xFFu << 24u) | dominantColour), count == 0 ? 0.0 : totalLuminance / count));
 }
 
-} // namespace caelestia::images
+} // namespace caelestia::shell::images

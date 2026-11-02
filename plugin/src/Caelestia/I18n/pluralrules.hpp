@@ -3,7 +3,7 @@
 #include <qbytearrayview.h>
 #include <qlist.h>
 
-namespace caelestia::i18n {
+namespace caelestia::shell::i18n {
 
 // A gettext `Plural-Forms` rule, compiled from a catalog header
 class PluralRules {
@@ -71,4 +71,4 @@ private:
     qsizetype parsePrimary();
 };
 
-} // namespace caelestia::i18n
+} // namespace caelestia::shell::i18n

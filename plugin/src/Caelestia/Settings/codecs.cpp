@@ -9,7 +9,7 @@
 #include "util/i18n.hpp"
 #include "util/metaenum.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
@@ -375,4 +375,4 @@ DecodeResult UnionCodec::decode(const QJsonValue& value) const {
 template class ListCodec<QStringList>;
 template class ListCodec<QList<qreal>>;
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

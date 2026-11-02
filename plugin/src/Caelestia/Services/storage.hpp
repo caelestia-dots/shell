@@ -12,7 +12,7 @@
 #include "diskinfo.hpp"
 #include "tickingservice.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class Storage : public TickingService {
     Q_OBJECT
@@ -20,10 +20,10 @@ class Storage : public TickingService {
     QML_SINGLETON
 
     Q_PROPERTY(qreal percentage READ percentage NOTIFY percentageChanged)
-    Q_PROPERTY(QQmlListProperty<caelestia::services::DiskInfo> disks READ disksProp NOTIFY disksChanged)
-    Q_PROPERTY(caelestia::services::DiskInfo* manualPrimaryDisk READ manualPrimaryDisk WRITE setManualPrimaryDisk NOTIFY
-            manualPrimaryDiskChanged)
-    Q_PROPERTY(caelestia::services::DiskInfo* primaryDisk READ primaryDisk NOTIFY primaryDiskChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::shell::services::DiskInfo> disks READ disksProp NOTIFY disksChanged)
+    Q_PROPERTY(caelestia::shell::services::DiskInfo* manualPrimaryDisk READ manualPrimaryDisk WRITE setManualPrimaryDisk
+            NOTIFY manualPrimaryDiskChanged)
+    Q_PROPERTY(caelestia::shell::services::DiskInfo* primaryDisk READ primaryDisk NOTIFY primaryDiskChanged)
 
 public:
     explicit Storage(QObject* parent = nullptr);
@@ -79,4 +79,4 @@ private:
     QFutureWatcher<AccumHash>* const m_futureWatcher;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

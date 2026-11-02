@@ -4,6 +4,10 @@ import Caelestia
 import Caelestia.I18n
 
 TranslatorInternal {
+    function formatDateTime(date: date, fmt: var): string {
+        return date.toLocaleString(locale, fmt);
+    }
+
     function tr(text: string): string {
         CUtils.dependency(__trsChanged);
         return _tr(text, "", false);

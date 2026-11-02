@@ -9,7 +9,7 @@
 
 #include <optional>
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class SessionManager : public QObject {
     Q_OBJECT
@@ -49,4 +49,4 @@ private:
     QString m_sessionPath;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services
