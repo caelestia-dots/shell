@@ -89,6 +89,7 @@ public:
     [[nodiscard]] Q_INVOKABLE bool isSameAppIcon(const QString& path) const;
 
     Q_INVOKABLE void dismiss();
+    Q_INVOKABLE void invokeDefaultAction();
 
 signals:
     void idChanged();
