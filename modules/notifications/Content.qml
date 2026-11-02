@@ -206,12 +206,8 @@ Item {
                 onSwiped: wrapper.forEachPopup(n => popups.dismiss(n))
                 onDismissed: wrapper.forEachPopup(n => n.dismiss())
                 onClicked: event => {
-                    if (!GlobalConfig.notifs.actionOnClick || event.button !== Qt.LeftButton || card.notifs.length !== 1)
-                        return;
-
-                    const actions = card.notifs[0].actions;
-                    if (actions.length === 1)
-                        actions[0].invoke();
+                    if (GlobalConfig.notifs.actionOnClick && event.button === Qt.LeftButton && !dragged && card.single)
+                        card.notifs[0].invokeDefaultAction();
                 }
 
                 NotifGroupCard {
