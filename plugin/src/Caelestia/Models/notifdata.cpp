@@ -13,6 +13,8 @@
 
 #include <caelestia/utils/process.hpp>
 
+#include <algorithm>
+
 #include "config/rootnodes.hpp"
 #include "util/i18n.hpp"
 
@@ -197,6 +199,15 @@ void NotifData::dismiss() {
         QMetaObject::invokeMethod(m_backer, "dismiss");
     else
         onBackerClosed();
+}
+
+void NotifData::invokeDefaultAction() {
+    if (m_actions.isEmpty())
+        return;
+
+    const auto it = std::ranges::find(m_actions, u"default"_s, &NotifAction::identifier);
+    auto action = it == m_actions.end() ? m_actions.first() : *it;
+    action.invoke();
 }
 
 bool NotifData::isSameImage(const QString& path) const {

@@ -9,7 +9,8 @@ MouseArea {
     property bool expandable: true
     property bool dragExpand: expandable
     property bool hoveringLink
-    property int startY
+    property bool dragged
+    property point pressPos
     property real lastX
     property real lastMoveTime
     property real velocity
@@ -27,7 +28,8 @@ MouseArea {
     drag.axis: Drag.XAxis
 
     onPressed: event => {
-        startY = event.y;
+        dragged = false;
+        pressPos = Qt.point(event.x, event.y);
         lastX = x;
         lastMoveTime = Date.now();
         velocity = 0;
@@ -40,6 +42,9 @@ MouseArea {
         if (pressedButtons !== Qt.LeftButton)
             return;
 
+        if (Math.abs(event.x - pressPos.x) > drag.threshold || Math.abs(event.y - pressPos.y) > drag.threshold)
+            dragged = true;
+
         const now = Date.now();
         const dt = now - lastMoveTime;
         if (dt > 0) {
@@ -49,7 +54,7 @@ MouseArea {
         }
 
         if (dragExpand) {
-            const diffY = event.y - startY;
+            const diffY = event.y - pressPos.y;
             if (Math.abs(diffY) > Config.notifs.expandThreshold)
                 requestExpand(diffY > 0);
         }
