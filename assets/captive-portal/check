@@ -1,0 +1,217 @@
+#!/usr/bin/env bash
+set -u
+
+dev="$(
+    nmcli -t -f DEVICE,TYPE,STATE device status 2>/dev/null |
+        awk -F: '$2=="wifi" && $3=="connected" {print $1; exit}'
+)"
+
+curl_ip_family=()
+if ! ip -o -4 addr show dev "$dev" 2>/dev/null | grep -q ' inet '; then
+    if ip -o -6 addr show dev "$dev" 2>/dev/null | grep -q ' inet6 '; then
+        curl_ip_family=(-6)
+    fi
+fi
+
+if [[ -z "$dev" ]]; then
+    printf 'none\t\n'
+    exit 0
+fi
+
+connection="$(nmcli -g GENERAL.CONNECTION device show "$dev" 2>/dev/null | head -n1)"
+if [[ -z "$connection" || "$connection" == "--" ]]; then
+    printf 'none\t\n'
+    exit 0
+fi
+
+still_connected() {
+    [[ "$(nmcli -g GENERAL.CONNECTION device show "$dev" 2>/dev/null | head -n1)" == "$connection" ]]
+}
+
+is_probe_url() {
+    case "$1" in
+        http://ping.archlinux.org/*|https://ping.archlinux.org/*|\
+        http://connectivitycheck.gstatic.com/*|https://connectivitycheck.gstatic.com/*|\
+        http://www.msftconnecttest.com/*|https://www.msftconnecttest.com/*|\
+        http://detectportal.firefox.com/*|https://detectportal.firefox.com/*|\
+        http://captive.apple.com/*|https://captive.apple.com/*|\
+        http://httpbin.org/*|https://httpbin.org/*|\
+        http://httpbingo.org/*|https://httpbingo.org/*|\
+        http://cp.cloudflare.com/*|https://cp.cloudflare.com/*)
+            return 0 ;;
+        *)  return 1 ;;
+    esac
+}
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+dhcp_dump="$(nmcli -f DHCP4.OPTION,DHCP6.OPTION device show "$dev" 2>/dev/null || true)"
+advertised="$(
+    printf '%s\n' "$dhcp_dump" |
+        grep -Ei 'captive|(^|[[:space:]_.-])(114|103)([[:space:]_.=-]|$)' |
+        grep -Eo 'https?://[^[:space:]]+' |
+        sed 's/[",;)]*$//' |
+        head -n1
+)"
+
+if [[ -n "$advertised" ]]; then
+    (
+        body="$tmp/capport.body"
+        code="$(
+            curl "${curl_ip_family[@]}" --noproxy '*' --interface "if!$dev" -sS \
+                -H 'Accept: application/capport+json' --max-filesize 16384 \
+                --connect-timeout 1 --max-time 2 \
+                -o "$body" -w '%{http_code}' "$advertised" 2>/dev/null || true
+        )"
+        if [[ "$code" == "200" ]]; then
+            portal="$(python3 - "$body" <<'PY'
+import json
+import sys
+from urllib.parse import urlparse
+try:
+    with open(sys.argv[1], encoding="utf-8") as stream:
+        data = json.load(stream)
+    url = data.get("user-portal-url", "")
+    if data.get("captive") is True and isinstance(url, str) and len(url) <= 4096:
+        parsed = urlparse(url)
+        if parsed.scheme in ("http", "https") and parsed.hostname and not parsed.username and not parsed.password and not any(ord(char) < 32 for char in url):
+            print(url)
+except (OSError, ValueError, TypeError, AttributeError):
+    pass
+PY
+)"
+            if [[ -n "$portal" ]]; then
+                printf 'portal\t%s\n' "$portal" > "$tmp/capport.result"
+            fi
+        fi
+    ) &
+fi
+
+probe_http() {
+    local id="$1" url="$2" expected="$3" mode="$4"
+    local headers="$tmp/$id.headers" body="$tmp/$id.body" result="$tmp/$id.result"
+    local code loc body_url
+
+    code="$(
+        curl "${curl_ip_family[@]}" --noproxy '*' --interface "if!$dev" -sS \
+            -A 'Mozilla/5.0 (X11; Linux x86_64; rv:154.0) Gecko/20100101 Firefox/154.0' \
+            -H 'Cache-Control: no-cache' \
+            --connect-timeout 1 --max-time 2.5 \
+            -D "$headers" -o "$body" -w '%{http_code}' "$url" 2>/dev/null || true
+    )"
+
+    loc="$(sed -n 's/^[Ll]ocation:[[:space:]]*//p' "$headers" 2>/dev/null | tr -d '\r' | head -n1)"
+
+    case "$code" in
+        301|302|303|307|308|511)
+            if [[ "$loc" =~ ^https?:// ]] && ! is_probe_url "$loc"; then
+                printf 'portal\t%s\n' "$loc" > "$result"
+            else
+                printf 'portal\t\n' > "$result"
+            fi
+            ;;
+        200)
+            if [[ "$mode" == "exact" && "$(cat "$body" 2>/dev/null)" == "$expected" ]]; then
+                printf 'ok\t\n' > "$result"
+            elif [[ "$mode" == "contains" ]] && grep -Fqi "$expected" "$body" 2>/dev/null; then
+                printf 'ok\t\n' > "$result"
+            else
+                printf 'portal\t\n' > "$result"
+            fi
+            ;;
+        204)
+            if [[ "$mode" == "204" ]]; then
+                printf 'ok\t\n' > "$result"
+            else
+                printf 'unknown\t\n' > "$result"
+            fi
+            ;;
+        *)
+            printf 'unknown\t\n' > "$result"
+            ;;
+    esac
+}
+
+probe_https() {
+    local result="$tmp/https.result" code
+    code="$(
+        curl "${curl_ip_family[@]}" --noproxy '*' --interface "if!$dev" -sS \
+            --connect-timeout 1 --max-time 2.5 \
+            -o /dev/null -w '%{http_code}' \
+            'https://www.cloudflare.com/cdn-cgi/trace' 2>/dev/null || true
+    )"
+    case "$code" in
+        2??|3??) printf 'ok\t\n' > "$result" ;;
+        *)       printf 'unknown\t\n' > "$result" ;;
+    esac
+}
+
+probe_http firefox 'http://detectportal.firefox.com/success.txt' 'success' exact &
+probe_http apple 'http://captive.apple.com/hotspot-detect.html' 'Success' contains &
+probe_http google 'http://connectivitycheck.gstatic.com/generate_204' '' 204 &
+probe_http msft 'http://www.msftconnecttest.com/connecttest.txt' 'Microsoft Connect Test' exact &
+probe_http canary_cloudflare 'http://cp.cloudflare.com/generate_204' '' 204 &
+probe_https &
+wait
+
+if ! still_connected; then
+    printf 'none\t\n'
+    exit 0
+fi
+
+for result in "$tmp"/*.result; do
+    [[ -f "$result" ]] || continue
+    state="$(cut -f1 "$result")"
+    url="$(cut -f2- "$result")"
+    if [[ "$state" == "portal" && -n "$url" ]]; then
+        printf 'portal\t%s\n' "$url"
+        exit 0
+    fi
+done
+
+portal_seen=0
+canary_portal=0
+canary_ok=0
+http_ok=0
+https_ok=0
+for result in "$tmp"/*.result; do
+    [[ -f "$result" ]] || continue
+    state="$(cut -f1 "$result")"
+    case "$(basename "$result"):$state" in
+        https.result:ok) https_ok=1 ;;
+        canary_*.result:portal) canary_portal=$((canary_portal + 1)) ;;
+        canary_*.result:ok) canary_ok=$((canary_ok + 1)) ;;
+        *.result:portal) portal_seen=$((portal_seen + 1)) ;;
+        firefox.result:ok|apple.result:ok|arch.result:ok|google.result:ok|msft.result:ok)
+            http_ok=$((http_ok + 1))
+            ;;
+    esac
+done
+
+if [[ "$canary_portal" -ge 1 || "$portal_seen" -ge 2 ]]; then
+    printf 'portal\t\n'
+    exit 0
+fi
+
+if [[ "$https_ok" -eq 1 && "$http_ok" -ge 2 && "$canary_ok" -ge 1 ]]; then
+    printf 'full\t\n'
+    exit 0
+fi
+
+cached="$(nmcli networking connectivity 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+case "$cached" in
+    portal)
+        printf 'portal\t\n'
+        ;;
+    limited)
+        printf 'limited\t\n'
+        ;;
+    *)
+        if [[ "$http_ok" -gt 0 && "$https_ok" -eq 0 ]]; then
+            printf 'limited\t\n'
+        else
+            printf 'offline\t\n'
+        fi
+        ;;
+esac

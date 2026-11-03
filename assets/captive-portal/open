@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+set -u
+
+print_only=0
+if [[ "${1:-}" == "--print" ]]; then
+    print_only=1
+    shift
+fi
+
+candidate="${1:-}"
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
+log_file="$state_dir/captive-portal.log"
+mkdir -p "$state_dir" 2>/dev/null || true
+
+log() {
+    printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$log_file" 2>/dev/null || true
+}
+
+for key in DISPLAY WAYLAND_DISPLAY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS XDG_CURRENT_DESKTOP XDG_SESSION_TYPE; do
+    if [[ -z "${!key:-}" ]]; then
+        value="$(systemctl --user show-environment 2>/dev/null | sed -n "s/^${key}=//p" | head -n1)"
+        [[ -n "$value" ]] && export "$key=$value"
+    fi
+done
+
+dev="$(
+    nmcli -t -f DEVICE,TYPE,STATE device status 2>/dev/null |
+        awk -F: '$2=="wifi" && $3=="connected" {print $1; exit}'
+)"
+[[ -n "$dev" ]] || {
+    log "click: no connected Wi-Fi device"
+    exit 0
+}
+
+connection="$(nmcli -g GENERAL.CONNECTION device show "$dev" 2>/dev/null | head -n1)"
+[[ -n "$connection" && "$connection" != "--" ]] || {
+    log "click: Wi-Fi device has no active connection"
+    exit 0
+}
+
+log "click: connected Wi-Fi; cached candidate present=$([[ -n "$candidate" ]] && echo yes || echo no)"
+
+curl_ip_family=()
+if ! ip -o -4 addr show dev "$dev" 2>/dev/null | grep -q ' inet '; then
+    if ip -o -6 addr show dev "$dev" 2>/dev/null | grep -q ' inet6 '; then
+        curl_ip_family=(-6)
+    fi
+fi
+
+still_connected() {
+    [[ "$(nmcli -g GENERAL.CONNECTION device show "$dev" 2>/dev/null | head -n1)" == "$connection" ]]
+}
+
+is_probe_url() {
+    case "$1" in
+        ""|\
+        http://ping.archlinux.org/*|https://ping.archlinux.org/*|\
+        http://connectivitycheck.gstatic.com/*|https://connectivitycheck.gstatic.com/*|\
+        http://www.msftconnecttest.com/*|https://www.msftconnecttest.com/*|\
+        http://detectportal.firefox.com/*|https://detectportal.firefox.com/*|\
+        http://captive.apple.com/*|https://captive.apple.com/*|\
+        http://httpbin.org/*|https://httpbin.org/*|\
+        http://httpbingo.org/*|https://httpbingo.org/*|\
+        http://cp.cloudflare.com/*|https://cp.cloudflare.com/*|\
+        http://example.com/*|https://example.com/*)
+            return 0 ;;
+        *)  return 1 ;;
+    esac
+}
+
+open_target() {
+    local target="$1"
+    log "open: captive login requested"
+
+    if [[ "$print_only" -eq 1 ]]; then
+        printf '%s\n' "$target"
+        exit 0
+    fi
+
+    portal_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if command -v python3 >/dev/null 2>&1 && [[ -f "$portal_root/portal_helper.py" ]]; then
+        if python3 "$portal_root/portal_helper.py" browser "$target" "$dev" >/dev/null 2>&1; then
+            log "open: isolated Wi-Fi-bound browser launched"
+            exit 0
+        fi
+        log "open: isolated browser unavailable"
+    fi
+
+    log "open: no Wi-Fi-bound sign-in browser available"
+    notify-send -a Caelestia -i network-wireless \
+        'Wi-Fi sign-in' 'Could not start a Wi-Fi-only sign-in browser.' >/dev/null 2>&1 || true
+    exit 1
+}
+
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+probe_one() {
+    local id="$1" url="$2"
+    local headers="$tmp/$id.headers" body="$tmp/$id.body" loc
+
+    curl "${curl_ip_family[@]}" --noproxy '*' --interface "if!$dev" -sS         -A 'Mozilla/5.0 (X11; Linux x86_64; rv:154.0) Gecko/20100101 Firefox/154.0'         -H 'Cache-Control: no-cache'         --connect-timeout 1 --max-time 2         -D "$headers" -o "$body" "$url" >/dev/null 2>&1 || true
+
+    loc="$(sed -n 's/^[Ll]ocation:[[:space:]]*//p' "$headers" 2>/dev/null | tr -d '\r' | head -n1)"
+    if [[ "$loc" =~ ^https?:// ]] && ! is_probe_url "$loc"; then
+        printf '%s\n' "$loc" > "$tmp/$id.found"
+    fi
+}
+
+discover_once() {
+    rm -f "$tmp"/*.found "$tmp"/*.headers "$tmp"/*.body 2>/dev/null || true
+    local stamp f url
+    stamp="$(date +%s)"
+
+    probe_one firefox "http://detectportal.firefox.com/success.txt?cp=$stamp" &
+    probe_one apple "http://captive.apple.com/hotspot-detect.html?cp=$stamp" &
+    probe_one msft "http://www.msftconnecttest.com/connecttest.txt?cp=$stamp" &
+    probe_one arch "http://ping.archlinux.org/nm-check.txt?cp=$stamp" &
+    probe_one google "http://connectivitycheck.gstatic.com/generate_204?cp=$stamp" &
+
+    wait
+
+    for f in "$tmp"/*.found; do
+        [[ -f "$f" ]] || continue
+        url="$(head -n1 "$f")"
+        if [[ "$url" =~ ^https?:// ]] && ! is_probe_url "$url"; then
+            printf '%s\n' "$url"
+            return 0
+        fi
+    done
+    return 1
+}
+
+target="$(discover_once || true)"
+still_connected || exit 0
+if [[ -n "$target" ]]; then
+    log "discovery: fresh portal URL found"
+    open_target "$target"
+fi
+
+still_connected || {
+    log "discovery: Wi-Fi changed during click"
+    exit 0
+}
+
+for _attempt in 1 2 3; do
+    sleep 1
+    still_connected || exit 0
+    target="$(discover_once || true)"
+    if [[ -n "$target" ]]; then
+        log "discovery: fresh portal URL found on retry"
+        open_target "$target"
+    fi
+done
+
+gateway="$(nmcli -g IP4.GATEWAY device show "$dev" 2>/dev/null | head -n1)"
+if [[ "$gateway" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    route_dev="$(ip -4 route get "$gateway" 2>/dev/null | sed -n 's/.* dev \([^ ]*\).*/\1/p' | head -n1)"
+    if [[ "$route_dev" == "$dev" ]]; then
+        log "discovery: using connected Wi-Fi gateway as safe fallback"
+        open_target "http://$gateway/"
+    fi
+fi
+
+gateway6="$(nmcli -g IP6.GATEWAY device show "$dev" 2>/dev/null | head -n1)"
+gateway6="${gateway6//\\:/:}"
+if [[ "$gateway6" =~ ^[0-9a-fA-F:]+$ && "$gateway6" == *:* ]]; then
+    route_dev="$(ip -6 route get "$gateway6" dev "$dev" 2>/dev/null | sed -n 's/.* dev \([^ ]*\).*/\1/p' | head -n1)"
+    if [[ "$route_dev" == "$dev" ]]; then
+        if [[ "$gateway6" == fe80:* || "$gateway6" == FE80:* ]]; then
+            open_target "http://[${gateway6}%25${dev}]/"
+        else
+            open_target "http://[${gateway6}]/"
+        fi
+    fi
+fi
+
+if [[ "$candidate" =~ ^https?:// ]] && ! is_probe_url "$candidate" && still_connected; then
+    log "discovery: using cached portal URL as last fallback"
+    open_target "$candidate"
+fi
+
+log "discovery: portal URL not found"
+if [[ "$print_only" -eq 1 ]]; then
+    printf 'NOT_FOUND\n'
+else
+    notify-send -a Caelestia -i network-wireless         'Wi-Fi sign-in'         'The network looks captive, but its login page did not answer yet.'         >/dev/null 2>&1 || true
+fi
