@@ -4,7 +4,7 @@
 #include "common.hpp"
 #include "enums.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class NotifsConfig : public settings::ObjectNode {
     CONFIG_NODE(NotifsConfig, settings::ObjectNode)
@@ -20,4 +20,4 @@ class NotifsConfig : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, openExpanded, false)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

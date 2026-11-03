@@ -18,6 +18,7 @@ Item {
     required property int index
     required property int activeWsId
     required property int ws
+    required property HyprlandMonitor monitor
 
     required property int displayType
     required property bool showWindows
@@ -31,6 +32,21 @@ Item {
     readonly property bool hasWindows: isOccupied && showWindows && Config.bar.workspaces.maxWindowIcons > 0
     readonly property bool focused: activeWsId === ws
     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
+
+    property color offMonitorColour: Colours.palette.m3outlineVariant
+    readonly property bool onOtherMonitor: {
+        if (Config.bar.workspaces.perMonitor)
+            return false;
+        const mon = Hypr.workspaces.values.find(w => w.id === ws)?.monitor;
+        return !!(mon && mon !== monitor);
+    }
+    readonly property color fgColour: {
+        if (onOtherMonitor)
+            return offMonitorColour;
+        if (focused || isOccupied || Config.bar.workspaces.occupiedBg)
+            return Colours.palette.m3onSurface;
+        return Colours.layer(Colours.palette.m3outlineVariant, 2);
+    }
 
     function updateShape(): void {
         const shape = indicator.item as MaterialShape;
@@ -74,7 +90,7 @@ Item {
         MaterialShape {
             implicitSize: Tokens.sizes.bar.innerWidth - Tokens.padding.small
 
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            color: root.fgColour
             scale: root.focused ? 2 / 3 : root.isOccupied ? 1 / 3 : 1 / 4
 
             animationEasing: Tokens.anim.expressiveDefaultSpatial
@@ -122,7 +138,7 @@ Item {
                     return String(wsName).toLowerCase();
                 return wsName;
             }
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            color: root.fgColour
             verticalAlignment: Qt.AlignVCenter
             font.family: Tokens.font.workspaces
         }
@@ -135,7 +151,7 @@ Item {
             fill: 1
             grade: 25
             text: iconCacher.icon
-            color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.focused ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+            color: root.fgColour
             verticalAlignment: Qt.AlignVCenter
 
             WsIconCacher {
@@ -213,7 +229,7 @@ Item {
                     grade: 0
                     horizontalAlignment: Text.AlignHCenter
                     text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant
 
                     opacity: LazyListView.adding || LazyListView.removing ? 0 : 1
 

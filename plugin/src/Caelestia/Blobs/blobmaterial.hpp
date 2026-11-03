@@ -4,7 +4,7 @@
 #include <qsgmaterial.h>
 #include <qsgmaterialshader.h>
 
-namespace caelestia::blobs {
+namespace caelestia::shell::blobs {
 
 // Max rects the shader smins over; must match the loop bounds in blob.frag
 inline constexpr int k_maxRects = 16;
@@ -21,7 +21,7 @@ struct BlobRectData {
     float radius[4] = { 0, 0, 0, 0 };
     // Bitmask of indices in this rect's m_cachedRects that mutually exclude (or are excluded by) this rect.
     // Used by the shader to skip smin between excluded pairs.
-    int excludeMask = 0;
+    quint32 excludeMask = 0;
 };
 
 class BlobMaterial : public QSGMaterial {
@@ -51,4 +51,4 @@ public:
     bool updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial* oldMaterial) override;
 };
 
-} // namespace caelestia::blobs
+} // namespace caelestia::shell::blobs

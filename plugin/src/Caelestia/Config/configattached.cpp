@@ -4,7 +4,7 @@
 
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 Config::Config(QObject* parent)
     : QQuickAttachedPropertyPropagator(parent) {
@@ -48,7 +48,7 @@ void Config::propagateScreen() {
 void Config::attachedParentChange(
     QQuickAttachedPropertyPropagator* newParent, QQuickAttachedPropertyPropagator* oldParent) {
     Q_UNUSED(oldParent);
-    auto* const config = qobject_cast<Config*>(newParent);
+    const auto* config = qobject_cast<Config*>(newParent);
     if (config)
         inheritScreen(config->screen());
 }
@@ -92,4 +92,4 @@ Config* Config::qmlAttachedProperties(QObject* object) {
     return new Config(object);
 }
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

@@ -5,7 +5,7 @@
 #include "util/i18n.hpp"
 #include "codecs.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -33,7 +33,7 @@ void ObjectNode::resetOption(const QString& key) {
     if (desc->isNode)
         value(key).value<Node*>()->resetToDefaults();
     else
-        setValue(key, fallbackNode() ? fallbackNode()->value(key) : desc->defaultValue(this));
+        setValue(key, fallbackNode() ? fallbackNode()->value(key) : desc->defaultValue());
 }
 
 Descriptor ObjectNode::descriptorFor(const QString& key) const {
@@ -61,14 +61,13 @@ QJsonValue ObjectNode::toJson(bool sparse) const {
         if (sparse && !isOverride(desc.key))
             continue;
 
-        auto* const codec = ValueCodec::codecFor(desc.type);
-        if (!codec) { // This should not happen
+        if (!desc.codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not serialising %s", desc.type.name(),
                 qUtf8Printable(pathFor(desc.key)));
             continue;
         }
 
-        json.insert(desc.key, codec->encode(val));
+        json.insert(desc.key, desc.codec->encode(val));
     }
 
     if (m_quarantine)
@@ -151,14 +150,13 @@ QSet<QString> ObjectNode::loadFromJson(const QJsonObject& json, QList<Diagnostic
             SKIP;
         }
 
-        auto* const codec = ValueCodec::codecFor(desc->type);
-        if (!codec) { // This should not happen
+        if (!desc->codec) { // This should not happen
             qCCritical(lcSettings, "No codec found for type %s, not loading %s", desc->type.name(),
                 qUtf8Printable(pathFor(key)));
             SKIP;
         }
 
-        auto val = codec->decode(v);
+        auto val = desc->codec->decode(v);
         if (val.error) {
             auto path = pathFor(key);
             for (const auto index : std::as_const(val.indexPath))
@@ -196,8 +194,8 @@ void ObjectNode::resetUnvisited(const QSet<QString>& visited) {
         if ((m_globalOnly || desc.globalOnly()) && fallbackNode())
             continue;
 
-        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue(this));
+        setValue(desc.key, fallbackNode() ? fallbackNode()->value(desc.key) : desc.defaultValue());
     }
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

@@ -6,7 +6,7 @@
 #include <qquickitem.h>
 #include <qvariant.h>
 
-namespace caelestia {
+namespace caelestia::shell {
 
 class CUtils : public QObject {
     Q_OBJECT
@@ -17,6 +17,9 @@ class CUtils : public QObject {
     Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
 
 public:
+    // No-op for declaring variable/expression dependencies in QML bindings
+    Q_INVOKABLE static void dependency(const QVariant& value);
+
     Q_INVOKABLE void saveItem(
         QQuickItem* target, const QUrl& path, const QJSValue& onSaved = {}, const QJSValue& onFailed = {});
     Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, const QJSValue& onSaved = {},
@@ -38,4 +41,4 @@ public:
     [[nodiscard]] static QString qtVersion();
 };
 
-} // namespace caelestia
+} // namespace caelestia::shell

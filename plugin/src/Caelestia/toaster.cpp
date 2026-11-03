@@ -4,7 +4,7 @@
 
 #include <utility>
 
-namespace caelestia {
+namespace caelestia::shell {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -118,7 +118,7 @@ QQmlListProperty<Toast> Toaster::toasts() {
 
 void Toaster::toast(const QString& title, const QString& message, const QString& icon, Toast::Type type, int timeout) {
     auto* const toast = new Toast(title, message, icon, type, timeout, this);
-    QObject::connect(toast, &Toast::finishedClose, this, [toast, this]() {
+    QObject::connect(toast, &Toast::finishedClose, this, [toast, this] {
         if (m_toasts.removeOne(toast)) {
             emit toastsChanged();
             toast->deleteLater();
@@ -128,4 +128,4 @@ void Toaster::toast(const QString& title, const QString& message, const QString&
     emit toastsChanged();
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

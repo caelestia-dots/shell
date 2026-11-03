@@ -16,8 +16,8 @@ PageBase {
     id: root
 
     readonly property BluetoothDevice device: nState.selectedBtDevice
-    readonly property bool connected: device?.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
-    readonly property bool loading: device?.state === BluetoothDeviceState.Connecting || device?.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
+    readonly property bool connected: device?.state === BluetoothDeviceState.Connected
+    readonly property bool loading: device?.state === BluetoothDeviceState.Connecting || device?.state === BluetoothDeviceState.Disconnecting
 
     readonly property string statusText: {
         if (!device)

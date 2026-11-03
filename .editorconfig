@@ -1,0 +1,27 @@
+# https://editorconfig.org
+
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.css]
+indent_style = tab
+indent_size = 4
+
+[*.{json,jsonc,yaml,yml,nix}]
+indent_size = 2
+
+[flake.lock]
+indent_size = 2
+
+[{.clang-format,.clang-tidy}]
+indent_size = 2
+
+[utils/scripts/fzf.js]
+indent_size=2

@@ -48,17 +48,24 @@ PageBase {
         }
 
         ToggleRow {
-            text: Tr.trCtx("Show windows", "bar workspaces")
-            subtext: Tr.tr("Show icons of open windows on each workspace")
-            checked: Config.bar.workspaces.showWindows
-            onToggled: GlobalConfig.bar.workspaces.showWindows = checked
-        }
-
-        ToggleRow {
             text: Tr.trCtx("Show unoccupied", "bar workspaces")
             subtext: Tr.tr("Show workspaces that are inactive and empty")
             checked: Config.bar.workspaces.showUnoccupied
             onToggled: GlobalConfig.bar.workspaces.showUnoccupied = checked
+        }
+
+        ToggleRow {
+            text: Tr.trCtx("Per monitor", "bar workspaces")
+            subtext: Tr.tr("Hide workspaces not on the current monitor")
+            checked: Config.bar.workspaces.perMonitor
+            onToggled: GlobalConfig.bar.workspaces.perMonitor = checked
+        }
+
+        ToggleRow {
+            text: Tr.trCtx("Show windows", "bar workspaces")
+            subtext: Tr.tr("Show icons of open windows on each workspace")
+            checked: Config.bar.workspaces.showWindows
+            onToggled: GlobalConfig.bar.workspaces.showWindows = checked
         }
 
         ToggleRow {

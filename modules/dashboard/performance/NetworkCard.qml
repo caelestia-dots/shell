@@ -57,10 +57,10 @@ StyledRect {
                 property real smoothMax: targetMax
 
                 anchors.fill: parent
-                line1: NetworkUsage.uploadBuffer // qmllint disable missing-type
+                line1: NetworkUsage.uploadBuffer
                 line1Color: Colours.palette.m3secondary
                 line1FillAlpha: 0.15
-                line2: NetworkUsage.downloadBuffer // qmllint disable missing-type
+                line2: NetworkUsage.downloadBuffer
                 line2Color: Colours.palette.m3tertiary
                 line2FillAlpha: 0.2
                 maxValue: smoothMax

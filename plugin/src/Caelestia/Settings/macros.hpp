@@ -1,18 +1,28 @@
 #pragma once
 
+#include <qmetatype.h>
 #include <qobject.h>
 #include <qvariant.h>
 
 #include "listnode.hpp" // IWYU pragma: keep
 #include "schema.hpp"   // IWYU pragma: keep
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 inline QVariantMap vmap(std::initializer_list<std::pair<QString, QVariant>> entries) {
     QVariantMap map;
     for (const auto& [key, value] : entries)
-        map.insert(std::move(key), std::move(value));
+        map.insert(key, value);
     return map;
+}
+
+template <typename... Ts> inline QList<QMetaType> unionTypes() {
+    static_assert(sizeof...(Ts) >= 2, "A union needs at least two types");
+    // If the max size is changed, common.cpp `mismatchStr` must be updated
+    static_assert(sizeof...(Ts) <= 4, "A union cannot have more than 4 types");
+    static_assert((!std::is_same_v<Ts, QVariant> && ...), "A union cannot contain QVariant");
+
+    return { QMetaType::fromType<Ts>()... };
 }
 
 namespace detail {
@@ -37,7 +47,7 @@ template <std::floating_point T> bool compare(const QList<T>& a, const QList<T>&
 
 } // namespace detail
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings
 
 // Helper macro to prevent splitting initialiser lists
 #define DEFAULT_ARG(...) __VA_ARGS__
@@ -47,9 +57,9 @@ template <std::floating_point T> bool compare(const QList<T>& a, const QList<T>&
     Q_OBJECT                                                                                                           \
                                                                                                                        \
 public:                                                                                                                \
-    [[nodiscard]] const caelestia::settings::Schema& schema() const override {                                         \
+    [[nodiscard]] const caelestia::shell::settings::Schema& schema() const override {                                  \
         static const auto schema =                                                                                     \
-            caelestia::settings::Schema::build(&staticMetaObject, Base::staticMetaObject.propertyCount());             \
+            caelestia::shell::settings::Schema::build(&staticMetaObject, Base::staticMetaObject.propertyCount());      \
         return schema;                                                                                                 \
     }                                                                                                                  \
                                                                                                                        \
@@ -81,10 +91,13 @@ public:                                                                         
         if (!true /* TODO: validation */)                                                                              \
             return;                                                                                                    \
                                                                                                                        \
+        if (rejectInvalidWrite(QStringLiteral(#name), value))                                                          \
+            return; /* Skip writes of the wrong type */                                                                \
+                                                                                                                       \
         if (rejectGlobalWrite(QStringLiteral(#name)))                                                                  \
             return; /* Skip writes to global only keys, they should be sent to the global layer */                     \
                                                                                                                        \
-        const auto needsNotify = !caelestia::settings::detail::compare(value, m_##name);                               \
+        const auto needsNotify = !caelestia::shell::settings::detail::compare(value, m_##name);                        \
         m_##name = value;                                                                                              \
         if (recordWrite(QStringLiteral(#name), needsNotify))                                                           \
             Q_EMIT name##Changed();                                                                                    \
@@ -93,12 +106,10 @@ public:                                                                         
     Q_SIGNAL void name##Changed();                                                                                     \
                                                                                                                        \
 private:                                                                                                               \
-    Type m_##name = fallbackValue(&Self::m_##name, caelestia::settings::DefaultSpec::resolve<Type>(this, defaultVal)); \
+    Type m_##name = fallbackValue(&Self::m_##name, defaultVal);                                                        \
     inline static const bool s_register_##name =                                                                       \
-        (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = caelestia::settings::DefaultSpec::create<Type>(defaultVal),                             \
-                 .globalOnly = global,                                                                                 \
-                 __VA_ARGS__ }),                                                                                       \
+        (caelestia::shell::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                        \
+             { .defaultValue = QVariant::fromValue<Type>(defaultVal), .globalOnly = global, __VA_ARGS__ }),            \
             true);
 
 #define SETTINGS_PROPERTY(Type, name, defaultVal, ...)                                                                 \
@@ -122,7 +133,7 @@ public:                                                                         
 private:                                                                                                               \
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
-        (caelestia::settings::Schema::annotate(                                                                        \
+        (caelestia::shell::settings::Schema::annotate(                                                                 \
              &staticMetaObject, QStringLiteral(#name), { .defaultValue = {}, .globalOnly = global }),                  \
             true);
 
@@ -133,13 +144,13 @@ private:                                                                        
 
 // Defines a list type for use with SETTINGS_LIST.
 #define SETTINGS_LIST_TYPE(Element, Name)                                                                              \
-    class Name : public caelestia::settings::ListNode {                                                                \
+    class Name : public caelestia::shell::settings::ListNode {                                                         \
         Q_OBJECT                                                                                                       \
         QML_ANONYMOUS                                                                                                  \
                                                                                                                        \
     public:                                                                                                            \
         explicit Name(Name* fallback = nullptr, QObject* parent = nullptr, bool globalOnly = false)                    \
-            : caelestia::settings::ListNode(fallback, parent, globalOnly) {}                                           \
+            : caelestia::shell::settings::ListNode(fallback, parent, globalOnly) {}                                    \
                                                                                                                        \
         [[nodiscard]] Q_INVOKABLE Element* at(qsizetype index) const { /* Format ugh */                                \
             return static_cast<Element*>(elementAt(index));                                                            \
@@ -149,7 +160,8 @@ private:                                                                        
         }                                                                                                              \
                                                                                                                        \
     protected:                                                                                                         \
-        [[nodiscard]] caelestia::settings::Node* createElement(caelestia::settings::Node* fallback) override {         \
+        [[nodiscard]] caelestia::shell::settings::Node* createElement(                                                 \
+            caelestia::shell::settings::Node* fallback) override {                                                     \
             return new Element(static_cast<Element*>(fallback), this);                                                 \
         }                                                                                                              \
     };
@@ -168,8 +180,8 @@ public:                                                                         
 private:                                                                                                               \
     Type* m_##name = new Type(fallbackValue(&Self::m_##name, nullptr), this, global);                                  \
     inline static const bool s_register_##name =                                                                       \
-        (caelestia::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                               \
-             { .defaultValue = caelestia::settings::DefaultSpec::create<QList<QVariantMap>>(defaultVal),               \
+        (caelestia::shell::settings::Schema::annotate(&staticMetaObject, QStringLiteral(#name),                        \
+             { .defaultValue = QVariant::fromValue<QList<QVariantMap>>(defaultVal),                                    \
                  .globalOnly = global,                                                                                 \
                  __VA_ARGS__ }),                                                                                       \
             true);

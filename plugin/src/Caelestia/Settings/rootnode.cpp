@@ -2,11 +2,11 @@
 
 #include <qjsonobject.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
-RootNode::RootNode(const QString& path, RootNode* fallback, QObject* parent)
+RootNode::RootNode(bool watch, const QString& path, RootNode* fallback, QObject* parent)
     : ObjectNode(fallback, parent)
-    , m_file(new SettingsFile(path, this)) {
+    , m_file(new SettingsFile(watch, path, this)) {
     QObject::connect(batcher(), &ChangeBatcher::dirtied, this, &RootNode::saveToFile);
     QObject::connect(m_file, &SettingsFile::changed, this, &RootNode::reloadFromFile);
     QObject::connect(m_file, &SettingsFile::readFailed, this, [this](const QString& error) {
@@ -43,4 +43,4 @@ void RootNode::saveToFile() {
     m_file->write(toJson());
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

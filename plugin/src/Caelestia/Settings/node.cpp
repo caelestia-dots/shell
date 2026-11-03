@@ -2,7 +2,7 @@
 
 #include "util/i18n.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -101,11 +101,8 @@ bool Node::setValue(const QString& key, const QVariant& value) {
     }
 
     // Type mismatch, conversion should happen before this function is called
-    if (desc->type != value.metaType()) {
-        qCWarning(lcSettings, "Type mismatch for %s, expected %s got %s", qUtf8Printable(pathFor(key)),
-            desc->type.name(), value.metaType().name());
+    if (rejectInvalidWrite(key, value))
         return false;
-    }
 
     return metaObject()->property(desc->metaIndex).write(this, value);
 }
@@ -122,12 +119,22 @@ void Node::resetToDefaults() {
         if (desc.isNode)
             value(desc.key).value<Node*>()->resetToDefaults();
         else if (!desc.globalOnly() || !m_fallbackNode) // Skip resetting global options on overlays
-            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue(this));
+            setValue(desc.key, m_fallbackNode ? m_fallbackNode->value(desc.key) : desc.defaultValue());
     }
 }
 
 const Quarantine* Node::quarantine() const {
     return m_quarantine.get();
+}
+
+bool Node::rejectInvalidWrite(const QString& key, const QVariant& value) const {
+    const auto* desc = schema().get(key);
+    if (!desc || desc->accepts(value.metaType()))
+        return false;
+
+    qCWarning(lcSettings, "Type mismatch for %s, expected %s got %s", qUtf8Printable(pathFor(key)),
+        qUtf8Printable(desc->typeString()), value.metaType().name());
+    return true;
 }
 
 void Node::warnGlobalRead(const QString& key) const {
@@ -271,4 +278,4 @@ void Node::onFallbackNotify(const QString& key) {
     setValue(key, m_fallbackNode->value(key));
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

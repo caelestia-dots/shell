@@ -4,7 +4,7 @@
 
 #include "service.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class TickingService : public Service {
     Q_OBJECT
@@ -33,4 +33,4 @@ private:
     bool m_running = false;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

@@ -74,7 +74,7 @@ Item {
         }
     }
 
-    ClippingRectangle {
+    ClipRect {
         id: clipRect
 
         anchors.left: parent.left

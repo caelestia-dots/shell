@@ -3,7 +3,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class LockConfig : public settings::ObjectNode {
     CONFIG_NODE(LockConfig, settings::ObjectNode)
@@ -17,6 +17,7 @@ class LockConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(int, maxHowdyTries, 3)
     CONFIG_GLOBAL_PROPERTY(bool, triggerHowdyOnWake, true)
     CONFIG_PROPERTY(bool, hideNotifs, false)
+    CONFIG_GLOBAL_PROPERTY(bool, enableSessionControls, false)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

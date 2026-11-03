@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -103,11 +104,11 @@ ConnectedRect {
                     id: popup
 
                     x: {
-                        tWatcher.transform;
+                        CUtils.dependency(tWatcher.transform);
                         return triggerArea.mapToItem(area.parent, 0, 0).x;
                     }
                     y: {
-                        tWatcher.transform;
+                        CUtils.dependency(tWatcher.transform);
                         return triggerArea.mapToItem(area.parent, 0, 0).y;
                     }
                     padding: Tokens.padding.small

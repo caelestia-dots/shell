@@ -7,7 +7,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 class AnimCurves : public settings::ObjectNode {
     CONFIG_NODE(AnimCurves, settings::ObjectNode)
@@ -247,4 +247,4 @@ class SizeTokens : public settings::ObjectNode {
     CONFIG_SUBOBJECT(NexusTokens, nexus)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

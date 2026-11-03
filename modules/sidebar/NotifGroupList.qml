@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Caelestia
 import Caelestia.Components
 import Caelestia.Config
 import qs.components
@@ -31,7 +32,7 @@ LazyListView {
 
     useCustomViewport: true
     viewport: {
-        tWatcher.transform; // mapToItem is not reactive so use this to trigger updates
+        CUtils.dependency(tWatcher.transform); // mapToItem is not reactive so use this to trigger updates
         return Qt.rect(0, container.contentY - mapToItem(container.contentItem, 0, 0).y, width, container.height);
     }
 

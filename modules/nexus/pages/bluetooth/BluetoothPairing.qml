@@ -16,7 +16,7 @@ import qs.modules.nexus.common
 PageBase {
     id: root
 
-    readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter // qmllint disable unresolved-type
+    readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
     property bool showAll: false
 
     function setScan(on: bool): void {
@@ -105,8 +105,7 @@ PageBase {
             model: ScriptModel {
                 values: {
                     const isAddress = d => !d?.name || d.name === d.address?.replace(/:/g, "-");
-                    return Bluetooth.devices.values // qmllint disable unresolved-type
-                    .filter(d => !d.bonded && (root.showAll || !isAddress(d) || d.pairing)).sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name));
+                    return Bluetooth.devices.values.filter(d => !d.bonded && (root.showAll || !isAddress(d) || d.pairing)).sort((a, b) => (b.pairing - a.pairing) || a.name.localeCompare(b.name));
                 }
             }
 

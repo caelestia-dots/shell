@@ -9,7 +9,7 @@
 
 #include <utility>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 class AnimatedRepeaterAttached : public QObject {
     Q_OBJECT
@@ -82,7 +82,7 @@ private:
         None,
         Count,
         List,
-        Model
+        Model,
     };
 
     // Delegate properties in the order they must be applied
@@ -135,4 +135,4 @@ private:
     QList<QMetaObject::Connection> m_modelConnections;
 };
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

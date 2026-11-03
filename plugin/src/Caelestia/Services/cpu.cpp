@@ -7,7 +7,7 @@
 
 #include "sensorslib.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -111,9 +111,9 @@ QString Cpu::cleanName(QString s) {
         u"\\(R\\)|\\(TM\\)|CPU|\\d+(?:th|nd|rd|st) Gen |Core |Processor"_s, QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression k_spaces(u"\\s+"_s);
 
-    s.replace(k_noise, QString());
+    s.replace(k_noise, {});
     s.replace(k_spaces, u" "_s);
     return s.trimmed();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

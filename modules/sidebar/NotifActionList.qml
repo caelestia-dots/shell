@@ -129,7 +129,7 @@ Item {
                         id: copyTimer
 
                         interval: 3000
-                        onTriggered: actionInner.item.text = "content_copy"
+                        onTriggered: (actionInner.item as MaterialIcon).text = "content_copy"
                     }
 
                     StateLayer {
@@ -140,7 +140,7 @@ Item {
                                 root.notif.close();
                             } else if (action.modelData.isCopy) {
                                 Quickshell.clipboardText = root.notif.body;
-                                actionInner.item.text = "inventory";
+                                (actionInner.item as MaterialIcon).text = "inventory";
                                 copyTimer.start();
                             } else if (action.modelData.invoke) {
                                 action.modelData.invoke();

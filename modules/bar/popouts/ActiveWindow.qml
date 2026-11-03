@@ -89,7 +89,7 @@ Item {
             ScreencopyView {
                 id: preview
 
-                captureSource: Hypr.activeToplevel?.wayland ?? null // qmllint disable unresolved-type
+                captureSource: Hypr.activeToplevel?.wayland ?? null
                 live: visible
 
                 constraintSize.width: Tokens.sizes.bar.windowPreviewSize

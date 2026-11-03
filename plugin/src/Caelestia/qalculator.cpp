@@ -7,7 +7,7 @@
 
 #include "util/i18n.hpp"
 
-namespace caelestia {
+namespace caelestia::shell {
 
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
@@ -70,7 +70,8 @@ QPair<QString, QString> Qalculator::evaluate(const QString& expr) {
     const QMutexLocker locker(&s_calculatorMutex);
 
     const EvaluationOptions eo;
-    const PrintOptions po;
+    PrintOptions po;
+    po.interval_display = INTERVAL_DISPLAY_SIGNIFICANT_DIGITS;
 
     std::string parsed;
     const std::string result = CALCULATOR->calculateAndPrint(
@@ -140,4 +141,4 @@ void Qalculator::setBusy(bool busy) {
     emit busyChanged();
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

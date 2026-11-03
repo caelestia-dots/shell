@@ -1,0 +1,105 @@
+name: Detect changes
+
+on:
+  workflow_call:
+    inputs:
+      filter-group:
+        description: "Filter group: build, format"
+        required: true
+        type: string
+    outputs:
+      build:
+        value: ${{ jobs.changes.outputs.build }}
+      lint:
+        value: ${{ jobs.changes.outputs.lint }}
+      format-cpp:
+        value: ${{ jobs.changes.outputs.format-cpp }}
+      format-qml:
+        value: ${{ jobs.changes.outputs.format-qml }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      build: >-
+        ${{ github.event_name == 'push'
+            || steps.build-filter.outputs.build == 'true'
+            || steps.build-filter.outputs.build-workflow == 'true'
+            || steps.build-filter.outputs.changes-workflow == 'true'
+            || steps.build-filter.outputs.verification-action == 'true' }}
+      lint: >-
+        ${{ github.event_name == 'push'
+            || steps.build-filter.outputs.lint == 'true'
+            || steps.build-filter.outputs.lint-workflow == 'true'
+            || steps.build-filter.outputs.changes-workflow == 'true'
+            || steps.build-filter.outputs.verification-action == 'true' }}
+      format-cpp: >-
+        ${{ github.event_name == 'push'
+           || steps.format-filter.outputs.source-cpp == 'true'
+           || steps.format-filter.outputs.format-workflow == 'true'
+           || steps.format-filter.outputs.changes-workflow == 'true'
+           || steps.format-filter.outputs.verification-action == 'true' }}
+      format-qml: >-
+        ${{ github.event_name == 'push'
+           || steps.format-filter.outputs.source-qml == 'true'
+           || steps.format-filter.outputs.format-workflow == 'true'
+           || steps.format-filter.outputs.changes-workflow == 'true'
+           || steps.format-filter.outputs.verification-action == 'true' }}
+    steps:
+      - name: Validate filter group
+        env:
+          FILTER_GROUP: ${{ inputs.filter-group }}
+        run: |
+          [[ "$FILTER_GROUP" =~ ^(build|format)$ ]] || { echo "::error::Unknown filter group: $FILTER_GROUP"; exit 1; }
+
+      - name: Filter changes for build/linting
+        uses: dorny/paths-filter@v4
+        if: github.event_name == 'pull_request' && inputs.filter-group == 'build'
+        id: build-filter
+        with:
+          predicate-quantifier: every
+          filters: |
+            build: &build
+              - "**"
+              - "!**/*.md"
+              - "!.github/**"
+              - "!scripts/qml-lint-conventions.py"
+              - "!.vscode/**"
+              - "!assets/**"
+              - "!.gitignore"
+            lint:
+              - *build
+              - "!**/*.nix"
+              - "!**/flake.lock"
+            build-workflow:
+              - ".github/workflows/build.yml"
+            lint-workflow:
+              - ".github/workflows/lint.yml"
+            changes-workflow:
+              - ".github/workflows/detect-changes.yml"
+            verification-action:
+              - ".github/actions/verify-checks/**"
+
+      - name: Filter changes for formatting
+        uses: dorny/paths-filter@v4
+        if: github.event_name == 'pull_request' && inputs.filter-group == 'format'
+        id: format-filter
+        with:
+          predicate-quantifier: some
+          filters: |
+            source-qml:
+              - "**/*.qml"
+              - "**/.qmlformat.ini"
+              - "scripts/qml-lint-conventions.py"
+            source-cpp:
+              - "{plugin,extras}/**/*.{cpp,hpp}"
+              - "**/[_.]clang-format"
+              - "**/.clang-format-ignore"
+            format-workflow:
+              - ".github/workflows/check-format.yml"
+            changes-workflow:
+              - ".github/workflows/detect-changes.yml"
+            verification-action:
+              - ".github/actions/verify-checks/**"

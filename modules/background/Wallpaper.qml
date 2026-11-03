@@ -5,41 +5,22 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.components.filedialog
-import qs.components.images
+import qs.components.widgets
 import qs.services
 import qs.utils
 
 Item {
     id: root
 
-    property string source: Wallpapers.current
-    property CachingImage current
     property bool completed
 
-    onSourceChanged: {
-        if (!source)
-            current = null;
-        else
-            current = imgComp.createObject(this, {
-                path: source
-            });
-    }
-
-    Component.onCompleted: {
-        if (source)
-            Qt.callLater(() => {
-                current = imgComp.createObject(this, {
-                    path: source
-                });
-                completed = true;
-            });
-    }
+    Component.onCompleted: completed = true
 
     Loader {
         asynchronous: true
         anchors.fill: parent
 
-        active: root.completed && !root.source
+        active: root.completed && !impl.source
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer
@@ -101,35 +82,9 @@ Item {
         }
     }
 
-    Component {
-        id: imgComp
+    WallpaperImpl {
+        id: impl
 
-        CachingImage {
-            id: img
-
-            anchors.fill: parent
-
-            opacity: 0
-
-            onStatusChanged: {
-                if (status === Image.Ready)
-                    anim.start();
-            }
-
-            Anim on opacity {
-                id: anim
-
-                type: Anim.SlowEffects
-                running: false
-                from: 0
-                to: 1
-            }
-
-            Timer {
-                running: root.current !== img && root.current?.status === Image.Ready
-                interval: anim.duration
-                onTriggered: img.destroy()
-            }
-        }
+        anchors.fill: parent
     }
 }

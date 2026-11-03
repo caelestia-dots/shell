@@ -108,7 +108,7 @@ Searcher {
 
         recursive: true
         path: Paths.wallsdir
-        filter: FileSystemModel.Images
+        filter: FileSystemModel.Images | FileSystemModel.Videos
     }
 
     Process {

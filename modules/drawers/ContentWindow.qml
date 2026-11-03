@@ -12,6 +12,7 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.modules.bar
+import qs.daemons
 
 StyledWindow {
     id: root
@@ -38,7 +39,7 @@ StyledWindow {
     property real fsTransitionProg: hasFullscreen ? 1 : 0
     readonly property real sdfBorderOffset: 2 * fsTransitionProg // SDFs joins are not exact, so offset by 2px to ensure nothing shows
     readonly property real borderThickness: contentItem.Config.border.thickness * (1 - fsTransitionProg)
-    readonly property real borderRounding: contentItem.Config.border.rounding * (1 - fsTransitionProg)
+    readonly property real borderRounding: (GameMode.enabled && GlobalConfig.utilities.gameMode.options["decoration:rounding"] === 0 ? 0 : contentItem.Config.border.rounding) * (1 - fsTransitionProg)
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
 
@@ -48,7 +49,7 @@ StyledWindow {
         if (focusGrab.active || panels.popouts.isDetached)
             return 0;
 
-        if (monitor?.lastIpcObject.specialWorkspace?.name || monitor?.activeWorkspace?.lastIpcObject.windows > 0)
+        if (monitor?.lastIpcObject.specialWorkspace?.name || monitor?.activeWorkspace?.toplevels.values.length > 0)
             return 0;
 
         const thresholds = [];

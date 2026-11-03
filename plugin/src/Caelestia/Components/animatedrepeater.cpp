@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -421,7 +421,7 @@ void AnimatedRepeater::connectModel() {
 }
 
 void AnimatedRepeater::disconnectModel() {
-    for (auto& conn : m_modelConnections)
+    for (const auto& conn : std::as_const(m_modelConnections))
         disconnect(conn);
     m_modelConnections.clear();
 }
@@ -469,4 +469,4 @@ void AnimatedRepeater::onDataChanged(
         updateItemData(i);
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

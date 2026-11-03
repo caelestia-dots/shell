@@ -17,13 +17,13 @@ QEasingCurve curve(const QPointF& c1, const QPointF& c2) {
 }
 
 qreal getFractionInRange(qreal playtime, int start, int duration) {
-    const auto fraction = static_cast<qreal>(playtime - start) / duration;
+    const auto fraction = (playtime - start) / duration;
     return std::clamp(fraction, 0.0, 1.0);
 }
 
 } // namespace
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 LinearIndicatorSegment::LinearIndicatorSegment(int gap, QObject* parent)
     : QObject(parent)
@@ -58,12 +58,18 @@ LinearIndicatorManager::LinearIndicatorManager(QObject* parent)
           new LinearIndicatorSegment(m_gap, this),
           new LinearIndicatorSegment(m_gap, this),
       }) {
-    for (auto* el : m_activeIndicators)
+    for (const auto* el : m_activeIndicators)
         QObject::connect(this, &LinearIndicatorManager::updated, el, &LinearIndicatorSegment::updated);
 }
 
-QList<LinearIndicatorSegment*> LinearIndicatorManager::activeIndicators() const {
-    return { m_activeIndicators.cbegin(), m_activeIndicators.cend() };
+QQmlListProperty<LinearIndicatorSegment> LinearIndicatorManager::activeIndicators() {
+    return { this, nullptr,
+        [](QQmlListProperty<LinearIndicatorSegment>*) {
+            return static_cast<qsizetype>(k_segments);
+        },
+        [](QQmlListProperty<LinearIndicatorSegment>* p, qsizetype i) {
+            return static_cast<LinearIndicatorManager*>(p->object)->m_activeIndicators[static_cast<size_t>(i)];
+        } };
 }
 
 qreal LinearIndicatorManager::progress() const {
@@ -115,4 +121,4 @@ void LinearIndicatorManager::updateCompleteEndProgress(qreal progress) {
     update(m_progress);
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

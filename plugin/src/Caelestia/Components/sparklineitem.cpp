@@ -4,7 +4,7 @@
 #include <qpainterpath.h>
 #include <qpen.h>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 SparklineItem::SparklineItem(QQuickItem* parent)
     : QQuickPaintedItem(parent) {
@@ -70,10 +70,10 @@ void SparklineItem::connectBuffer(CircularBuffer* buffer) {
     if (!buffer)
         return;
 
-    connect(buffer, &CircularBuffer::valuesChanged, this, [this]() {
+    connect(buffer, &CircularBuffer::valuesChanged, this, [this] {
         update();
     });
-    connect(buffer, &QObject::destroyed, this, [this, buffer]() {
+    connect(buffer, &QObject::destroyed, this, [this, buffer] {
         if (m_line1 == buffer) {
             m_line1 = nullptr;
             emit line1Changed();
@@ -212,4 +212,4 @@ void SparklineItem::setLineWidth(qreal width) {
     update();
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

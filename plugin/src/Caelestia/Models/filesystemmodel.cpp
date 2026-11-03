@@ -1,13 +1,14 @@
 #include "filesystemmodel.hpp"
 
 #include <qdiriterator.h>
+#include <qmediaformat.h>
 #include <qtconcurrentrun.h>
 
 #include <algorithm>
 #include <optional>
 #include <utility>
 
-namespace caelestia::models {
+namespace caelestia::shell::models {
 
 using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
@@ -187,11 +188,11 @@ void FileSystemModel::setSortReverse(bool sortReverse) {
     update();
 }
 
-FileSystemModel::Filter FileSystemModel::filter() const {
+FileSystemModel::Filters FileSystemModel::filter() const {
     return m_filter;
 }
 
-void FileSystemModel::setFilter(Filter filter) {
+void FileSystemModel::setFilter(Filters filter) {
     if (m_filter == filter) {
         return;
     }
@@ -225,7 +226,7 @@ void FileSystemModel::watchDirIfRecursive(const QString& path) {
     if (m_recursive && m_watchChanges) {
         const auto currentDir = m_dir;
         const bool showHidden = m_showHidden;
-        auto future = QtConcurrent::run([showHidden, path]() {
+        auto future = QtConcurrent::run([showHidden, path] {
             QDir::Filters filters = QDir::Dirs | QDir::NoDotAndDotDot;
             if (showHidden) {
                 filters |= QDir::Hidden;
@@ -292,9 +293,13 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
     const auto filter = m_filter;
     const auto nameFilters = m_nameFilters;
 
+    const bool isRoot = dir == m_path;
+    const QString prefix = dir.endsWith(u'/') ? dir : dir + u'/';
     QSet<QString> oldPaths;
-    for (const auto& entry : std::as_const(m_entries))
-        oldPaths << entry->path();
+    for (const auto& entry : std::as_const(m_entries)) {
+        if (isRoot || entry->path().startsWith(prefix))
+            oldPaths << entry->path();
+    }
 
     auto future = QtConcurrent::run([=](QPromise<PathDiff>& promise) {
         const auto flags = recursive ? QDirIterator::Subdirectories : QDirIterator::NoIteratorFlags;
@@ -316,32 +321,53 @@ void FileSystemModel::updateEntriesForDir(const QString& dir) {
                 if (!result.removed.isEmpty() || !result.added.isEmpty())
                     applyChanges(result.removed, result.added);
             })
-        .onCanceled(this, [dir, this]() {
+        .onCanceled(this, [dir, this] {
             m_futures.remove(dir);
         });
 }
 
 FileSystemModel::ScanFilters FileSystemModel::filtersFor(
-    Filter filter, const QStringList& nameFilters, bool showHidden) {
+    Filters filter, const QStringList& nameFilters, bool showHidden) {
     ScanFilters filters;
     filters.nameFilters = nameFilters;
 
-    if (filter == Filter::Images) {
-        const auto formats = QImageReader::supportedImageFormats();
-        for (const auto& format : formats)
-            filters.nameFilters << u"*."_s + QString::fromUtf8(format);
+    const bool images = filter.testFlag(Filter::Images);
+    const bool videos = filter.testFlag(Filter::Videos);
+    const bool allFiles = filter.testFlag(Filter::Files);
+    const bool dirs = filter.testFlag(Filter::Dirs);
 
-        filters.filterFn = [](const QString& path) {
-            return QImageReader(path).canRead();
+    if (!allFiles && (images || videos)) {
+        if (images) {
+            const auto formats = QImageReader::supportedImageFormats();
+            for (const auto& format : formats)
+                filters.nameFilters << u"*."_s + QString::fromUtf8(format);
+        }
+
+        QSet<QString> videoMimeTypes;
+        if (videos) {
+            const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
+            for (const auto format : formats) {
+                const auto mimeType = QMediaFormat(format).mimeType();
+                if (!mimeType.name().startsWith(u"video/"_s))
+                    continue;
+                videoMimeTypes << mimeType.name();
+                filters.nameFilters << mimeType.globPatterns();
+            }
+        }
+
+        filters.filterFn = [images, videoMimeTypes](const QString& path) {
+            return (images && QImageReader(path).canRead()) ||
+                   videoMimeTypes.contains(QMimeDatabase().mimeTypeForFile(path).name());
         };
     }
 
-    if (filter == Filter::Files || filter == Filter::Images)
-        filters.filters = QDir::Files;
-    else if (filter == Filter::Dirs)
-        filters.filters = QDir::Dirs | QDir::NoDotAndDotDot;
-    else
-        filters.filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
+    const bool files = allFiles || images || videos;
+    if (!files && !dirs)
+        filters.filters = QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot;
+    if (files)
+        filters.filters |= QDir::Files;
+    if (dirs)
+        filters.filters |= QDir::Dirs | QDir::NoDotAndDotDot;
 
     if (showHidden)
         filters.filters |= QDir::Hidden;
@@ -413,9 +439,13 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     }
 
     // Create new entries
+    QSet<QString> existing;
+    for (const auto& entry : std::as_const(m_entries))
+        existing << entry->path();
     QList<FileSystemEntry*> newEntries;
     for (const auto& path : addedPaths) {
-        newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
+        if (!existing.contains(path))
+            newEntries << new FileSystemEntry(path, m_dir.relativeFilePath(path), this);
     }
     std::ranges::sort(newEntries, [this](const FileSystemEntry* a, const FileSystemEntry* b) {
         return compareEntries(a, b);
@@ -456,4 +486,4 @@ bool FileSystemModel::compareEntries(const FileSystemEntry* a, const FileSystemE
     return m_sortReverse ? cmp > 0 : cmp < 0;
 }
 
-} // namespace caelestia::models
+} // namespace caelestia::shell::models

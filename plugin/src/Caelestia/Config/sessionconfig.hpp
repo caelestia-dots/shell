@@ -6,7 +6,7 @@
 #include "settings/objectnode.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -38,4 +38,4 @@ class SessionConfig : public settings::ObjectNode {
     CONFIG_SUBOBJECT(SessionCommands, commands)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

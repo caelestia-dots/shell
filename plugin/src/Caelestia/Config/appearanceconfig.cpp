@@ -2,7 +2,7 @@
 
 #include "tokens.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 namespace {
 
@@ -12,7 +12,7 @@ template <typename Source, typename Target> void connectTokenSignals(Source* sou
     const auto* meta = source->metaObject();
 
     for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
-        auto prop = meta->property(i);
+        const auto prop = meta->property(i);
 
         if (prop.hasNotifySignal())
             QObject::connect(source, prop.notifySignal(), target,
@@ -192,4 +192,4 @@ int AnimDurations::expressiveSlowEffects() const {
     return m_tokens ? static_cast<int>(m_tokens->expressiveSlowEffects() * m_scale) : 0;
 }
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

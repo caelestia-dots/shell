@@ -12,7 +12,7 @@ Q_LOGGING_CATEGORY(lcAp, "caelestia.services.ap", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 AudioProcessor::AudioProcessor(QObject* parent)
     : QObject(parent) {}
@@ -82,4 +82,4 @@ void AudioProvider::stop() {
     }
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

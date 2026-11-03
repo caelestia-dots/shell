@@ -1,14 +1,25 @@
 #include "anim.hpp"
 
 #include <qpoint.h>
+#include <qqmlengine.h>
 
 #include "appearanceconfig.hpp"
+#include "rootnodes.hpp"
 #include "tokens.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 AnimTokens::AnimTokens(QObject* parent)
-    : QObject(parent) {}
+    : QObject(parent) {
+    QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+    bindDurations(ConfigSingleton::instance()->appearance()->anim()->durations());
+    bindCurves(TokensSingleton::instance()->appearance()->curves());
+}
+
+AnimTokens* AnimTokens::instance() {
+    static AnimTokens s_instance;
+    return &s_instance;
+}
 
 QEasingCurve AnimTokens::emphasized() const {
     return m_emphasized;
@@ -115,4 +126,4 @@ void AnimTokens::bindDurations(AnimDurations* durations) {
     emit durationsChanged();
 }
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

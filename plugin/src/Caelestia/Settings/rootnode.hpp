@@ -4,15 +4,15 @@
 #include "objectnode.hpp"
 #include "settingsfile.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 class RootNode : public ObjectNode {
     Q_OBJECT
 
-    Q_PROPERTY(QList<caelestia::settings::Diagnostic> diagnostics READ diagnostics NOTIFY diagnosticsChanged)
+    Q_PROPERTY(QList<caelestia::shell::settings::Diagnostic> diagnostics READ diagnostics NOTIFY diagnosticsChanged)
 
 public:
-    explicit RootNode(const QString& path, RootNode* fallback, QObject* parent = nullptr);
+    explicit RootNode(bool watch, const QString& path, RootNode* fallback, QObject* parent = nullptr);
 
     [[nodiscard]] QList<Diagnostic> diagnostics() const;
 
@@ -20,9 +20,9 @@ public:
 
 signals:
     void diagnosticsChanged();
-    void treeLoaded(RootNode* self);
-    void treeLoadFailed(RootNode* self, const QString& error);
-    void treeSaveFailed(RootNode* self, const QString& error);
+    void treeLoaded(caelestia::shell::settings::RootNode* self);
+    void treeLoadFailed(caelestia::shell::settings::RootNode* self, const QString& error);
+    void treeSaveFailed(caelestia::shell::settings::RootNode* self, const QString& error);
 
 private:
     SettingsFile* const m_file;
@@ -32,4 +32,4 @@ private:
     void saveToFile();
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings
