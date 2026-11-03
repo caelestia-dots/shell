@@ -188,11 +188,12 @@ Item {
     }
 
     Connections {
-        target: repeater
         function onCountChanged() {
             if (root.screenState.dashboardTab >= repeater.count)
                 root.screenState.dashboardTab = Math.max(0, repeater.count - 1);
         }
+
+        target: repeater
     }
 
     Behavior on implicitWidth {
