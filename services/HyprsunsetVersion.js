@@ -6,11 +6,6 @@ function parseVersion(output) {
     return version ? [Number(version[1]), Number(version[2]), Number(version[3])] : null;
 }
 
-function supportsToggle(output) {
-    const version = parseVersion(output);
-    return version !== null && (version[0] > 0 || version[1] >= 3);
-}
-
 function supportsIdentityQuery(output) {
     const version = parseVersion(output);
     return version !== null && (version[0] > 0 || version[1] >= 4);

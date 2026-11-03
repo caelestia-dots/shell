@@ -10,7 +10,6 @@ Singleton {
     id: root
 
     property bool available: false
-    property bool statusQuerySupported: false
     property bool active: false
     property bool pending: false
     property bool requestedActive: false
@@ -19,7 +18,7 @@ Singleton {
     property int stateGeneration: 0
 
     function refresh(): void {
-        if (!statusQuerySupported || pending || statusProc.running)
+        if (!available || pending || statusProc.running)
             return;
 
         statusProc.requestGeneration = stateGeneration;
@@ -59,9 +58,8 @@ Singleton {
         command: ["sh", "-c", "command -v hyprctl >/dev/null && hyprsunset --version 2>/dev/null"]
         stdout: StdioCollector {
             onStreamFinished: {
-                root.available = HyprsunsetVersion.supportsToggle(text);
-                root.statusQuerySupported = HyprsunsetVersion.supportsIdentityQuery(text);
-                if (root.statusQuerySupported)
+                root.available = HyprsunsetVersion.supportsIdentityQuery(text);
+                if (root.available)
                     root.refresh();
             }
         }
@@ -94,7 +92,7 @@ Singleton {
     Timer {
         interval: 15000
         repeat: true
-        running: root.statusQuerySupported
+        running: root.available
         onTriggered: root.refresh()
     }
 

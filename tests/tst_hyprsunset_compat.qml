@@ -13,13 +13,6 @@ Item {
             verify(!HyprsunsetVersion.supportsIdentityQuery("hyprsunset v0.3.10"));
         }
 
-        function test_legacyCanToggleWithoutQuerying() {
-            verify(HyprsunsetVersion.supportsToggle("hyprsunset v0.3.3"));
-            verify(!HyprsunsetVersion.supportsIdentityQuery("hyprsunset v0.3.3"));
-            verify(HyprsunsetVersion.supportsToggle("hyprsunset v0.4.0"));
-            verify(!HyprsunsetVersion.supportsToggle("hyprsunset v0.2.1"));
-        }
-
         function test_supportedVersions() {
             verify(HyprsunsetVersion.supportsIdentityQuery("hyprsunset v0.4.0"));
             verify(HyprsunsetVersion.supportsIdentityQuery("hyprsunset v0.4.12"));
