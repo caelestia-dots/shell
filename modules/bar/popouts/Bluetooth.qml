@@ -64,8 +64,8 @@ ColumnLayout {
     Repeater {
         model: ScriptModel {
             values: {
-                // Unnamed devices show up as their bare MAC address. List them after the named ones, so other
-                // people's devices nearby don't push the user's own out of the five slots.
+                // Unnamed devices show up as their bare MAC address.
+                // Show connected/paired devices first, followed by named ones, and unnamed ones last.
                 const macName = /^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i;
                 return [...Bluetooth.devices.values].sort((a, b) => {
                     const byState = (b.connected - a.connected) || (b.paired - a.paired);
