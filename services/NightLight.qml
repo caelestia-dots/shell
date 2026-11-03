@@ -13,16 +13,28 @@ Singleton {
     property bool active: false
     property bool pending: false
     property bool requestedActive: false
+    property bool temperatureDirty: false
+    property int configuredTemperature: GlobalConfig.services.nightLightTemperature
+
     property int startupAttempts: 0
     property bool attemptedStart: false
     property int stateGeneration: 0
 
     function refresh(): void {
-        if (!available || pending || statusProc.running)
+        if (!available || pending || statusProc.running || temperatureProc.running)
             return;
 
         statusProc.requestGeneration = stateGeneration;
         statusProc.running = true;
+    }
+
+    function applyTemperature(): void {
+        if (!temperatureDirty || !active || pending || temperatureProc.running)
+            return;
+
+        temperatureDirty = false;
+        stateGeneration++;
+        temperatureProc.running = true;
     }
 
     function toggle(): void {
@@ -30,6 +42,10 @@ Singleton {
             return;
 
         requestedActive = !active;
+        if (!requestedActive) {
+            temperatureTimer.stop();
+            temperatureDirty = false;
+        }
         stateGeneration++;
         pending = true;
         active = requestedActive;
@@ -37,7 +53,7 @@ Singleton {
         attemptedStart = false;
         if (requestedActive)
             enableProc.running = true;
-        else
+        else if (!temperatureProc.running)
             disableProc.running = true;
     }
 
@@ -46,9 +62,20 @@ Singleton {
         if (!success)
             active = !requestedActive;
         pending = false;
+        if (!active)
+            temperatureDirty = false;
+        else if (temperatureDirty)
+            temperatureTimer.restart();
         if (!success && requestedActive && attemptedStart && ownedSunset.running)
             ownedSunset.running = false;
         refresh();
+    }
+
+    onConfiguredTemperatureChanged: {
+        if (!active)
+            return;
+        temperatureDirty = true;
+        temperatureTimer.restart();
     }
 
     Process {
@@ -72,19 +99,20 @@ Singleton {
 
         command: ["hyprctl", "hyprsunset", "identity", "get"]
         // qmllint disable signal-handler-parameters
-        onExited: {
-            if (!root.pending && requestGeneration !== root.stateGeneration)
+        onExited: code => {
+            if (root.pending)
+                return;
+            if (requestGeneration !== root.stateGeneration)
                 Qt.callLater(root.refresh);
+            else if (code !== 0)
+                root.active = false;
         }
         stdout: StdioCollector {
             onStreamFinished: {
                 if (root.pending || statusProc.requestGeneration !== root.stateGeneration)
                     return;
                 const identity = text.trim();
-                if (identity === "true")
-                    root.active = false;
-                else if (identity === "false")
-                    root.active = true;
+                root.active = identity === "false";
             }
         }
     }
@@ -94,6 +122,32 @@ Singleton {
         repeat: true
         running: root.available
         onTriggered: root.refresh()
+    }
+
+    Timer {
+        id: temperatureTimer
+
+        interval: 100
+        onTriggered: root.applyTemperature()
+    }
+
+    Process {
+        id: temperatureProc
+
+        command: ["hyprctl", "hyprsunset", "temperature", String(root.configuredTemperature)]
+        // qmllint disable signal-handler-parameters
+        onExited: code => {
+            if (root.pending && !root.requestedActive) {
+                disableProc.running = true;
+            } else {
+                if (code !== 0 && !root.pending) {
+                    root.active = false;
+                    root.temperatureDirty = false;
+                }
+                root.applyTemperature();
+                root.refresh();
+            }
+        }
     }
 
     Process {
@@ -112,7 +166,7 @@ Singleton {
     Process {
         id: enableProc
 
-        command: ["hyprctl", "hyprsunset", "temperature", String(GlobalConfig.services.nightLightTemperature)]
+        command: ["hyprctl", "hyprsunset", "temperature", String(root.configuredTemperature)]
         // qmllint disable signal-handler-parameters
         onExited: code => {
             if (code === 0) {
