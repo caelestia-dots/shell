@@ -58,7 +58,6 @@ PageBase {
 
         SliderRow {
             first: true
-            last: true
             icon: `brightness_${(Math.round(value * 6) + 1)}`
             nightLightActive: NightLight.active
             iconTapEnabled: NightLight.available
@@ -69,6 +68,18 @@ PageBase {
             wheelStep: GlobalConfig.services.brightnessIncrement
             onIconTapped: NightLight.toggle()
             onMoved: v => Brightness.getMonitor("active")?.setBrightness(v)
+        }
+
+        StepperRow {
+            last: true
+            label: Tr.tr("Night Light temperature")
+            subtext: Tr.tr("Color temperature when Night Light is enabled (K)")
+            value: GlobalConfig.services.nightLightTemperature
+            from: 2500
+            to: 6500
+            stepSize: 100
+            enabled: NightLight.available
+            onMoved: v => GlobalConfig.services.nightLightTemperature = v
         }
 
         // Detected running players, used as default-player options

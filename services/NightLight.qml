@@ -3,11 +3,14 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.Config
+import "HyprsunsetVersion.js" as HyprsunsetVersion
 
 Singleton {
     id: root
 
     property bool available: false
+    property bool statusQuerySupported: false
     property bool active: false
     property bool pending: false
     property bool requestedActive: false
@@ -16,7 +19,7 @@ Singleton {
     property int stateGeneration: 0
 
     function refresh(): void {
-        if (!available || pending || statusProc.running)
+        if (!statusQuerySupported || pending || statusProc.running)
             return;
 
         statusProc.requestGeneration = stateGeneration;
@@ -53,12 +56,14 @@ Singleton {
         id: availabilityProc
 
         running: true
-        command: ["sh", "-c", "command -v hyprsunset >/dev/null && command -v hyprctl >/dev/null"]
-        // qmllint disable signal-handler-parameters
-        onExited: code => {
-            root.available = code === 0;
-            if (root.available)
-                root.refresh();
+        command: ["sh", "-c", "command -v hyprctl >/dev/null && hyprsunset --version 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.available = HyprsunsetVersion.supportsToggle(text);
+                root.statusQuerySupported = HyprsunsetVersion.supportsIdentityQuery(text);
+                if (root.statusQuerySupported)
+                    root.refresh();
+            }
         }
     }
 
@@ -89,7 +94,7 @@ Singleton {
     Timer {
         interval: 15000
         repeat: true
-        running: root.available
+        running: root.statusQuerySupported
         onTriggered: root.refresh()
     }
 
@@ -109,7 +114,7 @@ Singleton {
     Process {
         id: enableProc
 
-        command: ["hyprctl", "hyprsunset", "temperature", "4500"]
+        command: ["hyprctl", "hyprsunset", "temperature", String(GlobalConfig.services.nightLightTemperature)]
         // qmllint disable signal-handler-parameters
         onExited: code => {
             if (code === 0) {
