@@ -15,10 +15,6 @@ ColumnLayout {
     id: root
 
     required property PopoutState popouts
-    // Devices that do not advertise a name are shown as their bare MAC address. In public places the list fills up
-    // with those (other people's phones, earbuds and trackers), pushing the user's own devices out of the popout.
-    // Keep them out unless they are connected or paired.
-    readonly property var visibleDevices: [...Bluetooth.devices.values].filter(d => d.connected || d.paired || !/^([0-9A-Fa-f]{2}[-:]){5}[0-9A-Fa-f]{2}$/.test(d.name ?? ""))
 
     width: 300
     spacing: Tokens.spacing.small
@@ -54,8 +50,8 @@ ColumnLayout {
         Layout.topMargin: Tokens.spacing.small
         Layout.rightMargin: Tokens.padding.extraSmall
         text: {
-            const devices = root.visibleDevices;
-            const connected = devices.filter(d => d.connected).length;
+            const devices = Bluetooth.devices.values;
+            const connected = devices.reduce((total, d) => total + d.connected, 0);
             if (connected > 0)
                 // TRANSLATORS: %n = total paired devices, %1 = how many of them are connected
                 return Tr.trN("%n device available (%1 connected)", "%n devices available (%1 connected)", devices.length).arg(connected);
@@ -67,7 +63,24 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: [...root.visibleDevices].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5)
+            values: {
+                // Unnamed devices show up as their bare MAC address. List them after the named ones, so other
+                // people's devices nearby don't push the user's own out of the five slots.
+                const macName = /^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i;
+                return [...Bluetooth.devices.values].sort((a, b) => {
+                    const byState = (b.connected - a.connected) || (b.paired - a.paired);
+                    if (byState)
+                        return byState;
+
+                    if (!a.connected && !a.paired) {
+                        const byNameType = macName.test(a.name) - macName.test(b.name);
+                        if (byNameType)
+                            return byNameType;
+                    }
+
+                    return a.name.localeCompare(b.name);
+                }).slice(0, 5);
+            }
         }
 
         RowLayout {
