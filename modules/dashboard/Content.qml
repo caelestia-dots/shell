@@ -45,8 +45,8 @@ Item {
         return allTabs.filter(tab => tab.enabled);
     }
 
-    readonly property real nonAnimWidth: view.implicitWidth + viewWrapper.anchors.margins * 2
-    readonly property real nonAnimHeight: tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2
+    readonly property real nonAnimWidth: dashboardTabs.length > 0 ? view.implicitWidth + viewWrapper.anchors.margins * 2 : 0
+    readonly property real nonAnimHeight: dashboardTabs.length > 0 ? tabs.implicitHeight + tabs.anchors.topMargin + view.implicitHeight + viewWrapper.anchors.margins * 2 : 0
 
     implicitWidth: nonAnimWidth
     implicitHeight: nonAnimHeight
@@ -80,7 +80,7 @@ Item {
         Flickable {
             id: view
 
-            readonly property int currentIndex: root.screenState.dashboardTab
+            readonly property int currentIndex: Math.min(root.screenState.dashboardTab, repeater.count - 1)
             readonly property Item currentItem: {
                 CUtils.dependency(repeater.count); // Trigger update on count change
                 return repeater.itemAt(currentIndex);
@@ -184,6 +184,14 @@ Item {
             Behavior on contentX {
                 Anim {}
             }
+        }
+    }
+
+    Connections {
+        target: repeater
+        function onCountChanged() {
+            if (root.screenState.dashboardTab >= repeater.count)
+                root.screenState.dashboardTab = Math.max(0, repeater.count - 1);
         }
     }
 
