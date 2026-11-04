@@ -14,7 +14,7 @@ using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
 
 FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
-    : QObject(parent)
+    : util::RefGated(parent)
     , m_fileInfo(path)
     , m_path(path)
     , m_relativePath(std::move(relativePath))
@@ -270,7 +270,8 @@ void FileSystemModel::updateEntries() {
     if (m_path.isEmpty()) {
         if (!m_entries.isEmpty()) {
             beginResetModel();
-            qDeleteAll(m_entries);
+            for (auto* const entry : std::as_const(m_entries))
+                entry->release();
             m_entries.clear();
             endResetModel();
             emit entriesChanged();
@@ -422,7 +423,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
         } else {
             beginRemoveRows(QModelIndex(), end, start);
             for (int i = start; i >= end; --i) {
-                m_entries.takeAt(i)->deleteLater();
+                m_entries.takeAt(i)->release();
             }
             endRemoveRows();
 
@@ -433,7 +434,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     if (start != -1) {
         beginRemoveRows(QModelIndex(), end, start);
         for (int i = start; i >= end; --i) {
-            m_entries.takeAt(i)->deleteLater();
+            m_entries.takeAt(i)->release();
         }
         endRemoveRows();
     }
