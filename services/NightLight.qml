@@ -19,6 +19,27 @@ Singleton {
     property int startupAttempts: 0
     property bool attemptedStart: false
     property int stateGeneration: 0
+    property bool initialStateChecked: false
+
+    function acceptStatus(identity: string): void {
+        const observed = identity === "false";
+        if (!initialStateChecked) {
+            initialStateChecked = true;
+            active = observed;
+            if (!GlobalConfig.services.nightLightConfigured)
+                return;
+
+            const preferred = GlobalConfig.services.nightLightEnabled;
+            if (preferred !== observed)
+                requestEnabled(preferred);
+            else if (preferred) {
+                temperatureDirty = true;
+                temperatureTimer.restart();
+            }
+            return;
+        }
+        active = observed;
+    }
 
     function refresh(): void {
         if (!available || pending || statusProc.running || temperatureProc.running)
@@ -38,10 +59,14 @@ Singleton {
     }
 
     function toggle(): void {
-        if (!available || pending)
+        if (!available || pending || !initialStateChecked)
             return;
 
-        requestedActive = !active;
+        requestEnabled(!active);
+    }
+
+    function requestEnabled(enabled: bool): void {
+        requestedActive = enabled;
         if (!requestedActive) {
             temperatureTimer.stop();
             temperatureDirty = false;
@@ -61,8 +86,10 @@ Singleton {
         startupTimer.stop();
         if (!success)
             active = !requestedActive;
-        else
+        else {
             GlobalConfig.services.nightLightEnabled = active;
+            GlobalConfig.services.nightLightConfigured = true;
+        }
         pending = false;
         if (!active)
             temperatureDirty = false;
@@ -88,12 +115,8 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.available = HyprsunsetVersion.supportsIdentityQuery(text);
-                if (root.available) {
-                    if (GlobalConfig.services.nightLightEnabled)
-                        root.toggle();
-                    else
-                        root.refresh();
-                }
+                if (root.available)
+                    root.refresh();
             }
         }
     }
@@ -108,6 +131,13 @@ Singleton {
         onExited: code => {
             if (root.pending)
                 return;
+            if (code !== 0 && !root.initialStateChecked) {
+                Qt.callLater(() => {
+                    if (!root.initialStateChecked)
+                        root.acceptStatus("unavailable");
+                });
+                return;
+            }
             if (requestGeneration !== root.stateGeneration)
                 Qt.callLater(root.refresh);
             else if (code !== 0)
@@ -119,11 +149,13 @@ Singleton {
                     return;
                 const identity = text.trim();
                 if (identity !== "true" && identity !== "false") {
-                    root.active = false;
+                    if (!root.initialStateChecked)
+                        root.acceptStatus("unavailable");
+                    else
+                        root.active = false;
                     return;
                 }
-                root.active = identity === "false";
-                GlobalConfig.services.nightLightEnabled = root.active;
+                root.acceptStatus(identity);
             }
         }
     }
