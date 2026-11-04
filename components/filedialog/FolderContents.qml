@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtCore
 import Quickshell
+import M3Shapes
 import Caelestia
 import Caelestia.Components
 import Caelestia.Config
@@ -135,23 +136,105 @@ Item {
 
     Loader {
         asynchronous: true
-        anchors.centerIn: parent
+        anchors.fill: parent
 
         opacity: grid.count === 0 ? 1 : 0
         active: opacity > 0
+        z: active ? 1 : 0
 
-        sourceComponent: ColumnLayout {
-            MaterialIcon {
-                Layout.alignment: Qt.AlignHCenter
-                text: "scan_delete"
-                color: Colours.palette.outline
-                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.Medium).build()
+        sourceComponent: MouseArea {
+            id: noFiles
+
+            property int clicks
+            property int exitTrigger
+
+            onPressed: clicks++
+            opacity: clicks > 10 && clicks < 15 ? 0 : 1
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.SlowEffects
+                }
             }
 
-            StyledText {
-                text: Tr.tr("This folder is empty")
-                color: Colours.palette.outline
-                font: Tokens.font.body.builders.large.weight(Font.Medium).build()
+            Timer {
+                running: noFiles.clicks >= 16
+                interval: Tokens.anim.durations.expressiveFastEffects + Tokens.anim.durations.expressiveDefaultEffects
+                onTriggered: {
+                    if (noFiles.exitTrigger === 0) {
+                        interval = 300;
+                        running = true;
+                    } else if (noFiles.exitTrigger === 1) {
+                        noFiles.opacity = 0;
+                        interval = Tokens.anim.durations.expressiveSlowEffects;
+                        running = true;
+                    } else {
+                        root.dState.rejected();
+                    }
+                    noFiles.exitTrigger++;
+                }
+            }
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: Tokens.spacing.extraSmall
+
+                MaterialShape {
+                    Layout.alignment: Qt.AlignHCenter
+                    color: Colours.tPalette.surfaceContainerHigh
+                    shape: MaterialShape.Ghostish
+                    implicitSize: noFilesIcon.implicitHeight + Tokens.padding.large * 2
+
+                    MaterialIcon {
+                        id: noFilesIcon
+
+                        anchors.centerIn: parent
+                        text: "folder_open"
+                        color: Colours.palette.onSurfaceVariant
+                        fontStyle: Tokens.font.icon.extraLarge
+                    }
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+                }
+
+                StyledText {
+                    Layout.topMargin: Tokens.spacing.small
+                    Layout.alignment: Qt.AlignHCenter
+                    text: {
+                        if (noFiles.clicks >= 12)
+                            return Tr.tr("This folder is done with you");
+                        if (noFiles.clicks >= 6)
+                            return Tr.tr("This folder is annoyed");
+                        return Tr.tr("This folder is empty");
+                    }
+                    color: Colours.palette.onSurfaceVariant
+                    font: Tokens.font.title.medium
+                    animate: true
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: {
+                        if (noFiles.clicks >= 16)
+                            return Tr.tr("You win. I'm out.");
+                        if (noFiles.clicks >= 12)
+                            return Tr.tr("Why are you still here?? Go touch some grass.");
+                        if (noFiles.clicks >= 8)
+                            return Tr.tr("I really will leave...");
+                        if (noFiles.clicks >= 6)
+                            return Tr.tr("That's it, I'm leaving.");
+                        if (noFiles.clicks >= 3)
+                            return Tr.tr("Stop clicking me. Can't a folder be empty in peace?");
+                        if (noFiles.clicks >= 1)
+                            return Tr.tr("Hey. There really is nothing here...");
+                        return Tr.tr("Nothing to see here... I mean it, really.");
+                    }
+                    color: Colours.palette.outline
+                    font: Tokens.font.body.medium
+                    animate: true
+                }
             }
         }
 
