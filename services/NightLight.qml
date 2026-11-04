@@ -61,6 +61,8 @@ Singleton {
         startupTimer.stop();
         if (!success)
             active = !requestedActive;
+        else
+            GlobalConfig.services.nightLightEnabled = active;
         pending = false;
         if (!active)
             temperatureDirty = false;
@@ -86,8 +88,12 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.available = HyprsunsetVersion.supportsIdentityQuery(text);
-                if (root.available)
-                    root.refresh();
+                if (root.available) {
+                    if (GlobalConfig.services.nightLightEnabled)
+                        root.toggle();
+                    else
+                        root.refresh();
+                }
             }
         }
     }
@@ -112,7 +118,12 @@ Singleton {
                 if (root.pending || statusProc.requestGeneration !== root.stateGeneration)
                     return;
                 const identity = text.trim();
+                if (identity !== "true" && identity !== "false") {
+                    root.active = false;
+                    return;
+                }
                 root.active = identity === "false";
+                GlobalConfig.services.nightLightEnabled = root.active;
             }
         }
     }
