@@ -21,6 +21,7 @@ QtObject {
     property bool save
     property string confirmLabel
     property bool showHidden
+    property FileSystemEntry selectedPath
 
     signal accepted(path: string)
     signal rejected
@@ -49,5 +50,12 @@ QtObject {
     function cdBack(): void {
         if (cwdStack.length)
             cwd = cwdStack.pop();
+    }
+
+    function select(entry: FileSystemEntry): void {
+        const old = selectedPath;
+        entry?.ref(this);
+        selectedPath = entry;
+        old?.unref(this);
     }
 }

@@ -73,6 +73,14 @@ Item {
         return Quickshell.iconPath("inode-directory");
     }
 
+    onCurrentItemChanged: {
+        // currentItem gets nulled when it is scrolled out of view, so only update if it exists
+        if (currentItem)
+            dState.select(currentItem.modelData);
+    }
+    // Use currentIndex instead to reset the selection
+    onCurrentIndexChanged: dState.select(currentItem?.modelData)
+
     Component.onCompleted: model.path = currentDir
     onCurrentDirChanged: {
         model.path = "";
@@ -119,6 +127,8 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: Tokens.padding.extraSmall
+            anchors.topMargin: 0
+            anchors.bottomMargin: 0
             radius: Tokens.rounding.medium
         }
     }
@@ -212,14 +222,6 @@ Item {
         }
     }
 
-    CurrentItem {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Tokens.padding.extraSmall
-
-        currentItem: root.currentItem
-    }
-
     component FileEntry: StyledRect {
         id: item
 
@@ -227,15 +229,12 @@ Item {
         required property FileSystemEntry modelData
 
         readonly property bool isCurrentItem: root.currentIndex === index
-        readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
 
         implicitWidth: Tokens.sizes.fileDialog.itemWidth
-        implicitHeight: nonAnimHeight
+        implicitHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
 
         radius: Tokens.rounding.large
         color: isCurrentItem ? Colours.tPalette.surfaceContainerHighest : Qt.alpha(Colours.tPalette.surfaceContainerHighest, 0)
-        z: isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
-        clip: true
 
         opacity: LazyGridView.adding || LazyGridView.removing ? 0 : 1
 
@@ -259,7 +258,7 @@ Item {
             implicitWidth: Tokens.sizes.fileDialog.itemWidth - Tokens.padding.extraLarge * 2
             implicitHeight: implicitWidth
             fillMode: VisualSource.PreserveAspectFit
-            opacity: item.modelData?.name.startsWith(".") ? 0.5 : 1
+            opacity: !ready ? 0 : item.modelData?.name.startsWith(".") ? 0.5 : 1
 
             Component.onCompleted: source = root.getSource(item.modelData)
         }

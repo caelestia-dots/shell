@@ -19,7 +19,7 @@ FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObj
     , m_path(path)
     , m_relativePath(std::move(relativePath))
     , m_isImageInitialised(false)
-    , m_mimeTypeInitialised(false) {}
+    , m_mimeInitialised(false) {}
 
 QString FileSystemEntry::path() const {
     return m_path;
@@ -63,12 +63,23 @@ bool FileSystemEntry::isImage() const {
 }
 
 QString FileSystemEntry::mimeType() const {
-    if (!m_mimeTypeInitialised) {
+    return mime().name();
+}
+
+QString FileSystemEntry::mimeComment() const {
+    auto comment = mime().comment();
+    if (!comment.isEmpty())
+        comment.front() = comment.front().toUpper();
+    return comment;
+}
+
+const QMimeType& FileSystemEntry::mime() const {
+    if (!m_mimeInitialised) {
         static const QMimeDatabase k_db;
-        m_mimeType = k_db.mimeTypeForFile(m_path).name();
-        m_mimeTypeInitialised = true;
+        m_mime = k_db.mimeTypeForFile(m_path);
+        m_mimeInitialised = true;
     }
-    return m_mimeType;
+    return m_mime;
 }
 
 void FileSystemEntry::updateRelativePath(const QDir& dir) {
