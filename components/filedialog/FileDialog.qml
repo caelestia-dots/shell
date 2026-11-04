@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import QtCore
 import Quickshell
+import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
@@ -52,10 +52,14 @@ LazyLoader {
             onRejected: loader.rejected()
         }
 
-        implicitWidth: 1000
-        implicitHeight: 600
-        minimumSize.width: 400
-        minimumSize.height: 300
+        contentItem.Config.screen: screen.name
+        contentItem.Tokens.screen: screen.name
+
+        implicitWidth: contentItem.Tokens.sizes.fileDialog.initialWidth
+        implicitHeight: contentItem.Tokens.sizes.fileDialog.initialHeight
+        minimumSize.width: contentItem.Tokens.sizes.fileDialog.minWidth
+        minimumSize.height: contentItem.Tokens.sizes.fileDialog.minHeight
+
         color: Colours.tPalette.surface
         surfaceFormat.opaque: false
         title: loader.title

@@ -234,7 +234,11 @@ class NexusTokens : public settings::ObjectNode {
 class FileDialogTokens : public settings::ObjectNode {
     CONFIG_NODE(FileDialogTokens, settings::ObjectNode)
 
-    CONFIG_PROPERTY(int, itemWidth, 103)
+    CONFIG_PROPERTY(int, initialWidth, 1500)
+    CONFIG_PROPERTY(int, initialHeight, 800)
+    CONFIG_PROPERTY(int, minWidth, 850)
+    CONFIG_PROPERTY(int, minHeight, 480)
+    CONFIG_PROPERTY(int, itemWidth, 140)
     CONFIG_PROPERTY(int, sidebarWidth, 230)
 };
 
