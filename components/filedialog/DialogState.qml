@@ -20,6 +20,7 @@ QtObject {
     }
     property bool save
     property string confirmLabel
+    property bool showHidden
 
     signal accepted(path: string)
     signal rejected
