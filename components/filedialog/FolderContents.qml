@@ -172,6 +172,10 @@ Item {
             if (root.dState.selectionValid)
                 root.dState.accepted(root.currentItem.modelData.path);
         }
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_H && event.modifiers & Qt.ControlModifier)
+                root.dState.showHidden = !root.dState.showHidden;
+        }
 
         StyledScrollBar.vertical: StyledScrollBar {
             flickable: view
@@ -196,6 +200,8 @@ Item {
 
             model: FileSystemModel {
                 id: model
+
+                showHidden: root.dState.showHidden
             }
 
             delegate: FileEntry {}
@@ -254,6 +260,7 @@ Item {
             implicitWidth: Tokens.sizes.fileDialog.itemWidth - Tokens.padding.medium * 2
             implicitHeight: implicitWidth
             fillMode: VisualSource.PreserveAspectFit
+            opacity: item.modelData?.name.startsWith(".") ? 0.5 : 1
 
             Component.onCompleted: source = root.getSource(item.modelData)
         }
