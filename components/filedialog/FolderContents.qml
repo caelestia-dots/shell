@@ -129,7 +129,7 @@ Item {
             anchors.margins: Tokens.padding.extraSmall
             anchors.topMargin: 0
             anchors.bottomMargin: 0
-            radius: Tokens.rounding.medium
+            radius: Tokens.rounding.largeIncreased
         }
     }
 
@@ -167,6 +167,8 @@ Item {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.extraSmall + Tokens.padding.medium
+        anchors.topMargin: Tokens.padding.medium
+        anchors.bottomMargin: Tokens.padding.medium
 
         flickableDirection: Flickable.VerticalFlick
         contentWidth: width
