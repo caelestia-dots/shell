@@ -11,13 +11,12 @@ import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.effects
-import qs.components.filedialog
 import qs.utils
 
 Item {
     id: root
 
-    required property var dialog
+    required property DialogState dState
     readonly property FileEntry currentItem: view.currentItem as FileEntry
 
     StyledRect {
@@ -89,12 +88,12 @@ Item {
         Keys.onEscapePressed: currentIndex = -1
 
         Keys.onReturnPressed: {
-            if (root.dialog.selectionValid)
-                root.dialog.accepted((currentItem as FileEntry).modelData.path);
+            if (root.dState.selectionValid)
+                root.dState.accepted((currentItem as FileEntry).modelData.path);
         }
         Keys.onEnterPressed: {
-            if (root.dialog.selectionValid)
-                root.dialog.accepted((currentItem as FileEntry).modelData.path);
+            if (root.dState.selectionValid)
+                root.dState.accepted((currentItem as FileEntry).modelData.path);
         }
 
         StyledScrollBar.vertical: StyledScrollBar {
@@ -103,10 +102,10 @@ Item {
 
         model: FileSystemModel {
             path: {
-                if (root.dialog.cwd[0] === "Home")
-                    return Paths.home + `/${root.dialog.cwd.slice(1).join("/")}`;
+                if (root.dState.cwd[0] === "Home")
+                    return Paths.home + `/${root.dState.cwd.slice(1).join("/")}`;
                 else
-                    return root.dialog.cwd.join("/");
+                    return root.dState.cwd.join("/");
             }
             onPathChanged: view.currentIndex = -1
         }
@@ -174,9 +173,9 @@ Item {
             onClicked: view.currentIndex = item.index
             onDoubleClicked: {
                 if (item.modelData.isDir)
-                    root.dialog.cwd.push(item.modelData.name);
-                else if (root.dialog.selectionValid)
-                    root.dialog.accepted(item.modelData.path);
+                    root.dState.cwd.push(item.modelData.name);
+                else if (root.dState.selectionValid)
+                    root.dState.accepted(item.modelData.path);
             }
         }
 
@@ -197,7 +196,7 @@ Item {
                     source = Qt.resolvedUrl(file.path);
                 else if (!file.isDir)
                     source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
-                else if (root.dialog.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
+                else if (root.dState.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
                     source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
                 else
                     source = Quickshell.iconPath("inode-directory");
