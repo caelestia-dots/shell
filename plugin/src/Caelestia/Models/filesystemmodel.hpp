@@ -11,9 +11,11 @@
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 
+#include "util/refgated.hpp"
+
 namespace caelestia::shell::models {
 
-class FileSystemEntry : public QObject {
+class FileSystemEntry : public util::RefGated {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("FileSystemEntry instances can only be retrieved from a FileSystemModel")
@@ -59,6 +61,8 @@ private:
 
     mutable QString m_mimeType;
     mutable bool m_mimeTypeInitialised;
+
+    friend class FileSystemModel;
 };
 
 class FileSystemModel : public QAbstractListModel {
