@@ -87,7 +87,7 @@ void NotifPopups::offer(NotifData* notif) {
     QObject::connect(timer, &QTimer::timeout, this, [this, notif] {
         close(notif);
     });
-    m_popups.insert(notif, { timer });
+    m_popups.insert(notif, { .timer = timer });
 
     if (m_groups.add(notif))
         emit groupsChanged();
