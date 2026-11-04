@@ -40,6 +40,7 @@ class LazyGridView : public LazyViewBase {
     Q_PROPERTY(qreal cellWidth READ cellWidth WRITE setCellWidth NOTIFY cellWidthChanged)
     Q_PROPERTY(qreal rowSpacing READ rowSpacing WRITE setRowSpacing NOTIFY rowSpacingChanged)
     Q_PROPERTY(qreal columnSpacing READ columnSpacing WRITE setColumnSpacing NOTIFY columnSpacingChanged)
+    Q_PROPERTY(bool fillWidth READ fillWidth WRITE setFillWidth NOTIFY fillWidthChanged)
 
     // Resolved layout (read-only)
     Q_PROPERTY(int resolvedColumns READ resolvedColumns NOTIFY resolvedColumnsChanged)
@@ -67,6 +68,9 @@ public:
     [[nodiscard]] qreal columnSpacing() const;
     void setColumnSpacing(qreal spacing);
 
+    [[nodiscard]] bool fillWidth() const;
+    void setFillWidth(bool fill);
+
     [[nodiscard]] int resolvedColumns() const;
     [[nodiscard]] qreal resolvedCellWidth() const;
 
@@ -86,6 +90,7 @@ signals:
     void cellWidthChanged();
     void rowSpacingChanged();
     void columnSpacingChanged();
+    void fillWidthChanged();
     void resolvedColumnsChanged();
     void resolvedCellWidthChanged();
     void stiffnessChanged();
@@ -154,6 +159,7 @@ private:
     qreal m_cellWidth = 0;
     qreal m_rowSpacing = 0;
     qreal m_columnSpacing = 0;
+    bool m_fillWidth = false;
 
     int m_resolvedColumns = 1;
     qreal m_resolvedCellWidth = 0;
