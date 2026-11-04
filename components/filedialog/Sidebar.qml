@@ -110,7 +110,7 @@ StyledRect {
 
             MaterialIcon {
                 text: place.icon
-                color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+                color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.medium
                 fill: place.selected ? 1 : 0
 
