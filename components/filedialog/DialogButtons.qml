@@ -3,14 +3,14 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
+import qs.components.controls
 
 StyledRect {
     id: root
 
     required property DialogState dState
-    required property FolderContents folder
 
-    implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
+    implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
 
     color: Colours.tPalette.surfaceContainer
 
@@ -19,77 +19,56 @@ StyledRect {
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.medium
+        anchors.leftMargin: 0
 
         spacing: Tokens.spacing.small
-
-        StyledText {
-            text: Tr.trCtx("Filter:", "file filter")
-        }
 
         StyledRect {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.rightMargin: Tokens.spacing.medium
+            Layout.rightMargin: Tokens.spacing.small
 
             color: Colours.tPalette.surfaceContainerHigh
-            radius: Tokens.rounding.medium
+            radius: Tokens.rounding.full
 
             StyledText {
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.medium
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Tokens.padding.large
 
                 text: {
-                    const filters = root.dState.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
-                    // TRANSLATORS: %1 = filter label, %2 = file patterns
-                    return Tr.trCtx("%1 (%2)", "file filter label and patterns").arg(root.dState.filterLabel).arg(filters);
+                    const entry = root.dState.selectedPath;
+                    if (!entry)
+                        return Tr.tr("No selected file");
+
+                    if (entry.isDir)
+                        // TRANSLATORS: %1 = selected folder
+                        return Tr.trCtx("\"%1\" | Folder", "selected folder label").arg(entry.name);
+
+                    // TRANSLATORS: %1 = file name, %2 = file size, %3 = file type
+                    return Tr.trCtx("\"%1\" | %2 | %3", "selected file label").arg(entry.name).arg(Units.formatBytes(entry.size)).arg(entry.mimeComment);
                 }
+                elide: StyledText.ElideRight
             }
         }
 
-        StyledRect {
-            color: Colours.tPalette.surfaceContainerHigh
-            radius: Tokens.rounding.medium
-
-            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
-            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
-
-            StateLayer {
-                disabled: !root.dState.selectionValid
-                onClicked: root.dState.accepted(root.folder.currentItem.modelData.path)
-            }
-
-            StyledText {
-                id: selectText
-
-                anchors.centerIn: parent
-                anchors.margins: Tokens.padding.medium
-
-                text: Tr.trCtx("Select", "button")
-                color: root.dState.selectionValid ? Colours.palette.onSurface : Colours.palette.outline
-            }
+        TextButton {
+            isRound: true
+            horizontalPadding: Tokens.padding.large
+            verticalPadding: Tokens.padding.medium
+            disabled: !root.dState.selectionValid
+            text: Tr.trCtx("Select", "button")
+            onClicked: root.dState.accepted(root.dState.selectedPath.path)
         }
 
-        StyledRect {
-            color: Colours.tPalette.surfaceContainerHigh
-            radius: Tokens.rounding.medium
-
-            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
-            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
-
-            StateLayer {
-                onClicked: {
-                    root.dState.rejected();
-                }
-            }
-
-            StyledText {
-                id: cancelText
-
-                anchors.centerIn: parent
-                anchors.margins: Tokens.padding.medium
-
-                text: Tr.trCtx("Cancel", "button")
-            }
+        TextButton {
+            type: TextButton.Tonal
+            isRound: true
+            horizontalPadding: Tokens.padding.large
+            verticalPadding: Tokens.padding.medium
+            text: Tr.trCtx("Cancel", "button")
+            onClicked: root.dState.rejected()
         }
     }
 }
