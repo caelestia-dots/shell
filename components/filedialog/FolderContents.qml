@@ -3,12 +3,15 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Caelestia
+import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Models
 import Caelestia.Multimedia
 import Caelestia.Scheme
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.components.effects
 import qs.utils
@@ -16,8 +19,38 @@ import qs.utils
 Item {
     id: root
 
+    readonly property FileEntry currentItem: {
+        CUtils.dependency(grid.itemsDirty);
+        return grid.itemAtIndex(grid.currentIndex) as FileEntry;
+    }
     required property DialogState dState
-    readonly property FileEntry currentItem: view.currentItem as FileEntry
+
+    property string currentDir: dState.cwd.join("/")
+
+    Component.onCompleted: model.path = currentDir
+    onCurrentDirChanged: {
+        model.path = "";
+        model.path = currentDir;
+        grid.currentIndex = -1;
+    }
+
+    Behavior on currentDir {
+        SequentialAnimation {
+            Anim {
+                target: view
+                property: "opacity"
+                to: 0
+                type: Anim.DefaultEffects
+            }
+            PropertyAction {}
+            Anim {
+                target: view
+                property: "opacity"
+                to: 1
+                type: Anim.DefaultEffects
+            }
+        }
+    }
 
     StyledRect {
         anchors.fill: parent
@@ -48,7 +81,7 @@ Item {
         asynchronous: true
         anchors.centerIn: parent
 
-        opacity: view.count === 0 ? 1 : 0
+        opacity: grid.count === 0 ? 1 : 0
         active: opacity > 0
 
         sourceComponent: ColumnLayout {
@@ -73,74 +106,58 @@ Item {
         }
     }
 
-    GridView {
+    StyledFlickable {
         id: view
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.extraSmall + Tokens.padding.medium
 
-        cellWidth: Sizes.itemWidth + Tokens.spacing.small
-        cellHeight: Sizes.itemWidth + Tokens.spacing.large + Tokens.padding.medium * 2 + 1
+        flickableDirection: Flickable.VerticalFlick
+        contentWidth: width
+        contentHeight: grid.implicitHeight
 
         clip: true
         focus: true
-        currentIndex: -1
-        Keys.onEscapePressed: currentIndex = -1
-
+        Keys.onEscapePressed: grid.currentIndex = -1
         Keys.onReturnPressed: {
             if (root.dState.selectionValid)
-                root.dState.accepted((currentItem as FileEntry).modelData.path);
+                root.dState.accepted(root.currentItem.modelData.path);
         }
         Keys.onEnterPressed: {
             if (root.dState.selectionValid)
-                root.dState.accepted((currentItem as FileEntry).modelData.path);
+                root.dState.accepted(root.currentItem.modelData.path);
         }
 
         StyledScrollBar.vertical: StyledScrollBar {
             flickable: view
         }
 
-        model: FileSystemModel {
-            path: {
-                if (root.dState.cwd[0] === "Home")
-                    return Paths.home + `/${root.dState.cwd.slice(1).join("/")}`;
-                else
-                    return root.dState.cwd.join("/");
-            }
-            onPathChanged: view.currentIndex = -1
-        }
+        LazyGridView {
+            id: grid
 
-        delegate: FileEntry {}
+            property int currentIndex: -1
 
-        add: Transition {
-            Anim {
-                properties: "opacity,scale"
-                from: 0
-                to: 1
-            }
-        }
+            anchors.left: parent.left
+            anchors.right: parent.right
+            implicitHeight: contentHeight
 
-        remove: Transition {
-            Anim {
-                type: Anim.DefaultEffects
-                property: "opacity"
-                to: 0
-            }
-            Anim {
-                property: "scale"
-                to: 0.5
-            }
-        }
+            cellWidth: Tokens.sizes.fileDialog.itemWidth
+            columnSpacing: Tokens.spacing.small
+            rowSpacing: Tokens.spacing.small
+            removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
-        displaced: Transition {
-            Anim {
-                type: Anim.DefaultEffects
-                properties: "opacity,scale"
-                to: 1
-                easing: Tokens.anim.standardDecel
+            useCustomViewport: true
+            viewport: Qt.rect(0, view.contentY, width, view.height)
+
+            model: FileSystemModel {
+                id: model
             }
-            Anim {
-                properties: "x,y"
+
+            delegate: FileEntry {}
+
+            FrameAnimation {
+                running: grid.animating
+                onTriggered: grid.step(frameTime)
             }
         }
     }
@@ -150,7 +167,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.padding.extraSmall
 
-        currentItem: view.currentItem
+        currentItem: root.currentItem
     }
 
     component FileEntry: StyledRect {
@@ -159,18 +176,21 @@ Item {
         required property int index
         required property FileSystemEntry modelData
 
+        readonly property bool isCurrentItem: grid.currentIndex === index
         readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
 
-        implicitWidth: Sizes.itemWidth
+        implicitWidth: Tokens.sizes.fileDialog.itemWidth
         implicitHeight: nonAnimHeight
 
         radius: Tokens.rounding.large
-        color: GridView.isCurrentItem ? Colours.tPalette.surfaceContainerHighest : Qt.alpha(Colours.tPalette.surfaceContainerHighest, 0)
-        z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
+        color: isCurrentItem ? Colours.tPalette.surfaceContainerHighest : Qt.alpha(Colours.tPalette.surfaceContainerHighest, 0)
+        z: isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
         clip: true
 
+        opacity: LazyGridView.adding || LazyGridView.removing ? 0 : 1
+
         StateLayer {
-            onClicked: view.currentIndex = item.index
+            onClicked: grid.currentIndex = item.index
             onDoubleClicked: {
                 if (item.modelData.isDir)
                     root.dState.cwd.push(item.modelData.name);
@@ -186,14 +206,14 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: Tokens.padding.medium
 
-            implicitWidth: Sizes.itemWidth - Tokens.padding.medium * 2
+            implicitWidth: Tokens.sizes.fileDialog.itemWidth - Tokens.padding.medium * 2
             implicitHeight: implicitWidth
             fillMode: VisualSource.PreserveAspectFit
 
             Component.onCompleted: {
                 const file = item.modelData;
-                if (file.isImage)
-                    source = Qt.resolvedUrl(file.path);
+                if (MediaUtils.isSupported(file.path))
+                    source = file.path;
                 else if (!file.isDir)
                     source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
                 else if (root.dState.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
@@ -213,14 +233,20 @@ Item {
             anchors.margins: Tokens.padding.medium
 
             horizontalAlignment: Text.AlignHCenter
-            elide: item.GridView.isCurrentItem ? Text.ElideNone : Text.ElideRight
-            wrapMode: item.GridView.isCurrentItem ? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
+            elide: item.isCurrentItem ? Text.ElideNone : Text.ElideRight
+            wrapMode: item.isCurrentItem ? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
 
             Component.onCompleted: text = item.modelData.name
         }
 
         Behavior on implicitHeight {
             Anim {}
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 }
