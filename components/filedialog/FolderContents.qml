@@ -222,21 +222,32 @@ Item {
         }
     }
 
-    component FileEntry: StyledRect {
+    component FileEntry: Item {
         id: item
 
         required property int index
         required property FileSystemEntry modelData
 
         readonly property bool isCurrentItem: root.currentIndex === index
+        readonly property int radius: Tokens.rounding.largeIncreased
 
         implicitWidth: Tokens.sizes.fileDialog.itemWidth
         implicitHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
 
-        radius: Tokens.rounding.large
-        color: isCurrentItem ? Colours.tPalette.surfaceContainerHighest : Qt.alpha(Colours.tPalette.surfaceContainerHighest, 0)
-
         opacity: LazyGridView.adding || LazyGridView.removing ? 0 : 1
+
+        StyledRect {
+            anchors.fill: parent
+            anchors.margins: item.isCurrentItem ? 0 : Tokens.padding.large
+            radius: item.radius
+            color: Qt.alpha(Colours.palette.primaryContainer, item.isCurrentItem ? 1 : 0)
+
+            Behavior on anchors.margins {
+                Anim {
+                    // type: Anim.DefaultEffects
+                }
+            }
+        }
 
         StateLayer {
             onClicked: root.currentIndex = item.index
@@ -272,6 +283,7 @@ Item {
             anchors.topMargin: Tokens.spacing.extraSmall
             anchors.margins: Tokens.padding.small
 
+            color: item.isCurrentItem ? Colours.palette.onPrimaryContainer : Colours.palette.onSurface
             font: Tokens.font.body.small
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
