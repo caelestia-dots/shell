@@ -158,6 +158,19 @@ void LazyGridView::setColumnSpacing(qreal spacing) {
     polish();
 }
 
+bool LazyGridView::fillWidth() const {
+    return m_fillWidth;
+}
+
+void LazyGridView::setFillWidth(bool fill) {
+    if (m_fillWidth == fill)
+        return;
+    m_fillWidth = fill;
+    emit fillWidthChanged();
+    updateResolvedColumns();
+    polish();
+}
+
 int LazyGridView::resolvedColumns() const {
     return m_resolvedColumns;
 }
@@ -247,8 +260,8 @@ void LazyGridView::updateResolvedColumns() {
         cw = std::max(0.0, avail / cols);
     } else if (m_cellWidth > 0) {
         // Derived here, not bound externally, so columns and cell width change in one pass
-        cols = std::max(1, static_cast<int>(std::floor(width() / m_cellWidth)));
-        cw = std::max(0.0, (width() - m_columnSpacing * (cols - 1)) / cols);
+        cols = std::max(1, static_cast<int>(std::floor((width() + m_columnSpacing) / (m_cellWidth + m_columnSpacing))));
+        cw = m_fillWidth ? std::max(0.0, (width() - m_columnSpacing * (cols - 1)) / cols) : m_cellWidth;
     } else {
         cols = 1;
         cw = width();
