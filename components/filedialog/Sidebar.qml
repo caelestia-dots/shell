@@ -43,12 +43,6 @@ StyledRect {
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DownloadLocation)).split("/")
-            icon: "file_download"
-            label: Tr.trCtx("Download", "file location")
-        }
-
-        Place {
             path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DesktopLocation)).split("/")
             icon: "desktop_windows"
             label: Tr.trCtx("Desktop", "file location")
@@ -58,6 +52,12 @@ StyledRect {
             path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DocumentsLocation)).split("/")
             icon: "description"
             label: Tr.trCtx("Documents", "file location")
+        }
+
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DownloadLocation)).split("/")
+            icon: "file_download"
+            label: Tr.trCtx("Downloads", "file location")
         }
 
         Place {
