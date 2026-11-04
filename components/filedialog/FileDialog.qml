@@ -2,18 +2,22 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtCore
 import Quickshell
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
+import qs.utils
 
 LazyLoader {
     id: loader
 
-    property list<string> cwd: ["Home"]
-    property string filterLabel: Tr.tr("All files")
-    property list<string> filters: ["*"]
     property string title: Tr.tr("Select a file")
+    property list<string> initialDir: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.HomeLocation)).split("/")
+    property list<string> nameFilters
+    property int filters
+    property bool save
+    property string confirmLabel: Tr.tr("Select")
 
     signal accepted(path: string)
     signal rejected
@@ -32,21 +36,20 @@ LazyLoader {
     FloatingWindow {
         id: root
 
-        property list<string> cwd: loader.cwd
-        property string filterLabel: loader.filterLabel
-        property list<string> filters: loader.filters
-
         readonly property bool selectionValid: {
             const file = folderContents.currentItem?.modelData;
             return (file && !file.isDir && (filters.includes("*") || filters.some(filter => filter.toLowerCase() === file.suffix.toLowerCase()))) ?? false;
         }
 
-        function accepted(path: string): void {
-            loader.accepted(path);
-        }
+        property DialogState dState: DialogState {
+            cwd: loader.initialDir
+            nameFilters: loader.nameFilters
+            filters: loader.filters
+            save: loader.save
+            confirmLabel: loader.confirmLabel
 
-        function rejected(): void {
-            loader.rejected();
+            onAccepted: path => loader.accepted(path)
+            onRejected: loader.rejected()
         }
 
         implicitWidth: 1000
@@ -59,17 +62,16 @@ LazyLoader {
 
         onVisibleChanged: {
             if (!visible)
-                rejected();
+                dState.rejected();
         }
 
         RowLayout {
             anchors.fill: parent
-
             spacing: 0
 
             Sidebar {
                 Layout.fillHeight: true
-                dialog: root
+                dState: root.dState
             }
 
             ColumnLayout {
@@ -80,7 +82,7 @@ LazyLoader {
 
                 HeaderBar {
                     Layout.fillWidth: true
-                    dialog: root
+                    dState: root.dState
                 }
 
                 FolderContents {
@@ -88,12 +90,12 @@ LazyLoader {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    dialog: root
+                    dState: root.dState
                 }
 
                 DialogButtons {
                     Layout.fillWidth: true
-                    dialog: root
+                    dState: root.dState
                     folder: folderContents
                 }
             }
