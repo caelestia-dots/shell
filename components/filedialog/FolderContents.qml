@@ -20,9 +20,10 @@ import qs.utils
 Item {
     id: root
 
+    property int currentIndex: -1
     readonly property FileEntry currentItem: {
         CUtils.dependency(grid.itemsDirty);
-        return grid.itemAtIndex(grid.currentIndex) as FileEntry;
+        return grid.itemAtIndex(currentIndex) as FileEntry;
     }
     required property DialogState dState
 
@@ -76,7 +77,7 @@ Item {
     onCurrentDirChanged: {
         model.path = "";
         model.path = currentDir;
-        grid.currentIndex = -1;
+        currentIndex = -1;
     }
 
     Behavior on currentDir {
@@ -85,7 +86,7 @@ Item {
                 target: view
                 property: "opacity"
                 to: 0
-                type: Anim.DefaultEffects
+                type: Anim.FastEffects
             }
             PropertyAction {}
             Anim {
@@ -163,7 +164,7 @@ Item {
 
         clip: true
         focus: true
-        Keys.onEscapePressed: grid.currentIndex = -1
+        Keys.onEscapePressed: root.currentIndex = -1
         Keys.onReturnPressed: {
             if (root.dState.selectionValid)
                 root.dState.accepted(root.currentItem.modelData.path);
@@ -184,15 +185,13 @@ Item {
         LazyGridView {
             id: grid
 
-            property int currentIndex: -1
-
             anchors.left: parent.left
             anchors.right: parent.right
             implicitHeight: contentHeight
 
             cellWidth: Tokens.sizes.fileDialog.itemWidth
-            columnSpacing: Tokens.spacing.small
-            rowSpacing: Tokens.spacing.small
+            columnSpacing: Tokens.spacing.extraSmall
+            rowSpacing: Tokens.spacing.extraSmall
             removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
             useCustomViewport: true
@@ -227,7 +226,7 @@ Item {
         required property int index
         required property FileSystemEntry modelData
 
-        readonly property bool isCurrentItem: grid.currentIndex === index
+        readonly property bool isCurrentItem: root.currentIndex === index
         readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
 
         implicitWidth: Tokens.sizes.fileDialog.itemWidth
@@ -241,7 +240,7 @@ Item {
         opacity: LazyGridView.adding || LazyGridView.removing ? 0 : 1
 
         StateLayer {
-            onClicked: grid.currentIndex = item.index
+            onClicked: root.currentIndex = item.index
             onDoubleClicked: {
                 if (item.modelData.isDir)
                     root.dState.cwd.push(item.modelData.name);
@@ -257,7 +256,7 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: Tokens.padding.medium
 
-            implicitWidth: Tokens.sizes.fileDialog.itemWidth - Tokens.padding.medium * 2
+            implicitWidth: Tokens.sizes.fileDialog.itemWidth - Tokens.padding.extraLarge * 2
             implicitHeight: implicitWidth
             fillMode: VisualSource.PreserveAspectFit
             opacity: item.modelData?.name.startsWith(".") ? 0.5 : 1
@@ -271,17 +270,19 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: icon.bottom
-            anchors.topMargin: Tokens.spacing.small
-            anchors.margins: Tokens.padding.medium
+            anchors.topMargin: Tokens.spacing.extraSmall
+            anchors.margins: Tokens.padding.small
 
+            font: Tokens.font.body.small
             horizontalAlignment: Text.AlignHCenter
-            elide: item.isCurrentItem ? Text.ElideNone : Text.ElideRight
-            wrapMode: item.isCurrentItem ? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
             Component.onCompleted: text = item.modelData.name
         }
 
         Behavior on implicitHeight {
+            enabled: item.LazyGridView.ready
+
             Anim {}
         }
 
