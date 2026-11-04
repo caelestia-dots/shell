@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtCore
 import Quickshell
 import Caelestia
 import Caelestia.Components
@@ -25,7 +26,51 @@ Item {
     }
     required property DialogState dState
 
-    property string currentDir: dState.cwd.join("/")
+    property string currentDir: dState.cwd.join("/") || "/"
+
+    readonly property var locToIcon: {
+        const path = p => Paths.toLocalFile(StandardPaths.writableLocation(p));
+        return {
+            [path(StandardPaths.HomeLocation)]: "home",
+            [path(StandardPaths.DesktopLocation)]: "desktop",
+            [path(StandardPaths.DocumentsLocation)]: "documents",
+            [path(StandardPaths.DownloadLocation)]: "downloads",
+            [path(StandardPaths.MusicLocation)]: "music",
+            [path(StandardPaths.PicturesLocation)]: "pictures",
+            [path(StandardPaths.PublicShareLocation)]: "public",
+            [path(StandardPaths.TemplatesLocation)]: "templates",
+            [path(StandardPaths.MoviesLocation)]: "videos",
+            [path(StandardPaths.HomeLocation) + "/Games"]: "games",
+            [path(StandardPaths.HomeLocation) + "/.steam"]: "steam",
+            [path(StandardPaths.GenericDataLocation) + "/Steam"]: "steam",
+            [path(StandardPaths.HomeLocation) + "/.wine"]: "wine",
+            [path(StandardPaths.HomeLocation) + "/VirtualBox VMs"]: "vbox",
+            [path(StandardPaths.HomeLocation) + "/vmware"]: "vmware",
+            [path(StandardPaths.HomeLocation) + "/Dropbox"]: "dropbox",
+            [path(StandardPaths.HomeLocation) + "/Nextcloud"]: "nextcloud",
+            [path(StandardPaths.HomeLocation) + "/OneDrive"]: "onedrive",
+            [path(StandardPaths.HomeLocation) + "/MEGA"]: "mega",
+            [path(StandardPaths.HomeLocation) + "/Sync"]: "syncthing"
+        };
+    }
+
+    function getSource(file: FileSystemEntry): string {
+        if (!file.isDir) {
+            if (MediaUtils.isSupported(file.path))
+                return file.path;
+            return Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
+        }
+
+        if (locToIcon[file.path])
+            return Quickshell.iconPath("folder-" + locToIcon[file.path], "inode-directory");
+
+        if (file.name === ".git")
+            return Quickshell.iconPath("folder-git", "inode-directory");
+        if (file.name === ".github")
+            return Quickshell.iconPath("folder-github", "inode-directory");
+
+        return Quickshell.iconPath("inode-directory");
+    }
 
     Component.onCompleted: model.path = currentDir
     onCurrentDirChanged: {
@@ -210,17 +255,7 @@ Item {
             implicitHeight: implicitWidth
             fillMode: VisualSource.PreserveAspectFit
 
-            Component.onCompleted: {
-                const file = item.modelData;
-                if (MediaUtils.isSupported(file.path))
-                    source = file.path;
-                else if (!file.isDir)
-                    source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
-                else if (root.dState.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
-                    source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
-                else
-                    source = Quickshell.iconPath("inode-directory");
-            }
+            Component.onCompleted: source = root.getSource(item.modelData)
         }
 
         StyledText {
