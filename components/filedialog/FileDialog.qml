@@ -102,7 +102,6 @@ LazyLoader {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             dState: root.dState
-            folder: folderContents
         }
 
         Behavior on color {
