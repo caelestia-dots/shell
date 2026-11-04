@@ -17,13 +17,15 @@ def run_case(case: str) -> None:
         root = Path(directory)
         bin_dir = root / "bin"
         bin_dir.mkdir()
-        (root / "state").write_text("off" if case == "enable-change" else "on")
+        (root / "state").write_text("off" if case in ("enable-change", "restore-on", "restore-off") else "on")
         service = (SOURCE / "NightLight.qml").read_text()
         service = service.replace("pragma Singleton\n", "")
         service = service.replace("import Caelestia.Config\n", "")
         service = service.replace("Singleton {", "Item {", 1)
-        service = service.replace("    id: root\n", "    id: root\n    property int testTemperature: 4500\n", 1)
+        restore_enabled = "true" if case == "restore-on" else "false"
+        service = service.replace("    id: root\n", f"    id: root\n    property int testTemperature: 4500\n    property bool testRestoreEnabled: {restore_enabled}\n", 1)
         service = service.replace("GlobalConfig.services.nightLightTemperature", "testTemperature")
+        service = service.replace("GlobalConfig.services.nightLightEnabled", "testRestoreEnabled")
         (root / "NightLightPreview.qml").write_text(service)
         shutil.copyfile(SOURCE / "HyprsunsetVersion.js", root / "HyprsunsetVersion.js")
         (bin_dir / "hyprsunset").write_text(
@@ -93,7 +95,8 @@ ShellRoot {{
         interval: 1450
         onTriggered: {{
             console.log("VERIFY_RESULT:" + JSON.stringify({{
-                active: night.active, pending: night.pending, available: night.available
+                active: night.active, pending: night.pending, available: night.available,
+                saved: night.testRestoreEnabled
             }}));
             Qt.quit();
         }}
@@ -133,6 +136,14 @@ ShellRoot {{
                 assert calls.index("hyprsunset temperature 5100") < calls.index("hyprsunset temperature 5200"), calls
             else:
                 assert "hyprsunset temperature 4500" in calls, calls
+        elif case == "restore-on":
+            assert result["active"] and (root / "state").read_text() == "on", (result, calls)
+            assert "hyprsunset temperature 4500" in calls, calls
+            assert result["saved"], (result, calls)
+        elif case == "restore-off":
+            assert not result["active"] and (root / "state").read_text() == "off", (result, calls)
+            assert not any(call.startswith("hyprsunset temperature ") for call in calls), calls
+            assert not result["saved"], (result, calls)
         elif case == "race":
             assert not result["active"] and (root / "state").read_text() == "off", (result, calls)
             assert "hyprsunset temperature 5200" in calls, calls
@@ -141,5 +152,5 @@ ShellRoot {{
 
 
 if __name__ == "__main__":
-    for scenario in ("temperature", "disconnect", "invalid", "race", "rapid", "enable-change"):
+    for scenario in ("temperature", "disconnect", "invalid", "race", "rapid", "enable-change", "restore-on", "restore-off"):
         run_case(scenario)
