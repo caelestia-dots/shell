@@ -65,40 +65,40 @@ LazyLoader {
                 dState.rejected();
         }
 
-        RowLayout {
-            anchors.fill: parent
-            spacing: 0
+        Sidebar {
+            id: sidebar
 
-            Sidebar {
-                Layout.fillHeight: true
-                dState: root.dState
-            }
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            dState: root.dState
+        }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+        HeaderBar {
+            id: header
 
-                spacing: 0
+            anchors.left: sidebar.right
+            anchors.right: parent.right
+            dState: root.dState
+        }
 
-                HeaderBar {
-                    Layout.fillWidth: true
-                    dState: root.dState
-                }
+        FolderContents {
+            id: folderContents
 
-                FolderContents {
-                    id: folderContents
+            anchors.left: sidebar.right
+            anchors.right: parent.right
+            anchors.top: header.bottom
+            anchors.bottom: buttons.top
+            dState: root.dState
+        }
 
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    dState: root.dState
-                }
+        DialogButtons {
+            id: buttons
 
-                DialogButtons {
-                    Layout.fillWidth: true
-                    dState: root.dState
-                    folder: folderContents
-                }
-            }
+            anchors.left: sidebar.right
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            dState: root.dState
+            folder: folderContents
         }
 
         Behavior on color {
