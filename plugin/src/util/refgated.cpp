@@ -1,16 +1,29 @@
 #include "util/refgated.hpp"
 
+#include <utility>
+
 namespace util {
 
 void RefGated::ref(QObject* ref) {
-    QObject::connect(
+    if (m_refs.contains(ref))
+        return;
+
+    auto conn = QObject::connect(
         ref, &QObject::destroyed, this,
         [this, ref] {
-            if (m_refs.remove(ref) && m_released && m_refs.isEmpty())
-                deleteLater();
+            dropRef(ref);
         },
         Qt::SingleShotConnection);
-    m_refs << ref;
+    m_refs.insert(ref, std::move(conn));
+}
+
+void RefGated::unref(QObject* ref) {
+    const auto it = m_refs.constFind(ref);
+    if (it == m_refs.constEnd())
+        return;
+
+    QObject::disconnect(it.value());
+    dropRef(ref);
 }
 
 void RefGated::release() {
@@ -21,6 +34,11 @@ void RefGated::release() {
 
 bool RefGated::released() const {
     return m_released;
+}
+
+void RefGated::dropRef(QObject* ref) {
+    if (m_refs.remove(ref) && m_released && m_refs.isEmpty())
+        deleteLater();
 }
 
 } // namespace util
