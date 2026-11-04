@@ -31,11 +31,8 @@ void ButtonRow::itemChange(QQuickItem::ItemChange change, const QQuickItem::Item
         QObject::connect(child, &QQuickItem::implicitHeightChanged, this, &ButtonRow::invalidate);
         QObject::connect(child, &QQuickItem::visibleChanged, this, &ButtonRow::invalidate);
 
-        const auto* childMeta = child->metaObject();
-        const auto morphSignalIdx = childMeta->indexOfSignal("shapeMorphExpansionChanged()");
-        if (morphSignalIdx != -1)
-            QObject::connect(child, childMeta->method(morphSignalIdx), this,
-                metaObject()->method(metaObject()->indexOfSlot("invalidate()")));
+        connectOptionalSignal(child, "shapeMorphExpansionChanged()");
+        connectOptionalSignal(child, "ignoreLayoutChanged()");
 
         invalidate();
     } else if (change == QQuickItem::ItemChildRemovedChange) {
@@ -63,7 +60,7 @@ void ButtonRow::relayout() {
 
     QList<QQuickItem*> validChildren;
     for (auto* const child : allChildren) {
-        if (child->isVisible() && !child->inherits("QQuickRepeater"))
+        if (child->isVisible() && !child->inherits("QQuickRepeater") && !child->property("ignoreLayout").toBool())
             validChildren.append(child);
     }
     const auto nChildren = validChildren.size();
@@ -123,6 +120,14 @@ void ButtonRow::relayout() {
 
     setImplicitWidth(reservedWidth + unreservedWidth + totalSpacing);
     setImplicitHeight(maxHeight);
+}
+
+void ButtonRow::connectOptionalSignal(const QQuickItem* child, const char* signature) {
+    const auto* childMeta = child->metaObject();
+    const auto signalIdx = childMeta->indexOfSignal(signature);
+    if (signalIdx != -1)
+        QObject::connect(
+            child, childMeta->method(signalIdx), this, metaObject()->method(metaObject()->indexOfSlot("invalidate()")));
 }
 
 qreal ButtonRow::getMorphExpansion(const QQuickItem* item) {
