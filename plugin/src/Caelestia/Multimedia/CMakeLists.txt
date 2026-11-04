@@ -6,6 +6,7 @@ qml_module(caelestia-multimedia
         ktxencoder.cpp
         visualanalyser.cpp
         remotecache.cpp
+        mediautils.cpp
     QML_FILES
         Visual.qml
     LIBRARIES
