@@ -17,19 +17,21 @@ def run_case(case: str) -> None:
         root = Path(directory)
         bin_dir = root / "bin"
         bin_dir.mkdir()
-        (root / "state").write_text("off" if case in ("enable-change", "restore-on", "restore-off") else "on")
+        (root / "state").write_text("off" if case in ("enable-change", "restore-on", "restore-off", "restore-on-no-daemon", "restore-off-no-daemon") else "on")
         service = (SOURCE / "NightLight.qml").read_text()
         service = service.replace("pragma Singleton\n", "")
         service = service.replace("import Caelestia.Config\n", "")
         service = service.replace("Singleton {", "Item {", 1)
-        restore_enabled = "true" if case == "restore-on" else "false"
-        service = service.replace("    id: root\n", f"    id: root\n    property int testTemperature: 4500\n    property bool testRestoreEnabled: {restore_enabled}\n", 1)
+        restore_enabled = "true" if case in ("restore-on", "restore-on-existing-on", "restore-on-no-daemon") else "false"
+        restore_configured = "true" if case.startswith("restore-") else "false"
+        service = service.replace("    id: root\n", f"    id: root\n    property int testTemperature: 4500\n    property bool testRestoreEnabled: {restore_enabled}\n    property bool testRestoreConfigured: {restore_configured}\n", 1)
         service = service.replace("GlobalConfig.services.nightLightTemperature", "testTemperature")
         service = service.replace("GlobalConfig.services.nightLightEnabled", "testRestoreEnabled")
+        service = service.replace("GlobalConfig.services.nightLightConfigured", "testRestoreConfigured")
         (root / "NightLightPreview.qml").write_text(service)
         shutil.copyfile(SOURCE / "HyprsunsetVersion.js", root / "HyprsunsetVersion.js")
         (bin_dir / "hyprsunset").write_text(
-            '#!/bin/sh\nif [ "$1" = "--version" ]; then echo "hyprsunset v0.4.0"; exit 0; fi\nexit 1\n'
+            '#!/bin/sh\nif [ "$1" = "--version" ]; then echo "hyprsunset v0.4.0"; exit 0; fi\nif [ "$1" = "--identity" ] && [ "$MOCK_NIGHTLIGHT_CASE" = "restore-on-no-daemon" ]; then\n touch "$MOCK_NIGHTLIGHT_DIR/daemon"\n sleep 4\n exit 0\nfi\nexit 1\n'
         )
         (bin_dir / "hyprctl").write_text("""#!/usr/bin/env python3
 import os
@@ -41,6 +43,8 @@ root = Path(os.environ["MOCK_NIGHTLIGHT_DIR"])
 args = sys.argv[1:]
 with (root / "calls").open("a") as output:
     output.write(" ".join(args) + "\\n")
+if os.environ["MOCK_NIGHTLIGHT_CASE"] in ("restore-on-no-daemon", "restore-off-no-daemon") and not (root / "daemon").exists():
+    sys.exit(1)
 if args == ["hyprsunset", "identity", "get"]:
     path = root / "queries"
     count = int(path.read_text() if path.exists() else "0") + 1
@@ -81,7 +85,7 @@ ShellRoot {{
         }}
     }}
     Timer {{
-        running: ["race", "enable-change"].includes("{case}")
+        running: ["race", "enable-change", "unmanaged-toggle-off"].includes("{case}")
         interval: "{case}" === "enable-change" ? 230 : 540
         onTriggered: night.toggle()
     }}
@@ -96,7 +100,7 @@ ShellRoot {{
         onTriggered: {{
             console.log("VERIFY_RESULT:" + JSON.stringify({{
                 active: night.active, pending: night.pending, available: night.available,
-                saved: night.testRestoreEnabled
+                saved: night.testRestoreEnabled, configured: night.testRestoreConfigured
             }}));
             Qt.quit();
         }}
@@ -136,14 +140,24 @@ ShellRoot {{
                 assert calls.index("hyprsunset temperature 5100") < calls.index("hyprsunset temperature 5200"), calls
             else:
                 assert "hyprsunset temperature 4500" in calls, calls
-        elif case == "restore-on":
+        elif case in ("restore-on", "restore-on-existing-on", "restore-on-no-daemon"):
             assert result["active"] and (root / "state").read_text() == "on", (result, calls)
             assert "hyprsunset temperature 4500" in calls, calls
             assert result["saved"], (result, calls)
-        elif case == "restore-off":
+            if case == "restore-on-no-daemon":
+                assert (root / "daemon").exists(), (result, calls)
+        elif case in ("restore-off", "restore-off-existing-on", "restore-off-no-daemon"):
             assert not result["active"] and (root / "state").read_text() == "off", (result, calls)
             assert not any(call.startswith("hyprsunset temperature ") for call in calls), calls
             assert not result["saved"], (result, calls)
+            assert result["configured"], (result, calls)
+            assert calls.count("hyprsunset identity") == (1 if case == "restore-off-existing-on" else 0), calls
+        elif case == "unmanaged-on":
+            assert result["active"] and not result["configured"], (result, calls)
+            assert "hyprsunset identity" not in calls, calls
+        elif case == "unmanaged-toggle-off":
+            assert not result["active"] and not result["saved"] and result["configured"], (result, calls)
+            assert calls.count("hyprsunset identity") == 1, calls
         elif case == "race":
             assert not result["active"] and (root / "state").read_text() == "off", (result, calls)
             assert "hyprsunset temperature 5200" in calls, calls
@@ -152,5 +166,5 @@ ShellRoot {{
 
 
 if __name__ == "__main__":
-    for scenario in ("temperature", "disconnect", "invalid", "race", "rapid", "enable-change", "restore-on", "restore-off"):
+    for scenario in ("temperature", "disconnect", "invalid", "race", "rapid", "enable-change", "restore-on", "restore-off", "restore-on-existing-on", "restore-off-existing-on", "restore-on-no-daemon", "restore-off-no-daemon", "unmanaged-on", "unmanaged-toggle-off"):
         run_case(scenario)
