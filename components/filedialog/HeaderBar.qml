@@ -2,139 +2,141 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
+import qs.components.controls
 
 StyledRect {
     id: root
 
-    required property var dialog
+    required property DialogState dState
 
-    implicitWidth: inner.implicitWidth + Tokens.padding.medium * 2
-    implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
+    implicitHeight: Math.max(backButton.implicitHeight, upButton.implicitHeight, location.implicitHeight) + Tokens.padding.medium * 2
 
     color: Colours.tPalette.surfaceContainer
 
-    RowLayout {
-        id: inner
+    NavButton {
+        id: backButton
 
-        anchors.fill: parent
+        disabled: root.dState.cwdStack.length === 0
+        icon: "arrow_back"
+        onClicked: root.dState.cdBack()
+    }
+
+    NavButton {
+        id: upButton
+
+        anchors.left: backButton.right
+        anchors.leftMargin: Tokens.spacing.extraSmall / 2
+
+        disabled: root.dState.cwd.length === 1
+        icon: "arrow_upward"
+        label.anchors.verticalCenterOffset: 0
+        onClicked: root.dState.cdUp()
+    }
+
+    StyledRect {
+        id: location
+
+        anchors.left: upButton.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: Tokens.spacing.small
         anchors.margins: Tokens.padding.medium
-        spacing: Tokens.spacing.small
 
-        Item {
-            implicitWidth: implicitHeight
-            implicitHeight: upIcon.implicitHeight + Tokens.padding.small
+        radius: Tokens.rounding.full
+        color: Colours.tPalette.surfaceContainerHigh
 
-            StateLayer {
-                radius: Tokens.rounding.medium
-                disabled: root.dialog.cwd.length === 1
-                onClicked: root.dialog.cwd.pop()
-            }
+        implicitHeight: pathComponents.implicitHeight + pathComponents.anchors.margins * 2
 
-            MaterialIcon {
-                id: upIcon
+        ButtonRow {
+            id: pathComponents
 
-                anchors.centerIn: parent
-                text: "drive_folder_upload"
-                color: root.dialog.cwd.length === 1 ? Colours.palette.outline : Colours.palette.onSurface
-                grade: 200
-            }
-        }
+            anchors.fill: parent
+            anchors.margins: Tokens.padding.extraSmall
 
-        StyledRect {
-            Layout.fillWidth: true
+            spacing: Tokens.spacing.extraSmall
 
-            radius: Tokens.rounding.medium
-            color: Colours.tPalette.surfaceContainerHigh
+            AnimatedRepeater {
+                id: repeater
 
-            implicitHeight: pathComponents.implicitHeight + pathComponents.anchors.margins * 2
+                // -1 so we don't show root unless it's the only one
+                model: Math.max(root.dState.cwd.length - 1, 1)
 
-            RowLayout {
-                id: pathComponents
+                removeDuration: Tokens.anim.durations.expressiveSlowEffects
 
-                anchors.fill: parent
-                anchors.margins: Tokens.padding.extraSmall / 2
-                anchors.leftMargin: 0
+                TextButton {
+                    id: folder
 
-                spacing: Tokens.spacing.small
+                    required property int index
+                    readonly property bool ignoreLayout: AnimatedRepeater.removing // For ButtonRow
 
-                Repeater {
-                    model: root.dialog.cwd
+                    Component.onCompleted: {
+                        text = root.dState.cwd[index + 1] || "/";
+                        label.animate = true;
+                    }
 
-                    RowLayout {
-                        id: folder
+                    isRound: true
+                    shapeMorph: true
+                    font: Tokens.font.label.medium
+                    horizontalPadding: Tokens.padding.large
+                    disabled: index === repeater.count - 1
+                    onClicked: root.dState.cdTo(root.dState.cwd.slice(0, index + 2))
 
-                        required property string modelData
-                        required property int index
+                    topLeftRadius: index === 0 ? Tokens.rounding.full : undefined
+                    bottomLeftRadius: index === 0 ? Tokens.rounding.full : undefined
 
-                        spacing: 0
+                    inactiveColour: Qt.alpha(Colours.palette.primaryContainer, 0)
+                    inactiveOnColour: Colours.palette.onSurfaceVariant
+                    disabledColour: Colours.palette.primaryContainer
+                    disabledOnColour: Colours.palette.onPrimaryContainer
 
-                        Loader {
-                            asynchronous: true
-                            Layout.rightMargin: Tokens.spacing.small
-                            active: folder.index > 0
-                            sourceComponent: StyledText {
-                                text: "/"
-                                color: Colours.palette.onSurfaceVariant
-                                font: Tokens.font.body.builders.small.weight(Font.Bold).build()
-                            }
-                        }
+                    opacity: AnimatedRepeater.adding || AnimatedRepeater.removing ? 0 : 1
 
-                        Item {
-                            implicitWidth: homeIcon.implicitWidth + (homeIcon.active ? Tokens.padding.extraSmall : 0) + folderName.implicitWidth + Tokens.padding.medium * 2
-                            implicitHeight: folderName.implicitHeight + Tokens.padding.small
-
-                            Loader {
-                                asynchronous: true
-                                anchors.fill: parent
-                                active: folder.index < root.dialog.cwd.length - 1
-                                sourceComponent: StateLayer {
-                                    onClicked: {
-                                        root.dialog.cwd = root.dialog.cwd.slice(0, folder.index + 1);
-                                    }
-
-                                    radius: Tokens.rounding.medium
-                                }
-                            }
-
-                            Loader {
-                                id: homeIcon
-
-                                asynchronous: true
-
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.leftMargin: Tokens.padding.medium
-
-                                active: folder.index === 0 && folder.modelData === "Home"
-                                sourceComponent: MaterialIcon {
-                                    text: "home"
-                                    color: root.dialog.cwd.length === 1 ? Colours.palette.onSurface : Colours.palette.onSurfaceVariant
-                                    fill: 1
-                                }
-                            }
-
-                            StyledText {
-                                id: folderName
-
-                                anchors.left: homeIcon.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.leftMargin: homeIcon.active ? Tokens.padding.extraSmall : 0
-
-                                text: folder.modelData
-                                color: folder.index < root.dialog.cwd.length - 1 ? Colours.palette.onSurfaceVariant : Colours.palette.onSurface
-                                font: Tokens.font.body.builders.small.weight(Font.Bold).build()
-                            }
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.SlowEffects
                         }
                     }
-                }
 
-                Item {
-                    Layout.fillWidth: true
+                    Behavior on implicitWidth {
+                        enabled: !folder.AnimatedRepeater.adding
+
+                        Anim {}
+                    }
+
+                    Connections {
+                        function onCwdChanged(): void {
+                            const label = root.dState.cwd[folder.index + 1];
+                            if (repeater.count === 1 || label !== undefined)
+                                folder.text = label || "/";
+                        }
+
+                        target: root.dState
+                    }
                 }
             }
+
+            Item {
+                Layout.fillWidth: true
+            }
         }
+    }
+
+    component NavButton: IconButton {
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.margins: Tokens.padding.medium
+        implicitWidth: {
+            const w = height - Tokens.padding.extraSmall * 2;
+            return w + (w % 2);
+        }
+
+        type: IconButton.Text
+        isRound: true
     }
 }

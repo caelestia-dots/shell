@@ -7,7 +7,7 @@ import qs.components
 StyledRect {
     id: root
 
-    required property var dialog
+    required property DialogState dState
     required property FolderContents folder
 
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
@@ -39,9 +39,9 @@ StyledRect {
                 anchors.margins: Tokens.padding.medium
 
                 text: {
-                    const filters = root.dialog.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
+                    const filters = root.dState.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
                     // TRANSLATORS: %1 = filter label, %2 = file patterns
-                    return Tr.trCtx("%1 (%2)", "file filter label and patterns").arg(root.dialog.filterLabel).arg(filters);
+                    return Tr.trCtx("%1 (%2)", "file filter label and patterns").arg(root.dState.filterLabel).arg(filters);
                 }
             }
         }
@@ -54,8 +54,8 @@ StyledRect {
             implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
 
             StateLayer {
-                disabled: !root.dialog.selectionValid
-                onClicked: root.dialog.accepted(root.folder.currentItem.modelData.path)
+                disabled: !root.dState.selectionValid
+                onClicked: root.dState.accepted(root.folder.currentItem.modelData.path)
             }
 
             StyledText {
@@ -65,7 +65,7 @@ StyledRect {
                 anchors.margins: Tokens.padding.medium
 
                 text: Tr.trCtx("Select", "button")
-                color: root.dialog.selectionValid ? Colours.palette.onSurface : Colours.palette.outline
+                color: root.dState.selectionValid ? Colours.palette.onSurface : Colours.palette.outline
             }
         }
 
@@ -78,7 +78,7 @@ StyledRect {
 
             StateLayer {
                 onClicked: {
-                    root.dialog.rejected();
+                    root.dState.rejected();
                 }
             }
 

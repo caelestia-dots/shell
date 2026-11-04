@@ -2,18 +2,19 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtCore
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
-import qs.components.filedialog
+import qs.utils
 
 StyledRect {
     id: root
 
-    required property var dialog
+    required property DialogState dState
 
-    implicitWidth: Sizes.sidebarWidth
+    implicitWidth: Tokens.sizes.fileDialog.sidebarWidth
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
     color: Colours.tPalette.surfaceContainer
@@ -32,83 +33,100 @@ StyledRect {
             Layout.topMargin: Tokens.padding.extraSmall / 2
             Layout.bottomMargin: Tokens.spacing.medium
             text: Tr.trCtx("Files", "file dialog sidebar heading")
-            color: Colours.palette.onSurface
-            font: Tokens.font.body.builders.large.weight(Font.Bold).build()
+            font: Tokens.font.title.medium
         }
 
-        Repeater {
-            model: ["Home", "Downloads", "Desktop", "Documents", "Music", "Pictures", "Videos"]
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.HomeLocation)).split("/")
+            icon: "home"
+            label: Tr.trCtx("Home", "file location")
+        }
 
-            StyledRect {
-                id: place
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DownloadLocation)).split("/")
+            icon: "file_download"
+            label: Tr.trCtx("Download", "file location")
+        }
 
-                required property string modelData
-                readonly property bool selected: modelData === root.dialog.cwd[root.dialog.cwd.length - 1]
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DesktopLocation)).split("/")
+            icon: "desktop_windows"
+            label: Tr.trCtx("Desktop", "file location")
+        }
 
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DocumentsLocation)).split("/")
+            icon: "description"
+            label: Tr.trCtx("Documents", "file location")
+        }
+
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.MusicLocation)).split("/")
+            icon: "music_note"
+            label: Tr.trCtx("Music", "file location")
+        }
+
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.PicturesLocation)).split("/")
+            icon: "image"
+            label: Tr.trCtx("Pictures", "file location")
+        }
+
+        Place {
+            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.MoviesLocation)).split("/")
+            icon: "video_library"
+            label: Tr.trCtx("Videos", "file location")
+        }
+    }
+
+    component Place: StyledRect {
+        id: place
+
+        required property list<string> path
+        required property string icon
+        required property string label
+        readonly property bool selected: path.join("/") === root.dState.cwd.join("/")
+
+        Layout.fillWidth: true
+        implicitHeight: placeInner.implicitHeight + Tokens.padding.medium * 2
+
+        radius: Tokens.rounding.full
+        color: Qt.alpha(Colours.palette.secondaryContainer, selected ? 1 : 0)
+
+        StateLayer {
+            color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+            onClicked: root.dState.cdTo(place.path)
+        }
+
+        RowLayout {
+            id: placeInner
+
+            anchors.fill: parent
+            anchors.margins: Tokens.padding.medium
+            anchors.leftMargin: Tokens.padding.large
+            anchors.rightMargin: Tokens.padding.large
+
+            spacing: Tokens.spacing.medium
+
+            MaterialIcon {
+                text: place.icon
+                color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+                fontStyle: Tokens.font.icon.medium
+                fill: place.selected ? 1 : 0
+
+                Behavior on fill {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
+            }
+
+            StyledText {
                 Layout.fillWidth: true
-                implicitHeight: placeInner.implicitHeight + Tokens.padding.medium * 2
-
-                radius: Tokens.rounding.full
-                color: Qt.alpha(Colours.palette.secondaryContainer, selected ? 1 : 0)
-
-                StateLayer {
-                    color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
-                    onClicked: {
-                        if (place.modelData === "Home")
-                            root.dialog.cwd = ["Home"];
-                        else
-                            root.dialog.cwd = ["Home", place.modelData];
-                    }
-                }
-
-                RowLayout {
-                    id: placeInner
-
-                    anchors.fill: parent
-                    anchors.margins: Tokens.padding.medium
-                    anchors.leftMargin: Tokens.padding.large
-                    anchors.rightMargin: Tokens.padding.large
-
-                    spacing: Tokens.spacing.medium
-
-                    MaterialIcon {
-                        text: {
-                            const p = place.modelData;
-                            if (p === "Home")
-                                return "home";
-                            if (p === "Downloads")
-                                return "file_download";
-                            if (p === "Desktop")
-                                return "desktop_windows";
-                            if (p === "Documents")
-                                return "description";
-                            if (p === "Music")
-                                return "music_note";
-                            if (p === "Pictures")
-                                return "image";
-                            if (p === "Videos")
-                                return "video_library";
-                            return "folder";
-                        }
-                        color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
-                        fontStyle: Tokens.font.icon.medium
-                        fill: place.selected ? 1 : 0
-
-                        Behavior on fill {
-                            Anim {
-                                type: Anim.DefaultEffects
-                            }
-                        }
-                    }
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: place.modelData
-                        color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
-                        font: Tokens.font.body.small
-                        elide: Text.ElideRight
-                    }
-                }
+                text: place.label
+                color: place.selected ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
+                font: Tokens.font.body.small
+                elide: Text.ElideRight
             }
         }
     }
