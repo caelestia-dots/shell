@@ -29,7 +29,7 @@ QtObject {
         if (selectedPath.isDir)
             return dirs || !(files || images || videos);
 
-        if (nameFilters.length > 0 && !nameFilters.some(f => CUtils.matchGlob(selectedPath.name, f)))
+        if (nameFilters.length > 0 && !nameFilters.some(f => CUtils.matchesGlob(selectedPath.name, f)))
             return false;
 
         if (files || !(images || videos))
