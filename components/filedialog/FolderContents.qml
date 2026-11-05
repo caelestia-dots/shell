@@ -284,7 +284,7 @@ Item {
 
         required property FileSystemEntry modelData
 
-        readonly property bool isCurrentItem: root.dState.selectedPath === modelData
+        readonly property bool isCurrentItem: modelData && root.dState.selectedPath === modelData
         readonly property int radius: Tokens.rounding.largeIncreased
 
         implicitWidth: Tokens.sizes.fileDialog.itemWidth
