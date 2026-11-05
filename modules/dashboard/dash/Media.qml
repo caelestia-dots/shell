@@ -21,12 +21,9 @@ Item {
 
     readonly property real arcCoverGap: Tokens.spacing.extraSmall
 
-    readonly property real baseHeight: cover.y + cover.height
-    + title.height + album.height + artist.height + controls.height
-    + Tokens.spacing.medium * 2 + Tokens.spacing.small * 2
-    + Tokens.padding.large
+    readonly property real baseHeight: cover.y + cover.height + title.height + album.height + artist.height + controls.height + Tokens.spacing.medium * 2 + Tokens.spacing.small * 2 + Tokens.padding.large
 
-readonly property real extraGap: bongocat.visible ? 0 : Math.max(0, (height - baseHeight - 10) / 4)
+    readonly property real extraGap: bongocat.visible ? 0 : Math.max(0, (height - baseHeight - 10) / 4)
 
     anchors.top: parent.top
     anchors.bottom: parent.bottom
