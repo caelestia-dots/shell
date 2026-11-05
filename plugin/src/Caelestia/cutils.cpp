@@ -24,6 +24,11 @@ void CUtils::dependency(const QVariant& value) {
     Q_UNUSED(value);
 }
 
+bool CUtils::matchesGlob(const QString& text, const QString& pattern, bool caseSensitive) {
+    const auto re = QRegularExpression::fromWildcard(pattern, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    return re.match(text).hasMatch();
+}
+
 void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QJSValue& onSaved, const QJSValue& onFailed) {
     this->saveItem(target, path, QRect(), onSaved, onFailed);
 }

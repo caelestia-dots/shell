@@ -1,6 +1,8 @@
 import QtQuick
+import Caelestia
 import Caelestia.I18n
 import Caelestia.Models
+import Caelestia.Multimedia
 
 QtObject {
     property list<string> cwd
@@ -22,6 +24,27 @@ QtObject {
     property string confirmLabel
     property bool showHidden
     property FileSystemEntry selectedPath
+
+    readonly property bool selectionValid: {
+        if (!selectedPath)
+            return false;
+
+        const files = (filters & FileSystemModel.Files) !== 0;
+        const images = (filters & FileSystemModel.Images) !== 0;
+        const videos = (filters & FileSystemModel.Videos) !== 0;
+        const dirs = (filters & FileSystemModel.Dirs) !== 0;
+
+        if (selectedPath.isDir)
+            return dirs || !(files || images || videos);
+
+        if (nameFilters.length > 0 && !nameFilters.some(f => CUtils.matchGlob(selectedPath.name, f)))
+            return false;
+
+        if (files || !(images || videos))
+            return true;
+
+        return (images && MediaUtils.isImage(selectedPath.path)) || (videos && MediaUtils.isVideo(selectedPath.path));
+    }
 
     signal accepted(path: string)
     signal rejected
