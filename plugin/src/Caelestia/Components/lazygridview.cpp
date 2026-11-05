@@ -475,8 +475,9 @@ void LazyGridView::step(qreal dt) {
     // Content height springs too so a bound implicitHeight animates
     const qreal target = contentHeightTarget();
     qreal value = contentHeight();
-    if (m_contentHeightPlaced && !settled(value, m_contentHeightVel, target)) {
-        integrateSpring(value, m_contentHeightVel, target, naturalFreq, dampingRatio, dt);
+    if (m_contentHeightPlaced) {
+        if (!settled(value, m_contentHeightVel, target))
+            integrateSpring(value, m_contentHeightVel, target, naturalFreq, dampingRatio, dt);
         if (settled(value, m_contentHeightVel, target)) {
             value = target;
             m_contentHeightVel = 0;
