@@ -39,10 +39,11 @@ Item {
         id: location
 
         anchors.left: upButton.right
-        anchors.right: parent.right
+        anchors.right: hiddenToggle.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.leftMargin: Tokens.spacing.small
+        anchors.rightMargin: Tokens.spacing.small
         anchors.margins: Tokens.padding.medium
 
         radius: Tokens.rounding.full
@@ -122,6 +123,19 @@ Item {
                 Layout.fillWidth: true
             }
         }
+    }
+
+    NavButton {
+        id: hiddenToggle
+
+        anchors.right: parent.right
+        implicitWidth: height
+
+        type: IconButton.Tonal
+        icon: "visibility"
+        isToggle: true
+        checked: root.dState.showHidden
+        onClicked: root.dState.showHidden = !root.dState.showHidden
     }
 
     component NavButton: IconButton {
