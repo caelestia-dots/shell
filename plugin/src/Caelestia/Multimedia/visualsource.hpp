@@ -8,7 +8,6 @@
 #include <qrect.h>
 #include <qsize.h>
 #include <qurl.h>
-#include <qvideoframe.h>
 
 #include <atomic>
 
@@ -99,7 +98,8 @@ private:
     void refresh();
     void loadBucket(const QSize& bucket);
     void watchWindow(QQuickWindow* window);
-    void onVideoFrame(const QVideoFrame& frame);
+    void onPreviewStored();
+    void onVideoFrame();
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void syncPlayer();
     void unload();

@@ -4,6 +4,7 @@
 #include <qmimedatabase.h>
 #include <qquickwindow.h>
 #include <qscopeguard.h>
+#include <qvideoframe.h>
 #include <qvideosink.h>
 
 #include "imagecache.hpp"
@@ -149,9 +150,9 @@ void VisualSource::setVideoOutput(QObject* videoOutput) {
 
                 QMetaObject::invokeMethod(
                     this,
-                    [this, frame, generation = m_generation.load()] {
+                    [this, generation = m_generation.load()] {
                         if (generation == m_generation && m_type == Type::Live)
-                            onVideoFrame(frame);
+                            onVideoFrame();
                     },
                     Qt::QueuedConnection);
             },
@@ -304,6 +305,13 @@ void VisualSource::loadBucket(const QSize& bucket) {
         setSourceSize(bucket);
         m_preview = cached;
         setImagePath(m_videoReady ? QUrl() : cached);
+
+        if (cached.isEmpty() && !m_videoReady)
+            cache->storeVideo(m_key, path, bucket, aspectMode()).then(this, [this, key = m_key](bool stored) {
+                if (stored && key == m_key)
+                    onPreviewStored();
+            });
+
         syncPlayer();
         return;
     }
@@ -322,14 +330,18 @@ void VisualSource::loadBucket(const QSize& bucket) {
     }
 }
 
-void VisualSource::onVideoFrame(const QVideoFrame& frame) {
+void VisualSource::onPreviewStored() {
+    m_preview = ImageCache::instance()->lookupSync(m_key);
+    if (!m_videoReady)
+        setImagePath(m_preview);
+}
+
+void VisualSource::onVideoFrame() {
     if (m_videoReady && m_playing)
         return;
 
     setVideoReady(true);
     setImagePath({});
-
-    ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
 
     if (!m_playing)
         unload();
@@ -372,8 +384,7 @@ void VisualSource::syncPlayer() {
         return;
     }
 
-    const auto previewPending = m_sizeSource && m_key.isEmpty();
-    if (m_playing || (!previewPending && m_preview.isEmpty())) {
+    if (m_playing) {
         m_loading = true;
         m_player.setSource(url);
     }
