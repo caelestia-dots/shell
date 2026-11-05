@@ -9,17 +9,6 @@ QtObject {
     property list<var> cwdStack
     property list<string> nameFilters
     property int filters
-    property string filterLabel: {
-        const images = filters & FileSystemModel.Images;
-        const videos = filters & FileSystemModel.Videos;
-        if (images && videos)
-            return Tr.tr("Images and videos");
-        if (images)
-            return Tr.tr("Images");
-        if (videos)
-            return Tr.tr("Videos");
-        return Tr.tr("All files");
-    }
     property bool save
     property string confirmLabel
     property bool showHidden
