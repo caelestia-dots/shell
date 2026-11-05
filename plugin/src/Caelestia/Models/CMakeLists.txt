@@ -3,6 +3,7 @@ qml_module(caelestia-models
     INCLUDE_PREFIX models
     SOURCES
         filesystemmodel.cpp
+        filtermodel.cpp
         appdb.cpp
         notifdata.cpp
         notifgroup.cpp
