@@ -2,6 +2,7 @@ import QtQuick
 import Caelestia.Config
 import Caelestia.Models
 import Caelestia.Multimedia
+import Caelestia.State
 import qs.components
 import qs.components.effects
 import qs.services
@@ -25,6 +26,8 @@ Item {
     implicitHeight: image.height + label.height + Tokens.spacing.extraSmall + Tokens.padding.large + Tokens.padding.medium
 
     StateLayer {
+        id: stateLayer
+
         radius: Tokens.rounding.large
         onClicked: {
             Wallpapers.setWallpaper(root.modelData.path);
@@ -66,7 +69,7 @@ Item {
         Visual {
             anchors.fill: parent
             source: root.modelData.path
-            playing: root.PathView.isCurrentItem
+            playing: (root.PathView.isCurrentItem && PersistentState.wallpaperPlaying) || stateLayer.containsMouse
         }
     }
 

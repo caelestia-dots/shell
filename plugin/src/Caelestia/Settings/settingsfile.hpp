@@ -5,7 +5,7 @@
 #include <qobject.h>
 #include <qtimer.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 class SettingsFile : public QObject {
     Q_OBJECT
@@ -50,4 +50,4 @@ private:
     void writeNow();
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

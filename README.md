@@ -237,7 +237,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
 > - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
-> - `utilities`: `toasts.*`, `vpn.*`
+> - `utilities`: `gameMode.*`, `toasts.*`, `vpn.*`
 >
 > </details>
 
@@ -931,7 +931,19 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "id": "vpn",
                 "enabled": false
             }
-        ]
+        ],
+        "gameMode": {
+            "options": {
+                "animations:enabled": 0,
+                "decoration:blur:enabled": 0,
+                "decoration:shadow:enabled": 0,
+                "decoration:rounding": 0,
+                "general:gaps_in": 0,
+                "general:gaps_out": 0,
+                "general:border_size": 1,
+                "general:allow_tearing": 1
+            }
+        }
     },
     "paths": {
         "wallpaperDir": "~/Pictures/Wallpapers",

@@ -6,7 +6,7 @@
 #include <qquickpainteditem.h>
 #include <qvector.h>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 class VisualiserBars : public QQuickPaintedItem {
     Q_OBJECT
@@ -69,4 +69,4 @@ private:
     bool m_settled = true;
 };
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

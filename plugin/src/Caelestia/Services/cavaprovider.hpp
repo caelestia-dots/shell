@@ -6,7 +6,7 @@
 
 #include "audioprovider.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class CavaProcessor : public AudioProcessor {
     Q_OBJECT
@@ -63,4 +63,4 @@ private:
     void updateValues(const QVector<double>& values);
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

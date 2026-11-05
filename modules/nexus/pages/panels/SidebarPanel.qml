@@ -30,6 +30,13 @@ PageBase {
             onToggled: GlobalConfig.sidebar.enabled = checked
         }
 
+        ToggleRow {
+            text: Tr.tr("Show on hover")
+            subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
+            checked: Config.sidebar.showOnHover
+            onToggled: GlobalConfig.sidebar.showOnHover = checked
+        }
+
         StepperRow {
             last: true
             label: Tr.tr("Drag threshold")

@@ -2,7 +2,7 @@
 
 #include "node.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 class ListNode : public Node {
     Q_OBJECT
@@ -36,9 +36,9 @@ public:
 
 signals:
     void countChanged();
-    void elementsChanged(const caelestia::settings::ListNode::NodeChanges& added,
-        const caelestia::settings::ListNode::NodeChanges& removed,
-        const caelestia::settings::ListNode::MoveChanges& moved);
+    void elementsChanged(const caelestia::shell::settings::ListNode::NodeChanges& added,
+        const caelestia::shell::settings::ListNode::NodeChanges& removed,
+        const caelestia::shell::settings::ListNode::MoveChanges& moved);
 
 protected:
     bool recordWrite(const QString& key, bool changed) override;
@@ -68,4 +68,4 @@ private:
     void onFallbackListNotify(const NodeChanges& added, const NodeChanges& removed, const MoveChanges& moved);
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

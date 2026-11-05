@@ -50,7 +50,7 @@ inline qreal getFractionInRange(qreal playtime, qreal start, qreal duration) {
 
 } // namespace
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 CircularIndicatorManager::CircularIndicatorManager(QObject* parent)
     : QObject(parent)
@@ -213,4 +213,4 @@ void CircularIndicatorManager::updateAdvance(qreal progress) {
         emit endFractionChanged();
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

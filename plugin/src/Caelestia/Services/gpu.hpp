@@ -7,7 +7,7 @@
 #include "config/enums.hpp"
 #include "tickingservice.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using GpuType = config::GpuType::Enum;
 
@@ -16,7 +16,7 @@ class Gpu : public TickingService {
     QML_ELEMENT
     QML_SINGLETON
 
-    Q_PROPERTY(caelestia::config::GpuType::Enum type READ type NOTIFY typeChanged)
+    Q_PROPERTY(caelestia::shell::config::GpuType::Enum type READ type NOTIFY typeChanged)
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(bool detecting READ detecting NOTIFY detectingChanged)
     Q_PROPERTY(qreal percentage READ percentage NOTIFY percentageChanged)
@@ -84,4 +84,4 @@ private:
     bool m_nvidiaQuerying = false;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

@@ -3,7 +3,7 @@
 #include <qfile.h>
 #include <qregularexpression.h>
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -57,4 +57,4 @@ void Memory::tick() {
     emit changed();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

@@ -3,7 +3,7 @@
 #include "audiocollector.hpp"
 #include "audioprovider.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 BeatProcessor::BeatProcessor(QObject* parent)
     : AudioProcessor(parent)
@@ -56,4 +56,4 @@ void BeatTracker::updateBpm(smpl_t bpm) {
     }
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

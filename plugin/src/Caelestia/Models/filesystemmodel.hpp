@@ -11,7 +11,7 @@
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 
-namespace caelestia::models {
+namespace caelestia::shell::models {
 
 class FileSystemEntry : public QObject {
     Q_OBJECT
@@ -70,10 +70,11 @@ class FileSystemModel : public QAbstractListModel {
     Q_PROPERTY(bool watchChanges READ watchChanges WRITE setWatchChanges NOTIFY watchChangesChanged)
     Q_PROPERTY(bool showHidden READ showHidden WRITE setShowHidden NOTIFY showHiddenChanged)
     Q_PROPERTY(bool sortReverse READ sortReverse WRITE setSortReverse NOTIFY sortReverseChanged)
-    Q_PROPERTY(caelestia::models::FileSystemModel::Filters filter READ filter WRITE setFilter NOTIFY filterChanged)
+    Q_PROPERTY(
+        caelestia::shell::models::FileSystemModel::Filters filter READ filter WRITE setFilter NOTIFY filterChanged)
     Q_PROPERTY(QStringList nameFilters READ nameFilters WRITE setNameFilters NOTIFY nameFiltersChanged)
 
-    Q_PROPERTY(QQmlListProperty<caelestia::models::FileSystemEntry> entries READ entries NOTIFY entriesChanged)
+    Q_PROPERTY(QQmlListProperty<caelestia::shell::models::FileSystemEntry> entries READ entries NOTIFY entriesChanged)
 
 public:
     enum class Filter : quint8 {
@@ -162,6 +163,6 @@ private:
     [[nodiscard]] bool compareEntries(const FileSystemEntry* a, const FileSystemEntry* b) const;
 };
 
-} // namespace caelestia::models
+} // namespace caelestia::shell::models
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(caelestia::models::FileSystemModel::Filters)
+Q_DECLARE_OPERATORS_FOR_FLAGS(caelestia::shell::models::FileSystemModel::Filters)

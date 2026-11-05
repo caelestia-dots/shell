@@ -5,7 +5,7 @@
 #include <qpair.h>
 #include <qqmlintegration.h>
 
-namespace caelestia {
+namespace caelestia::shell {
 
 class Qalculator : public QObject {
     Q_OBJECT
@@ -46,4 +46,4 @@ private:
     quint64 m_generation = 0;
 };
 
-} // namespace caelestia
+} // namespace caelestia::shell

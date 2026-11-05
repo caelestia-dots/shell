@@ -4,10 +4,10 @@ import QtQuick
 import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Multimedia
 import qs.components
 import qs.components.effects
 import qs.components.filedialog
-import qs.components.images
 import qs.services
 import qs.utils
 
@@ -74,7 +74,7 @@ Item {
             Loader {
                 anchors.centerIn: parent
                 asynchronous: true
-                active: pfp.status !== Image.Ready
+                active: !pfp.ready
 
                 sourceComponent: MaterialIcon {
                     text: "person_add"
@@ -85,16 +85,16 @@ Item {
                 }
             }
 
-            CachingImage {
+            Visual {
                 id: pfp
 
                 anchors.fill: parent
-                path: `${Paths.home}/.face`
+                source: `${Paths.home}/.face`
             }
 
             StyledRect {
                 anchors.fill: parent
-                color: Qt.alpha(Colours.palette.m3scrim, pfp.status === Image.Ready ? 0.4 : 0)
+                color: Qt.alpha(Colours.palette.m3scrim, pfp.ready ? 0.4 : 0)
                 opacity: mouse.containsMouse ? 1 : 0
                 layer.enabled: opacity < 1
 

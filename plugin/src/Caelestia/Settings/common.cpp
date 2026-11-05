@@ -7,7 +7,7 @@ using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
 using util::i18n::markCtx;
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 Q_LOGGING_CATEGORY(lcSettings, "caelestia.settings", QtInfoMsg)
 
@@ -128,4 +128,4 @@ Diagnostic Diagnostic::mismatch(const QList<ExpectedType>& expected, const QJson
     };
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

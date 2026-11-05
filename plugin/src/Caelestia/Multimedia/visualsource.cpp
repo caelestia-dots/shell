@@ -6,13 +6,14 @@
 
 #include "imagecache.hpp"
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 using Qt::StringLiterals::operator""_s;
 
 VisualSource::VisualSource(QObject* parent)
     : QObject(parent) {
     m_player.setLoops(QMediaPlayer::Infinite);
+    QObject::connect(&m_player, &QMediaPlayer::mediaStatusChanged, this, &VisualSource::onMediaStatusChanged);
 }
 
 VisualSource::Type VisualSource::type() const {
@@ -21,6 +22,10 @@ VisualSource::Type VisualSource::type() const {
 
 bool VisualSource::videoReady() const {
     return m_videoReady;
+}
+
+QSize VisualSource::sourceSize() const {
+    return m_sourceSize;
 }
 
 QUrl VisualSource::imagePath() const {
@@ -39,10 +44,17 @@ void VisualSource::setSource(const QString& source) {
     emit sourceChanged();
 
     const auto path = localPath();
-    const auto mime = path.isEmpty() ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    const auto provider = QUrl(m_source).scheme() == u"image"_s;
+    const auto mime = path.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    // We don't use the mime type for svg checking because Qt doesn't.
+    // See QQuickPixmap::isScalableImageFormat.
+    const auto prettyPath = QUrl(m_source).path(QUrl::PrettyDecoded);
+    m_scalable =
+        provider || prettyPath.endsWith(u"svg"_s) || prettyPath.endsWith(u"svgz"_s) || prettyPath.endsWith(u"pdf"_s);
+
     if (mime.startsWith(u"video/"_s))
         setType(Type::Live);
-    else if (mime.startsWith(u"image/"_s))
+    else if (provider || mime.startsWith(u"image/"_s) || mime == u"application/pdf"_s)
         setType(Type::Still);
     else
         setType(Type::Unknown);
@@ -50,6 +62,8 @@ void VisualSource::setSource(const QString& source) {
     ++m_generation;
     setVideoReady(false);
     m_key.clear();
+    m_preview.clear();
+    m_position = 0;
     refresh();
     syncPlayer();
 }
@@ -151,6 +165,14 @@ void VisualSource::setVideoReady(bool videoReady) {
     emit videoReadyChanged();
 }
 
+void VisualSource::setSourceSize(const QSize& sourceSize) {
+    if (m_sourceSize == sourceSize)
+        return;
+
+    m_sourceSize = sourceSize;
+    emit sourceSizeChanged();
+}
+
 void VisualSource::setImagePath(const QUrl& imagePath) {
     if (m_imagePath == imagePath)
         return;
@@ -168,14 +190,26 @@ void VisualSource::watchWindow(QQuickWindow* window) {
 
 void VisualSource::refresh() {
     const auto path = localPath();
-    if (path.isEmpty() || m_type == Type::Unknown || !m_sizeSource) {
+    if (path.isEmpty()) {
         setImagePath({});
+        return;
+    }
+
+    if (!m_sizeSource) {
+        setSourceSize({});
+        setImagePath(m_type == Type::Live ? QUrl() : rawUrl());
         return;
     }
 
     const auto* window = m_sizeSource->window();
     if (!window || m_sizeSource->size().isEmpty())
         return;
+
+    if (m_scalable || m_type == Type::Unknown) {
+        setSourceSize(m_scalable ? m_sizeSource->size().toSize() : QSize());
+        setImagePath(rawUrl());
+        return;
+    }
 
     auto* const cache = ImageCache::instance();
     const auto bucket = ImageCache::bucketFor((m_sizeSource->size() * window->devicePixelRatio()).toSize());
@@ -185,10 +219,13 @@ void VisualSource::refresh() {
 
     m_key = key;
     m_bucket = bucket;
+    setSourceSize(bucket);
     const auto cached = cache->lookup(key);
 
     if (m_type == Type::Live) {
+        m_preview = cached;
         setImagePath(m_videoReady ? QUrl() : cached);
+        syncPlayer();
         return;
     }
 
@@ -201,7 +238,7 @@ void VisualSource::refresh() {
 }
 
 void VisualSource::onVideoFrame(const QVideoFrame& frame) {
-    if (m_videoReady)
+    if (m_videoReady && m_playing)
         return;
 
     setVideoReady(true);
@@ -209,22 +246,71 @@ void VisualSource::onVideoFrame(const QVideoFrame& frame) {
 
     if (!m_key.isEmpty() && ImageCache::instance()->lookup(m_key).isEmpty())
         ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
+
+    if (!m_playing)
+        unload();
 }
 
-void VisualSource::syncPlayer() {
-    const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
-    if (m_player.source() != url)
-        m_player.setSource(url);
+void VisualSource::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    // Stopping also reports LoadedMedia, so only react to loads started here
+    if (status != QMediaPlayer::LoadedMedia || !m_loading)
+        return;
 
-    if (m_playing && !url.isEmpty())
+    m_loading = false;
+    if (m_position > 0)
+        m_player.setPosition(m_position);
+
+    if (m_playing)
         m_player.play();
     else
         m_player.pause();
 }
 
+void VisualSource::syncPlayer() {
+    const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
+    if (!m_player.source().isEmpty() && m_player.source() != url)
+        unload();
+
+    if (url.isEmpty())
+        return;
+
+    if (m_player.source() == url) {
+        if (m_loading)
+            return;
+
+        if (m_playing) {
+            m_player.play();
+        } else if (m_videoReady) {
+            m_position = m_player.position();
+            unload();
+        }
+
+        return;
+    }
+
+    const auto previewPending = m_sizeSource && m_key.isEmpty();
+    if (m_playing || (!previewPending && m_preview.isEmpty())) {
+        m_loading = true;
+        m_player.setSource(url);
+    }
+}
+
+void VisualSource::unload() {
+    if (m_player.source().isEmpty())
+        return;
+
+    ++m_generation;
+    m_player.setSource({});
+}
+
 QString VisualSource::localPath() const {
     const QUrl url(m_source);
     return url.isLocalFile() ? url.toLocalFile() : m_source;
+}
+
+QUrl VisualSource::rawUrl() const {
+    const QUrl url(m_source);
+    return url.isLocalFile() || !url.scheme().isEmpty() ? url : QUrl::fromLocalFile(m_source);
 }
 
 Qt::AspectRatioMode VisualSource::aspectMode() const {
@@ -240,4 +326,4 @@ Qt::AspectRatioMode VisualSource::aspectMode() const {
     Q_UNREACHABLE_RETURN(Qt::IgnoreAspectRatio);
 }
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

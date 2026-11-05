@@ -21,7 +21,7 @@ Q_LOGGING_CATEGORY(lcCache, "caelestia.multimedia.image.cache", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_L1;
@@ -178,4 +178,4 @@ QString ImageCacheWorker::pathFor(const QString& key) const {
     return m_dir + u'/' + key + k_suffix;
 }
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

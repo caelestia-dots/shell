@@ -9,7 +9,7 @@
 #include "core/toaster.hpp"
 #include "util/i18n.hpp"
 
-namespace caelestia::services::hypr {
+namespace caelestia::shell::services::hypr {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -187,4 +187,4 @@ bool HyprDevices::updateLastIpcObject(const QJsonObject& object) {
     return dirty;
 }
 
-} // namespace caelestia::services::hypr
+} // namespace caelestia::shell::services::hypr

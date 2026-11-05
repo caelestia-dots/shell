@@ -2,7 +2,7 @@
 
 #include "util/i18n.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -278,4 +278,4 @@ void Node::onFallbackNotify(const QString& key) {
     setValue(key, m_fallbackNode->value(key));
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

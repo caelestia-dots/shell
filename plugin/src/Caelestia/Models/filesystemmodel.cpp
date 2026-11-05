@@ -8,7 +8,7 @@
 #include <optional>
 #include <utility>
 
-namespace caelestia::models {
+namespace caelestia::shell::models {
 
 using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
@@ -486,4 +486,4 @@ bool FileSystemModel::compareEntries(const FileSystemEntry* a, const FileSystemE
     return m_sortReverse ? cmp > 0 : cmp < 0;
 }
 
-} // namespace caelestia::models
+} // namespace caelestia::shell::models

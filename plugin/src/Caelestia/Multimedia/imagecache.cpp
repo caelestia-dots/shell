@@ -9,7 +9,7 @@
 
 #include "imagecacheworker.hpp"
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -103,4 +103,4 @@ void ImageCache::store(const QString& key, const QImage& image, const QSize& buc
         Qt::QueuedConnection);
 }
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

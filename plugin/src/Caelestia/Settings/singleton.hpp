@@ -24,7 +24,7 @@
                                                                                                                        \
         void initLayer(Root* layer);                                                                                   \
                                                                                                                        \
-        caelestia::settings::LayerRegistry<Root> m_layers;                                                             \
+        caelestia::shell::settings::LayerRegistry<Root> m_layers;                                                      \
     };
 
 // Handler provides static loaded(Root*, screen), loadFailed(error, screen) and saveFailed(error, screen);
@@ -58,12 +58,12 @@
         QObject::connect(layer, &Root::treeLoaded, this, [this, layer] {                                               \
             Handler::loaded(layer, m_layers.nameFor(layer));                                                           \
         });                                                                                                            \
-        QObject::connect(                                                                                              \
-            layer, &Root::treeLoadFailed, this, [this, layer](caelestia::settings::RootNode*, const QString& error) {  \
+        QObject::connect(layer, &Root::treeLoadFailed, this,                                                           \
+            [this, layer](caelestia::shell::settings::RootNode*, const QString& error) {                               \
                 Handler::loadFailed(error, m_layers.nameFor(layer));                                                   \
             });                                                                                                        \
-        QObject::connect(                                                                                              \
-            layer, &Root::treeSaveFailed, this, [this, layer](caelestia::settings::RootNode*, const QString& error) {  \
+        QObject::connect(layer, &Root::treeSaveFailed, this,                                                           \
+            [this, layer](caelestia::shell::settings::RootNode*, const QString& error) {                               \
                 Handler::saveFailed(error, m_layers.nameFor(layer));                                                   \
             });                                                                                                        \
         layer->load();                                                                                                 \

@@ -7,7 +7,7 @@
 #include <qsqldatabase.h>
 #include <qstring.h>
 
-namespace caelestia::multimedia {
+namespace caelestia::shell::multimedia {
 
 class ImageCacheWorker : public QObject {
     Q_OBJECT
@@ -33,4 +33,4 @@ private:
     QSqlDatabase m_db;
 };
 
-} // namespace caelestia::multimedia
+} // namespace caelestia::shell::multimedia

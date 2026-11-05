@@ -10,7 +10,7 @@
 
 #include "common.hpp"
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 struct DecodeResult {
     QVariant value;
@@ -98,4 +98,4 @@ private:
     QHash<int, const ValueCodec*> m_byType;        // Type id to alternative, for encoding
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

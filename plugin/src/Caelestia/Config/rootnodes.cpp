@@ -4,7 +4,7 @@
 #include "util/i18n.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -82,4 +82,4 @@ SETTINGS_SINGLETON_IMPL(ConfigSingleton, ConfigRoot, configDir(), monitorConfigD
 SETTINGS_SINGLETON_IMPL(TokensSingleton, TokensRoot, configDir(), monitorConfigDir(), u"shell-tokens.json"_s,
     detail::Handler<detail::ConfigKind::Tokens>)
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config
