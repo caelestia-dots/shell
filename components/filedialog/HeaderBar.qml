@@ -2,21 +2,18 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 
-StyledRect {
+Item {
     id: root
 
     required property DialogState dState
 
     implicitHeight: Math.max(backButton.implicitHeight, upButton.implicitHeight, location.implicitHeight) + Tokens.padding.medium * 2
-
-    color: Colours.tPalette.surfaceContainer
 
     NavButton {
         id: backButton

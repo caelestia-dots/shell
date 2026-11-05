@@ -1,6 +1,5 @@
 import QtQuick
 import Caelestia
-import Caelestia.I18n
 import Caelestia.Models
 import Caelestia.Multimedia
 
