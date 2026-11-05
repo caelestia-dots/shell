@@ -17,7 +17,7 @@ LazyLoader {
     property list<string> nameFilters
     property int filters
     property bool save
-    property string confirmLabel: Tr.tr("Select")
+    property string confirmLabel: Tr.trCtx("Select", "button")
 
     signal accepted(path: string)
     signal rejected

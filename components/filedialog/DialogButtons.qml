@@ -59,7 +59,7 @@ StyledRect {
             horizontalPadding: Tokens.padding.large
             verticalPadding: Tokens.padding.medium
             disabled: !root.dState.selectionValid
-            text: Tr.trCtx("Select", "button")
+            text: root.dState.confirmLabel
             onClicked: root.dState.accepted(root.dState.selectedPath.path)
         }
 
