@@ -59,7 +59,10 @@ Item {
             verticalPadding: Tokens.padding.medium
             disabled: !root.dState.selectionValid
             text: root.dState.confirmLabel
-            onClicked: root.dState.accepted(root.dState.selectedPath.path)
+            onClicked: {
+                const d = root.dState;
+                d.accepted(d.save ? d.cwd.join("/") + "/" + d.search : d.selectedPath.path);
+            }
         }
 
         TextButton {

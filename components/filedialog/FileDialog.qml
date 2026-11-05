@@ -78,12 +78,8 @@ LazyLoader {
 
         Component.onCompleted: {
             if (dState.save) {
-                if (loader.initialName) {
-                    search.text = loader.initialName;
-                    const idx = search.text.indexOf(".");
-                    // >0 to fully select hidden files
-                    search.select(0, idx > 0 ? idx : search.length);
-                }
+                if (loader.initialName)
+                    search.selectName(loader.initialName);
                 search.focus = true;
             }
         }
@@ -233,7 +229,7 @@ LazyLoader {
                         root.dState.rejected();
                 }
                 onFocusChanged: {
-                    if (!focus && text)
+                    if (!focus && text && !root.dState.save)
                         clear();
                 }
                 onTextChanged: {
