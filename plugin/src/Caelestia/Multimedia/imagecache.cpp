@@ -1,5 +1,7 @@
 #include "imagecache.hpp"
 
+#include <caelestia/media/video.hpp>
+
 #include <algorithm>
 
 #include "ktxencoder.hpp"
@@ -41,15 +43,17 @@ QString ImageCache::keyFor(const QString& path, const QSize& bucket, Qt::AspectR
         u"%1x%2|%3"_s.arg(QString::number(bucket.width()), QString::number(bucket.height()), QString::number(mode)));
 }
 
-void ImageCache::store(const QString& key, const QString& path, const QSize& bucket, Qt::AspectRatioMode mode) {
-    FileCache::store(key, [path, bucket, mode] {
+QFuture<bool> ImageCache::store(
+    const QString& key, const QString& path, const QSize& bucket, Qt::AspectRatioMode mode) {
+    return FileCache::store(key, [path, bucket, mode] {
         return encode(ktx::readFitted(path, bucket, mode));
     });
 }
 
-void ImageCache::store(const QString& key, const QImage& image, const QSize& bucket, Qt::AspectRatioMode mode) {
-    FileCache::store(key, [image, bucket, mode] {
-        return encode(ktx::fitted(image, bucket, mode));
+QFuture<bool> ImageCache::storeVideo(
+    const QString& key, const QString& path, const QSize& bucket, Qt::AspectRatioMode mode) {
+    return FileCache::store(key, [path, bucket, mode] {
+        return encode(ktx::fitted(media::videoFrame(path, bucket, mode), bucket, mode));
     });
 }
 
