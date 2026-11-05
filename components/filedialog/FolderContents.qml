@@ -73,6 +73,22 @@ Item {
         return Quickshell.iconPath("inode-directory");
     }
 
+    function navLeft(): void {
+        currentIndex = Math.max(0, currentIndex - 1);
+    }
+
+    function navRight(): void {
+        currentIndex = Math.min(grid.count - 1, currentIndex + 1);
+    }
+
+    function navUp(): void {
+        currentIndex = Math.max(0, currentIndex - grid.resolvedColumns);
+    }
+
+    function navDown(): void {
+        currentIndex = Math.min(grid.count - 1, currentIndex + grid.resolvedColumns);
+    }
+
     onCurrentItemChanged: {
         // currentItem gets nulled when it is scrolled out of view, so only update if it exists
         if (currentItem)
@@ -229,20 +245,6 @@ Item {
         contentHeight: grid.implicitHeight
 
         clip: true
-        focus: true
-        Keys.onEscapePressed: root.currentIndex = -1
-        Keys.onReturnPressed: {
-            if (root.dState.selectionValid)
-                root.dState.accepted(root.currentItem.modelData.path);
-        }
-        Keys.onEnterPressed: {
-            if (root.dState.selectionValid)
-                root.dState.accepted(root.currentItem.modelData.path);
-        }
-        Keys.onPressed: event => {
-            if (event.key === Qt.Key_H && event.modifiers & Qt.ControlModifier)
-                root.dState.showHidden = !root.dState.showHidden;
-        }
 
         StyledScrollBar.vertical: StyledScrollBar {
             flickable: view
