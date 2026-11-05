@@ -19,7 +19,7 @@ LazyLoader {
     property list<string> nameFilters
     property int filters
     property bool save
-    property string confirmLabel: Tr.trCtx("Select", "button")
+    property string confirmLabel: save ? Tr.trCtx("Save", "button") : Tr.trCtx("Select", "button")
 
     signal accepted(path: string)
     signal rejected
@@ -40,7 +40,6 @@ LazyLoader {
 
         property DialogState dState: DialogState {
             cwd: loader.initialDir
-            search: loader.initialName
             nameFilters: loader.nameFilters
             filters: loader.filters
             save: loader.save
@@ -48,6 +47,21 @@ LazyLoader {
 
             onAccepted: path => loader.accepted(path)
             onRejected: loader.rejected()
+        }
+
+        function handleEnter(): void {
+            if (dState.save) {
+                if (!dState.search)
+                    return;
+
+                dState.accepted(dState.cwd.join("/") + "/" + dState.search);
+                return;
+            }
+
+            if (dState.selectedPath?.isDir)
+                dState.cdInto(dState.selectedPath.name);
+            else if (dState.selectionValid)
+                dState.accepted(dState.selectedPath.path);
         }
 
         contentItem.Config.screen: screen.name
@@ -62,6 +76,18 @@ LazyLoader {
         surfaceFormat.opaque: false
         title: loader.title
 
+        Component.onCompleted: {
+            if (dState.save) {
+                if (loader.initialName) {
+                    search.text = loader.initialName;
+                    const idx = search.text.indexOf(".");
+                    // >0 to fully select hidden files
+                    search.select(0, idx > 0 ? idx : search.length);
+                }
+                search.focus = true;
+            }
+        }
+
         onVisibleChanged: {
             if (!visible)
                 dState.rejected();
@@ -74,18 +100,8 @@ LazyLoader {
             else
                 dState.rejected();
         }
-        contentItem.Keys.onReturnPressed: {
-            if (dState.selectedPath?.isDir)
-                dState.cdInto(dState.selectedPath.name);
-            else if (dState.selectionValid)
-                dState.accepted(dState.selectedPath.path);
-        }
-        contentItem.Keys.onEnterPressed: {
-            if (dState.selectedPath?.isDir)
-                dState.cdInto(dState.selectedPath.name);
-            else if (dState.selectionValid)
-                dState.accepted(dState.selectedPath.path);
-        }
+        contentItem.Keys.onReturnPressed: handleEnter()
+        contentItem.Keys.onEnterPressed: handleEnter()
         contentItem.Keys.onPressed: event => {
             if (event.modifiers & Qt.ControlModifier) {
                 if (event.key === Qt.Key_H)
@@ -207,13 +223,21 @@ LazyLoader {
                     matrix: searchBg.deformMatrix
                 }
 
-                Keys.onEscapePressed: clear()
+                Keys.onReturnPressed: root.handleEnter()
+                Keys.onEnterPressed: root.handleEnter()
+
+                Keys.onEscapePressed: {
+                    if (text || !root.dState.save)
+                        clear();
+                    else
+                        root.dState.rejected();
+                }
                 onFocusChanged: {
                     if (!focus && text)
                         clear();
                 }
                 onTextChanged: {
-                    if (!text)
+                    if (!text && !root.dState.save)
                         root.contentItem.focus = true;
                 }
             }

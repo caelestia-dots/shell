@@ -262,7 +262,7 @@ Item {
             model: FilterModel {
                 id: filtered
 
-                filter: root.dState.search
+                filter: root.dState.save ? "" : root.dState.search
                 propertyName: "name"
                 sourceModel: FileSystemModel {
                     id: model
