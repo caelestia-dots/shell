@@ -1,3 +1,4 @@
+import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
@@ -5,14 +6,12 @@ import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 
-StyledRect {
+Item {
     id: root
 
     required property DialogState dState
 
     implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
-
-    color: Colours.tPalette.surfaceContainer
 
     RowLayout {
         id: inner
@@ -50,7 +49,7 @@ StyledRect {
                     // TRANSLATORS: %1 = file name, %2 = file size, %3 = file type
                     return Tr.trCtx("\"%1\" | %2 | %3", "selected file label").arg(entry.name).arg(Units.formatBytes(entry.size)).arg(entry.mimeComment);
                 }
-                elide: StyledText.ElideRight
+                elide: Text.ElideRight
             }
         }
 

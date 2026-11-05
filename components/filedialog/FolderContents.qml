@@ -15,7 +15,6 @@ import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.components.effects
 import qs.utils
 
 Item {
@@ -104,33 +103,6 @@ Item {
                 to: 1
                 type: Anim.DefaultEffects
             }
-        }
-    }
-
-    StyledRect {
-        anchors.fill: parent
-        color: Colours.tPalette.surfaceContainer
-
-        layer.enabled: true
-        layer.effect: Mask {
-            maskSource: mask
-            maskInverted: true
-        }
-    }
-
-    Item {
-        id: mask
-
-        anchors.fill: parent
-        layer.enabled: true
-        visible: false
-
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.extraSmall
-            anchors.topMargin: 0
-            anchors.bottomMargin: 0
-            radius: Tokens.rounding.largeIncreased
         }
     }
 
@@ -249,9 +221,8 @@ Item {
         id: view
 
         anchors.fill: parent
-        anchors.margins: Tokens.padding.extraSmall + Tokens.padding.medium
-        anchors.topMargin: Tokens.padding.medium
-        anchors.bottomMargin: Tokens.padding.medium
+        anchors.margins: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.small + Tokens.padding.medium
 
         flickableDirection: Flickable.VerticalFlick
         contentWidth: width
@@ -323,7 +294,7 @@ Item {
 
         StyledRect {
             anchors.fill: parent
-            anchors.margins: item.isCurrentItem ? 0 : Tokens.padding.large
+            anchors.margins: item.isCurrentItem ? 0 : Tokens.padding.medium
             radius: item.radius
             color: Qt.alpha(Colours.palette.primaryContainer, item.isCurrentItem ? 1 : 0)
 
