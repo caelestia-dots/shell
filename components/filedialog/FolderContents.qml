@@ -310,7 +310,7 @@ Item {
             onClicked: root.dState.select(item.modelData)
             onDoubleClicked: {
                 if (item.modelData.isDir)
-                    root.dState.cwd.push(item.modelData.name);
+                    root.dState.cdInto(item.modelData.name);
                 else if (root.dState.selectionValid)
                     root.dState.accepted(item.modelData.path);
             }
