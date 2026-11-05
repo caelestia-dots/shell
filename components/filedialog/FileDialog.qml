@@ -36,11 +36,6 @@ LazyLoader {
     FloatingWindow {
         id: root
 
-        readonly property bool selectionValid: {
-            const file = folderContents.currentItem?.modelData;
-            return (file && !file.isDir && (filters.includes("*") || filters.some(filter => filter.toLowerCase() === file.suffix.toLowerCase()))) ?? false;
-        }
-
         property DialogState dState: DialogState {
             cwd: loader.initialDir
             nameFilters: loader.nameFilters

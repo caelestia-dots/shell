@@ -14,6 +14,8 @@ public:
     using QObject::QObject;
 
     Q_INVOKABLE static bool isSupported(const QString& path);
+    Q_INVOKABLE static bool isImage(const QString& path);
+    Q_INVOKABLE static bool isVideo(const QString& path);
 };
 
 } // namespace caelestia::shell::multimedia

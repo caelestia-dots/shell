@@ -14,6 +14,7 @@ qml_module(caelestia-multimedia
         Qt::Multimedia
         Qt::Concurrent
         Qt::Network
+        caelestia-util
         caelestia::caelestia
         rgbcx
 )

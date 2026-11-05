@@ -37,6 +37,7 @@ StyledRect {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: Tokens.padding.large
 
+                animate: true
                 text: {
                     const entry = root.dState.selectedPath;
                     if (!entry)
