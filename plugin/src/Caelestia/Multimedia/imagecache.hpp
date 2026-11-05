@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qfuture.h>
 #include <qimage.h>
 #include <qnamespace.h>
 #include <qsize.h>
@@ -16,8 +17,8 @@ public:
     [[nodiscard]] static QSize bucketFor(const QSize& devicePixels);
     [[nodiscard]] static QString keyFor(const QString& path, const QSize& bucket, Qt::AspectRatioMode mode);
 
-    void store(const QString& key, const QString& path, const QSize& bucket, Qt::AspectRatioMode mode);
-    void store(const QString& key, const QImage& image, const QSize& bucket, Qt::AspectRatioMode mode);
+    QFuture<bool> store(const QString& key, const QString& path, const QSize& bucket, Qt::AspectRatioMode mode);
+    QFuture<bool> storeVideo(const QString& key, const QString& path, const QSize& bucket, Qt::AspectRatioMode mode);
 
 private:
     explicit ImageCache();
