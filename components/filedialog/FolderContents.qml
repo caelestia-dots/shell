@@ -329,7 +329,7 @@ Item {
 
             Behavior on anchors.margins {
                 Anim {
-                    // type: Anim.DefaultEffects
+                    type: Anim.DefaultEffects
                 }
             }
         }
