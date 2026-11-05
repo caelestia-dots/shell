@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import QtCore
 import Quickshell
 import M3Shapes
-import Caelestia
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
@@ -20,11 +19,6 @@ import qs.utils
 Item {
     id: root
 
-    property int currentIndex: -1
-    readonly property FileEntry currentItem: {
-        CUtils.dependency(grid.itemsDirty);
-        return grid.itemAtIndex(currentIndex) as FileEntry;
-    }
     required property DialogState dState
 
     property string currentDir: dState.cwd.join("/") || "/"
@@ -73,35 +67,36 @@ Item {
         return Quickshell.iconPath("inode-directory");
     }
 
+    function navBy(delta: int): void {
+        if (grid.count === 0)
+            return;
+
+        const cur = filtered.indexOf(dState.selectedPath);
+        const next = Math.max(0, Math.min(grid.count - 1, cur + delta));
+        dState.select(filtered.entryAt(next));
+    }
+
     function navLeft(): void {
-        currentIndex = Math.max(0, currentIndex - 1);
+        navBy(-1);
     }
 
     function navRight(): void {
-        currentIndex = Math.min(grid.count - 1, currentIndex + 1);
+        navBy(1);
     }
 
     function navUp(): void {
-        currentIndex = Math.max(0, currentIndex - grid.resolvedColumns);
+        navBy(-grid.resolvedColumns);
     }
 
     function navDown(): void {
-        currentIndex = Math.min(grid.count - 1, currentIndex + grid.resolvedColumns);
+        navBy(grid.resolvedColumns);
     }
-
-    onCurrentItemChanged: {
-        // currentItem gets nulled when it is scrolled out of view, so only update if it exists
-        if (currentItem)
-            dState.select(currentItem.modelData);
-    }
-    // Use currentIndex instead to reset the selection
-    onCurrentIndexChanged: dState.select(currentItem?.modelData)
 
     Component.onCompleted: model.path = currentDir
     onCurrentDirChanged: {
         model.path = "";
         model.path = currentDir;
-        currentIndex = -1;
+        dState.select(null);
     }
 
     Behavior on currentDir {
@@ -265,6 +260,8 @@ Item {
             viewport: Qt.rect(0, view.contentY, width, view.height)
 
             model: FilterModel {
+                id: filtered
+
                 filter: root.dState.search
                 propertyName: "name"
                 sourceModel: FileSystemModel {
@@ -286,10 +283,9 @@ Item {
     component FileEntry: Item {
         id: item
 
-        required property int index
         required property FileSystemEntry modelData
 
-        readonly property bool isCurrentItem: root.currentIndex === index
+        readonly property bool isCurrentItem: root.dState.selectedPath === modelData
         readonly property int radius: Tokens.rounding.largeIncreased
 
         implicitWidth: Tokens.sizes.fileDialog.itemWidth
@@ -311,7 +307,7 @@ Item {
         }
 
         StateLayer {
-            onClicked: root.currentIndex = item.index
+            onClicked: root.dState.select(item.modelData)
             onDoubleClicked: {
                 if (item.modelData.isDir)
                     root.dState.cwd.push(item.modelData.name);
