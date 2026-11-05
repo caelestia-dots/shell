@@ -265,10 +265,14 @@ Item {
             useCustomViewport: true
             viewport: Qt.rect(0, view.contentY, width, view.height)
 
-            model: FileSystemModel {
-                id: model
+            model: FilterModel {
+                filter: root.dState.search
+                propertyName: "name"
+                sourceModel: FileSystemModel {
+                    id: model
 
-                showHidden: root.dState.showHidden
+                    showHidden: root.dState.showHidden
+                }
             }
 
             delegate: FileEntry {}
