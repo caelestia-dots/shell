@@ -50,7 +50,7 @@ QtObject {
     }
 
     function cdUp(): void {
-        if (!cwd.length)
+        if (cwd.length <= 1)
             return;
 
         cwdStack.push([...cwd]);
@@ -68,6 +68,9 @@ QtObject {
     }
 
     function select(entry: FileSystemEntry): void {
+        if (entry === selectedPath)
+            return;
+
         const old = selectedPath;
         entry?.ref(this);
         selectedPath = entry;
