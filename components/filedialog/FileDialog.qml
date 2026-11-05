@@ -15,6 +15,7 @@ LazyLoader {
 
     property string title: Tr.tr("Select a file")
     property list<string> initialDir: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.HomeLocation)).split("/")
+    property string initialName
     property list<string> nameFilters
     property int filters
     property bool save
@@ -39,6 +40,7 @@ LazyLoader {
 
         property DialogState dState: DialogState {
             cwd: loader.initialDir
+            search: loader.initialName
             nameFilters: loader.nameFilters
             filters: loader.filters
             save: loader.save
@@ -65,6 +67,43 @@ LazyLoader {
                 dState.rejected();
         }
 
+        contentItem.focus: true
+        contentItem.Keys.onEscapePressed: {
+            if (folderContents.currentIndex >= 0)
+                folderContents.currentIndex = -1;
+            else
+                dState.rejected();
+        }
+        contentItem.Keys.onReturnPressed: {
+            if (dState.selectedPath?.isDir)
+                dState.cdInto(dState.selectedPath.name);
+            else if (dState.selectionValid)
+                dState.accepted(dState.selectedPath.path);
+        }
+        contentItem.Keys.onEnterPressed: {
+            if (dState.selectedPath?.isDir)
+                dState.cdInto(dState.selectedPath.name);
+            else if (dState.selectionValid)
+                dState.accepted(dState.selectedPath.path);
+        }
+        contentItem.Keys.onPressed: event => {
+            if (event.modifiers & Qt.ControlModifier) {
+                if (event.key === Qt.Key_H)
+                    dState.showHidden = !dState.showHidden;
+                return;
+            }
+
+            if (/^[^\x00-\x1F\x7F-\x9F]+$/.test(event.text)) {
+                search.text += event.text;
+                search.focus = true;
+            }
+        }
+
+        contentItem.Keys.onLeftPressed: folderContents.navLeft()
+        contentItem.Keys.onRightPressed: folderContents.navRight()
+        contentItem.Keys.onUpPressed: folderContents.navUp()
+        contentItem.Keys.onDownPressed: folderContents.navDown()
+
         Item {
             anchors.fill: parent
             opacity: blobGroup.color.a
@@ -90,6 +129,24 @@ LazyLoader {
                 borderRight: Tokens.padding.small
                 borderTop: header.height
                 borderBottom: buttons.height
+            }
+
+            BlobRect {
+                id: searchBg
+
+                x: searchWrapper.x + search.x - Tokens.padding.large
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: buttons.height - (searchWrapper.open ? 0 : searchWrapper.realHeight + 5)
+
+                implicitWidth: search.width + Tokens.padding.large * 2
+                implicitHeight: searchWrapper.realHeight
+                group: blobGroup
+                radius: Tokens.rounding.largeIncreased
+                deformScale: 0.00003 * Config.appearance.deformScale
+
+                Behavior on anchors.bottomMargin {
+                    Anim {}
+                }
             }
         }
 
@@ -120,8 +177,56 @@ LazyLoader {
             anchors.left: sidebar.right
             anchors.right: parent.right
             anchors.top: header.bottom
-            anchors.bottom: buttons.top
+            anchors.bottom: searchWrapper.top
             dState: root.dState
+        }
+
+        Item {
+            id: searchWrapper
+
+            readonly property bool open: root.dState.save || root.dState.search
+            readonly property int realHeight: search.implicitHeight + search.anchors.topMargin + Tokens.padding.extraSmall
+
+            anchors.left: sidebar.right
+            anchors.right: parent.right
+            anchors.bottom: buttons.top
+
+            clip: true
+            implicitHeight: open ? realHeight : 0
+            opacity: open ? 1 : 0
+
+            FooterSearch {
+                id: search
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: Tokens.padding.medium
+                dState: root.dState
+
+                transform: Matrix4x4 {
+                    matrix: searchBg.deformMatrix
+                }
+
+                Keys.onEscapePressed: clear()
+                onFocusChanged: {
+                    if (!focus && text)
+                        clear();
+                }
+                onTextChanged: {
+                    if (!text)
+                        root.contentItem.focus = true;
+                }
+            }
+
+            Behavior on implicitHeight {
+                Anim {}
+            }
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
         }
 
         DialogButtons {

@@ -238,6 +238,7 @@ class FileDialogTokens : public settings::ObjectNode {
     CONFIG_PROPERTY(int, initialHeight, 800)
     CONFIG_PROPERTY(int, minWidth, 850)
     CONFIG_PROPERTY(int, minHeight, 480)
+    CONFIG_PROPERTY(int, minSearchWidth, 400)
     CONFIG_PROPERTY(int, itemWidth, 140)
     CONFIG_PROPERTY(int, sidebarWidth, 230)
 };
