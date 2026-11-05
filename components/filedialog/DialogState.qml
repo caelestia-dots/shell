@@ -12,6 +12,7 @@ QtObject {
     property string confirmLabel
     property bool showHidden
     property FileSystemEntry selectedPath
+    property string search
 
     readonly property bool selectionValid: {
         if (!selectedPath)
