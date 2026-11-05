@@ -27,6 +27,9 @@ public:
 
     void setSourceModel(QAbstractItemModel* sourceModel) override;
 
+    Q_INVOKABLE [[nodiscard]] int indexOf(QObject* entry) const;
+    Q_INVOKABLE [[nodiscard]] QObject* entryAt(int row) const;
+
 signals:
     void filterChanged();
     void propertyNameChanged();
