@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtCore
 import Quickshell
+import Caelestia.Blobs
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
@@ -62,6 +63,39 @@ LazyLoader {
         onVisibleChanged: {
             if (!visible)
                 dState.rejected();
+        }
+
+        Item {
+            anchors.fill: parent
+            opacity: blobGroup.color.a
+            layer.enabled: true
+
+            BlobGroup {
+                id: blobGroup
+
+                smoothing: root.contentItem.Tokens.rounding.largeIncreased
+                color: Colours.tPalette.surfaceContainer
+
+                Behavior on color {
+                    CAnim {}
+                }
+            }
+
+            BlobInvertedRect {
+                anchors.fill: parent
+                group: blobGroup
+                radius: Tokens.rounding.largeIncreased
+
+                borderLeft: sidebar.width
+                borderRight: Tokens.padding.small
+                borderTop: header.height
+                borderBottom: buttons.height
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: root.contentItem.focus = true
         }
 
         Sidebar {

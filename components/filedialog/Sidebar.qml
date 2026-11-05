@@ -9,15 +9,13 @@ import Caelestia.Scheme
 import qs.components
 import qs.utils
 
-StyledRect {
+Item {
     id: root
 
     required property DialogState dState
 
     implicitWidth: Tokens.sizes.fileDialog.sidebarWidth
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
-
-    color: Colours.tPalette.surfaceContainer
 
     ColumnLayout {
         id: inner
