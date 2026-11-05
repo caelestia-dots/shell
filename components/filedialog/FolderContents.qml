@@ -233,14 +233,13 @@ Item {
         }
     }
 
-    StyledFlickable {
+    VerticalFadeFlickable {
         id: view
 
         anchors.fill: parent
         anchors.margins: Tokens.padding.medium
         anchors.rightMargin: Tokens.padding.small + Tokens.padding.medium
 
-        flickableDirection: Flickable.VerticalFlick
         contentWidth: width
         contentHeight: grid.implicitHeight
 
