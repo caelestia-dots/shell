@@ -5,7 +5,6 @@
 #include <qdiriterator.h>
 #include <qfilesystemwatcher.h>
 #include <qfuture.h>
-#include <qimagereader.h>
 #include <qmimedatabase.h>
 #include <qmimetype.h>
 #include <qobject.h>
@@ -144,7 +143,7 @@ private:
     struct ScanFilters {
         QStringList nameFilters;
         QDir::Filters filters;
-        std::function<bool(const QString&)> filterFn = nullptr;
+        std::function<bool(const QFileInfo&)> filterFn = nullptr;
     };
 
     QDir m_dir;

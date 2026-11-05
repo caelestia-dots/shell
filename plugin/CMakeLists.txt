@@ -26,6 +26,7 @@ include(cmake/qml-module.cmake)
 # Shared helpers
 add_library(caelestia-util STATIC
     src/util/i18n.cpp
+    src/util/mediatypes.cpp
     src/util/metaenum.cpp
     src/util/refgated.cpp
 )
@@ -33,7 +34,7 @@ qt_extract_metatypes(caelestia-util)
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include")
 file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/src/util" "${CMAKE_CURRENT_BINARY_DIR}/include/util" SYMBOLIC)
 target_include_directories(caelestia-util PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
-target_link_libraries(caelestia-util PUBLIC Qt::Core)
+target_link_libraries(caelestia-util PUBLIC Qt::Core Qt::Gui Qt::Multimedia)
 set_target_properties(caelestia-util PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(3rdparty/rgbcx)
