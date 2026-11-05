@@ -24,28 +24,27 @@ Item {
     property string currentDir: dState.cwd.join("/") || "/"
 
     readonly property var locToIcon: {
-        const path = p => Paths.toLocalFile(StandardPaths.writableLocation(p));
         return {
-            [path(StandardPaths.HomeLocation)]: "home",
-            [path(StandardPaths.DesktopLocation)]: "desktop",
-            [path(StandardPaths.DocumentsLocation)]: "documents",
-            [path(StandardPaths.DownloadLocation)]: "downloads",
-            [path(StandardPaths.MusicLocation)]: "music",
-            [path(StandardPaths.PicturesLocation)]: "pictures",
-            [path(StandardPaths.PublicShareLocation)]: "public",
-            [path(StandardPaths.TemplatesLocation)]: "templates",
-            [path(StandardPaths.MoviesLocation)]: "videos",
-            [path(StandardPaths.HomeLocation) + "/Games"]: "games",
-            [path(StandardPaths.HomeLocation) + "/.steam"]: "steam",
-            [path(StandardPaths.GenericDataLocation) + "/Steam"]: "steam",
-            [path(StandardPaths.HomeLocation) + "/.wine"]: "wine",
-            [path(StandardPaths.HomeLocation) + "/VirtualBox VMs"]: "vbox",
-            [path(StandardPaths.HomeLocation) + "/vmware"]: "vmware",
-            [path(StandardPaths.HomeLocation) + "/Dropbox"]: "dropbox",
-            [path(StandardPaths.HomeLocation) + "/Nextcloud"]: "nextcloud",
-            [path(StandardPaths.HomeLocation) + "/OneDrive"]: "onedrive",
-            [path(StandardPaths.HomeLocation) + "/MEGA"]: "mega",
-            [path(StandardPaths.HomeLocation) + "/Sync"]: "syncthing"
+            [Paths.location(StandardPaths.HomeLocation)]: "home",
+            [Paths.location(StandardPaths.DesktopLocation)]: "desktop",
+            [Paths.location(StandardPaths.DocumentsLocation)]: "documents",
+            [Paths.location(StandardPaths.DownloadLocation)]: "downloads",
+            [Paths.location(StandardPaths.MusicLocation)]: "music",
+            [Paths.location(StandardPaths.PicturesLocation)]: "pictures",
+            [Paths.location(StandardPaths.PublicShareLocation)]: "public",
+            [Paths.location(StandardPaths.TemplatesLocation)]: "templates",
+            [Paths.location(StandardPaths.MoviesLocation)]: "videos",
+            [Paths.location(StandardPaths.HomeLocation) + "/Games"]: "games",
+            [Paths.location(StandardPaths.HomeLocation) + "/.steam"]: "steam",
+            [Paths.location(StandardPaths.GenericDataLocation) + "/Steam"]: "steam",
+            [Paths.location(StandardPaths.HomeLocation) + "/.wine"]: "wine",
+            [Paths.location(StandardPaths.HomeLocation) + "/VirtualBox VMs"]: "vbox",
+            [Paths.location(StandardPaths.HomeLocation) + "/vmware"]: "vmware",
+            [Paths.location(StandardPaths.HomeLocation) + "/Dropbox"]: "dropbox",
+            [Paths.location(StandardPaths.HomeLocation) + "/Nextcloud"]: "nextcloud",
+            [Paths.location(StandardPaths.HomeLocation) + "/OneDrive"]: "onedrive",
+            [Paths.location(StandardPaths.HomeLocation) + "/MEGA"]: "mega",
+            [Paths.location(StandardPaths.HomeLocation) + "/Sync"]: "syncthing"
         };
     }
 

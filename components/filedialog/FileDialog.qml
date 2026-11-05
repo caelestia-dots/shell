@@ -14,7 +14,7 @@ LazyLoader {
     id: loader
 
     property string title: Tr.tr("Select a file")
-    property list<string> initialDir: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.HomeLocation)).split("/")
+    property list<string> initialDir: Paths.location(StandardPaths.HomeLocation).split("/")
     property string initialName
     property list<string> nameFilters
     property int filters
