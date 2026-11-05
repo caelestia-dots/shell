@@ -6,7 +6,6 @@
 #include <qquickitem.h>
 #include <qsize.h>
 #include <qurl.h>
-#include <qvideoframe.h>
 
 #include <atomic>
 
@@ -89,7 +88,8 @@ private:
     void setLocalPath(const QString& path);
     void refresh();
     void watchWindow(QQuickWindow* window);
-    void onVideoFrame(const QVideoFrame& frame);
+    void onPreviewStored();
+    void onVideoFrame();
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void syncPlayer();
     void unload();
@@ -108,7 +108,6 @@ private:
     QObject* m_videoOutput = nullptr;
     QQuickItem* m_sizeSource = nullptr;
     QString m_key;
-    QSize m_bucket;
     QUrl m_preview;
     qint64 m_position = 0;
     bool m_loading = false;
