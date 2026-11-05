@@ -60,6 +60,22 @@ void FilterModel::setSourceModel(QAbstractItemModel* sourceModel) {
     m_role = sourceModel ? sourceModel->roleNames().key("modelData"_ba, Qt::UserRole) : Qt::UserRole;
 }
 
+int FilterModel::indexOf(QObject* entry) const {
+    if (!entry)
+        return -1;
+
+    const int count = rowCount();
+    for (int row = 0; row < count; ++row) {
+        if (entryAt(row) == entry)
+            return row;
+    }
+    return -1;
+}
+
+QObject* FilterModel::entryAt(int row) const {
+    return index(row, 0).data(m_role).value<QObject*>();
+}
+
 bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
     if (m_filter.isEmpty())
         return true;

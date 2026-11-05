@@ -69,8 +69,8 @@ LazyLoader {
 
         contentItem.focus: true
         contentItem.Keys.onEscapePressed: {
-            if (folderContents.currentIndex >= 0)
-                folderContents.currentIndex = -1;
+            if (dState.selectedPath)
+                dState.select(null);
             else
                 dState.rejected();
         }
