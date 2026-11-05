@@ -35,43 +35,43 @@ Item {
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.HomeLocation)).split("/")
+            path: Paths.location(StandardPaths.HomeLocation).split("/")
             icon: "home"
             label: Tr.trCtx("Home", "file location")
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DesktopLocation)).split("/")
+            path: Paths.location(StandardPaths.DesktopLocation).split("/")
             icon: "desktop_windows"
             label: Tr.trCtx("Desktop", "file location")
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DocumentsLocation)).split("/")
+            path: Paths.location(StandardPaths.DocumentsLocation).split("/")
             icon: "description"
             label: Tr.trCtx("Documents", "file location")
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.DownloadLocation)).split("/")
+            path: Paths.location(StandardPaths.DownloadLocation).split("/")
             icon: "file_download"
             label: Tr.trCtx("Downloads", "file location")
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.MusicLocation)).split("/")
+            path: Paths.location(StandardPaths.MusicLocation).split("/")
             icon: "music_note"
             label: Tr.trCtx("Music", "file location")
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.PicturesLocation)).split("/")
+            path: Paths.location(StandardPaths.PicturesLocation).split("/")
             icon: "image"
             label: Tr.trCtx("Pictures", "file location")
         }
 
         Place {
-            path: Paths.toLocalFile(StandardPaths.writableLocation(StandardPaths.MoviesLocation)).split("/")
+            path: Paths.location(StandardPaths.MoviesLocation).split("/")
             icon: "video_library"
             label: Tr.trCtx("Videos", "file location")
         }

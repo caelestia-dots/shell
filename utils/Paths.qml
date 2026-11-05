@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import QtCore
 import Quickshell
 import Caelestia
 import Caelestia.Config
@@ -33,5 +34,9 @@ Singleton {
 
     function shortenHome(path: string): string {
         return path.replace(home, "~");
+    }
+
+    function location(location: int): string {
+        return toLocalFile(StandardPaths.writableLocation(location));
     }
 }
