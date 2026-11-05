@@ -5,6 +5,7 @@ import Quickshell
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Models
 import qs.components
 import qs.components.filedialog
 import qs.utils
@@ -15,8 +16,7 @@ Item {
     required property ScreenState screenState
     readonly property FileDialog facePicker: FileDialog {
         title: Tr.tr("Select a profile picture")
-        filterLabel: Tr.tr("Image files")
-        filters: Images.validImageExtensions
+        filters: FileSystemModel.Images
         onAccepted: path => {
             if (CUtils.copyFile(Qt.resolvedUrl(path), Qt.resolvedUrl(`${Paths.home}/.face`)))
                 // TRANSLATORS: %1 = a file path

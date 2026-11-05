@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Caelestia.Config
 import qs.components
 import qs.components.containers
+import qs.components.widgets
 import qs.services
 
 Variants {
@@ -47,7 +48,7 @@ Variants {
                 anchors.fill: parent
                 active: Config.background.wallpaperEnabled
 
-                sourceComponent: Wallpaper {}
+                sourceComponent: WallpaperImpl {}
             }
 
             Visualiser {
