@@ -15,6 +15,9 @@ QtObject {
     property string search
 
     readonly property bool selectionValid: {
+        if (save)
+            return search.length > 0;
+
         if (!selectedPath)
             return false;
 
