@@ -18,7 +18,7 @@ endif()
 include(cmake/sensorslib.cmake)
 
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
-qt_standard_project_setup(REQUIRES 6.9)
+qt_standard_project_setup(REQUIRES 6.10)
 
 include(cmake/pch.cmake)
 include(cmake/qml-module.cmake)
