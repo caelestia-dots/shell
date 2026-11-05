@@ -56,8 +56,8 @@ void FilterModel::setCaseSensitive(bool caseSensitive) {
 }
 
 void FilterModel::setSourceModel(QAbstractItemModel* sourceModel) {
-    QSortFilterProxyModel::setSourceModel(sourceModel);
     m_role = sourceModel ? sourceModel->roleNames().key("modelData"_ba, Qt::UserRole) : Qt::UserRole;
+    QSortFilterProxyModel::setSourceModel(sourceModel);
 }
 
 int FilterModel::indexOf(QObject* entry) const {
