@@ -20,6 +20,7 @@ qml_module(caelestia-services
         networkusage.cpp
         hyprdevices.cpp
         hyprextras.cpp
+        chargethreshold.cpp
     LIBRARIES
         Qt::Concurrent
         Qt::DBus
