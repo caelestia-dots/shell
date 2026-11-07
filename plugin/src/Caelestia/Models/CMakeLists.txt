@@ -1,5 +1,6 @@
 qml_module(caelestia-models
     URI Caelestia.Models
+    INCLUDE_PREFIX models
     SOURCES
         filesystemmodel.cpp
         appdb.cpp
