@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 RowLayout {
     id: root
@@ -50,7 +50,7 @@ RowLayout {
 
             bottomRightRadius: Tokens.rounding.extraLarge
             radius: Tokens.rounding.medium
-            color: Colours.tPalette.m3surfaceContainer
+            color: Colours.tPalette.surfaceContainer
 
             NotifDock {
                 lock: root.lock

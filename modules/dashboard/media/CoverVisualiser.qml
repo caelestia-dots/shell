@@ -6,6 +6,7 @@ import Quickshell
 import M3Shapes
 import Caelestia
 import Caelestia.Config
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.widgets
@@ -56,7 +57,7 @@ Item {
             asynchronous: true
             capStyle: root.Tokens.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
             strokeWidth: 360 / GlobalConfig.services.visualiserBars - root.Tokens.spacing.small / 4
-            strokeColor: Colours.palette.m3primary
+            strokeColor: Colours.palette.primary
 
             startX: root.centerX + shapeEdgeDist * cos
             startY: root.centerY + shapeEdgeDist * sin

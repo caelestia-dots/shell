@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.modules.nexus.common
 
 ConnectedRect {
@@ -49,7 +49,7 @@ ConnectedRect {
                 Layout.fillWidth: true
                 visible: root.subtext
                 text: root.subtext
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
             }

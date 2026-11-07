@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.nexus
 
 Singleton {
@@ -25,7 +25,7 @@ Singleton {
         FloatingWindow {
             id: win
 
-            color: Colours.tPalette.m3surface
+            color: Colours.tPalette.surface
             surfaceFormat.opaque: false
 
             onVisibleChanged: {

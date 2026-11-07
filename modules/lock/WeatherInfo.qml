@@ -1,6 +1,7 @@
 import "weather"
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -17,7 +18,7 @@ StyledRect {
         return base + brief.anchors.topMargin;
     }
     radius: Tokens.rounding.extraExtraLarge
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
 
     Timer {
         running: true

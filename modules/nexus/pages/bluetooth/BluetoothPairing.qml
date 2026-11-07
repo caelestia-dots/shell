@@ -6,9 +6,9 @@ import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -58,7 +58,7 @@ PageBase {
                 anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.2)
 
                 text: Tr.tr("Available devices")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.body.small
             }
         }
@@ -128,7 +128,7 @@ PageBase {
 
                     MaterialIcon {
                         text: Icons.getBluetoothIcon(newDevice.modelData?.icon ?? "")
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Colours.palette.onSurfaceVariant
                         fontStyle: Tokens.font.icon.medium
                         opacity: newDevice.textOpacity
                     }
@@ -148,7 +148,7 @@ PageBase {
                         StyledText {
                             Layout.fillWidth: true
                             text: newDevice.modelData?.pairing ? Tr.tr("Pairing...") : (newDevice.modelData?.address ?? "")
-                            color: Colours.palette.m3outline
+                            color: Colours.palette.outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                             animate: true

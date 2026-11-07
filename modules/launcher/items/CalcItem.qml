@@ -4,8 +4,8 @@ import Quickshell
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -52,10 +52,10 @@ Item {
 
             color: {
                 if (text.includes("error: ") || text.includes("warning: "))
-                    return Colours.palette.m3error;
+                    return Colours.palette.error;
                 if (!root.math)
-                    return Colours.palette.m3onSurfaceVariant;
-                return Colours.palette.m3onSurface;
+                    return Colours.palette.onSurfaceVariant;
+                return Colours.palette.onSurface;
             }
 
             text: root.math.length > 0 ? (Qalculator.result ? Tr.trMarked(Qalculator.result) : Tr.tr("Calculating...")) : Tr.tr("Type an expression to calculate")
@@ -66,7 +66,7 @@ Item {
         }
 
         StyledRect {
-            color: Colours.palette.m3tertiary
+            color: Colours.palette.tertiary
             radius: Tokens.rounding.large
             clip: true
 
@@ -83,7 +83,7 @@ Item {
                     root.list.screenState.launcher = false;
                 }
 
-                color: Colours.palette.m3onTertiary
+                color: Colours.palette.onTertiary
             }
 
             StyledText {
@@ -94,7 +94,7 @@ Item {
                 anchors.rightMargin: Tokens.spacing.small
 
                 text: Tr.tr("Open in calculator")
-                color: Colours.palette.m3onTertiary
+                color: Colours.palette.onTertiary
                 font: Tokens.font.label.medium
 
                 opacity: stateLayer.containsMouse ? 1 : 0
@@ -114,7 +114,7 @@ Item {
                 anchors.rightMargin: Tokens.padding.medium
 
                 text: "open_in_new"
-                color: Colours.palette.m3onTertiary
+                color: Colours.palette.onTertiary
                 fontStyle: Tokens.font.icon.large
             }
 

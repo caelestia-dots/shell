@@ -2,9 +2,14 @@
 
 #include <qloggingcategory.h>
 
+#include <caelestia/scheme/smart.hpp>
 #include <caelestia/theme/theme.hpp>
+#include <caelestia/wallpaper/wallpaper.hpp>
+
+#include <stdexcept>
 
 #include "config/rootnodes.hpp"
+#include "schemehandles.hpp"
 #include "wallpapers.hpp"
 
 namespace {
@@ -48,6 +53,36 @@ QFuture<lib::SchemeData> getSchemeData(
 
 } // namespace
 
+void connectResolveSchemeUpdates(const QObject* receiver, const std::function<void(bool)>& fn) {
+    QObject::connect(Wallpapers::instance(), &Wallpapers::analysisDone, receiver, fn);
+    QObject::connect(
+        config::ConfigSingleton::instance()->services(), &config::ServiceConfig::smartSchemeChanged, receiver, [fn] {
+            fn(false);
+        });
+}
+
+QFuture<lib::SchemeData> resolveScheme(const QString& scheme, const QString& flavour, lib::Mode mode, bool smart) {
+    if (scheme == k_dynamic) {
+        const auto analysis = Wallpapers::instance()->analysis();
+        if (analysis.colours.isEmpty()) {
+            return QtFuture::makeExceptionalFuture<lib::SchemeData>(
+                std::make_exception_ptr(std::runtime_error("no colours found in the current wallpaper")));
+        }
+
+        const auto choice = lib::smartChoice(analysis);
+        return getSchemeData(lib::Scheme::forColour(analysis.colours.first()), smart ? choice.flavour : flavour,
+            smart ? choice.mode : mode);
+    }
+
+    return lib::Scheme::forName(scheme)
+        .then([scheme, flavour, mode](const std::shared_ptr<lib::Scheme>& s) {
+            if (!s)
+                throw std::runtime_error(u"no such scheme: %1"_s.arg(scheme).toStdString());
+            return getSchemeData(s, flavour, mode);
+        })
+        .unwrap();
+}
+
 ColourPalette::ColourPalette(QObject* parent)
     : QObject(parent) {}
 
@@ -87,10 +122,16 @@ Colours::Colours(QObject* parent)
     connect(transparency, &config::AppearanceTransparency::layersChanged, this, &Colours::updateLayer);
     connect(Wallpapers::instance(), &Wallpapers::analysisDone, this, &Colours::updateLayer);
 
-    connect(Wallpapers::instance(), &Wallpapers::coloursChanged, this, [this] {
-        if (m_state.name == k_dynamic)
-            applyState(m_state.name, m_state.flavour, m_state.mode, Wallpapers::instance()->committed());
+    connectResolveSchemeUpdates(this, [this](bool committed) {
+        if (committed || m_state.name != k_dynamic)
+            return;
+
+        const auto smart = config::ConfigSingleton::instance()->services()->smartScheme();
+        applyState(m_state.name, m_state.flavour, m_state.mode, false, smart);
     });
+
+    loadState();
+    loadSchemes();
 }
 
 bool Colours::committed() const {
@@ -101,24 +142,16 @@ QString Colours::scheme() const {
     return m_state.name;
 }
 
-void Colours::setScheme(const QString& scheme) {
-    applyState(scheme, m_state.flavour, m_state.mode);
-}
-
 QString Colours::flavour() const {
     return m_state.flavour;
 }
 
-void Colours::setFlavour(const QString& flavour) {
-    applyState(m_state.name, flavour, m_state.mode);
-}
-
 Colours::Mode Colours::mode() const {
-    return m_state.mode == lib::Mode::Light ? Mode::Light : Mode::Dark;
+    return static_cast<Mode>(m_state.mode);
 }
 
-void Colours::setMode(Mode mode) {
-    applyState(m_state.name, m_state.flavour, mode == Mode::Light ? lib::Mode::Light : lib::Mode::Dark);
+QList<SchemeHandle> Colours::schemes() const {
+    return m_schemes;
 }
 
 ColourPalette* Colours::palette() const {
@@ -137,20 +170,29 @@ void Colours::commit() {
     if (m_committed)
         return;
 
-    theme::Theme(m_state).apply().then(this, [this] {
-        m_committed = true;
-        emit committedChanged();
+    theme::Theme(m_state).apply().onFailed(this, [](const std::exception& e) {
+        qCWarning(lcColours) << "Failed to apply theme:" << e.what();
     });
-}
-
-void Colours::reset() {
-    if (m_committed)
-        return;
-
-    loadState();
 
     m_committed = true;
     emit committedChanged();
+}
+
+void Colours::reset() {
+    if (!m_committed)
+        loadState();
+}
+
+void Colours::setScheme(const QString& scheme, const QString& flavour, bool commit) {
+    setState(scheme, flavour, m_state.mode, commit, flavour.isEmpty());
+}
+
+void Colours::setFlavour(const QString& flavour, bool commit) {
+    setState(m_state.name, flavour, m_state.mode, commit, false);
+}
+
+void Colours::setMode(Mode mode, bool commit) {
+    setState(m_state.name, m_state.flavour, static_cast<lib::Mode>(mode), commit, false);
 }
 
 QColor Colours::_layer(const QColor& colour, int layer) const {
@@ -200,38 +242,44 @@ void Colours::updateLayer() {
 }
 
 void Colours::loadState() {
-    if (const auto state = lib::loadState()) {
-        applyState(*state, true);
-        return;
-    }
-
-    lib::defaultScheme().then(this, [this](const lib::SchemeData& data) {
+    bool ok;
+    wallpaper::currentScheme(&ok).then(this, [this, ok](const lib::SchemeData& data) {
         applyState(data, true);
+
+        if (!ok)
+            lib::saveState(data);
     });
 }
 
-void Colours::applyState(const QString& scheme, const QString& flavour, lib::Mode mode, bool committed) {
-    if (scheme == k_dynamic) {
-        const auto colours = Wallpapers::instance()->colours();
-        if (colours.isEmpty()) {
-            qCCritical(lcColours) << "Failed to apply scheme: no colours found in the current wallpaper";
-            return;
-        }
+void Colours::loadSchemes() {
+    lib::Scheme::all().then(this, [this](const QList<std::shared_ptr<lib::Scheme>>& schemes) {
+        m_schemes.clear();
 
-        getSchemeData(lib::Scheme::forColour(colours.first()), flavour, mode)
-            .then(this, [this, committed](const lib::SchemeData& data) {
+        m_schemes.emplaceBack(*lib::Scheme::forColour(Qt::black));
+        for (const auto& scheme : schemes)
+            m_schemes.emplaceBack(*scheme);
+
+        emit schemesChanged();
+    });
+}
+
+void Colours::setState(const QString& scheme, const QString& flavour, lib::Mode mode, bool commit, bool smart) {
+    applyState(scheme, flavour, mode, false, smart).then(this, [this, commit] {
+        if (commit)
+            this->commit();
+    });
+}
+
+QFuture<void> Colours::applyState(
+    const QString& scheme, const QString& flavour, lib::Mode mode, bool committed, bool smart) {
+    return resolveScheme(scheme, flavour, mode, smart)
+        .then(this,
+            [this, committed](const lib::SchemeData& data) {
                 applyState(data, committed);
-            });
-    } else {
-        lib::Scheme::forName(scheme)
-            .then([flavour, mode](const std::shared_ptr<lib::Scheme>& s) {
-                return getSchemeData(s, flavour, mode);
             })
-            .unwrap()
-            .then(this, [this, committed](const lib::SchemeData& data) {
-                applyState(data, committed);
-            });
-    }
+        .onFailed(this, [](const std::exception& e) {
+            qCCritical(lcColours) << "Failed to apply scheme:" << e.what();
+        });
 }
 
 void Colours::applyState(const lib::SchemeData& data, bool committed) {
@@ -245,8 +293,8 @@ void Colours::applyState(const lib::SchemeData& data, bool committed) {
     if (schemeChanged)
         emit this->schemeChanged();
 
-    if (!committed && m_committed) {
-        m_committed = false;
+    if (committed != m_committed) {
+        m_committed = committed;
         emit committedChanged();
     }
 }

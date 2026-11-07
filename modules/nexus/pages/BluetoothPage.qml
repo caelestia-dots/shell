@@ -6,9 +6,9 @@ import Quickshell
 import Quickshell.Bluetooth
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -91,14 +91,14 @@ PageBase {
                         implicitWidth: implicitHeight
                         implicitHeight: deviceIcon.implicitHeight + Tokens.padding.small * 2
                         radius: Tokens.rounding.full
-                        color: device.connected ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+                        color: device.connected ? Colours.palette.primary : Colours.palette.secondaryContainer
 
                         MaterialIcon {
                             id: deviceIcon
 
                             anchors.centerIn: parent
                             text: Icons.getBluetoothIcon(device.modelData?.icon ?? "")
-                            color: device.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                            color: device.connected ? Colours.palette.onPrimary : Colours.palette.onSecondaryContainer
                             fontStyle: Tokens.font.icon.medium
                             fill: device.connected ? 1 : 0
                             opacity: device.textOpacity
@@ -131,7 +131,7 @@ PageBase {
                                     return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.modelData.battery));
                                 return Tr.trCtx("Connected", "bluetooth device state");
                             }
-                            color: Colours.palette.m3outline
+                            color: Colours.palette.outline
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                             animate: true
@@ -153,7 +153,7 @@ PageBase {
                                     icon: "settings"
                                     type: IconButton.Text
                                     padding: Tokens.padding.small
-                                    inactiveOnColour: device.connected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                    inactiveOnColour: device.connected ? Colours.palette.primary : Colours.palette.onSurfaceVariant
                                     label.fill: 0
 
                                     onClicked: {

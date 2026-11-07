@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.nexus.common
 
 PageBase {
@@ -26,21 +26,21 @@ PageBase {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "handyman"
-                color: Colours.palette.m3outlineVariant
+                color: Colours.palette.outlineVariant
                 fontStyle: Tokens.font.icon.extraLarge
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("Page under construction")
-                color: Colours.palette.m3outlineVariant
+                color: Colours.palette.outlineVariant
                 font: Tokens.font.title.large
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("This page will be available in a future update.")
-                color: Colours.palette.m3outlineVariant
+                color: Colours.palette.outlineVariant
                 font: Tokens.font.body.large
             }
         }

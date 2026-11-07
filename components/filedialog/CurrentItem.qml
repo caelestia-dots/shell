@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Shapes
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -24,7 +24,7 @@ Item {
             readonly property real roundingY: flatten ? root.implicitHeight / 2 : rounding
 
             strokeWidth: -1
-            fillColor: Colours.tPalette.m3surfaceContainer
+            fillColor: Colours.tPalette.surfaceContainer
 
             startX: root.implicitWidth
             startY: root.implicitHeight

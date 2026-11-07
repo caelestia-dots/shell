@@ -1,7 +1,7 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ButtonBase {
     id: root
@@ -12,17 +12,17 @@ ButtonBase {
     font: Tokens.font.icon.medium
     padding: type === IconButton.Text ? Tokens.padding.extraSmall / 2 : Tokens.padding.small
 
-    activeColour: type === IconButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondary
+    activeColour: type === IconButton.Filled ? Colours.palette.primary : Colours.palette.secondary
     inactiveColour: {
         if (!isToggle && type === IconButton.Filled)
-            return Colours.palette.m3primary;
-        return type === IconButton.Filled ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3secondaryContainer;
+            return Colours.palette.primary;
+        return type === IconButton.Filled ? Colours.tPalette.surfaceContainer : Colours.palette.secondaryContainer;
     }
-    activeOnColour: type === IconButton.Filled ? Colours.palette.m3onPrimary : type === IconButton.Tonal ? Colours.palette.m3onSecondary : Colours.palette.m3primary
+    activeOnColour: type === IconButton.Filled ? Colours.palette.onPrimary : type === IconButton.Tonal ? Colours.palette.onSecondary : Colours.palette.primary
     inactiveOnColour: {
         if (!isToggle && type === IconButton.Filled)
-            return Colours.palette.m3onPrimary;
-        return type === IconButton.Tonal ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant;
+            return Colours.palette.onPrimary;
+        return type === IconButton.Tonal ? Colours.palette.onSecondaryContainer : Colours.palette.onSurfaceVariant;
     }
 
     implicitWidth: implicitHeight

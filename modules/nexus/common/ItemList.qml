@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ConnectedRect {
     id: root
@@ -20,7 +20,7 @@ ConnectedRect {
 
     Layout.fillWidth: true
     implicitHeight: (showList && list.count > 0 ? list.contentHeight : placeholder.implicitHeight + Tokens.padding.extraLarge * 2) + extraHeight
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     clip: true
 
     Behavior on implicitHeight {
@@ -40,7 +40,7 @@ ConnectedRect {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.placeholderIcon
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 fontStyle: Tokens.font.icon.large
                 animate: true
             }
@@ -48,7 +48,7 @@ ConnectedRect {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.placeholderText
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 font: Tokens.font.body.large
                 animate: true
             }

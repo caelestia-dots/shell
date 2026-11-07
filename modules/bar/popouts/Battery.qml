@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Column {
     id: root
@@ -90,7 +90,7 @@ Column {
             implicitWidth: child.implicitWidth + Tokens.padding.medium * 2
             implicitHeight: child.implicitHeight + Tokens.padding.large
 
-            color: Colours.palette.m3error
+            color: Colours.palette.error
             radius: Tokens.rounding.large
 
             Column {
@@ -107,14 +107,14 @@ Column {
                         anchors.verticalCenterOffset: -font.pointSize / 10
 
                         text: "warning"
-                        color: Colours.palette.m3onError
+                        color: Colours.palette.onError
                     }
 
                     StyledText {
                         anchors.verticalCenter: parent.verticalCenter
                         // TRANSLATORS: charger or thermal warning: the battery cannot draw full power
                         text: Tr.tr("Performance degraded")
-                        color: Colours.palette.m3onError
+                        color: Colours.palette.onError
                         font: Tokens.font.title.small
                     }
 
@@ -123,7 +123,7 @@ Column {
                         anchors.verticalCenterOffset: -font.pointSize / 10
 
                         text: "warning"
-                        color: Colours.palette.m3onError
+                        color: Colours.palette.onError
                     }
                 }
 
@@ -131,7 +131,7 @@ Column {
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     text: root.perfDegradationToString(PowerProfiles.degradationReason)
-                    color: Colours.palette.m3onError
+                    color: Colours.palette.onError
                 }
             }
         }
@@ -154,13 +154,13 @@ Column {
         implicitWidth: saver.implicitHeight + balance.implicitHeight + perf.implicitHeight + Tokens.padding.medium * 2 + Tokens.spacing.largeIncreased * 2
         implicitHeight: Math.max(saver.implicitHeight, balance.implicitHeight, perf.implicitHeight) + Tokens.padding.small
 
-        color: Colours.tPalette.m3surfaceContainer
+        color: Colours.tPalette.surfaceContainer
         radius: Tokens.rounding.full
 
         StyledRect {
             id: indicator
 
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             radius: Tokens.rounding.full
             state: profiles.current
 
@@ -244,7 +244,7 @@ Column {
 
         StateLayer {
             radius: Tokens.rounding.full
-            color: profiles.current === parent.icon ? Colours.palette.m3onPrimary : Colours.palette.m3onSurface
+            color: profiles.current === parent.icon ? Colours.palette.onPrimary : Colours.palette.onSurface
             onClicked: PowerProfiles.profile = parent.profile
         }
 
@@ -255,7 +255,7 @@ Column {
 
             text: parent.icon
             fontStyle: Tokens.font.icon.large
-            color: profiles.current === text ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+            color: profiles.current === text ? Colours.palette.onPrimary : Colours.palette.onSurfaceVariant
             fill: profiles.current === text ? 1 : 0
 
             Behavior on fill {

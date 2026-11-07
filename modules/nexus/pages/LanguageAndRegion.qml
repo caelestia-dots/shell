@@ -3,9 +3,9 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.modules.nexus.common
 
 PageBase {
@@ -129,14 +129,14 @@ PageBase {
                 MaterialIcon {
                     Layout.alignment: Qt.AlignHCenter
                     text: "map"
-                    color: Colours.palette.m3outlineVariant
+                    color: Colours.palette.outlineVariant
                     fontStyle: Tokens.font.icon.extraLarge
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.tr("Location picker coming soon")
-                    color: Colours.palette.m3outlineVariant
+                    color: Colours.palette.outlineVariant
                     font: Tokens.font.title.small
                 }
 
@@ -145,7 +145,7 @@ PageBase {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     text: Tr.tr("Choose your weather location on a map in a future update")
-                    color: Colours.palette.m3outlineVariant
+                    color: Colours.palette.outlineVariant
                     font: Tokens.font.body.small
                 }
             }
