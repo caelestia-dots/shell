@@ -81,6 +81,20 @@ PageBase {
             onClicked: root.nState.openSubPage(1)
         }
 
+        // Keep awake
+        SectionHeader {
+            text: Tr.trCtx("Keep awake", "idle inhibitor")
+        }
+
+        ToggleRow {
+            first: true
+            last: true
+            text: Tr.tr("Stay awake with the lid closed")
+            subtext: Tr.tr("Closing the lid won't suspend while keep awake is on")
+            checked: GlobalConfig.general.idle.inhibitWhenLidClosed
+            onToggled: GlobalConfig.general.idle.inhibitWhenLidClosed = checked
+        }
+
         // Polling
         SectionHeader {
             text: Tr.tr("Polling")
