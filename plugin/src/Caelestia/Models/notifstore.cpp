@@ -15,6 +15,8 @@
 #include <limits>
 #include <utility>
 
+#include "notifpopups.hpp"
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcNotifStore, "caelestia.notifs.store", QtInfoMsg)
@@ -107,7 +109,8 @@ QString text(const QString& value) {
 
 NotifStore::NotifStore(QObject* parent)
     : QObject(parent)
-    , m_connectionName(QUuid::createUuid().toString()) {
+    , m_connectionName(QUuid::createUuid().toString())
+    , m_groups(this) {
     m_flushTimer.setSingleShot(true);
     QObject::connect(&m_flushTimer, &QTimer::timeout, this, &NotifStore::flush);
     m_timeStrTimer.setSingleShot(true);
@@ -153,23 +156,7 @@ QQmlListProperty<NotifData> NotifStore::notifs() {
 }
 
 QQmlListProperty<NotifGroup> NotifStore::groups() {
-    return { this, nullptr,
-        [](auto* p) {
-            return static_cast<NotifStore*>(p->object)->m_groups.list.size();
-        },
-        [](auto* p, qsizetype i) {
-            return static_cast<NotifStore*>(p->object)->m_groups.list.at(i);
-        } };
-}
-
-QQmlListProperty<NotifGroup> NotifStore::popupGroups() {
-    return { this, nullptr,
-        [](auto* p) {
-            return static_cast<NotifStore*>(p->object)->m_popupGroups.list.size();
-        },
-        [](auto* p, qsizetype i) {
-            return static_cast<NotifStore*>(p->object)->m_popupGroups.list.at(i);
-        } };
+    return m_groups.qmlList();
 }
 
 NotifData* NotifStore::add(QObject* backer, bool popup) {
@@ -181,20 +168,14 @@ NotifData* NotifStore::add(QObject* backer, bool popup) {
     auto* const notif = new NotifData(backer, this);
     m_notifs.prepend(notif);
     track(notif);
-    addToGroup(m_groups, notif->m_group, notif);
-    emit groupsChanged();
+    if (m_groups.add(notif))
+        emit groupsChanged();
     markDirty(notif);
 
     emit notifsChanged();
     if (popup) {
-        notif->m_popup = true;
-        addToGroup(m_popupGroups, notif->m_popupGroup, notif);
-        emit popupGroupsChanged();
-        QObject::connect(notif, &NotifData::popupClosed, this, [this, notif] {
-            if (removeFromGroup(m_popupGroups, notif->m_popupGroup, notif))
-                emit popupGroupsChanged();
-        });
-        notif->startPopupTimer();
+        for (auto* const popups : std::as_const(m_popups))
+            popups->offer(notif);
     }
 
     enforceLimits({ notif->m_appName });
@@ -205,6 +186,16 @@ void NotifStore::clear() {
     const auto notifs = m_notifs;
     for (auto* const notif : notifs)
         notif->dismiss();
+}
+
+void NotifStore::closePopups() {
+    for (auto* const notif : std::as_const(m_notifs))
+        closePopup(notif);
+}
+
+void NotifStore::closePopup(NotifData* notif) {
+    for (auto* const popups : std::as_const(m_popups))
+        popups->close(notif);
 }
 
 void NotifStore::enforceLimits(const QSet<QString>& groups) {
@@ -267,66 +258,14 @@ void NotifStore::refreshTimeStrs() {
     m_timeStrTimer.start(interval);
 }
 
-void NotifStore::addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif) {
-    auto*& group = index.byName[notif->m_appName];
-    if (!group) {
-        group = new NotifGroup(notif->m_appName, this);
-        index.list.prepend(group);
-    }
-
-    slot = group;
-    group->add(notif);
-    repositionGroup(index, group, true);
-}
-
-bool NotifStore::removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif) {
-    auto* const group = std::exchange(slot, nullptr);
-    if (!group)
-        return false;
-
-    group->remove(notif);
-    if (!group->m_notifs.isEmpty())
-        return repositionGroup(index, group, false);
-
-    index.list.removeOne(group);
-    index.byName.remove(group->m_appName);
-    group->release();
-    return true;
-}
-
-bool NotifStore::repositionGroup(GroupIndex& index, NotifGroup* group, bool tiesFirst) {
-    const auto from = index.list.indexOf(group);
-    const auto newest = group->m_notifs.first()->m_createdAt;
-
-    qsizetype to = 0;
-    for (; to < index.list.size(); ++to) {
-        auto* const other = index.list.at(to);
-        if (other == group)
-            continue;
-        const auto otherNewest = other->m_notifs.first()->m_createdAt;
-        if (otherNewest < newest || (tiesFirst && otherNewest == newest))
-            break;
-    }
-    if (to > from)
-        --to;
-
-    if (to == from)
-        return false;
-    index.list.move(from, to);
-    return true;
-}
-
 void NotifStore::regroup(NotifData* notif) {
-    removeFromGroup(m_groups, notif->m_group, notif);
-    addToGroup(m_groups, notif->m_group, notif);
-    emit groupsChanged();
+    const auto removed = m_groups.remove(notif);
+    const auto added = m_groups.add(notif);
+    if (removed || added)
+        emit groupsChanged();
 
-    if (!notif->m_popup)
-        return;
-
-    removeFromGroup(m_popupGroups, notif->m_popupGroup, notif);
-    addToGroup(m_popupGroups, notif->m_popupGroup, notif);
-    emit popupGroupsChanged();
+    for (auto* const popups : std::as_const(m_popups))
+        popups->regroup(notif);
 }
 
 void NotifStore::markDirty(NotifData* notif) {
@@ -382,10 +321,9 @@ void NotifStore::remove(NotifData* notif) {
 
     if (m_notifs.removeOne(notif))
         emit notifsChanged();
-    if (removeFromGroup(m_groups, notif->m_group, notif))
+    if (m_groups.remove(notif))
         emit groupsChanged();
-    if (removeFromGroup(m_popupGroups, notif->m_popupGroup, notif))
-        emit popupGroupsChanged();
+    closePopup(notif);
 }
 
 void NotifStore::loadNotifs() {
@@ -416,7 +354,7 @@ void NotifStore::loadNotifs() {
         notif->m_progress = query.value(12).toInt();
         m_notifs.prepend(notif);
         track(notif);
-        addToGroup(m_groups, notif->m_group, notif);
+        m_groups.add(notif);
     }
 
     emit notifsChanged();

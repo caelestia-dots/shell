@@ -263,6 +263,7 @@ StyledWindow {
             screenState: root.screenState
             bar: bar
             borderThickness: root.borderThickness
+            fullscreen: root.hasFullscreen
 
             utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
             utilities.deformMatrix: utilsBg.rawDeformMatrix
