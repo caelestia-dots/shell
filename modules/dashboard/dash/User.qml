@@ -90,6 +90,7 @@ Item {
 
                 anchors.fill: parent
                 source: `${Paths.home}/.face`
+                playing: true
             }
 
             StyledRect {

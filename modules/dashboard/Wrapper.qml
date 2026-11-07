@@ -16,7 +16,7 @@ Item {
     required property ScreenState screenState
     readonly property FileDialog facePicker: FileDialog {
         title: Tr.tr("Select a profile picture")
-        filters: FileSystemModel.Images
+        filters: FileSystemModel.Images | FileSystemModel.Videos
         onAccepted: path => {
             if (CUtils.copyFile(Qt.resolvedUrl(path), Qt.resolvedUrl(`${Paths.home}/.face`)))
                 // TRANSLATORS: %1 = a file path
