@@ -18,7 +18,7 @@ Item {
         id: placeholder
 
         anchors.centerIn: parent
-        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)
+        active: !Config.dashboard.performance.showCpu && !(Config.dashboard.performance.showGpu && Gpu.type !== GpuType.None) && !Config.dashboard.performance.showMemory && !Config.dashboard.performance.showStorage && !Config.dashboard.performance.showNetwork && !((UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) && Config.dashboard.performance.showBattery)
         asynchronous: true
 
         sourceComponent: ColumnLayout {
@@ -134,7 +134,7 @@ Item {
 
         WrappedLoader {
             Layout.fillWidth: false
-            active: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery
+            active: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) && Config.dashboard.performance.showBattery
             sourceComponent: BatteryTank {}
         }
     }
