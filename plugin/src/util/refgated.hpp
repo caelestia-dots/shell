@@ -1,7 +1,7 @@
 #pragma once
 
+#include <qhash.h>
 #include <qobject.h>
-#include <qset.h>
 
 namespace util {
 
@@ -13,6 +13,7 @@ public:
     using QObject::QObject;
 
     Q_INVOKABLE void ref(QObject* ref);
+    Q_INVOKABLE void unref(QObject* ref);
 
 protected:
     void release();
@@ -20,7 +21,9 @@ protected:
 
 private:
     bool m_released = false;
-    QSet<QObject*> m_refs;
+    QHash<QObject*, QMetaObject::Connection> m_refs;
+
+    void dropRef(QObject* ref);
 };
 
 } // namespace util

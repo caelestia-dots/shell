@@ -20,6 +20,8 @@ public:
     // No-op for declaring variable/expression dependencies in QML bindings
     Q_INVOKABLE static void dependency(const QVariant& value);
 
+    Q_INVOKABLE static bool matchesGlob(const QString& text, const QString& pattern, bool caseSensitive = true);
+
     Q_INVOKABLE void saveItem(
         QQuickItem* target, const QUrl& path, const QJSValue& onSaved = {}, const QJSValue& onFailed = {});
     Q_INVOKABLE void saveItem(QQuickItem* target, const QUrl& path, const QRect& rect, const QJSValue& onSaved = {},
