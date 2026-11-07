@@ -63,24 +63,8 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: {
-                // Unnamed devices show up as their bare MAC address.
-                // Show connected/paired devices first, followed by named ones, and unnamed ones last.
-                const macName = /^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i;
-                return [...Bluetooth.devices.values].sort((a, b) => {
-                    const byState = (b.connected - a.connected) || (b.paired - a.paired);
-                    if (byState)
-                        return byState;
-
-                    if (!a.connected && !a.paired) {
-                        const byNameType = macName.test(a.name) - macName.test(b.name);
-                        if (byNameType)
-                            return byNameType;
-                    }
-
-                    return a.name.localeCompare(b.name);
-                }).slice(0, 5);
-            }
+            // Connected/paired devices first, then devices that report their own name, and unnamed ones last
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || (!a.deviceName - !b.deviceName) || a.name.localeCompare(b.name)).slice(0, 5)
         }
 
         RowLayout {
