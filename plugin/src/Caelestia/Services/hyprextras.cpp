@@ -161,6 +161,35 @@ void HyprExtras::cursorPosition(const QJSValue& callback) {
     });
 }
 
+void HyprExtras::windowProps(const QString& address, const QStringList& props, const QJSValue& callback) {
+    if (address.isEmpty() || props.isEmpty())
+        return;
+
+    QStringList requests;
+    requests.reserve(props.size());
+    for (const auto& prop : props)
+        requests << u"j/getprop address:%1 %2"_s.arg(address.startsWith(u"0x") ? address : u"0x"_s + address, prop);
+
+    makeRequest(u"[[BATCH]]"_s + requests.join(u';'), [callback, this](bool success, const QByteArray& res) {
+        if (!success)
+            return;
+
+        QVariantMap values;
+        const auto chunks = res.split('\n');
+        for (const auto& chunk : chunks) {
+            if (chunk.isEmpty())
+                continue;
+
+            const auto obj = QJsonDocument::fromJson(chunk).object();
+            for (auto it = obj.constBegin(); it != obj.constEnd(); ++it)
+                values.insert(it.key(), it.value().toVariant());
+        }
+
+        if (auto* const engine = qmlEngine(this))
+            callback.call({ engine->toScriptValue(values) });
+    });
+}
+
 void HyprExtras::socketError(QLocalSocket::LocalSocketError error) const {
     if (!m_socketValid) {
         qCWarning(lcHypr) << "socketError: unable to connect to Hyprland event socket:" << error;

@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE void refreshDevices();
 
     Q_INVOKABLE void cursorPosition(const QJSValue& callback);
+    Q_INVOKABLE void windowProps(const QString& address, const QStringList& props, const QJSValue& callback);
 
 signals:
     void optionsChanged();
