@@ -74,9 +74,13 @@ private:
 
 #undef TRANSITION
 
+    Q_PROPERTY(QUrl superellipse READ superellipse CONSTANT)
+
 public:
     explicit Shaders(QObject* parent = nullptr)
         : QObject(parent) {};
+
+    [[nodiscard]] static QUrl superellipse() { return { QStringLiteral("qrc:/shaders/superellipse.frag.qsb") }; }
 };
 
 } // namespace caelestia::shell::shaders
