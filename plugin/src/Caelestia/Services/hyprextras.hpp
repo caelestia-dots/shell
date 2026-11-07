@@ -2,6 +2,7 @@
 
 #include <qlocalsocket.h>
 #include <qobject.h>
+#include <qpoint.h>
 #include <qqmlintegration.h>
 #include <qsharedpointer.h>
 #include <qvariant.h>
@@ -30,6 +31,8 @@ public:
 
     Q_INVOKABLE void refreshOptions();
     Q_INVOKABLE void refreshDevices();
+
+    Q_INVOKABLE void cursorPosition(const QJSValue& callback);
 
 signals:
     void optionsChanged();
