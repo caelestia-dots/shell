@@ -1,0 +1,246 @@
+pragma Singleton
+
+import QtQuick
+import Quickshell
+import Quickshell.Io
+import Caelestia.Config
+import "HyprsunsetVersion.js" as HyprsunsetVersion
+
+Singleton {
+    id: root
+
+    property bool available: false
+    property bool active: false
+    property bool pending: false
+    property bool requestedActive: false
+    property bool temperatureDirty: false
+    property int configuredTemperature: GlobalConfig.services.nightLightTemperature
+
+    property int startupAttempts: 0
+    property bool attemptedStart: false
+    property int stateGeneration: 0
+    property bool initialStateChecked: false
+
+    function acceptStatus(identity: string): void {
+        const observed = identity === "false";
+        if (!initialStateChecked) {
+            initialStateChecked = true;
+            active = observed;
+            if (!GlobalConfig.services.nightLightConfigured)
+                return;
+
+            const preferred = GlobalConfig.services.nightLightEnabled;
+            if (preferred !== observed)
+                requestEnabled(preferred);
+            else if (preferred) {
+                temperatureDirty = true;
+                temperatureTimer.restart();
+            }
+            return;
+        }
+        active = observed;
+    }
+
+    function refresh(): void {
+        if (!available || pending || statusProc.running || temperatureProc.running)
+            return;
+
+        statusProc.requestGeneration = stateGeneration;
+        statusProc.running = true;
+    }
+
+    function applyTemperature(): void {
+        if (!temperatureDirty || !active || pending || temperatureProc.running)
+            return;
+
+        temperatureDirty = false;
+        stateGeneration++;
+        temperatureProc.running = true;
+    }
+
+    function toggle(): void {
+        if (!available || pending || !initialStateChecked)
+            return;
+
+        requestEnabled(!active);
+    }
+
+    function requestEnabled(enabled: bool): void {
+        requestedActive = enabled;
+        if (!requestedActive) {
+            temperatureTimer.stop();
+            temperatureDirty = false;
+        }
+        stateGeneration++;
+        pending = true;
+        active = requestedActive;
+        startupAttempts = 0;
+        attemptedStart = false;
+        if (requestedActive)
+            enableProc.running = true;
+        else if (!temperatureProc.running)
+            disableProc.running = true;
+    }
+
+    function complete(success: bool): void {
+        startupTimer.stop();
+        if (!success)
+            active = !requestedActive;
+        else {
+            GlobalConfig.services.nightLightEnabled = active;
+            GlobalConfig.services.nightLightConfigured = true;
+        }
+        pending = false;
+        if (!active)
+            temperatureDirty = false;
+        else if (temperatureDirty)
+            temperatureTimer.restart();
+        if (!success && requestedActive && attemptedStart && ownedSunset.running)
+            ownedSunset.running = false;
+        refresh();
+    }
+
+    onConfiguredTemperatureChanged: {
+        if (!active)
+            return;
+        temperatureDirty = true;
+        temperatureTimer.restart();
+    }
+
+    Process {
+        id: availabilityProc
+
+        running: true
+        command: ["sh", "-c", "command -v hyprctl >/dev/null && hyprsunset --version 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.available = HyprsunsetVersion.supportsIdentityQuery(text);
+                if (root.available)
+                    root.refresh();
+            }
+        }
+    }
+
+    Process {
+        id: statusProc
+
+        property int requestGeneration: 0
+
+        command: ["hyprctl", "hyprsunset", "identity", "get"]
+        // qmllint disable signal-handler-parameters
+        onExited: code => {
+            if (root.pending)
+                return;
+            if (code !== 0 && !root.initialStateChecked) {
+                Qt.callLater(() => {
+                    if (!root.initialStateChecked)
+                        root.acceptStatus("unavailable");
+                });
+                return;
+            }
+            if (requestGeneration !== root.stateGeneration)
+                Qt.callLater(root.refresh);
+            else if (code !== 0)
+                root.active = false;
+        }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (root.pending || statusProc.requestGeneration !== root.stateGeneration)
+                    return;
+                const identity = text.trim();
+                if (identity !== "true" && identity !== "false") {
+                    if (!root.initialStateChecked)
+                        root.acceptStatus("unavailable");
+                    else
+                        root.active = false;
+                    return;
+                }
+                root.acceptStatus(identity);
+            }
+        }
+    }
+
+    Timer {
+        interval: 15000
+        repeat: true
+        running: root.available
+        onTriggered: root.refresh()
+    }
+
+    Timer {
+        id: temperatureTimer
+
+        interval: 100
+        onTriggered: root.applyTemperature()
+    }
+
+    Process {
+        id: temperatureProc
+
+        command: ["hyprctl", "hyprsunset", "temperature", String(root.configuredTemperature)]
+        // qmllint disable signal-handler-parameters
+        onExited: code => {
+            if (root.pending && !root.requestedActive) {
+                disableProc.running = true;
+            } else {
+                if (code !== 0 && !root.pending) {
+                    root.active = false;
+                    root.temperatureDirty = false;
+                }
+                root.applyTemperature();
+                root.refresh();
+            }
+        }
+    }
+
+    Process {
+        id: ownedSunset
+
+        command: ["hyprsunset", "--identity"]
+        // qmllint disable signal-handler-parameters
+        onExited: {
+            if (root.pending && root.requestedActive)
+                root.complete(false);
+            else if (root.active)
+                root.active = false;
+        }
+    }
+
+    Process {
+        id: enableProc
+
+        command: ["hyprctl", "hyprsunset", "temperature", String(root.configuredTemperature)]
+        // qmllint disable signal-handler-parameters
+        onExited: code => {
+            if (code === 0) {
+                root.complete(true);
+            } else if (!root.attemptedStart) {
+                root.attemptedStart = true;
+                ownedSunset.running = true;
+                startupTimer.restart();
+            } else if (root.startupAttempts < 3) {
+                startupTimer.restart();
+            } else {
+                root.complete(false);
+            }
+        }
+    }
+
+    Process {
+        id: disableProc
+
+        command: ["hyprctl", "hyprsunset", "identity"]
+        // qmllint disable signal-handler-parameters
+        onExited: code => root.complete(code === 0)
+    }
+
+    Timer {
+        id: startupTimer
+
+        interval: 200
+        onTriggered: {
+            root.startupAttempts++;
+            enableProc.running = true;
+        }
+    }
+}
