@@ -17,8 +17,8 @@ QtObject {
     function resolveTempUnit(unit: int): int {
         if (Number(unit) !== TemperatureUnit.Auto)
             return unit;
-        const system = Qt.locale().measurementSystem;
-        return system === Locale.ImperialUSSystem || system === Locale.ImperialUKSystem ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
+        // Qt reports ImperialUKSystem for en_GB, but the UK uses Celsius
+        return Qt.locale().measurementSystem === Locale.ImperialUSSystem ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
     }
 
     // Converts a temperature in Celsius to the given TemperatureUnit
