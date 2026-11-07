@@ -385,10 +385,10 @@ void Lyrics::doLoad() {
     // Restore per-track prefs (offset, last-selected backend/id)
     m_settingFromPrefs = true;
     const QJsonObject saved = m_lyricsMap.value(trackKey()).toObject();
-    setOffset(saved.value(u"offset"_s).toDouble(0.0));
+    setOffset(saved.value(u"offset").toDouble(0.0));
     LyricCandidate restored;
-    const QString savedBackendKey = saved.value(u"backend"_s).toString();
-    const QString savedId = saved.value(u"id"_s).toString();
+    const QString savedBackendKey = saved.value(u"backend").toString();
+    const QString savedId = saved.value(u"id").toString();
     if (!savedBackendKey.isEmpty() && !savedId.isEmpty()) {
         restored = LyricCandidate(backendFromKey(savedBackendKey), savedId, m_title, m_artist, m_album, m_duration);
     }
@@ -539,8 +539,8 @@ void Lyrics::tryLrclib(int reqId) {
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
         const QJsonObject obj = doc.object();
-        const QString synced = obj.value(u"syncedLyrics"_s).toString();
-        const qint64 id = static_cast<qint64>(obj.value(u"id"_s).toDouble());
+        const QString synced = obj.value(u"syncedLyrics").toString();
+        const qint64 id = static_cast<qint64>(obj.value(u"id").toDouble());
 
         if (synced.isEmpty()) {
             qCDebug(lcLyrics) << "lrclib: no syncedLyrics for" << m_artist << "-" << m_title;
@@ -556,9 +556,8 @@ void Lyrics::tryLrclib(int reqId) {
 
         writeCachedLrc(LyricsBackend::LRCLIB, QString::number(id), synced);
         setLines(lines, LyricsBackend::LRCLIB);
-        const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), obj.value(u"trackName"_s).toString(),
-            obj.value(u"artistName"_s).toString(), obj.value(u"albumName"_s).toString(),
-            obj.value(u"duration"_s).toDouble());
+        const LyricCandidate cand(LyricsBackend::LRCLIB, QString::number(id), obj.value(u"trackName").toString(),
+            obj.value(u"artistName").toString(), obj.value(u"albumName").toString(), obj.value(u"duration").toDouble());
         appendCandidates({ cand });
         m_selected = cand;
         emit selectedCandidateChanged();
@@ -601,19 +600,19 @@ void Lyrics::tryNetEase(int reqId) {
         }
 
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonArray songs = doc.object().value(u"result"_s).toObject().value(u"songs"_s).toArray();
+        const QJsonArray songs = doc.object().value(u"result").toObject().value(u"songs").toArray();
 
         // Find best match by artist substring
         qint64 bestId = -1;
         for (const auto& v : songs) {
             const QJsonObject s = v.toObject();
-            const QJsonArray artists = s.value(u"artists"_s).toArray();
+            const QJsonArray artists = s.value(u"artists").toArray();
             if (artists.isEmpty()) {
                 continue;
             }
-            const QString sArtist = artists.first().toObject().value(u"name"_s).toString();
+            const QString sArtist = artists.first().toObject().value(u"name").toString();
             if (containsCi(m_artist, sArtist) || containsCi(sArtist, m_artist)) {
-                bestId = static_cast<qint64>(s.value(u"id"_s).toDouble());
+                bestId = static_cast<qint64>(s.value(u"id").toDouble());
                 break;
             }
         }
@@ -654,13 +653,12 @@ void Lyrics::searchLrclibCandidates(int reqId) {
         add.reserve(arr.size());
         for (const auto& v : arr) {
             const QJsonObject o = v.toObject();
-            if (o.value(u"syncedLyrics"_s).isNull() && o.value(u"plainLyrics"_s).isNull()) {
+            if (o.value(u"syncedLyrics").isNull() && o.value(u"plainLyrics").isNull()) {
                 continue;
             }
-            add.append(
-                LyricCandidate(LyricsBackend::LRCLIB, QString::number(static_cast<qint64>(o.value(u"id"_s).toDouble())),
-                    o.value(u"trackName"_s).toString(), o.value(u"artistName"_s).toString(),
-                    o.value(u"albumName"_s).toString(), o.value(u"duration"_s).toDouble()));
+            add.append(LyricCandidate(LyricsBackend::LRCLIB,
+                QString::number(static_cast<qint64>(o.value(u"id").toDouble())), o.value(u"trackName").toString(),
+                o.value(u"artistName").toString(), o.value(u"albumName").toString(), o.value(u"duration").toDouble()));
         }
         appendCandidates(add);
     });
@@ -689,21 +687,21 @@ void Lyrics::searchNetEaseCandidates(int reqId) {
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QJsonArray songs = doc.object().value(u"result"_s).toObject().value(u"songs"_s).toArray();
+        const QJsonArray songs = doc.object().value(u"result").toObject().value(u"songs").toArray();
 
         QList<LyricCandidate> add;
         add.reserve(songs.size());
         for (const auto& v : songs) {
             const QJsonObject s = v.toObject();
             QStringList artistNames;
-            const QJsonArray artists = s.value(u"artists"_s).toArray();
+            const QJsonArray artists = s.value(u"artists").toArray();
             artistNames.reserve(artists.size());
             for (const auto& a : artists) {
-                artistNames.append(a.toObject().value(u"name"_s).toString());
+                artistNames.append(a.toObject().value(u"name").toString());
             }
-            add.append(LyricCandidate(LyricsBackend::NetEase,
-                QString::number(static_cast<qint64>(s.value(u"id"_s).toDouble())), s.value(u"name"_s).toString(),
-                artistNames.join(u", "_s)));
+            add.append(
+                LyricCandidate(LyricsBackend::NetEase, QString::number(static_cast<qint64>(s.value(u"id").toDouble())),
+                    s.value(u"name").toString(), artistNames.join(u", "_s)));
         }
         appendCandidates(add);
     });
@@ -725,7 +723,7 @@ void Lyrics::fetchLrclibById(const QString& id, int reqId) {
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QString synced = doc.object().value(u"syncedLyrics"_s).toString();
+        const QString synced = doc.object().value(u"syncedLyrics").toString();
         if (synced.isEmpty()) {
             qCDebug(lcLyrics) << "lrclib /get/{id}: no syncedLyrics";
             setLoading(false);
@@ -760,7 +758,7 @@ void Lyrics::fetchNetEaseLyricsById(const QString& id, int reqId) {
             return;
         }
         const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        const QString lrc = doc.object().value(u"lrc"_s).toObject().value(u"lyric"_s).toString();
+        const QString lrc = doc.object().value(u"lrc").toObject().value(u"lyric").toString();
         if (lrc.isEmpty()) {
             qCDebug(lcLyrics) << "netease /lyric: empty for id" << id;
             setLoading(false);
@@ -858,9 +856,9 @@ QString Lyrics::lyricsDir() {
     if (dir.isEmpty()) {
         return {};
     }
-    if (dir == u"~"_s) {
+    if (dir == u"~") {
         dir = QDir::homePath();
-    } else if (dir.startsWith(u"~/"_s)) {
+    } else if (dir.startsWith(u"~/")) {
         dir.replace(0, 1, QDir::homePath());
     }
     while (dir.endsWith(u'/') && dir.size() > 1) {
@@ -895,13 +893,13 @@ QString Lyrics::backendKey(LyricsBackend value) {
 }
 
 LyricsBackend Lyrics::backendFromKey(const QString& key) {
-    if (key.compare(u"Local"_s, Qt::CaseInsensitive) == 0) {
+    if (key.compare(u"Local", Qt::CaseInsensitive) == 0) {
         return LyricsBackend::Local;
     }
-    if (key.compare(u"LRCLIB"_s, Qt::CaseInsensitive) == 0) {
+    if (key.compare(u"LRCLIB", Qt::CaseInsensitive) == 0) {
         return LyricsBackend::LRCLIB;
     }
-    if (key.compare(u"NetEase"_s, Qt::CaseInsensitive) == 0) {
+    if (key.compare(u"NetEase", Qt::CaseInsensitive) == 0) {
         return LyricsBackend::NetEase;
     }
     return LyricsBackend::Auto;
