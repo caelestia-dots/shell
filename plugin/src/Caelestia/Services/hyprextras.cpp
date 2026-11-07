@@ -152,6 +152,15 @@ void HyprExtras::refreshDevices() {
     });
 }
 
+void HyprExtras::cursorPosition(const QJSValue& callback) {
+    makeRequestJson(u"cursorpos"_s, [callback, this](bool success, const QJsonDocument& response) {
+        if (!success)
+            return;
+        if (auto* const engine = qmlEngine(this))
+            callback.call({ engine->toScriptValue(response.object()) });
+    });
+}
+
 void HyprExtras::socketError(QLocalSocket::LocalSocketError error) const {
     if (!m_socketValid) {
         qCWarning(lcHypr) << "socketError: unable to connect to Hyprland event socket:" << error;
