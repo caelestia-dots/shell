@@ -9,7 +9,7 @@ qml_module(caelestia-shaders
 
 qt_add_shaders(caelestia-shaders "shaders"
     BATCHABLE OPTIMIZED NOHLSL NOMSL
-    GLSL "300es,330"
+    GLSL "100es,300es,330"
     PREFIX "/shaders"
     FILES
         crossfade.frag
