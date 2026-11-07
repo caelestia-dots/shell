@@ -124,6 +124,7 @@ ClipRect {
                 activeWsId: root.activeWsId
                 ws: Config.bar.workspaces.showUnoccupied ? root.groupOffset + index + 1 : modelData
                 monitor: root.monitor
+                appIconLayer: appIcons
 
                 displayType: Config.bar.workspaces.displayType
                 showWindows: Config.bar.workspaces.showWindows
@@ -167,6 +168,14 @@ ClipRect {
                 }
                 mask: workspaces
             }
+        }
+
+        // Keep application images outside the active indicator's colourised source.
+        Item {
+            id: appIcons
+
+            z: 1
+            anchors.fill: workspaces
         }
 
         MouseArea {
