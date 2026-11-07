@@ -34,6 +34,11 @@ Region {
     }
 
     R {
+        panel: root.panels.overview
+        y: 0
+        height: panel.height * (1 - root.panels.launcher.offsetScale) + root.borderThickness
+    }
+    R {
         id: sessionRegion
 
         panel: root.panels.sessionWrapper
