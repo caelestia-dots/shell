@@ -84,6 +84,8 @@ private:
 
     void tryLocal(int reqId);
     void tryLrclib(int reqId);
+    void tryLrclibSearch(int reqId);
+    [[nodiscard]] bool applyLrclibResult(const QJsonObject& obj);
     void tryNetEase(int reqId);
     void chainNext(LyricsBackend justFailed, int reqId);
 
