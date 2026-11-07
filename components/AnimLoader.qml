@@ -17,6 +17,7 @@ Loader {
         if (isComplete)
             anim.restart();
     }
+    Component.onDestruction: anim.stop()
 
     SequentialAnimation {
         id: anim

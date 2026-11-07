@@ -14,11 +14,11 @@ QString NotifGroup::appName() const {
 }
 
 QString NotifGroup::image() const {
-    return m_image;
+    return m_imageSource ? m_imageSource->image() : QString();
 }
 
 QString NotifGroup::icon() const {
-    return m_icon;
+    return m_iconSource ? m_iconSource->appIcon() : QString();
 }
 
 NotifData::Urgency NotifGroup::urgency() const {
@@ -35,25 +35,57 @@ QQmlListProperty<NotifData> NotifGroup::notifs() {
         } };
 }
 
+bool NotifGroup::isSameImage(const QString& path) const {
+    return m_imageSource && m_imageSource->isSameImage(path);
+}
+
+bool NotifGroup::isSameAppIcon(const QString& path) const {
+    return m_iconSource && m_iconSource->isSameAppIcon(path);
+}
+
+void NotifGroup::add(NotifData* notif) {
+    const auto pos = std::ranges::find_if(m_notifs, [notif](const NotifData* n) {
+        return n->createdAt() <= notif->createdAt();
+    });
+    m_notifs.insert(pos, notif);
+    QObject::connect(notif, &NotifData::imageChanged, this, &NotifGroup::sync);
+    QObject::connect(notif, &NotifData::appIconChanged, this, &NotifGroup::sync);
+    QObject::connect(notif, &NotifData::urgencyChanged, this, &NotifGroup::sync);
+    sync();
+    emit notifsChanged();
+}
+
+void NotifGroup::remove(NotifData* notif) {
+    m_notifs.removeOne(notif);
+    QObject::disconnect(notif, nullptr, this, nullptr);
+    if (m_notifs.isEmpty()) {
+        m_imageSource = nullptr;
+        m_iconSource = nullptr;
+    } else {
+        sync();
+    }
+    emit notifsChanged();
+}
+
 void NotifGroup::sync() {
-    QString image;
-    QString icon;
+    NotifData* imageSource = nullptr;
+    NotifData* iconSource = nullptr;
     auto urgency = NotifData::Urgency::Low;
 
-    for (const auto* notif : std::as_const(m_notifs)) {
-        if (image.isEmpty())
-            image = notif->image();
-        if (icon.isEmpty())
-            icon = notif->appIcon();
+    for (auto* const notif : std::as_const(m_notifs)) {
+        if (!imageSource && !notif->image().isEmpty())
+            imageSource = notif;
+        if (!iconSource && !notif->appIcon().isEmpty())
+            iconSource = notif;
         urgency = std::max(urgency, notif->urgency());
     }
 
-    if (m_image != image) {
-        m_image = std::move(image);
+    if (m_imageSource != imageSource) {
+        m_imageSource = imageSource;
         emit imageChanged();
     }
-    if (m_icon != icon) {
-        m_icon = std::move(icon);
+    if (m_iconSource != iconSource) {
+        m_iconSource = iconSource;
         emit iconChanged();
     }
     if (m_urgency != urgency) {

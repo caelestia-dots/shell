@@ -29,6 +29,9 @@ public:
     [[nodiscard]] NotifData::Urgency urgency() const;
     [[nodiscard]] QQmlListProperty<NotifData> notifs();
 
+    [[nodiscard]] Q_INVOKABLE bool isSameImage(const QString& path) const;
+    [[nodiscard]] Q_INVOKABLE bool isSameAppIcon(const QString& path) const;
+
 signals:
     void imageChanged();
     void iconChanged();
@@ -37,11 +40,13 @@ signals:
 
 private:
     QString m_appName;
-    QString m_image;
-    QString m_icon;
+    NotifData* m_imageSource = nullptr;
+    NotifData* m_iconSource = nullptr;
     NotifData::Urgency m_urgency = NotifData::Urgency::Normal;
     QList<NotifData*> m_notifs;
 
+    void add(NotifData* notif);
+    void remove(NotifData* notif);
     void sync();
 
     friend class NotifStore;

@@ -5,6 +5,7 @@
 #include <qdatetime.h>
 #include <qfile.h>
 #include <qimage.h>
+#include <qloggingcategory.h>
 #include <qmetaobject.h>
 #include <qqml.h>
 #include <qquickimageprovider.h>
@@ -12,6 +13,12 @@
 
 #include "config/rootnodes.hpp"
 #include "util/i18n.hpp"
+
+namespace {
+
+Q_LOGGING_CATEGORY(lcNotifData, "caelestia.notifs.data", QtInfoMsg)
+
+}
 
 namespace caelestia::shell::models {
 
@@ -29,6 +36,11 @@ template <typename T> bool assign(T& field, const T& value) {
     return true;
 }
 
+QString normaliseAppIcon(const QString& icon) {
+    const QUrl url(icon);
+    return url.isLocalFile() ? url.toLocalFile() : icon;
+}
+
 utils::FileCache& imageCache() {
     static utils::FileCache s_cache(u"notifs/images"_s, 512ll * 1024 * 1024, {}, k_cacheVersion);
     return s_cache;
@@ -44,6 +56,13 @@ QString keyForImage(const QImage& image) {
             .toUtf8());
     hash.addData(QByteArrayView(reinterpret_cast<const char*>(image.constBits()), image.sizeInBytes()));
     return QString::fromLatin1(hash.result().toHex());
+}
+
+QByteArray readFile(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return {};
+    return file.readAll();
 }
 
 QByteArray encodeImage(const QImage& image) {
@@ -130,6 +149,10 @@ QVariantMap NotifData::hints() const {
     return m_hints;
 }
 
+int NotifData::progress() const {
+    return m_progress;
+}
+
 int NotifData::expireTimeout() const {
     return m_expireTimeout;
 }
@@ -154,6 +177,10 @@ QString NotifData::timeStr() const {
     return m_timeStr;
 }
 
+qint64 NotifData::createdAt() const {
+    return m_createdAt;
+}
+
 void NotifData::dismiss() {
     if (released())
         return;
@@ -162,6 +189,14 @@ void NotifData::dismiss() {
         QMetaObject::invokeMethod(m_backer, "dismiss");
     else
         onBackerClosed();
+}
+
+bool NotifData::isSameImage(const QString& path) const {
+    return path == m_image || path == m_originalImage;
+}
+
+bool NotifData::isSameAppIcon(const QString& path) const {
+    return path == m_appIcon || path == m_originalAppIcon;
 }
 
 void NotifData::dismissPopup() {
@@ -239,21 +274,28 @@ void NotifData::syncFromBacker() {
         dirty = true;
         emit bodyChanged();
     }
-    if (assign(m_appIcon, m_backer->property("appIcon").toString())) {
+    if (assign(m_originalAppIcon, normaliseAppIcon(m_backer->property("appIcon").toString()))) {
+        m_appIcon = m_originalAppIcon;
         dirty = true;
+        cacheIcon();
         emit appIconChanged();
     }
     if (assign(m_appName, m_backer->property("appName").toString())) {
         dirty = true;
         emit appNameChanged();
     }
-    if (assign(m_image, m_backer->property("image").toString())) {
+    if (assign(m_originalImage, m_backer->property("image").toString())) {
+        m_image = m_originalImage;
         dirty = true;
         cacheImage();
         emit imageChanged();
     }
     if (assign(m_hints, m_backer->property("hints").toMap()))
         emit hintsChanged();
+    if (const auto value = m_hints.value(u"value"_s); assign(m_progress, value.isValid() ? value.toInt() : -1)) {
+        dirty = true;
+        emit progressChanged();
+    }
     if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000);
         timeout > 0 && !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
         dirty = true;
@@ -327,25 +369,48 @@ QList<NotifAction> NotifData::readBackerActions() {
     return actions;
 }
 
+void NotifData::cacheIcon() {
+    if (m_appIcon.isEmpty() || m_appIcon.startsWith(imageCache().dir()))
+        return;
+
+    const QUrl url(m_appIcon);
+    const auto path = url.isLocalFile() ? url.toLocalFile() : m_appIcon;
+    if (!path.startsWith(u'/'))
+        return;
+
+    storeImage(m_appIcon, utils::Cache::keyForPath(path), [path] {
+        return readFile(path);
+    });
+}
+
 void NotifData::cacheImage() {
     if (m_image.isEmpty() || m_image.startsWith(imageCache().dir()))
         return;
 
     const QUrl url(m_image);
     if (url.scheme() != u"image") {
-        storeImage(utils::Cache::keyForPath(m_image), [path = m_image] {
-            return QFile(path).readAll();
+        const auto path = url.isLocalFile() ? url.toLocalFile() : m_image;
+        storeImage(m_image, utils::Cache::keyForPath(path), [path] {
+            return readFile(path);
         });
         return;
     }
 
-    auto* const engine = qmlEngine(this);
-    if (!engine)
+    // Don't cache named icons
+    if (url.host() == u"icon" && !url.path().mid(1).contains(u'/'))
         return;
 
-    auto* const base = engine->imageProvider(url.host());
-    if (!base)
+    const auto* engine = qmlEngine(parent());
+    if (!engine) {
+        qCWarning(lcNotifData) << "Failed to cache image from provider - no QML engine";
         return;
+    }
+
+    auto* const base = engine->imageProvider(url.host());
+    if (!base) {
+        qCWarning(lcNotifData) << "Failed to cache image from provider - no image provider";
+        return;
+    }
 
     // Keep the ?path= / ?fallback= query, drop only scheme, host and leading slash
     const auto id = url.toString(QUrl::RemoveScheme | QUrl::RemoveAuthority).mid(1);
@@ -360,6 +425,7 @@ void NotifData::cacheImage() {
         auto* const provider = static_cast<QQuickImageProvider*>(base);
         image = QtFuture::makeReadyValueFuture(provider->requestPixmap(id, nullptr, k_providerCacheSize).toImage());
     } else {
+        qCWarning(lcNotifData) << "Failed to cache image from provider - unsupported image type";
         return;
     }
 
@@ -369,28 +435,28 @@ void NotifData::cacheImage() {
                 return std::pair{ keyForImage(img), img };
             })
         .then(this, [this](const std::pair<QString, QImage>& result) {
-            storeImage(result.first, [img = result.second] {
+            storeImage(m_image, result.first, [img = result.second] {
                 return encodeImage(img);
             });
         });
 }
 
-void NotifData::storeImage(const QString& key, utils::Cache::Producer producer) {
+void NotifData::storeImage(QString& target, const QString& key, utils::Cache::Producer producer) {
     if (key.isEmpty())
         return;
 
-    imageCache().lookup(key).then(this, [this, key, producer = std::move(producer)](const QUrl& cached) {
+    imageCache().lookup(key).then(this, [this, &target, key, producer = std::move(producer)](const QUrl& cached) {
         if (!cached.isEmpty()) {
-            m_image = cached.toLocalFile();
+            target = cached.toLocalFile();
             emit changed();
             return;
         }
 
-        imageCache().store(key, producer).then(this, [this, key](bool ok) {
+        imageCache().store(key, producer).then(this, [this, &target, key](bool ok) {
             if (!ok)
                 return;
 
-            m_image = imageCache().pathFor(key);
+            target = imageCache().pathFor(key);
             emit changed();
         });
     });
