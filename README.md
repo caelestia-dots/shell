@@ -232,7 +232,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
-> - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `triggerHowdyOnWake`
+> - `lock`: `enableFace`, `enableFprint`, `faceProvider`, `maxFaceTries`, `maxFprintTries`, `triggerFaceOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
@@ -805,9 +805,10 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "recolourLogo": true,
         "enableFprint": true,
         "maxFprintTries": 3,
-        "enableHowdy": true,
-        "maxHowdyTries": 3,
-        "triggerHowdyOnWake": true,
+        "enableFace": true,
+        "faceProvider": "howdy",
+        "maxFaceTries": 3,
+        "triggerFaceOnWake": true,
         "hideNotifs": false,
         "enableSessionControls": true
     },
