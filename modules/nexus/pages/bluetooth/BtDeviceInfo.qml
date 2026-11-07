@@ -38,6 +38,7 @@ PageBase {
 
     title: device?.name ?? Tr.trCtx("Device", "unnamed bluetooth device")
     isSubPage: true
+    searchable: false
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

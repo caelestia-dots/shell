@@ -19,18 +19,21 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bar-clock-background"
             text: Tr.trCtx("Background", "taskbar clock: draw a background behind the clock")
             checked: Config.bar.clock.background
             onToggled: GlobalConfig.bar.clock.background = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-clock-show-date"
             text: Tr.tr("Show date")
             checked: Config.bar.clock.showDate
             onToggled: GlobalConfig.bar.clock.showDate = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-clock-show-icon"
             text: Tr.tr("Show icon")
             checked: Config.bar.clock.showIcon
             onToggled: GlobalConfig.bar.clock.showIcon = checked
@@ -38,6 +41,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bar-clock-show-seconds"
             text: Tr.tr("Show seconds")
             checked: Config.bar.clock.showSeconds
             onToggled: GlobalConfig.bar.clock.showSeconds = checked

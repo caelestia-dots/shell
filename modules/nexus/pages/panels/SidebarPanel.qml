@@ -25,12 +25,14 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "sidebar-enabled"
             text: Tr.trCtx("Enabled", "toggle label")
             checked: Config.sidebar.enabled
             onToggled: GlobalConfig.sidebar.enabled = checked
         }
 
         ToggleRow {
+            settingAnchor: "sidebar-show-on-hover"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
             checked: Config.sidebar.showOnHover
@@ -39,6 +41,7 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "sidebar-drag-threshold"
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the sidebar opens")
             value: Config.sidebar.dragThreshold

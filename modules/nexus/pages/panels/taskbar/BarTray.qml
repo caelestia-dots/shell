@@ -19,12 +19,14 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "bar-tray-background"
             text: Tr.trCtx("Background", "taskbar tray: draw a background behind the tray")
             checked: Config.bar.tray.background
             onToggled: GlobalConfig.bar.tray.background = checked
         }
 
         ToggleRow {
+            settingAnchor: "bar-tray-recolour-icons"
             // TRANSLATORS: tint system tray icons with the theme accent colour
             text: Tr.tr("Recolour icons")
             checked: Config.bar.tray.recolour
@@ -32,6 +34,7 @@ PageBase {
         }
 
         ToggleRow {
+            settingAnchor: "bar-tray-compact"
             text: Tr.trCtx("Compact", "taskbar tray layout")
             checked: Config.bar.tray.compact
             onToggled: GlobalConfig.bar.tray.compact = checked
@@ -39,6 +42,7 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "bar-tray-popout-on-hover"
             text: Tr.tr("Popout on hover")
             subtext: Tr.tr("Show the tray menu popout when hovering")
             checked: Config.bar.popouts.tray
