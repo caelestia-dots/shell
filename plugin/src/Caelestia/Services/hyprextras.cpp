@@ -215,21 +215,26 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
     }
 
     auto socket = SocketPtr::create(this);
+    auto buffer = QSharedPointer<QByteArray>::create();
 
-    QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this] {
-        QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback] {
-            auto response = socket->readAll();
-            callback(true, std::move(response));
-            socket->close();
-        });
-
+    QObject::connect(socket.data(), &QLocalSocket::connected, this, [socket, request] {
         socket->write(request.toUtf8());
         socket->flush();
     });
 
+    QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, buffer] {
+        buffer->append(socket->readAll());
+    });
+
+    // Hyprland closes the socket once the full response is written
     QObject::connect(socket.data(), &QLocalSocket::errorOccurred, this, [=](QLocalSocket::LocalSocketError err) {
-        qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
-        callback(false, {});
+        if (err == QLocalSocket::PeerClosedError) {
+            buffer->append(socket->readAll());
+            callback(true, std::move(*buffer));
+        } else {
+            qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
+            callback(false, {});
+        }
         socket->close();
     });
 
