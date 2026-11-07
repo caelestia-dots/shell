@@ -142,6 +142,7 @@ Scope {
 
     Connections {
         function onResumed(): void {
+            fprint.checkAvailable();
             if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
                 howdy.start();
         }
