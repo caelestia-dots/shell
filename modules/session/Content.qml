@@ -9,6 +9,7 @@ import qs.components
 import qs.components.controls
 import qs.services
 import qs.utils
+import qs.modules.nexus.common
 
 Column {
     id: root
@@ -62,9 +63,21 @@ Column {
             speed: Config.general.sessionGifSpeed
             source: Paths.absolutePath(Config.paths.sessionGif)
             fillMode: AnimatedImage.PreserveAspectFit
+            visible: Config.session.chibiAnimation
         }
     }
 
+    Item {
+        implicitWidth: Tokens.sizes.session.button
+        implicitHeight: Tokens.sizes.session.button
+        visible: !Config.session.chibiAnimation
+
+        AnimatedLogo {
+            anchors.centerIn: parent
+            width: parent.width
+            height: parent.height
+        }
+    }
     SessionButton {
         id: hibernate
 

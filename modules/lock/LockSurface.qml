@@ -4,9 +4,8 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell.Wayland
 import Caelestia.Config
-import Caelestia.Multimedia
-import Caelestia.State
 import qs.components
+import qs.components.images
 import qs.services
 
 WlSessionLockSurface {
@@ -188,9 +187,8 @@ WlSessionLockSurface {
     Component {
         id: wallpaperBackground
 
-        Visual {
-            source: Wallpapers.current
-            playing: PersistentState.wallpaperPlaying
+        CachingImage {
+            path: Wallpapers.current
         }
     }
 

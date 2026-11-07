@@ -31,6 +31,7 @@ class SessionCommands : public settings::ObjectNode {
 class SessionConfig : public settings::ObjectNode {
     CONFIG_NODE(SessionConfig, settings::ObjectNode)
 
+    CONFIG_PROPERTY(bool, chibiAnimation, true)
     CONFIG_PROPERTY(bool, enabled, true)
     CONFIG_PROPERTY(int, dragThreshold, 30)
     CONFIG_PROPERTY(bool, vimKeybinds, false)
