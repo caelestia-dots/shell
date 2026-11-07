@@ -15,11 +15,11 @@ Item {
     readonly property string msg: {
         // Errors
         if (pam.fprint.state === Pam.Error)
-            return Tr.tr("FP ERROR: %1").arg(pam.fprint.message);
+            return Tr.tr("FP ERROR: %1").arg(pam.fprint.message || pam.fprint.errorMessage);
         if (pam.howdy.state === Pam.Error)
-            return Tr.tr("FACE ERROR: %1").arg(pam.howdy.message);
+            return Tr.tr("FACE ERROR: %1").arg(pam.howdy.message || pam.howdy.errorMessage);
         if (pam.state === Pam.Error)
-            return Tr.tr("PW ERROR: %1").arg(pam.passwd.message);
+            return Tr.tr("PW ERROR: %1").arg(pam.lockMessage || pam.passwordErrorMessage);
 
         // Fprint/howdy fail
         if (pam.state !== Pam.MaxTries) {
@@ -38,7 +38,7 @@ Item {
                 return Tr.tr("Face not recognised (%1/%2). Please try again.").arg(pam.howdy.tries).arg(GlobalConfig.lock.maxHowdyTries);
         }
 
-        if (pam.lockMessage) // Password max tries message
+        if (pam.lockMessage) // Message from PAM, e.g. account locked
             return pam.lockMessage;
 
         // Password fail
