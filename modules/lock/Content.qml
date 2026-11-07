@@ -8,6 +8,7 @@ RowLayout {
     id: root
 
     required property var lock
+    required property real lockHeight
 
     spacing: Tokens.spacing.largeIncreased * 2
 
@@ -34,6 +35,7 @@ RowLayout {
 
     Center {
         lock: root.lock
+        lockHeight: root.lockHeight
     }
 
     ColumnLayout {
