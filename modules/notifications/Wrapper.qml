@@ -10,9 +10,17 @@ Item {
     property alias sessionPanel: content.sessionPanel
     property alias utilitiesPanel: content.utilitiesPanel
 
-    visible: height > 0
-    anchors.topMargin: -5
-    implicitWidth: Math.max(sidebarPanel.width, content.implicitWidth)
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: Math.max(sidebarPanel.width, content.naturalWidth)
+
+    visible: height > 0 && !layoutHidden
+    anchors.topMargin: -5 + layoutShiftY
+    anchors.rightMargin: -layoutShiftX
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     implicitHeight: content.implicitHeight
 
     Content {
@@ -20,5 +28,6 @@ Item {
 
         anchors.topMargin: -root.anchors.topMargin
         screenState: root.screenState
+        layoutMaxWidth: root.layoutMaxWidth
     }
 }
