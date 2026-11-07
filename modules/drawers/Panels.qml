@@ -3,6 +3,7 @@ import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.modules.bar as Bar
+import qs.modules.cheatsheet as Cheatsheet
 import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.notifications as Notifications
@@ -20,7 +21,6 @@ Item {
     required property ScreenState screenState
     required property Bar.BarWrapper bar
     required property real borderThickness
-
     readonly property alias osd: osd
     readonly property alias osdWrapper: osdWrapper
     readonly property alias notifications: notifications
@@ -33,6 +33,7 @@ Item {
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
+    readonly property alias cheatsheet: cheatsheet
 
     anchors.fill: parent
     anchors.margins: borderThickness
@@ -45,7 +46,6 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
         clip: sidebar.visible || session.visible
-
         implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
         implicitHeight: osd.implicitHeight
 
@@ -55,7 +55,6 @@ Item {
             screen: root.screen
             screenState: root.screenState
             sidebarOrSessionVisible: sidebar.visible || session.visible
-
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
         }
@@ -69,7 +68,6 @@ Item {
         osdPanel: osdWrapper
         sessionPanel: sessionWrapper
         utilitiesPanel: utilities
-
         anchors.top: parent.top
         anchors.right: parent.right
     }
@@ -81,7 +79,6 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: sidebar.width * (1 - sidebar.offsetScale)
         clip: sidebar.visible
-
         implicitWidth: session.implicitWidth * (1 - session.offsetScale)
         implicitHeight: session.implicitHeight
 
@@ -90,7 +87,6 @@ Item {
 
             screenState: root.screenState
             sidebarVisible: sidebar.visible
-
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
         }
@@ -102,7 +98,6 @@ Item {
         screen: root.screen
         screenState: root.screenState
         panels: root
-
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
     }
@@ -111,9 +106,16 @@ Item {
         id: dashboard
 
         screenState: root.screenState
-
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
+    }
+
+    Cheatsheet.Wrapper {
+        id: cheatsheet
+
+        screenState: root.screenState
+        x: Math.round((parent.width - implicitWidth) / 2)
+        y: Math.round((parent.height - implicitHeight) / 2)
     }
 
     BarPopouts.ClipWrapper {
@@ -129,7 +131,6 @@ Item {
         screenState: root.screenState
         sidebar: sidebar
         popouts: popoutsWrapper.content
-
         anchors.bottom: parent.bottom
         anchors.right: parent.right
     }
@@ -146,7 +147,6 @@ Item {
         id: sidebar
 
         screenState: root.screenState
-
         anchors.top: notifications.bottom
         anchors.bottom: utilities.top
         anchors.right: parent.right
