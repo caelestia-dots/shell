@@ -12,6 +12,7 @@ class PStateRoot : public settings::RootNode {
 
     STATE_GLOBAL_PROPERTY(bool, wallpaperPlaying, true)
     STATE_GLOBAL_PROPERTY(bool, doNotDisturb, false)
+    STATE_GLOBAL_PROPERTY(QVariantMap, workspaceWallpapers, {})
 
 public:
     explicit PStateRoot(const QString& path, PStateRoot* fallback = nullptr, QObject* parent = nullptr);

@@ -47,6 +47,12 @@ class BackgroundVisualiser : public settings::ObjectNode {
     CONFIG_PROPERTY(qreal, spacing, 1)
 };
 
+class WorkspaceWallpapers : public settings::ObjectNode {
+    CONFIG_NODE(WorkspaceWallpapers, settings::ObjectNode)
+
+    CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
+};
+
 class BackgroundConfig : public settings::ObjectNode {
     CONFIG_NODE(BackgroundConfig, settings::ObjectNode)
 
@@ -55,6 +61,7 @@ class BackgroundConfig : public settings::ObjectNode {
     CONFIG_ENUM_PROPERTY(WallpaperTransition, wallpaperTransition, WallpaperTransition::Crossfade)
     CONFIG_SUBOBJECT(DesktopClock, desktopClock)
     CONFIG_SUBOBJECT(BackgroundVisualiser, visualiser)
+    CONFIG_SUBOBJECT(WorkspaceWallpapers, workspaceWallpapers)
 };
 
 } // namespace caelestia::shell::config
