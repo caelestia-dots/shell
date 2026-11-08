@@ -218,7 +218,7 @@ QHash<QByteArray, Storage::DeviceEntry> Storage::collectDevices() {
         const auto totalBytes = static_cast<quint64>(v.bytesTotal());
         const auto availBytes = static_cast<quint64>(v.bytesAvailable());
         const auto usedBytes = totalBytes > availBytes ? totalBytes - availBytes : 0;
-        const auto isRoot = v.rootPath() == u"/"_s;
+        const auto isRoot = v.rootPath() == u"/";
 
         DeviceEntry& e = byDevice[device];
         e.device = device;
@@ -260,7 +260,7 @@ Storage::AccumHash Storage::foldToDisks(const QHash<QByteArray, DeviceEntry>& by
         }
 
         for (const auto& d : disks) {
-            if (d.startsWith(u"zram"_s))
+            if (d.startsWith(u"zram"))
                 continue;
 
             Accum& a = byDisk[d];

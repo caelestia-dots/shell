@@ -86,7 +86,7 @@ RemoteCache* RemoteCache::instance() {
 }
 
 bool RemoteCache::isRemote(const QUrl& url) {
-    return url.scheme() == u"http"_s || url.scheme() == u"https"_s;
+    return url.scheme() == u"http" || url.scheme() == u"https";
 }
 
 RemoteCache::RemoteCache(QObject* parent)
