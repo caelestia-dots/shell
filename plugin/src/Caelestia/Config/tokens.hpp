@@ -231,6 +231,18 @@ class NexusTokens : public settings::ObjectNode {
     CONFIG_PROPERTY(int, smallTextFieldWidth, 100)
 };
 
+class FileDialogTokens : public settings::ObjectNode {
+    CONFIG_NODE(FileDialogTokens, settings::ObjectNode)
+
+    CONFIG_PROPERTY(int, initialWidth, 1500)
+    CONFIG_PROPERTY(int, initialHeight, 800)
+    CONFIG_PROPERTY(int, minWidth, 850)
+    CONFIG_PROPERTY(int, minHeight, 480)
+    CONFIG_PROPERTY(int, minSearchWidth, 400)
+    CONFIG_PROPERTY(int, itemWidth, 140)
+    CONFIG_PROPERTY(int, sidebarWidth, 230)
+};
+
 class SizeTokens : public settings::ObjectNode {
     CONFIG_NODE(SizeTokens, settings::ObjectNode)
 
@@ -245,6 +257,7 @@ class SizeTokens : public settings::ObjectNode {
     CONFIG_SUBOBJECT(LockTokens, lock)
     CONFIG_SUBOBJECT(WInfoTokens, winfo)
     CONFIG_SUBOBJECT(NexusTokens, nexus)
+    CONFIG_SUBOBJECT(FileDialogTokens, fileDialog)
 };
 
 } // namespace caelestia::shell::config
