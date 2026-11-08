@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.UPower
 import Caelestia.Config
@@ -48,26 +47,11 @@ Scope {
         interval: 60000
         onTriggered: root.controllerActive = false
     }
-    Process {
-        id: controllerWatcher
-
-        command: ["python3", Quickshell.shellPath("assets/controller-activity.py")]
-        running: true
-        stdout: SplitParser {
-            onRead: data => {
-                if (data === "activity") {
-                    root.controllerActive = true;
-                    controllerGrace.restart();
-                }
-            }
+    GamepadActivity {
+        onActivity: {
+            root.controllerActive = true;
+            controllerGrace.restart();
         }
-        onExited: controllerRestart.start()
-    }
-    Timer {
-        id: controllerRestart
-
-        interval: 5000
-        onTriggered: controllerWatcher.running = true
     }
 
     Connections {

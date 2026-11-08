@@ -5,7 +5,6 @@
   makeWrapper,
   makeFontsConf,
   fish,
-  python3,
   ddcutil,
   brightnessctl,
   networkmanager,
@@ -41,7 +40,6 @@
   runtimeDeps =
     [
       fish
-      python3
       ddcutil
       brightnessctl
       networkmanager
