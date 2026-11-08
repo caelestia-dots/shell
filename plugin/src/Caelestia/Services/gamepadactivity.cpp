@@ -43,7 +43,7 @@ void GamepadActivity::scan() {
         if (fd < 0)
             continue;
         auto* notifier = new QSocketNotifier(fd, QSocketNotifier::Read, this);
-        m_devices.insert(path, { fd, notifier, {} });
+        m_devices.insert(path, { .fd = fd, .notifier = notifier, .axes = {} });
         connect(notifier, &QSocketNotifier::activated, this, [this, path] {
             readEvents(path);
         });
