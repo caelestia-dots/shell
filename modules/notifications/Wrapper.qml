@@ -11,14 +11,18 @@ Item {
     property alias utilitiesPanel: content.utilitiesPanel
 
     visible: height > 0
-    anchors.topMargin: -5
+    anchors.topMargin: content.nonAnimHeight > 0 ? 0 : -5
     implicitWidth: Math.max(sidebarPanel.width, content.implicitWidth)
-    implicitHeight: content.implicitHeight - anchors.topMargin
+    implicitHeight: content.implicitHeight
 
     Content {
         id: content
 
         anchors.topMargin: -root.anchors.topMargin
         screenState: root.screenState
+    }
+
+    Behavior on anchors.topMargin {
+        Anim {}
     }
 }

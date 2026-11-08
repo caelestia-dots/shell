@@ -23,13 +23,7 @@ Item {
     required property Item utilitiesPanel
     readonly property int padding: Tokens.padding.large
     readonly property int clampedPadding: CUtils.clamp(padding - Config.border.thickness, 0, padding)
-
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
-
-    implicitWidth: Tokens.sizes.notifs.width
-    implicitHeight: {
+    readonly property int nonAnimHeight: {
         if (list.count === 0)
             return 0;
 
@@ -55,6 +49,13 @@ Item {
 
         return Math.min(((QsWindow.window as QsWindow)?.screen?.height ?? 0) + padding - clampedPadding * 2 - Config.border.thickness, height + padding + clampedPadding);
     }
+
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.right: parent.right
+
+    implicitWidth: Tokens.sizes.notifs.width
+    implicitHeight: nonAnimHeight
 
     ClippingWrapperRectangle {
         anchors.fill: parent
