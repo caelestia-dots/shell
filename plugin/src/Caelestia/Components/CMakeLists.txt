@@ -12,10 +12,12 @@ qml_module(caelestia-components
         sparklineitem.cpp
         visualiserbars.cpp
         roundedmask.cpp
+        screencapture.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick
         caelestia-core
+        caelestia::caelestia
     DEPENDENCIES
         Caelestia
 )
