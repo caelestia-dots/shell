@@ -4,7 +4,9 @@ import QtQuick
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Models
 import qs.components
+import qs.components.widgets.notifs
 import qs.services
 
 LazyListView {
@@ -36,66 +38,61 @@ LazyListView {
     removeDuration: Tokens.anim.durations.normal
 
     model: ScriptModel {
-        values: {
-            const map = new Map();
-            for (const n of Notifs.notClosed)
-                map.set(n.appName, null);
-            for (const n of Notifs.list)
-                map.set(n.appName, null);
-            return [...map.keys()];
-        }
+        values: [...Notifs.groups]
     }
 
     delegate: Component {
-        MouseArea {
+        NotifSwipeArea {
             id: notif
 
             required property int index
-            required property string modelData
+            required property NotifGroup modelData
 
-            readonly property bool closed: notifInner.notifCount === 0
-            property int startY
+            readonly property bool closed: card.notifs.length === 0
+
+            function toggleExpand(expand: bool): void {
+                if (expand) {
+                    if (!expanded)
+                        root.props.expandedNotifs.push(modelData.appName);
+                } else if (expanded) {
+                    root.props.expandedNotifs.splice(root.props.expandedNotifs.indexOf(modelData.appName), 1);
+                }
+            }
 
             function closeAll(): void {
                 clearTimer.start();
             }
 
-            LazyListView.trackViewport: !notifInner.expanded && notifInner.nonAnimHeight < notifInner.implicitHeight
-            LazyListView.preferredHeight: closed ? 0 : notifInner.nonAnimHeight
-            LazyListView.visibleHeight: notifInner.implicitHeight
-            implicitHeight: notifInner.implicitHeight
+            Component.onDestruction: {
+                if (closed && expanded)
+                    toggleExpand(false);
+            }
+
+            LazyListView.trackViewport: !expanded && card.nonAnimHeight < card.implicitHeight
+            LazyListView.preferredHeight: closed ? 0 : card.nonAnimHeight
+            LazyListView.visibleHeight: card.implicitHeight
+            implicitHeight: card.implicitHeight
 
             opacity: LazyListView.removing || closed || LazyListView.adding ? 0 : 1
-            scale: LazyListView.removing || closed ? 0.6 : LazyListView.adding ? 0 : 1
+            scale: LazyListView.adding ? 0 : 1
 
-            hoverEnabled: true
-            cursorShape: pressed ? Qt.ClosedHandCursor : undefined
-            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-            preventStealing: true
+            expanded: root.props.expandedNotifs.includes(modelData.appName)
             enabled: !closed
 
-            drag.target: this
-            drag.axis: Drag.XAxis
+            onClosedChanged: {
+                if (closed)
+                    slideOut.start();
+            }
+            onRequestExpand: expand => toggleExpand(expand)
+            onSwiped: closeAll()
+            onDismissed: closeAll()
 
-            onPressed: event => {
-                startY = event.y;
-                if (event.button === Qt.RightButton)
-                    notifInner.toggleExpand(!notifInner.expanded);
-                else if (event.button === Qt.MiddleButton)
-                    closeAll();
-            }
-            onPositionChanged: event => {
-                if (pressed) {
-                    const diffY = event.y - startY;
-                    if (Math.abs(diffY) > Config.notifs.expandThreshold)
-                        notifInner.toggleExpand(diffY > 0);
-                }
-            }
-            onReleased: event => {
-                if (Math.abs(x) < width * Config.notifs.clearThreshold)
-                    x = 0;
-                else
-                    closeAll();
+            Anim {
+                id: slideOut
+
+                target: notif
+                property: "x"
+                to: notif.x >= 0 ? notif.width : -notif.width
             }
 
             Timer {
@@ -105,24 +102,27 @@ LazyListView {
                 repeat: true
                 triggeredOnStart: true
                 onTriggered: {
-                    const notifs = Notifs.notClosed.filter(n => n.appName === notif.modelData);
+                    const notifs = [...notif.modelData.notifs];
                     if (notifs.length === 0) {
                         stop();
                         return;
                     }
 
                     for (const n of notifs.slice(0, 30))
-                        n.close();
+                        n.dismiss();
                 }
             }
 
-            NotifGroup {
-                id: notifInner
+            NotifGroupCard {
+                id: card
 
-                modelData: notif.modelData
-                props: root.props
+                group: notif.modelData
                 container: root.container
-                screenState: root.screenState
+                expanded: notif.expanded
+                baseLayer: 1
+                onRequestExpand: expand => notif.toggleExpand(expand)
+                onSwiped: notif => notif.dismiss()
+                onLinkActivated: root.screenState.sidebar = false
             }
 
             Behavior on y {
@@ -138,10 +138,6 @@ LazyListView {
             }
 
             Behavior on scale {
-                Anim {}
-            }
-
-            Behavior on x {
                 Anim {}
             }
         }

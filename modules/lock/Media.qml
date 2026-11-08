@@ -7,7 +7,7 @@ import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.components.images
+import qs.components.widgets
 import qs.services
 
 ClipRect {

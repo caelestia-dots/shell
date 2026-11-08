@@ -6,10 +6,12 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Models
 import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.effects
+import qs.components.widgets.notifs
 import qs.services
 import qs.utils
 
@@ -78,19 +80,26 @@ ColumnLayout {
         }
 
         StyledListView {
+            id: list
+
             anchors.fill: parent
             visible: !Config.lock.hideNotifs
             spacing: Tokens.spacing.small
             clip: true
 
             model: ScriptModel {
-                values: {
-                    const list = Notifs.notClosed.map(n => [n.appName, null]);
-                    return [...new Map(list).keys()];
-                }
+                values: [...Notifs.groups]
             }
 
-            delegate: NotifGroup {}
+            delegate: NotifGroupCard {
+                required property NotifGroup modelData
+
+                group: modelData
+                container: list
+                expanded: false
+                expandable: false
+                baseSurface: 1
+            }
 
             add: Transition {
                 Anim {
