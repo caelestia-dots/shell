@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell.Services.Pipewire
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -105,8 +106,8 @@ Item {
         IconTextButton {
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.medium
-            inactiveColour: Colours.palette.m3primaryContainer
-            inactiveOnColour: Colours.palette.m3onPrimaryContainer
+            inactiveColour: Colours.palette.primaryContainer
+            inactiveOnColour: Colours.palette.onPrimaryContainer
             verticalPadding: Tokens.padding.extraSmall
             text: Tr.tr("Open settings")
             icon: "settings"

@@ -3,10 +3,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.controls
-import qs.services
 import qs.modules.launcher.items
 import qs.modules.launcher.services
 
@@ -29,7 +29,7 @@ StyledListView {
     function stateForText(text: string): string {
         const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
+            for (const action of ["calc", "scheme"])
                 if (text.startsWith(`${prefix}${action} `))
                     return action;
 
@@ -47,8 +47,6 @@ StyledListView {
             return [0];
         case "scheme":
             return Schemes.query(text);
-        case "variant":
-            return M3Variants.query(text);
         default:
             return Apps.search(text);
         }
@@ -70,7 +68,7 @@ StyledListView {
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
         radius: Tokens.rounding.large
-        color: Colours.palette.m3onSurface
+        color: Colours.palette.onSurface
         opacity: 0.08
 
         y: root.currentItem?.y ?? 0
@@ -83,11 +81,6 @@ StyledListView {
     }
 
     state: screenState.launcher ? requestedState : displayState
-
-    onStateChanged: {
-        if (state === "scheme" || state === "variant")
-            Schemes.reload();
-    }
 
     Component.onCompleted: displayText = search.text
 
@@ -118,13 +111,6 @@ StyledListView {
 
             PropertyChanges {
                 root.delegate: schemeItem
-            }
-        },
-        State {
-            name: "variant"
-
-            PropertyChanges {
-                root.delegate: variantItem
             }
         }
     ]
@@ -275,14 +261,6 @@ StyledListView {
         id: schemeItem
 
         SchemeItem {
-            list: root
-        }
-    }
-
-    Component {
-        id: variantItem
-
-        VariantItem {
             list: root
         }
     }

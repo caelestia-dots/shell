@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Caelestia.Config
-import qs.services
+import Caelestia.Scheme
 
 Text {
     id: root
@@ -11,7 +11,7 @@ Text {
 
     renderType: Text.NativeRendering
     textFormat: Text.PlainText
-    color: Colours.palette.m3onSurface
+    color: Colours.palette.onSurface
     font: Tokens.font.body.small
 
     Behavior on color {

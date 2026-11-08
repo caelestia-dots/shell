@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Services.Pipewire
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.utils
@@ -28,7 +29,7 @@ PageBase {
             Layout.leftMargin: Tokens.padding.small
             Layout.bottomMargin: Tokens.spacing.medium
             text: Tr.tr("Adjust the volume of individual apps currently playing audio.")
-            color: Colours.palette.m3outline
+            color: Colours.palette.outline
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
         }
@@ -41,7 +42,7 @@ PageBase {
             showList: true
             placeholderIcon: "music_off"
             placeholderText: Tr.tr("No apps playing audio")
-            color: list.count === 0 ? Colours.tPalette.m3surfaceContainer : "transparent"
+            color: list.count === 0 ? Colours.tPalette.surfaceContainer : "transparent"
             list.spacing: Tokens.spacing.extraSmall / 2
 
             model: ScriptModel {

@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Shapes
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Shape {
     id: root
 
-    property color color: Colours.palette.m3surfaceContainer
+    property color color: Colours.palette.surfaceContainer
     property int waves: 4
     property real amplitude: 3
 

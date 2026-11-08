@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 StyledRect {
     id: root
@@ -34,7 +34,7 @@ StyledRect {
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: nonAnimHeight
 
-    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)
+    color: Config.bar.tray.background && items.count > 0 ? Colours.tPalette.surfaceContainer : Qt.alpha(Colours.tPalette.surfaceContainer, 0)
     radius: Tokens.rounding.full
 
     Column {
@@ -105,7 +105,7 @@ StyledRect {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: Config.bar.tray.background ? Tokens.padding.extraSmall : -Tokens.padding.small
                 text: "expand_less"
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.medium
                 rotation: root.expanded ? 180 : 0
 

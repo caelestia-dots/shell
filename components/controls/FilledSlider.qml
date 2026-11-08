@@ -2,8 +2,8 @@ import "../effects"
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Slider {
     id: root
@@ -15,7 +15,7 @@ Slider {
     orientation: Qt.Vertical
 
     background: StyledRect {
-        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+        color: Colours.layer(Colours.palette.surfaceContainer, 2)
         radius: Tokens.rounding.full
 
         StyledRect {
@@ -25,7 +25,7 @@ Slider {
             y: root.handle.y
             implicitHeight: parent.height - y
 
-            color: Colours.palette.m3secondary
+            color: Colours.palette.secondary
             radius: parent.radius
         }
     }
@@ -50,7 +50,7 @@ Slider {
 
             anchors.fill: parent
 
-            color: Colours.palette.m3inverseSurface
+            color: Colours.palette.inverseSurface
             radius: Tokens.rounding.full
 
             MouseArea {
@@ -70,7 +70,7 @@ Slider {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: 1
                 text: moving ? Math.round(root.value * 100) : root.icon
-                color: Colours.palette.m3inverseOnSurface
+                color: Colours.palette.inverseOnSurface
                 font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
 
                 Behavior on moving {

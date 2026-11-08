@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Services.SystemTray
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components.effects
-import qs.services
 import qs.utils
 
 MouseArea {
@@ -28,7 +28,7 @@ MouseArea {
 
         anchors.fill: parent
         source: Icons.getTrayIcon(root.modelData.id, root.modelData.icon)
-        colour: Colours.palette.m3secondary
+        colour: Colours.palette.secondary
         layer.enabled: Config.bar.tray.recolour
     }
 }

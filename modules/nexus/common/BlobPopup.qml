@@ -1,8 +1,8 @@
 import QtQuick
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 Item {
     id: root
@@ -30,7 +30,7 @@ Item {
     BlobGroup {
         id: blobGroup
 
-        color: Colours.palette.m3surfaceContainerHighest
+        color: Colours.palette.surfaceContainerHighest
         smoothing: root.Tokens.rounding.medium
         cornerFill: false
 
@@ -120,7 +120,7 @@ Item {
 
             anchors.centerIn: parent
             text: "view_apps"
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             fontStyle: Tokens.font.icon.medium
         }
     }

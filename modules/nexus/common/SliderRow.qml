@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.modules.nexus.common
 
 ConnectedRect {
@@ -32,7 +32,7 @@ ConnectedRect {
         MaterialIcon {
             id: icon
 
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             fontStyle: Tokens.font.icon.medium
         }
 
@@ -55,7 +55,7 @@ ConnectedRect {
                 StyledText {
                     id: valueLabel
 
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.body.small
                 }
             }

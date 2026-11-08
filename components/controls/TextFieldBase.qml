@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Templates
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 TextField {
     id: root
@@ -10,9 +10,9 @@ TextField {
     implicitWidth: contentWidth + leftPadding + rightPadding
     implicitHeight: contentHeight + topPadding + bottomPadding
 
-    color: Colours.palette.m3onSurface
-    placeholderTextColor: Colours.palette.m3onSurfaceVariant // No anim cause placeholder is custom
-    selectionColor: Qt.alpha(Colours.palette.m3primary, 0.4)
+    color: Colours.palette.onSurface
+    placeholderTextColor: Colours.palette.onSurfaceVariant // No anim cause placeholder is custom
+    selectionColor: Qt.alpha(Colours.palette.primary, 0.4)
     selectedTextColor: color
 
     font: Tokens.font.body.small
@@ -40,7 +40,7 @@ TextField {
         implicitWidth: 1.5
         implicitHeight: root.cursorRectangle.height
 
-        color: Colours.palette.m3primary
+        color: Colours.palette.primary
         radius: Tokens.rounding.large
 
         Connections {
