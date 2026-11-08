@@ -92,11 +92,11 @@ ColumnLayout {
 
             WButton {
                 required property int index
-                readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
-                readonly property bool isCurrent: root.client?.workspace.id === wsId
+                readonly property int wsId: Math.floor((Math.max(1, Hypr.activeWsNumber) - 1) / 10) * 10 + index + 1
+                readonly property bool isCurrent: root.client?.workspace?.address === String(wsId)
 
                 onClicked: {
-                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.move({ window = "address:0x${root.client?.address}", workspace = "${wsId}", follow = true })` : `movetoworkspace ${wsId},address:0x${root.client?.address}`);
+                    Hypr.dispatch(`hl.dsp.window.move({ window = "address:0x${root.client?.address}", workspace = "${wsId}", follow = true })`);
                 }
 
                 color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
@@ -119,7 +119,7 @@ ColumnLayout {
             color: Colours.palette.m3secondaryContainer
             textColor: Colours.palette.m3onSecondaryContainer
             text: root.client?.lastIpcObject.floating ? Tr.tr("Tile") : Tr.tr("Float")
-            onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.float({ window = "address:0x${root.client?.address}" })` : `togglefloating address:0x${root.client?.address}`)
+            onClicked: Hypr.dispatch(`hl.dsp.window.float({ window = "address:0x${root.client?.address}" })`)
         }
 
         Loader {
@@ -133,7 +133,7 @@ ColumnLayout {
                 color: Colours.palette.m3secondaryContainer
                 textColor: Colours.palette.m3onSecondaryContainer
                 text: root.client?.lastIpcObject.pinned ? Tr.tr("Unpin") : Tr.tr("Pin")
-                onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })` : `pin address:0x${root.client?.address}`)
+                onClicked: Hypr.dispatch(`hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })`)
             }
         }
 
@@ -141,7 +141,7 @@ ColumnLayout {
             color: Colours.palette.m3errorContainer
             textColor: Colours.palette.m3onErrorContainer
             text: Tr.tr("Kill")
-            onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })` : `killwindow address:0x${root.client?.address}`)
+            onClicked: Hypr.dispatch(`hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })`)
         }
     }
 

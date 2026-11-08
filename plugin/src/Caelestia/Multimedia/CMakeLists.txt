@@ -3,14 +3,16 @@ qml_module(caelestia-multimedia
     SOURCES
         visualsource.cpp
         imagecache.cpp
-        imagecacheworker.cpp
         ktxencoder.cpp
+        visualanalyser.cpp
+        remotecache.cpp
     QML_FILES
         Visual.qml
     LIBRARIES
         Qt::Quick
         Qt::Multimedia
         Qt::Concurrent
-        Qt::Sql
+        Qt::Network
+        caelestia::caelestia
         rgbcx
 )

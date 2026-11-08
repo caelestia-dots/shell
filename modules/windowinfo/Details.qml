@@ -67,8 +67,8 @@ ColumnLayout {
 
     Detail {
         icon: "workspaces"
-        // TRANSLATORS: %1 = workspace name, %2 = workspace id
-        text: Tr.tr("Workspace: %1 (%2)").arg(root.client?.workspace.name ?? -1).arg(root.client?.workspace.id ?? -1)
+        // TRANSLATORS: %1 = workspace name
+        text: root.client?.workspace ? Tr.tr("Workspace: %1").arg(root.client.workspace.name) : Tr.tr("Workspace: unknown")
         color: Colours.palette.m3secondary
     }
 
