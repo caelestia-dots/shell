@@ -51,7 +51,7 @@ ColumnLayout {
         Layout.rightMargin: Tokens.padding.extraSmall
         text: {
             const devices = Bluetooth.devices.values;
-            const connected = devices.filter(d => d.connected).length;
+            const connected = devices.reduce((total, d) => total + d.connected, 0);
             if (connected > 0)
                 // TRANSLATORS: %n = total paired devices, %1 = how many of them are connected
                 return Tr.trN("%n device available (%1 connected)", "%n devices available (%1 connected)", devices.length).arg(connected);
@@ -63,7 +63,8 @@ ColumnLayout {
 
     Repeater {
         model: ScriptModel {
-            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || a.name.localeCompare(b.name)).slice(0, 5)
+            // Connected/paired devices first, then devices that report their own name, and unnamed ones last
+            values: [...Bluetooth.devices.values].sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired) || (!a.deviceName - !b.deviceName) || a.name.localeCompare(b.name)).slice(0, 5)
         }
 
         RowLayout {
