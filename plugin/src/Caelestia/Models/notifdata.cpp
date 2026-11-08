@@ -98,15 +98,9 @@ void NotifAction::invoke() {
 
 NotifData::NotifData(QObject* parent)
     : util::RefGated(parent)
-    , m_expirePopup(config::ConfigSingleton::instance()->notifs()->expire())
     , m_createdAt(QDateTime::currentMSecsSinceEpoch())
-    , m_popupTimer(new QTimer(this))
     , m_id(QUuid::createUuid().toString(QUuid::WithoutBraces))
-    , m_expireTimeout(config::ConfigSingleton::instance()->notifs()->defaultExpireTimeout()) {
-    m_popupTimer->setSingleShot(true);
-    if (m_expirePopup)
-        QObject::connect(m_popupTimer, &QTimer::timeout, this, &NotifData::dismissPopup);
-}
+    , m_expireTimeout(config::ConfigSingleton::instance()->notifs()->defaultExpireTimeout()) {}
 
 NotifData::NotifData(QObject* backer, QObject* parent)
     : NotifData(parent) {
@@ -157,6 +151,10 @@ int NotifData::expireTimeout() const {
     return m_expireTimeout;
 }
 
+bool NotifData::hasCustomTimeout() const {
+    return m_hasCustomTimeout;
+}
+
 NotifData::Urgency NotifData::urgency() const {
     return m_urgency;
 }
@@ -197,37 +195,6 @@ bool NotifData::isSameImage(const QString& path) const {
 
 bool NotifData::isSameAppIcon(const QString& path) const {
     return path == m_appIcon || path == m_originalAppIcon;
-}
-
-void NotifData::dismissPopup() {
-    if (released() || !m_popup)
-        return;
-
-    m_popup = false;
-    emit popupClosed();
-}
-
-void NotifData::holdPopup() {
-    if (!m_popup || !m_expirePopup || !m_popupTimer->isActive())
-        return;
-
-    m_timeUntilExpire = m_popupTimer->remainingTime();
-    m_popupTimer->stop();
-}
-
-void NotifData::releasePopup() {
-    if (!m_popup || !m_expirePopup || m_popupTimer->isActive() || m_timeUntilExpire <= 0)
-        return;
-
-    m_popupTimer->start(m_timeUntilExpire);
-}
-
-void NotifData::startPopupTimer() {
-    if (!m_expirePopup)
-        return;
-
-    m_popupTimer->setInterval(m_expireTimeout);
-    m_popupTimer->start();
 }
 
 void NotifData::refreshTimeStr() {
@@ -296,11 +263,12 @@ void NotifData::syncFromBacker() {
         dirty = true;
         emit progressChanged();
     }
-    if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000);
-        timeout > 0 && !qFuzzyCompare(m_expireTimeout + 1.0, timeout + 1.0)) {
-        dirty = true;
-        m_expireTimeout = timeout;
-        emit expireTimeoutChanged();
+    if (const auto timeout = static_cast<int>(m_backer->property("expireTimeout").toReal() * 1000); timeout > 0) {
+        m_hasCustomTimeout = true;
+        if (assign(m_expireTimeout, timeout)) {
+            dirty = true;
+            emit expireTimeoutChanged();
+        }
     }
     if (assign(m_urgency, m_backer->property("urgency").value<Urgency>())) {
         dirty = true;

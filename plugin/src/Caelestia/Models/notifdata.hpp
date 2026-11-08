@@ -2,7 +2,6 @@
 
 #include <qobject.h>
 #include <qqmlintegration.h>
-#include <qtimer.h>
 
 #include <caelestia/utils/cache.hpp>
 
@@ -78,6 +77,7 @@ public:
     [[nodiscard]] QVariantMap hints() const;
     [[nodiscard]] int progress() const;
     [[nodiscard]] int expireTimeout() const;
+    [[nodiscard]] bool hasCustomTimeout() const;
     [[nodiscard]] Urgency urgency() const;
     [[nodiscard]] bool resident() const;
     [[nodiscard]] bool hasActionIcons() const;
@@ -89,10 +89,6 @@ public:
     [[nodiscard]] Q_INVOKABLE bool isSameAppIcon(const QString& path) const;
 
     Q_INVOKABLE void dismiss();
-    Q_INVOKABLE void dismissPopup();
-
-    Q_INVOKABLE void holdPopup();
-    Q_INVOKABLE void releasePopup();
 
 signals:
     void idChanged();
@@ -110,7 +106,6 @@ signals:
     void actionsChanged();
     void timeStrChanged();
 
-    void popupClosed();
     void changed();
     void closed();
 
@@ -119,12 +114,7 @@ private slots:
     void onBackerClosed();
 
 private:
-    bool m_popup = false;
-    bool m_expirePopup = true;
-    NotifGroup* m_group = nullptr;
-    NotifGroup* m_popupGroup = nullptr;
     qint64 m_createdAt;
-    QTimer* m_popupTimer = nullptr;
     QObject* m_backer = nullptr; // A Notification from Quickshell
 
     QString m_id;
@@ -138,14 +128,12 @@ private:
     QVariantMap m_hints;
     int m_progress = -1;
     int m_expireTimeout;
-    int m_timeUntilExpire = -1;
+    bool m_hasCustomTimeout = false;
     Urgency m_urgency = Urgency::Normal;
     bool m_resident = false;
     bool m_hasActionIcons = false;
     QList<NotifAction> m_actions;
     QString m_timeStr;
-
-    void startPopupTimer();
 
     void refreshTimeStr();
     [[nodiscard]] int timeStrInterval() const;
