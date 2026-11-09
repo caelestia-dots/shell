@@ -51,7 +51,7 @@ Item {
         text: {
             if (root.pam.passwd.active)
                 return Tr.tr("Loading...");
-            if (root.pam.howdy.active)
+            if (root.pam.face.active)
                 return Tr.tr("Scanning face...");
             if (root.pam.state === Pam.MaxTries)
                 return Tr.tr("Max tries reached");
