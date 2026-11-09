@@ -328,7 +328,7 @@ MouseArea {
             property color borderColor: Colours.palette.primary
 
             readonly property var props: root.clientProps[modelData.address]
-            readonly property real rounding: props?.rounding ?? 0
+            readonly property real rounding: modelData.lastIpcObject?.fullscreen === 2 ? 0 : (props?.rounding ?? 0)
             readonly property real roundingPower: props?.rounding_power ?? 0
             readonly property real thick: props?.border_size ?? root.borderWidth
 
