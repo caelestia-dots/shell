@@ -61,11 +61,15 @@ void CaptureSession::copy(const QRect& region) {
                 QByteArray png;
                 QBuffer buffer(&png);
                 buffer.open(QIODevice::WriteOnly);
-                img.save(&buffer, "PNG");
+                if (!img.save(&buffer, "PNG"))
+                    png.clear();
                 return png;
             })
         .then(this, [this, image](const QByteArray& png) {
-            pipeToClipboard(image, png);
+            if (png.isEmpty())
+                emit copyFailed();
+            else
+                pipeToClipboard(image, png);
         });
 }
 
