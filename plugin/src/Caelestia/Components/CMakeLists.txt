@@ -13,6 +13,9 @@ qml_module(caelestia-components
         visualiserbars.cpp
         roundedmask.cpp
         screencapture.cpp
+        annotationshape.cpp
+        annotationdocument.cpp
+        annotationcanvas.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick
