@@ -6,7 +6,6 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import Caelestia.Blobs
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
@@ -19,6 +18,7 @@ StyledWindow {
 
     readonly property alias bar: bar
     readonly property alias interactionWrapper: interactions
+    readonly property alias panelBlobs: blobs
 
     readonly property ScreenState screenState: ShellState.forScreen(screen)
 
@@ -37,6 +37,7 @@ StyledWindow {
     readonly property real borderRounding: contentItem.Config.border.rounding * (1 - fsTransitionProg)
     readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
     readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
+    readonly property bool panelsAboveToplevels: !hasFullscreen || WlrLayershell.layer === WlrLayer.Overlay
 
     property color surfaceColour: Colours.tPalette.surface
 
@@ -152,95 +153,18 @@ StyledWindow {
             shadowColor: Qt.alpha("black", Math.max(0, root.shadowOpacity))
         }
 
-        BlobGroup {
-            id: blobGroup
+        PanelBlobs {
+            id: blobs
 
+            anchors.fill: parent
+            panels: panels
+            bar: bar
             color: root.surfaceColour
             smoothing: root.contentItem.Config.border.smoothing
-        }
-
-        BlobInvertedRect {
-            anchors.fill: parent
-            anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
-            group: blobGroup
-            radius: root.borderRounding
-            borderLeft: bar.implicitWidth - anchors.margins - root.sdfBorderOffset
-            borderRight: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderTop: root.borderThickness - anchors.margins - root.sdfBorderOffset
-            borderBottom: root.borderThickness - anchors.margins - root.sdfBorderOffset
-        }
-
-        PanelBg {
-            id: dashBg
-
-            panel: panels.dashboard
-            deformAmount: 0.1
-        }
-
-        PanelBg {
-            id: launcherBg
-
-            panel: panels.launcher
-            deformAmount: 0.1
-        }
-
-        PanelBg {
-            id: sessionBg
-
-            panel: panels.sessionWrapper
-            deformAmount: 0.2
-            x: panels.sessionWrapper.x + panels.session.x + bar.implicitWidth
-            implicitWidth: panels.session.width
-        }
-
-        PanelBg {
-            id: sidebarBg
-
-            panel: panels.sidebar
-            deformAmount: 0.03
-            implicitHeight: panel.height * (1 / rawDeformMatrix.m22) + 2
-            exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
-            bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
-        }
-
-        PanelBg {
-            id: osdBg
-
-            panel: panels.osdWrapper
-            deformAmount: 0.25
-            x: panels.osdWrapper.x + panels.osd.x + bar.implicitWidth
-            implicitWidth: panels.osd.width
-        }
-
-        PanelBg {
-            id: notifsBg
-
-            panel: panels.notifications
-        }
-
-        PanelBg {
-            id: utilsBg
-
-            panel: panels.utilities
-            deformAmount: panels.sidebar.visible ? 0.1 : 0.15
-            exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
-            topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
-        }
-
-        PanelBg {
-            id: popoutBg
-
-            // Extra width to prevent vertical movement deformation partially detaching panel from bar
-            property real extraWidth: panels.popouts.isDetached ? 0 : 0.2
-
-            panel: panels.popoutsWrapper
-            deformAmount: panels.popouts.isDetached ? 0.05 : panels.popouts.hasCurrent ? 0.15 : 0.1
-            x: panels.popoutsWrapper.x + panels.popouts.x + bar.implicitWidth - panels.popouts.width * extraWidth
-            implicitWidth: panels.popouts.width * (1 + extraWidth)
-
-            Behavior on extraWidth {
-                Anim {}
-            }
+            deformScale: Config.appearance.deformScale
+            borderThickness: root.borderThickness
+            borderRounding: root.borderRounding
+            sdfBorderOffset: root.sdfBorderOffset
         }
     }
 
@@ -264,32 +188,32 @@ StyledWindow {
             borderThickness: root.borderThickness
             fullscreen: root.hasFullscreen
 
-            utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
-            utilities.deformMatrix: utilsBg.rawDeformMatrix
+            utilities.horizontalStretch: (blobs.sidebar.rawDeformMatrix.m11 - 1) / 2 + 1
+            utilities.deformMatrix: blobs.utilities.rawDeformMatrix
 
             dashboard.transform: Matrix4x4 {
-                matrix: dashBg.deformMatrix
+                matrix: blobs.dashboard.deformMatrix
             }
             launcher.transform: Matrix4x4 {
-                matrix: launcherBg.deformMatrix
+                matrix: blobs.launcher.deformMatrix
             }
             session.transform: Matrix4x4 {
-                matrix: sessionBg.deformMatrix
+                matrix: blobs.session.deformMatrix
             }
             sidebar.transform: Matrix4x4 {
-                matrix: sidebarBg.deformMatrix
+                matrix: blobs.sidebar.deformMatrix
             }
             osd.transform: Matrix4x4 {
-                matrix: osdBg.deformMatrix
+                matrix: blobs.osd.deformMatrix
             }
             notifications.transform: Matrix4x4 {
-                matrix: notifsBg.deformMatrix
+                matrix: blobs.notifications.deformMatrix
             }
             utilities.transform: Matrix4x4 {
-                matrix: utilsBg.deformMatrix
+                matrix: blobs.utilities.deformMatrix
             }
             popouts.transform: Matrix4x4 {
-                matrix: popoutBg.deformMatrix
+                matrix: blobs.popouts.deformMatrix
             }
         }
 
@@ -329,18 +253,5 @@ StyledWindow {
         screen: root.screen
         slot: "panels"
         component: panels
-    }
-
-    component PanelBg: BlobRect {
-        required property Item panel
-        property real deformAmount: 0.15
-
-        group: blobGroup
-        x: panel.x + bar.implicitWidth
-        y: panel.y + root.borderThickness
-        implicitWidth: panel.width
-        implicitHeight: panel.height
-        radius: Tokens.rounding.extraLarge
-        deformScale: (deformAmount * Config.appearance.deformScale) / 10000
     }
 }
