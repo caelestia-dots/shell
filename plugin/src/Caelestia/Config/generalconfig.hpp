@@ -42,6 +42,8 @@ class GeneralIdle : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, lockBeforeSleep, true)
     CONFIG_PROPERTY(bool, inhibitWhenAudio, true)
     CONFIG_PROPERTY(bool, inhibitWhenCharging, false)
+    // Also stop the lid switch action (e.g. suspend) while keep awake is on
+    CONFIG_PROPERTY(bool, inhibitWhenLidClosed, false)
     CONFIG_LIST(GeneralIdleTimeoutList, timeouts,
         DEFAULT_ARG({
             vmap({
