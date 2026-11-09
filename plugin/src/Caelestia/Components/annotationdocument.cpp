@@ -238,7 +238,6 @@ void AnnotationDocument::press(const QPointF& point, bool constrain) {
         setSelected(index);
         if (index >= 0) {
             m_dragging = true;
-            m_dragMoved = false;
             m_dragLast = point;
         }
         return;
@@ -256,14 +255,14 @@ void AnnotationDocument::press(const QPointF& point, bool constrain) {
 
 void AnnotationDocument::move(const QPointF& point, bool constrain) {
     if (m_dragging && m_selected >= 0) {
-        if (!m_dragMoved) {
-            m_dragMoved = true;
+        if (!m_preview) {
             pushUndo();
-            m_shapes[m_selected] = m_shapes[m_selected]->clone();
+            m_preview = m_shapes[m_selected]->clone();
+            emit changed();
         }
-        m_shapes[m_selected]->translate(point - m_dragLast);
+        m_preview->translate(point - m_dragLast);
         m_dragLast = point;
-        emit changed();
+        emit previewChanged();
         return;
     }
 
@@ -277,8 +276,14 @@ void AnnotationDocument::move(const QPointF& point, bool constrain) {
 void AnnotationDocument::release() {
     if (m_dragging) {
         m_dragging = false;
-        if (m_dragMoved)
-            emit changed();
+        if (!m_preview)
+            return;
+
+        if (m_selected >= 0)
+            m_shapes[m_selected] = std::move(m_preview);
+        m_preview = nullptr;
+        emit previewChanged();
+        emit changed();
         return;
     }
 
@@ -313,8 +318,10 @@ void AnnotationDocument::doubleClick(const QPointF& point) {
 void AnnotationDocument::render(QPainter& painter) const {
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::TextAntialiasing);
-    for (const auto& shape : m_shapes)
-        shape->render(painter);
+    const auto dragged = m_dragging && m_preview ? m_selected : -1;
+    for (qsizetype i = 0; i < m_shapes.size(); ++i)
+        if (i != dragged)
+            m_shapes[i]->render(painter);
 }
 
 void AnnotationDocument::renderPreview(QPainter& painter, const QImage& below) const {
@@ -331,7 +338,9 @@ void AnnotationDocument::renderPreview(QPainter& painter, const QImage& below) c
 QRectF AnnotationDocument::selectedBounds() const {
     if (m_selected < 0 || m_selected >= static_cast<int>(m_shapes.size()))
         return {};
-    return m_shapes[m_selected]->bounds().adjusted(-2, -2, 2, 2);
+
+    const auto& shape = m_dragging && m_preview ? m_preview : m_shapes[m_selected];
+    return shape->bounds().adjusted(-2, -2, 2, 2);
 }
 
 Style AnnotationDocument::currentStyle() const {

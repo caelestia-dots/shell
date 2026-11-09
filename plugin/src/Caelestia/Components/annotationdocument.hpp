@@ -145,7 +145,6 @@ private:
     std::shared_ptr<annotation::Shape> m_preview;
     int m_selected = -1;
     bool m_dragging = false;
-    bool m_dragMoved = false;
     QPointF m_dragLast;
     QPointF m_textPos;
 };
