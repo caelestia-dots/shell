@@ -12,6 +12,8 @@ class PStateRoot : public settings::RootNode {
 
     STATE_GLOBAL_PROPERTY(bool, wallpaperPlaying, true)
     STATE_GLOBAL_PROPERTY(bool, doNotDisturb, false)
+    STATE_GLOBAL_PROPERTY(bool, keepAwakeEnabled, false)
+    STATE_GLOBAL_PROPERTY(qreal, keepAwakeEnabledAt, -1)
 
 public:
     explicit PStateRoot(const QString& path, PStateRoot* fallback = nullptr, QObject* parent = nullptr);
@@ -22,8 +24,6 @@ class RStateRoot : public settings::RootNode {
     QML_ANONYMOUS
 
     STATE_GLOBAL_PROPERTY(bool, gameMode, false)
-    STATE_GLOBAL_PROPERTY(bool, inhibitIdle, false)
-    STATE_GLOBAL_PROPERTY(qreal, inhibitingIdleSince, -1)
 
 public:
     explicit RStateRoot(const QString& path, RStateRoot* fallback = nullptr, QObject* parent = nullptr);
