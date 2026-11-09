@@ -258,6 +258,70 @@ MouseArea {
         Behavior on border.color {
             CAnim {}
         }
+
+        StyledRect {
+            id: geomContainer
+
+            readonly property bool inCorner: root.sw > implicitWidth * 2 && root.sh > implicitHeight * 4
+            property real heightMult: inCorner ? 1 : 0
+
+            x: parent.width - implicitWidth
+            y: parent.height - implicitHeight * heightMult
+
+            topLeftRadius: inCorner || root.sw < implicitWidth ? Tokens.rounding.small : 0
+            bottomLeftRadius: inCorner ? 0 : Tokens.rounding.small
+            bottomRightRadius: inCorner ? 0 : Tokens.rounding.small
+
+            color: Colours.palette.primary
+            implicitWidth: geomLabelMetrics.width + Tokens.padding.extraSmall * 2
+            implicitHeight: geomLabelMetrics.height + Tokens.padding.extraSmall * 2
+
+            Behavior on heightMult {
+                Anim {}
+            }
+
+            Behavior on topLeftRadius {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            Behavior on bottomRightRadius {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            Behavior on bottomLeftRadius {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+
+            Behavior on implicitWidth {
+                Anim {}
+            }
+
+            TextMetrics {
+                id: geomLabelMetrics
+
+                text: "0".repeat(Math.round(root.sw).toString().length) + " x " + "0".repeat(Math.round(root.sh).toString().length)
+                font: geomLabel.font
+            }
+
+            StyledText {
+                id: geomLabel
+
+                anchors.centerIn: parent
+                width: geomLabelMetrics.width
+                height: geomLabelMetrics.height
+                horizontalAlignment: Text.AlignHCenter
+
+                text: Math.round(root.sw) + " x " + Math.round(root.sh)
+                color: Colours.palette.onPrimary
+                font: Tokens.font.label.small
+            }
+        }
     }
 
     Item {
