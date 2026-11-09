@@ -8,20 +8,16 @@ Scope {
     id: root
 
     Connections {
-        function onKeepAwakeEnabledChanged(): void {
-            if (PersistentState.keepAwakeEnabled) {
-                if (PersistentState.keepAwakeEnabledAt <= 0)
-                    PersistentState.keepAwakeEnabledAt = new Date().getTime();
-            } else {
-                PersistentState.keepAwakeEnabledAt = -1;
-            }
+        function onInhibitIdleChanged(): void {
+            if (RuntimeState.inhibitIdle)
+                RuntimeState.inhibitingIdleSince = new Date().getTime();
         }
 
-        target: PersistentState
+        target: RuntimeState
     }
 
     IdleInhibitor {
-        enabled: PersistentState.keepAwakeEnabled
+        enabled: RuntimeState.inhibitIdle
         window: PanelWindow {
             implicitWidth: 0
             implicitHeight: 0
@@ -32,24 +28,19 @@ Scope {
 
     IpcHandler {
         function isEnabled(): bool {
-            return PersistentState.keepAwakeEnabled;
+            return RuntimeState.inhibitIdle;
         }
 
         function toggle(): void {
-            if (PersistentState.keepAwakeEnabled)
-                disable();
-            else
-                enable();
+            RuntimeState.inhibitIdle = !RuntimeState.inhibitIdle;
         }
 
         function enable(): void {
-            PersistentState.keepAwakeEnabled = true;
-            PersistentState.keepAwakeEnabledAt = new Date().getTime();
+            RuntimeState.inhibitIdle = true;
         }
 
         function disable(): void {
-            PersistentState.keepAwakeEnabled = false;
-            PersistentState.keepAwakeEnabledAt = -1;
+            RuntimeState.inhibitIdle = false;
         }
 
         target: "idleInhibitor"
