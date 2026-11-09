@@ -19,6 +19,8 @@ MouseArea {
 
     property var hoveredRect // var so it can be null
     property bool selecting
+    property bool pendingSelect
+    property bool selectCancelled
     property var zOrder: ({}) // address -> clients request index
     property var clientProps: ({}) // address -> { rounding, rounding_power, border_size }
     property list<HyprlandToplevel> clients: sortClients(zOrder)
@@ -149,20 +151,25 @@ MouseArea {
     onPressed: event => {
         if (event.button === Qt.RightButton) {
             selecting = false;
+            pendingSelect = false;
+            selectCancelled = true;
             sx = sy = ex = ey = -1;
             checkRects(event.x, event.y);
             return;
         }
 
-        selecting = true;
+        selectCancelled = false;
+        pendingSelect = true;
         ssx = event.x;
         ssy = event.y;
     }
 
     onReleased: event => {
-        if (!selecting || event.button !== Qt.LeftButton)
+        if (selectCancelled || event.button !== Qt.LeftButton)
             return;
+
         selecting = false;
+        pendingSelect = false;
 
         if (selectClients && hoveredRect) {
             selected(hoveredRect);
@@ -177,6 +184,11 @@ MouseArea {
     onPositionChanged: event => {
         const x = event.x;
         const y = event.y;
+
+        if (pendingSelect) {
+            selecting = true;
+            pendingSelect = false;
+        }
 
         if (selecting) {
             hoveredRect = null;
@@ -324,7 +336,7 @@ MouseArea {
             required property int index
             readonly property rect rect: root.rectForClient(modelData)
 
-            property color fillColor: Qt.alpha(Colours.palette.primary, root.hoveredRect === rect ? 0.2 : 0)
+            property color fillColor: Qt.alpha(Colours.palette.primary, root.hoveredRect === rect ? root.pendingSelect ? 0.3 : 0.2 : 0)
             property color borderColor: Colours.palette.primary
 
             readonly property var props: root.clientProps[modelData.address]
