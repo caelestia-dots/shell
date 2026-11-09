@@ -169,12 +169,16 @@ void ScreenCapture::tryCapture() {
     if (!m_session || m_captureDone)
         return;
 
-    if (const auto* w = window())
-        m_session->capture(w->screen()).then(this, [this](QImage image) {
-            m_image = std::move(image);
-            update();
-            emit imageChanged();
-        });
+    const auto* w = window();
+    if (!w)
+        return;
+
+    m_captureDone = true;
+    m_session->capture(w->screen()).then(this, [this](QImage image) {
+        m_image = std::move(image);
+        update();
+        emit imageChanged();
+    });
 }
 
 } // namespace caelestia::shell::components
