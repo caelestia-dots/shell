@@ -400,7 +400,7 @@ MouseArea {
             required property int index
             readonly property rect rect: root.rectForClient(modelData)
 
-            property color fillColor: Qt.alpha(Colours.palette.primary, root.hoveredRect === rect ? root.pendingSelect ? 0.3 : 0.2 : 0)
+            property color fillColor: Qt.alpha(Colours.palette.primary, root.hoveredRect === rect ? 0.2 : 0)
             property color borderColor: Colours.palette.primary
 
             readonly property var props: root.clientProps[modelData.address]
