@@ -40,7 +40,7 @@ Item {
             implicitHeight: 1
             color: Colours.palette.m3outline
 
-            opacity: AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0 || root.workspaces[index - 1]?.ws === modelData?.ws - 1 ? 0 : 1
+            opacity: AnimatedRepeater.adding || AnimatedRepeater.removing || !modelData || index === 0 || Number(root.workspaces[index - 1]?.ws) === Number(modelData?.ws) - 1 ? 0 : 1
 
             Behavior on opacity {
                 Anim {
