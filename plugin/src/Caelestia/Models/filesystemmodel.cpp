@@ -1,7 +1,6 @@
 #include "filesystemmodel.hpp"
 
 #include <qdiriterator.h>
-#include <qmediaformat.h>
 #include <qtconcurrentrun.h>
 
 #include <algorithm>
@@ -12,6 +11,25 @@ namespace caelestia::shell::models {
 
 using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
+
+namespace {
+
+// QMediaFormat would load FFmpeg
+bool isVideo(const QString& path) {
+    return QMimeDatabase().mimeTypeForFile(path).name().startsWith(u"video/"_s);
+}
+
+QStringList videoNameFilters() {
+    QStringList globs;
+    const auto mimeTypes = QMimeDatabase().allMimeTypes();
+    for (const auto& mimeType : mimeTypes) {
+        if (mimeType.name().startsWith(u"video/"_s))
+            globs << mimeType.globPatterns();
+    }
+    return globs;
+}
+
+} // namespace
 
 FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
     : QObject(parent)
@@ -343,21 +361,11 @@ FileSystemModel::ScanFilters FileSystemModel::filtersFor(
                 filters.nameFilters << u"*."_s + QString::fromUtf8(format);
         }
 
-        QSet<QString> videoMimeTypes;
-        if (videos) {
-            const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
-            for (const auto format : formats) {
-                const auto mimeType = QMediaFormat(format).mimeType();
-                if (!mimeType.name().startsWith(u"video/"_s))
-                    continue;
-                videoMimeTypes << mimeType.name();
-                filters.nameFilters << mimeType.globPatterns();
-            }
-        }
+        if (videos)
+            filters.nameFilters << videoNameFilters();
 
-        filters.filterFn = [images, videoMimeTypes](const QString& path) {
-            return (images && QImageReader(path).canRead()) ||
-                   videoMimeTypes.contains(QMimeDatabase().mimeTypeForFile(path).name());
+        filters.filterFn = [images, videos](const QString& path) {
+            return (images && QImageReader(path).canRead()) || (videos && isVideo(path));
         };
     }
 
