@@ -41,7 +41,10 @@ void CaptureSession::save(const QRect& region) {
     }
 
     screenshot::cache(image).then(this, [this](const QString& path) {
-        emit saved(path);
+        if (path.isEmpty())
+            emit saveFailed();
+        else
+            emit saved(path);
     });
 }
 
@@ -82,7 +85,10 @@ void CaptureSession::pipeToClipboard(const QImage& image, const QByteArray& png)
     QObject::connect(proc, &QProcess::finished, this, [this, proc, image](int code, QProcess::ExitStatus status) {
         if (status == QProcess::NormalExit && code == 0) {
             screenshot::cache(image).then(this, [this](const QString& path) {
-                emit copied(path);
+                if (path.isEmpty())
+                    emit copyFailed();
+                else
+                    emit copied(path);
             });
         } else {
             emit copyFailed();
