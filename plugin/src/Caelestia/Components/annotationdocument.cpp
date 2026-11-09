@@ -184,6 +184,7 @@ void AnnotationDocument::deleteSelected() {
 
     auto shapes = m_shapes;
     shapes.erase(shapes.begin() + m_selected);
+    setSelected(-1);
     commit(std::move(shapes));
 }
 
@@ -210,6 +211,7 @@ void AnnotationDocument::setText(int index, const QString& text) {
 
     if (empty) {
         shapes.erase(shapes.begin() + index);
+        setSelected(-1);
     } else {
         copy->setText(text);
         shapes[index] = copy;
@@ -235,9 +237,8 @@ void AnnotationDocument::press(const QPointF& point, bool constrain) {
 
         setSelected(index);
         if (index >= 0) {
-            pushUndo();
-            m_shapes[index] = m_shapes[index]->clone();
             m_dragging = true;
+            m_dragMoved = false;
             m_dragLast = point;
         }
         return;
@@ -255,6 +256,11 @@ void AnnotationDocument::press(const QPointF& point, bool constrain) {
 
 void AnnotationDocument::move(const QPointF& point, bool constrain) {
     if (m_dragging && m_selected >= 0) {
+        if (!m_dragMoved) {
+            m_dragMoved = true;
+            pushUndo();
+            m_shapes[m_selected] = m_shapes[m_selected]->clone();
+        }
         m_shapes[m_selected]->translate(point - m_dragLast);
         m_dragLast = point;
         emit changed();
@@ -271,7 +277,8 @@ void AnnotationDocument::move(const QPointF& point, bool constrain) {
 void AnnotationDocument::release() {
     if (m_dragging) {
         m_dragging = false;
-        emit changed();
+        if (m_dragMoved)
+            emit changed();
         return;
     }
 

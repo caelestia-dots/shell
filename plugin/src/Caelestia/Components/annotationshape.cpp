@@ -331,6 +331,9 @@ bool RectShape::isEffect() const {
 }
 
 void RectShape::renderEffect(QPainter& painter, const QImage& source) const {
+    if (isEmpty())
+        return;
+
     const auto dpr = source.devicePixelRatio();
     const auto local = painter.worldTransform().mapRect(rect());
     const auto dev = QRectF(local.topLeft() * dpr, local.size() * dpr).toAlignedRect().intersected(source.rect());

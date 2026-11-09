@@ -61,6 +61,10 @@ void AnnotationCanvas::setDocument(AnnotationDocument* document) {
 
     m_document = document;
     if (m_document) {
+        QObject::connect(m_document, &QObject::destroyed, this, [this] {
+            m_document = nullptr;
+            invalidateCache();
+        });
         QObject::connect(m_document, &AnnotationDocument::changed, this, &AnnotationCanvas::invalidateCache);
         QObject::connect(m_document, &AnnotationDocument::previewChanged, this, [this] {
             update();
@@ -79,6 +83,9 @@ QImage AnnotationCanvas::base() const {
 }
 
 void AnnotationCanvas::setBase(const QImage& base) {
+    if (m_base.cacheKey() == base.cacheKey())
+        return;
+
     m_base = base;
     invalidateCache();
     emit baseChanged();
