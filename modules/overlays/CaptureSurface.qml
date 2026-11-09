@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -18,7 +20,7 @@ Item {
     required property real contentOpacity
     property alias session: capture.session
     property bool hideToolbar
-    property bool toolbarBottom
+    property bool toolbarBottom: cState.annotating && cState.region.y < toolbar.implicitHeight
 
     Behavior on toolbarBottom {
         SequentialAnimation {
@@ -56,6 +58,17 @@ Item {
         opacity: root.contentOpacity
     }
 
+    Annotation {
+        id: annotation
+
+        anchors.fill: parent
+        opacity: root.contentOpacity
+        active: root.cState.annotating
+        document: capture.session.document
+        screen: root.screen
+        base: capture.image
+    }
+
     RegionSelect {
         id: regionSelect
 
@@ -63,9 +76,20 @@ Item {
         opacity: root.contentOpacity
         screen: root.screen
         freeze: true
-        selectClients: root.cState.selectClients
-        showCrosshair: root.cState.showCrosshair
-        onSelected: r => capture.session.save(Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height))
+        enabled: !root.cState.annotating
+        hoverEnabled: !root.cState.annotating
+        cursorShape: root.cState.annotating ? undefined : Qt.CrossCursor // FIXME: doesn't work currently
+        selectClients: !root.cState.annotating && root.cState.selectClients
+        showCrosshair: !root.cState.annotating && root.cState.showCrosshair
+        onSelected: r => {
+            const region = Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height);
+            if (root.cState.annotate) {
+                root.cState.region = region;
+                root.cState.annotating = true;
+            } else {
+                capture.session.save(region);
+            }
+        }
     }
 
     Item {
@@ -129,8 +153,9 @@ Item {
         x: toolbarBg.x
         y: toolbarBg.y
 
-        implicitWidth: topLayout.implicitWidth + Tokens.padding.small * 2
-        implicitHeight: topLayout.implicitHeight + Tokens.padding.small * 2
+        clip: true
+        implicitWidth: toolbarContent.implicitWidth + Tokens.padding.small * 2
+        implicitHeight: toolbarContent.implicitHeight + Tokens.padding.small * 2
 
         opacity: root.contentOpacity
         hoverEnabled: true
@@ -139,10 +164,32 @@ Item {
             matrix: toolbarBg.deformMatrix
         }
 
-        RowLayout {
-            id: topLayout
+        onImplicitWidthChanged: {
+            if (toolbarContent.status === Loader.Ready)
+                toolbarWidthAnim.enabled = true;
+        }
+
+        Behavior on implicitWidth {
+            id: toolbarWidthAnim
+
+            enabled: false
+
+            Anim {}
+        }
+
+        Loader {
+            id: toolbarContent
 
             anchors.centerIn: parent
+            asynchronous: true
+            sourceComponent: root.cState.annotating ? annotateToolbar : regionToolbar
+        }
+    }
+
+    Component {
+        id: regionToolbar
+
+        RowLayout {
             spacing: Tokens.spacing.medium
 
             MaterialIcon {
@@ -165,43 +212,45 @@ Item {
             ButtonRow {
                 spacing: Tokens.spacing.extraSmall
 
-                IconButton {
-                    shapeMorph: true
-                    isRound: true
+                ToolbarButton {
                     isToggle: true
-                    inactiveColour: Colours.palette.primaryContainer
-                    inactiveOnColour: Colours.palette.onPrimaryContainer
-                    implicitWidth: implicitHeight + Tokens.padding.small * 2
-                    padding: Tokens.padding.small
                     checked: root.cState.showCrosshair
                     icon: "my_location"
                     onClicked: root.cState.showCrosshair = !root.cState.showCrosshair
                 }
 
-                IconButton {
-                    shapeMorph: true
-                    isRound: true
+                ToolbarButton {
                     isToggle: true
-                    inactiveColour: Colours.palette.primaryContainer
-                    inactiveOnColour: Colours.palette.onPrimaryContainer
-                    implicitWidth: implicitHeight + Tokens.padding.small * 2
-                    padding: Tokens.padding.small
                     checked: root.cState.selectClients
                     icon: "select_window_2"
                     onClicked: root.cState.selectClients = !root.cState.selectClients
                 }
 
-                IconButton {
-                    shapeMorph: true
-                    isRound: true
-                    inactiveColour: Colours.palette.primaryContainer
-                    inactiveOnColour: Colours.palette.onPrimaryContainer
-                    implicitWidth: implicitHeight + Tokens.padding.small * 2
-                    padding: Tokens.padding.small
+                ToolbarButton {
                     icon: "close"
                     onClicked: root.cState.cancelled()
                 }
             }
         }
+    }
+
+    Component {
+        id: annotateToolbar
+
+        AnnotationToolbar {
+            annotation: annotation
+            onSaved: capture.session.save(root.cState.region)
+            onCopied: capture.session.copy(root.cState.region)
+            onCancelled: root.cState.cancelled()
+        }
+    }
+
+    component ToolbarButton: IconButton {
+        shapeMorph: true
+        isRound: true
+        inactiveColour: Colours.palette.primaryContainer
+        inactiveOnColour: Colours.palette.onPrimaryContainer
+        implicitWidth: implicitHeight + Tokens.padding.small * 2
+        padding: Tokens.padding.small
     }
 }
