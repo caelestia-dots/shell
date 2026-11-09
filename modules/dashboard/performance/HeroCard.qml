@@ -83,6 +83,9 @@ StyledRect {
         spacing: Tokens.spacing.extraSmall
 
         RowLayout {
+            // Some GPUs (e.g. Intel iGPUs) expose no temperature sensor; 0 means
+            // unavailable, so only the utilisation is shown for them.
+            visible: root.temperature > 0
             Layout.leftMargin: -Tokens.padding.extraSmall
             spacing: Tokens.spacing.extraSmall
 
@@ -104,6 +107,7 @@ StyledRect {
             value: root.temperature / 100
             implicitHeight: Tokens.padding.small
             fgColour: root.accent
+            visible: root.temperature > 0
             indeterminate: isNaN(root.usage) || isNaN(root.temperature)
         }
     }
