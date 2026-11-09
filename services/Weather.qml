@@ -22,10 +22,19 @@ Singleton {
     property bool citiesLoaded: false
     property string pendingCoords
 
+    readonly property int weatherUnit: GlobalConfig.services.weatherUnits
+    readonly property bool isCelsius: Units.resolveTempUnit(weatherUnit) === TemperatureUnit.Celsius
+
     readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
     readonly property string description: cc ? getWeatherCondition(cc.weatherCode) : Tr.tr("No weather")
-    readonly property string temp: formatTemp(cc?.tempC)
-    readonly property string feelsLike: formatTemp(cc?.feelsLikeC)
+    readonly property string temp: {
+        CUtils.dependency(weatherUnit);
+        return formatTemp(cc?.tempC);
+    }
+    readonly property string feelsLike: {
+        CUtils.dependency(weatherUnit);
+        return formatTemp(cc?.feelsLikeC);
+    }
     readonly property int humidity: cc?.humidity ?? 0
     readonly property real windSpeed: cc?.windSpeed ?? 0
     readonly property string sunrise: cc ? Tr.formatDateTime(new Date(cc.sunrise), Units.twelveHourClock ? "h:mm A" : "h:mm") : "--:--"
@@ -33,7 +42,17 @@ Singleton {
 
     readonly property var cachedCities: new Map()
 
+    function toggleUnit(): void {
+        const current = Units.resolveTempUnit(GlobalConfig.services.weatherUnits);
+        GlobalConfig.services.weatherUnits = current === TemperatureUnit.Celsius ? TemperatureUnit.Fahrenheit : TemperatureUnit.Celsius;
+    }
+
+    function setUnit(unit: int): void {
+        GlobalConfig.services.weatherUnits = unit;
+    }
+
     function formatTemp(temp: var, compact = false): string {
+        CUtils.dependency(weatherUnit);
         const unit = GlobalConfig.services.weatherUnits;
         const value = temp !== undefined ? Math.round(Units.toTemperature(temp, unit)) : "--";
         return Units.formatTemp(value, unit, compact);
@@ -416,5 +435,33 @@ Singleton {
 
         name: "caelestia.qml.services.weather"
         defaultLogLevel: LoggingCategory.Info
+    }
+
+    IpcHandler {
+        function getTemp(): string {
+            return root.temp;
+        }
+
+        function getUnit(): string {
+            return root.isCelsius ? "celsius" : "fahrenheit";
+        }
+
+        function toggleUnit(): void {
+            root.toggleUnit();
+        }
+
+        function setCelsius(): void {
+            root.setUnit(TemperatureUnit.Celsius);
+        }
+
+        function setFahrenheit(): void {
+            root.setUnit(TemperatureUnit.Fahrenheit);
+        }
+
+        function reload(): void {
+            root.reload();
+        }
+
+        target: "weather"
     }
 }

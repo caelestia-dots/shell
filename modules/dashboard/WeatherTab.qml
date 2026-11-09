@@ -1,8 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
+import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.widgets
 import qs.services
 import qs.utils
 
@@ -48,6 +50,7 @@ Item {
 
             Row {
                 spacing: Tokens.spacing.largeIncreased
+                Layout.alignment: Qt.AlignVCenter
 
                 WeatherStat {
                     icon: "wb_twilight"
@@ -62,6 +65,10 @@ Item {
                     value: Weather.sunset
                     colour: Colours.palette.m3tertiary
                 }
+
+                WeatherUnitToggle {
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
 
@@ -71,6 +78,12 @@ Item {
 
             radius: Tokens.rounding.extraLarge * 2
             color: Colours.tPalette.m3surfaceContainer
+
+            StateLayer {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Weather.toggleUnit()
+            }
 
             RowLayout {
                 id: bigInfoRow
@@ -192,6 +205,7 @@ Item {
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
                             text: {
+                                CUtils.dependency(Weather.weatherUnit);
                                 const min = Weather.formatTemp(forecastItem.modelData.minTempC, true);
                                 const max = Weather.formatTemp(forecastItem.modelData.maxTempC, true);
                                 return Tr.trCtx("%1 / %2", "min/max temperature").arg(min).arg(max);
