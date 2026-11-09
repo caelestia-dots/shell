@@ -32,7 +32,8 @@ jobs:
           for file in (string match -v 'build/*' **.qml)
             /usr/lib/qt6/bin/qmlformat $file | diff -u $file - || exit 1
           end
-          python3 scripts/qml-lint-conventions.py
+          python3 scripts/qml-lint-conventions.py || exit 1
+          python3 scripts/settings-index-check.py
 
   check-cpp:
     needs: changes

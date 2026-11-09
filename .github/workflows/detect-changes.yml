@@ -66,6 +66,7 @@ jobs:
               - "!**/*.md"
               - "!.github/**"
               - "!scripts/qml-lint-conventions.py"
+              - "!scripts/settings-index-check.py"
               - "!.vscode/**"
               - "!assets/**"
               - "!.gitignore"
@@ -93,6 +94,8 @@ jobs:
               - "**/*.qml"
               - "**/.qmlformat.ini"
               - "scripts/qml-lint-conventions.py"
+              - "scripts/settings-index-check.py"
+              - "utils/scripts/settings-indexer.js"
             source-cpp:
               - "{plugin,extras}/**/*.{cpp,hpp}"
               - "**/[_.]clang-format"

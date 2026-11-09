@@ -32,6 +32,7 @@ PageBase {
 
     title: Tr.tr("App info")
     isSubPage: true
+    searchable: false
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter
