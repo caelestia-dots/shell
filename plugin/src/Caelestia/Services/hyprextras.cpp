@@ -86,6 +86,31 @@ void HyprExtras::batchMessage(const QStringList& messages) {
     });
 }
 
+void HyprExtras::batchRequest(const QStringList& requests, const QJSValue& callback) {
+    if (requests.isEmpty())
+        return;
+
+    makeRequest(u"[[BATCH]]"_s + requests.join(u';'), [callback, this](bool success, const QByteArray& res) {
+        if (!success) {
+            qCWarning(lcHypr) << "batchRequest: request error:" << QString::fromUtf8(res);
+            return;
+        }
+
+        auto* const engine = qmlEngine(this);
+        if (!engine)
+            return;
+
+        QJSValueList args;
+        const auto replies = QString::fromUtf8(res.trimmed()).split(u"\n\n\n"_s);
+        for (const auto& reply : replies) {
+            const auto doc = QJsonDocument::fromJson(reply.toUtf8());
+            args << (doc.isNull() ? engine->toScriptValue(reply) : engine->toScriptValue(doc.toVariant()));
+        }
+
+        callback.call(args);
+    });
+}
+
 void HyprExtras::applyOptions(const QVariantHash& options) {
     if (options.isEmpty()) {
         return;
@@ -158,35 +183,6 @@ void HyprExtras::cursorPosition(const QJSValue& callback) {
             return;
         if (auto* const engine = qmlEngine(this))
             callback.call({ engine->toScriptValue(response.object()) });
-    });
-}
-
-void HyprExtras::windowProps(const QString& address, const QStringList& props, const QJSValue& callback) {
-    if (address.isEmpty() || props.isEmpty())
-        return;
-
-    QStringList requests;
-    requests.reserve(props.size());
-    for (const auto& prop : props)
-        requests << u"j/getprop address:%1 %2"_s.arg(address.startsWith(u"0x") ? address : u"0x"_s + address, prop);
-
-    makeRequest(u"[[BATCH]]"_s + requests.join(u';'), [callback, this](bool success, const QByteArray& res) {
-        if (!success)
-            return;
-
-        QVariantMap values;
-        const auto chunks = res.split('\n');
-        for (const auto& chunk : chunks) {
-            if (chunk.isEmpty())
-                continue;
-
-            const auto obj = QJsonDocument::fromJson(chunk).object();
-            for (auto it = obj.constBegin(); it != obj.constEnd(); ++it)
-                values.insert(it.key(), it.value().toVariant());
-        }
-
-        if (auto* const engine = qmlEngine(this))
-            callback.call({ engine->toScriptValue(values) });
     });
 }
 
