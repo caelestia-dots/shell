@@ -54,13 +54,13 @@ Column {
     width: Tokens.sizes.bar.batteryWidth
 
     StyledText {
-        text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
+        text: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
     }
 
     StyledText {
         text: {
             const dev = UPower.displayDevice;
-            if (!dev.isLaptopBattery)
+            if (!(dev.isLaptopBattery || dev.type === UPowerDeviceType.Ups))
                 return Tr.tr("Power profile: %1").arg(root.powerProfileToString(PowerProfiles.profile));
 
             if (UPower.onBattery) {
