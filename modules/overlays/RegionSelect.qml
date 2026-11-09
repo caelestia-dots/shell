@@ -1,11 +1,13 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Caelestia.Config
 import Caelestia.Scheme
 import Caelestia.Shaders
 import qs.components
 import qs.components.effects
 import qs.services
+import qs.modules.drawers
 
 MouseArea {
     id: root
@@ -20,6 +22,9 @@ MouseArea {
     property var zOrder: ({}) // address -> clients request index
     property var clientProps: ({}) // address -> { rounding, rounding_power, border_size }
     property list<HyprlandToplevel> clients: sortClients(zOrder)
+
+    readonly property var shellComponents: ShellState.componentsFor(screen)
+    property var frozenCoverage // ItemGrabResult, keeps the grabbed image alive
 
     readonly property int borderWidth: 1
 
@@ -129,9 +134,12 @@ MouseArea {
     Component.onCompleted: {
         Hypr.extras.refreshOptions();
 
-        // Break binding if frozen
-        if (freeze)
-            clients = clients;
+        if (freeze) {
+            clients = clients; // Break binding
+            const drawers = shellComponents?.rootWindow;
+            if (drawers?.panelsAboveToplevels)
+                drawers.panelBlobs.grabToImage(result => frozenCoverage = result);
+        }
 
         refreshZOrder();
         Hypr.extras.cursorPosition(pos => checkRects(pos.x - screen.x, pos.y - screen.y));
@@ -273,6 +281,41 @@ MouseArea {
         }
     }
 
+    Item {
+        id: panelMask
+
+        anchors.fill: parent
+        layer.enabled: true
+        visible: false
+
+        Loader {
+            anchors.fill: parent
+            active: {
+                if (root.freeze || !root.shellComponents)
+                    return false;
+
+                const c = root.shellComponents;
+                return c.rootWindow.panelsAboveToplevels && c.panels && c.bar;
+            }
+
+            sourceComponent: PanelBlobs {
+                panels: root.shellComponents.panels
+                bar: root.shellComponents.bar
+                color: "white"
+                smoothing: Config.border.smoothing
+                deformScale: 0
+                borderThickness: root.shellComponents.rootWindow.borderThickness
+                borderRounding: root.shellComponents.rootWindow.borderRounding
+                sdfBorderOffset: root.shellComponents.rootWindow.sdfBorderOffset
+            }
+        }
+
+        Image {
+            anchors.fill: parent
+            source: root.frozenCoverage?.url ?? ""
+        }
+    }
+
     Repeater {
         model: root.clients
 
@@ -296,6 +339,7 @@ MouseArea {
             readonly property point itemPos: Qt.point(x, y)
             readonly property real ownIndex: index
             readonly property Item occlusion: occluders
+            readonly property Item panelCoverage: panelMask
             property real hovered: root.hoveredRect === rect ? 1 : 0
 
             x: rect.x - thick
