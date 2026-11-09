@@ -17,6 +17,8 @@ StyledListView {
     required property ScreenState screenState
 
     property string displayText
+    property var displayResults: []
+    property var queueIds: []
 
     readonly property string requestedState: stateForText(search.text)
     readonly property string displayState: stateForText(displayText)
@@ -54,10 +56,27 @@ StyledListView {
         }
     }
 
-    model: ScriptModel {
-        values: root.resultsForText(root.displayText)
-        onValuesChanged: root.currentIndex = 0
+    function refreshResults(): void {
+        const results = root.resultsForText(root.displayText);
+        root.queueIds = root.displayState === "apps" ? results.map(entry => entry.id) : [];
+        root.displayResults = results;
+        root.currentIndex = 0;
     }
+
+    function rebindAppResults(): void {
+        if (root.displayState !== "apps" || root.queueIds.length === 0)
+            return;
+
+        const byId = new Map(DesktopEntries.applications.values.map(entry => [entry.id, entry]));
+        root.displayResults = root.queueIds.filter(id => byId.has(id)).map(id => byId.get(id));
+    }
+
+    model: ScriptModel {
+        values: root.displayResults
+        objectProp: root.displayState === "apps" ? "id" : ""
+    }
+
+    onDisplayTextChanged: root.refreshResults()
 
     spacing: Tokens.spacing.small
     orientation: Qt.Vertical
@@ -89,7 +108,10 @@ StyledListView {
             Schemes.reload();
     }
 
-    Component.onCompleted: displayText = search.text
+    Component.onCompleted: {
+        displayText = search.text;
+        refreshResults();
+    }
 
     states: [
         State {
@@ -298,8 +320,20 @@ StyledListView {
     Connections {
         function onLauncherChanged() {
             root.syncDisplayText();
+            if (root.screenState.launcher) {
+                root.displayText = root.search.text;
+                root.refreshResults();
+            }
         }
 
         target: root.screenState
+    }
+
+    Connections {
+        function onApplicationsChanged(): void {
+            root.rebindAppResults();
+        }
+
+        target: DesktopEntries
     }
 }
