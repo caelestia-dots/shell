@@ -240,7 +240,7 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
     }
 
     auto socket = SocketPtr::create(this);
-    auto buffer = QSharedPointer<QByteArray>::create();
+    const auto buffer = QSharedPointer<QByteArray>::create();
 
     QObject::connect(socket.data(), &QLocalSocket::connected, this, [socket, request] {
         socket->write(request.toUtf8());
