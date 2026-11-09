@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -19,9 +20,36 @@ ColumnLayout {
     property string view: "wireless" // "wireless" or "ethernet"
     property var passwordNetwork: null
     property bool showPasswordDialog: false
+    property string captiveState: "none"
+    property string captiveUrl: ""
+    property string captiveCheckNetwork: ""
+    readonly property string currentWifiKey: Nmcli.active ? Nmcli.active.ssid + "|" + Nmcli.active.bssid : ""
+    readonly property bool checkCaptivePortal: root.popouts.hasCurrent && root.popouts.currentName === "network" && Nmcli.active !== null
+
+    function refreshCaptivePortal(): void {
+        if (!checkCaptivePortal || portalCheck.running)
+            return;
+        captiveCheckNetwork = currentWifiKey;
+        portalCheck.running = true;
+    }
+
+    function openCaptivePortal(): void {
+        if (captiveState !== "portal" || !checkCaptivePortal || captiveCheckNetwork !== currentWifiKey)
+            return;
+
+        Quickshell.execDetached(["bash", Quickshell.shellPath("assets/captive-portal/open"), captiveUrl]);
+    }
 
     spacing: Tokens.spacing.small
     width: Tokens.sizes.bar.networkWidth
+
+    onCheckCaptivePortalChanged: {
+        if (!checkCaptivePortal) {
+            captiveState = "none";
+            captiveUrl = "";
+            captiveCheckNetwork = "";
+        }
+    }
 
     // Wireless section
     StyledText {
@@ -165,6 +193,72 @@ ColumnLayout {
                 }
             }
         }
+    }
+
+    StyledRect {
+        visible: root.checkCaptivePortal && root.captiveState === "portal"
+        Layout.preferredHeight: visible ? captiveAction.implicitHeight + Tokens.padding.small : 0
+        Layout.topMargin: visible ? Tokens.spacing.small : 0
+        Layout.fillWidth: true
+
+        radius: Tokens.rounding.full
+        color: Colours.palette.m3primaryContainer
+
+        StateLayer {
+            color: Colours.palette.m3onPrimaryContainer
+            onClicked: root.openCaptivePortal()
+        }
+
+        RowLayout {
+            id: captiveAction
+
+            anchors.centerIn: parent
+            spacing: Tokens.spacing.small
+
+            MaterialIcon {
+                id: captiveIcon
+
+                Layout.topMargin: Math.round(fontInfo.pointSize * 0.0575)
+                text: "wifi_password"
+                color: Colours.palette.m3onPrimaryContainer
+            }
+
+            StyledText {
+                Layout.topMargin: -Math.round(captiveIcon.fontInfo.pointSize * 0.0575)
+                text: Tr.tr("Sign in to Wi-Fi")
+                color: Colours.palette.m3onPrimaryContainer
+            }
+
+            MaterialIcon {
+                text: "open_in_new"
+                fontStyle: Tokens.font.icon.small
+                color: Colours.palette.m3onPrimaryContainer
+            }
+        }
+    }
+
+    Process {
+        id: portalCheck
+
+        command: ["bash", Quickshell.shellPath("assets/captive-portal/check")]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (!root.checkCaptivePortal || root.captiveCheckNetwork !== currentWifiKey)
+                    return;
+                const fields = text.trim().split("\t");
+                root.captiveState = ["portal", "full", "limited", "offline", "none"].includes(fields[0]) ? fields[0] : "none";
+                root.captiveUrl = root.captiveState === "portal" && fields.length > 1 ? fields.slice(1).join("\t").trim() : "";
+            }
+        }
+    }
+
+    Timer {
+        interval: root.captiveState === "full" ? 60000 : 12000
+        running: root.checkCaptivePortal
+        triggeredOnStart: true
+        repeat: true
+        onTriggered: root.refreshCaptivePortal()
     }
 
     StyledRect {
@@ -343,6 +437,9 @@ ColumnLayout {
 
     Connections {
         function onActiveChanged(): void {
+            root.captiveState = "none";
+            root.captiveUrl = "";
+            root.refreshCaptivePortal();
             if (Nmcli.active && root.connectingToSsid === Nmcli.active.ssid) {
                 root.connectingToSsid = "";
                 // Close password dialog if we successfully connected

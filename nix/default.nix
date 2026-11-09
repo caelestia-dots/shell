@@ -8,6 +8,9 @@
   ddcutil,
   brightnessctl,
   networkmanager,
+  curl,
+  iproute2,
+  python3,
   lm_sensors,
   swappy,
   wl-clipboard,
@@ -43,6 +46,9 @@
       ddcutil
       brightnessctl
       networkmanager
+      curl
+      iproute2
+      python3
       lm_sensors
       swappy
       wl-clipboard
