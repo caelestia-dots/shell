@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -86,5 +87,6 @@ Item {
         id: impl
 
         anchors.fill: parent
+        source: Wallpapers.forScreen((QsWindow.window as QsWindow)?.screen)
     }
 }
