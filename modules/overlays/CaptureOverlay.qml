@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Caelestia.Components
+import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.services
@@ -16,10 +17,14 @@ LazyLoader {
     property real contentOpacity: open ? 1 : 0
 
     signal saved(path: string)
+    signal copied(path: string)
+    signal failed
     signal unsupported
     signal cancelled
 
     onSaved: open = false
+    onCopied: open = false
+    onFailed: open = false
     onUnsupported: open = false
     onCancelled: open = false
 
@@ -38,14 +43,18 @@ LazyLoader {
             annotate: root.annotate
             Component.onCompleted: open = Qt.binding(() => root.open)
 
-            onSaved: path => root.saved(path)
             onCancelled: root.cancelled()
         }
 
         CaptureSession {
             id: captureSession
 
+            document.font: Tokens.font.body.medium
+
             onSaved: path => root.saved(path)
+            onCopied: path => root.copied(path)
+            onSaveFailed: root.failed()
+            onCopyFailed: root.failed()
             onUnsupported: root.unsupported()
         }
 
