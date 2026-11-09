@@ -12,10 +12,14 @@ import qs.modules.lock
 Scope {
     id: root
 
+    // Controller events are not included in the compositor's desktop idle clock.
+    property bool controllerActive: false
     required property Lock lock
     readonly property bool hasPlayer: Players.list.some(p => p.isPlaying)
     readonly property bool isCharging: !UPower.onBattery
     readonly property bool enabled: {
+        if (controllerActive)
+            return false;
         if (GlobalConfig.general.idle.inhibitWhenAudio && hasPlayer)
             return false;
         if (GlobalConfig.general.idle.inhibitWhenCharging && isCharging)
@@ -35,6 +39,19 @@ Scope {
             Hypr.dispatch(Hypr.usingLua && ["dpms off", "dpms on"].includes(action) ? `hl.dsp.dpms({ action = "${action === "dpms off" ? "disable" : "enable"}" })` : action);
         else if (!SessionManager.exec(action))
             Quickshell.execDetached(action);
+    }
+
+    Timer {
+        id: controllerGrace
+
+        interval: 60000
+        onTriggered: root.controllerActive = false
+    }
+    GamepadActivity {
+        onActivity: {
+            root.controllerActive = true;
+            controllerGrace.restart();
+        }
     }
 
     Connections {
