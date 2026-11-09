@@ -17,6 +17,37 @@ Item {
     required property ShellScreen screen
     required property real contentOpacity
     property alias session: capture.session
+    property bool hideToolbar
+    property bool toolbarBottom
+
+    Behavior on toolbarBottom {
+        SequentialAnimation {
+            PropertyAction {
+                target: root
+                property: "hideToolbar"
+                value: true
+            }
+            PauseAnimation {
+                duration: toolbarAnim.duration
+            }
+            PropertyAction {
+                target: toolbarBehaviour
+                property: "enabled"
+                value: false
+            }
+            PropertyAction {}
+            PropertyAction {
+                target: toolbarBehaviour
+                property: "enabled"
+                value: true
+            }
+            PropertyAction {
+                target: root
+                property: "hideToolbar"
+                value: false
+            }
+        }
+    }
 
     ScreenCapture {
         id: capture
@@ -26,6 +57,8 @@ Item {
     }
 
     RegionSelect {
+        id: regionSelect
+
         anchors.fill: parent
         opacity: root.contentOpacity
         screen: root.screen
@@ -61,20 +94,29 @@ Item {
         }
 
         BlobRect {
-            id: topRect
+            id: toolbarBg
 
             group: group
             anchors.horizontalCenter: parent.horizontalCenter
-            y: root.cState.open ? 0 : -height - 10
+            y: {
+                const open = root.cState.open && !root.hideToolbar && !regionSelect.selecting;
+                if (root.toolbarBottom)
+                    return open ? root.height - height : root.height + 10;
+                return open ? 0 : -height - 10;
+            }
 
             radius: Tokens.rounding.extraExtraLarge
-            implicitWidth: topContent.implicitWidth
-            implicitHeight: topContent.implicitHeight
+            implicitWidth: toolbar.implicitWidth
+            implicitHeight: toolbar.implicitHeight
 
             deformScale: 0.00005 * Config.appearance.deformScale
 
             Behavior on y {
+                id: toolbarBehaviour
+
                 Anim {
+                    id: toolbarAnim
+
                     type: Anim.SlowEffects
                 }
             }
@@ -82,10 +124,10 @@ Item {
     }
 
     MouseArea {
-        id: topContent
+        id: toolbar
 
-        x: topRect.x
-        y: topRect.y
+        x: toolbarBg.x
+        y: toolbarBg.y
 
         implicitWidth: topLayout.implicitWidth + Tokens.padding.small * 2
         implicitHeight: topLayout.implicitHeight + Tokens.padding.small * 2
@@ -94,7 +136,7 @@ Item {
         hoverEnabled: true
 
         transform: Matrix4x4 {
-            matrix: topRect.deformMatrix
+            matrix: toolbarBg.deformMatrix
         }
 
         RowLayout {
