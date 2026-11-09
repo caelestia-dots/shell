@@ -131,6 +131,11 @@ Item {
                         values: root.dashboardTabs
                     }
 
+                    onCountChanged: {
+                        if (root.screenState.dashboardTab >= count)
+                            root.screenState.dashboardTab = Math.max(0, count - 1);
+                    }
+
                     delegate: Loader {
                         id: paneLoader
 
@@ -185,15 +190,6 @@ Item {
                 Anim {}
             }
         }
-    }
-
-    Connections {
-        function onCountChanged() {
-            if (root.screenState.dashboardTab >= repeater.count)
-                root.screenState.dashboardTab = Math.max(0, repeater.count - 1);
-        }
-
-        target: repeater
     }
 
     Behavior on implicitWidth {
