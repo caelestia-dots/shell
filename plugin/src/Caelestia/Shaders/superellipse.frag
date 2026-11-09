@@ -14,12 +14,27 @@ layout(std140, binding = 0) uniform buf {
     float thick;
     vec4  fillColor;      // premultiplied
     vec4  borderColor;    // premultiplied
+    vec2  screenSize;
+    vec2  itemPos;        // item origin in screen space
+    float ownIndex;       // stacking index, lower is above
+    float hovered;
 };
+
+layout(binding = 1) uniform sampler2D occlusion; // bit (i % 8) of rgb channel (i / 8) set where window i covers, 24 windows max
 
 const float SMOOTHING_CONSTANT = 3.1415926535897932 / 5.34665792551;
 
 float pnorm(vec2 v, float p) {
     return pow(pow(v.x, p) + pow(v.y, p), 1.0 / p);
+}
+
+int bitsBelow(float channel, int limit) {
+    int bits = int(channel * 255.0 + 0.5);
+    int count = 0;
+    for (int b = 0; b < 8; ++b)
+        if (b < limit && (bits & (1 << b)) != 0)
+            ++count;
+    return count;
 }
 
 // coverage: 1 inside the curve, 0 outside, smooth across one pixel
@@ -50,5 +65,11 @@ void main() {
     if (insideBorder <= 0.0)
         discard;
 
-    fragColor = mix(borderColor, fillColor, insideFill) * insideBorder * qt_Opacity;
+    vec4 texel = texture(occlusion, (itemPos + original) / screenSize);
+    int own = int(ownIndex + 0.5);
+    int above = bitsBelow(texel.r, own) + bitsBelow(texel.g, own - 8) + bitsBelow(texel.b, own - 16);
+    vec4 border = borderColor * pow(mix(0.2, 0.5, hovered), float(above));
+    vec4 fill = fillColor * pow(0.8, float(above));
+
+    fragColor = mix(border, fill, insideFill) * insideBorder * qt_Opacity;
 }

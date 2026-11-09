@@ -27,13 +27,13 @@ public:
 
     Q_INVOKABLE void message(const QString& message);
     Q_INVOKABLE void batchMessage(const QStringList& messages);
+    Q_INVOKABLE void batchRequest(const QStringList& requests, const QJSValue& callback);
     Q_INVOKABLE void applyOptions(const QVariantHash& options);
 
     Q_INVOKABLE void refreshOptions();
     Q_INVOKABLE void refreshDevices();
 
     Q_INVOKABLE void cursorPosition(const QJSValue& callback);
-    Q_INVOKABLE void windowProps(const QString& address, const QStringList& props, const QJSValue& callback);
 
 signals:
     void optionsChanged();
