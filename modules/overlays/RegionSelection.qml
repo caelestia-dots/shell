@@ -213,18 +213,29 @@ Item {
         property string yProp
         readonly property bool fits: (xProp && yProp) || (xProp ? root.rect.height : root.rect.width) >= root.handleSpace
 
+        property point pressPos
+        property real startX
+        property real startY
+
         enabled: root.resizeMode && fits
         preventStealing: true
 
+        onPressed: event => {
+            pressPos = mapToItem(root, event.x, event.y);
+            if (xProp)
+                startX = root[xProp];
+            if (yProp)
+                startY = root[yProp];
+        }
         onPositionChanged: event => {
             if (!pressed)
                 return;
 
             const p = mapToItem(root, event.x, event.y);
             if (xProp)
-                root[xProp] = Math.max(0, Math.min(root.width, p.x));
+                root[xProp] = Math.max(0, Math.min(root.width, startX + p.x - pressPos.x));
             if (yProp)
-                root[yProp] = Math.max(0, Math.min(root.height, p.y));
+                root[yProp] = Math.max(0, Math.min(root.height, startY + p.y - pressPos.y));
         }
         onReleased: {
             if (root.sx > root.ex)
