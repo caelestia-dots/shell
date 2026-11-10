@@ -86,6 +86,8 @@ Item {
         base: capture.image
     }
 
+    // TODO: add sub toolbar for tool config
+
     RegionSelect {
         id: regionSelect
 
