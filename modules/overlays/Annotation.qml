@@ -15,9 +15,22 @@ Item {
     property alias base: canvas.base
     property bool active
 
+    property point hoverPos
+    property int hoverIndex: -1
+
+    readonly property bool overSelection: {
+        if (document.selected < 0)
+            return false;
+        const b = document.selectedBounds;
+        return hoverPos.x >= b.x && hoverPos.x <= b.x + b.width && hoverPos.y >= b.y && hoverPos.y <= b.y + b.height;
+    }
+
     readonly property int cursorShape: {
-        if (document.tool === AnnotationDocument.Select)
-            return Qt.ArrowCursor;
+        if (document.tool === AnnotationDocument.Select) {
+            if (overSelection)
+                return Qt.SizeAllCursor;
+            return hoverIndex >= 0 ? Qt.PointingHandCursor : Qt.ArrowCursor;
+        }
         if (document.tool === AnnotationDocument.Text)
             return Qt.IBeamCursor;
         return Qt.CrossCursor;
@@ -134,6 +147,10 @@ Item {
         return true;
     }
 
+    function updateHover(): void {
+        hoverIndex = active ? document.shapeAt(hoverPos) : -1;
+    }
+
     AnnotationCanvas {
         id: canvas
 
@@ -149,11 +166,22 @@ Item {
 
         anchors.fill: parent
         enabled: root.active && !textEditor.visible
+        hoverEnabled: true
 
         onPressed: event => root.document.press(globalPos(event), event.modifiers & Qt.ShiftModifier)
-        onPositionChanged: event => root.document.move(globalPos(event), event.modifiers & Qt.ShiftModifier)
-        onReleased: root.document.release()
+        onPositionChanged: event => {
+            root.hoverPos = globalPos(event);
+            if (pressed)
+                root.document.move(root.hoverPos, event.modifiers & Qt.ShiftModifier);
+            else
+                root.updateHover();
+        }
+        onReleased: {
+            root.document.release();
+            root.updateHover();
+        }
         onDoubleClicked: event => root.document.doubleClick(globalPos(event))
+        onExited: root.hoverIndex = -1
     }
 
     MouseArea {
@@ -212,6 +240,10 @@ Item {
     }
 
     Connections {
+        function onChanged(): void {
+            root.updateHover();
+        }
+
         function onTextEditRequested(index: int, pos: point, text: string): void {
             const local = Qt.point(pos.x - root.screen.x, pos.y - root.screen.y);
             if (local.x < 0 || local.y < 0 || local.x >= root.width || local.y >= root.height)
