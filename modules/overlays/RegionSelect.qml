@@ -16,6 +16,7 @@ MouseArea {
     property bool freeze
     property bool selectClients: true
     property bool showCrosshair
+    property bool resizeMode
 
     property var hoveredRect // var so it can be null
     property bool selecting
@@ -43,7 +44,13 @@ MouseArea {
     property real sw: Math.abs(sx - ex)
     property real sh: Math.abs(sy - ey)
 
+    readonly property real handleSize: Tokens.padding.medium
+    readonly property real handleLength: Tokens.padding.extraLarge
+    readonly property real handlePadding: Tokens.padding.small
+    readonly property real handleSpace: handleLength + handleSize + handlePadding * 4
+
     signal selected(region: rect)
+    signal resized(region: rect)
 
     function rectForClient(client: HyprlandToplevel): rect {
         const ipc = client.lastIpcObject;
@@ -128,8 +135,25 @@ MouseArea {
         hoveredRect = null;
     }
 
+    onRsxChanged: {
+        if (resizeMode)
+            resized(Qt.rect(rsx, rsy, sw, sh));
+    }
+    onRsyChanged: {
+        if (resizeMode)
+            resized(Qt.rect(rsx, rsy, sw, sh));
+    }
+    onSwChanged: {
+        if (resizeMode)
+            resized(Qt.rect(rsx, rsy, sw, sh));
+    }
+    onShChanged: {
+        if (resizeMode)
+            resized(Qt.rect(rsx, rsy, sw, sh));
+    }
+
     anchors.fill: parent
-    hoverEnabled: true
+    hoverEnabled: !resizeMode
     cursorShape: Qt.CrossCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
@@ -149,6 +173,11 @@ MouseArea {
     onClientsChanged: refreshClientProps()
 
     onPressed: event => {
+        if (resizeMode) {
+            event.accepted = false;
+            return;
+        }
+
         if (event.button === Qt.RightButton) {
             selecting = false;
             pendingSelect = false;
@@ -165,6 +194,11 @@ MouseArea {
     }
 
     onReleased: event => {
+        if (resizeMode) {
+            event.accepted = false;
+            return;
+        }
+
         if (selectCancelled || event.button !== Qt.LeftButton)
             return;
 
@@ -182,6 +216,11 @@ MouseArea {
     }
 
     onPositionChanged: event => {
+        if (resizeMode) {
+            event.accepted = false;
+            return;
+        }
+
         const x = event.x;
         const y = event.y;
 
@@ -322,6 +361,70 @@ MouseArea {
                 font: Tokens.font.label.small
             }
         }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            cursorShape: Qt.SizeHorCursor
+            innerHeight: root.handleLength
+            xProp: "sx"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.left
+            anchors.verticalCenter: parent.top
+            cursorShape: Qt.SizeFDiagCursor
+            xProp: "sx"
+            yProp: "sy"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.top
+            cursorShape: Qt.SizeVerCursor
+            innerWidth: root.handleLength
+            yProp: "sy"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.right
+            anchors.verticalCenter: parent.top
+            cursorShape: Qt.SizeBDiagCursor
+            xProp: "ex"
+            yProp: "sy"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            cursorShape: Qt.SizeHorCursor
+            innerHeight: root.handleLength
+            xProp: "ex"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.right
+            anchors.verticalCenter: parent.bottom
+            cursorShape: Qt.SizeFDiagCursor
+            xProp: "ex"
+            yProp: "ey"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.bottom
+            cursorShape: Qt.SizeVerCursor
+            innerWidth: root.handleLength
+            yProp: "ey"
+        }
+
+        ResizeHandle {
+            anchors.horizontalCenter: parent.left
+            anchors.verticalCenter: parent.bottom
+            cursorShape: Qt.SizeBDiagCursor
+            xProp: "sx"
+            yProp: "ey"
+        }
     }
 
     Item {
@@ -424,7 +527,7 @@ MouseArea {
             implicitHeight: rect.height + thick * 2
             fragmentShader: Shaders.superellipse
 
-            opacity: root.selectClients && !root.selecting ? 1 : 0
+            opacity: root.selectClients && !root.resizeMode && !root.selecting ? 1 : 0
 
             Behavior on fillColor {
                 CAnim {}
@@ -454,7 +557,7 @@ MouseArea {
         x: root.mouseX - 1
         color: Colours.palette.secondary
         width: 1
-        opacity: root.showCrosshair && !root.selecting ? 1 : 0
+        opacity: root.showCrosshair && !root.resizeMode && !root.selecting ? 1 : 0
 
         Behavior on opacity {
             Anim {
@@ -469,12 +572,61 @@ MouseArea {
         y: root.mouseY - 1
         color: Colours.palette.secondary
         height: 1
-        opacity: root.showCrosshair && !root.selecting ? 1 : 0
+        opacity: root.showCrosshair && !root.resizeMode && !root.selecting ? 1 : 0
 
         Behavior on opacity {
             Anim {
                 type: Anim.DefaultEffects
             }
+        }
+    }
+
+    component ResizeHandle: MouseArea {
+        property alias innerWidth: resizeInner.implicitWidth
+        property alias innerHeight: resizeInner.implicitHeight
+        property string xProp
+        property string yProp
+        readonly property bool fits: (xProp && yProp) || (xProp ? root.sh : root.sw) >= root.handleSpace
+
+        enabled: root.resizeMode && fits
+        preventStealing: true
+
+        onPositionChanged: event => {
+            if (!pressed)
+                return;
+
+            const p = mapToItem(root, event.x, event.y);
+            if (xProp)
+                root[xProp] = Math.max(0, Math.min(root.width, p.x));
+            if (yProp)
+                root[yProp] = Math.max(0, Math.min(root.height, p.y));
+        }
+        onReleased: {
+            if (root.sx > root.ex)
+                [root.sx, root.ex] = [root.ex, root.sx];
+            if (root.sy > root.ey)
+                [root.sy, root.ey] = [root.ey, root.sy];
+        }
+
+        implicitWidth: resizeInner.implicitWidth + root.handlePadding * 2
+        implicitHeight: resizeInner.implicitHeight + root.handlePadding * 2
+
+        scale: root.resizeMode && fits ? 1 : 0
+
+        Behavior on scale {
+            Anim {
+                type: Anim.FastSpatial
+            }
+        }
+
+        StyledRect {
+            id: resizeInner
+
+            anchors.centerIn: parent
+            color: Colours.palette.primary
+            radius: Tokens.rounding.full
+            implicitWidth: root.handleSize
+            implicitHeight: root.handleSize
         }
     }
 }
