@@ -19,7 +19,15 @@ Item {
     required property real contentOpacity
     property alias session: capture.session
     property bool hideToolbar
-    property bool toolbarBottom: cState.annotating && cState.region.y - screen.y < toolbar.implicitHeight
+    property bool toolbarBottom: {
+        if (!cState.annotating)
+            return false;
+
+        const r = cState.region;
+        const tx = screen.x + toolbar.x;
+        const ty = screen.y;
+        return r.x < tx + toolbar.implicitWidth && r.x + r.width > tx && r.y < ty + toolbar.implicitHeight && r.y + r.height > ty;
+    }
     property bool moveModifier
 
     focus: true
