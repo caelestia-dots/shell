@@ -8,6 +8,7 @@
 #include <qqmlintegration.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "annotationshape.hpp"
@@ -104,8 +105,9 @@ public:
     Q_INVOKABLE void release();
     Q_INVOKABLE void doubleClick(const QPointF& point);
 
-    void render(QPainter& painter) const;
-    void renderPreview(QPainter& painter, const QImage& below) const;
+    void render(QPainter& painter, const QImage& base = QImage()) const;
+    void renderPreview(QPainter& painter, const QImage& base, const QImage& above, const QPoint& deviceOffset) const;
+    [[nodiscard]] std::optional<QRectF> previewBounds() const;
     [[nodiscard]] QRectF selectedBounds() const;
 
 signals:

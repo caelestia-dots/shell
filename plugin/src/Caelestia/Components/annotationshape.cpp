@@ -278,7 +278,7 @@ void RectShape::render(QPainter& painter) const {
     const auto r = rect();
     if (isEffect()) {
         if (const auto* image = dynamic_cast<const QImage*>(painter.device()))
-            renderEffect(painter, *image);
+            renderEffect(painter, *image, QImage(), QPoint());
         else
             painter.fillRect(r, QColor(0, 0, 0, 60));
         return;
@@ -330,18 +330,28 @@ bool RectShape::isEffect() const {
     return m_kind == Kind::Blur || m_kind == Kind::Pixelate;
 }
 
-void RectShape::renderEffect(QPainter& painter, const QImage& source) const {
+void RectShape::renderEffect(
+    QPainter& painter, const QImage& base, const QImage& above, const QPoint& deviceOffset) const {
     if (isEmpty())
         return;
 
-    const auto dpr = source.devicePixelRatio();
+    const auto dpr = base.devicePixelRatio();
     const auto local = painter.worldTransform().mapRect(rect());
-    const auto dev = QRectF(local.topLeft() * dpr, local.size() * dpr).toAlignedRect().intersected(source.rect());
+    const auto target = QRectF(local.topLeft() * dpr, local.size() * dpr).toAlignedRect();
+    const auto dev = target.translated(deviceOffset).intersected(base.rect());
     if (dev.isEmpty())
         return;
 
-    const auto scale = dev.width() / rect().width();
-    auto region = source.copy(dev).convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    const auto scale = target.width() / rect().width();
+    auto region = base.copy(dev).convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    region.setDevicePixelRatio(1);
+    if (!above.isNull()) {
+        auto layer = above.copy(dev);
+        layer.setDevicePixelRatio(1);
+        QPainter p(&region);
+        p.drawImage(QPoint(), layer);
+    }
+
     if (m_kind == Kind::Pixelate) {
         const auto block = std::max(1.0, (4 + m_style.effectStrength * 28) * scale);
         const auto small = region.scaled(std::max(1, qRound(region.width() / block)),
@@ -354,7 +364,7 @@ void RectShape::renderEffect(QPainter& painter, const QImage& source) const {
     region.setDevicePixelRatio(dpr);
     painter.save();
     painter.resetTransform();
-    painter.drawImage(QPointF(dev.topLeft()) / dpr, region);
+    painter.drawImage(QPointF(dev.topLeft() - deviceOffset) / dpr, region);
     painter.restore();
 }
 
