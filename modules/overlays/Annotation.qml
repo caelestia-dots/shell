@@ -26,7 +26,7 @@ Item {
     readonly property alias editingText: textEditor.visible
     readonly property var tools: [
         {
-            icon: "arrow_selector_tool",
+            icon: "drag_pan",
             tool: AnnotationDocument.Select,
             key: Qt.Key_V
         },
@@ -41,12 +41,12 @@ Item {
             key: Qt.Key_2
         },
         {
-            icon: "horizontal_rule",
+            icon: "diagonal_line",
             tool: AnnotationDocument.Line,
             key: Qt.Key_3
         },
         {
-            icon: "north_east",
+            icon: "line_end_arrow",
             tool: AnnotationDocument.Arrow,
             key: Qt.Key_4
         },
@@ -61,7 +61,7 @@ Item {
             key: Qt.Key_6
         },
         {
-            icon: "title",
+            icon: "insert_text",
             tool: AnnotationDocument.Text,
             key: Qt.Key_7
         },
@@ -76,7 +76,7 @@ Item {
             key: Qt.Key_9
         },
         {
-            icon: "grid_view",
+            icon: "grain",
             tool: AnnotationDocument.Pixelate,
             key: Qt.Key_0
         }
