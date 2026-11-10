@@ -76,11 +76,11 @@ Item {
         opacity: root.contentOpacity
         screen: root.screen
         freeze: true
-        enabled: !root.cState.annotating
-        hoverEnabled: !root.cState.annotating
+        resizeMode: root.cState.annotating
         cursorShape: root.cState.annotating ? annotation.cursorShape : Qt.CrossCursor
-        selectClients: !root.cState.annotating && root.cState.selectClients
-        showCrosshair: !root.cState.annotating && root.cState.showCrosshair
+        selectClients: root.cState.selectClients
+        showCrosshair: root.cState.showCrosshair
+
         onSelected: r => {
             const region = Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height);
             if (root.cState.annotate) {
@@ -90,6 +90,8 @@ Item {
                 capture.session.save(region);
             }
         }
+
+        onResized: r => root.cState.region = Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height)
     }
 
     Item {
