@@ -2,9 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Caelestia
 import Caelestia.Config
-import Caelestia.I18n
 import qs.components
 import qs.services
 
@@ -25,7 +23,7 @@ StyledRect {
         id: layout
 
         anchors.centerIn: parent
-        spacing: compact ? 2 : Tokens.spacing.extraSmall
+        spacing: root.compact ? 2 : Tokens.spacing.extraSmall
 
         StyledRect {
             id: cBtn
