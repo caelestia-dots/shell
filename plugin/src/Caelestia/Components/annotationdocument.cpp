@@ -90,18 +90,6 @@ void AnnotationDocument::setFont(const QFont& font) {
     emit fontChanged();
 }
 
-qreal AnnotationDocument::fontSize() const {
-    return m_fontSize;
-}
-
-void AnnotationDocument::setFontSize(qreal size) {
-    if (qFuzzyCompare(m_fontSize, size))
-        return;
-
-    m_fontSize = size;
-    emit fontSizeChanged();
-}
-
 bool AnnotationDocument::textBackground() const {
     return m_textBackground;
 }
@@ -112,6 +100,42 @@ void AnnotationDocument::setTextBackground(bool background) {
 
     m_textBackground = background;
     emit textBackgroundChanged();
+}
+
+QColor AnnotationDocument::textBackgroundColor() const {
+    return m_textBackgroundColor;
+}
+
+void AnnotationDocument::setTextBackgroundColor(const QColor& color) {
+    if (m_textBackgroundColor == color)
+        return;
+
+    m_textBackgroundColor = color;
+    emit textBackgroundColorChanged();
+}
+
+qreal AnnotationDocument::textPadding() const {
+    return m_textPadding;
+}
+
+void AnnotationDocument::setTextPadding(qreal padding) {
+    if (qFuzzyCompare(m_textPadding, padding))
+        return;
+
+    m_textPadding = padding;
+    emit textPaddingChanged();
+}
+
+qreal AnnotationDocument::textRadius() const {
+    return m_textRadius;
+}
+
+void AnnotationDocument::setTextRadius(qreal radius) {
+    if (qFuzzyCompare(m_textRadius, radius))
+        return;
+
+    m_textRadius = radius;
+    emit textRadiusChanged();
 }
 
 qreal AnnotationDocument::effectStrength() const {
@@ -388,15 +412,16 @@ QRectF AnnotationDocument::selectedBounds() const {
 }
 
 Style AnnotationDocument::currentStyle() const {
-    auto font = m_font;
-    font.setPixelSize(qRound(m_fontSize));
     return {
         .color = m_color,
         .width = m_strokeWidth,
         .fill = m_fill,
         .rounded = m_rounded,
-        .font = font,
+        .font = m_font,
         .textBackground = m_textBackground,
+        .textBackgroundColor = m_textBackgroundColor,
+        .textPadding = m_textPadding,
+        .textRadius = m_textRadius,
         .effectStrength = m_effectStrength,
     };
 }
