@@ -22,6 +22,9 @@ struct Style {
     bool rounded = true;
     QFont font;
     bool textBackground = true;
+    QColor textBackgroundColor = QColor(0, 0, 0, 170);
+    qreal textPadding = 6.0;
+    qreal textRadius = 8.0;
     qreal effectStrength = 0.5;
 };
 

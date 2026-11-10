@@ -218,13 +218,13 @@ Item {
         scale: textEditor.scale
         transformOrigin: Item.TopLeft
 
-        x: textEditor.x - Tokens.padding.small
-        y: textEditor.y - Tokens.padding.small
-        implicitWidth: textEditor.width + Tokens.padding.small * 2
-        implicitHeight: textEditor.height + Tokens.padding.small * 2
+        x: textEditor.x - root.document.textPadding
+        y: textEditor.y - root.document.textPadding
+        implicitWidth: textEditor.width + root.document.textPadding * 2
+        implicitHeight: textEditor.height + root.document.textPadding * 2
 
-        radius: Tokens.rounding.small
-        color: Qt.alpha("black", 0.67)
+        radius: root.document.textRadius
+        color: root.document.textBackgroundColor
 
         Behavior on opacityMult {
             Anim {
@@ -243,9 +243,11 @@ Item {
         id: textEditor
 
         property bool editing
+        property bool committing
         property int editIndex: -1
 
         function open(index: int, pos: point, initial: string): void {
+            committing = false;
             editIndex = index;
             x = pos.x;
             y = pos.y;
@@ -257,6 +259,8 @@ Item {
         function commit(): void {
             if (!editing)
                 return;
+
+            committing = true;
             editing = false;
             root.document.setText(editIndex, text);
             root.forceActiveFocus();
@@ -288,12 +292,16 @@ Item {
         Keys.onEscapePressed: cancel()
 
         Behavior on opacity {
+            enabled: !textEditor.committing
+
             Anim {
                 type: Anim.DefaultEffects
             }
         }
 
         Behavior on scale {
+            enabled: !textEditor.committing
+
             Anim {
                 type: Anim.DefaultEffects
             }
