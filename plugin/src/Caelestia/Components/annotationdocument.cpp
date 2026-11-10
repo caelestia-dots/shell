@@ -10,7 +10,11 @@ namespace caelestia::shell::components {
 using namespace annotation;
 
 AnnotationDocument::AnnotationDocument(QObject* parent)
-    : QObject(parent) {}
+    : QObject(parent) {
+    connect(this, &AnnotationDocument::selectedChanged, this, &AnnotationDocument::selectedBoundsChanged);
+    connect(this, &AnnotationDocument::changed, this, &AnnotationDocument::selectedBoundsChanged);
+    connect(this, &AnnotationDocument::previewChanged, this, &AnnotationDocument::selectedBoundsChanged);
+}
 
 AnnotationDocument::Tool AnnotationDocument::tool() const {
     return m_tool;

@@ -35,6 +35,7 @@ class AnnotationDocument : public QObject {
     Q_PROPERTY(bool empty READ isEmpty NOTIFY changed FINAL)
     Q_PROPERTY(int nextCounter READ nextCounter NOTIFY changed FINAL)
     Q_PROPERTY(int selected READ selected NOTIFY selectedChanged FINAL)
+    Q_PROPERTY(QRectF selectedBounds READ selectedBounds NOTIFY selectedBoundsChanged FINAL)
 
 public:
     enum class Tool : quint8 {
@@ -96,6 +97,7 @@ public:
     Q_INVOKABLE void paste();
     Q_INVOKABLE void setText(int index, const QString& text);
     Q_INVOKABLE [[nodiscard]] QString textAt(int index) const;
+    Q_INVOKABLE [[nodiscard]] int shapeAt(const QPointF& point) const;
 
     Q_INVOKABLE void press(const QPointF& point, bool constrain);
     Q_INVOKABLE void move(const QPointF& point, bool constrain);
@@ -119,6 +121,7 @@ signals:
     void changed();
     void previewChanged();
     void selectedChanged();
+    void selectedBoundsChanged();
     void textEditRequested(int index, QPointF pos, const QString& text);
 
 private:
@@ -126,7 +129,6 @@ private:
 
     [[nodiscard]] annotation::Style currentStyle() const;
     [[nodiscard]] std::shared_ptr<annotation::Shape> createShape(const QPointF& point) const;
-    [[nodiscard]] int shapeAt(const QPointF& point) const;
     void pushUndo();
     void commit(Shapes shapes);
     void setSelected(int index);
