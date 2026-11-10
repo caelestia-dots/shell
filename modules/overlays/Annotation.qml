@@ -7,6 +7,7 @@ import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
+import qs.components.controls
 
 Item {
     id: root
@@ -40,7 +41,7 @@ Item {
         return Qt.CrossCursor;
     }
 
-    readonly property alias editingText: textEditor.visible
+    readonly property alias editingText: textEditor.editing
     readonly property var tools: [
         {
             icon: "drag_pan",
@@ -185,7 +186,7 @@ Item {
         }
 
         anchors.fill: parent
-        enabled: root.active && !textEditor.visible
+        enabled: root.active && !textEditor.editing
         hoverEnabled: true
 
         onPressed: event => root.document.press(globalPos(event), event.modifiers & Qt.ShiftModifier)
@@ -206,23 +207,42 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        enabled: textEditor.visible
+        enabled: textEditor.editing
         onPressed: textEditor.commit()
     }
 
     StyledRect {
-        visible: textEditor.visible && root.document.textBackground
+        property real opacityMult: root.document.textBackground ? 1 : 0
+
+        opacity: textEditor.opacity * opacityMult
+        scale: textEditor.scale
+        transformOrigin: Item.TopLeft
+
         x: textEditor.x - Tokens.padding.small
         y: textEditor.y - Tokens.padding.small
         implicitWidth: textEditor.width + Tokens.padding.small * 2
         implicitHeight: textEditor.height + Tokens.padding.small * 2
+
         radius: Tokens.rounding.small
         color: Qt.alpha("black", 0.67)
+
+        Behavior on opacityMult {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on implicitHeight {
+            Anim {
+                type: Anim.FastEffects
+            }
+        }
     }
 
-    TextInput {
+    TextAreaBase {
         id: textEditor
 
+        property bool editing
         property int editIndex: -1
 
         function open(index: int, pos: point, initial: string): void {
@@ -230,33 +250,54 @@ Item {
             x = pos.x;
             y = pos.y;
             text = initial;
-            visible = true;
+            editing = true;
             forceActiveFocus();
         }
 
         function commit(): void {
-            if (!visible)
+            if (!editing)
                 return;
-            visible = false;
+            editing = false;
             root.document.setText(editIndex, text);
             root.forceActiveFocus();
         }
 
         function cancel(): void {
-            visible = false;
+            editing = false;
             root.forceActiveFocus();
         }
 
-        visible: false
-        width: Math.max(contentWidth, root.document.fontSize)
-        height: contentHeight
+        function handleReturn(event: KeyEvent): void {
+            if (event.modifiers & Qt.ShiftModifier)
+                event.accepted = false;
+            else
+                commit();
+        }
+
+        enabled: editing
+        opacity: editing ? 1 : 0
+        scale: editing ? 1 : 0.8
+        transformOrigin: Item.TopLeft
+        wrapMode: TextEdit.NoWrap
         color: root.document.color
         font: root.document.font
-        cursorVisible: visible
-        renderType: Text.NativeRendering
 
-        onAccepted: commit()
+        onEditingFinished: commit()
+        Keys.onReturnPressed: event => handleReturn(event)
+        Keys.onEnterPressed: event => handleReturn(event)
         Keys.onEscapePressed: cancel()
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        Behavior on scale {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
     }
 
     Connections {
