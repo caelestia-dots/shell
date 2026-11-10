@@ -92,6 +92,8 @@ public:
     Q_INVOKABLE void clear();
     Q_INVOKABLE void deselect();
     Q_INVOKABLE void deleteSelected();
+    Q_INVOKABLE void copy();
+    Q_INVOKABLE void paste();
     Q_INVOKABLE void setText(int index, const QString& text);
     Q_INVOKABLE [[nodiscard]] QString textAt(int index) const;
 
@@ -143,6 +145,7 @@ private:
     std::vector<Shapes> m_undo;
     std::vector<Shapes> m_redo;
     std::shared_ptr<annotation::Shape> m_preview;
+    std::shared_ptr<annotation::Shape> m_clipboard;
     int m_selected = -1;
     bool m_dragging = false;
     QPointF m_dragStart;

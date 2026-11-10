@@ -189,6 +189,23 @@ void AnnotationDocument::deleteSelected() {
     commit(std::move(shapes));
 }
 
+void AnnotationDocument::copy() {
+    if (m_selected >= 0)
+        m_clipboard = m_shapes[m_selected]->clone();
+}
+
+void AnnotationDocument::paste() {
+    if (!m_clipboard)
+        return;
+
+    auto shape = m_clipboard->clone();
+    shape->translate(QPointF(16, 16));
+    auto shapes = m_shapes;
+    shapes.push_back(std::move(shape));
+    commit(std::move(shapes));
+    setSelected(static_cast<int>(m_shapes.size()) - 1);
+}
+
 void AnnotationDocument::setText(int index, const QString& text) {
     const bool empty = text.trimmed().isEmpty();
     auto shapes = m_shapes;
