@@ -21,10 +21,23 @@ Item {
     property alias session: capture.session
     property bool hideToolbar
     property bool toolbarBottom: cState.annotating && cState.region.y < toolbar.implicitHeight
+    property bool moveModifier
 
     focus: true
     Keys.onEscapePressed: cState.cancelled()
-    Keys.onPressed: event => annotation.handleKey(event)
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Control)
+            moveModifier = true;
+        annotation.handleKey(event);
+    }
+    Keys.onReleased: event => {
+        if (event.key === Qt.Key_Control)
+            moveModifier = false;
+    }
+    onActiveFocusChanged: {
+        if (!activeFocus)
+            moveModifier = false;
+    }
 
     Behavior on toolbarBottom {
         SequentialAnimation {
@@ -81,7 +94,13 @@ Item {
         screen: root.screen
         freeze: true
         resizeMode: root.cState.annotating
-        cursorShape: root.cState.annotating ? annotation.cursorShape : Qt.CrossCursor
+        cursorShape: {
+            if (!root.cState.annotating)
+                return Qt.CrossCursor;
+            if (root.moveModifier)
+                return Qt.SizeAllCursor;
+            return annotation.cursorShape;
+        }
         selectClients: root.cState.selectClients
         showCrosshair: root.cState.showCrosshair
 

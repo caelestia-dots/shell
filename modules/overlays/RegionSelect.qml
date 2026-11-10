@@ -16,6 +16,9 @@ MouseArea {
     property bool selecting
     property bool pendingSelect
     property bool selectCancelled
+    property bool movingRegion
+    property point moveStart
+    property rect moveBase
 
     property real ssx
     property real ssy
@@ -32,6 +35,13 @@ MouseArea {
 
     onPressed: event => {
         if (resizeMode) {
+            if (event.button === Qt.LeftButton && event.modifiers & Qt.ControlModifier) {
+                movingRegion = true;
+                moveStart = Qt.point(event.x, event.y);
+                moveBase = selection.rect;
+                return;
+            }
+
             event.accepted = false;
             return;
         }
@@ -52,6 +62,11 @@ MouseArea {
     }
 
     onReleased: event => {
+        if (movingRegion) {
+            movingRegion = false;
+            return;
+        }
+
         if (resizeMode) {
             event.accepted = false;
             return;
@@ -74,6 +89,16 @@ MouseArea {
     }
 
     onPositionChanged: event => {
+        if (movingRegion) {
+            const dx = Math.max(-moveBase.x, Math.min(width - moveBase.x - moveBase.width, event.x - moveStart.x));
+            const dy = Math.max(-moveBase.y, Math.min(height - moveBase.y - moveBase.height, event.y - moveStart.y));
+            selection.sx = moveBase.x + dx;
+            selection.sy = moveBase.y + dy;
+            selection.ex = moveBase.x + moveBase.width + dx;
+            selection.ey = moveBase.y + moveBase.height + dy;
+            return;
+        }
+
         if (resizeMode) {
             event.accepted = false;
             return;
