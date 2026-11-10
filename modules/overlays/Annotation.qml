@@ -108,6 +108,16 @@ Item {
                 return true;
             }
 
+            if (event.key === Qt.Key_C) {
+                document.copy();
+                return true;
+            }
+
+            if (event.key === Qt.Key_V) {
+                document.paste();
+                return true;
+            }
+
             return false;
         }
 
