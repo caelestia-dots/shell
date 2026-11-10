@@ -88,9 +88,6 @@ LazyLoader {
                     screen: win.modelData
                     session: captureSession
                     contentOpacity: root.contentOpacity
-
-                    focus: true
-                    Keys.onEscapePressed: root.cancelled()
                 }
             }
         }

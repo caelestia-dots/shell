@@ -22,6 +22,10 @@ Item {
     property bool hideToolbar
     property bool toolbarBottom: cState.annotating && cState.region.y < toolbar.implicitHeight
 
+    focus: true
+    Keys.onEscapePressed: cState.cancelled()
+    Keys.onPressed: event => annotation.handleKey(event)
+
     Behavior on toolbarBottom {
         SequentialAnimation {
             PropertyAction {
