@@ -358,7 +358,13 @@ void RectShape::renderEffect(
             std::max(1, qRound(region.height() / block)), Qt::IgnoreAspectRatio, Qt::FastTransformation);
         region = small.scaled(region.size(), Qt::IgnoreAspectRatio, Qt::FastTransformation);
     } else {
-        boxBlur(region, qRound((2 + m_style.effectStrength * 14) * scale));
+        const auto radius = qRound((2 + m_style.effectStrength * 14) * scale);
+        const auto factor = std::max(1, radius / 2);
+        const auto size = region.size();
+        auto small = region.scaled(std::max(1, size.width() / factor), std::max(1, size.height() / factor),
+            Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        boxBlur(small, std::max(1, radius / factor));
+        region = small.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
 
     region.setDevicePixelRatio(dpr);
