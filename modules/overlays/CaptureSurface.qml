@@ -78,7 +78,7 @@ Item {
         freeze: true
         enabled: !root.cState.annotating
         hoverEnabled: !root.cState.annotating
-        cursorShape: root.cState.annotating ? undefined : Qt.CrossCursor // FIXME: doesn't work currently
+        cursorShape: root.cState.annotating ? annotation.cursorShape : Qt.CrossCursor
         selectClients: !root.cState.annotating && root.cState.selectClients
         showCrosshair: !root.cState.annotating && root.cState.showCrosshair
         onSelected: r => {

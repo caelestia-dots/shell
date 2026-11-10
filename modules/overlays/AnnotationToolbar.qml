@@ -86,8 +86,8 @@ RowLayout {
 
     component Separator: StyledRect {
         Layout.fillHeight: true
-        Layout.topMargin: Tokens.padding.large
-        Layout.bottomMargin: Tokens.padding.large
+        Layout.topMargin: Tokens.padding.small
+        Layout.bottomMargin: Tokens.padding.small
         implicitWidth: 1
         color: Qt.alpha(Colours.palette.onSecondaryContainer, 0.3)
     }

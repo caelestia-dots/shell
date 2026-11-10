@@ -15,6 +15,14 @@ Item {
     property alias base: canvas.base
     property bool active
 
+    readonly property int cursorShape: {
+        if (document.tool === AnnotationDocument.Select)
+            return Qt.ArrowCursor;
+        if (document.tool === AnnotationDocument.Text)
+            return Qt.IBeamCursor;
+        return Qt.CrossCursor;
+    }
+
     readonly property alias editingText: textEditor.visible
     readonly property var tools: [
         {
@@ -131,13 +139,6 @@ Item {
 
         anchors.fill: parent
         enabled: root.active && !textEditor.visible
-        cursorShape: {
-            if (root.document.tool === AnnotationDocument.Select)
-                return Qt.ArrowCursor;
-            if (root.document.tool === AnnotationDocument.Text)
-                return Qt.IBeamCursor;
-            return Qt.CrossCursor;
-        }
 
         onPressed: event => root.document.press(globalPos(event), event.modifiers & Qt.ShiftModifier)
         onPositionChanged: event => root.document.move(globalPos(event), event.modifiers & Qt.ShiftModifier)
