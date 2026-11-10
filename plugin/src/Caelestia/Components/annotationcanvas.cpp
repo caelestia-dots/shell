@@ -1,51 +1,61 @@
 #include "annotationcanvas.hpp"
 
 #include <qpainter.h>
-#include <qpen.h>
 #include <qquickwindow.h>
 #include <qscreen.h>
 
 namespace caelestia::shell::components {
 
+namespace {
+
+constexpr int k_previewMargin = 4;
+
+} // namespace
+
+AnnotationPreview::AnnotationPreview(AnnotationCanvas* canvas)
+    : QQuickPaintedItem(canvas)
+    , m_canvas(canvas) {
+    setVisible(false);
+}
+
+void AnnotationPreview::paint(QPainter* painter) {
+    const auto* document = m_canvas->document();
+    if (!document)
+        return;
+
+    const auto dpr = m_canvas->layer().devicePixelRatio();
+    painter->translate(-(position() + m_canvas->origin()));
+    document->renderPreview(*painter, m_canvas->scaledBase(), m_canvas->layer(), (position() * dpr).toPoint());
+}
+
 AnnotationCanvas::AnnotationCanvas(QQuickItem* parent)
-    : QQuickPaintedItem(parent) {
-    QObject::connect(this, &AnnotationCanvas::windowChanged, this, &AnnotationCanvas::invalidateCache);
+    : QQuickPaintedItem(parent)
+    , m_preview(new AnnotationPreview(this)) {
+    QObject::connect(this, &AnnotationCanvas::windowChanged, this, &AnnotationCanvas::invalidateLayer);
 }
 
 void AnnotationCanvas::paint(QPainter* painter) {
     if (!m_document)
         return;
 
-    const auto offset = -origin();
     const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
-    if (m_cacheDirty || m_cache.size() != (size() * dpr).toSize()) {
-        m_cache = QImage((size() * dpr).toSize(), QImage::Format_ARGB32_Premultiplied);
-        m_cache.setDevicePixelRatio(dpr);
-        m_cache.fill(Qt::transparent);
-
-        QPainter cachePainter(&m_cache);
-        if (!m_base.isNull())
-            cachePainter.drawImage(boundingRect(), m_base);
-
-        cachePainter.translate(offset);
-        m_document->render(cachePainter);
-        m_cacheDirty = false;
+    const auto layerSize = (size() * dpr).toSize();
+    if (m_layer.size() != layerSize) {
+        m_layer = QImage(layerSize, QImage::Format_ARGB32_Premultiplied);
+        m_layer.setDevicePixelRatio(dpr);
+        m_scaledBase = QImage();
+        m_layerDirty = true;
     }
 
-    painter->drawImage(QPointF(0, 0), m_cache);
-    painter->translate(offset);
-    m_document->renderPreview(*painter, m_cache);
+    if (m_layerDirty) {
+        m_layer.fill(Qt::transparent);
+        QPainter layerPainter(&m_layer);
+        layerPainter.translate(-origin());
+        m_document->render(layerPainter, scaledBase());
+        m_layerDirty = false;
+    }
 
-    const auto selection = m_document->selectedBounds();
-    if (selection.isEmpty())
-        return;
-
-    painter->setRenderHint(QPainter::Antialiasing);
-    QPen pen(m_selectionColor, 1.5);
-    pen.setStyle(Qt::DashLine);
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(selection);
+    painter->drawImage(QPointF(0, 0), m_layer);
 }
 
 AnnotationDocument* AnnotationCanvas::document() const {
@@ -63,18 +73,15 @@ void AnnotationCanvas::setDocument(AnnotationDocument* document) {
     if (m_document) {
         QObject::connect(m_document, &QObject::destroyed, this, [this] {
             m_document = nullptr;
-            invalidateCache();
+            invalidateLayer();
+            updatePreview();
         });
-        QObject::connect(m_document, &AnnotationDocument::changed, this, &AnnotationCanvas::invalidateCache);
-        QObject::connect(m_document, &AnnotationDocument::previewChanged, this, [this] {
-            update();
-        });
-        QObject::connect(m_document, &AnnotationDocument::selectedChanged, this, [this] {
-            update();
-        });
+        QObject::connect(m_document, &AnnotationDocument::changed, this, &AnnotationCanvas::invalidateLayer);
+        QObject::connect(m_document, &AnnotationDocument::previewChanged, this, &AnnotationCanvas::updatePreview);
     }
 
-    invalidateCache();
+    invalidateLayer();
+    updatePreview();
     emit documentChanged();
 }
 
@@ -87,26 +94,21 @@ void AnnotationCanvas::setBase(const QImage& base) {
         return;
 
     m_base = base;
-    invalidateCache();
+    m_scaledBase = QImage();
+    invalidateLayer();
     emit baseChanged();
 }
 
-QColor AnnotationCanvas::selectionColor() const {
-    return m_selectionColor;
+const QImage& AnnotationCanvas::layer() const {
+    return m_layer;
 }
 
-void AnnotationCanvas::setSelectionColor(const QColor& color) {
-    if (m_selectionColor == color)
-        return;
-
-    m_selectionColor = color;
-    update();
-    emit selectionColorChanged();
-}
-
-void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) {
-    QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
-    invalidateCache();
+const QImage& AnnotationCanvas::scaledBase() {
+    if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull()) {
+        m_scaledBase = m_base.scaled(m_layer.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        m_scaledBase.setDevicePixelRatio(m_layer.devicePixelRatio());
+    }
+    return m_scaledBase;
 }
 
 QPointF AnnotationCanvas::origin() const {
@@ -114,9 +116,30 @@ QPointF AnnotationCanvas::origin() const {
     return w && w->screen() ? QPointF(w->screen()->geometry().topLeft()) : QPointF();
 }
 
-void AnnotationCanvas::invalidateCache() {
-    m_cacheDirty = true;
+void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) {
+    QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
+    invalidateLayer();
+}
+
+void AnnotationCanvas::invalidateLayer() {
+    m_layerDirty = true;
     update();
+}
+
+void AnnotationCanvas::updatePreview() {
+    const auto bounds = m_document ? m_document->previewBounds() : std::nullopt;
+    if (!bounds) {
+        m_preview->setVisible(false);
+        return;
+    }
+
+    const auto rect = bounds->translated(-origin())
+                          .adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin)
+                          .toAlignedRect();
+    m_preview->setPosition(rect.topLeft());
+    m_preview->setSize(rect.size());
+    m_preview->setVisible(true);
+    m_preview->update();
 }
 
 } // namespace caelestia::shell::components

@@ -347,24 +347,38 @@ void AnnotationDocument::doubleClick(const QPointF& point) {
     }
 }
 
-void AnnotationDocument::render(QPainter& painter) const {
+void AnnotationDocument::render(QPainter& painter, const QImage& base) const {
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::TextAntialiasing);
+    const auto* above = base.isNull() ? nullptr : dynamic_cast<const QImage*>(painter.device());
     const auto dragged = m_dragging && m_preview ? m_selected : -1;
-    for (qsizetype i = 0; i < m_shapes.size(); ++i)
-        if (i != dragged)
+    for (qsizetype i = 0; i < m_shapes.size(); ++i) {
+        if (i == dragged)
+            continue;
+        if (const auto* effect = dynamic_cast<const RectShape*>(m_shapes[i].get());
+            effect && effect->isEffect() && above)
+            effect->renderEffect(painter, base, *above, QPoint());
+        else
             m_shapes[i]->render(painter);
+    }
 }
 
-void AnnotationDocument::renderPreview(QPainter& painter, const QImage& below) const {
+void AnnotationDocument::renderPreview(
+    QPainter& painter, const QImage& base, const QImage& above, const QPoint& deviceOffset) const {
     if (!m_preview)
         return;
 
     painter.setRenderHint(QPainter::Antialiasing);
     if (const auto* effect = dynamic_cast<const RectShape*>(m_preview.get()); effect && effect->isEffect())
-        effect->renderEffect(painter, below);
+        effect->renderEffect(painter, base, above, deviceOffset);
     else
         m_preview->render(painter);
+}
+
+std::optional<QRectF> AnnotationDocument::previewBounds() const {
+    if (!m_preview)
+        return std::nullopt;
+    return m_preview->bounds();
 }
 
 QRectF AnnotationDocument::selectedBounds() const {
