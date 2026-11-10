@@ -12,7 +12,6 @@ namespace caelestia::shell::components::annotation {
 namespace {
 
 constexpr qreal k_hitSlop = 8.0;
-constexpr qreal k_textPadding = 6.0;
 
 QPointF constrainTo45(const QPointF& start, const QPointF& point) {
     const auto d = point - start;
@@ -397,21 +396,21 @@ void Text::render(QPainter& painter) const {
 
     painter.save();
     painter.setFont(m_style.font);
-    const auto r = textRect();
 
     if (m_style.textBackground) {
         painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(0, 0, 0, 170));
-        painter.drawRoundedRect(r.adjusted(-k_textPadding, -k_textPadding, k_textPadding, k_textPadding), 8, 8);
+        painter.setBrush(m_style.textBackgroundColor);
+        painter.drawRoundedRect(bounds(), m_style.textRadius, m_style.textRadius);
     }
 
     painter.setPen(m_style.color);
-    painter.drawText(r, Qt::AlignLeft | Qt::AlignTop, m_text);
+    painter.drawText(textRect(), Qt::AlignLeft | Qt::AlignTop, m_text);
     painter.restore();
 }
 
 QRectF Text::bounds() const {
-    return textRect().adjusted(-k_textPadding, -k_textPadding, k_textPadding, k_textPadding);
+    const auto pad = m_style.textPadding;
+    return textRect().adjusted(-pad, -pad, pad, pad);
 }
 
 bool Text::hitTest(const QPointF& point) const {

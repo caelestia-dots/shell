@@ -50,6 +50,9 @@ LazyLoader {
             id: captureSession
 
             document.font: Tokens.font.body.medium
+            document.textBackgroundColor: Qt.alpha("black", 0.67)
+            document.textPadding: TokenConfig.appearance.padding.small
+            document.textRadius: TokenConfig.appearance.rounding.small
 
             onSaved: path => root.saved(path)
             onCopied: path => root.copied(path)
