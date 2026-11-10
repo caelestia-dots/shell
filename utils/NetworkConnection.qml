@@ -71,6 +71,20 @@ QtObject {
 
             if (hasSavedProfile) {
                 Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
+            } else if (network.security && (network.security.includes("802.1X") || network.security.includes("EAP"))) {
+                if (Nmcli.pendingConnection) {
+                    Nmcli.connectionCheckTimer.stop();
+                    Nmcli.immediateCheckTimer.stop();
+                    Nmcli.immediateCheckTimer.checkCount = 0;
+                    Nmcli.pendingConnection = null;
+                }
+
+                if (session && session.network) {
+                    session.network.showPasswordDialog = true;
+                    session.network.pendingNetwork = network;
+                } else if (onPasswordNeeded) {
+                    onPasswordNeeded(network);
+                }
             } else {
                 // Use password check with callback
                 Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
@@ -112,5 +126,13 @@ QtObject {
         }
 
         Nmcli.connectToNetwork(network.ssid, password || "", network.bssid || "", onResult || null);
+    }
+
+    function connectEnterprise(network, identity, password, onResult): void {
+        if (!network) {
+            return;
+        }
+
+        Nmcli.connectEnterprise(network.ssid, identity || "", password || "", onResult || null);
     }
 }
