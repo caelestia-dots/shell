@@ -18,11 +18,14 @@ Item {
 
     property point hoverPos
     property int hoverIndex: -1
+    property int shownSelected: -1
+    property int activeRect: 0
 
     readonly property bool overSelection: {
         if (document.selected < 0)
             return false;
-        const b = document.selectedBounds;
+
+        const b = padded(document.selectedBounds);
         return hoverPos.x >= b.x && hoverPos.x <= b.x + b.width && hoverPos.y >= b.y && hoverPos.y <= b.y + b.height;
     }
 
@@ -148,6 +151,11 @@ Item {
         return true;
     }
 
+    function padded(b: rect): rect {
+        const pad = Tokens.padding.medium;
+        return Qt.rect(b.x - pad, b.y - pad, b.width + pad * 2, b.height + pad * 2);
+    }
+
     function updateHover(): void {
         hoverIndex = active ? document.shapeAt(hoverPos) : -1;
     }
@@ -159,29 +167,16 @@ Item {
         document: root.document
     }
 
-    Shape {
-        id: selection
+    SelectionRect {
+        id: rectA
 
-        readonly property rect bounds: root.document.selectedBounds
+        active: root.activeRect === 0
+    }
 
-        visible: root.document.selected >= 0
-        x: bounds.x - root.screen.x
-        y: bounds.y - root.screen.y
-        width: bounds.width
-        height: bounds.height
-        preferredRendererType: Shape.CurveRenderer
+    SelectionRect {
+        id: rectB
 
-        ShapePath {
-            strokeColor: Colours.palette.primary
-            strokeWidth: 1.5
-            strokeStyle: ShapePath.DashLine
-            fillColor: "transparent"
-
-            PathRectangle {
-                width: selection.width
-                height: selection.height
-            }
-        }
+        active: root.activeRect === 1
     }
 
     MouseArea {
@@ -269,6 +264,17 @@ Item {
             root.updateHover();
         }
 
+        function onSelectedBoundsChanged(): void {
+            const sel = root.document.selected;
+            if (sel !== root.shownSelected) {
+                if (sel >= 0 && root.shownSelected >= 0)
+                    root.activeRect = 1 - root.activeRect;
+                root.shownSelected = sel;
+            }
+            if (sel >= 0)
+                (root.activeRect === 0 ? rectA : rectB).bounds = root.padded(root.document.selectedBounds);
+        }
+
         function onTextEditRequested(index: int, pos: point, text: string): void {
             const local = Qt.point(pos.x - root.screen.x, pos.y - root.screen.y);
             if (local.x < 0 || local.y < 0 || local.x >= root.width || local.y >= root.height)
@@ -277,5 +283,42 @@ Item {
         }
 
         target: root.document
+    }
+
+    component SelectionRect: Shape {
+        id: shape
+
+        property rect bounds
+        property bool active
+
+        x: bounds.x - root.screen.x
+        y: bounds.y - root.screen.y
+        width: bounds.width
+        height: bounds.height
+        preferredRendererType: Shape.CurveRenderer
+        opacity: active && root.document.selected >= 0 ? 1 : 0
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+
+        ShapePath {
+            strokeColor: Colours.palette.primary
+            strokeWidth: 2
+            strokeStyle: ShapePath.DashLine
+            fillColor: "transparent"
+
+            Behavior on strokeColor {
+                CAnim {}
+            }
+
+            PathRectangle {
+                radius: root.Tokens.rounding.medium
+                width: shape.width
+                height: shape.height
+            }
+        }
     }
 }

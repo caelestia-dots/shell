@@ -384,9 +384,7 @@ std::optional<QRectF> AnnotationDocument::previewBounds() const {
 QRectF AnnotationDocument::selectedBounds() const {
     if (m_selected < 0 || m_selected >= static_cast<int>(m_shapes.size()))
         return {};
-
-    const auto& shape = m_dragging && m_preview ? m_preview : m_shapes[m_selected];
-    return shape->bounds().adjusted(-2, -2, 2, 2);
+    return (m_dragging && m_preview ? m_preview : m_shapes[m_selected])->bounds();
 }
 
 Style AnnotationDocument::currentStyle() const {
