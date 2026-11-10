@@ -3,6 +3,7 @@
 #include <qpainter.h>
 
 #include <algorithm>
+#include <cmath>
 
 namespace caelestia::shell::components {
 
@@ -238,7 +239,7 @@ void AnnotationDocument::press(const QPointF& point, bool constrain) {
         setSelected(index);
         if (index >= 0) {
             m_dragging = true;
-            m_dragLast = point;
+            m_dragStart = point;
         }
         return;
     }
@@ -255,13 +256,22 @@ void AnnotationDocument::press(const QPointF& point, bool constrain) {
 
 void AnnotationDocument::move(const QPointF& point, bool constrain) {
     if (m_dragging && m_selected >= 0) {
-        if (!m_preview) {
+        if (!m_dragBase) {
             pushUndo();
-            m_preview = m_shapes[m_selected]->clone();
+            m_dragBase = m_shapes[m_selected]->clone();
             emit changed();
         }
-        m_preview->translate(point - m_dragLast);
-        m_dragLast = point;
+
+        auto delta = point - m_dragStart;
+        if (constrain) {
+            if (std::abs(delta.x()) >= std::abs(delta.y()))
+                delta.setY(0);
+            else
+                delta.setX(0);
+        }
+
+        m_preview = m_dragBase->clone();
+        m_preview->translate(delta);
         emit previewChanged();
         return;
     }
@@ -276,6 +286,7 @@ void AnnotationDocument::move(const QPointF& point, bool constrain) {
 void AnnotationDocument::release() {
     if (m_dragging) {
         m_dragging = false;
+        m_dragBase = nullptr;
         if (!m_preview)
             return;
 
