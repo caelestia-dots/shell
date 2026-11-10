@@ -216,6 +216,7 @@ Item {
         property point pressPos
         property real startX
         property real startY
+        property real startRatio
 
         enabled: root.resizeMode && fits
         preventStealing: true
@@ -231,16 +232,28 @@ Item {
                 startX = root[xProp];
             if (yProp)
                 startY = root[yProp];
+            startRatio = root.rect.width > 0 ? root.rect.height / root.rect.width : 1;
         }
         onPositionChanged: event => {
             if (!pressed)
                 return;
 
             const p = mapToItem(root, event.x, event.y);
+            let dx = p.x - pressPos.x;
+            let dy = p.y - pressPos.y;
+
+            if (xProp && yProp && event.modifiers & Qt.ShiftModifier) {
+                const diagX = xProp === "sx" ? -1 : 1;
+                const diagY = (yProp === "sy" ? -1 : 1) * startRatio;
+                const t = (dx * diagX + dy * diagY) / (diagX * diagX + diagY * diagY);
+                dx = t * diagX;
+                dy = t * diagY;
+            }
+
             if (xProp)
-                root[xProp] = Math.max(0, Math.min(root.width, startX + p.x - pressPos.x));
+                root[xProp] = Math.max(0, Math.min(root.width, startX + dx));
             if (yProp)
-                root[yProp] = Math.max(0, Math.min(root.height, startY + p.y - pressPos.y));
+                root[yProp] = Math.max(0, Math.min(root.height, startY + dy));
         }
 
         implicitWidth: resizeInner.implicitWidth + root.handlePadding * 2
