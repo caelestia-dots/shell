@@ -221,6 +221,11 @@ Item {
         preventStealing: true
 
         onPressed: event => {
+            if (root.sx > root.ex)
+                [root.sx, root.ex] = [root.ex, root.sx];
+            if (root.sy > root.ey)
+                [root.sy, root.ey] = [root.ey, root.sy];
+
             pressPos = mapToItem(root, event.x, event.y);
             if (xProp)
                 startX = root[xProp];
@@ -236,12 +241,6 @@ Item {
                 root[xProp] = Math.max(0, Math.min(root.width, startX + p.x - pressPos.x));
             if (yProp)
                 root[yProp] = Math.max(0, Math.min(root.height, startY + p.y - pressPos.y));
-        }
-        onReleased: {
-            if (root.sx > root.ex)
-                [root.sx, root.ex] = [root.ex, root.sx];
-            if (root.sy > root.ey)
-                [root.sy, root.ey] = [root.ey, root.sy];
         }
 
         implicitWidth: resizeInner.implicitWidth + root.handlePadding * 2
