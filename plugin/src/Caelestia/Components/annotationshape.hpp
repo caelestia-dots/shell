@@ -111,7 +111,7 @@ public:
     [[nodiscard]] bool isEmpty() const override;
 
     [[nodiscard]] bool isEffect() const;
-    void renderEffect(QPainter& painter, const QImage& source) const;
+    void renderEffect(QPainter& painter, const QImage& base, const QImage& above, const QPoint& deviceOffset) const;
 
 protected:
     [[nodiscard]] QPainterPath outline() const override;

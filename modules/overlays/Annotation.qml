@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import Caelestia.Components
 import Caelestia.Config
@@ -156,7 +157,31 @@ Item {
 
         anchors.fill: parent
         document: root.document
-        selectionColor: Colours.palette.primary
+    }
+
+    Shape {
+        id: selection
+
+        readonly property rect bounds: root.document.selectedBounds
+
+        visible: root.document.selected >= 0
+        x: bounds.x - root.screen.x
+        y: bounds.y - root.screen.y
+        width: bounds.width
+        height: bounds.height
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeColor: Colours.palette.primary
+            strokeWidth: 1.5
+            strokeStyle: ShapePath.DashLine
+            fillColor: "transparent"
+
+            PathRectangle {
+                width: selection.width
+                height: selection.height
+            }
+        }
     }
 
     MouseArea {
