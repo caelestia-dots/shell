@@ -222,6 +222,11 @@ Item {
         preventStealing: true
 
         onPressed: event => {
+            if (event.modifiers & Qt.ControlModifier) {
+                event.accepted = false;
+                return;
+            }
+
             if (root.sx > root.ex)
                 [root.sx, root.ex] = [root.ex, root.sx];
             if (root.sy > root.ey)
