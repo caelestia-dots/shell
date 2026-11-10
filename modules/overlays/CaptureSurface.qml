@@ -10,7 +10,6 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
-import qs.components.controls
 
 Item {
     id: root
@@ -20,15 +19,15 @@ Item {
     required property real contentOpacity
     property alias session: capture.session
     property bool hideToolbar
-    property bool toolbarBottom: cState.annotating && cState.region.y < toolbar.implicitHeight
+    property bool toolbarBottom: cState.annotating && cState.region.y - screen.y < toolbar.implicitHeight
     property bool moveModifier
 
     focus: true
-    Keys.onEscapePressed: cState.cancelled()
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Control)
             moveModifier = true;
-        annotation.handleKey(event);
+        if (!annotation.handleKey(event) && event.key === Qt.Key_Escape)
+            cState.cancelled();
     }
     Keys.onReleased: event => {
         if (event.key === Qt.Key_Control)
@@ -270,14 +269,5 @@ Item {
             onCopied: capture.session.copy(root.cState.region)
             onCancelled: root.cState.cancelled()
         }
-    }
-
-    component ToolbarButton: IconButton {
-        shapeMorph: true
-        isRound: true
-        inactiveColour: Colours.palette.primaryContainer
-        inactiveOnColour: Colours.palette.onPrimaryContainer
-        implicitWidth: implicitHeight + Tokens.padding.small * 2
-        padding: Tokens.padding.small
     }
 }

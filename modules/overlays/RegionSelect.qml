@@ -79,8 +79,10 @@ MouseArea {
         pendingSelect = false;
 
         if (selectClients && hoveredRect) {
-            selected(hoveredRect);
-            return;
+            selection.sx = hoveredRect.x;
+            selection.sy = hoveredRect.y;
+            selection.ex = hoveredRect.x + hoveredRect.width;
+            selection.ey = hoveredRect.y + hoveredRect.height;
         }
 
         const rect = selection.rect;

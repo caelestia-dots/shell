@@ -17,6 +17,7 @@ Item {
     property real ey: -1
 
     readonly property rect rect: Qt.rect(Math.min(sx, ex), Math.min(sy, ey), Math.abs(sx - ex), Math.abs(sy - ey))
+    readonly property bool empty: sx < 0
 
     readonly property int borderWidth: 1
     readonly property real handleSize: Tokens.padding.medium
@@ -218,7 +219,7 @@ Item {
         property real startY
         property real startRatio
 
-        enabled: root.resizeMode && fits
+        enabled: root.resizeMode && !root.empty && fits
         preventStealing: true
 
         onPressed: event => {
@@ -264,7 +265,7 @@ Item {
         implicitWidth: resizeInner.implicitWidth + root.handlePadding * 2
         implicitHeight: resizeInner.implicitHeight + root.handlePadding * 2
 
-        scale: root.resizeMode && fits ? 1 : 0
+        scale: root.resizeMode && !root.empty && fits ? 1 : 0
 
         Behavior on scale {
             Anim {
