@@ -157,10 +157,11 @@ void AnnotationCanvas::updatePreview() {
         QPainter painter(&m_previewImage);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.translate(-origin());
-        stroke->render(painter);
+        stroke->renderOpaque(painter);
 
         m_preview->setPosition(QPointF(0, 0));
         m_preview->setSize(size());
+        m_preview->setOpacity(stroke->opacity());
         m_preview->setVisible(true);
         m_preview->update();
         return;
@@ -172,6 +173,7 @@ void AnnotationCanvas::updatePreview() {
                           .toAlignedRect();
     m_preview->setPosition(rect.topLeft());
     m_preview->setSize(rect.size());
+    m_preview->setOpacity(1.0);
     m_preview->setVisible(true);
     m_preview->update();
 }
@@ -180,6 +182,12 @@ void AnnotationCanvas::extendPreview() {
     const auto* stroke = m_document ? m_document->previewStroke() : nullptr;
     if (!stroke || m_previewImage.isNull())
         return;
+
+    // The press dot overshoots the flat start, so redraw it once
+    if (stroke->isFirstSegment()) {
+        updatePreview();
+        return;
+    }
 
     QPainter painter(&m_previewImage);
     painter.setRenderHint(QPainter::Antialiasing);
