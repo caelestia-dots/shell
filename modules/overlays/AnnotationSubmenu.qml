@@ -15,6 +15,8 @@ Item {
     id: root
 
     required property AnnotationDocument document
+    property color customColour
+    property color customBackgroundColour
     property Item picking
 
     implicitWidth: loader.implicitWidth
@@ -63,6 +65,7 @@ Item {
             spacing: Tokens.spacing.large
 
             Swatches {
+                custom: root.customColour
                 selectedColour: root.document.color
                 onSelected: c => root.document.color = c
             }
@@ -86,6 +89,7 @@ Item {
             spacing: Tokens.spacing.large
 
             Swatches {
+                custom: root.customColour
                 selectedColour: root.document.color
                 onSelected: c => root.document.color = c
             }
@@ -126,6 +130,7 @@ Item {
             spacing: Tokens.spacing.large
 
             Swatches {
+                custom: root.customColour
                 selectedColour: root.document.color
                 onSelected: c => root.document.color = c
             }
@@ -158,6 +163,7 @@ Item {
             }
 
             Swatches {
+                custom: root.customColour
                 selectedColour: root.document.color
                 onSelected: c => root.document.color = c
             }
@@ -167,6 +173,8 @@ Item {
             }
 
             Swatches {
+                background: true
+                custom: root.customBackgroundColour
                 colours: [Colours.palette.surface, Colours.palette.surfaceContainerHighest, Colours.palette.primaryContainer, Colours.palette.errorContainer]
                 selectedColour: root.document.backgroundColor
                 onSelected: c => root.document.backgroundColor = c
@@ -216,6 +224,7 @@ Item {
             }
 
             Swatches {
+                custom: root.customColour
                 selectedColour: root.document.color
                 onSelected: c => root.document.color = c
             }
@@ -225,6 +234,8 @@ Item {
             }
 
             Swatches {
+                background: true
+                custom: root.customBackgroundColour
                 colours: [Colours.palette.surface, Colours.palette.surfaceContainerHighest, Colours.palette.primaryContainer, Colours.palette.errorContainer]
                 selectedColour: root.document.backgroundColor
                 onSelected: c => root.document.backgroundColor = c
@@ -327,6 +338,8 @@ Item {
         id: swatches
 
         required property color selectedColour
+        required property color custom
+        property bool background
         property alias colours: swatchRepeater.model
 
         signal selected(colour: color)
@@ -347,7 +360,7 @@ Item {
         Swatch {
             id: pickerSwatch
 
-            modelData: selected ? swatches.selectedColour : Colours.palette.surface
+            modelData: selected ? swatches.selectedColour : swatches.custom
             selected: !swatchRepeater.model.includes(swatches.selectedColour)
             onClicked: root.picking = swatches
 
