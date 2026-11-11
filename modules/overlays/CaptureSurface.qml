@@ -10,6 +10,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
+import qs.components.controls
 
 Item {
     id: root
@@ -21,7 +22,8 @@ Item {
     property bool hideToolbar
     property real toolbarOpacity: hideToolbar ? 0 : 1
     property real submenuOpacity: hideToolbar || !cState.annotating || annotation.document.tool === AnnotationDocument.Select ? 0 : 1
-    property bool toolbarBottom: {
+    property bool toolbarBottom
+    readonly property bool wantsToolbarBottom: {
         if (!cState.annotating)
             return false;
 
@@ -35,9 +37,10 @@ Item {
             return true;
         if (annotation.document.tool === AnnotationDocument.Select)
             return false;
-        return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, screen.y + toolbar.implicitHeight, submenu.implicitHeight);
+        return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, screen.y + toolbar.implicitHeight, submenuContent.implicitHeight + Tokens.padding.small * 2);
     }
     property bool moveModifier
+    property bool picking: submenuContent.picking !== null
 
     readonly property real toolbarY: {
         const open = cState.open && !hideToolbar && !regionSelect.selecting;
@@ -50,7 +53,11 @@ Item {
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Control)
             moveModifier = true;
-        if (!annotation.handleKey(event) && event.key === Qt.Key_Escape)
+        if (annotation.handleKey(event) || event.key !== Qt.Key_Escape)
+            return;
+        if (picking)
+            submenuContent.picking = null;
+        else
             cState.cancelled();
     }
     Keys.onReleased: event => {
@@ -62,6 +69,14 @@ Item {
             moveModifier = false;
     }
 
+    Binding {
+        target: root
+        property: "toolbarBottom"
+        value: root.wantsToolbarBottom
+        when: !root.picking
+        restoreMode: Binding.RestoreNone
+    }
+
     Behavior on toolbarOpacity {
         Anim {
             type: Anim.DefaultEffects
@@ -71,6 +86,35 @@ Item {
     Behavior on submenuOpacity {
         Anim {
             type: Anim.DefaultEffects
+        }
+    }
+
+    Behavior on picking {
+        SequentialAnimation {
+            PropertyAction {
+                target: submenuAnim
+                property: "type"
+                value: Anim.DefaultSpatial
+            }
+            PropertyAction {
+                target: submenuBg
+                property: "deformScale"
+                value: 0.00002 * root.Config.appearance.deformScale
+            }
+            PropertyAction {}
+            PauseAnimation {
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+            }
+            PropertyAction {
+                target: submenuBg
+                property: "deformScale"
+                value: 0.00005 * root.Config.appearance.deformScale
+            }
+            PropertyAction {
+                target: submenuAnim
+                property: "type"
+                value: toolbarAnim.type
+            }
         }
     }
 
@@ -152,6 +196,13 @@ Item {
         onResized: r => root.cState.region = Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height)
     }
 
+    MouseArea {
+        anchors.fill: parent
+        visible: root.picking
+        enabled: root.picking
+        onClicked: submenuContent.picking = null
+    }
+
     Item {
         anchors.fill: parent
         layer.enabled: true
@@ -207,13 +258,17 @@ Item {
             group: group
             anchors.horizontalCenter: parent.horizontalCenter
             y: {
+                const h = submenu.implicitHeight;
+                if (root.picking)
+                    return (root.height - h) / 2;
+
                 const open = root.cState.open && !root.hideToolbar && root.cState.annotating && annotation.document.tool !== AnnotationDocument.Select;
                 if (root.toolbarBottom)
-                    return open ? root.toolbarY - height : root.toolbarY + toolbarBg.height / 2;
-                return open ? root.toolbarY + toolbarBg.height : root.toolbarY + toolbarBg.height / 2 - height;
+                    return open ? root.toolbarY - h : root.toolbarY + toolbarBg.height / 2;
+                return open ? root.toolbarY + toolbarBg.height : root.toolbarY + toolbarBg.height / 2 - h;
             }
 
-            radius: Tokens.rounding.extraExtraLarge
+            radius: root.picking ? Tokens.rounding.extraLarge : Tokens.rounding.extraExtraLarge
             implicitWidth: submenu.implicitWidth
             implicitHeight: submenu.implicitHeight
 
@@ -223,7 +278,19 @@ Item {
                 id: submenuBehaviour
 
                 Anim {
+                    id: submenuAnim
+
                     type: toolbarAnim.type
+                }
+            }
+
+            Behavior on implicitHeight {
+                Anim {}
+            }
+
+            Behavior on radius {
+                Anim {
+                    type: Anim.DefaultEffects
                 }
             }
         }
@@ -271,17 +338,18 @@ Item {
     MouseArea {
         id: submenu
 
-        readonly property real fullHeight: submenuContent.implicitHeight + Tokens.padding.small * 2
+        readonly property Item content: root.picking ? (picker.item ?? submenuContent) : submenuContent
+        readonly property real fullHeight: content.implicitHeight + Tokens.padding.small * 2
         readonly property real toolbarEdge: root.toolbarBottom ? toolbarBg.y : toolbarBg.y + toolbarBg.height
-        readonly property real visibleTop: root.toolbarBottom ? submenuBg.y : Math.max(submenuBg.y, toolbarEdge)
-        readonly property real visibleBottom: root.toolbarBottom ? Math.min(submenuBg.y + fullHeight, toolbarEdge) : submenuBg.y + fullHeight
+        readonly property real visibleTop: root.toolbarBottom || root.picking ? submenuBg.y : Math.max(submenuBg.y, toolbarEdge)
+        readonly property real visibleBottom: root.toolbarBottom && !root.picking ? Math.min(submenuBg.y + fullHeight, toolbarEdge) : submenuBg.y + fullHeight
         readonly property real pivotY: submenuBg.y - y + fullHeight / 2
 
         x: submenuBg.x
         y: visibleTop
 
         clip: true
-        implicitWidth: submenuContent.implicitWidth + Tokens.padding.small * 2
+        implicitWidth: content.implicitWidth + Tokens.padding.small * 2
         implicitHeight: fullHeight
         height: Math.max(0, visibleBottom - visibleTop)
 
@@ -312,6 +380,34 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             y: submenuBg.y - submenu.y + Tokens.padding.small
             document: annotation.document
+            opacity: root.picking ? 0 : 1
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+        }
+
+        Loader {
+            id: picker
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: submenuBg.y - submenu.y + Tokens.padding.small
+            active: opacity > 0
+            opacity: root.picking ? 1 : 0
+
+            sourceComponent: ColourPicker {
+                anchors.centerIn: parent
+                colour: submenuContent.picking?.selectedColour ?? Colours.palette.primary
+                onInteraction: c => submenuContent.picking?.selected(c)
+            }
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
         }
     }
 
