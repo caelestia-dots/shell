@@ -256,10 +256,13 @@ Line::Line(Style style, const QPointF& start, bool arrow)
     , m_arrow(arrow) {}
 
 void Line::render(QPainter& painter) const {
+    if (isEmpty())
+        return;
+
     painter.save();
     painter.setPen(pen());
     painter.setBrush(Qt::NoBrush);
-    painter.drawLine(m_start, m_end);
+    painter.drawLine(m_start, shaftEnd());
 
     if (m_arrow) {
         painter.setPen(Qt::NoPen);
@@ -300,15 +303,13 @@ QPainterPath Line::outline() const {
 
 QPainterPath Line::head() const {
     QPainterPath path;
-    if (!m_arrow)
+    if (!m_arrow || isEmpty())
         return path;
 
-    const QLineF line(m_end, m_start);
-    const auto size = std::max(12.0, m_style.width * 4);
-    const auto angle = qDegreesToRadians(line.angle());
-    const QPointF dir(qCos(angle), -qSin(angle));
+    const auto size = headSize();
+    const auto dir = direction();
     const QPointF normal(-dir.y(), dir.x());
-    const auto base = m_end + dir * size;
+    const auto base = shaftEnd();
 
     path.moveTo(m_end);
     path.lineTo(base + normal * size / 2);
@@ -316,6 +317,19 @@ QPainterPath Line::head() const {
     path.closeSubpath();
 
     return path;
+}
+
+QPointF Line::shaftEnd() const {
+    return m_arrow ? m_end + direction() * headSize() : m_end;
+}
+
+QPointF Line::direction() const {
+    const auto line = QLineF(m_end, m_start).unitVector();
+    return { line.dx(), line.dy() };
+}
+
+qreal Line::headSize() const {
+    return std::max(12.0, m_style.width * 4);
 }
 
 RectShape::RectShape(Style style, const QPointF& start, Kind kind)
