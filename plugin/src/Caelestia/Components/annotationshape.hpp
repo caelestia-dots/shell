@@ -17,14 +17,13 @@ namespace caelestia::shell::components::annotation {
 
 struct Style {
     QColor color;
+    QColor backgroundColor = QColor(0, 0, 0, 170);
     qreal width = 4.0;
+    qreal radius = 8.0;
     bool fill = false;
-    bool rounded = true;
     QFont font;
     bool textBackground = true;
-    QColor textBackgroundColor = QColor(0, 0, 0, 170);
     qreal textPadding = 6.0;
-    qreal textRadius = 8.0;
     qreal effectStrength = 0.5;
 };
 

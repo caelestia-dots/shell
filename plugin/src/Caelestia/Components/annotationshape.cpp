@@ -353,10 +353,8 @@ void RectShape::render(QPainter& painter) const {
                                   : QBrush(Qt::NoBrush));
     if (m_kind == Kind::Ellipse)
         painter.drawEllipse(r);
-    else if (m_style.rounded)
-        painter.drawRoundedRect(r, 8, 8);
     else
-        painter.drawRect(r);
+        painter.drawRoundedRect(r, m_style.radius, m_style.radius);
     painter.restore();
 }
 
@@ -463,8 +461,8 @@ void Text::render(QPainter& painter) const {
 
     if (m_style.textBackground) {
         painter.setPen(Qt::NoPen);
-        painter.setBrush(m_style.textBackgroundColor);
-        painter.drawRoundedRect(bounds(), m_style.textRadius, m_style.textRadius);
+        painter.setBrush(m_style.backgroundColor);
+        painter.drawRoundedRect(bounds(), m_style.radius, m_style.radius);
     }
 
     painter.setPen(m_style.color);
@@ -524,12 +522,12 @@ Counter::Counter(Style style, const QPointF& pos, int number)
 void Counter::render(QPainter& painter) const {
     painter.save();
     painter.setPen(Qt::NoPen);
-    painter.setBrush(m_style.color);
+    painter.setBrush(m_style.backgroundColor);
     painter.drawEllipse(m_pos, radius(), radius());
     auto font = m_style.font;
     font.setBold(true);
     painter.setFont(font);
-    painter.setPen(m_style.color.lightness() > 140 ? Qt::black : Qt::white);
+    painter.setPen(m_style.color);
     painter.drawText(bounds(), Qt::AlignCenter, QString::number(m_number));
     painter.restore();
 }
