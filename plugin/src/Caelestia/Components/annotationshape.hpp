@@ -60,15 +60,23 @@ public:
     void update(const QPointF& point, bool constrain) override;
     [[nodiscard]] std::shared_ptr<Shape> clone() const override;
 
+    // draws only the segment appended by the last update(), returns its bounds
+    [[nodiscard]] QRectF renderSegment(QPainter& painter) const;
+
 protected:
     [[nodiscard]] QPainterPath outline() const override;
 
 private:
+    [[nodiscard]] QPen strokePen() const;
     [[nodiscard]] QPainterPath dot() const;
     [[nodiscard]] QPainterPath path() const;
     [[nodiscard]] qreal width() const;
+    void extendBounds(const QPointF& point);
 
     QList<QPointF> m_points;
+    QPainterPath m_path;
+    QPainterPath m_segment;
+    QRectF m_bounds;
     bool m_highlighter;
 };
 

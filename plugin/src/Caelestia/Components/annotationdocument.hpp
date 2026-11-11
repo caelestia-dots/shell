@@ -118,6 +118,7 @@ public:
     void render(QPainter& painter, const QImage& base = QImage()) const;
     void renderPreview(QPainter& painter, const QImage& base, const QImage& above, const QPoint& deviceOffset) const;
     [[nodiscard]] std::optional<QRectF> previewBounds() const;
+    [[nodiscard]] const annotation::Stroke* previewStroke() const;
     [[nodiscard]] QRectF selectedBounds() const;
 
 signals:
@@ -134,6 +135,7 @@ signals:
     void effectStrengthChanged();
     void changed();
     void previewChanged();
+    void previewExtended();
     void selectedChanged();
     void selectedBoundsChanged();
     void textEditRequested(int index, QPointF pos, const QString& text);
