@@ -30,6 +30,13 @@ Item {
     }
     property bool moveModifier
 
+    readonly property real toolbarY: {
+        const open = cState.open && !hideToolbar && !regionSelect.selecting;
+        if (toolbarBottom)
+            return open ? height - toolbarBg.height : height + 10;
+        return open ? 0 : -toolbarBg.height - 10;
+    }
+
     focus: true
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Control)
@@ -57,13 +64,13 @@ Item {
                 duration: toolbarAnim.duration
             }
             PropertyAction {
-                target: toolbarBehaviour
+                targets: [toolbarBehaviour, submenuBehaviour]
                 property: "enabled"
                 value: false
             }
             PropertyAction {}
             PropertyAction {
-                target: toolbarBehaviour
+                targets: [toolbarBehaviour, submenuBehaviour]
                 property: "enabled"
                 value: true
             }
@@ -156,12 +163,7 @@ Item {
 
             group: group
             anchors.horizontalCenter: parent.horizontalCenter
-            y: {
-                const open = root.cState.open && !root.hideToolbar && !regionSelect.selecting;
-                if (root.toolbarBottom)
-                    return open ? root.height - height : root.height + 10;
-                return open ? 0 : -height - 10;
-            }
+            y: root.toolbarY
 
             radius: Tokens.rounding.extraExtraLarge
             implicitWidth: toolbar.implicitWidth
@@ -176,6 +178,33 @@ Item {
                     id: toolbarAnim
 
                     type: Anim.SlowEffects
+                }
+            }
+        }
+
+        BlobRect {
+            id: submenuBg
+
+            group: group
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: {
+                const open = root.cState.open && !root.hideToolbar && root.cState.annotating;
+                if (root.toolbarBottom)
+                    return open ? root.toolbarY - height : root.toolbarY + toolbarBg.height;
+                return open ? root.toolbarY + toolbarBg.height : root.toolbarY - height;
+            }
+
+            radius: Tokens.rounding.extraExtraLarge
+            implicitWidth: submenu.implicitWidth
+            implicitHeight: submenu.implicitHeight
+
+            deformScale: 0.00005 * Config.appearance.deformScale
+
+            Behavior on y {
+                id: submenuBehaviour
+
+                Anim {
+                    type: toolbarAnim.type
                 }
             }
         }
@@ -217,6 +246,35 @@ Item {
             anchors.centerIn: parent
             asynchronous: true
             sourceComponent: root.cState.annotating ? annotateToolbar : regionToolbar
+        }
+    }
+
+    MouseArea {
+        id: submenu
+
+        x: submenuBg.x
+        y: submenuBg.y
+
+        clip: true
+        implicitWidth: submenuContent.implicitWidth + Tokens.padding.small * 2
+        implicitHeight: submenuContent.implicitHeight + Tokens.padding.small * 2
+
+        opacity: root.contentOpacity
+        hoverEnabled: true
+
+        transform: Matrix4x4 {
+            matrix: submenuBg.deformMatrix
+        }
+
+        Behavior on implicitWidth {
+            Anim {}
+        }
+
+        AnnotationSubmenu {
+            id: submenuContent
+
+            anchors.centerIn: parent
+            document: annotation.document
         }
     }
 
