@@ -11,47 +11,313 @@ import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 
-AnimLoader {
+Item {
     id: root
 
     required property AnnotationDocument document
 
-    sourceComp: penControls
+    implicitWidth: loader.implicitWidth
+    implicitHeight: dummySizing.implicitHeight
+
+    // Use the toggle button as the height to keep it all uniform (the toggle is the tallest item)
+    ToggleButton {
+        id: dummySizing
+
+        visible: false
+    }
+
+    AnimLoader {
+        id: loader
+
+        anchors.centerIn: parent
+        sourceComp: {
+            switch (root.document.tool) {
+            case AnnotationDocument.Select:
+                return null;
+            case AnnotationDocument.Pencil:
+            case AnnotationDocument.Highlighter:
+            case AnnotationDocument.Line:
+            case AnnotationDocument.Arrow:
+                return penControls;
+            case AnnotationDocument.Rect:
+                return rectControls;
+            case AnnotationDocument.Ellipse:
+                return ellipseControls;
+            case AnnotationDocument.Text:
+                return textControls;
+            case AnnotationDocument.Counter:
+                return counterControls;
+            case AnnotationDocument.Blur:
+            case AnnotationDocument.Pixelate:
+                return effectControls;
+            }
+        }
+    }
 
     Component {
         id: penControls
 
         RowLayout {
-            spacing: Tokens.spacing.small
+            spacing: Tokens.spacing.large
 
             Swatches {
                 selectedColour: root.document.color
                 onSelected: c => root.document.color = c
             }
 
-            StyledText {
-                Layout.leftMargin: Tokens.spacing.small
-                text: "1"
-                color: Colours.palette.onSecondaryContainer
-                font: Tokens.font.label.small
+            IconLabel {
+                text: "line_weight"
             }
 
-            StyledSlider {
-                handleHeight: dragging ? 2.8 : 2.4
-                bgColour: Colours.palette.primaryContainer
-                from: 1
-                to: 10
-                stepSize: 1
-                value: root.document.strokeWidth
-                onInteraction: v => root.document.strokeWidth = valueAt(v)
-            }
-
-            StyledText {
+            SliderControl {
                 Layout.rightMargin: Tokens.padding.extraSmall
-                text: "10"
-                color: Colours.palette.onSecondaryContainer
-                font: Tokens.font.label.small
+                value: root.document.strokeWidth
+                onInteraction: v => root.document.strokeWidth = v
             }
+        }
+    }
+
+    Component {
+        id: rectControls
+
+        RowLayout {
+            spacing: Tokens.spacing.large
+
+            Swatches {
+                selectedColour: root.document.color
+                onSelected: c => root.document.color = c
+            }
+
+            IconLabel {
+                text: "line_weight"
+            }
+
+            SliderControl {
+                value: root.document.strokeWidth
+                onInteraction: v => root.document.strokeWidth = v
+            }
+
+            ToggleButton {
+                checked: root.document.fill
+                onClicked: root.document.fill = !root.document.fill
+            }
+
+            IconLabel {
+                text: "rounded_corner"
+            }
+
+            SliderControl {
+                Layout.rightMargin: Tokens.padding.extraSmall
+                from: 0
+                to: 20
+                stepSize: 0
+                value: root.document.radius
+                onInteraction: v => root.document.radius = v
+            }
+        }
+    }
+
+    Component {
+        id: ellipseControls
+
+        RowLayout {
+            spacing: Tokens.spacing.large
+
+            Swatches {
+                selectedColour: root.document.color
+                onSelected: c => root.document.color = c
+            }
+
+            IconLabel {
+                text: "line_weight"
+            }
+
+            SliderControl {
+                value: root.document.strokeWidth
+                onInteraction: v => root.document.strokeWidth = v
+            }
+
+            ToggleButton {
+                checked: root.document.fill
+                onClicked: root.document.fill = !root.document.fill
+            }
+        }
+    }
+
+    Component {
+        id: textControls
+
+        RowLayout {
+            spacing: Tokens.spacing.large
+
+            IconLabel {
+                Layout.leftMargin: Tokens.padding.extraSmall
+                text: "format_color_text"
+            }
+
+            Swatches {
+                selectedColour: root.document.color
+                onSelected: c => root.document.color = c
+            }
+
+            IconLabel {
+                text: "format_color_fill"
+            }
+
+            Swatches {
+                colours: [Colours.palette.surface, Colours.palette.surfaceContainerHighest, Colours.palette.primaryContainer, Colours.palette.errorContainer]
+                selectedColour: root.document.backgroundColor
+                onSelected: c => root.document.backgroundColor = c
+            }
+
+            IconLabel {
+                text: "format_size"
+            }
+
+            SliderControl {
+                from: 8
+                to: 96
+                stepSize: 0
+                value: root.document.font.pointSize
+                onInteraction: v => root.document.font.pointSize = v
+            }
+
+            ToggleButton {
+                checked: root.document.textBackground
+                onClicked: root.document.textBackground = !root.document.textBackground
+            }
+
+            IconLabel {
+                text: "rounded_corner"
+            }
+
+            SliderControl {
+                Layout.rightMargin: Tokens.padding.extraSmall
+                from: 0
+                to: 20
+                stepSize: 0
+                value: root.document.radius
+                onInteraction: v => root.document.radius = v
+            }
+        }
+    }
+
+    Component {
+        id: counterControls
+
+        RowLayout {
+            spacing: Tokens.spacing.large
+
+            IconLabel {
+                Layout.leftMargin: Tokens.padding.extraSmall
+                text: "format_color_text"
+            }
+
+            Swatches {
+                selectedColour: root.document.color
+                onSelected: c => root.document.color = c
+            }
+
+            IconLabel {
+                text: "format_color_fill"
+            }
+
+            Swatches {
+                colours: [Colours.palette.surface, Colours.palette.surfaceContainerHighest, Colours.palette.primaryContainer, Colours.palette.errorContainer]
+                selectedColour: root.document.backgroundColor
+                onSelected: c => root.document.backgroundColor = c
+            }
+
+            IconLabel {
+                text: "format_size"
+            }
+
+            SliderControl {
+                from: 8
+                to: 96
+                stepSize: 0
+                value: root.document.font.pointSize
+                onInteraction: v => root.document.font.pointSize = v
+            }
+
+            ToggleButton {
+                checked: root.document.textBackground
+                onClicked: root.document.textBackground = !root.document.textBackground
+            }
+        }
+    }
+
+    Component {
+        id: effectControls
+
+        RowLayout {
+            spacing: Tokens.spacing.large
+
+            IconLabel {
+                Layout.leftMargin: Tokens.padding.extraSmall
+                text: "wand_shine"
+            }
+
+            SliderControl {
+                Layout.rightMargin: Tokens.padding.extraSmall
+                from: 0
+                to: 1
+                stepSize: 0
+                value: root.document.effectStrength
+                onInteraction: v => root.document.effectStrength = v
+            }
+        }
+    }
+
+    component ToggleButton: IconButton {
+        icon: "texture"
+        isRound: true
+        isToggle: true
+        inactiveColour: Colours.palette.primaryContainer
+        inactiveOnColour: Colours.palette.onPrimaryContainer
+        font: Tokens.font.body.medium
+        padding: Tokens.padding.extraSmall
+    }
+
+    component IconLabel: MaterialIcon {
+        Layout.rightMargin: -Tokens.spacing.small
+        color: Colours.palette.onSecondaryContainer
+        fontStyle: Tokens.font.icon.medium
+    }
+
+    component SliderControl: RowLayout {
+        id: slider
+
+        property alias from: sliderControl.from
+        property alias to: sliderControl.to
+        property alias stepSize: sliderControl.stepSize
+        property alias value: sliderControl.value
+
+        signal interaction(v: real)
+
+        spacing: Tokens.spacing.small
+
+        StyledText {
+            text: slider.from
+            color: Colours.palette.onSecondaryContainer
+            font: Tokens.font.label.small
+        }
+
+        StyledSlider {
+            id: sliderControl
+
+            handleHeight: dragging ? 2.8 : 2.4
+            bgColour: Colours.palette.primaryContainer
+            from: 1
+            to: 10
+            stepSize: 1
+            onInteraction: v => slider.interaction(valueAt(v))
+        }
+
+        StyledText {
+            text: slider.to
+            color: Colours.palette.onSecondaryContainer
+            font: Tokens.font.label.small
         }
     }
 
@@ -59,6 +325,7 @@ AnimLoader {
         id: swatches
 
         required property color selectedColour
+        property alias colours: swatchRepeater.model
 
         signal selected(colour: color)
 

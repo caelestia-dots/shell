@@ -66,18 +66,6 @@ void AnnotationDocument::setFill(bool fill) {
     emit fillChanged();
 }
 
-bool AnnotationDocument::rounded() const {
-    return m_rounded;
-}
-
-void AnnotationDocument::setRounded(bool rounded) {
-    if (m_rounded == rounded)
-        return;
-
-    m_rounded = rounded;
-    emit roundedChanged();
-}
-
 QFont AnnotationDocument::font() const {
     return m_font;
 }
@@ -102,16 +90,16 @@ void AnnotationDocument::setTextBackground(bool background) {
     emit textBackgroundChanged();
 }
 
-QColor AnnotationDocument::textBackgroundColor() const {
-    return m_textBackgroundColor;
+QColor AnnotationDocument::backgroundColor() const {
+    return m_backgroundColor;
 }
 
-void AnnotationDocument::setTextBackgroundColor(const QColor& color) {
-    if (m_textBackgroundColor == color)
+void AnnotationDocument::setBackgroundColor(const QColor& color) {
+    if (m_backgroundColor == color)
         return;
 
-    m_textBackgroundColor = color;
-    emit textBackgroundColorChanged();
+    m_backgroundColor = color;
+    emit backgroundColorChanged();
 }
 
 qreal AnnotationDocument::textPadding() const {
@@ -126,16 +114,16 @@ void AnnotationDocument::setTextPadding(qreal padding) {
     emit textPaddingChanged();
 }
 
-qreal AnnotationDocument::textRadius() const {
-    return m_textRadius;
+qreal AnnotationDocument::radius() const {
+    return m_radius;
 }
 
-void AnnotationDocument::setTextRadius(qreal radius) {
-    if (qFuzzyCompare(m_textRadius, radius))
+void AnnotationDocument::setRadius(qreal radius) {
+    if (qFuzzyCompare(m_radius, radius))
         return;
 
-    m_textRadius = radius;
-    emit textRadiusChanged();
+    m_radius = radius;
+    emit radiusChanged();
 }
 
 qreal AnnotationDocument::effectStrength() const {
@@ -428,14 +416,13 @@ QRectF AnnotationDocument::selectedBounds() const {
 Style AnnotationDocument::currentStyle() const {
     return {
         .color = m_color,
+        .backgroundColor = m_backgroundColor,
         .width = m_strokeWidth,
+        .radius = m_radius,
         .fill = m_fill,
-        .rounded = m_rounded,
         .font = m_font,
         .textBackground = m_textBackground,
-        .textBackgroundColor = m_textBackgroundColor,
         .textPadding = m_textPadding,
-        .textRadius = m_textRadius,
         .effectStrength = m_effectStrength,
     };
 }

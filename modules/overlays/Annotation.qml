@@ -228,18 +228,12 @@ Item {
         implicitWidth: textEditor.width + root.document.textPadding * 2
         implicitHeight: textEditor.height + root.document.textPadding * 2
 
-        radius: root.document.textRadius
-        color: root.document.textBackgroundColor
+        radius: root.document.radius
+        color: root.document.backgroundColor
 
         Behavior on opacityMult {
             Anim {
                 type: Anim.DefaultEffects
-            }
-        }
-
-        Behavior on implicitHeight {
-            Anim {
-                type: Anim.FastEffects
             }
         }
     }
