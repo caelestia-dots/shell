@@ -12,6 +12,7 @@ qml_module(caelestia-components
         sparklineitem.cpp
         visualiserbars.cpp
         roundedmask.cpp
+        oklchwheel.cpp
         screencapture.cpp
         annotationshape.cpp
         annotationdocument.cpp
@@ -32,4 +33,6 @@ qt_add_shaders(caelestia-components "components_shaders"
     FILES
         shaders/roundedmask.frag
         shaders/roundedmask.vert
+        shaders/oklchwheel.frag
+        shaders/oklchwheel.vert
 )
