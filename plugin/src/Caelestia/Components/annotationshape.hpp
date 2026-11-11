@@ -100,6 +100,9 @@ protected:
 
 private:
     [[nodiscard]] QPainterPath head() const;
+    [[nodiscard]] QPointF shaftEnd() const;
+    [[nodiscard]] QPointF direction() const;
+    [[nodiscard]] qreal headSize() const;
 
     QPointF m_start;
     QPointF m_end;
