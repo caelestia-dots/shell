@@ -1,4 +1,5 @@
 import QtQuick
+import Caelestia.Scheme
 
 QtObject {
     property bool annotate
@@ -7,6 +8,8 @@ QtObject {
     property bool showCrosshair
     property bool annotating
     property rect region
+    property color customColour: Colours.palette.outline
+    property color customBackgroundColour: Colours.palette.outlineVariant
 
     signal cancelled
 }

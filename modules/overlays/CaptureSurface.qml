@@ -380,6 +380,8 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             y: submenuBg.y - submenu.y + Tokens.padding.small
             document: annotation.document
+            customColour: root.cState.customColour
+            customBackgroundColour: root.cState.customBackgroundColour
             opacity: root.picking ? 0 : 1
 
             Behavior on opacity {
@@ -400,7 +402,17 @@ Item {
             sourceComponent: ColourPicker {
                 anchors.centerIn: parent
                 colour: submenuContent.picking?.selectedColour ?? Colours.palette.primary
-                onInteraction: c => submenuContent.picking?.selected(c)
+                onInteraction: c => {
+                    const swatches = submenuContent.picking;
+                    if (!swatches)
+                        return;
+
+                    swatches.selected(c);
+                    if (swatches.background)
+                        root.cState.customBackgroundColour = c;
+                    else
+                        root.cState.customColour = c;
+                }
             }
 
             Behavior on opacity {
