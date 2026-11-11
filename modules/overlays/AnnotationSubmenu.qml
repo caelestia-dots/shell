@@ -15,6 +15,7 @@ Item {
     id: root
 
     required property AnnotationDocument document
+    property Item picking
 
     implicitWidth: loader.implicitWidth
     implicitHeight: dummySizing.implicitHeight
@@ -30,6 +31,7 @@ Item {
         id: loader
 
         anchors.centerIn: parent
+        onSourceCompChanged: root.picking = null
         sourceComp: {
             switch (root.document.tool) {
             case AnnotationDocument.Select:
@@ -343,9 +345,26 @@ Item {
         }
 
         Swatch {
+            id: pickerSwatch
+
             modelData: selected ? swatches.selectedColour : Colours.palette.surface
             selected: !swatchRepeater.model.includes(swatches.selectedColour)
-            onClicked: swatches.selected(Colours.palette.tertiary) // TODO: open colour picker
+            onClicked: root.picking = swatches
+
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: "more_horiz"
+                color: (Colours.toOklch(pickerSwatch.modelData).x > 0.6) ^ (Colours.mode === Colours.Light) ? Colours.palette.inverseOnSurface : Colours.palette.onSurface
+                font: Tokens.font.icon.small
+
+                opacity: pickerSwatch.selected ? 0 : 1
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
+            }
         }
     }
 
