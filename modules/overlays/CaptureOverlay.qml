@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.services
@@ -50,9 +51,10 @@ LazyLoader {
             id: captureSession
 
             document.font: Tokens.font.body.medium
-            document.textBackgroundColor: Qt.alpha("black", 0.67)
+            document.color: Colours.palette.primary
+            document.backgroundColor: Colours.palette.surface
             document.textPadding: TokenConfig.appearance.padding.small
-            document.textRadius: TokenConfig.appearance.rounding.small
+            document.radius: TokenConfig.appearance.rounding.small
 
             onSaved: path => root.saved(path)
             onCopied: path => root.copied(path)

@@ -25,13 +25,11 @@ class AnnotationDocument : public QObject {
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged FINAL)
     Q_PROPERTY(bool fill READ fill WRITE setFill NOTIFY fillChanged FINAL)
-    Q_PROPERTY(bool rounded READ rounded WRITE setRounded NOTIFY roundedChanged FINAL)
     Q_PROPERTY(QFont font READ font WRITE setFont NOTIFY fontChanged FINAL)
     Q_PROPERTY(bool textBackground READ textBackground WRITE setTextBackground NOTIFY textBackgroundChanged FINAL)
-    Q_PROPERTY(QColor textBackgroundColor READ textBackgroundColor WRITE setTextBackgroundColor NOTIFY
-            textBackgroundColorChanged FINAL)
+    Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor NOTIFY backgroundColorChanged FINAL)
     Q_PROPERTY(qreal textPadding READ textPadding WRITE setTextPadding NOTIFY textPaddingChanged FINAL)
-    Q_PROPERTY(qreal textRadius READ textRadius WRITE setTextRadius NOTIFY textRadiusChanged FINAL)
+    Q_PROPERTY(qreal radius READ radius WRITE setRadius NOTIFY radiusChanged FINAL)
     Q_PROPERTY(qreal effectStrength READ effectStrength WRITE setEffectStrength NOTIFY effectStrengthChanged FINAL)
 
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY changed FINAL)
@@ -71,23 +69,20 @@ public:
     [[nodiscard]] bool fill() const;
     void setFill(bool fill);
 
-    [[nodiscard]] bool rounded() const;
-    void setRounded(bool rounded);
-
     [[nodiscard]] QFont font() const;
     void setFont(const QFont& font);
 
     [[nodiscard]] bool textBackground() const;
     void setTextBackground(bool background);
 
-    [[nodiscard]] QColor textBackgroundColor() const;
-    void setTextBackgroundColor(const QColor& color);
+    [[nodiscard]] QColor backgroundColor() const;
+    void setBackgroundColor(const QColor& color);
 
     [[nodiscard]] qreal textPadding() const;
     void setTextPadding(qreal padding);
 
-    [[nodiscard]] qreal textRadius() const;
-    void setTextRadius(qreal radius);
+    [[nodiscard]] qreal radius() const;
+    void setRadius(qreal radius);
 
     [[nodiscard]] qreal effectStrength() const;
     void setEffectStrength(qreal strength);
@@ -126,12 +121,11 @@ signals:
     void colorChanged();
     void strokeWidthChanged();
     void fillChanged();
-    void roundedChanged();
     void fontChanged();
     void textBackgroundChanged();
-    void textBackgroundColorChanged();
+    void backgroundColorChanged();
     void textPaddingChanged();
-    void textRadiusChanged();
+    void radiusChanged();
     void effectStrengthChanged();
     void changed();
     void previewChanged();
@@ -154,12 +148,11 @@ private:
     QColor m_color = Qt::red;
     qreal m_strokeWidth = 4.0;
     bool m_fill = false;
-    bool m_rounded = true;
     QFont m_font;
     bool m_textBackground = true;
-    QColor m_textBackgroundColor = QColor(0, 0, 0, 170);
+    QColor m_backgroundColor = QColor(0, 0, 0, 170);
     qreal m_textPadding = 6.0;
-    qreal m_textRadius = 8.0;
+    qreal m_radius = 8.0;
     qreal m_effectStrength = 0.5;
 
     Shapes m_shapes;
