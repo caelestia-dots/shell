@@ -32,7 +32,10 @@ RowLayout {
                 isToggle: true
                 checked: root.annotation.document.tool === modelData.tool
                 icon: modelData.icon
-                onClicked: root.annotation.document.tool = modelData.tool
+                onClicked: {
+                    root.annotation.document.tool = modelData.tool;
+                    checkedChanged();
+                }
             }
         }
     }
