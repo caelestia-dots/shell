@@ -125,6 +125,13 @@ Stroke::Stroke(Style style, const QPointF& start, bool highlighter)
 
 void Stroke::render(QPainter& painter) const {
     painter.save();
+    painter.setOpacity(painter.opacity() * opacity());
+    renderOpaque(painter);
+    painter.restore();
+}
+
+void Stroke::renderOpaque(QPainter& painter) const {
+    painter.save();
     const auto p = strokePen();
 
     if (m_points.size() == 1) {
@@ -166,9 +173,13 @@ void Stroke::update(const QPointF& point, bool constrain) {
 
     const auto& control = m_points[count - 1];
     const auto mid = (control + point) / 2;
-    m_segment = QPainterPath(m_path.currentPosition());
-    m_segment.quadTo(control, mid);
     m_path.quadTo(control, mid);
+
+    // Includes the previous segment so its flat end cap gets painted over
+    const auto first = std::max<qsizetype>(count - 2, 1);
+    m_segment = QPainterPath(first == 1 ? m_points.first() : (m_points[first - 1] + m_points[first]) / 2);
+    for (auto i = first; i < count; ++i)
+        m_segment.quadTo(m_points[i], (m_points[i] + m_points[i + 1]) / 2);
 }
 
 std::shared_ptr<Shape> Stroke::clone() const {
@@ -193,17 +204,19 @@ QPainterPath Stroke::outline() const {
     return m_points.size() == 1 ? dot() : path();
 }
 
+qreal Stroke::opacity() const {
+    return m_highlighter ? 0.4 : 1.0;
+}
+
+bool Stroke::isFirstSegment() const {
+    return !m_segment.isEmpty() && m_points.size() == 3;
+}
+
 QPen Stroke::strokePen() const {
     auto p = pen();
     p.setWidthF(width());
-
-    if (m_highlighter) {
-        auto c = m_style.color;
-        c.setAlphaF(0.4F);
-        p.setColor(c);
+    if (m_highlighter)
         p.setCapStyle(Qt::FlatCap);
-    }
-
     return p;
 }
 
