@@ -362,7 +362,11 @@ Item {
 
             modelData: selected ? swatches.selectedColour : swatches.custom
             selected: !swatchRepeater.model.includes(swatches.selectedColour)
-            onClicked: root.picking = swatches
+            onClicked: {
+                if (!selected)
+                    swatches.selected(modelData);
+                root.picking = swatches;
+            }
 
             MaterialIcon {
                 anchors.centerIn: parent
