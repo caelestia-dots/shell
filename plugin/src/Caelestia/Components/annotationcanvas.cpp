@@ -23,6 +23,13 @@ void AnnotationPreview::paint(QPainter* painter) {
     if (!document)
         return;
 
+    const auto& image = m_canvas->previewImage();
+    if (!image.isNull()) {
+        painter->setCompositionMode(QPainter::CompositionMode_Source);
+        painter->drawImage(QPointF(0, 0), image);
+        return;
+    }
+
     const auto dpr = m_canvas->layer().devicePixelRatio();
     painter->translate(-(position() + m_canvas->origin()));
     document->renderPreview(*painter, m_canvas->scaledBase(), m_canvas->layer(), (position() * dpr).toPoint());
@@ -39,10 +46,8 @@ void AnnotationCanvas::paint(QPainter* painter) {
         return;
 
     const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
-    const auto layerSize = (size() * dpr).toSize();
-    if (m_layer.size() != layerSize) {
-        m_layer = QImage(layerSize, QImage::Format_ARGB32_Premultiplied);
-        m_layer.setDevicePixelRatio(dpr);
+    if (m_layer.size() != (size() * dpr).toSize()) {
+        m_layer = newLayer();
         m_scaledBase = QImage();
         m_layerDirty = true;
     }
@@ -78,6 +83,7 @@ void AnnotationCanvas::setDocument(AnnotationDocument* document) {
         });
         QObject::connect(m_document, &AnnotationDocument::changed, this, &AnnotationCanvas::invalidateLayer);
         QObject::connect(m_document, &AnnotationDocument::previewChanged, this, &AnnotationCanvas::updatePreview);
+        QObject::connect(m_document, &AnnotationDocument::previewExtended, this, &AnnotationCanvas::extendPreview);
     }
 
     invalidateLayer();
@@ -103,6 +109,10 @@ const QImage& AnnotationCanvas::layer() const {
     return m_layer;
 }
 
+const QImage& AnnotationCanvas::previewImage() const {
+    return m_previewImage;
+}
+
 const QImage& AnnotationCanvas::scaledBase() {
     if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull()) {
         m_scaledBase = m_base.scaled(m_layer.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -121,6 +131,13 @@ void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& o
     invalidateLayer();
 }
 
+QImage AnnotationCanvas::newLayer() const {
+    const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
+    QImage layer((size() * dpr).toSize(), QImage::Format_ARGB32_Premultiplied);
+    layer.setDevicePixelRatio(dpr);
+    return layer;
+}
+
 void AnnotationCanvas::invalidateLayer() {
     m_layerDirty = true;
     update();
@@ -129,10 +146,27 @@ void AnnotationCanvas::invalidateLayer() {
 void AnnotationCanvas::updatePreview() {
     const auto bounds = m_document ? m_document->previewBounds() : std::nullopt;
     if (!bounds) {
+        m_previewImage = QImage();
         m_preview->setVisible(false);
         return;
     }
 
+    if (const auto* stroke = m_document->previewStroke()) {
+        m_previewImage = newLayer();
+        m_previewImage.fill(Qt::transparent);
+        QPainter painter(&m_previewImage);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.translate(-origin());
+        stroke->render(painter);
+
+        m_preview->setPosition(QPointF(0, 0));
+        m_preview->setSize(size());
+        m_preview->setVisible(true);
+        m_preview->update();
+        return;
+    }
+
+    m_previewImage = QImage();
     const auto rect = bounds->translated(-origin())
                           .adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin)
                           .toAlignedRect();
@@ -140,6 +174,23 @@ void AnnotationCanvas::updatePreview() {
     m_preview->setSize(rect.size());
     m_preview->setVisible(true);
     m_preview->update();
+}
+
+void AnnotationCanvas::extendPreview() {
+    const auto* stroke = m_document ? m_document->previewStroke() : nullptr;
+    if (!stroke || m_previewImage.isNull())
+        return;
+
+    QPainter painter(&m_previewImage);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.translate(-origin());
+    const auto rect = stroke->renderSegment(painter);
+    if (rect.isNull())
+        return;
+
+    m_preview->update(rect.translated(-origin())
+            .adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin)
+            .toAlignedRect());
 }
 
 } // namespace caelestia::shell::components

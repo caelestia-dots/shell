@@ -332,7 +332,10 @@ void AnnotationDocument::move(const QPointF& point, bool constrain) {
         return;
 
     m_preview->update(point, constrain);
-    emit previewChanged();
+    if (previewStroke())
+        emit previewExtended();
+    else
+        emit previewChanged();
 }
 
 void AnnotationDocument::release() {
@@ -410,6 +413,10 @@ std::optional<QRectF> AnnotationDocument::previewBounds() const {
     if (!m_preview)
         return std::nullopt;
     return m_preview->bounds();
+}
+
+const annotation::Stroke* AnnotationDocument::previewStroke() const {
+    return m_dragging ? nullptr : dynamic_cast<const annotation::Stroke*>(m_preview.get());
 }
 
 QRectF AnnotationDocument::selectedBounds() const {
