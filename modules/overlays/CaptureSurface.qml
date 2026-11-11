@@ -19,6 +19,8 @@ Item {
     required property real contentOpacity
     property alias session: capture.session
     property bool hideToolbar
+    property real toolbarOpacity: hideToolbar ? 0 : 1
+    property real submenuOpacity: hideToolbar || !cState.annotating || annotation.document.tool === AnnotationDocument.Select ? 0 : 1
     property bool toolbarBottom: {
         if (!cState.annotating)
             return false;
@@ -51,6 +53,18 @@ Item {
     onActiveFocusChanged: {
         if (!activeFocus)
             moveModifier = false;
+    }
+
+    Behavior on toolbarOpacity {
+        Anim {
+            type: Anim.DefaultEffects
+        }
+    }
+
+    Behavior on submenuOpacity {
+        Anim {
+            type: Anim.DefaultEffects
+        }
     }
 
     Behavior on toolbarBottom {
@@ -188,10 +202,10 @@ Item {
             group: group
             anchors.horizontalCenter: parent.horizontalCenter
             y: {
-                const open = root.cState.open && !root.hideToolbar && root.cState.annotating;
+                const open = root.cState.open && !root.hideToolbar && root.cState.annotating && annotation.document.tool !== AnnotationDocument.Select;
                 if (root.toolbarBottom)
-                    return open ? root.toolbarY - height : root.toolbarY + toolbarBg.height;
-                return open ? root.toolbarY + toolbarBg.height : root.toolbarY - height;
+                    return open ? root.toolbarY - height : root.toolbarY + toolbarBg.height / 2;
+                return open ? root.toolbarY + toolbarBg.height : root.toolbarY + toolbarBg.height / 2 - height;
             }
 
             radius: Tokens.rounding.extraExtraLarge
@@ -220,7 +234,7 @@ Item {
         implicitWidth: toolbarContent.implicitWidth + Tokens.padding.small * 2
         implicitHeight: toolbarContent.implicitHeight + Tokens.padding.small * 2
 
-        opacity: root.contentOpacity
+        opacity: root.contentOpacity * root.toolbarOpacity
         hoverEnabled: true
 
         transform: Matrix4x4 {
@@ -252,19 +266,36 @@ Item {
     MouseArea {
         id: submenu
 
+        readonly property real fullHeight: submenuContent.implicitHeight + Tokens.padding.small * 2
+        readonly property real toolbarEdge: root.toolbarBottom ? toolbarBg.y : toolbarBg.y + toolbarBg.height
+        readonly property real visibleTop: root.toolbarBottom ? submenuBg.y : Math.max(submenuBg.y, toolbarEdge)
+        readonly property real visibleBottom: root.toolbarBottom ? Math.min(submenuBg.y + fullHeight, toolbarEdge) : submenuBg.y + fullHeight
+        readonly property real pivotY: submenuBg.y - y + fullHeight / 2
+
         x: submenuBg.x
-        y: submenuBg.y
+        y: visibleTop
 
         clip: true
         implicitWidth: submenuContent.implicitWidth + Tokens.padding.small * 2
-        implicitHeight: submenuContent.implicitHeight + Tokens.padding.small * 2
+        implicitHeight: fullHeight
+        height: Math.max(0, visibleBottom - visibleTop)
 
-        opacity: root.contentOpacity
+        opacity: root.contentOpacity * root.submenuOpacity
         hoverEnabled: true
 
-        transform: Matrix4x4 {
-            matrix: submenuBg.deformMatrix
-        }
+        transform: [
+            Translate {
+                x: -submenu.width / 2
+                y: -submenu.pivotY
+            },
+            Matrix4x4 {
+                matrix: submenuBg.rawDeformMatrix
+            },
+            Translate {
+                x: submenu.width / 2
+                y: submenu.pivotY
+            }
+        ]
 
         Behavior on implicitWidth {
             Anim {}
@@ -273,7 +304,8 @@ Item {
         AnnotationSubmenu {
             id: submenuContent
 
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: submenuBg.y - submenu.y + Tokens.padding.small
             document: annotation.document
         }
     }
