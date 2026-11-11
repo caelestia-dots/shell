@@ -220,12 +220,10 @@ RowLayout {
                         font: Tokens.font.label.builders.medium.capitalisation(Font.AllUppercase).letterSpacing(1).build()
                     }
 
-                    IconButton {
-                        icon: "content_copy"
-                        type: IconButton.Tonal
+                    CopyButton {
+                        value: root.hex
                         inactiveColour: Qt.alpha(root.lchOnColour, 0.18)
                         inactiveOnColour: root.lchOnColour
-                        onClicked: Quickshell.execDetached(["wl-copy", root.hex])
                     }
                 }
 
@@ -419,13 +417,29 @@ RowLayout {
                 }
             }
 
-            IconButton {
-                icon: "content_copy"
-                type: IconButton.Tonal
+            CopyButton {
+                value: valueRow.value
                 isRound: true
                 radiusMorph: false
-                onClicked: Quickshell.execDetached(["wl-copy", valueRow.value])
             }
+        }
+    }
+
+    component CopyButton: IconButton {
+        required property string value
+
+        icon: copyTimer.running ? "inventory" : "content_copy"
+        type: IconButton.Tonal
+        onClicked: {
+            Quickshell.execDetached(["wl-copy", value]);
+            copyTimer.restart();
+        }
+        label.animate: true
+
+        Timer {
+            id: copyTimer
+
+            interval: 3000
         }
     }
 
