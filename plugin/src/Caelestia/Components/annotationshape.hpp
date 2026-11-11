@@ -60,8 +60,12 @@ public:
     void update(const QPointF& point, bool constrain) override;
     [[nodiscard]] std::shared_ptr<Shape> clone() const override;
 
+    // draws without the highlighter alpha, which the caller applies via opacity()
+    void renderOpaque(QPainter& painter) const;
     // draws only the segment appended by the last update(), returns its bounds
     [[nodiscard]] QRectF renderSegment(QPainter& painter) const;
+    [[nodiscard]] qreal opacity() const;
+    [[nodiscard]] bool isFirstSegment() const;
 
 protected:
     [[nodiscard]] QPainterPath outline() const override;
