@@ -119,19 +119,13 @@ QPen Shape::pen() const {
 Stroke::Stroke(Style style, const QPointF& start, bool highlighter)
     : Shape(std::move(style))
     , m_points({ start })
+    , m_path(start)
+    , m_bounds(start, start)
     , m_highlighter(highlighter) {}
 
 void Stroke::render(QPainter& painter) const {
     painter.save();
-    auto p = pen();
-    p.setWidthF(width());
-
-    if (m_highlighter) {
-        auto c = m_style.color;
-        c.setAlphaF(0.4F);
-        p.setColor(c);
-        p.setCapStyle(Qt::FlatCap);
-    }
+    const auto p = strokePen();
 
     if (m_points.size() == 1) {
         painter.setPen(Qt::NoPen);
@@ -147,26 +141,70 @@ void Stroke::render(QPainter& painter) const {
 
 QRectF Stroke::bounds() const {
     const auto m = width() / 2;
-    return path().boundingRect().adjusted(-m, -m, m, m);
+    return m_bounds.adjusted(-m, -m, m, m);
 }
 
 void Stroke::translate(const QPointF& delta) {
     for (auto& p : m_points)
         p += delta;
+    m_path.translate(delta);
+    m_segment.translate(delta);
+    m_bounds.translate(delta);
 }
 
 void Stroke::update(const QPointF& point, bool constrain) {
     Q_UNUSED(constrain)
-    if (m_points.isEmpty() || QLineF(m_points.last(), point).length() > 1.0)
-        m_points.append(point);
+    m_segment = QPainterPath();
+    if (QLineF(m_points.last(), point).length() <= 1.0)
+        return;
+
+    const auto count = m_points.size();
+    m_points.append(point);
+    extendBounds(point);
+    if (count < 2)
+        return;
+
+    const auto& control = m_points[count - 1];
+    const auto mid = (control + point) / 2;
+    m_segment = QPainterPath(m_path.currentPosition());
+    m_segment.quadTo(control, mid);
+    m_path.quadTo(control, mid);
 }
 
 std::shared_ptr<Shape> Stroke::clone() const {
     return std::make_shared<Stroke>(*this);
 }
 
+QRectF Stroke::renderSegment(QPainter& painter) const {
+    if (m_segment.isEmpty())
+        return {};
+
+    painter.save();
+    painter.setPen(strokePen());
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPath(m_segment);
+    painter.restore();
+
+    const auto m = width() / 2;
+    return m_segment.controlPointRect().adjusted(-m, -m, m, m);
+}
+
 QPainterPath Stroke::outline() const {
     return m_points.size() == 1 ? dot() : path();
+}
+
+QPen Stroke::strokePen() const {
+    auto p = pen();
+    p.setWidthF(width());
+
+    if (m_highlighter) {
+        auto c = m_style.color;
+        c.setAlphaF(0.4F);
+        p.setColor(c);
+        p.setCapStyle(Qt::FlatCap);
+    }
+
+    return p;
 }
 
 QPainterPath Stroke::dot() const {
@@ -181,21 +219,21 @@ QPainterPath Stroke::dot() const {
 }
 
 QPainterPath Stroke::path() const {
-    QPainterPath path(m_points.first());
-    if (m_points.size() == 1)
-        return path;
-
-    for (int i = 1; i < m_points.size() - 1; ++i) {
-        const auto mid = (m_points[i] + m_points[i + 1]) / 2;
-        path.quadTo(m_points[i], mid);
-    }
-
-    path.lineTo(m_points.last());
+    auto path = m_path;
+    if (m_points.size() > 1)
+        path.lineTo(m_points.last());
     return path;
 }
 
 qreal Stroke::width() const {
     return m_highlighter ? m_style.width * 3 : m_style.width;
+}
+
+void Stroke::extendBounds(const QPointF& point) {
+    m_bounds.setLeft(std::min(m_bounds.left(), point.x()));
+    m_bounds.setTop(std::min(m_bounds.top(), point.y()));
+    m_bounds.setRight(std::max(m_bounds.right(), point.x()));
+    m_bounds.setBottom(std::max(m_bounds.bottom(), point.y()));
 }
 
 Line::Line(Style style, const QPointF& start, bool arrow)

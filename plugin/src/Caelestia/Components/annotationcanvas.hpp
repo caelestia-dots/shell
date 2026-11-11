@@ -40,6 +40,7 @@ public:
     void setBase(const QImage& base);
 
     [[nodiscard]] const QImage& layer() const;
+    [[nodiscard]] const QImage& previewImage() const;
     [[nodiscard]] const QImage& scaledBase();
     [[nodiscard]] QPointF origin() const;
 
@@ -51,13 +52,16 @@ protected:
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private:
+    [[nodiscard]] QImage newLayer() const;
     void invalidateLayer();
     void updatePreview();
+    void extendPreview();
 
     AnnotationDocument* m_document = nullptr;
     QImage m_base;
     QImage m_scaledBase;
     QImage m_layer;
+    QImage m_previewImage;
     bool m_layerDirty = true;
     AnnotationPreview* m_preview;
 };
