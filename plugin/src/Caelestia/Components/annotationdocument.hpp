@@ -105,6 +105,7 @@ public:
     Q_INVOKABLE void deleteSelected();
     Q_INVOKABLE void copy();
     Q_INVOKABLE void paste();
+    Q_INVOKABLE void duplicate();
     Q_INVOKABLE void setText(int index, const QString& text);
     Q_INVOKABLE [[nodiscard]] QString textAt(int index) const;
     Q_INVOKABLE [[nodiscard]] int shapeAt(const QPointF& point) const;
@@ -144,6 +145,7 @@ private:
     [[nodiscard]] std::shared_ptr<annotation::Shape> createShape(const QPointF& point) const;
     void pushUndo();
     void commit(Shapes shapes);
+    void insertCopy(const annotation::Shape& source);
     void setSelected(int index);
 
     Tool m_tool = Tool::Pencil;
