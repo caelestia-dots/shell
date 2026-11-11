@@ -222,12 +222,11 @@ QPen Stroke::strokePen() const {
 
 QPainterPath Stroke::dot() const {
     const auto r = width() / 2;
-    const QRectF rect(m_points.first() - QPointF(r, r), QSizeF(width(), width()));
     QPainterPath path;
     if (m_highlighter)
-        path.addRect(rect);
+        path.addRect(QRectF(m_points.first() - QPointF(r / 2, r), QSizeF(r, width())));
     else
-        path.addEllipse(rect);
+        path.addEllipse(m_points.first(), r, r);
     return path;
 }
 
