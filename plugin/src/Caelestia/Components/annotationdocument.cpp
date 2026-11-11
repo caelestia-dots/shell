@@ -223,10 +223,17 @@ void AnnotationDocument::copy() {
 }
 
 void AnnotationDocument::paste() {
-    if (!m_clipboard)
-        return;
+    if (m_clipboard)
+        insertCopy(*m_clipboard);
+}
 
-    auto shape = m_clipboard->clone();
+void AnnotationDocument::duplicate() {
+    if (m_selected >= 0)
+        insertCopy(*m_shapes[m_selected]);
+}
+
+void AnnotationDocument::insertCopy(const annotation::Shape& source) {
+    auto shape = source.clone();
     shape->translate(QPointF(16, 16));
     auto shapes = m_shapes;
     shapes.push_back(std::move(shape));

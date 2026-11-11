@@ -46,57 +46,57 @@ Item {
         {
             icon: "drag_pan",
             tool: AnnotationDocument.Select,
-            key: Qt.Key_V
+            keys: [Qt.Key_V, Qt.Key_S]
         },
         {
             icon: "edit",
             tool: AnnotationDocument.Pencil,
-            key: Qt.Key_1
+            keys: [Qt.Key_1, Qt.Key_P, Qt.Key_D]
         },
         {
             icon: "ink_highlighter",
             tool: AnnotationDocument.Highlighter,
-            key: Qt.Key_2
+            keys: [Qt.Key_2, Qt.Key_H]
         },
         {
             icon: "diagonal_line",
             tool: AnnotationDocument.Line,
-            key: Qt.Key_3
+            keys: [Qt.Key_3, Qt.Key_L]
         },
         {
             icon: "line_end_arrow",
             tool: AnnotationDocument.Arrow,
-            key: Qt.Key_4
+            keys: [Qt.Key_4, Qt.Key_A]
         },
         {
             icon: "rectangle",
             tool: AnnotationDocument.Rect,
-            key: Qt.Key_5
+            keys: [Qt.Key_5, Qt.Key_R]
         },
         {
             icon: "circle",
             tool: AnnotationDocument.Ellipse,
-            key: Qt.Key_6
+            keys: [Qt.Key_6, Qt.Key_E, Qt.Key_C, Qt.Key_O]
         },
         {
             icon: "insert_text",
             tool: AnnotationDocument.Text,
-            key: Qt.Key_7
+            keys: [Qt.Key_7, Qt.Key_T]
         },
         {
             icon: "counter_1",
             tool: AnnotationDocument.Counter,
-            key: Qt.Key_8
+            keys: [Qt.Key_8, Qt.Key_N]
         },
         {
             icon: "blur_on",
             tool: AnnotationDocument.Blur,
-            key: Qt.Key_9
+            keys: [Qt.Key_9, Qt.Key_B]
         },
         {
             icon: "grain",
             tool: AnnotationDocument.Pixelate,
-            key: Qt.Key_0
+            keys: [Qt.Key_0, Qt.Key_X]
         }
     ]
 
@@ -136,6 +136,11 @@ Item {
                 return true;
             }
 
+            if (event.key === Qt.Key_D) {
+                document.duplicate();
+                return true;
+            }
+
             return false;
         }
 
@@ -144,7 +149,7 @@ Item {
             return true;
         }
 
-        const entry = tools.find(t => t.key === event.key);
+        const entry = tools.find(t => t.keys.includes(event.key));
         if (!entry)
             return false;
 
