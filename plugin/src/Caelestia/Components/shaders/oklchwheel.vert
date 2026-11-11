@@ -13,6 +13,9 @@ layout(std140, binding = 0) uniform buf {
     float gap;
     float hue;
     float cornerRadius;
+    float outerRadius;
+    float ringLightness;
+    float ringChroma;
 };
 
 void main() {

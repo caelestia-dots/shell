@@ -16,6 +16,9 @@ class OklchWheel : public QQuickItem {
     Q_PROPERTY(qreal gap READ gap WRITE setGap NOTIFY gapChanged)
     Q_PROPERTY(qreal hue READ hue WRITE setHue NOTIFY hueChanged)
     Q_PROPERTY(qreal cornerRadius READ cornerRadius WRITE setCornerRadius NOTIFY cornerRadiusChanged)
+    Q_PROPERTY(qreal outerRadius READ outerRadius NOTIFY outerRadiusChanged)
+    Q_PROPERTY(qreal ringLightness READ ringLightness CONSTANT)
+    Q_PROPERTY(qreal ringChroma READ ringChroma CONSTANT)
 
 public:
     explicit OklchWheel(QQuickItem* parent = nullptr);
@@ -32,23 +35,32 @@ public:
     [[nodiscard]] qreal cornerRadius() const;
     void setCornerRadius(qreal cornerRadius);
 
+    [[nodiscard]] qreal outerRadius() const;
+    [[nodiscard]] static qreal ringLightness();
+    [[nodiscard]] static qreal ringChroma();
+
 signals:
     void ringWidthChanged();
     void gapChanged();
     void hueChanged();
     void cornerRadiusChanged();
+    void outerRadiusChanged();
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private:
+    static constexpr qreal k_ringLightness = 0.72;
+    static constexpr qreal k_ringChroma = 0.11;
+
     bool updateReal(qreal& member, qreal value);
 
     qreal m_ringWidth = 16;
     qreal m_gap = 8;
     qreal m_hue = 0;
     qreal m_cornerRadius = 8;
+    qreal m_outerRadius = 0;
 };
 
 class OklchWheelMaterial : public QSGMaterial {
@@ -63,6 +75,9 @@ public:
     float m_gap = 0;
     float m_hue = 0;
     float m_cornerRadius = 0;
+    float m_outerRadius = 0;
+    float m_ringLightness = 0;
+    float m_ringChroma = 0;
 };
 
 class OklchWheelMaterialShader : public QSGMaterialShader {

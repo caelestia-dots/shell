@@ -11,6 +11,9 @@ layout(std140, binding = 0) uniform buf {
     float gap;        // device pixels, between ring and triangle
     float hue;        // degrees, triangle hue
     float cornerRadius; // device pixels, mask only
+    float outerRadius;  // device pixels
+    float ringLightness;
+    float ringChroma;
 };
 
 const float PI = 3.14159265358979;
@@ -73,14 +76,13 @@ float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2) {
 void main() {
     // Centered, y up, in device pixels
     vec2 p = (qt_TexCoord0 - 0.5) * size * vec2(1.0, -1.0);
-    // Keep the antialiased edge inside the item, the quad clips anything beyond it
-    float outer = min(size.x, size.y) * 0.5 - 1.0;
+    float outer = outerRadius;
     float inner = outer - ringWidth;
     float r = length(p);
 
     float ringMask = smoothstep(inner - 0.5, inner + 0.5, r) * (1.0 - smoothstep(outer - 0.5, outer + 0.5, r));
     float ringHue = degrees(atan(p.y, p.x));
-    vec3 ringRgb = oklchToLinear(0.72, 0.11, ringHue);
+    vec3 ringRgb = oklchToLinear(ringLightness, ringChroma, ringHue);
 
     // Equilateral triangle inscribed in the circle inside the gap, tip to the right
     float tr = inner - gap;

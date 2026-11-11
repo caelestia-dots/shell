@@ -17,9 +17,11 @@ RowLayout {
     property color colour
     readonly property int maxRecents: 8
 
-    property real lightness
-    property real chromaFraction
-    property real hue
+    property vector3d lch
+
+    readonly property real lightness: lch.x
+    readonly property real chromaFraction: lch.y
+    readonly property real hue: lch.z
 
     property bool hadInteraction
 
@@ -40,13 +42,9 @@ RowLayout {
         if (Qt.colorEqual(colour, lchColour))
             return;
 
-        const lch = Colours.toOklch(colour);
-        lightness = lch.x;
-        const max = Colours.maxChroma(lch.x, lch.z);
-        if (max > 0.001)
-            chromaFraction = CUtils.clamp(lch.y / max, 0, 1);
-        if (lch.y > 0.01)
-            hue = lch.z;
+        const c = Colours.toOklch(colour);
+        const max = Colours.maxChroma(c.x, c.z);
+        lch = Qt.vector3d(c.x, max > 0.001 ? CUtils.clamp(c.y / max, 0, 1) : chromaFraction, c.y > 0.01 ? c.z : hue);
     }
 
     function onColourFor(c: color): color {
@@ -79,8 +77,7 @@ RowLayout {
 
         readonly property real ringWidth: Tokens.padding.large
         readonly property real gap: Tokens.padding.small
-        readonly property real outerRadius: Math.min(width, height) / 2
-        readonly property real innerRadius: outerRadius - ringWidth
+        readonly property real innerRadius: oklchWheel.outerRadius - ringWidth
         readonly property real triRadius: innerRadius - gap
         readonly property real triLeft: -triRadius / 2
         readonly property real triHeight: triRadius * Math.sqrt(3)
@@ -95,12 +92,11 @@ RowLayout {
             const y = height / 2 - e.y;
             if (inRing) {
                 const deg = Math.atan2(y, x) * 180 / Math.PI;
-                root.hue = (deg + 360) % 360;
+                root.lch = Qt.vector3d(root.lightness, root.chromaFraction, (deg + 360) % 360);
             } else {
-                root.lightness = CUtils.clamp((y + triHeight / 2) / triHeight, 0, 1);
-                const w = rowWidth(root.lightness);
-                if (w > 0)
-                    root.chromaFraction = CUtils.clamp((x - triLeft) / w, 0, 1);
+                const l = CUtils.clamp((y + triHeight / 2) / triHeight, 0, 1);
+                const w = rowWidth(l);
+                root.lch = Qt.vector3d(l, w > 0 ? CUtils.clamp((x - triLeft) / w, 0, 1) : root.chromaFraction, root.hue);
             }
 
             root.interaction(root.lchColour);
@@ -119,6 +115,8 @@ RowLayout {
         onPositionChanged: e => update(e)
 
         OklchWheel {
+            id: oklchWheel
+
             anchors.fill: parent
             ringWidth: wheel.ringWidth
             gap: wheel.gap
@@ -155,12 +153,12 @@ RowLayout {
         Handle {
             id: hueHandle
 
-            readonly property real ringRadius: wheel.innerRadius + wheel.ringWidth / 2 - 1
+            readonly property real ringRadius: wheel.innerRadius + wheel.ringWidth / 2
             property real angle: root.hue
 
             x: wheel.width / 2 + ringRadius * Math.cos(angle * Math.PI / 180)
             y: wheel.height / 2 - ringRadius * Math.sin(angle * Math.PI / 180)
-            color: Colours.oklch(0.72, 0.11, root.hue)
+            color: Colours.oklch(oklchWheel.ringLightness, oklchWheel.ringChroma, root.hue)
             pressed: wheel.pressed && wheel.inRing
 
             transform: Translate {
@@ -300,7 +298,7 @@ RowLayout {
                         id: recent
 
                         required property string modelData
-                        readonly property bool active: Qt.colorEqual(modelData, root.lchColour)
+                        readonly property bool active: modelData === root.lchColour.toString()
 
                         Layout.fillWidth: true
                         Layout.maximumWidth: Tokens.padding.extraLargeIncreased * 2
