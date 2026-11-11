@@ -6,6 +6,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
+#include <qvector3d.h>
 
 #include <caelestia/scheme/scheme.hpp>
 
@@ -172,6 +173,10 @@ public:
     // NOLINTNEXTLINE(readability-identifier-naming)
     [[nodiscard]] Q_INVOKABLE QColor _layer(const QColor& colour, int layer) const;
     [[nodiscard]] QColor layer(const QColor& colour, int layer = 1) const;
+
+    [[nodiscard]] Q_INVOKABLE static QColor oklch(qreal l, qreal c, qreal h);
+    [[nodiscard]] Q_INVOKABLE static QVector3D toOklch(const QColor& colour);
+    [[nodiscard]] Q_INVOKABLE static qreal maxChroma(qreal l, qreal h);
 
 signals:
     void committedChanged();
