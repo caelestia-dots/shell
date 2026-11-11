@@ -23,6 +23,7 @@ RowLayout {
     readonly property real chromaFraction: lch.y
     readonly property real hue: lch.z
 
+    property color lastColour
     property bool hadInteraction
 
     readonly property real chroma: chromaFraction * Colours.maxChroma(lightness, hue)
@@ -67,10 +68,13 @@ RowLayout {
     Component.onCompleted: syncFromColour()
     Component.onDestruction: {
         if (hadInteraction)
-            commitRecent(colour);
+            commitRecent(lastColour);
     }
 
-    onInteraction: hadInteraction = true
+    onInteraction: c => {
+        lastColour = c;
+        hadInteraction = true;
+    }
 
     MouseArea {
         id: wheel
