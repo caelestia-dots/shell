@@ -401,7 +401,6 @@ Item {
 
             sourceComponent: ColourPicker {
                 anchors.centerIn: parent
-                colour: submenuContent.picking?.selectedColour ?? Colours.palette.primary
                 onInteraction: c => {
                     const swatches = submenuContent.picking;
                     if (!swatches)
@@ -412,6 +411,12 @@ Item {
                         root.cState.customBackgroundColour = c;
                     else
                         root.cState.customColour = c;
+                }
+
+                Binding on colour {
+                    when: submenuContent.picking !== null
+                    value: submenuContent.picking?.selectedColour
+                    restoreMode: Binding.RestoreNone
                 }
             }
 
