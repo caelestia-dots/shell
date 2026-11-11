@@ -26,9 +26,16 @@ Item {
             return false;
 
         const r = cState.region;
-        const tx = screen.x + toolbar.x;
-        const ty = screen.y;
-        return r.x < tx + toolbar.implicitWidth && r.x + r.width > tx && r.y < ty + toolbar.implicitHeight && r.y + r.height > ty;
+        const overlaps = (w, y, h) => {
+            const x = screen.x + (width - w) / 2;
+            return r.x < x + w && r.x + r.width > x && r.y < y + h && r.y + r.height > y;
+        };
+
+        if (overlaps(toolbar.implicitWidth, screen.y, toolbar.implicitHeight))
+            return true;
+        if (annotation.document.tool === AnnotationDocument.Select)
+            return false;
+        return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, screen.y + toolbar.implicitHeight, submenu.implicitHeight);
     }
     property bool moveModifier
 
