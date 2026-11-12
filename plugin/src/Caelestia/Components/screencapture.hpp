@@ -9,6 +9,7 @@
 #include <qrect.h>
 
 #include "annotationdocument.hpp"
+#include "imageexporter.hpp"
 
 class QScreen;
 
@@ -40,10 +41,9 @@ signals:
 private:
     [[nodiscard]] QImage compose(const QRect& region) const;
 
-    void pipeToClipboard(const QImage& image, const QByteArray& png);
-
     QHash<const QScreen*, QImage> m_images;
     AnnotationDocument* m_document;
+    ImageExporter* m_exporter;
     bool m_unsupportedEmitted = false;
 };
 

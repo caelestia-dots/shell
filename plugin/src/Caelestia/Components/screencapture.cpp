@@ -1,8 +1,6 @@
 #include "screencapture.hpp"
 
-#include <qbuffer.h>
 #include <qpainter.h>
-#include <qprocess.h>
 #include <qquickwindow.h>
 #include <qscreen.h>
 
@@ -16,7 +14,13 @@ using Qt::StringLiterals::operator""_s;
 
 CaptureSession::CaptureSession(QObject* parent)
     : QObject(parent)
-    , m_document(new AnnotationDocument(this)) {}
+    , m_document(new AnnotationDocument(this))
+    , m_exporter(new ImageExporter(this)) {
+    QObject::connect(m_exporter, &ImageExporter::saved, this, &CaptureSession::saved);
+    QObject::connect(m_exporter, &ImageExporter::saveFailed, this, &CaptureSession::saveFailed);
+    QObject::connect(m_exporter, &ImageExporter::copied, this, &CaptureSession::copied);
+    QObject::connect(m_exporter, &ImageExporter::copyFailed, this, &CaptureSession::copyFailed);
+}
 
 QFuture<QImage> CaptureSession::capture(const QScreen* screen) {
     if (!screenshot::isSupported()) {
@@ -34,75 +38,15 @@ QFuture<QImage> CaptureSession::capture(const QScreen* screen) {
 }
 
 void CaptureSession::save(const QRect& region) {
-    const auto image = compose(region);
-    if (image.isNull()) {
-        emit saveFailed();
-        return;
-    }
-
-    screenshot::cache(image).then(this, [this](const QString& path) {
-        if (path.isEmpty())
-            emit saveFailed();
-        else
-            emit saved(path);
-    });
+    m_exporter->save(compose(region));
 }
 
 void CaptureSession::copy(const QRect& region) {
-    const auto image = compose(region);
-    if (image.isNull()) {
-        emit copyFailed();
-        return;
-    }
-
-    QtFuture::makeReadyValueFuture(image)
-        .then(QtFuture::Launch::Async,
-            [](const QImage& img) {
-                QByteArray png;
-                QBuffer buffer(&png);
-                buffer.open(QIODevice::WriteOnly);
-                if (!img.save(&buffer, "PNG"))
-                    png.clear();
-                return png;
-            })
-        .then(this, [this, image](const QByteArray& png) {
-            if (png.isEmpty())
-                emit copyFailed();
-            else
-                pipeToClipboard(image, png);
-        });
+    m_exporter->copy(compose(region));
 }
 
 AnnotationDocument* CaptureSession::document() const {
     return m_document;
-}
-
-void CaptureSession::pipeToClipboard(const QImage& image, const QByteArray& png) {
-    auto* const proc = new QProcess(this);
-    QObject::connect(proc, &QProcess::errorOccurred, this, [this, proc](QProcess::ProcessError error) {
-        if (error != QProcess::FailedToStart)
-            return;
-
-        emit copyFailed();
-        proc->deleteLater();
-    });
-    QObject::connect(proc, &QProcess::finished, this, [this, proc, image](int code, QProcess::ExitStatus status) {
-        if (status == QProcess::NormalExit && code == 0) {
-            screenshot::cache(image).then(this, [this](const QString& path) {
-                if (path.isEmpty())
-                    emit copyFailed();
-                else
-                    emit copied(path);
-            });
-        } else {
-            emit copyFailed();
-        }
-        proc->deleteLater();
-    });
-
-    proc->start(u"wl-copy"_s, { u"--type"_s, u"image/png"_s });
-    proc->write(png);
-    proc->closeWriteChannel();
 }
 
 QImage CaptureSession::compose(const QRect& region) const {

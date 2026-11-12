@@ -13,6 +13,8 @@ qml_module(caelestia-components
         visualiserbars.cpp
         roundedmask.cpp
         oklchwheel.cpp
+        imageexporter.cpp
+        imageloader.cpp
         screencapture.cpp
         annotationshape.cpp
         annotationdocument.cpp

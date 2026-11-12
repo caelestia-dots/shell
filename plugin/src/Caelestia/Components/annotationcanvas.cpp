@@ -115,8 +115,12 @@ const QImage& AnnotationCanvas::previewImage() const {
 
 const QImage& AnnotationCanvas::scaledBase() {
     if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull()) {
-        m_scaledBase = m_base.scaled(m_layer.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        m_scaledBase.setDevicePixelRatio(m_layer.devicePixelRatio());
+        m_scaledBase = newLayer();
+        m_scaledBase.fill(Qt::transparent);
+        QPainter painter(&m_scaledBase);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.translate(-origin());
+        painter.drawImage(effectiveBaseRect(), m_base);
     }
     return m_scaledBase;
 }
@@ -130,9 +134,43 @@ void AnnotationCanvas::setOrigin(const QPointF& origin) {
         return;
 
     m_origin = origin;
+    m_scaledBase = QImage();
     invalidateLayer();
     updatePreview();
     emit originChanged();
+}
+
+QRectF AnnotationCanvas::baseRect() const {
+    return m_baseRect;
+}
+
+void AnnotationCanvas::setBaseRect(const QRectF& baseRect) {
+    if (m_baseRect == baseRect)
+        return;
+
+    m_baseRect = baseRect;
+    m_scaledBase = QImage();
+    invalidateLayer();
+    emit baseRectChanged();
+}
+
+QRectF AnnotationCanvas::effectiveBaseRect() const {
+    return m_baseRect.isEmpty() ? QRectF(m_origin, size()) : m_baseRect;
+}
+
+QImage AnnotationCanvas::composite() const {
+    if (!m_document || m_base.isNull())
+        return {};
+
+    auto result = m_base.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    result.setDevicePixelRatio(1);
+
+    const auto rect = effectiveBaseRect();
+    QPainter painter(&result);
+    painter.scale(result.width() / rect.width(), result.height() / rect.height());
+    painter.translate(-rect.topLeft());
+    m_document->render(painter, result);
+    return result;
 }
 
 void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) {
