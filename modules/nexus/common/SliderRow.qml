@@ -32,7 +32,7 @@ ConnectedRect {
         MaterialIcon {
             id: icon
 
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             fontStyle: Tokens.font.icon.medium
         }
 
@@ -55,7 +55,7 @@ ConnectedRect {
                 StyledText {
                     id: valueLabel
 
-                    color: Colours.palette.m3outline
+                    color: Hallownest.subtext
                     font: Tokens.font.body.small
                 }
             }

@@ -72,7 +72,7 @@ PageBase {
 
                     MaterialIcon {
                         text: saved.ap ? Icons.getNetworkIcon(saved.ap.strength, !["", "none"].includes(Nmcli.savedSecurityFor(saved.modelData))) : "signal_wifi_off"
-                        color: saved.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                        color: saved.isActive ? Hallownest.soul : Hallownest.subtext
                         fontStyle: Tokens.font.icon.medium
                     }
 
@@ -100,7 +100,7 @@ PageBase {
                                     return Tr.trCtx("Connected • %1", "network connected with security").arg(security);
                                 return security;
                             }
-                            color: saved.isActive ? Colours.palette.m3primary : Colours.palette.m3outline
+                            color: saved.isActive ? Hallownest.soul : Hallownest.subtext
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                         }
@@ -108,7 +108,7 @@ PageBase {
 
                     MaterialIcon {
                         text: "chevron_right"
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Hallownest.subtext
                         fontStyle: Tokens.font.icon.medium
                     }
                 }

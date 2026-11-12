@@ -31,10 +31,10 @@ Row {
     readonly property alias textRow: textRow
     readonly property alias expandBtn: expandBtn
 
-    property color colour: type == SplitButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
-    property color textColour: type == SplitButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
-    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
-    property color disabledTextColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
+    property color colour: type == SplitButton.Filled ? Hallownest.soul : Hallownest.button
+    property color textColour: type == SplitButton.Filled ? Hallownest.void_ : Hallownest.text
+    property color disabledColour: Qt.alpha(Hallownest.text, 0.1)
+    property color disabledTextColour: Qt.alpha(Hallownest.text, 0.38)
 
     spacing: Math.floor(Tokens.spacing.extraSmall / 2)
 

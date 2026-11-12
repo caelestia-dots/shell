@@ -16,8 +16,8 @@ Item {
     property int strokeWidth: Tokens.padding.small
     property int padding: 0
     property int spacing: Tokens.spacing.small
-    property color fgColour: Colours.palette.m3primary
-    property color bgColour: Colours.palette.m3secondaryContainer
+    property color fgColour: Hallownest.soul
+    property color bgColour: Hallownest.button
     property alias hasEndIndicator: dot.active
 
     property bool wavy: false

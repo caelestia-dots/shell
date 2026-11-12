@@ -99,7 +99,7 @@ TextFieldBase {
             renderType: Text.QtRendering
 
             text: root.placeholderText
-            color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)
+            color: root.isError ? Hallownest.grimm : (root.activeFocus ? Hallownest.soul : root.text ? Hallownest.subtext : root.placeholderTextColor)
 
             states: [
                 State {
@@ -153,7 +153,7 @@ TextFieldBase {
 
             sourceComponent: MaterialIcon {
                 text: root.leadingIcon
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.subtext
                 fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
             }
         }
@@ -168,7 +168,7 @@ TextFieldBase {
 
             sourceComponent: MaterialIcon {
                 text: root.trailingIcon
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.subtext
                 fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
             }
         }
@@ -184,7 +184,7 @@ TextFieldBase {
 
         sourceComponent: StyledText {
             text: root.effectiveSupportingText
-            color: root.isError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+            color: root.isError ? Hallownest.grimm : Hallownest.subtext
             font: Tokens.font.label.small
         }
     }
@@ -210,7 +210,7 @@ TextFieldBase {
                 readonly property real inset: strokeWidth / 2
 
                 strokeWidth: root.activeFocus ? 2 : 1
-                strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                strokeColor: root.isError ? Hallownest.grimm : (root.activeFocus ? Hallownest.soul : Hallownest.subtext)
                 fillColor: "transparent"
                 capStyle: ShapePath.RoundCap
 
@@ -282,14 +282,14 @@ TextFieldBase {
         StyledRect {
             topLeftRadius: root.clampedRadius
             topRightRadius: root.clampedRadius
-            color: root.activeFocus ? Colours.tPalette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainerHigh
+            color: root.activeFocus ? Hallownest.button : Hallownest.button
 
             StyledRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 implicitHeight: root.activeFocus ? 2 : 1
-                color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                color: root.isError ? Hallownest.grimm : (root.activeFocus ? Hallownest.soul : Hallownest.subtext)
 
                 Behavior on implicitHeight {
                     Anim {}

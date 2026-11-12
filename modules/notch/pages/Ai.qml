@@ -3,11 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
-import qs.components.controls
 import qs.components.hallownest
 import qs.services
 import qs.modules.notch
@@ -15,8 +13,9 @@ import qs.modules.notch
 NotchPage {
     id: root
 
-    function launched(): void {
-        promptField.text = "";
+    // Same toggle as SUPER + A / SUPER + SHIFT + A (Hyprland's utils/functions.lua)
+    function openAssistant(agent: string): void {
+        Quickshell.execDetached(["hyprctl", "dispatch", `require("utils.functions").toggle("${agent}")`]);
         root.screenState.notch = false;
     }
 
@@ -38,7 +37,7 @@ NotchPage {
     implicitWidth: 760
     implicitHeight: layout.implicitHeight
 
-    Component.onCompleted: AiAgents.reload()
+    Component.onCompleted: AiUsage.refresh(false)
 
     ColumnLayout {
         id: layout
@@ -53,73 +52,38 @@ NotchPage {
             Layout.rightMargin: Tokens.padding.small
             spacing: Tokens.spacing.medium
 
-            Item {
-                Layout.alignment: Qt.AlignVCenter
-                implicitWidth: 36
-                implicitHeight: 36
-
-                IconImage {
-                    id: providerIcon
-
-                    anchors.fill: parent
-                    source: Quickshell.iconPath(AiAgents.provider.icon, true)
-                    visible: source.toString() !== ""
-                }
-
-                MaterialIcon {
-                    anchors.centerIn: parent
-                    visible: !providerIcon.visible
-                    text: AiAgents.provider.fallbackIcon
-                    fontStyle: Tokens.font.icon.builders.extraLarge.scale(1.2).build()
-                    color: Hallownest.lifeblood
-                }
-            }
-
             Column {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.fillWidth: true
 
                 StyledText {
-                    text: AiAgents.provider.name
-                    font: Tokens.font.body.builders.large.size(20).weight(Font.DemiBold).build()
+                    text: Tr.tr("Assistant")
                     color: Hallownest.text
+                    font.family: Hallownest.serif
+                    font.pointSize: 16
+                    font.weight: Font.Bold
                 }
 
                 StyledText {
-                    text: {
-                        if (!AiAgents.hasCli)
-                            return Tr.tr("Not installed");
-                        const v = AiAgents.versions[AiAgents.providerId];
-                        return v ? `v${v}` : "";
-                    }
-                    font: Tokens.font.body.small
-                    color: AiAgents.hasCli ? Hallownest.subtext : Hallownest.grimm
-                }
-            }
-
-            Row {
-                Layout.alignment: Qt.AlignVCenter
-                spacing: Tokens.spacing.extraSmall
-
-                Repeater {
-                    model: AiAgents.providers
-
-                    delegate: Chip {
-                        required property var modelData
-
-                        text: modelData.name
-                        selected: modelData.id === AiAgents.providerId
-                        onClicked: AiAgents.setProvider(modelData.id)
-                    }
+                    text: Tr.tr("Super + A · Super + Shift + A")
+                    color: Hallownest.subtext
+                    font.pointSize: 8
                 }
             }
 
             HkButton {
-                implicitHeight: 28
                 Layout.alignment: Qt.AlignVCenter
-                icon: "refresh"
-                disabled: AiAgents.loading
-                onClicked: AiAgents.reload()
+                filled: true
+                icon: "terminal"
+                text: "Claude Code"
+                onClicked: root.openAssistant("claude")
+            }
+
+            HkButton {
+                Layout.alignment: Qt.AlignVCenter
+                icon: "terminal"
+                text: "Antigravity"
+                onClicked: root.openAssistant("agy")
             }
         }
 
@@ -133,15 +97,10 @@ NotchPage {
             Layout.fillWidth: true
             spacing: Tokens.spacing.medium
 
-            StyledRect {
-                Layout.preferredWidth: 390
+            Card {
+                Layout.preferredWidth: 430
                 Layout.fillHeight: true
                 implicitHeight: live.implicitHeight + Tokens.padding.large * 2
-
-                radius: Tokens.rounding.extraLarge
-                color: Hallownest.card
-                border.width: 1
-                border.color: Hallownest.border
 
                 ColumnLayout {
                     id: live
@@ -158,12 +117,8 @@ NotchPage {
                         Layout.bottomMargin: Tokens.spacing.extraSmall
                         spacing: Tokens.spacing.small
 
-                        StyledText {
+                        CardTitle {
                             text: Tr.tr("Live sessions")
-                            color: Hallownest.steel
-                            font.family: Hallownest.serif
-                            font.pointSize: 11
-                            font.weight: Font.Bold
                         }
 
                         StyledText {
@@ -221,293 +176,173 @@ NotchPage {
                 }
             }
 
-            ColumnLayout {
+            Card {
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop
-                spacing: Tokens.spacing.medium
+                Layout.fillHeight: true
+                implicitHeight: limits.implicitHeight + Tokens.padding.large * 2
 
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: quick.implicitHeight + Tokens.padding.large * 2
+                ColumnLayout {
+                    id: limits
 
-                    radius: Tokens.rounding.extraLarge
-                    color: Hallownest.card
-                    border.width: 1
-                    border.color: Hallownest.border
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: Tokens.padding.large
+                    spacing: Tokens.spacing.medium
 
-                    ColumnLayout {
-                        id: quick
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: Tokens.padding.small
 
-                        anchors.fill: parent
-                        anchors.margins: Tokens.padding.large
-                        spacing: Tokens.spacing.medium
-
-                        RowLayout {
+                        CardTitle {
                             Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
-
-                            HkButton {
-                                filled: true
-                                icon: "terminal"
-                                text: Tr.tr("Terminal")
-                                disabled: !AiAgents.hasCli
-                                onClicked: {
-                                    AiAgents.newSession();
-                                    root.launched();
-                                }
-                            }
-
-                            HkButton {
-                                visible: AiAgents.hasApp
-                                icon: "desktop_windows"
-                                text: Tr.tr("App")
-                                onClicked: {
-                                    AiAgents.openApp();
-                                    root.launched();
-                                }
-                            }
-
-                            HkButton {
-                                icon: "history"
-                                text: Tr.tr("Continue")
-                                disabled: !AiAgents.hasCli
-                                onClicked: {
-                                    AiAgents.continueSession();
-                                    root.launched();
-                                }
-                            }
-
-                            Item {
-                                Layout.fillWidth: true
-                            }
+                            text: Tr.tr("Limits")
                         }
 
-                        Flow {
-                            Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
-
-                            MaterialIcon {
-                                height: folderChip.implicitHeight
-                                verticalAlignment: Text.AlignVCenter
-                                text: "folder"
-                                color: Hallownest.subtext
-                            }
-
-                            Repeater {
-                                model: ScriptModel {
-                                    values: AiAgents.directories
-                                }
-
-                                delegate: Chip {
-                                    required property string modelData
-
-                                    text: AiAgents.dirName(modelData)
-                                    selected: modelData === AiAgents.directory
-                                    onClicked: AiAgents.directory = modelData
-                                }
-                            }
-
-                            Chip {
-                                id: folderChip
-
-                                icon: "folder_open"
-                                text: Tr.tr("Other...")
-                                onClicked: {
-                                    AiAgents.pickDirectory();
-                                    root.screenState.notch = false;
-                                }
-                            }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Tokens.spacing.small
-
-                            HkField {
-                                id: promptField
-
-                                Layout.fillWidth: true
-                                enabled: AiAgents.hasCli
-                                leadingIcon: "auto_awesome"
-                                placeholderText: Tr.tr("Ask %1...").arg(AiAgents.provider.name)
-                                onAccepted: {
-                                    if (!text.trim())
-                                        return;
-                                    AiAgents.ask(text);
-                                    root.launched();
-                                }
-                                Keys.onEscapePressed: root.screenState.notch = false
-                                onActiveFocusChanged: {
-                                    if (activeFocus)
-                                        root.screenState.notch = true;
-                                }
-                            }
-
-                            HkButton {
-                                filled: true
-                                implicitHeight: 28
-                                Layout.alignment: Qt.AlignVCenter
-                                icon: "send"
-                                disabled: !promptField.text.trim()
-                                onClicked: promptField.accepted()
-                            }
+                        HkButton {
+                            implicitHeight: 26
+                            icon: "refresh"
+                            disabled: AiUsage.loading
+                            onClicked: AiUsage.refresh(true)
                         }
                     }
-                }
 
-                StyledRect {
-                    Layout.fillWidth: true
-                    implicitHeight: recent.implicitHeight + Tokens.padding.large * 2
+                    AgentLimits {
+                        name: "Claude Code"
+                        usage: AiUsage.claude
+                        signIn: "claude auth login"
+                    }
 
-                    radius: Tokens.rounding.extraLarge
-                    color: Hallownest.card
-                    border.width: 1
-                    border.color: Hallownest.border
-
-                    ColumnLayout {
-                        id: recent
-
-                        anchors.fill: parent
-                        anchors.margins: Tokens.padding.large
-                        spacing: Tokens.spacing.extraSmall
-
-                        StyledText {
-                            Layout.leftMargin: Tokens.padding.small
-                            Layout.bottomMargin: Tokens.spacing.extraSmall
-                            text: Tr.tr("Recent sessions")
-                            color: Hallownest.steel
-                            font.family: Hallownest.serif
-                            font.pointSize: 11
-                            font.weight: Font.Bold
-                        }
-
-                        StyledText {
-                            Layout.leftMargin: Tokens.padding.small
-                            visible: AiAgents.sessions.length === 0
-                            text: AiAgents.loading ? Tr.tr("Loading...") : Tr.tr("No sessions yet")
-                            font: Tokens.font.body.small
-                            color: Hallownest.subtext
-                        }
-
-                        Repeater {
-                            model: ScriptModel {
-                                values: AiAgents.sessions.slice(0, 3)
-                            }
-
-                            delegate: SessionRow {}
-                        }
+                    AgentLimits {
+                        name: "Antigravity"
+                        usage: AiUsage.agy
+                        signIn: "agy"
                     }
                 }
             }
         }
     }
 
-    component Chip: StyledRect {
-        id: chip
+    component AgentLimits: ColumnLayout {
+        id: agent
 
-        property string icon
-        property string text
-        property bool selected
+        property string name
+        property var usage
+        property string signIn
 
-        signal clicked
+        Layout.fillWidth: true
+        spacing: 6
 
-        implicitWidth: chipRow.implicitWidth + Tokens.padding.medium * 2
-        implicitHeight: chipRow.implicitHeight + Tokens.padding.small * 2
-
-        radius: Tokens.rounding.full
-        color: selected ? Qt.alpha(Hallownest.lifeblood, 0.18) : "transparent"
-        border.width: selected ? 0 : 1
-        border.color: Hallownest.border
-
-        StateLayer {
-            color: chip.selected ? Hallownest.soul : Hallownest.text
-            onClicked: chip.clicked()
+        StyledText {
+            Layout.leftMargin: Tokens.padding.small
+            text: agent.name
+            color: Hallownest.steel
+            font.pointSize: 9
+            font.weight: Font.DemiBold
         }
 
-        Row {
-            id: chipRow
+        StyledText {
+            Layout.fillWidth: true
+            Layout.leftMargin: Tokens.padding.small
+            visible: !!agent.usage?.error
+            text: {
+                const e = agent.usage?.error;
+                if (e === "not-logged-in" || e === "auth")
+                    return Tr.tr("Sign in again with `%1`").arg(agent.signIn);
+                if (e === "expired")
+                    return Tr.tr("Run `%1` once to refresh the sign-in").arg(agent.signIn);
+                if (e === "rate-limited")
+                    return Tr.tr("Too many checks, try again later");
+                return Tr.tr("Couldn't reach the provider");
+            }
+            wrapMode: Text.WordWrap
+            color: Hallownest.subtext
+            font.pointSize: 8
+        }
 
-            anchors.centerIn: parent
-            spacing: Tokens.spacing.extraSmall
+        Meter {
+            title: Tr.tr("Session (5 h)")
+            window: agent.usage?.session ?? null
+            resetFormat: "HH:mm"
+        }
 
-            MaterialIcon {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: chip.icon || chip.selected
-                text: chip.icon || "check"
-                color: chip.selected ? Hallownest.soul : Hallownest.subtext
-                fontStyle: Tokens.font.icon.small
+        Meter {
+            title: Tr.tr("Week")
+            window: agent.usage?.week ?? null
+            resetFormat: "ddd HH:mm"
+        }
+    }
+
+    component Card: StyledRect {
+        radius: Tokens.rounding.extraLarge
+        color: Hallownest.card
+        border.width: 1
+        border.color: Hallownest.border
+    }
+
+    component CardTitle: StyledText {
+        color: Hallownest.steel
+        font.family: Hallownest.serif
+        font.pointSize: 11
+        font.weight: Font.Bold
+    }
+
+    component Meter: ColumnLayout {
+        id: meter
+
+        property string title
+        property var window
+        property string resetFormat
+        readonly property real percent: window?.percent ?? 0
+        readonly property color tone: percent >= 90 ? Hallownest.grimm : percent >= 70 ? Hallownest.gold : Hallownest.lifeblood
+
+        Layout.fillWidth: true
+        Layout.leftMargin: Tokens.padding.small
+        Layout.rightMargin: Tokens.padding.small
+        visible: !!window
+        spacing: 4
+
+        RowLayout {
+            Layout.fillWidth: true
+
+            StyledText {
+                Layout.fillWidth: true
+                text: meter.title
+                color: Hallownest.text
+                font.pointSize: 10
             }
 
             StyledText {
-                anchors.verticalCenter: parent.verticalCenter
-                text: chip.text
-                font: Tokens.font.label.large
-                color: chip.selected ? Hallownest.soul : Hallownest.subtext
-            }
-        }
-    }
-
-    component SessionRow: StyledRect {
-        id: row
-
-        required property var modelData
-
-        Layout.fillWidth: true
-        implicitHeight: rowLayout.implicitHeight + Tokens.padding.small * 2
-
-        radius: Tokens.rounding.large
-        color: "transparent"
-
-        StateLayer {
-            color: Hallownest.text
-            onClicked: {
-                AiAgents.resume(row.modelData);
-                root.launched();
+                text: `${Math.round(meter.percent)}%`
+                color: meter.tone
+                font.family: Hallownest.mono
+                font.pointSize: 9
             }
         }
 
-        RowLayout {
-            id: rowLayout
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 6
+            radius: 3
+            color: Hallownest.button
 
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.small
-            anchors.leftMargin: Tokens.padding.medium
-            anchors.rightMargin: Tokens.padding.medium
-            spacing: Tokens.spacing.medium
+            Rectangle {
+                width: parent.width * Math.min(1, meter.percent / 100)
+                height: parent.height
+                radius: 3
+                color: meter.tone
 
-            MaterialIcon {
-                Layout.alignment: Qt.AlignVCenter
-                text: row.modelData.entrypoint === "claude-desktop" ? "desktop_windows" : "terminal"
-                color: Hallownest.lifeblood
-            }
-
-            ColumnLayout {
-                Layout.alignment: Qt.AlignVCenter
-                Layout.fillWidth: true
-                spacing: 0
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: row.modelData.title || row.modelData.prompt || Tr.tr("Untitled session")
-                    elide: Text.ElideRight
-                    font: Tokens.font.body.medium
-                    color: Hallownest.text
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: `${AiAgents.prettyPath(row.modelData.cwd)} · ${root.relativeTime(row.modelData.mtime)}`
-                    elide: Text.ElideMiddle
-                    font: Tokens.font.body.small
-                    color: Hallownest.subtext
+                Behavior on width {
+                    Anim {}
                 }
             }
+        }
 
-            MaterialIcon {
-                Layout.alignment: Qt.AlignVCenter
-                text: "play_arrow"
-                color: Hallownest.subtext
-            }
+        StyledText {
+            visible: !!meter.window?.resetsAt
+            text: Tr.tr("Resets %1").arg(Qt.locale().toString(new Date(meter.window?.resetsAt ?? 0), meter.resetFormat))
+            color: Hallownest.faint
+            font.pointSize: 8
         }
     }
 

@@ -17,11 +17,11 @@ Item {
     property real targetX
     property real targetY
     property real size: 40
-    property color boneColour: "#daebeb"
+    property color boneColour: Hallownest.isMono ? "#e4e5e8" : "#daebeb"
     property real voidness
     property real soulness
     readonly property color headColour: Qt.tint(Qt.tint(boneColour, Qt.rgba(1, 1, 1, soulness * 0.7)), Qt.rgba(0.03, 0.03, 0.045, voidness))
-    readonly property color eyeColour: Qt.tint(Qt.tint(Season.current === "grimm" ? "#7a0f17" : "black", Qt.rgba(0.66, 0.74, 0.84, soulness)), Qt.rgba(0.95, 0.97, 0.98, voidness))
+    readonly property color eyeColour: Qt.tint(Qt.tint("black", Qt.rgba(0.66, 0.74, 0.84, soulness)), Qt.rgba(0.95, 0.97, 0.98, voidness))
     readonly property color rimColour: Qt.tint(Qt.tint("#4d4d4d", Qt.rgba(0.8, 0.86, 0.92, soulness)), Qt.rgba(0.08, 0.08, 0.1, voidness))
     readonly property color lidColour: "#8c919b"
 
@@ -1897,19 +1897,20 @@ Item {
             readonly property real headroom: 45
             readonly property real pivotY: 101.6 - root.originY + headroom
             readonly property bool voidRim: root.voidness > root.soulness
+            readonly property bool tightRim: voidRim || (Hallownest.light && root.soulness < 0.05)
 
             anchors.fill: parent
             anchors.topMargin: -headroom
-            layer.enabled: root.soulness > 0.01 || root.voidness > 0.01
-            // Soul = wide glow; Void = tight light rim so the black body doesn't vanish into the notch
+            layer.enabled: Hallownest.light || root.soulness > 0.01 || root.voidness > 0.01
+            // Soul = wide glow; Void / light mode = tight rim so the body doesn't vanish into the notch
             layer.effect: MultiEffect {
                 shadowEnabled: true
                 shadowColor: Hallownest.soul
-                shadowOpacity: Math.max(root.soulness, root.voidness)
-                shadowBlur: body.voidRim ? 0.15 : 1
+                shadowOpacity: Math.max(Hallownest.light ? 0.55 : 0, root.soulness, root.voidness)
+                shadowBlur: body.tightRim ? 0.18 : 1
                 shadowHorizontalOffset: 0
                 shadowVerticalOffset: 0
-                blurMax: body.voidRim ? 5 : 24
+                blurMax: body.tightRim ? 5 : 24
             }
 
             transform: [
@@ -1968,15 +1969,15 @@ Item {
                 }
 
                 Eye {
-                    x: 130.3 + root.smoothLookX * 3.5
-                    y: 77 + root.smoothLookY * 2.5
+                    x: 130.3 + root.smoothLookX * 5
+                    y: 77 + root.smoothLookY * 3.5
                     isLeft: true
                     opacity: 1 - root.boss
                 }
 
                 Eye {
-                    x: 158.5 + root.smoothLookX * 3.5
-                    y: 77 + root.smoothLookY * 2.5
+                    x: 158.5 + root.smoothLookX * 5
+                    y: 77 + root.smoothLookY * 3.5
                     isLeft: false
                     opacity: 1 - root.boss
                 }
@@ -2209,7 +2210,7 @@ Item {
                             preferredRendererType: Shape.CurveRenderer
 
                             ShapePath {
-                                fillColor: "#00c3e2"
+                                fillColor: Hallownest.isMono ? Hallownest.lifeblood : "#00c3e2"
                                 strokeWidth: -1
 
                                 PathSvg {
@@ -2338,8 +2339,8 @@ Item {
             }
 
             Oval {
-                x: root.smoothLookX * 3 + root.shake * 0.4
-                y: root.smoothLookY * 2.5
+                x: root.smoothLookX * 4.5 + root.shake * 0.4
+                y: root.smoothLookY * 3.5
                 rx: 2.8
                 ry: 4
                 fill: root.eyeColour
@@ -2360,7 +2361,7 @@ Item {
                 preferredRendererType: Shape.CurveRenderer
 
                 ShapePath {
-                    fillColor: "#6bd1f9"
+                    fillColor: Hallownest.isMono ? Hallownest.lifeblood : "#6bd1f9"
                     strokeWidth: -1
 
                     PathSvg {
@@ -2375,7 +2376,7 @@ Item {
                 opacity: 1 - root.drip
                 rx: 1.5
                 ry: 2
-                fill: "#6bd1f9"
+                fill: Hallownest.isMono ? Hallownest.lifeblood : "#6bd1f9"
             }
         }
 
@@ -2394,8 +2395,8 @@ Item {
             }
 
             Item {
-                x: root.smoothLookX * 2.2
-                y: root.smoothLookY * 1.6
+                x: root.smoothLookX * 3.3
+                y: root.smoothLookY * 2.4
 
                 Oval {
                     rx: 7.8389201
@@ -2407,14 +2408,14 @@ Item {
                     y: 0.06
                     rx: 7.1683073
                     ry: 9.9771566
-                    fill: "#d54501"
+                    fill: Hallownest.isMono ? Hallownest.faint : "#d54501"
                 }
 
                 Oval {
                     y: 0.28
                     rx: 6.776 * (0.9 + root.glow * 0.1)
                     ry: 8.65 * (0.9 + root.glow * 0.1)
-                    fill: Qt.tint("#d88f01", Qt.rgba(1, 0.8, 0.3, root.glow * 0.35))
+                    fill: Hallownest.isMono ? Qt.tint(Hallownest.infection, Qt.rgba(1, 1, 1, root.glow * 0.35)) : Qt.tint("#d88f01", Qt.rgba(1, 0.8, 0.3, root.glow * 0.35))
                 }
             }
         }
@@ -2508,8 +2509,8 @@ Item {
                 matrix: hollowEye.matrix
             },
             Translate {
-                x: root.smoothLookX * 3
-                y: root.smoothLookY * 2
+                x: root.smoothLookX * 4.5
+                y: root.smoothLookY * 3
             }
         ]
 
@@ -2518,7 +2519,7 @@ Item {
             y: hollowEye.cy
             rx: 6.085526
             ry: 9.8280611
-            fill: Qt.tint(Qt.tint("#1a1a1a", Qt.rgba(0.835, 0.1, 0.1, root.bossInfection)), Qt.rgba(0.95, 0.97, 0.98, root.voidness))
+            fill: Qt.tint(Qt.tint("#1a1a1a", Hallownest.isMono ? Qt.rgba(0.55, 0.56, 0.6, root.bossInfection) : Qt.rgba(0.835, 0.1, 0.1, root.bossInfection)), Qt.rgba(0.95, 0.97, 0.98, root.voidness))
         }
 
         Oval {
@@ -2526,7 +2527,7 @@ Item {
             y: hollowEye.cy
             rx: 5.35
             ry: 8.92
-            fill: "#d88f01"
+            fill: Hallownest.isMono ? Hallownest.infection : "#d88f01"
             opacity: root.bossInfection * (1 - root.voidness)
             visible: opacity > 0
         }

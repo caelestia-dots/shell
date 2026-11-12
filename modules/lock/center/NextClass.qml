@@ -9,6 +9,7 @@ import qs.services
 Row {
     id: root
 
+    property real maxWidth: Infinity
     readonly property var next: {
         const now = clock.date;
         const mins = now.getHours() * 60 + now.getMinutes();
@@ -43,6 +44,8 @@ Row {
     }
 
     MaterialIcon {
+        id: icon
+
         anchors.verticalCenter: parent.verticalCenter
         text: "school"
         color: Hallownest.gold
@@ -51,6 +54,8 @@ Row {
 
     StyledText {
         anchors.verticalCenter: parent.verticalCenter
+        width: Math.min(implicitWidth, root.maxWidth - icon.implicitWidth - root.spacing)
+        elide: Text.ElideRight
         text: root.next ? Tr.tr("Next: %1 · %2").arg(root.next.title).arg(root.next.start) + (root.next.location ? ` · ${root.next.location}` : "") : ""
         color: Hallownest.text
         font.pointSize: Tokens.font.body.medium.pointSize

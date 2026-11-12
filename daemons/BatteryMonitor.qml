@@ -50,6 +50,9 @@ Scope {
             if (!UPower.displayDevice.ready)
                 return;
 
+            if (NotchSettings.values.autoPowerProfile)
+                PowerProfiles.profile = UPower.onBattery ? PowerProfile.PowerSaver : PowerProfile.Balanced;
+
             if (UPower.onBattery) {
                 if (GlobalConfig.utilities.toasts.chargingChanged && !NotchSettings.values.osdCharger)
                     Toaster.toast(Tr.tr("Charger unplugged"), Tr.tr("Battery is discharging"), "power_off");

@@ -37,8 +37,8 @@ StyledRect {
     property color inactiveColour
     property color activeOnColour
     property color inactiveOnColour
-    property color disabledColour: Qt.alpha(Colours.palette.m3onSurface, 0.1)
-    property color disabledOnColour: Qt.alpha(Colours.palette.m3onSurface, 0.38)
+    property color disabledColour: Qt.alpha(Hallownest.text, 0.1)
+    property color disabledOnColour: Qt.alpha(Hallownest.text, 0.38)
 
     property bool internalChecked
     property real shapeMorphExpansion: 0

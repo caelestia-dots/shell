@@ -6,23 +6,44 @@ import Caelestia.I18n
 QtObject {
     id: root
 
+    // Order must match PageCompRegistry.pageComps
     readonly property list<var> pages: [
-        // Appearance
         {
-            label: Tr.tr("Wallpaper & style"),
+            label: Tr.tr("Style"),
             icon: "palette",
-            description: Tr.tr("Wallpaper, fonts, colours"),
+            description: Tr.tr("Style, flavour, wallpaper"),
             category: "appearance"
         },
-
-        // Connectivity
-        // TODO
-        // {
-        //     label: Tr.tr("Display"),
-        //     icon: "monitor",
-        //     description: Tr.tr("Output configuration"),
-        //     category: "connectivity"
-        // },
+        {
+            label: Tr.tr("Animations"),
+            icon: "animation",
+            description: Tr.tr("Mascot, scenes, seasons, transitions"),
+            category: "appearance"
+        },
+        {
+            label: Tr.tr("Notch"),
+            icon: "toggle_on",
+            description: Tr.tr("Clock, scale, mascot, focus timer"),
+            category: "shell"
+        },
+        {
+            label: Tr.tr("Overlays"),
+            icon: "notifications",
+            description: Tr.tr("OSD, notifications, toasts"),
+            category: "shell"
+        },
+        {
+            label: Tr.tr("AI agents"),
+            icon: "smart_toy",
+            description: Tr.tr("Claude Code hooks and approvals"),
+            category: "shell"
+        },
+        {
+            label: Tr.tr("Apps"),
+            icon: "apps",
+            description: Tr.tr("Default apps, favourites, hidden apps"),
+            category: "shell"
+        },
         {
             label: Tr.tr("Network"),
             icon: "wifi",
@@ -42,53 +63,23 @@ QtObject {
             description: Tr.tr("App volumes, sound devices"),
             category: "connectivity"
         },
-
-        // System
-        {
-            label: Tr.tr("Updates"),
-            icon: "update",
-            description: Tr.tr("System updates"),
-            category: "system"
-        },
-        {
-            label: Tr.tr("Plugins"),
-            icon: "extension",
-            description: Tr.tr("Manage plugins"),
-            category: "system"
-        },
-
-        // Shell
-        {
-            label: Tr.tr("Panels"),
-            icon: "dock_to_bottom",
-            description: Tr.tr("Dashboard, taskbar, launcher, sidebar"),
-            category: "shell"
-        },
-        {
-            label: Tr.tr("Apps"),
-            icon: "apps",
-            description: Tr.tr("Default apps, favourites, hidden apps"),
-            category: "shell"
-        },
         {
             label: Tr.tr("Services"),
             icon: "build",
-            description: Tr.tr("Poll intervals, lyrics backend"),
-            category: "shell"
+            description: Tr.tr("Input steps, polling, media"),
+            category: "system"
         },
         {
             label: Tr.tr("Language & region"),
             icon: "globe",
-            description: Tr.tr("UI language, weather location, display units"),
-            category: "shell"
+            description: Tr.tr("UI language, units"),
+            category: "system"
         },
-
-        // About
         {
             label: Tr.tr("About"),
             icon: "info",
-            description: Tr.tr("System information, credits"),
-            category: "about"
-        },
+            description: Tr.tr("System information"),
+            category: "system"
+        }
     ]
 }

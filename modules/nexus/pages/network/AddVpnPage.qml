@@ -98,7 +98,7 @@ PageBase {
             Layout.leftMargin: Tokens.padding.small
             // TRANSLATORS: the four names in brackets are provider identifiers, leave them untranslated
             text: Tr.tr("Built-in names (wireguard, warp, tailscale, netbird) auto-fill their commands. For others, provide the connect/disconnect commands.")
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
         }
@@ -181,8 +181,8 @@ PageBase {
                 isRound: true
                 horizontalPadding: Tokens.padding.extraLarge
                 verticalPadding: Tokens.padding.medium
-                inactiveColour: Colours.palette.m3errorContainer
-                inactiveOnColour: Colours.palette.m3onErrorContainer
+                inactiveColour: Qt.alpha(Hallownest.grimm, 0.16)
+                inactiveOnColour: Hallownest.grimm
                 iconLabel.fill: 1
                 iconLabel.grade: 25
                 icon: "delete_forever"

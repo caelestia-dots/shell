@@ -43,8 +43,8 @@ ColumnLayout {
                     font: Tokens.font.icon.medium
                     type: IconButton.Tonal
                     isRound: true
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
-                    inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                    inactiveColour: Hallownest.button
+                    inactiveOnColour: Hallownest.subtext
                     onClicked: root.nState.closeSubPage()
                 }
             }

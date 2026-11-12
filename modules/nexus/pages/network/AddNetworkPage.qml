@@ -77,7 +77,7 @@ PageBase {
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.extraSmall
             text: Tr.tr("Enter the details below to manually connect to a network.")
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
         }
@@ -207,8 +207,8 @@ PageBase {
 
                 shapeMorph: true
                 isRound: true
-                inactiveColour: Colours.palette.m3primary
-                inactiveOnColour: Colours.palette.m3onPrimary
+                inactiveColour: Hallownest.soul
+                inactiveOnColour: Hallownest.void_
                 stateLayer.disabled: root.connecting || ssidField.text.trim().length === 0
 
                 implicitWidth: connectMetrics.width + Tokens.padding.extraLarge * 2

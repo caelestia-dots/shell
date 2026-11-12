@@ -63,7 +63,7 @@ ConnectedRect {
                 Layout.fillWidth: true
                 visible: root.subtext
                 text: input.isError && root.errorText ? root.errorText : root.subtext
-                color: input.isError && root.errorText ? Colours.palette.m3error : Colours.palette.m3outline
+                color: input.isError && root.errorText ? Hallownest.grimm : Hallownest.subtext
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
                 animate: root.errorText

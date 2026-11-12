@@ -72,6 +72,15 @@ Scope {
             return NotchPages.all.map(p => p.id).join("\n");
         }
 
+        function setMascot(name: string): void {
+            if (["knight", "grimm", "hornet"].includes(name))
+                NotchSettings.set("mascotKind", name);
+        }
+
+        function getMascot(): string {
+            return NotchSettings.mascotKind;
+        }
+
         target: "notch"
     }
 }

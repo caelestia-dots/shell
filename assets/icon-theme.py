@@ -2,30 +2,33 @@
 """Builds YAMIS-Hallownest: a copy of the monochrome YAMIS-Cosmic icon theme tinted with the flavour.
 
 YAMIS draws every glyph in its text colour (#d8dee9) with a dark highlight (#3b4252); both are
-swapped for the flavour's Soul accent and a dark steel. Source: ~/.local/share/icons/YAMIS-Cosmic.
+swapped for the style and flavour's Soul accent and a dark steel. Source: ~/.local/share/icons/YAMIS-Cosmic.
 """
 import re
 import shutil
 import sys
 from pathlib import Path
 
-ACCENTS = {"vessel": "#f0f4f8", "lifeblood": "#6cc9ff", "infection": "#ff8a2a", "greenpath": "#74c98a"}
-STEELS = {"vessel": "#9ba4b5", "lifeblood": "#8fb3cc", "infection": "#b8a08f", "greenpath": "#94b39c"}
+from hkstyle import palette
 
 
 def darken(hex_colour, k):
     return "#" + "".join(f"{round(int(hex_colour[i:i + 2], 16) * k):02x}" for i in (1, 3, 5))
 
 
-flavour = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ACCENTS else "vessel"
+def lighten(hex_colour, k):
+    return "#" + "".join(f"{round(int(hex_colour[i:i + 2], 16) + (255 - int(hex_colour[i:i + 2], 16)) * k):02x}" for i in (1, 3, 5))
+
+
+p = palette()
 icons = Path.home() / ".local/share/icons"
 src = icons / "YAMIS-Cosmic"
 dst = icons / "YAMIS-Hallownest"
 stamp = dst / ".flavour"
-if not src.is_dir() or (stamp.exists() and stamp.read_text().strip() == flavour):
+if not src.is_dir() or (stamp.exists() and stamp.read_text().strip() == p["key"]):
     sys.exit(0)
 
-colours = {"#d8dee9": ACCENTS[flavour], "#3b4252": darken(STEELS[flavour], 0.35)}
+colours = {"#d8dee9": p["accent"], "#3b4252": lighten(p["steel"], 0.45) if p["light"] else darken(p["steel"], 0.35)}
 pattern = re.compile("|".join(colours), re.IGNORECASE)
 
 
@@ -60,7 +63,7 @@ dirs = [Path.home() / ".local/share/icons", Path("/usr/share/icons")]
 text = re.sub(r"(?m)^Inherits=(.*)$", lambda m: "Inherits=" + ",".join(
     t for t in m.group(1).split(",") if any((d / t).is_dir() for d in dirs)), text)
 index.write_text(text, encoding="utf-8")
-(tmp / ".flavour").write_text(flavour)
+(tmp / ".flavour").write_text(p["key"])
 # Swap in one go so apps never see a half-written theme
 shutil.rmtree(dst, ignore_errors=True)
 tmp.rename(dst)

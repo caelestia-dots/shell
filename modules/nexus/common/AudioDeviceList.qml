@@ -57,14 +57,14 @@ ItemList {
                 implicitWidth: implicitHeight
                 implicitHeight: devIcon.implicitHeight + Tokens.padding.small * 2
                 radius: Tokens.rounding.full
-                color: device.active ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+                color: device.active ? Hallownest.soul : Hallownest.button
 
                 MaterialIcon {
                     id: devIcon
 
                     anchors.centerIn: parent
                     text: root.iconName
-                    color: device.active ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                    color: device.active ? Hallownest.void_ : Hallownest.text
                     fontStyle: Tokens.font.icon.medium
                     fill: device.active ? 1 : 0
 
@@ -83,7 +83,7 @@ ItemList {
 
             MaterialIcon {
                 text: "check"
-                color: Colours.palette.m3primary
+                color: Hallownest.soul
                 fontStyle: Tokens.font.icon.medium
                 opacity: device.active ? 1 : 0
 

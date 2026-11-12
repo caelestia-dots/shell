@@ -12,10 +12,8 @@ import qs.modules.nexus.pages.apps
 import qs.modules.nexus.pages.audio
 import qs.modules.nexus.pages.bluetooth
 import qs.modules.nexus.pages.network
-import qs.modules.nexus.pages.panels
 import qs.modules.nexus.pages.services
 import qs.modules.nexus.pages.wallandstyle
-import qs.modules.nexus.pages.panels.taskbar
 
 QtObject {
     id: root
@@ -23,10 +21,9 @@ QtObject {
     readonly property list<Component> pageComps: [
         // Appearance
         Component {
-            // Wallpaper & style
             StackPage {
                 Component {
-                    WallpaperAndStyle {}
+                    StylePage {}
                 }
                 Component {
                     WallpaperSelect {}
@@ -34,15 +31,57 @@ QtObject {
                 Component {
                     WallpaperCategory {}
                 }
+            }
+        },
+        Component {
+            StackPage {
                 Component {
-                    ColourSelect {}
+                    AnimationsPage {}
+                }
+            }
+        },
+
+        // Shell
+        Component {
+            StackPage {
+                Component {
+                    NotchSettingsPage {}
+                }
+            }
+        },
+        Component {
+            StackPage {
+                Component {
+                    OverlaysPage {}
+                }
+                Component {
+                    NotificationsPage {}
+                }
+            }
+        },
+        Component {
+            StackPage {
+                Component {
+                    AgentsPage {}
+                }
+            }
+        },
+        Component {
+            StackPage {
+                Component {
+                    AppsPage {}
+                }
+                Component {
+                    AllApps {}
+                }
+                Component {
+                    AppInfo {}
                 }
             }
         },
 
         // Connectivity
         Component {
-            // Network
             StackPage {
                 Component {
                     NetworkPage {}
@@ -68,7 +107,6 @@ QtObject {
             }
         },
         Component {
-            // Bluetooth
             StackPage {
                 Component {
                     BluetoothPage {}
@@ -82,7 +120,6 @@ QtObject {
             }
         },
         Component {
-            // Audio
             StackPage {
                 Component {
                     AudioPage {}
@@ -95,88 +132,19 @@ QtObject {
 
         // System
         Component {
-            PlaceholderComp {}
-        },
-        Component {
-            PlaceholderComp {}
-        },
-
-        // Shell
-        Component {
-            // Panels
-            StackPage {
-                Component {
-                    PanelsPage {}
-                }
-                Component {
-                    DashboardPanel {}
-                }
-                Component {
-                    TaskbarPanel {}
-                }
-                Component {
-                    LauncherPanel {}
-                }
-                Component {
-                    SidebarPanel {}
-                }
-                Component {
-                    UtilitiesPanel {}
-                }
-
-                // Taskbar component sub-pages
-                Component {
-                    BarWorkspaces {}
-                }
-                Component {
-                    BarActiveWindow {}
-                }
-                Component {
-                    BarTray {}
-                }
-                Component {
-                    BarStatusIcons {}
-                }
-                Component {
-                    BarClock {}
-                }
-            }
-        },
-        Component {
-            // Apps
-            StackPage {
-                Component {
-                    AppsPage {}
-                }
-                Component {
-                    AllApps {}
-                }
-                Component {
-                    AppInfo {}
-                }
-            }
-        },
-        Component {
-            // Services
             StackPage {
                 Component {
                     ServicesPage {}
                 }
-                Component {
-                    NotificationsPage {}
-                }
             }
         },
         Component {
-            // Language & region
             StackPage {
                 Component {
                     LanguageAndRegion {}
                 }
             }
         },
-
-        // About
         Component {
             StackPage {
                 Component {
@@ -200,21 +168,21 @@ QtObject {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: "handyman"
-                color: Colours.palette.m3outlineVariant
+                color: Hallownest.faint
                 fontStyle: Tokens.font.icon.extraLarge
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("Page under construction")
-                color: Colours.palette.m3outlineVariant
+                color: Hallownest.faint
                 font: Tokens.font.title.large
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("This page will be available in a future update.")
-                color: Colours.palette.m3outlineVariant
+                color: Hallownest.faint
                 font: Tokens.font.body.large
             }
         }

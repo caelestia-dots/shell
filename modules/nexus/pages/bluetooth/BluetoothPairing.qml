@@ -58,7 +58,7 @@ PageBase {
                 anchors.verticalCenterOffset: Math.round(fontInfo.pointSize * 0.2)
 
                 text: Tr.tr("Available devices")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.subtext
                 font: Tokens.font.body.small
             }
         }
@@ -128,7 +128,7 @@ PageBase {
 
                     MaterialIcon {
                         text: Icons.getBluetoothIcon(newDevice.modelData?.icon ?? "")
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Hallownest.subtext
                         fontStyle: Tokens.font.icon.medium
                         opacity: newDevice.textOpacity
                     }
@@ -148,7 +148,7 @@ PageBase {
                         StyledText {
                             Layout.fillWidth: true
                             text: newDevice.modelData?.pairing ? Tr.tr("Pairing...") : (newDevice.modelData?.address ?? "")
-                            color: Colours.palette.m3outline
+                            color: Hallownest.subtext
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                             animate: true

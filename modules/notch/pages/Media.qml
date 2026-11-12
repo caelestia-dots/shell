@@ -216,7 +216,7 @@ NotchPage {
                 implicitWidth: lyricsRow.implicitWidth + Tokens.padding.large * 2
                 implicitHeight: 26
                 radius: 13
-                color: NotchSettings.lyrics ? Qt.alpha(Hallownest.soul, 0.1) : "#1a1a22"
+                color: NotchSettings.lyrics ? Qt.alpha(Hallownest.soul, 0.1) : Hallownest.button
                 border.width: 1
                 border.color: NotchSettings.lyrics ? Qt.alpha(Hallownest.soul, 0.4) : Hallownest.border
 

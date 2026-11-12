@@ -23,13 +23,13 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: true
         mipmap: true
-        opacity: root.filled ? 1 : 0.5
+        opacity: root.filled ? 1 : (Hallownest.light ? 0.28 : 0.5)
         layer.enabled: true
         layer.effect: MultiEffect {
-            colorization: root.colour === Hallownest.soul ? 0 : 0.6
+            colorization: Hallownest.light ? 0.85 : (root.colour === Hallownest.soul ? 0 : 0.6)
             colorizationColor: root.colour
-            brightness: root.filled ? 0 : -0.35
-            saturation: root.filled ? 0 : -1
+            brightness: Hallownest.light ? -0.18 : (root.filled ? 0 : -0.35)
+            saturation: Hallownest.isMono || !root.filled ? -1 : 0
             shadowEnabled: root.glow
             shadowColor: Hallownest.soul
             shadowOpacity: 0.6

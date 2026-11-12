@@ -34,7 +34,7 @@ Item {
             Layout.fillWidth: true
             implicitHeight: width
             radius: Tokens.rounding.largeIncreased
-            color: Colours.tPalette.m3surfaceContainer
+            color: Hallownest.card
 
             Loader {
                 anchors.centerIn: parent
@@ -46,7 +46,7 @@ Item {
                     implicitWidth: loadingIndicator.implicitSize + Tokens.padding.large * 2
                     implicitHeight: loadingIndicator.implicitSize + Tokens.padding.large * 2
 
-                    color: Colours.palette.m3primaryContainer
+                    color: Qt.alpha(Hallownest.soul, 0.16)
                     radius: Tokens.rounding.full
 
                     LoadingIndicator {
@@ -78,7 +78,7 @@ Item {
 
             Layout.bottomMargin: Tokens.padding.small
             Layout.fillWidth: true
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             font: Tokens.font.label.builders.small.weight(Font.Medium).build()
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight

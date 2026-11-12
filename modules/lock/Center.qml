@@ -37,6 +37,7 @@ ColumnLayout {
 
     NextClass {
         Layout.alignment: Qt.AlignHCenter
+        maxWidth: root.centerWidth
     }
 
     Item {

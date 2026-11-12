@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
-import qs.components.controls
+import qs.components.hallownest
 import qs.services
 import qs.modules.nexus.common
 
@@ -48,19 +48,18 @@ ConnectedRect {
                 Layout.fillWidth: true
                 visible: root.subtext
                 text: root.subtext
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
             }
         }
 
-        StyledSpinBox {
+        HkStepper {
             from: root.from
             to: root.to
             stepSize: root.stepSize
             value: root.value
-            cLayer: 2
-            onValueModified: root.moved(value)
+            onMoved: v => root.moved(v)
         }
     }
 }

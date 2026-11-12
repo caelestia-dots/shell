@@ -10,12 +10,14 @@ import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.State
 import qs.components
+import qs.components.effects
 import qs.components.hallownest
 import qs.services
+import qs.utils
 import qs.modules.nexus
 import qs.modules.notch
-import qs.modules.bar.components as BarComponents
 import qs.modules.notch.pages.home as HomeDetails
 
 NotchPage {
@@ -23,6 +25,7 @@ NotchPage {
 
     // "" = overview; otherwise the bar popout shown in place: network, bluetooth, audio, battery
     property string detail
+    property SystemTrayItem trayItem
     readonly property MprisPlayer player: NotchMedia.player
     readonly property bool charging: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state)
     readonly property real battery: UPower.displayDevice.percentage
@@ -30,6 +33,12 @@ NotchPage {
 
     function open(id: string): void {
         screenState.notchPage = NotchPages.find(id);
+    }
+
+    onTrayItemChanged: {
+        // the app quit while its menu was open
+        if (!trayItem && detail === "tray")
+            detail = "";
     }
 
     implicitWidth: 660
@@ -124,6 +133,36 @@ NotchPage {
                 IconButton {
                     icon: "chevron_right"
                     onClicked: root.detail = "audio"
+                }
+
+                Rectangle {
+                    implicitWidth: 1
+                    implicitHeight: 20
+                    color: Hallownest.border
+                }
+
+                QuickToggle {
+                    icon: Audio.sourceMuted ? "mic_off" : "mic"
+                    checked: !Audio.sourceMuted
+                    onClicked: {
+                        const audio = Audio.source?.audio;
+                        if (audio)
+                            audio.muted = !audio.muted;
+                    }
+                }
+
+                QuickToggle {
+                    icon: "coffee"
+                    checked: RuntimeState.inhibitIdle
+                    accent: Hallownest.gold
+                    onClicked: RuntimeState.inhibitIdle = !RuntimeState.inhibitIdle
+                }
+
+                QuickToggle {
+                    icon: "notifications_off"
+                    checked: PersistentState.doNotDisturb
+                    accent: Hallownest.grimm
+                    onClicked: PersistentState.doNotDisturb = !PersistentState.doNotDisturb
                 }
             }
         }
@@ -220,6 +259,15 @@ NotchPage {
                 }
             }
 
+            HkButton {
+                icon: "settings"
+                text: Tr.tr("Settings")
+                onClicked: {
+                    root.screenState.notch = false;
+                    WindowFactory.create(null, {});
+                }
+            }
+
             Item {
                 Layout.fillWidth: true
             }
@@ -229,7 +277,34 @@ NotchPage {
                     values: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
                 }
 
-                BarComponents.TrayItem {}
+                MouseArea {
+                    id: trayIcon
+
+                    required property SystemTrayItem modelData
+
+                    implicitWidth: 30
+                    implicitHeight: 30
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: event => {
+                        if (event?.button === Qt.MiddleButton) {
+                            modelData.secondaryActivate();
+                        } else if (modelData.hasMenu && (event?.button === Qt.RightButton || modelData.onlyMenu)) {
+                            root.trayItem = modelData;
+                            root.detail = "tray";
+                        } else {
+                            modelData.activate();
+                        }
+                    }
+
+                    ColouredIcon {
+                        anchors.centerIn: parent
+                        implicitSize: 18
+                        source: Icons.getTrayIcon(trayIcon.modelData.id, trayIcon.modelData.icon)
+                        colour: Hallownest.steel
+                        layer.enabled: Config.bar.tray.recolour
+                    }
+                }
             }
 
             HkButton {
@@ -294,7 +369,8 @@ NotchPage {
                         bluetooth: Tr.tr("Bluetooth"),
                         audio: Tr.tr("Sound"),
                         mixer: Tr.tr("App volumes"),
-                        battery: Tr.tr("Power")
+                        battery: Tr.tr("Power"),
+                        tray: root.trayItem?.tooltipTitle || root.trayItem?.title || root.trayItem?.id || ""
                     })[root.detail] ?? ""
                 color: Hallownest.soul
                 font.family: Hallownest.serif
@@ -303,7 +379,7 @@ NotchPage {
             }
 
             HkButton {
-                visible: root.detail !== "battery"
+                visible: root.detail !== "battery" && root.detail !== "tray"
                 icon: "settings"
                 text: Tr.tr("Open settings")
                 onClicked: {
@@ -321,7 +397,8 @@ NotchPage {
                     bluetooth: bluetoothDetail,
                     audio: audioDetail,
                     mixer: mixerDetail,
-                    battery: batteryDetail
+                    battery: batteryDetail,
+                    tray: trayDetail
                 })[root.detail] ?? null
         }
     }
@@ -358,11 +435,26 @@ NotchPage {
         HomeDetails.Power {}
     }
 
+    Component {
+        id: trayDetail
+
+        HomeDetails.TrayMenu {
+            item: root.trayItem
+            onDone: root.detail = ""
+        }
+    }
+
     component Panel: Rectangle {
         radius: 14
         color: Hallownest.card
         border.width: 1
         border.color: Hallownest.border
+    }
+
+    component QuickToggle: HkToggle {
+        implicitWidth: 30
+        implicitHeight: 30
+        radius: 15
     }
 
     component IconButton: MaterialIcon {
@@ -403,7 +495,7 @@ NotchPage {
         Layout.preferredWidth: 1
         implicitHeight: 56
         radius: 14
-        color: checked ? Qt.alpha(accent, tileArea.containsMouse ? 0.2 : 0.14) : tileArea.containsMouse ? Qt.lighter(Hallownest.button, 1.6) : Hallownest.button
+        color: checked ? Qt.alpha(accent, tileArea.containsMouse ? 0.2 : 0.14) : tileArea.containsMouse ? Hallownest.raise(Hallownest.button, 1.6) : Hallownest.button
         border.width: 1
         border.color: checked ? Qt.alpha(accent, 0.55) : Hallownest.border
 

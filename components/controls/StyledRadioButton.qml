@@ -26,7 +26,7 @@ RadioButton {
 
         StateLayer {
             anchors.margins: -Tokens.padding.small
-            color: root.checked ? Colours.palette.m3onSurface : Colours.palette.m3primary
+            color: root.checked ? Hallownest.text : Hallownest.soul
             z: -1
             onClicked: root.click()
         }

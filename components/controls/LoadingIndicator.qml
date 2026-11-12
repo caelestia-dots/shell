@@ -53,7 +53,7 @@ MaterialShape {
     }
 
     implicitSize: 38
-    color: Colours.palette.m3primary
+    color: Hallownest.soul
     toShape: shapes[0]
 
     ElapsedTimer {

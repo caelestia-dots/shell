@@ -91,14 +91,14 @@ PageBase {
                         implicitWidth: implicitHeight
                         implicitHeight: deviceIcon.implicitHeight + Tokens.padding.small * 2
                         radius: Tokens.rounding.full
-                        color: device.connected ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+                        color: device.connected ? Hallownest.soul : Hallownest.button
 
                         MaterialIcon {
                             id: deviceIcon
 
                             anchors.centerIn: parent
                             text: Icons.getBluetoothIcon(device.modelData?.icon ?? "")
-                            color: device.connected ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondaryContainer
+                            color: device.connected ? Hallownest.void_ : Hallownest.text
                             fontStyle: Tokens.font.icon.medium
                             fill: device.connected ? 1 : 0
                             opacity: device.textOpacity
@@ -131,7 +131,7 @@ PageBase {
                                     return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.modelData.battery));
                                 return Tr.trCtx("Connected", "bluetooth device state");
                             }
-                            color: Colours.palette.m3outline
+                            color: Hallownest.subtext
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                             animate: true
@@ -153,7 +153,7 @@ PageBase {
                                     icon: "settings"
                                     type: IconButton.Text
                                     padding: Tokens.padding.small
-                                    inactiveOnColour: device.connected ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                                    inactiveOnColour: device.connected ? Hallownest.soul : Hallownest.subtext
                                     label.fill: 0
 
                                     onClicked: {

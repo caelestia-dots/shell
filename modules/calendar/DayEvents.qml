@@ -7,8 +7,10 @@ import Caelestia.I18n
 import qs.components
 import qs.components.containers
 import qs.components.controls
+import qs.components.hallownest
 import qs.services
 
+// Events of one day with inline add/edit forms, unfolded over the notch week view
 Item {
     id: root
 
@@ -40,55 +42,44 @@ Item {
         }
     }
 
-    ColumnLayout {
+    RowLayout {
         id: header
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Tokens.padding.extraLarge
+        anchors.margins: Tokens.padding.large
         spacing: Tokens.spacing.small
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Tokens.spacing.small
+        HkButton {
+            icon: "arrow_back"
+            onClicked: root.close()
+        }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 0
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Qt.locale().toString(root.date, "dddd")
-                    color: Colours.palette.m3primary
-                    font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
-                    elide: Text.ElideRight
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Qt.locale().toString(root.date, "d MMMM yyyy")
-                    color: Colours.palette.m3onSurface
-                    font: Tokens.font.headline.medium
-                    elide: Text.ElideRight
-                }
-            }
-
-            IconButton {
-                isRound: true
-                type: IconButton.Text
-                icon: "close"
-                onClicked: root.close()
-            }
+        StyledText {
+            Layout.leftMargin: Tokens.spacing.extraSmall
+            text: Qt.locale().toString(root.date, "dddd")
+            color: Hallownest.soul
+            font.family: Hallownest.serif
+            font.pointSize: 12
+            font.weight: Font.Bold
+            font.capitalization: Font.Capitalize
         }
 
         StyledText {
             Layout.fillWidth: true
-            visible: !Events.available
-            text: Tr.tr("khal is not installed or configured, so events can't be loaded")
-            color: Colours.palette.m3error
-            font: Tokens.font.body.small
-            wrapMode: Text.WordWrap
+            text: Qt.locale().toString(root.date, "d MMMM yyyy")
+            color: Hallownest.subtext
+            font.pointSize: 10
+            elide: Text.ElideRight
+        }
+
+        HkButton {
+            visible: !root.adding && !root.editingUid
+            disabled: !Events.available
+            icon: "add"
+            text: Tr.tr("Add event")
+            onClicked: root.adding = true
         }
     }
 
@@ -96,12 +87,11 @@ Item {
         id: view
 
         anchors.top: header.bottom
-        anchors.bottom: footer.visible ? footer.top : parent.bottom
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Tokens.padding.extraLarge
-        anchors.topMargin: Tokens.spacing.large
-        anchors.bottomMargin: Tokens.spacing.large
+        anchors.margins: Tokens.padding.large
+        anchors.topMargin: Tokens.spacing.medium
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -117,6 +107,23 @@ Item {
 
             width: view.width
             spacing: Tokens.spacing.small
+
+            StyledText {
+                Layout.fillWidth: true
+                visible: !Events.available
+                text: Tr.tr("khal is not installed or configured, so events can't be loaded")
+                color: Hallownest.grimm
+                font.pointSize: 9
+                wrapMode: Text.WordWrap
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                active: root.adding
+                visible: active
+
+                sourceComponent: EventForm {}
+            }
 
             Repeater {
                 model: root.events
@@ -149,127 +156,102 @@ Item {
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.topMargin: Tokens.spacing.large
+                Layout.topMargin: Tokens.spacing.extraLarge
                 visible: root.events.length === 0 && !root.adding
                 horizontalAlignment: Text.AlignHCenter
                 text: Tr.tr("No events this day")
-                color: Colours.palette.m3outline
-                font: Tokens.font.body.medium
-            }
-
-            Loader {
-                Layout.fillWidth: true
-                Layout.topMargin: root.events.length > 0 ? Tokens.spacing.large : 0
-                active: root.adding
-                visible: active
-
-                sourceComponent: EventForm {}
+                color: Hallownest.faint
+                font.family: Hallownest.serif
+                font.pointSize: 11
             }
         }
     }
 
-    RowLayout {
-        id: footer
-
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Tokens.padding.extraLarge
-        visible: !root.adding && !root.editingUid
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        IconTextButton {
-            disabled: !Events.available
-            icon: "add"
-            text: Tr.tr("Add event")
-            onClicked: {
-                root.editingUid = "";
-                root.adding = true;
-            }
-        }
-    }
-
-    component EventCard: StyledRect {
+    component EventCard: HkCard {
         id: card
 
         required property var modelData
         property bool confirmDelete
 
         Layout.fillWidth: true
-        implicitHeight: cardLayout.implicitHeight + Tokens.padding.large * 2
-
-        radius: Tokens.rounding.large
-        color: Colours.tPalette.m3surfaceContainer
+        implicitHeight: cardLayout.implicitHeight + 24
 
         RowLayout {
             id: cardLayout
 
             anchors.fill: parent
-            anchors.margins: Tokens.padding.large
+            anchors.margins: 12
             spacing: Tokens.spacing.medium
 
-            StyledRect {
+            Rectangle {
                 Layout.fillHeight: true
-                implicitWidth: 4
-                radius: 2
-                color: card.modelData.colour || Colours.palette.m3primary
+                implicitWidth: 3
+                radius: 1.5
+                color: card.modelData.colour || Hallownest.lifeblood
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Tokens.spacing.extraSmall
+                spacing: 2
 
-                StyledText {
+                RowLayout {
                     Layout.fillWidth: true
-                    text: card.modelData.allDay ? Tr.tr("All day") : `${card.modelData.start} – ${card.modelData.end}`
-                    color: Colours.palette.m3primary
-                    font: Tokens.font.label.medium
+                    spacing: Tokens.spacing.small
+
+                    StyledText {
+                        text: card.modelData.allDay ? Tr.tr("All day") : `${card.modelData.start} – ${card.modelData.end}`
+                        color: Hallownest.soul
+                        font.pointSize: 9
+                        font.weight: Font.DemiBold
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: card.modelData.title
+                        color: Hallownest.text
+                        font.pointSize: 10
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
                 }
 
-                StyledText {
+                Flow {
+                    id: infoFlow
+
                     Layout.fillWidth: true
-                    text: card.modelData.title
-                    color: Colours.palette.m3onSurface
-                    font: Tokens.font.title.small
-                    wrapMode: Text.WordWrap
-                }
+                    spacing: Tokens.spacing.large
 
-                InfoRow {
-                    icon: "location_on"
-                    text: card.modelData.location
-                }
+                    InfoRow {
+                        icon: "location_on"
+                        text: card.modelData.location
+                    }
 
-                InfoRow {
-                    icon: "event_repeat"
-                    text: card.modelData.recurring ? (card.modelData.until ? Tr.tr("Weekly until %1").arg(root.formatDate(card.modelData.until)) : Tr.tr("Repeats")) : ""
-                }
+                    InfoRow {
+                        icon: "event_repeat"
+                        text: card.modelData.recurring ? (card.modelData.until ? Tr.tr("Weekly until %1").arg(root.formatDate(card.modelData.until)) : Tr.tr("Repeats")) : ""
+                    }
 
-                InfoRow {
-                    icon: "notes"
-                    text: card.modelData.description
+                    InfoRow {
+                        icon: "notes"
+                        text: card.modelData.description
+                    }
                 }
             }
 
-            IconButton {
+            HkButton {
                 Layout.alignment: Qt.AlignTop
-                isRound: true
-                type: IconButton.Text
                 icon: "edit"
                 disabled: !!root.editingUid || root.adding
                 onClicked: root.editingUid = card.modelData.uid
             }
 
-            IconButton {
+            HkButton {
                 Layout.alignment: Qt.AlignTop
-                isRound: true
-                type: card.confirmDelete ? IconButton.Filled : IconButton.Text
                 icon: card.confirmDelete ? "delete_forever" : "delete"
-                activeColour: Colours.palette.m3error
-                inactiveColour: card.confirmDelete ? Colours.palette.m3error : Colours.palette.m3surfaceContainer
-                inactiveOnColour: card.confirmDelete ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
+                text: card.confirmDelete ? Tr.tr("Delete") : ""
+                accent: Hallownest.grimm
+                tinted: true
+                filled: card.confirmDelete
                 onClicked: {
                     if (card.confirmDelete)
                         Events.remove(card.modelData.uid);
@@ -293,26 +275,26 @@ Item {
         property string icon
         property string text
 
-        Layout.fillWidth: true
+        width: Math.min(implicitWidth, parent?.width ?? implicitWidth)
         visible: !!text
         spacing: Tokens.spacing.extraSmall
 
         MaterialIcon {
-            Layout.alignment: Qt.AlignTop
             text: info.icon
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
+            fontStyle: Tokens.font.icon.small
         }
 
         StyledText {
             Layout.fillWidth: true
             text: info.text
-            color: Colours.palette.m3onSurfaceVariant
-            font: Tokens.font.body.small
-            wrapMode: Text.WordWrap
+            color: Hallownest.subtext
+            font.pointSize: 9
+            elide: Text.ElideRight
         }
     }
 
-    component EventForm: ColumnLayout {
+    component EventForm: HkCard {
         id: form
 
         // Event being edited (null when adding). Edits to a repeating event apply to the whole series.
@@ -321,12 +303,27 @@ Item {
         readonly property string initialUntil: event?.until ? root.formatDate(event.until) : ""
 
         readonly property var timeRe: /^([01]?\d|2[0-3]):[0-5]\d$/
-        readonly property date eventDate: dateField.visible ? Date.fromLocaleDateString(Qt.locale(), dateField.text.trim(), Events.dateFormat) : root.date
-        readonly property bool dateValid: !dateField.visible || !isNaN(eventDate)
+        readonly property bool showDate: !!event && !editingSeries
+        readonly property date eventDate: showDate ? Date.fromLocaleDateString(Qt.locale(), dateField.text.trim(), Events.dateFormat) : root.date
+        readonly property bool dateValid: !showDate || !isNaN(eventDate)
         readonly property date untilDate: Date.fromLocaleDateString(Qt.locale(), untilField.text.trim(), Events.dateFormat)
         readonly property bool untilValid: !weekly.checked || !untilField.text.trim() || (!isNaN(untilDate) && (editingSeries || untilDate >= eventDate))
-        readonly property bool timesValid: allDay.checked || (timeRe.test(startField.text) && timeRe.test(endField.text) && endField.text.padStart(5, "0") > startField.text.padStart(5, "0"))
+        readonly property bool timesWellFormed: allDay.checked || (timeRe.test(startField.text) && timeRe.test(endField.text))
+        readonly property bool timesValid: timesWellFormed && (allDay.checked || endField.text.padStart(5, "0") > startField.text.padStart(5, "0"))
         readonly property bool valid: titleField.text.trim() && timesValid && untilValid && dateValid
+        readonly property string message: {
+            if (!dateValid)
+                return Tr.tr("Enter a valid date");
+            if (!timesWellFormed)
+                return Tr.tr("Use HH:MM for times");
+            if (!timesValid)
+                return Tr.tr("End must be after start");
+            if (!untilValid)
+                return Tr.tr("Enter a date after this day");
+            if (editingSeries)
+                return Tr.tr("Changes apply to every occurrence");
+            return "";
+        }
 
         function close(): void {
             root.adding = false;
@@ -357,158 +354,184 @@ Item {
             close();
         }
 
-        spacing: Tokens.spacing.medium
+        Layout.fillWidth: true
+        implicitHeight: formLayout.implicitHeight + 28
+        ornate: true
 
-        Component.onCompleted: titleField.forceActiveFocus()
+        Component.onCompleted: titleField.forceFocus()
 
-        StyledText {
-            text: form.event ? Tr.tr("Edit event") : Tr.tr("New event")
-            color: Colours.palette.m3onSurface
-            font: Tokens.font.title.medium
-        }
+        GridLayout {
+            id: formLayout
 
-        StyledTextField {
-            id: titleField
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 14
+            columns: 2
+            rowSpacing: Tokens.spacing.small
+            columnSpacing: Tokens.spacing.medium
 
-            Layout.fillWidth: true
-            placeholderText: Tr.tr("Title")
-            leadingIcon: "title"
-            text: form.event?.title ?? ""
-            onAccepted: form.save()
-        }
+            StyledText {
+                Layout.columnSpan: 2
+                text: form.event ? Tr.tr("Edit event") : Tr.tr("New event")
+                color: Hallownest.soul
+                font.family: Hallownest.serif
+                font.pointSize: 11
+                font.weight: Font.Bold
+            }
 
-        StyledTextField {
-            id: dateField
+            Field {
+                id: titleField
 
-            Layout.fillWidth: true
-            visible: !!form.event && !form.editingSeries
-            placeholderText: Tr.tr("Date")
-            leadingIcon: "event"
-            text: root.formatDate(root.date)
-            errorText: Tr.tr("Enter a valid date")
-            isError: !form.dateValid
-            onAccepted: form.save()
-        }
+                Layout.columnSpan: 2
+                label: Tr.tr("Title")
+                icon: "title"
+                text: form.event?.title ?? ""
+                onAccepted: form.save()
+            }
 
-        StyledText {
-            Layout.fillWidth: true
-            visible: form.editingSeries
-            text: Tr.tr("Changes apply to every occurrence")
-            color: Colours.palette.m3onSurfaceVariant
-            font: Tokens.font.body.small
-            wrapMode: Text.WordWrap
-        }
+            SwitchRow {
+                id: allDay
 
-        SwitchRow {
-            id: allDay
+                label: Tr.tr("All day")
+                checked: form.event?.allDay ?? false
+            }
 
-            label: Tr.tr("All day")
-            checked: form.event?.allDay ?? false
-        }
+            SwitchRow {
+                id: weekly
 
-        RowLayout {
-            Layout.fillWidth: true
-            visible: !allDay.checked
-            spacing: Tokens.spacing.medium
+                label: form.event?.recurring && !/FREQ=WEEKLY/.test(form.event.repeat ?? "") ? Tr.tr("Repeat") : Tr.tr("Repeat weekly")
+                checked: form.event?.recurring ?? false
+            }
 
-            StyledTextField {
+            Field {
                 id: startField
 
-                Layout.fillWidth: true
-                placeholderText: Tr.tr("Start")
-                leadingIcon: "schedule"
+                visible: !allDay.checked
+                label: Tr.tr("Start")
+                icon: "schedule"
                 text: form.event && !form.event.allDay ? form.event.start : "09:00"
-                validate: form.timeRe
-                isError: !valid
+                error: !form.timesWellFormed || !form.timesValid
                 onAccepted: form.save()
             }
 
-            StyledTextField {
+            Field {
                 id: endField
 
-                Layout.fillWidth: true
-                placeholderText: Tr.tr("End")
-                leadingIcon: "schedule"
+                visible: !allDay.checked
+                label: Tr.tr("End")
+                icon: "schedule"
                 text: form.event && !form.event.allDay ? form.event.end : "10:00"
-                validate: form.timeRe
-                isError: !valid || (startField.valid && !form.timesValid)
-                errorText: startField.valid && !form.timesValid ? Tr.tr("Must be after start") : ""
+                error: !form.timesWellFormed || !form.timesValid
                 onAccepted: form.save()
             }
-        }
 
-        SwitchRow {
-            id: weekly
+            Field {
+                id: dateField
 
-            label: form.event?.recurring && !/FREQ=WEEKLY/.test(form.event.repeat ?? "") ? Tr.tr("Repeat") : Tr.tr("Repeat weekly")
-            checked: form.event?.recurring ?? false
-        }
-
-        StyledTextField {
-            id: untilField
-
-            Layout.fillWidth: true
-            visible: weekly.checked
-            placeholderText: Tr.tr("Until (optional)")
-            leadingIcon: "event_busy"
-            text: form.initialUntil
-            supportingText: {
-                const count = /COUNT=(\d+)/.exec(form.event?.repeat ?? "");
-                if (count && !text.trim())
-                    return Tr.tr("Currently ends after %1 occurrences").arg(count[1]);
-                return Tr.tr("Last day, e.g. %1").arg(root.formatDate(new Date(root.date.getFullYear(), root.date.getMonth() + 1, root.date.getDate())));
+                visible: form.showDate
+                label: Tr.tr("Date")
+                icon: "event"
+                text: root.formatDate(root.date)
+                error: !form.dateValid
+                onAccepted: form.save()
             }
-            errorText: Tr.tr("Enter a date after this day")
-            isError: !form.untilValid
-            onAccepted: form.save()
-        }
 
-        StyledTextField {
-            id: locationField
+            Field {
+                id: untilField
 
-            Layout.fillWidth: true
-            placeholderText: Tr.tr("Location (optional)")
-            leadingIcon: "location_on"
-            text: form.event?.location ?? ""
-            onAccepted: form.save()
-        }
+                visible: weekly.checked
+                label: {
+                    const count = /COUNT=(\d+)/.exec(form.event?.repeat ?? "");
+                    if (count && !text.trim())
+                        return Tr.tr("Until (now ends after %1 occurrences)").arg(count[1]);
+                    return Tr.tr("Until (optional, e.g. %1)").arg(root.formatDate(new Date(root.date.getFullYear(), root.date.getMonth() + 1, root.date.getDate())));
+                }
+                icon: "event_busy"
+                text: form.initialUntil
+                error: !form.untilValid
+                onAccepted: form.save()
+            }
 
-        StyledTextField {
-            id: descriptionField
+            Field {
+                id: locationField
 
-            Layout.fillWidth: true
-            placeholderText: Tr.tr("Notes (optional)")
-            leadingIcon: "notes"
-            text: form.event?.description ?? ""
-            onAccepted: form.save()
-        }
+                label: Tr.tr("Location (optional)")
+                icon: "location_on"
+                text: form.event?.location ?? ""
+                onAccepted: form.save()
+            }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: Tokens.spacing.small
-            spacing: Tokens.spacing.small
+            Field {
+                id: descriptionField
 
-            Item {
+                label: Tr.tr("Notes (optional)")
+                icon: "notes"
+                text: form.event?.description ?? ""
+                onAccepted: form.save()
+            }
+
+            RowLayout {
+                Layout.columnSpan: 2
                 Layout.fillWidth: true
-            }
+                Layout.topMargin: Tokens.spacing.small
+                spacing: Tokens.spacing.small
 
-            TextButton {
-                isRound: true
-                horizontalPadding: Tokens.padding.extraLarge
-                verticalPadding: Tokens.padding.medium
-                type: TextButton.Tonal
-                text: Tr.trCtx("Cancel", "button")
-                onClicked: form.close()
-            }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: form.message
+                    color: form.editingSeries && form.valid ? Hallownest.subtext : Hallownest.grimm
+                    font.pointSize: 9
+                    wrapMode: Text.WordWrap
+                }
 
-            TextButton {
-                isRound: true
-                horizontalPadding: Tokens.padding.extraLarge
-                verticalPadding: Tokens.padding.medium
-                disabled: !form.valid
-                text: Tr.trCtx("Save", "button")
-                onClicked: form.save()
+                HkButton {
+                    text: Tr.trCtx("Cancel", "button")
+                    onClicked: form.close()
+                }
+
+                HkButton {
+                    icon: "check"
+                    text: Tr.trCtx("Save", "button")
+                    filled: true
+                    disabled: !form.valid
+                    onClicked: form.save()
+                }
             }
+        }
+    }
+
+    component Field: ColumnLayout {
+        id: field
+
+        property alias label: fieldLabel.text
+        property alias text: input.text
+        property alias icon: input.leadingIcon
+        property bool error
+
+        signal accepted
+
+        function forceFocus(): void {
+            input.forceActiveFocus();
+        }
+
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        spacing: 3
+
+        StyledText {
+            id: fieldLabel
+
+            Layout.leftMargin: 6
+            color: field.error ? Hallownest.grimm : Hallownest.subtext
+            font.pointSize: 8
+        }
+
+        HkField {
+            id: input
+
+            Layout.fillWidth: true
+            onAccepted: field.accepted()
         }
     }
 
@@ -516,21 +539,24 @@ Item {
         id: switchRow
 
         property alias label: switchLabel.text
-        property alias checked: toggle.checked
+        property bool checked
 
         Layout.fillWidth: true
+        Layout.preferredWidth: 1
         spacing: Tokens.spacing.medium
 
         StyledText {
             id: switchLabel
 
             Layout.fillWidth: true
-            color: Colours.palette.m3onSurface
-            font: Tokens.font.body.medium
+            Layout.leftMargin: 6
+            color: Hallownest.text
+            font.pointSize: 10
         }
 
-        StyledSwitch {
-            id: toggle
+        HkSwitch {
+            checked: switchRow.checked
+            onToggled: c => switchRow.checked = c
         }
     }
 }

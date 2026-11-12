@@ -8,60 +8,79 @@ import qs.utils
 Singleton {
     id: root
 
-    readonly property color void_: "#06070a"
-    readonly property color shell: "#0e1015"
-    readonly property color card: "#14161c"
-    readonly property color button: "#18181c"
-    readonly property var steels: ({
-            vessel: "#9ba4b5",
-            lifeblood: "#8fb3cc",
-            infection: "#b8a08f",
-            greenpath: "#94b39c"
-        })
-    readonly property color steel: steels[flavour] ?? "#9ba4b5"
+    readonly property var styles: JSON.parse(stylesFile.text())
+    readonly property var styleData: styles[style] ?? styles.hallownest
+    readonly property var tone: styleData.flavours[flavour] ?? styleData.flavours.vessel
+    // Light styles keep the same order: every level steps away from void_, which here is the lightest
+    readonly property bool light: styleData.light ?? false
+    readonly property bool isMono: styleData.mono ?? false
+    readonly property color void_: styleData.base.void
+    readonly property color shell: styleData.base.shell
+    readonly property color card: styleData.base.card
+    readonly property color button: styleData.base.button
+    readonly property color steel: tone.steel
     readonly property color border: Qt.alpha(steel, 0.15)
-    readonly property var accents: ({
-            vessel: "#f0f4f8",
-            lifeblood: "#6cc9ff",
-            infection: "#ff8a2a",
-            greenpath: "#74c98a"
-        })
-    readonly property color soul: accents[flavour] ?? "#f0f4f8"
-    readonly property color text: "#e2e8f0"
-    readonly property color subtext: "#8a93a3"
-    readonly property color faint: "#4a505c"
-    readonly property color lifeblood: "#38bdf8"
-    readonly property color lifebloodDeep: "#00b4d8"
-    readonly property color lifebloodSoft: "#48cae4"
-    readonly property color glowBlue: "#4cc9f0"
-    readonly property color hotSpring: "#2dd4bf"
-    readonly property color infection: "#ff6b35"
-    readonly property color grimm: "#e63946"
-    readonly property color gold: "#f4a261"
-    readonly property color unn: "#52b788"
-    readonly property color crystal: "#a8dadc"
+    readonly property color soul: tone.accent
+    readonly property color text: styleData.base.text
+    readonly property color subtext: styleData.base.subtext
+    readonly property color faint: styleData.base.faint
+    readonly property color lifeblood: styleData.charms.lifeblood
+    readonly property color lifebloodDeep: styleData.charms.lifebloodDeep
+    readonly property color lifebloodSoft: styleData.charms.lifebloodSoft
+    readonly property color glowBlue: styleData.charms.glowBlue
+    readonly property color hotSpring: styleData.charms.hotSpring
+    readonly property color infection: styleData.charms.infection
+    readonly property color grimm: styleData.charms.grimm
+    readonly property color gold: styleData.charms.gold
+    readonly property color unn: styleData.charms.unn
+    readonly property color crystal: styleData.charms.crystal
     readonly property var charms: [grimm, gold, unn, crystal]
 
     readonly property var flavours: ["vessel", "lifeblood", "infection", "greenpath"]
+    readonly property var styleNames: Object.keys(styles)
+    property string style: "hallownest"
     property string flavour: "vessel"
+    // Folder in assets/schemes/hollowknight, also the caelestia flavour
+    readonly property string schemeFlavour: style === "hallownest" ? flavour : `${style}-${flavour}`
     property bool loaded
 
     readonly property string serif: cinzel.status === FontLoader.Ready ? cinzel.name : "serif"
     readonly property string mono: "JetBrainsMono Nerd Font"
 
+    // Hover/raised tint: lighter on dark styles, slightly darker on light ones
+    function raise(c: color, k: real): color {
+        return light ? Qt.darker(c, 1 + (k - 1) * 0.16) : Qt.lighter(c, k);
+    }
+
+    function setStyle(name: string): void {
+        setTheme(name, flavour);
+    }
+
     function setFlavour(name: string): void {
-        if (!flavours.includes(name) || name === flavour)
+        setTheme(style, name);
+    }
+
+    function setTheme(styleName: string, flavourName: string): void {
+        if (!styles[styleName] || !flavours.includes(flavourName) || (styleName === style && flavourName === flavour))
             return;
-        flavour = name;
+        style = styleName;
+        flavour = flavourName;
         state.setText(JSON.stringify({
+            style,
             flavour
         }));
         // The icons are re-tinted before caelestia reapplies the icon theme; thunar-theme.py must
         // run after caelestia, which rewrites thunar.css
-        Quickshell.execDetached(["sh", "-c", `python3 "$1" ${name}; caelestia scheme set -n hollowknight -f ${name} -m dark; python3 "$0" ${name}; command -v spicetify >/dev/null && spicetify -q refresh`, Quickshell.shellPath("assets/thunar-theme.py"), Quickshell.shellPath("assets/icon-theme.py")]);
-        Quickshell.execDetached(["python3", Quickshell.shellPath("assets/zen-theme.py"), name]);
-        Quickshell.execDetached(["python3", Quickshell.shellPath("assets/obsidian-theme.py"), name]);
-        Quickshell.execDetached(["python3", Quickshell.shellPath("assets/apps-theme.py"), name]);
+        Quickshell.execDetached(["sh", "-c", 'python3 "$2" "$0" "$1"; caelestia scheme set -n hollowknight -f "$4" -m "$5"; python3 "$3" "$0" "$1"; command -v spicetify >/dev/null && spicetify -q refresh', style, flavour, Quickshell.shellPath("assets/icon-theme.py"), Quickshell.shellPath("assets/thunar-theme.py"), schemeFlavour, light ? "light" : "dark"]);
+        for (const app of ["zen", "obsidian", "apps"])
+            Quickshell.execDetached(["python3", Quickshell.shellPath(`assets/${app}-theme.py`), style, flavour]);
+    }
+
+    FileView {
+        id: stylesFile
+
+        path: Quickshell.shellPath("assets/styles.json")
+        blockLoading: true
     }
 
     FileView {
@@ -72,13 +91,15 @@ Singleton {
 
         onLoaded: {
             try {
-                const f = JSON.parse(text()).flavour;
-                if (root.flavours.includes(f))
-                    root.flavour = f;
+                const saved = JSON.parse(text());
+                if (root.styles[saved.style])
+                    root.style = saved.style;
+                if (root.flavours.includes(saved.flavour))
+                    root.flavour = saved.flavour;
             } catch (e) {}
             root.loaded = true;
-            Quickshell.execDetached(["python3", Quickshell.shellPath("assets/thunar-theme.py"), root.flavour]);
-            Quickshell.execDetached(["python3", Quickshell.shellPath("assets/icon-theme.py"), root.flavour]);
+            Quickshell.execDetached(["python3", Quickshell.shellPath("assets/thunar-theme.py"), root.style, root.flavour]);
+            Quickshell.execDetached(["python3", Quickshell.shellPath("assets/icon-theme.py"), root.style, root.flavour]);
         }
         onLoadFailed: root.loaded = true
     }
@@ -88,8 +109,16 @@ Singleton {
             root.setFlavour(name);
         }
 
+        function style(name: string): void {
+            root.setStyle(name);
+        }
+
         function list(): string {
             return root.flavours.join("\n");
+        }
+
+        function styles(): string {
+            return root.styleNames.join("\n");
         }
 
         target: "hallownest"

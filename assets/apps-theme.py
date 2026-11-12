@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hallownest colours for zathura and btop, following the flavour.
+"""Hallownest colours for zathura and btop, following the style and flavour.
 
 - zathura: ~/.config/zathura/hallownest-colors, included from zathurarc (created if missing).
 - btop: ~/.config/btop/themes/hallownest.theme, selected in btop.conf.
@@ -10,13 +10,12 @@ import shutil
 import sys
 from pathlib import Path
 
-ACCENTS = {"vessel": "#f0f4f8", "lifeblood": "#6cc9ff", "infection": "#ff8a2a", "greenpath": "#74c98a"}
-STEELS = {"vessel": "#9ba4b5", "lifeblood": "#8fb3cc", "infection": "#b8a08f", "greenpath": "#94b39c"}
-VOID, SHELL, CARD, TEXT, SUBTEXT, FAINT = "#06070a", "#0e1015", "#14161c", "#e2e8f0", "#8a93a3", "#4a505c"
-GRIMM, GOLD = "#e63946", "#f4a261"
+from hkstyle import palette
 
-flavour = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ACCENTS else "vessel"
-accent, steel = ACCENTS[flavour], STEELS[flavour]
+p = palette()
+VOID, SHELL, CARD, TEXT, SUBTEXT, FAINT = (p[k] for k in ("void", "shell", "card", "text", "subtext", "faint"))
+GRIMM, GOLD = p["grimm"], p["gold"]
+accent, steel = p["accent"], p["steel"]
 config = Path.home() / ".config"
 
 
@@ -68,7 +67,7 @@ def btop() -> None:
         "main_bg": "", "main_fg": TEXT, "title": accent, "hi_fg": accent,
         "selected_bg": CARD, "selected_fg": accent, "inactive_fg": FAINT,
         "graph_text": SUBTEXT, "meter_bg": CARD, "proc_misc": accent,
-        "cpu_box": steel, "mem_box": steel, "net_box": steel, "proc_box": steel, "div_line": "#2a2d35",
+        "cpu_box": steel, "mem_box": steel, "net_box": steel, "proc_box": steel, "div_line": p["bright"],
         "temp_start": steel, "temp_mid": accent, "temp_end": GRIMM,
         "cpu_start": steel, "cpu_mid": accent, "cpu_end": GRIMM,
         "free_start": FAINT, "free_mid": steel, "free_end": accent,

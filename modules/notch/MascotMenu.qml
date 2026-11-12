@@ -15,6 +15,7 @@ import qs.services
 Scope {
     id: root
 
+    readonly property string kind: NotchSettings.mascotKind
     readonly property var entries: [
         {
             id: "",
@@ -68,8 +69,8 @@ Scope {
         },
         {
             id: "boss",
-            name: Tr.tr("Hollow Knight"),
-            icon: "skull"
+            name: kind === "grimm" ? Tr.tr("Nightmare King") : kind === "hornet" ? Tr.tr("Final form") : Tr.tr("Hollow Knight"),
+            icon: kind === "grimm" ? "local_fire_department" : kind === "hornet" ? "auto_fix_high" : "skull"
         },
         {
             id: "look",
@@ -101,7 +102,24 @@ Scope {
             name: Tr.tr("Stare"),
             icon: "sentiment_neutral"
         }
-    ]
+    ].concat(kind === "grimm" ? [
+        {
+            id: "bow",
+            name: Tr.tr("Bow"),
+            icon: "theater_comedy"
+        },
+        {
+            id: "teleport",
+            name: Tr.tr("Teleport"),
+            icon: "whatshot"
+        }
+    ] : kind === "hornet" ? [
+        {
+            id: "dash",
+            name: Tr.tr("Dash"),
+            icon: "fast_forward"
+        }
+    ] : [])
 
     function toggle(): void {
         if (loader.active)

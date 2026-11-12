@@ -62,7 +62,7 @@ ScrollBar {
             return 0;
         }
         radius: Tokens.rounding.full
-        color: Colours.palette.m3secondary
+        color: Hallownest.steel
 
         MouseArea {
             id: mouse

@@ -10,9 +10,9 @@ TextField {
     implicitWidth: contentWidth + leftPadding + rightPadding
     implicitHeight: contentHeight + topPadding + bottomPadding
 
-    color: Colours.palette.m3onSurface
-    placeholderTextColor: Colours.palette.m3onSurfaceVariant // No anim cause placeholder is custom
-    selectionColor: Qt.alpha(Colours.palette.m3primary, 0.4)
+    color: Hallownest.text
+    placeholderTextColor: Hallownest.subtext // No anim cause placeholder is custom
+    selectionColor: Qt.alpha(Hallownest.soul, 0.4)
     selectedTextColor: color
 
     font: Tokens.font.body.small
@@ -40,7 +40,7 @@ TextField {
         implicitWidth: 1.5
         implicitHeight: root.cursorRectangle.height
 
-        color: Colours.palette.m3primary
+        color: Hallownest.soul
         radius: Tokens.rounding.large
 
         Connections {

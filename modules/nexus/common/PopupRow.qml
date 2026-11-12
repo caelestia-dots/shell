@@ -40,7 +40,7 @@ ConnectedRect {
         MaterialIcon {
             id: icon
 
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             fontStyle: Tokens.font.icon.medium
         }
 
@@ -61,7 +61,7 @@ ConnectedRect {
 
                 Layout.fillWidth: true
                 visible: text
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
                 animate: true
@@ -115,7 +115,7 @@ ConnectedRect {
                     content: root.content
                     pressOverride: stateLayer.pressed
                     hoverOverride: stateLayer.containsMouse
-                    color: open || hovered || stateLayer.containsMouse ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHighest
+                    color: open || hovered || stateLayer.containsMouse ? Hallownest.button : Hallownest.button
                 }
             }
         }

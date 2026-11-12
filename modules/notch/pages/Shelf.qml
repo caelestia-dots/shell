@@ -309,7 +309,7 @@ NotchPage {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
 
-                        onClicked: mouse => root.click(card.index, card.modelData, mouse.modifiers)
+                        onClicked: mouse => root.click(card.index, card.modelData, mouse?.modifiers ?? 0)
                         onDoubleClicked: Shelf.open(card.modelData)
                     }
 

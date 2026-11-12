@@ -26,7 +26,6 @@ WlSessionLockSurface {
 
     Connections {
         function onUnlock(): void {
-            bench.standUp();
             unlockAnim.start();
         }
 

@@ -12,17 +12,17 @@ ButtonBase {
     font: Tokens.font.icon.medium
     padding: type === IconButton.Text ? Tokens.padding.extraSmall / 2 : Tokens.padding.small
 
-    activeColour: type === IconButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondary
+    activeColour: type === IconButton.Filled ? Hallownest.soul : Hallownest.steel
     inactiveColour: {
         if (!isToggle && type === IconButton.Filled)
-            return Colours.palette.m3primary;
-        return type === IconButton.Filled ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3secondaryContainer;
+            return Hallownest.soul;
+        return type === IconButton.Filled ? Hallownest.card : Hallownest.button;
     }
-    activeOnColour: type === IconButton.Filled ? Colours.palette.m3onPrimary : type === IconButton.Tonal ? Colours.palette.m3onSecondary : Colours.palette.m3primary
+    activeOnColour: type === IconButton.Filled ? Hallownest.void_ : type === IconButton.Tonal ? Hallownest.void_ : Hallownest.soul
     inactiveOnColour: {
         if (!isToggle && type === IconButton.Filled)
-            return Colours.palette.m3onPrimary;
-        return type === IconButton.Tonal ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant;
+            return Hallownest.void_;
+        return type === IconButton.Tonal ? Hallownest.text : Hallownest.subtext;
     }
 
     implicitWidth: implicitHeight

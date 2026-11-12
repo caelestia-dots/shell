@@ -13,6 +13,7 @@ RowLayout {
     id: root
 
     readonly property UPowerDevice dev: UPower.displayDevice
+    readonly property UPowerDevice battery: UPower.devices.values.find(d => d.isLaptopBattery) ?? null
     readonly property real level: dev.percentage
     readonly property bool charging: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(dev.state)
     readonly property bool low: level <= 0.2 && !charging
@@ -51,17 +52,17 @@ RowLayout {
             anchors.margins: 16
             spacing: 4
 
-            SoulVessel {
+            SoulOrb {
                 Layout.alignment: Qt.AlignHCenter
                 implicitWidth: 92
                 implicitHeight: 92
                 level: root.dev.isLaptopBattery ? root.level : 0
                 colour: root.accent
                 running: root.charging
-                ornate: false
 
                 StyledText {
                     anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -parent.height * 0.18
                     text: root.dev.isLaptopBattery ? `${Math.round(root.level * 100)}%` : "—"
                     color: Hallownest.soul
                     style: Text.Outline
@@ -88,6 +89,15 @@ RowLayout {
                 horizontalAlignment: Text.AlignHCenter
                 text: root.status()
                 color: Hallownest.subtext
+                font.pointSize: 8
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                visible: root.battery?.healthSupported ?? false
+                horizontalAlignment: Text.AlignHCenter
+                text: Tr.tr("Health %1%").arg(Math.round(root.battery?.healthPercentage ?? 0))
+                color: (root.battery?.healthPercentage ?? 100) < 70 ? Hallownest.grimm : Hallownest.faint
                 font.pointSize: 8
             }
         }
@@ -149,6 +159,38 @@ RowLayout {
                     font.pointSize: 9
                     elide: Text.ElideRight
                 }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 4
+            Layout.leftMargin: 6
+            spacing: 8
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Tr.tr("Follow the charger")
+                    color: Hallownest.text
+                    font.pointSize: 10
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Tr.tr("Power saver on battery, balanced when plugged in")
+                    color: Hallownest.faint
+                    font.pointSize: 8
+                    elide: Text.ElideRight
+                }
+            }
+
+            HkSwitch {
+                checked: NotchSettings.values.autoPowerProfile
+                onToggled: c => NotchSettings.set("autoPowerProfile", c)
             }
         }
     }

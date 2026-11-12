@@ -16,7 +16,7 @@ Item {
 
         onClose: root.close()
     }
-    property color blobColour: Colours.tPalette.m3surfaceContainerLow
+    property color blobColour: Hallownest.shell
 
     signal close
 
@@ -72,7 +72,7 @@ Item {
         icon: nState.isWindow ? "close" : "pip"
         type: IconButton.Text
         label.fill: 0
-        inactiveOnColour: hovered ? nState.isWindow ? Colours.palette.m3error : Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+        inactiveOnColour: hovered ? nState.isWindow ? Hallownest.grimm : Hallownest.soul : Hallownest.subtext
         stateLayer.opacity: 0
         onClicked: {
             if (!nState.isWindow)

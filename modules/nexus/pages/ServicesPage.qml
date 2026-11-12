@@ -66,23 +66,9 @@ PageBase {
             }
         }
 
-        // Notifications
-        SectionHeader {
-            first: true
-            text: Tr.tr("Notifications")
-        }
-
-        NavRow {
-            first: true
-            last: true
-            icon: "notifications"
-            text: Tr.tr("Notifications")
-            subtext: Tr.tr("Notifications, toasts, timeouts")
-            onClicked: root.nState.openSubPage(1)
-        }
-
         // Polling
         SectionHeader {
+            first: true
             text: Tr.tr("Polling")
         }
 
@@ -197,13 +183,6 @@ PageBase {
             to: 120
             stepSize: 2
             onMoved: v => GlobalConfig.services.visualiserBars = v
-        }
-
-        ToggleRow {
-            text: Tr.tr("Smart colour scheme")
-            subtext: Tr.tr("Derive theme mode and variant from the wallpaper")
-            checked: GlobalConfig.services.smartScheme
-            onToggled: GlobalConfig.services.smartScheme = checked
         }
 
         SelectRow {

@@ -184,7 +184,7 @@ PageBase {
                         implicitWidth: implicitHeight
                         implicitHeight: providerIcon.implicitHeight + Tokens.padding.small * 2
                         radius: Tokens.rounding.full
-                        color: provider.isConnected ? Colours.palette.m3primaryContainer : provider.isSelected ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHighest
+                        color: provider.isConnected ? Qt.alpha(Hallownest.soul, 0.16) : provider.isSelected ? Hallownest.button : Hallownest.button
 
                         MaterialIcon {
                             id: providerIcon
@@ -192,7 +192,7 @@ PageBase {
                             anchors.centerIn: parent
                             text: provider.isConnected || provider.isSelected ? "vpn_key" : "vpn_key_off"
                             fill: provider.isConnected ? 1 : 0
-                            color: provider.isConnected ? Colours.palette.m3onPrimaryContainer : provider.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurfaceVariant
+                            color: provider.isConnected ? Hallownest.soul : provider.isSelected ? Hallownest.text : Hallownest.subtext
                             fontStyle: Tokens.font.icon.medium
                             animate: true
                         }
@@ -231,15 +231,15 @@ PageBase {
                             }
                             color: {
                                 if (!provider.isSelected)
-                                    return Colours.palette.m3onSurfaceVariant;
+                                    return Hallownest.subtext;
                                 switch (VPN.status.state) {
                                 case "connected":
-                                    return Colours.palette.m3primary;
+                                    return Hallownest.soul;
                                 case "needs-auth":
                                 case "error":
-                                    return Colours.palette.m3error;
+                                    return Hallownest.grimm;
                                 default:
-                                    return Colours.palette.m3secondary;
+                                    return Hallownest.steel;
                                 }
                             }
                             font: Tokens.font.label.small
@@ -274,7 +274,7 @@ PageBase {
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
                                     text: Tr.trCtx("Interface", "network interface")
-                                    color: Colours.palette.m3onSurfaceVariant
+                                    color: Hallownest.subtext
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
                                     horizontalAlignment: Text.AlignRight
@@ -283,7 +283,7 @@ PageBase {
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
                                     text: provider.modelData.interface
-                                    color: Colours.palette.m3outline
+                                    color: Hallownest.subtext
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
                                     horizontalAlignment: Text.AlignRight
@@ -296,7 +296,7 @@ PageBase {
                                 StyledText {
                                     Layout.alignment: Qt.AlignRight
                                     text: Tr.trCtx("Current ping", "round-trip latency to the VPN endpoint")
-                                    color: Colours.palette.m3onSurfaceVariant
+                                    color: Hallownest.subtext
                                     font: Tokens.font.label.small
                                     elide: Text.ElideRight
                                     horizontalAlignment: Text.AlignRight
@@ -311,12 +311,12 @@ PageBase {
                                         implicitWidth: Math.round(Tokens.font.body.small.pointSize * 0.7)
                                         implicitHeight: implicitWidth
                                         radius: Tokens.rounding.full
-                                        color: VPN.pingMs <= 80 ? Colours.palette.m3primary : VPN.pingMs <= 150 ? Colours.palette.m3tertiary : Colours.palette.m3error
+                                        color: VPN.pingMs <= 80 ? Hallownest.soul : VPN.pingMs <= 150 ? Hallownest.lifeblood : Hallownest.grimm
                                     }
 
                                     StyledText {
                                         text: Tr.tr("%1 ms").arg(VPN.pingMs)
-                                        color: Colours.palette.m3outline
+                                        color: Hallownest.subtext
                                         font: Tokens.font.label.small
                                         elide: Text.ElideRight
                                         horizontalAlignment: Text.AlignRight

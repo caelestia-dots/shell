@@ -48,8 +48,7 @@ StyledWindow {
             ai: aiPage,
             focus: focusPage,
             shelf: shelfPage,
-            clipboard: clipboardPage,
-            settings: settingsPage
+            clipboard: clipboardPage
         })
 
     property bool hovered
@@ -92,9 +91,10 @@ StyledWindow {
     readonly property bool islandShown: NotchMedia.lyricsActive && !hasFullscreen && !screenState.dockShown && !minimal && (expanded ? page.id === "media" : (NotchMedia.player?.isPlaying ?? false) && Lyrics.hasLyrics)
 
     readonly property bool active: (NotchMedia.player?.isPlaying ?? false) || Pomodoro.running
-    property color glowColour: AgentSessions.current ? Qt.alpha(Hallownest.gold, 0.45) : active ? Qt.alpha(Hallownest.lifeblood, 0.4) : Season.current === "grimm" ? Qt.alpha(Hallownest.grimm, 0.4) : Qt.alpha("black", 0.75)
+    property color glowColour: AgentSessions.current ? Qt.alpha(Hallownest.gold, 0.45) : active ? Qt.alpha(Hallownest.lifeblood, 0.4) : Season.current === "grimm" ? Qt.alpha(Hallownest.grimm, 0.4) : Qt.alpha("black", Hallownest.light ? 0.28 : 0.75)
 
     property real wheelAccum
+    readonly property Item mascot: NotchSettings.mascotKind === "hornet" ? hornet : NotchSettings.mascotKind === "grimm" ? grimm : knight
     property bool cursorMoving
     property real lastCursorX: -1
     property real lastCursorY: -1
@@ -110,11 +110,11 @@ StyledWindow {
     }
 
     function updateLook(x: real, y: real): void {
-        const p = knight.mapToItem(null, knight.width / 2, knight.height * 0.65);
+        const p = root.mascot.mapToItem(null, root.mascot.width / 2, root.mascot.height * 0.65);
         const gx = screen.x + (screen.width - width) / 2 + p.x;
         const gy = screen.y + p.y;
-        knight.targetX = Math.max(-1, Math.min(1, (x - gx) / 260));
-        knight.targetY = Math.max(-1, Math.min(1, (y - gy) / 200));
+        root.mascot.targetX = Math.max(-1, Math.min(1, (x - gx) / 160));
+        root.mascot.targetY = Math.max(-1, Math.min(1, (y - gy) / 130));
         const now = Date.now();
         if (lastCursorX >= 0 && Math.hypot(x - lastCursorX, y - lastCursorY) > 2)
             lastCursorMove = now;
@@ -137,7 +137,7 @@ StyledWindow {
             visitEnd.interval = 6000;
             visitEnd.restart();
         }
-        knight.react(name);
+        root.mascot.react(name);
     }
 
     onCanReactChanged: playReaction()
@@ -234,7 +234,7 @@ StyledWindow {
                 root.mascotShown = true;
                 root.visiting = false;
             } else if (!isIdle && root.mascotShown && !root.visiting) {
-                knight.wake();
+                root.mascot.wake();
             }
         }
     }
@@ -280,7 +280,7 @@ StyledWindow {
     }
 
     Timer {
-        running: knight.visible && knight.running && NotchSettings.values.mascotTracking && !knight.dozing
+        running: root.mascot.visible && root.mascot.running && NotchSettings.values.mascotTracking && !root.mascot.dozing
         interval: 60
         repeat: true
         onTriggered: {
@@ -349,20 +349,20 @@ StyledWindow {
         id: visitEnd
 
         onTriggered: {
-            if (knight.reacting) {
+            if (root.mascot.reacting) {
                 interval = 1500;
                 restart();
                 return;
             }
             if (root.visiting && root.mascotShown)
-                knight.leave();
+                root.mascot.leave();
         }
     }
 
     Timer {
         id: surpriseTimer
 
-        onTriggered: root.screenState.mascotPick ? knight.play(root.screenState.mascotPick) : knight.surprise()
+        onTriggered: root.screenState.mascotPick ? root.mascot.play(root.screenState.mascotPick) : root.mascot.surprise()
     }
 
     Timer {
@@ -373,7 +373,7 @@ StyledWindow {
             if (root.alertShown || root.agentAlertShown || root.notifShown)
                 return;
             if (root.mascotShown)
-                knight.wake();
+                root.mascot.wake();
             else
                 root.hovered = true;
         }
@@ -551,7 +551,7 @@ StyledWindow {
 
                 property real radius: root.expanded ? 26 : Math.min(height / 2, 14)
                 readonly property real padding: Tokens.padding.large
-                readonly property real collapsedHeight: root.alertShown || root.agentAlertShown ? 52 : root.notifShown ? notifView.implicitHeight + 16 : root.mascotShown && !root.osdShown ? (knight.bossShown ? 72 : 46) : root.osdShown ? (root.richOsd ? 64 : 40) : 34
+                readonly property real collapsedHeight: root.alertShown || root.agentAlertShown ? 52 : root.notifShown ? notifView.implicitHeight + 16 : root.mascotShown && !root.osdShown ? (root.mascot.bossShown ? 72 : 46) : root.osdShown ? (root.richOsd ? 64 : 40) : 34
                 readonly property real collapsedWidth: {
                     if (root.alertShown)
                         return alertView.implicitWidth + padding * 2;
@@ -562,7 +562,7 @@ StyledWindow {
                     if (root.osdShown)
                         return root.richOsd ? Math.max(270, richView.implicitWidth + padding * 2) : Math.max(260, osdView.implicitWidth + padding * 2);
                     if (root.mascotShown)
-                        return knight.implicitWidth + padding * 2.5;
+                        return root.mascot.implicitWidth + padding * 2.5;
                     return Math.max(140, collapsed.implicitWidth + padding * 2);
                 }
 
@@ -1090,7 +1090,63 @@ StyledWindow {
                     music: NotchMedia.player?.isPlaying ?? false
                     tracking: NotchSettings.values.mascotTracking && root.cursorMoving
                     running: visible && root.visible
-                    opacity: root.mascotShown && !root.expanded && !root.osdShown && !root.alertShown && !root.agentAlertShown && !root.notifShown ? 1 : 0
+                    opacity: root.mascot === knight && root.mascotShown && !root.expanded && !root.osdShown && !root.alertShown && !root.agentAlertShown && !root.notifShown ? 1 : 0
+                    visible: opacity > 0
+
+                    onWoke: {
+                        root.mascotShown = false;
+                        root.visiting = false;
+                        if (hoverHandler.hovered)
+                            root.hovered = true;
+                    }
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+                }
+
+                Grimm {
+                    id: grimm
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 3
+                    size: 48
+                    dozing: longIdle.isIdle && !root.visiting
+                    music: NotchMedia.player?.isPlaying ?? false
+                    tracking: NotchSettings.values.mascotTracking && root.cursorMoving
+                    running: visible && root.visible
+                    opacity: root.mascot === grimm && root.mascotShown && !root.expanded && !root.osdShown && !root.alertShown && !root.agentAlertShown && !root.notifShown ? 1 : 0
+                    visible: opacity > 0
+
+                    onWoke: {
+                        root.mascotShown = false;
+                        root.visiting = false;
+                        if (hoverHandler.hovered)
+                            root.hovered = true;
+                    }
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+                }
+
+                Hornet {
+                    id: hornet
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 3
+                    size: 48
+                    dozing: longIdle.isIdle && !root.visiting
+                    music: NotchMedia.player?.isPlaying ?? false
+                    tracking: NotchSettings.values.mascotTracking && root.cursorMoving
+                    running: visible && root.visible
+                    opacity: root.mascot === hornet && root.mascotShown && !root.expanded && !root.osdShown && !root.alertShown && !root.agentAlertShown && !root.notifShown ? 1 : 0
                     visible: opacity > 0
 
                     onWoke: {
@@ -1110,6 +1166,38 @@ StyledWindow {
                 Item {
                     id: expandedView
 
+                    property Item kbItem
+
+                    // Keyboard cursor over the page's clickable areas, in reading order
+                    function kbTargets(): var {
+                        const out = [];
+                        const walk = it => {
+                            if (!it.visible || it.opacity <= 0)
+                                return;
+                            if (it.cursorShape === Qt.PointingHandCursor && it.enabled && it.width > 0 && typeof it.clicked === "function")
+                                out.push(it);
+                            for (const c of it.children)
+                                walk(c);
+                        };
+                        if (pageLoader.item)
+                            walk(pageLoader.item);
+                        const pos = it => it.mapToItem(expandedView, 0, 0);
+                        return out.map(it => ({ it, p: pos(it) })).sort((a, b) => Math.abs(a.p.y - b.p.y) > 8 ? a.p.y - b.p.y : a.p.x - b.p.x).map(e => e.it);
+                    }
+
+                    function kbMove(delta: int): void {
+                        const list = kbTargets();
+                        if (list.length === 0)
+                            return;
+                        const i = list.indexOf(kbItem);
+                        kbItem = list[i < 0 ? (delta > 0 ? 0 : list.length - 1) : (i + delta + list.length) % list.length];
+                    }
+
+                    function kbActivate(): void {
+                        if (kbItem && kbTargets().includes(kbItem))
+                            kbItem.clicked(null); // handlers get a null event
+                    }
+
                     anchors.fill: parent
                     anchors.margins: pill.padding
                     opacity: root.expanded ? 1 : 0
@@ -1118,9 +1206,28 @@ StyledWindow {
 
                     Keys.onLeftPressed: root.step(-1)
                     Keys.onRightPressed: root.step(1)
+                    Keys.onUpPressed: kbMove(-1)
+                    Keys.onDownPressed: kbMove(1)
+                    Keys.onTabPressed: kbMove(1)
+                    Keys.onBacktabPressed: kbMove(-1)
+                    Keys.onReturnPressed: kbActivate()
+                    Keys.onEnterPressed: kbActivate()
+                    Keys.onSpacePressed: kbActivate()
                     Keys.onEscapePressed: {
                         root.screenState.notch = false;
                         root.hovered = false;
+                    }
+
+                    Connections {
+                        function onPageIndexChanged(): void {
+                            expandedView.kbItem = null;
+                        }
+
+                        function onExpandedChanged(): void {
+                            expandedView.kbItem = null;
+                        }
+
+                        target: root
                     }
 
                     Behavior on opacity {
@@ -1137,6 +1244,23 @@ StyledWindow {
                         anchors.horizontalCenter: parent.horizontalCenter
                         active: root.expanded || expandedView.visible
                         sourceComponent: root.pageComponents[root.page.id] ?? placeholderPage
+                    }
+
+                    Rectangle {
+                        readonly property Item target: expandedView.kbItem
+                        // shortcut: re-maps only when the selection changes; track geometry if the ring lags after layout changes
+                        readonly property point pos: target ? target.mapToItem(expandedView, 0, 0) : Qt.point(0, 0)
+
+                        z: 10
+                        x: pos.x - 3
+                        y: pos.y - 3
+                        width: (target?.width ?? 0) + 6
+                        height: (target?.height ?? 0) + 6
+                        visible: target !== null && target.visible
+                        radius: Math.min(height / 2, 10)
+                        color: "transparent"
+                        border.width: 2
+                        border.color: Hallownest.soul
                     }
 
                     Item {
@@ -1474,15 +1598,6 @@ StyledWindow {
         id: weatherPage
 
         Pages.Weather {
-            screenState: root.screenState
-            page: root.page
-        }
-    }
-
-    Component {
-        id: settingsPage
-
-        Pages.Settings {
             screenState: root.screenState
             page: root.page
         }

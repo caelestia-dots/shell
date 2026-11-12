@@ -19,11 +19,12 @@ Item {
         const w = width;
         const h = height;
         const y0 = h * (1 - shown);
-        let d = `M 0 ${y0 + Math.sin(phase + offset) * amp}`;
-        for (let i = 1; i <= 16; i++) {
-            const x = w * i / 16;
-            d += ` L ${x} ${y0 + Math.sin(phase + offset + i / 16 * Math.PI * 2) * amp}`;
-        }
+        // Sloshing: the surface rocks around the centre, with a small ripple on top
+        const tilt = Math.sin(phase - offset * 0.3) * h * 0.09;
+        const y = t => y0 + (t - 0.5) * 2 * tilt + Math.sin(phase * 2 + offset + t * Math.PI) * amp * 0.6;
+        let d = `M 0 ${y(0)}`;
+        for (let i = 1; i <= 16; i++)
+            d += ` L ${w * i / 16} ${y(i / 16)}`;
         return d + ` L ${w} ${h} L 0 ${h} Z`;
     }
 
@@ -41,7 +42,7 @@ Item {
         loops: Animation.Infinite
         from: 0
         to: Math.PI * 2
-        duration: 2600
+        duration: 3200
     }
 
     Rectangle {

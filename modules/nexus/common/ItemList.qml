@@ -20,7 +20,7 @@ ConnectedRect {
 
     Layout.fillWidth: true
     implicitHeight: (showList && list.count > 0 ? list.contentHeight : placeholder.implicitHeight + Tokens.padding.extraLarge * 2) + extraHeight
-    color: Colours.tPalette.m3surfaceContainer
+    color: Hallownest.card
     clip: true
 
     Behavior on implicitHeight {
@@ -40,7 +40,7 @@ ConnectedRect {
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.placeholderIcon
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 fontStyle: Tokens.font.icon.large
                 animate: true
             }
@@ -48,7 +48,7 @@ ConnectedRect {
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.placeholderText
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 font: Tokens.font.body.large
                 animate: true
             }

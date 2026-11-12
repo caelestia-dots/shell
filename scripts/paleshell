@@ -1,0 +1,330 @@
+#!/usr/bin/env python3
+"""paleshell: friendly front-end for the shell's IPC (qs -c paleshell ipc call ...)."""
+
+import os
+import subprocess
+import sys
+
+CONFIG = "paleshell"
+
+COMMON_ANIMS = ["happy", "vibe", "sad", "cry", "infected", "angry", "shocked", "soul", "void", "boss",
+                "look", "tilt", "hop", "confused", "sigh", "stare"]
+EXTRA_ANIMS = {"knight": [], "grimm": ["bow", "teleport"], "hornet": ["dash"]}
+MASCOTS = list(EXTRA_ANIMS)
+SEASONS = ["grimm", "winter", "auto", "none"]
+SCENES = ["sun", "night", "cloud", "fog", "rain", "storm", "snow", "auto"]
+TOAST_KINDS = ["info", "success", "warn", "error"]
+
+
+class UsageError(Exception):
+    pass
+
+
+def ipc(target, fn, *args, quiet=False):
+    """Call target.fn and print what it returns; returns the output."""
+    res = subprocess.run(["qs", "-c", CONFIG, "ipc", "call", target, fn, *args],
+                         capture_output=True, text=True)
+    if res.returncode != 0:
+        msg = (res.stderr or res.stdout).strip()
+        sys.exit(f"paleshell: {msg or 'IPC call failed'} (is the shell running? try `paleshell restart`)")
+    out = res.stdout.strip()
+    if out and not quiet:
+        print(out)
+    return out
+
+
+def ipc_lines(target, fn):
+    return ipc(target, fn, quiet=True).splitlines()
+
+
+def pick(value, choices, what):
+    if value not in choices:
+        raise UsageError(f"unknown {what} '{value}' (choose from: {', '.join(choices)})")
+    return value
+
+
+def need(args, n, usage):
+    if len(args) < n:
+        raise UsageError(f"usage: paleshell {usage}")
+
+
+def switch(target, args, label):
+    """on / off / toggle / status for targets with enable/disable/toggle/isEnabled."""
+    action = args[0] if args else "toggle"
+    fns = {"on": "enable", "off": "disable", "toggle": "toggle", "status": "isEnabled"}
+    pick(action, list(fns), f"{label} action")
+    ipc(target, fns[action])
+
+
+# --- commands ---------------------------------------------------------------
+
+def cmd_mascot(args):
+    if not args:
+        return ipc("notch", "mascot")
+    sub, rest = args[0], args[1:]
+    if sub == "menu":
+        return ipc("notch", "mascotMenu")
+    if sub == "use":
+        need(rest, 1, "mascot use <" + "|".join(MASCOTS) + ">")
+        return ipc("notch", "setMascot", pick(rest[0], MASCOTS, "mascot"))
+    if sub == "which":
+        return ipc("notch", "getMascot")
+    if sub == "list":
+        current = ipc("notch", "getMascot", quiet=True)
+        print(f"Animations for {current}:")
+        print("  " + " ".join(COMMON_ANIMS + EXTRA_ANIMS.get(current, [])))
+        for kind, extra in EXTRA_ANIMS.items():
+            if extra and kind != current:
+                print(f"Only with {kind}: {' '.join(extra)}")
+        return
+    if sub == "random":
+        return ipc("notch", "mascot")
+    known = COMMON_ANIMS + sum(EXTRA_ANIMS.values(), [])
+    ipc("notch", "play", pick(sub, known, "animation"))
+
+
+def cmd_notch(args):
+    sub = args[0] if args else "toggle"
+    if sub == "open":
+        return ipc("notch", "open", args[1] if len(args) > 1 else "")
+    if sub in ("close", "toggle", "pages"):
+        return ipc("notch", sub)
+    # `paleshell notch weather` = open on that page
+    pages = ipc_lines("notch", "pages")
+    ipc("notch", "open", pick(sub, pages + ["open", "close", "toggle", "pages"], "notch page or action"))
+
+
+def cmd_season(args):
+    if not args or args[0] == "get":
+        return ipc("season", "get")
+    ipc("season", "set", pick(args[0], SEASONS, "season"))
+
+
+def cmd_weather(args):
+    need(args, 1, "weather <" + "|".join(SCENES) + ">")
+    ipc("weather", "scene", pick(args[0], SCENES, "weather scene"))
+
+
+def cmd_style(args):
+    styles = ipc_lines("hallownest", "styles")
+    if not args or args[0] == "list":
+        return print("\n".join(styles))
+    ipc("hallownest", "style", pick(args[0], styles, "style"))
+
+
+def cmd_flavour(args):
+    flavours = ipc_lines("hallownest", "list")
+    if not args or args[0] == "list":
+        return print("\n".join(flavours))
+    ipc("hallownest", "flavour", pick(args[0], flavours, "flavour"))
+
+
+def cmd_wallpaper(args):
+    if not args or args[0] == "get":
+        return ipc("wallpaper", "get")
+    if args[0] == "list":
+        return ipc("wallpaper", "list")
+    path = args[1] if args[0] == "set" and len(args) > 1 else args[0]
+    ipc("wallpaper", "set", os.path.abspath(os.path.expanduser(path)))
+
+
+def cmd_dnd(args):
+    action = args[0] if args else "toggle"
+    fns = {"on": "enableDnd", "off": "disableDnd", "toggle": "toggleDnd", "status": "isDndEnabled"}
+    ipc("notifs", fns[pick(action, list(fns), "dnd action")])
+
+
+def cmd_notifs(args):
+    need(args, 1, "notifs clear")
+    pick(args[0], ["clear"], "notifs action")
+    ipc("notifs", "clear")
+
+
+def cmd_toast(args):
+    need(args, 2, "toast [info|success|warn|error] <title> <message> [icon]")
+    kind = "info"
+    if args[0] in TOAST_KINDS:
+        kind, args = args[0], args[1:]
+    need(args, 2, "toast [info|success|warn|error] <title> <message> [icon]")
+    ipc("toaster", kind, args[0], args[1], args[2] if len(args) > 2 else "")
+
+
+def cmd_brightness(args):
+    if not args or args[0] == "get":
+        return ipc("brightness", "get")
+    ipc("brightness", "set", args[1] if args[0] == "set" and len(args) > 1 else args[0])
+
+
+def cmd_lock(args):
+    sub = args[0] if args else "lock"
+    fns = {"lock": "lock", "unlock": "unlock", "status": "isLocked"}
+    ipc("lock", fns[pick(sub, list(fns), "lock action")])
+
+
+def cmd_media(args):
+    sub = args[0] if args else "toggle"
+    fns = {"play": "play", "pause": "pause", "toggle": "playPause", "next": "next", "prev": "previous",
+           "stop": "stop", "list": "list"}
+    if sub == "get":
+        need(args, 2, "media get <property>")
+        return ipc("mpris", "getActive", args[1])
+    ipc("mpris", fns[pick(sub, list(fns) + ["get"], "media action")])
+
+
+def cmd_drawer(args):
+    drawers = ipc_lines("drawers", "list")
+    if not args or args[0] == "list":
+        return print("\n".join(drawers))
+    ipc("drawers", "toggle", pick(args[0], drawers, "drawer"))
+
+
+def cmd_picker(args):
+    mode = args[0] if args else "screen"
+    fns = {"screen": "open", "clip": "openClip", "freeze": "openFreeze", "freeze-clip": "openFreezeClip"}
+    ipc("picker", fns[pick(mode, list(fns), "picker mode")])
+
+
+def cmd_special(args):
+    sub = args[0] if args else "next"
+    if sub == "list":
+        return ipc("hypr", "listSpecialWorkspaces")
+    ipc("hypr", "cycleSpecialWorkspace", pick(sub, ["next", "prev"], "direction"))
+
+
+def simple(target, fn):
+    def run(args):
+        if args:
+            raise UsageError("this command takes no arguments")
+        ipc(target, fn)
+    return run
+
+
+def cmd_ipc(args):
+    if not args:
+        return subprocess.run(["qs", "-c", CONFIG, "ipc", "show"])
+    need(args, 2, "ipc <target> <function> [args...]")
+    ipc(*args)
+
+
+def cmd_restart(args):
+    subprocess.run(["qs", "kill", "-c", CONFIG], capture_output=True)
+    subprocess.run(["setsid", "-f", "qs", "-c", CONFIG, "-n", "-d"],
+                   stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    print("paleshell restarted")
+
+
+def cmd_log(args):
+    res = subprocess.run(["qs", "log", "-c", CONFIG], capture_output=True, text=True)
+    lines = res.stdout.splitlines()
+    if args and args[0] in ("-e", "--errors"):
+        lines = [line for line in lines if "WARN" in line or "ERROR" in line]
+    print("\n".join(lines))
+
+
+# name: (function, usage, summary, details)
+COMMANDS = {
+    "Mascot & notch": {
+        "mascot": (cmd_mascot, "mascot [<animation>|random|menu|list|which|use <mascot>]",
+                   "Play a mascot animation or pick the mascot",
+                   ["mascot happy        play an animation (see `mascot list`)",
+                    "mascot              summon the mascot with a random animation",
+                    "mascot menu         open the animation picker (Super + F8)",
+                    "mascot use hornet   switch mascot: " + ", ".join(MASCOTS),
+                    "mascot which        print the current mascot",
+                    "mascot list         animations available for the current mascot"]),
+        "notch": (cmd_notch, "notch [<page>|open [page]|close|toggle|pages]",
+                  "Open, close or toggle the notch",
+                  ["notch                toggle the notch",
+                   "notch weather        open it on a page (see `notch pages`)",
+                   "notch close"]),
+    },
+    "Look & feel": {
+        "season": (cmd_season, "season [" + "|".join(SEASONS) + "|get]", "Force or reset the seasonal decorations",
+                   ["season grimm         Grimm Troupe (and Grimm as mascot when using the Knight)",
+                    "season auto          follow the calendar (October grimm, December winter)",
+                    "season none          no season until restart",
+                    "season               print the current season"]),
+        "weather": (cmd_weather, "weather <" + "|".join(SCENES) + ">", "Preview a weather scene",
+                    ["weather storm", "weather auto         back to the real weather"]),
+        "style": (cmd_style, "style [<style>|list]", "Change the Hallownest style",
+                  ["style pale", "style                list the styles"]),
+        "flavour": (cmd_flavour, "flavour [<flavour>|list]", "Change the style's flavour (accent)",
+                    ["flavour lifeblood", "flavour              list the flavours"]),
+        "wallpaper": (cmd_wallpaper, "wallpaper [<path>|set <path>|get|list]", "Set or show the wallpaper",
+                      ["wallpaper ~/Pictures/bg.png", "wallpaper            print the current one"]),
+    },
+    "Windows & panels": {
+        "settings": (simple("nexus", "open"), "settings", "Open the settings (Nexus)", []),
+        "dock": (simple("dock", "toggle"), "dock", "Switch between island and dock", []),
+        "overview": (simple("overview", "toggle"), "overview", "Toggle the workspace overview", []),
+        "keybinds": (simple("keybinds", "toggle"), "keybinds", "Toggle the keybinds menu", []),
+        "emoji": (simple("emoji", "toggle"), "emoji", "Toggle the emoji picker", []),
+        "drawer": (cmd_drawer, "drawer [<name>|list]", "Toggle a drawer panel", ["drawer session"]),
+        "picker": (cmd_picker, "picker [screen|clip|freeze|freeze-clip]", "Screenshot region picker",
+                   ["picker clip          copy the region to the clipboard"]),
+        "special": (cmd_special, "special [next|prev|list]", "Cycle the special workspaces", []),
+    },
+    "System": {
+        "dnd": (cmd_dnd, "dnd [on|off|toggle|status]", "Do not disturb", []),
+        "notifs": (cmd_notifs, "notifs clear", "Clear all notifications", []),
+        "toast": (cmd_toast, "toast [info|success|warn|error] <title> <message> [icon]", "Show a toast",
+                  ['toast success "Done" "Backup finished" check_circle']),
+        "brightness": (cmd_brightness, "brightness [<value>|get]", "Set or read the brightness",
+                       ["brightness 50%", "brightness +10%", "brightness 0.4"]),
+        "lock": (cmd_lock, "lock [lock|unlock|status]", "Lock the session", []),
+        "idle": (lambda a: switch("idleInhibitor", a, "idle"), "idle [on|off|toggle|status]",
+                 "Keep the screen awake (idle inhibitor)", []),
+        "gamemode": (lambda a: switch("gameMode", a, "gamemode"), "gamemode [on|off|toggle|status]",
+                     "Game mode", []),
+        "media": (cmd_media, "media [play|pause|toggle|next|prev|stop|list|get <prop>]", "Control the active player",
+                  ["media next", "media get trackTitle"]),
+        "audio": (simple("audio", "cycleOutput"), "audio", "Cycle the audio output device", []),
+        "devices": (simple("hypr", "refreshDevices"), "devices", "Refresh the Hyprland input devices", []),
+    },
+    "Shell": {
+        "restart": (cmd_restart, "restart", "Restart the shell", []),
+        "log": (cmd_log, "log [-e]", "Show the shell log (-e: only warnings and errors)", []),
+        "ipc": (cmd_ipc, "ipc [<target> <function> [args...]]", "Raw IPC call; without arguments list every target",
+                ["ipc notch open media"]),
+    },
+}
+FLAT = {name: spec for group in COMMANDS.values() for name, spec in group.items()}
+
+
+def print_help():
+    print("Usage: paleshell <command> [args...]\n       paleshell <command> -h   help for one command\n")
+    for group, cmds in COMMANDS.items():
+        print(f"{group}:")
+        for name, (_, _, summary, _) in cmds.items():
+            print(f"  {name:<12}{summary}")
+        print()
+    print("Examples:\n  paleshell mascot happy\n  paleshell season grimm\n  paleshell style pale\n  paleshell notch weather")
+
+
+def print_command_help(name):
+    _, usage, summary, details = FLAT[name]
+    print(f"Usage: paleshell {usage}\n\n{summary}")
+    if details:
+        print("\nExamples:")
+        for line in details:
+            print(f"  paleshell {line}")
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help", "help"):
+        if len(argv) > 1 and argv[1] in FLAT:
+            return print_command_help(argv[1])
+        return print_help()
+    name, args = argv[0], argv[1:]
+    if name not in FLAT:
+        sys.exit(f"paleshell: unknown command '{name}' (see `paleshell -h`)")
+    if args and args[0] in ("-h", "--help"):
+        return print_command_help(name)
+    try:
+        FLAT[name][0](args)
+    except UsageError as e:
+        sys.exit(f"paleshell {name}: {e}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

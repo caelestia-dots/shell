@@ -159,7 +159,7 @@ PageBase {
             visible: active
 
             sourceComponent: StyledRect {
-                color: Colours.tPalette.m3surfaceContainer
+                color: Hallownest.card
                 radius: Tokens.rounding.extraLarge
                 implicitHeight: noWallsLayout.implicitHeight + Tokens.padding.extraExtraLarge * 2
 
@@ -172,14 +172,14 @@ PageBase {
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
                         text: "hide_image"
-                        color: Colours.palette.m3outline
+                        color: Hallownest.subtext
                         fontStyle: Tokens.font.icon.extraLarge
                     }
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
                         text: Tr.tr("No local wallpapers found")
-                        color: Colours.palette.m3outline
+                        color: Hallownest.subtext
                         font: Tokens.font.title.small
                     }
                 }

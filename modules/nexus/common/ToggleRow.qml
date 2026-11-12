@@ -74,7 +74,7 @@ StyledSwitch {
 
                 visible: root.subtext
                 text: root.subtext
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
             }

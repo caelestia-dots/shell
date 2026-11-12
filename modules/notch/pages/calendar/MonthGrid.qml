@@ -206,7 +206,7 @@ CustomMouseArea {
                     StateLayer {
                         color: Hallownest.text
                         radius: Tokens.rounding.full
-                        onClicked: EventsWindow.open(dayItem.model.date)
+                        onClicked: DayView.open(dayItem.model.date)
                     }
 
                     StyledText {

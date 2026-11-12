@@ -68,8 +68,8 @@ Singleton {
         }
         apply({
             name: "hollowknight",
-            flavour: Hallownest.flavour,
-            mode: "dark",
+            flavour: Hallownest.schemeFlavour,
+            mode: Hallownest.light ? "light" : "dark",
             colours
         }, false);
     }
@@ -132,7 +132,9 @@ Singleton {
     }
 
     FileView {
-        path: Hallownest.loaded ? Quickshell.shellPath(`assets/schemes/hollowknight/${Hallownest.flavour}/dark.txt`) : ""
+        // Style and flavour change one after the other, so the path briefly points at a missing combo
+        printErrors: false
+        path: Hallownest.loaded ? Quickshell.shellPath(`assets/schemes/hollowknight/${Hallownest.schemeFlavour}/${Hallownest.light ? "light" : "dark"}.txt`) : ""
         onLoaded: root.loadTheme(text())
     }
 

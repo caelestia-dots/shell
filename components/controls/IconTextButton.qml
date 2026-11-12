@@ -17,23 +17,23 @@ ButtonBase {
     horizontalPadding: Tokens.padding.medium
     verticalPadding: Tokens.padding.small
 
-    activeColour: type === TextButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondary
+    activeColour: type === TextButton.Filled ? Hallownest.soul : Hallownest.steel
     inactiveColour: {
         if (!isToggle && type === TextButton.Filled)
-            return Colours.palette.m3primary;
-        return type === TextButton.Filled ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3secondaryContainer;
+            return Hallownest.soul;
+        return type === TextButton.Filled ? Hallownest.card : Hallownest.button;
     }
     activeOnColour: {
         if (type === TextButton.Text)
-            return Colours.palette.m3primary;
-        return type === TextButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondary;
+            return Hallownest.soul;
+        return type === TextButton.Filled ? Hallownest.void_ : Hallownest.void_;
     }
     inactiveOnColour: {
         if (!isToggle && type === TextButton.Filled)
-            return Colours.palette.m3onPrimary;
+            return Hallownest.void_;
         if (type === TextButton.Text)
-            return Colours.palette.m3primary;
-        return type === TextButton.Filled ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer;
+            return Hallownest.soul;
+        return type === TextButton.Filled ? Hallownest.text : Hallownest.text;
     }
 
     implicitWidth: row.implicitWidth + horizontalPadding * 2

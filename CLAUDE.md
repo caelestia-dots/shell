@@ -10,7 +10,9 @@ está en `docs/claude-detalle.md`: búscalo ahí con `grep` cuando toques esa pa
 - Shell interactiva fish; las herramientas de Claude usan zsh (globs sin match dan error: comillas en
   `--include='*.qml'`, `"${VAR:?}"` en `rm`).
 - Thunar (archivos), foot (terminal), Zen (navegador), Obsidian (bóveda `~/Notas`), khal (calendario).
-- Pregunta antes de tocar cosas fuera del repo (Hyprland, `~/.config/*`); haz backup `*.bak-<motivo>`.
+- Pregunta antes de tocar cosas fuera del repo (Hyprland, `~/.config/*`). `~/.config/hypr` y
+  `~/.config/caelestia` son repos git locales (sin remoto): ahí nada de `*.bak`, cada cambio va en un
+  commit propio con mensaje en español. En el resto, backup `*.bak-<motivo>`.
   Los comandos con `sudo` los ejecuta él: dáselos en un bloque `bash`.
 - No hagas commits ni push salvo que lo pida (y solo se ofrecen al cerrar una etapa).
 - **Descartado, no reintroducir sin que lo pida**: Loaf, página Water del notch, Sombra al cerrar ventanas, sync con Google
@@ -39,8 +41,11 @@ hyprctl reload && hyprctl configerrors
 - Desde las herramientas, lanzar la shell con `setsid -f qs -c paleshell -n -d` y comprobar con
   `qs list -c paleshell` (a veces no queda corriendo). Una instancia vieja puede recargar a medio
   editar y loguear errores falsos.
+- CLI `paleshell <comando>` (`scripts/paleshell`, symlink en `~/.local/bin`): envoltorio de todos los
+  IPC con `-h` (`paleshell mascot happy`, `season grimm`, `style pale`, `restart`, `ipc` crudo). Si
+  agregas un `IpcHandler`, súmalo a la tabla `COMMANDS` del script.
 - IPC útiles para probar: `notch play <animación>`, `notch mascotMenu`, `season set <grimm|winter|auto>`,
-  `weather scene <sun|night|cloud|fog|rain|storm|snow|auto>`, `dock toggle`, `hallownest flavour <f>`.
+  `weather scene <sun|night|cloud|fog|rain|storm|snow|auto>`, `dock toggle`, `hallownest flavour <f>`, `hallownest style <s>`.
 
 ## Plugin C++ y `QML_IMPORT_PATH`
 
@@ -100,12 +105,20 @@ docs/           claude-detalle.md (detalle histórico)
 
 ## Estilo Hollow Knight
 
-- Paleta fija `Hallownest` (`services/Hallownest.qml`: `void_`, `card`, `steel`, `soul`, `lifeblood`,
+- Paleta `Hallownest` (`services/Hallownest.qml`: `void_`, `card`, `steel`, `soul`, `lifeblood`,
   `infection`, `grimm`, `gold`, `unn`, `crystal`, `serif` = Cinzel, `mono`). La UI propia usa esto, no
-  `Colours`. El flavour (`vessel`, `lifeblood`, `infection`, `greenpath`) vive en
-  `~/.local/state/paleshell/hallownest.json`; `Hallownest.setFlavour` también aplica
-  `caelestia scheme set -n hollowknight -f <f>` y los scripts de tema de `assets/` (iconos YAMIS, Zen,
-  Obsidian, Thunar, zathura/btop). `Colours` carga `assets/schemes/hollowknight/<flavour>/dark.txt`.
+  `Colours`. Fuente única de colores: `assets/styles.json` = style (`hallownest`, `pale`, `beezone`,
+  `void`, `grimm`: base, charms) × flavour (`vessel`, `lifeblood`, `infection`, `greenpath`: accent,
+  steel, tertiary, error, success). Ambos viven en `~/.local/state/paleshell/hallownest.json`;
+  `Hallownest.setTheme/setStyle/setFlavour` también aplica `caelestia scheme set -n hollowknight -f
+  <schemeFlavour>` y los scripts de tema de `assets/` (`<script> <style> <flavour>`, leen el JSON con
+  `assets/hkstyle.py`: iconos YAMIS, Zen, Obsidian, Thunar, zathura/btop). `Colours` carga
+  `assets/schemes/hollowknight/<schemeFlavour>/dark.txt` (`<flavour>` en hallownest,
+  `<style>-<flavour>` en el resto); tras editar el JSON: `python3 scripts/gen-hollowknight-scheme.py`.
+  `pale` es claro (`"light": true` → `light.txt`, `caelestia -m light`, Obsidian moonstone): cada nivel
+  `void_` → `shell` → `card` → `button` se aleja del fondo, así que en claro `void_` es el más claro y
+  el acento es oscuro. Hover con `Hallownest.raise(c, k)`, nunca `Qt.lighter`. `void` es blanco y negro
+  (`"mono": true`: la terminal conserva los colores de hallownest).
 - Librería `components/hallownest/` (úsala en vez de los controles M3): `HkButton`, `HkField`,
   `HkSwitch`, `HkStepper`, `HkSlider`, `HkCheck`, `HkSelect`, `HkCard` (`ornate`), `HkRow`,
   `HkSection`/`HkTitle`, `HkSelection`, `HkToggle`, `HkRadio`, `Filigree`, `CharmNotches`,
@@ -117,19 +130,28 @@ docs/           claude-detalle.md (detalle histórico)
 ## Mapa de funciones (dónde está cada cosa)
 
 - **Notch** (`modules/notch/`): `NotchWindow` por pantalla. Páginas Home, Media, Calendar, Weather,
-  Focus + herramientas Clipboard, Shelf, AI, Performance, Settings (`NotchPages`; `goTo(i)` sin módulo,
+  Focus + herramientas Clipboard, Shelf, AI, Performance (`NotchPages`; `goTo(i)` sin módulo,
   `step` da la vuelta). Prioridad colapsado: alerta To-Do > alerta de agente > OSD > mascota > reloj.
-  Settings del notch = `NotchSettings` (`notch/config.json`).
+  Ajustes del notch = `NotchSettings` (`notch/config.json`), editados desde Nexus.
 - **Mascota** (`mascot/Knight.qml`): reacciones (`reactionNames`) y gestos (`actionNames`), easter egg
   del Hollow Knight (`bossAnim`/`rageAnim`, 3 %), borde claro en modo Vacío. Menú `Super + F8`
-  (`MascotMenu.qml`); una llamada a propósito sale también en modo dock (`summoned`).
+  (`MascotMenu.qml`); una llamada a propósito sale también en modo dock (`summoned`). Selector en
+  Nexus → Notch (`NotchSettings.mascotKind`: knight/grimm/hornet; knight pasa a Grimm en temporada
+  Grimm). Misma interfaz, `NotchWindow` usa `root.mascot`. `mascot/Grimm.qml` (`grimm.svg`): `boss` =
+  Nightmare King, gestos `bow`, `teleport`. `mascot/Hornet.qml` (`hornet.svg`): `boss` = máscara de
+  forma final, gesto `dash` (izquierda y derecha); se va con un dash.
 - **Notificaciones en el notch** (`NotifView.qml`): diálogo de NPC con tipeo por `Timer`.
 - **Home**: centro de control con popouts de la barra en el sitio y mezclador por app
   (`pages/home/Mixer.qml`, streams `PwNodeType.AudioOutStream`).
 - **Weather**: escena animada por clima (`pages/weather/WeatherScene.qml`).
 - **Temporadas** (`services/Season.qml`): brasas Grimm en octubre, nieve en diciembre.
-- **Interruptores de animaciones**: sección Animations de Settings del notch (`mascot`, `animBench`,
-  `animWeather`, `animSeasons`, `animTyping`, `animGoo` en `NotchSettings`).
+- **Ajustes** (`modules/nexus/`, IPC `nexus open` o botón Settings de Home; sin atajo): menú propio.
+  Páginas en `PageRegistry` (lista) y `PageCompRegistry` (componentes, mismo orden): Style,
+  Animations, Notch, Overlays, AI agents, Apps, Network, Bluetooth, Audio, Services, Language &
+  region, About. Filas en `nexus/common` (`ToggleRow`, `StepperRow` → `HkStepper`, `SelectRow` →
+  `HkSelect`, `NotchToggle`/`NotchStepper` ligadas a una clave de `NotchSettings`). Interruptores de
+  animaciones en Animations (`mascot`, `animBench`, `animWeather`, `animSeasons`, `animTyping`, `animGoo`).
+  Los controles de `components/controls` usan `Hallownest.*`, no `Colours.palette`.
 - **Dock** (`modules/dock/`): `Dock.mode` manual (`Super + F1`), asomar por los bordes, menú de apps =
   launcher (el panel de `drawers` está apagado), animación de gotas (`GooWindow`). Espacio reservado
   para notch/dock en `drawers/Exclusions.qml` (constantes fijas).
@@ -137,16 +159,26 @@ docs/           claude-detalle.md (detalle histórico)
   abiertas se enfocan, OCR (`assets/ocr.sh`, `Super + F9`).
 - **Calendario** (khal): `services/Events.qml` (`loadRange`, `add`, `update`, `remove`, importar .ics
   con `assets/import-ics.py`), vistas en `pages/calendar/`. khal corta `UNTIL` a las 00:00: se suma 1 día.
-- **Bloqueo** (`modules/lock/`): próxima clase, almas de Undertale, juegos (flechas vía `gameKey`).
+- **Bloqueo** (`modules/lock/`): próxima clase, almas de Undertale, juegos en `Arcade.qml` (Dino, Tetris,
+  Pac-Man, Buscaminas, Snake, Sudoku; flechas vía `gameKey`, los números no llegan: el Sudoku usa teclado en pantalla).
   Descanso en el banco (`BenchRest.qml`): `IdleMonitors` pone `Lock.resting` 8 s antes del timeout de
   `lock` (viñeta + rayos + motas en una capa Overlay sin entrada; cualquier actividad lo cancela) y
   `LockSurface` abre siempre con destello de Alma y deja los rayos al 50 %. `Bench.qml`: dibujo del
   usuario `assets/hallownest/bench.svg` (capas banco/cuerpo/cabeza/ojos); `scripts/hallownest-bench.py`
   las renderiza a PNG ×4 en `bench/` (rsvg respeta sus desenfoques): rehacer tras editar el SVG.
   Abajo al centro; respira, parpadea, los ojos siguen al ratón (`HoverHandler` en `LockSurface`), alza
-  la cabeza al escribir, niega lento al fallar y se levanta al desbloquear. También sale en el oscurecido.
-- **AI** (`pages/Ai.qml`): lanzador de Claude Code / Antigravity y aprobaciones vía hooks
+  la cabeza al escribir, niega lento al fallar y se queda quieto al desbloquear. También sale en el oscurecido.
+- **AI** (`pages/Ai.qml`): abre las consolas del asistente (`hyprctl dispatch 'require("utils.functions").toggle("claude")'`),
+  límites de Claude y Antigravity (`services/AiUsage.qml` → `assets/ai-usage.py <claude|agy>`: OAuth
+  `api/oauth/usage` de Anthropic y `retrieveUserQuotaSummary` de Google con el token del keyring; caché 5 min),
+  sesiones en vivo y aprobaciones vía hooks
   (`assets/agent-hook.py` → socket `$XDG_RUNTIME_DIR/paleshell/agents.sock`; el relay nunca bloquea).
+- **Asistente** (`Super + A` Claude Code, `Super + Shift + A` Antigravity): consola desplegable =
+  espacios especiales `special:claude`/`special:agy` (toggles en `~/.config/caelestia/cli.json`,
+  geometría en `rules.lua`, `dim_special` en `decoration.lua`). `assets/assistant.sh <cli>` lo lanza
+  en `~/.local/share/paleshell/assistant` (CLAUDE.md/AGENTS.md → `assets/assistant/CLAUDE.md`).
+  La skill `assets/assistant/skills/paleshell` está enlazada en `~/.claude/skills` y
+  `~/.gemini/config/skills`: actualízala si cambian la CLI `paleshell` o los atajos.
 - Otros: overview `Super + Tab`, emojis, portapapeles (cliphist), capturas al Shelf, grabación,
   KDE Connect (archivos recibidos al Shelf), cursor y tema de iconos propios, SDDM en `assets/sddm/`.
 

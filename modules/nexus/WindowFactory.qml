@@ -25,7 +25,7 @@ Singleton {
         FloatingWindow {
             id: win
 
-            color: Colours.tPalette.m3surface
+            color: Hallownest.void_
             surfaceFormat.opaque: false
 
             onVisibleChanged: {

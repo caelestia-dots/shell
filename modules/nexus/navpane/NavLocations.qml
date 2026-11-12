@@ -120,7 +120,7 @@ VerticalFadeFlickable {
                         StyledText {
                             Layout.fillWidth: true
                             text: item.modelData.description
-                            color: Colours.palette.m3onSurfaceVariant
+                            color: Hallownest.subtext
                             font: Tokens.font.label.small
                             elide: Text.ElideRight
                         }

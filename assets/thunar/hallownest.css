@@ -1,11 +1,4 @@
-/* Hallownest theme for Thunar. @hk_accent and @hk_steel are defined by thunar-theme.py */
-
-@define-color hk_void #06070a;
-@define-color hk_shell #0e1015;
-@define-color hk_card #14161c;
-@define-color hk_text #e2e8f0;
-@define-color hk_subtext #8a93a3;
-@define-color hk_faint #4a505c;
+/* Hallownest theme for Thunar. The @hk_* colours are defined by thunar-theme.py */
 
 .thunar * {
     outline: none;

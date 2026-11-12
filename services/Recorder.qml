@@ -3,7 +3,9 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia.I18n
 import qs.services
+import qs.utils
 
 Singleton {
     id: root
@@ -16,6 +18,7 @@ Singleton {
     property list<string> startArgs
     property bool needsStop
     property bool needsPause
+    property bool stopping
 
     function elapsedText(): string {
         const s = Math.floor(elapsed);
@@ -57,6 +60,7 @@ Singleton {
             const running = code === 0;
 
             if (running && root.needsStop) {
+                root.stopping = true;
                 commandProc.exec(["caelestia", "record"]);
                 props.running = false;
                 props.paused = false;
@@ -88,7 +92,30 @@ Singleton {
         // The command owns the transition: `caelestia record` blocks on slurp for
         // region captures, and waits for the recorder to finalise the file when
         // stopping. Reconcile once it has actually finished.
-        onExited: checkProc.running = true
+        onExited: {
+            if (root.stopping) {
+                root.stopping = false;
+                latestProc.running = true;
+            }
+            checkProc.running = true;
+        }
+    }
+
+    // Hand the finished recording to the Shelf, like screenshots.
+    // shortcut: only stops made from the shell, not from `caelestia record` run elsewhere.
+    Process {
+        id: latestProc
+
+        command: ["sh", "-c", "ls -t \"$1\"/* 2>/dev/null | head -1", "sh", Paths.recsdir]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const file = text.trim();
+                if (!file)
+                    return;
+                Shelf.addUrls([`file://${file}`]);
+                Toaster.toast(Tr.tr("Recording saved"), Tr.tr("Added to the Shelf"), "videocam");
+            }
+        }
     }
 
     // Only poll while something is showing the state, i.e. the utilities drawer is open

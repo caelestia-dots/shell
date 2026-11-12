@@ -52,11 +52,6 @@ Singleton {
             id: "performance",
             icon: "speed",
             label: Tr.tr("Performance")
-        },
-        {
-            id: "settings",
-            icon: "settings",
-            label: Tr.tr("Settings")
         }
     ]
     // ScreenState.notchPage indexes this list

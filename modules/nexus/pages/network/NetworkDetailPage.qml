@@ -116,8 +116,8 @@ PageBase {
                 fillWidth: true
                 shapeMorph: root.isActive
                 isRound: true
-                inactiveColour: Colours.palette.m3errorContainer
-                inactiveOnColour: Colours.palette.m3onErrorContainer
+                inactiveColour: Qt.alpha(Hallownest.grimm, 0.16)
+                inactiveOnColour: Hallownest.grimm
 
                 implicitWidth: forgetLayout.implicitWidth + Tokens.padding.extraLarge * 2
                 implicitHeight: forgetLayout.implicitHeight + Tokens.padding.medium * 2
@@ -155,8 +155,8 @@ PageBase {
                 fillWidth: true
                 shapeMorph: true
                 isRound: true
-                inactiveColour: Colours.palette.m3primaryContainer
-                inactiveOnColour: Colours.palette.m3onPrimaryContainer
+                inactiveColour: Qt.alpha(Hallownest.soul, 0.16)
+                inactiveOnColour: Hallownest.soul
 
                 implicitWidth: disconnectLayout.implicitWidth + Tokens.padding.extraLarge * 2
                 implicitHeight: disconnectLayout.implicitHeight + Tokens.padding.medium * 2
@@ -440,8 +440,8 @@ PageBase {
 
                 shapeMorph: true
                 isRound: true
-                inactiveColour: Colours.palette.m3primary
-                inactiveOnColour: Colours.palette.m3onPrimary
+                inactiveColour: Hallownest.soul
+                inactiveOnColour: Hallownest.void_
                 stateLayer.disabled: !root.ipLoaded || root.savingIp
 
                 implicitWidth: applyMetrics.width + Tokens.padding.extraLarge * 2

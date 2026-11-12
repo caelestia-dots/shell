@@ -24,7 +24,7 @@ Rectangle {
             return accent;
         if (tinted)
             return Qt.alpha(accent, area.containsMouse ? 0.24 : 0.16);
-        return area.containsMouse ? Qt.lighter(Hallownest.button, 1.7) : Hallownest.button;
+        return area.containsMouse ? Hallownest.raise(Hallownest.button, 1.7) : Hallownest.button;
     }
     border.width: filled ? 0 : 1
     border.color: tinted ? Qt.alpha(accent, 0.35) : Hallownest.border

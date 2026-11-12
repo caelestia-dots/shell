@@ -259,7 +259,7 @@ StyledWindow {
                 blurMax: 32
                 shadowBlur: 1
                 shadowVerticalOffset: -2
-                shadowColor: Qt.alpha("black", 0.75)
+                shadowColor: Qt.alpha("black", Hallownest.light ? 0.28 : 0.75)
             }
 
             IslandShape {

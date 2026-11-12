@@ -28,7 +28,7 @@ PageBase {
             Layout.leftMargin: Tokens.padding.small
             Layout.bottomMargin: Tokens.spacing.medium
             text: Tr.tr("Adjust the volume of individual apps currently playing audio.")
-            color: Colours.palette.m3outline
+            color: Hallownest.subtext
             font: Tokens.font.body.small
             wrapMode: Text.WordWrap
         }
@@ -41,7 +41,7 @@ PageBase {
             showList: true
             placeholderIcon: "music_off"
             placeholderText: Tr.tr("No apps playing audio")
-            color: list.count === 0 ? Colours.tPalette.m3surfaceContainer : "transparent"
+            color: list.count === 0 ? Hallownest.card : "transparent"
             list.spacing: Tokens.spacing.extraSmall / 2
 
             model: ScriptModel {

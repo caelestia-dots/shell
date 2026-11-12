@@ -186,7 +186,7 @@ NotchPage {
                 width: list.width
                 implicitHeight: Math.max(30, row.implicitHeight + 4)
                 radius: implicitHeight / 2
-                color: taskHover.hovered ? Qt.lighter(Hallownest.card, 1.3) : Hallownest.card
+                color: taskHover.hovered ? Hallownest.raise(Hallownest.card, 1.3) : Hallownest.card
                 border.width: 1
                 border.color: Hallownest.border
 

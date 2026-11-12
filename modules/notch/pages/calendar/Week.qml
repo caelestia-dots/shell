@@ -174,7 +174,7 @@ Item {
                     StateLayer {
                         color: Hallownest.text
                         radius: Tokens.rounding.medium
-                        onClicked: EventsWindow.open(dayHeader.modelData)
+                        onClicked: DayView.open(dayHeader.modelData)
                     }
 
                     Column {
@@ -460,7 +460,7 @@ Item {
         StateLayer {
             color: Hallownest.soul
             radius: chip.radius
-            onClicked: EventsWindow.open(chip.date)
+            onClicked: DayView.open(chip.date)
         }
     }
 }

@@ -17,7 +17,7 @@ Rectangle {
     implicitWidth: 48
     implicitHeight: 44
     radius: 14
-    color: lit ? Qt.alpha(accent, area.containsMouse ? 0.2 : 0.14) : area.containsMouse ? Qt.lighter(Hallownest.button, 1.6) : Hallownest.button
+    color: lit ? Qt.alpha(accent, area.containsMouse ? 0.2 : 0.14) : area.containsMouse ? Hallownest.raise(Hallownest.button, 1.6) : Hallownest.button
     border.width: 1
     border.color: lit ? Qt.alpha(accent, 0.55) : Hallownest.border
     opacity: enabled ? 1 : 0.4

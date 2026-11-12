@@ -11,6 +11,7 @@ Singleton {
     readonly property string dir: `${Paths.state}/notch`
     readonly property var defaults: ({
             mascot: true,
+            mascotKind: "knight",
             mascotRandom: true,
             mascotTracking: true,
             mascotReactions: true,
@@ -31,6 +32,7 @@ Singleton {
             osdCapsLock: true,
             osdKbLayout: true,
             osdCharger: true,
+            autoPowerProfile: true,
             osdBattery: true,
             osdWifi: true,
             osdBluetooth: true,
@@ -48,6 +50,8 @@ Singleton {
     property var values: defaults
 
     readonly property bool mascot: values.mascot
+    // knight, grimm or hornet; the Knight gives way to Grimm while his troupe is in town
+    readonly property string mascotKind: values.mascotKind === "knight" && Season.current === "grimm" ? "grimm" : values.mascotKind
     readonly property bool minimal: values.minimal
     readonly property real scale: values.scale
     readonly property bool twelveHour: values.twelveHour

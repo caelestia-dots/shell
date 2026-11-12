@@ -35,6 +35,16 @@ ColumnLayout {
             id: "minesweeper",
             name: Tr.tr("Minesweeper"),
             icon: "flag"
+        },
+        {
+            id: "snake",
+            name: Tr.tr("Snake"),
+            icon: "gesture"
+        },
+        {
+            id: "sudoku",
+            name: Tr.tr("Sudoku"),
+            icon: "grid_on"
         }
     ]
 
@@ -80,6 +90,10 @@ ColumnLayout {
                 return pacman;
             if (root.current === "minesweeper")
                 return minesweeper;
+            if (root.current === "snake")
+                return snake;
+            if (root.current === "sudoku")
+                return sudoku;
             return dino;
         }
     }
@@ -171,5 +185,17 @@ ColumnLayout {
         id: minesweeper
 
         MinesweeperGame {}
+    }
+
+    Component {
+        id: snake
+
+        SnakeGame {}
+    }
+
+    Component {
+        id: sudoku
+
+        SudokuGame {}
     }
 }

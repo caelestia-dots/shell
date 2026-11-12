@@ -15,7 +15,6 @@ Item {
     property real raise // head lifted towards the password, 0..1
     property real blink
     property real shake
-    property real stand // 0 = sitting, 1 = standing up
     property bool typing
     property bool following
 
@@ -30,14 +29,14 @@ Item {
 
     // Eyes follow a point given in this item's coordinates
     function follow(x: real, y: real): void {
-        if (typing || stand > 0)
+        if (typing)
             return;
         const dx = x / canvasScale - 160;
         const dy = y / canvasScale - 99;
         const d = Math.max(Math.hypot(dx, dy), 1);
-        const reach = Math.min(d / 60, 1);
-        lookX = dx / d * 4 * reach;
-        lookY = dy / d * 3.5 * reach;
+        const reach = Math.min(d / 40, 1);
+        lookX = dx / d * 7 * reach;
+        lookY = dy / d * 5.5 * reach;
         following = true;
         followReset.restart();
     }
@@ -46,14 +45,6 @@ Item {
         refuseAnim.restart();
     }
 
-    function standUp(): void {
-        refuseAnim.stop();
-        typing = false;
-        lookX = 0;
-        lookY = 0;
-        raise = 0;
-        standAnim.restart();
-    }
 
     implicitWidth: 320 * canvasScale
     implicitHeight: 220 * canvasScale
@@ -120,7 +111,7 @@ Item {
 
     // Idle glances to the sides
     Timer {
-        running: root.visible && !root.typing && !root.following && root.stand === 0
+        running: root.visible && !root.typing && !root.following
         interval: 3500
         repeat: true
         onTriggered: {
@@ -130,7 +121,7 @@ Item {
     }
 
     Timer {
-        running: root.visible && root.stand === 0
+        running: root.visible
         interval: 4000
         repeat: true
         onTriggered: {
@@ -190,25 +181,6 @@ Item {
         }
     }
 
-    // Gets up from the bench: crouch, then rise until the legs clear the seat
-    SequentialAnimation {
-        id: standAnim
-
-        NumberAnimation {
-            target: root
-            property: "stand"
-            to: -0.12
-            duration: 120
-            easing.type: Easing.OutQuad
-        }
-        NumberAnimation {
-            target: root
-            property: "stand"
-            to: 1
-            duration: 380
-            easing.type: Easing.OutCubic
-        }
-    }
 
     Item {
         width: 320
@@ -222,16 +194,13 @@ Item {
 
         Item {
             anchors.fill: parent
-            transform: Translate {
-                y: -root.stand * 22
-            }
 
             BenchLayer {
                 name: "cuerpo"
                 transform: Scale {
                     origin.x: 160
                     origin.y: 150
-                    yScale: 1 + root.breath * 0.025 + Math.max(root.stand, 0) * 0.06
+                    yScale: 1 + root.breath * 0.025
                 }
             }
 
@@ -245,7 +214,7 @@ Item {
                         angle: root.shake * 6
                     },
                     Translate {
-                        y: -root.breath * 0.9 - root.raise * 4 - Math.max(root.stand, 0) * 2
+                        y: -root.breath * 0.9 - root.raise * 4
                     }
                 ]
 

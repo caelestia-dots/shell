@@ -125,7 +125,7 @@ NotchPage {
                 width: list.width
                 implicitHeight: modelData.image ? 64 : 34
                 radius: modelData.image ? 12 : implicitHeight / 2
-                color: entryHover.hovered ? Qt.lighter(Hallownest.card, 1.3) : Hallownest.card
+                color: entryHover.hovered ? Hallownest.raise(Hallownest.card, 1.3) : Hallownest.card
                 border.width: 1
                 border.color: copied ? Hallownest.soul : modelData.pinned ? Qt.alpha(Hallownest.gold, 0.35) : Hallownest.border
 

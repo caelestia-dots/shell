@@ -145,7 +145,7 @@ Item {
         implicitWidth: 20
         implicitHeight: 20
         radius: 10
-        color: area.containsMouse ? Qt.lighter(Hallownest.button, 1.6) : Hallownest.button
+        color: area.containsMouse ? Hallownest.raise(Hallownest.button, 1.6) : Hallownest.button
         border.width: 1
         border.color: Hallownest.border
 

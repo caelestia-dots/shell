@@ -15,7 +15,7 @@ Slider {
     orientation: Qt.Vertical
 
     background: StyledRect {
-        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+        color: Colours.layer(Hallownest.card, 2)
         radius: Tokens.rounding.full
 
         StyledRect {
@@ -25,7 +25,7 @@ Slider {
             y: root.handle.y
             implicitHeight: parent.height - y
 
-            color: Colours.palette.m3secondary
+            color: Hallownest.steel
             radius: parent.radius
         }
     }
@@ -50,7 +50,7 @@ Slider {
 
             anchors.fill: parent
 
-            color: Colours.palette.m3inverseSurface
+            color: Hallownest.text
             radius: Tokens.rounding.full
 
             MouseArea {
@@ -70,7 +70,7 @@ Slider {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: 1
                 text: moving ? Math.round(root.value * 100) : root.icon
-                color: Colours.palette.m3inverseOnSurface
+                color: Hallownest.void_
                 font: moving ? Tokens.font.body.small : Tokens.font.icon.medium
 
                 Behavior on moving {

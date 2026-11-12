@@ -10,7 +10,7 @@ import qs.utils
 Searcher {
     id: root
 
-    readonly property string currentScheme: `Hollow Knight ${Hallownest.flavour}`
+    readonly property string currentScheme: `${Hallownest.styleData.name} ${Hallownest.flavour}`
 
     function transformSearch(search: string): string {
         return search.slice(`${GlobalConfig.launcher.actionPrefix}theme `.length);
@@ -28,24 +28,26 @@ Searcher {
     Variants {
         id: schemes
 
-        model: Hallownest.flavours
+        // "style flavour" for every combination
+        model: Hallownest.styleNames.reduce((all, s) => all.concat(Hallownest.flavours.map(f => `${s} ${f}`)), [])
 
         Scheme {}
     }
 
     component Scheme: QtObject {
         required property string modelData
-        readonly property string name: "Hollow Knight"
-        readonly property string flavour: modelData
+        readonly property string style: modelData.split(" ")[0]
+        readonly property string name: Hallownest.styles[style].name
+        readonly property string flavour: modelData.split(" ")[1]
         readonly property var colours: ({
-                surface: Hallownest.void_.toString().slice(1),
-                outline: Hallownest.steels[modelData].slice(1),
-                primary: Hallownest.accents[modelData].slice(1)
+                surface: Hallownest.styles[style].base.void.slice(1),
+                outline: Hallownest.styles[style].flavours[flavour].steel.slice(1),
+                primary: Hallownest.styles[style].flavours[flavour].accent.slice(1)
             })
 
         function onClicked(list: AppList): void {
             list.screenState.launcher = false;
-            Hallownest.setFlavour(flavour);
+            Hallownest.setTheme(style, flavour);
         }
     }
 }

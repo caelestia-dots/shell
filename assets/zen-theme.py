@@ -5,24 +5,24 @@ import shutil
 import sys
 from pathlib import Path
 
-ACCENTS = {"vessel": "#f0f4f8", "lifeblood": "#6cc9ff", "infection": "#ff8a2a", "greenpath": "#74c98a"}
-STEELS = {"vessel": "#9ba4b5", "lifeblood": "#8fb3cc", "infection": "#b8a08f", "greenpath": "#94b39c"}
+from hkstyle import palette
+
 PREF = 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
 
-flavour = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ACCENTS else "vessel"
+p = palette()
 src = Path(__file__).parent / "zen" / "userChrome.css"
 zen = Path.home() / ".config" / "zen"
 ini = configparser.ConfigParser()
 ini.read(zen / "profiles.ini")
 
 colours = f""":root {{
-    --hk-accent: {ACCENTS[flavour]};
-    --hk-steel: {STEELS[flavour]};
-    --hk-void: #06070a;
-    --hk-shell: #0e1015;
-    --hk-card: #14161c;
-    --hk-text: #e2e8f0;
-    --hk-subtext: #8a93a3;
+    --hk-accent: {p["accent"]};
+    --hk-steel: {p["steel"]};
+    --hk-void: {p["void"]};
+    --hk-shell: {p["shell"]};
+    --hk-card: {p["card"]};
+    --hk-text: {p["text"]};
+    --hk-subtext: {p["subtext"]};
 }}
 """
 
