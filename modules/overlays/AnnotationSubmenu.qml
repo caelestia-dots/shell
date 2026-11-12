@@ -246,16 +246,12 @@ Item {
             }
 
             SliderControl {
+                Layout.rightMargin: Tokens.padding.extraSmall
                 from: 8
                 to: 96
                 stepSize: 0
                 value: root.document.font.pointSize
                 onInteraction: v => root.document.font.pointSize = v
-            }
-
-            ToggleButton {
-                checked: root.document.textBackground
-                onClicked: root.document.textBackground = !root.document.textBackground
             }
         }
     }
