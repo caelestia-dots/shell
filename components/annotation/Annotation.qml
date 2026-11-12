@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Shapes
-import Quickshell
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Scheme
@@ -12,7 +11,7 @@ import qs.components.controls
 Item {
     id: root
 
-    required property ShellScreen screen
+    property alias origin: canvas.origin
     property alias document: canvas.document
     property alias base: canvas.base
     property bool active
@@ -166,6 +165,9 @@ Item {
         hoverIndex = active ? document.shapeAt(hoverPos) : -1;
     }
 
+    implicitWidth: canvas.implicitWidth
+    implicitHeight: canvas.implicitHeight
+
     AnnotationCanvas {
         id: canvas
 
@@ -186,7 +188,7 @@ Item {
 
     MouseArea {
         function globalPos(event: MouseEvent): point {
-            return Qt.point(event.x + root.screen.x, event.y + root.screen.y);
+            return Qt.point(event.x + root.origin.x, event.y + root.origin.y);
         }
 
         anchors.fill: parent
@@ -339,7 +341,7 @@ Item {
         }
 
         function onTextEditRequested(index: int, pos: point, text: string): void {
-            const local = Qt.point(pos.x - root.screen.x, pos.y - root.screen.y);
+            const local = Qt.point(pos.x - root.origin.x, pos.y - root.origin.y);
             if (local.x < 0 || local.y < 0 || local.x >= root.width || local.y >= root.height)
                 return;
             textEditor.open(index, local, text);
@@ -354,8 +356,8 @@ Item {
         property rect bounds
         property bool active
 
-        x: bounds.x - root.screen.x
-        y: bounds.y - root.screen.y
+        x: bounds.x - root.origin.x
+        y: bounds.y - root.origin.y
         width: bounds.width
         height: bounds.height
         preferredRendererType: Shape.CurveRenderer
