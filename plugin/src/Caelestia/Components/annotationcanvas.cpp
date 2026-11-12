@@ -2,7 +2,6 @@
 
 #include <qpainter.h>
 #include <qquickwindow.h>
-#include <qscreen.h>
 
 namespace caelestia::shell::components {
 
@@ -101,6 +100,7 @@ void AnnotationCanvas::setBase(const QImage& base) {
 
     m_base = base;
     m_scaledBase = QImage();
+    setImplicitSize(m_base.deviceIndependentSize().width(), m_base.deviceIndependentSize().height());
     invalidateLayer();
     emit baseChanged();
 }
@@ -122,8 +122,17 @@ const QImage& AnnotationCanvas::scaledBase() {
 }
 
 QPointF AnnotationCanvas::origin() const {
-    const auto* w = window();
-    return w && w->screen() ? QPointF(w->screen()->geometry().topLeft()) : QPointF();
+    return m_origin;
+}
+
+void AnnotationCanvas::setOrigin(const QPointF& origin) {
+    if (m_origin == origin)
+        return;
+
+    m_origin = origin;
+    invalidateLayer();
+    updatePreview();
+    emit originChanged();
 }
 
 void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) {

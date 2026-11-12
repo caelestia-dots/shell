@@ -17,7 +17,7 @@ Item {
     required property AnnotationDocument document
     property color customColour
     property color customBackgroundColour
-    property Item picking
+    property Swatches picking
 
     implicitWidth: loader.implicitWidth
     implicitHeight: dummySizing.implicitHeight

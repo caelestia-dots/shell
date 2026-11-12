@@ -5,6 +5,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
+import qs.components.annotation
 
 RowLayout {
     id: root
