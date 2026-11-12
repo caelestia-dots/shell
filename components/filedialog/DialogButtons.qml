@@ -20,7 +20,7 @@ Item {
         anchors.margins: Tokens.padding.medium
         anchors.leftMargin: 0
 
-        spacing: Tokens.spacing.small
+        spacing: Tokens.spacing.extraSmall
 
         StyledRect {
             Layout.fillWidth: true
@@ -54,8 +54,11 @@ Item {
         }
 
         TextButton {
+            id: confirmButton
+
+            Layout.preferredWidth: Math.max(confirmButton.implicitWidth, cancelButton.implicitWidth)
             isRound: true
-            horizontalPadding: Tokens.padding.large
+            horizontalPadding: Tokens.padding.largeIncreased
             verticalPadding: Tokens.padding.medium
             disabled: !root.dState.selectionValid
             text: root.dState.confirmLabel
@@ -66,9 +69,12 @@ Item {
         }
 
         TextButton {
+            id: cancelButton
+
+            Layout.preferredWidth: Math.max(confirmButton.implicitWidth, cancelButton.implicitWidth)
             type: TextButton.Tonal
             isRound: true
-            horizontalPadding: Tokens.padding.large
+            horizontalPadding: Tokens.padding.largeIncreased
             verticalPadding: Tokens.padding.medium
             text: Tr.trCtx("Cancel", "button")
             onClicked: root.dState.rejected()
