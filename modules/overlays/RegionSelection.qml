@@ -9,28 +9,18 @@ import qs.components.effects
 Item {
     id: root
 
+    required property RegionState selection
+    required property point origin
     required property bool resizeMode
 
-    property real sx: -1
-    property real sy: -1
-    property real ex: -1
-    property real ey: -1
-
-    readonly property rect rect: Qt.rect(Math.min(sx, ex), Math.min(sy, ey), Math.abs(sx - ex), Math.abs(sy - ey))
-    readonly property bool empty: sx < 0
+    readonly property rect rect: Qt.rect(selection.rect.x - origin.x, selection.rect.y - origin.y, selection.rect.width, selection.rect.height)
+    readonly property bool empty: selection.empty
 
     readonly property int borderWidth: 1
     readonly property real handleSize: Tokens.padding.medium
     readonly property real handleLength: Tokens.padding.extraLarge
     readonly property real handlePadding: Tokens.padding.small
     readonly property real handleSpace: handleLength + handleSize + handlePadding * 4
-
-    function clear(): void {
-        sx = -1;
-        sy = -1;
-        ex = -1;
-        ey = -1;
-    }
 
     StyledRect {
         id: overlay
@@ -147,15 +137,15 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             cursorShape: Qt.SizeHorCursor
             innerHeight: root.handleLength
-            xProp: "sx"
+            xPoint: "start"
         }
 
         ResizeHandle {
             anchors.horizontalCenter: parent.left
             anchors.verticalCenter: parent.top
             cursorShape: Qt.SizeFDiagCursor
-            xProp: "sx"
-            yProp: "sy"
+            xPoint: "start"
+            yPoint: "start"
         }
 
         ResizeHandle {
@@ -163,15 +153,15 @@ Item {
             anchors.verticalCenter: parent.top
             cursorShape: Qt.SizeVerCursor
             innerWidth: root.handleLength
-            yProp: "sy"
+            yPoint: "start"
         }
 
         ResizeHandle {
             anchors.horizontalCenter: parent.right
             anchors.verticalCenter: parent.top
             cursorShape: Qt.SizeBDiagCursor
-            xProp: "ex"
-            yProp: "sy"
+            xPoint: "end"
+            yPoint: "start"
         }
 
         ResizeHandle {
@@ -179,15 +169,15 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             cursorShape: Qt.SizeHorCursor
             innerHeight: root.handleLength
-            xProp: "ex"
+            xPoint: "end"
         }
 
         ResizeHandle {
             anchors.horizontalCenter: parent.right
             anchors.verticalCenter: parent.bottom
             cursorShape: Qt.SizeFDiagCursor
-            xProp: "ex"
-            yProp: "ey"
+            xPoint: "end"
+            yPoint: "end"
         }
 
         ResizeHandle {
@@ -195,24 +185,24 @@ Item {
             anchors.verticalCenter: parent.bottom
             cursorShape: Qt.SizeVerCursor
             innerWidth: root.handleLength
-            yProp: "ey"
+            yPoint: "end"
         }
 
         ResizeHandle {
             anchors.horizontalCenter: parent.left
             anchors.verticalCenter: parent.bottom
             cursorShape: Qt.SizeBDiagCursor
-            xProp: "sx"
-            yProp: "ey"
+            xPoint: "start"
+            yPoint: "end"
         }
     }
 
     component ResizeHandle: MouseArea {
         property alias innerWidth: resizeInner.implicitWidth
         property alias innerHeight: resizeInner.implicitHeight
-        property string xProp
-        property string yProp
-        readonly property bool fits: (xProp && yProp) || (xProp ? root.rect.height : root.rect.width) >= root.handleSpace
+        property string xPoint
+        property string yPoint
+        readonly property bool fits: (xPoint && yPoint) || (xPoint ? root.rect.height : root.rect.width) >= root.handleSpace
 
         property point pressPos
         property real startX
@@ -228,16 +218,15 @@ Item {
                 return;
             }
 
-            if (root.sx > root.ex)
-                [root.sx, root.ex] = [root.ex, root.sx];
-            if (root.sy > root.ey)
-                [root.sy, root.ey] = [root.ey, root.sy];
+            const r = root.selection.rect;
+            root.selection.start = Qt.point(r.x, r.y);
+            root.selection.end = Qt.point(r.x + r.width, r.y + r.height);
 
             pressPos = mapToItem(root, event.x, event.y);
-            if (xProp)
-                startX = root[xProp];
-            if (yProp)
-                startY = root[yProp];
+            if (xPoint)
+                startX = root.selection[xPoint].x;
+            if (yPoint)
+                startY = root.selection[yPoint].y;
             startRatio = root.rect.width > 0 ? root.rect.height / root.rect.width : 1;
         }
         onPositionChanged: event => {
@@ -248,18 +237,18 @@ Item {
             let dx = p.x - pressPos.x;
             let dy = p.y - pressPos.y;
 
-            if (xProp && yProp && event.modifiers & Qt.ShiftModifier) {
-                const diagX = xProp === "sx" ? -1 : 1;
-                const diagY = (yProp === "sy" ? -1 : 1) * startRatio;
+            if (xPoint && yPoint && event.modifiers & Qt.ShiftModifier) {
+                const diagX = xPoint === "start" ? -1 : 1;
+                const diagY = (yPoint === "start" ? -1 : 1) * startRatio;
                 const t = (dx * diagX + dy * diagY) / (diagX * diagX + diagY * diagY);
                 dx = t * diagX;
                 dy = t * diagY;
             }
 
-            if (xProp)
-                root[xProp] = Math.max(0, Math.min(root.width, startX + dx));
-            if (yProp)
-                root[yProp] = Math.max(0, Math.min(root.height, startY + dy));
+            if (xPoint)
+                root.selection[xPoint] = Qt.point(startX + dx, root.selection[xPoint].y);
+            if (yPoint)
+                root.selection[yPoint] = Qt.point(root.selection[yPoint].x, startY + dy);
         }
 
         implicitWidth: resizeInner.implicitWidth + root.handlePadding * 2
