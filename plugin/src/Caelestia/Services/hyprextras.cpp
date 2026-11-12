@@ -4,6 +4,7 @@
 #include <qjsonarray.h>
 #include <qlocalsocket.h>
 #include <qloggingcategory.h>
+#include <qsharedpointer.h>
 #include <qvariant.h>
 
 #include "hyprdevices.hpp"
@@ -136,11 +137,11 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
 
 void HyprExtras::refreshOptions() {
     if (!m_optionsRefresh.isNull()) {
-        m_optionsRefresh->close();
+        m_optionsRefresh->deleteLater();
     }
 
     m_optionsRefresh = makeRequestJson(u"descriptions"_s, [this](bool success, const QJsonDocument& response) {
-        m_optionsRefresh.reset();
+        m_optionsRefresh.clear();
         if (!success) {
             return;
         }
@@ -166,11 +167,11 @@ void HyprExtras::refreshOptions() {
 
 void HyprExtras::refreshDevices() {
     if (!m_devicesRefresh.isNull()) {
-        m_devicesRefresh->close();
+        m_devicesRefresh->deleteLater();
     }
 
     m_devicesRefresh = makeRequestJson(u"devices"_s, [this](bool success, const QJsonDocument& response) {
-        m_devicesRefresh.reset();
+        m_devicesRefresh.clear();
         if (success) {
             m_devices->updateLastIpcObject(response.object());
         }
@@ -239,20 +240,20 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
         return {};
     }
 
-    auto socket = SocketPtr::create(this);
+    auto* const socket = new QLocalSocket(this);
     const auto buffer = QSharedPointer<QByteArray>::create();
 
-    QObject::connect(socket.data(), &QLocalSocket::connected, this, [socket, request] {
+    QObject::connect(socket, &QLocalSocket::connected, this, [socket, request] {
         socket->write(request.toUtf8());
         socket->flush();
     });
 
-    QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, buffer] {
+    QObject::connect(socket, &QLocalSocket::readyRead, this, [socket, buffer] {
         buffer->append(socket->readAll());
     });
 
     // Hyprland closes the socket once the full response is written
-    QObject::connect(socket.data(), &QLocalSocket::errorOccurred, this, [=](QLocalSocket::LocalSocketError err) {
+    QObject::connect(socket, &QLocalSocket::errorOccurred, this, [=](QLocalSocket::LocalSocketError err) {
         if (err == QLocalSocket::PeerClosedError) {
             buffer->append(socket->readAll());
             callback(true, std::move(*buffer));
@@ -260,7 +261,7 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
             qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
             callback(false, {});
         }
-        socket->close();
+        socket->deleteLater();
     });
 
     socket->connectToServer(m_requestSocket);
