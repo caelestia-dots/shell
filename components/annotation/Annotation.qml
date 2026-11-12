@@ -14,6 +14,7 @@ Item {
     property alias origin: canvas.origin
     property alias document: canvas.document
     property alias base: canvas.base
+    property alias baseRect: canvas.baseRect
     property bool active
 
     property point hoverPos
@@ -154,6 +155,10 @@ Item {
 
         document.tool = entry.tool;
         return true;
+    }
+
+    function composite(): var {
+        return canvas.composite();
     }
 
     function padded(b: rect): rect {
