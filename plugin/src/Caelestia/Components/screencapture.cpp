@@ -108,8 +108,13 @@ void CaptureSession::pipeToClipboard(const QImage& image, const QByteArray& png)
 QImage CaptureSession::compose(const QRect& region) const {
     qreal scale = 0.0;
     for (auto it = m_images.cbegin(); it != m_images.cend(); ++it) {
-        if (it.key()->geometry().intersects(region))
-            scale = std::max(scale, it.key()->devicePixelRatio());
+        if (!it.key()->geometry().intersects(region))
+            continue;
+
+        if (it.value().isNull())
+            return {};
+
+        scale = std::max(scale, it.key()->devicePixelRatio());
     }
     if (scale <= 0.0)
         return {};
