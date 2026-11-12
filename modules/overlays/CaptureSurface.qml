@@ -8,6 +8,7 @@ import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
+import qs.components.annotation
 import qs.components.controls
 
 Item {
@@ -167,7 +168,7 @@ Item {
         opacity: root.contentOpacity
         active: root.cState.annotating
         document: capture.session.document
-        screen: root.screen
+        origin: Qt.point(root.screen.x, root.screen.y)
         base: capture.image
     }
 
@@ -256,7 +257,7 @@ Item {
             group: root.cState.annotating ? group : null
             anchors.horizontalCenter: parent.horizontalCenter
             y: {
-                const h = submenu.implicitHeight;
+                const h = submenu.fullHeight;
                 if (root.picking)
                     return (root.height - h) / 2;
 
@@ -268,7 +269,7 @@ Item {
 
             radius: root.picking ? Tokens.rounding.extraLarge : Tokens.rounding.extraExtraLarge
             implicitWidth: submenu.implicitWidth
-            implicitHeight: submenu.implicitHeight
+            implicitHeight: submenu.fullHeight
 
             deformScale: 0.00005 * Config.appearance.deformScale
 
@@ -340,15 +341,15 @@ Item {
         readonly property real fullHeight: content.implicitHeight + Tokens.padding.small * 2
         readonly property real toolbarEdge: root.toolbarBottom ? toolbarBg.y : toolbarBg.y + toolbarBg.height
         readonly property real visibleTop: root.toolbarBottom || root.picking ? submenuBg.y : Math.max(submenuBg.y, toolbarEdge)
-        readonly property real visibleBottom: root.toolbarBottom && !root.picking ? Math.min(submenuBg.y + fullHeight, toolbarEdge) : submenuBg.y + fullHeight
-        readonly property real pivotY: submenuBg.y - y + fullHeight / 2
+        readonly property real visibleBottom: root.toolbarBottom && !root.picking ? Math.min(submenuBg.y + submenuBg.height, toolbarEdge) : submenuBg.y + submenuBg.height
+        readonly property real pivotY: submenuBg.y - y + submenuBg.height / 2
 
         x: submenuBg.x
         y: visibleTop
 
         clip: true
         implicitWidth: content.implicitWidth + Tokens.padding.small * 2
-        implicitHeight: fullHeight
+        implicitHeight: submenuBg.height
         height: Math.max(0, visibleBottom - visibleTop)
 
         opacity: root.contentOpacity * root.submenuOpacity
