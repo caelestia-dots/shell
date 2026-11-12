@@ -60,7 +60,7 @@ public:
 
     [[nodiscard]] const QImage& layer() const;
     [[nodiscard]] const QImage& previewImage() const;
-    [[nodiscard]] const QImage& scaledBase();
+    [[nodiscard]] const QImage& effectBase();
 
 signals:
     void documentChanged();

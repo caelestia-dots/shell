@@ -397,6 +397,14 @@ void AnnotationDocument::renderPreview(
         m_preview->render(painter);
 }
 
+bool AnnotationDocument::hasEffects() const {
+    const auto isEffect = [](const std::shared_ptr<annotation::Shape>& shape) {
+        const auto* rect = dynamic_cast<const RectShape*>(shape.get());
+        return rect && rect->isEffect();
+    };
+    return (m_preview && isEffect(m_preview)) || std::ranges::any_of(m_shapes, isEffect);
+}
+
 std::optional<QRectF> AnnotationDocument::previewBounds() const {
     if (!m_preview)
         return std::nullopt;

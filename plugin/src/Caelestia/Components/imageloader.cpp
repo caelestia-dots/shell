@@ -62,7 +62,7 @@ void ImageLoader::setSource(const QString& source) {
     QtFuture::makeReadyValueFuture(source)
         .then(QtFuture::Launch::Async,
             [](const QString& path) {
-                return QImage(path);
+                return QImage(path).convertToFormat(QImage::Format_ARGB32_Premultiplied);
             })
         .then(this, [this, generation](const QImage& image) {
             if (generation != m_generation)
