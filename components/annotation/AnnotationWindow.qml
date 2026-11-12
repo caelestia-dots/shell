@@ -30,6 +30,7 @@ FloatingWindow {
     readonly property real zoom: Math.exp(logZoom)
     readonly property real targetZoom: Math.exp(targetLogZoom)
     readonly property point origin: clampedOrigin(Qt.point(anchorDoc.x - anchorViewX / zoom, anchorDoc.y - anchorViewY / zoom), zoom)
+    readonly property point targetOrigin: clampedOrigin(Qt.point(anchorDoc.x - targetAnchorViewX / targetZoom, anchorDoc.y - targetAnchorViewY / targetZoom), targetZoom)
 
     property real logZoom: targetLogZoom
     property real targetLogZoom
@@ -231,8 +232,19 @@ FloatingWindow {
             document: document
             base: loader.image
             baseRect: Qt.rect(0, 0, loader.implicitWidth, loader.implicitHeight)
-            origin: root.origin
-            zoom: root.zoom
+            origin: root.targetOrigin
+            zoom: root.targetZoom
+
+            transform: [
+                Scale {
+                    xScale: root.zoom / root.targetZoom
+                    yScale: root.zoom / root.targetZoom
+                },
+                Translate {
+                    x: (root.targetOrigin.x - root.origin.x) * root.zoom
+                    y: (root.targetOrigin.y - root.origin.y) * root.zoom
+                }
+            ]
         }
 
         MouseArea {
