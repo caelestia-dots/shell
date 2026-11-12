@@ -219,8 +219,10 @@ Item {
             }
 
             const r = root.selection.rect;
-            root.selection.start = Qt.point(r.x, r.y);
-            root.selection.end = Qt.point(r.x + r.width, r.y + r.height);
+            const topLeft = Qt.point(r.x, r.y);
+            const bottomRight = Qt.point(r.x + r.width, r.y + r.height);
+            root.selection.start = topLeft;
+            root.selection.end = bottomRight;
 
             pressPos = mapToItem(root, event.x, event.y);
             if (xPoint)
