@@ -20,8 +20,8 @@ Item {
     required property real contentOpacity
     property alias session: capture.session
     property bool hideToolbar
-    property real toolbarOpacity: hideToolbar ? 0 : 1
-    property real submenuOpacity: hideToolbar || !cState.annotating || annotation.document.tool === AnnotationDocument.Select ? 0 : 1
+    property real toolbarOpacity: showToolbar ? 1 : 0
+    property real submenuOpacity: showToolbar && cState.annotating && annotation.document.tool !== AnnotationDocument.Select ? 1 : 0
     property bool toolbarBottom
     readonly property bool wantsToolbarBottom: {
         if (!cState.annotating)
@@ -39,11 +39,19 @@ Item {
             return false;
         return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, screen.y + toolbar.implicitHeight, submenuContent.implicitHeight + Tokens.padding.small * 2);
     }
+    readonly property bool regionOnScreen: {
+        if (!cState.annotating)
+            return true;
+
+        const r = cState.region;
+        return r.x < screen.x + width && r.x + r.width > screen.x && r.y < screen.y + height && r.y + r.height > screen.y;
+    }
+    readonly property bool showToolbar: cState.open && !hideToolbar && regionOnScreen
     property bool moveModifier
     property bool picking: submenuContent.picking !== null
 
     readonly property real toolbarY: {
-        const open = cState.open && !hideToolbar && !cState.selection.selecting;
+        const open = showToolbar && !cState.selection.selecting;
         if (toolbarBottom)
             return open ? height - toolbarBg.height : height + 10;
         return open ? 0 : -toolbarBg.height - 10;
@@ -256,7 +264,7 @@ Item {
                 if (root.picking)
                     return (root.height - h) / 2;
 
-                const open = root.cState.open && !root.hideToolbar && root.cState.annotating && annotation.document.tool !== AnnotationDocument.Select;
+                const open = root.showToolbar && root.cState.annotating && annotation.document.tool !== AnnotationDocument.Select;
                 if (root.toolbarBottom)
                     return open ? root.toolbarY - h : root.toolbarY + toolbarBg.height / 2;
                 return open ? root.toolbarY + toolbarBg.height : root.toolbarY + toolbarBg.height / 2 - h;
