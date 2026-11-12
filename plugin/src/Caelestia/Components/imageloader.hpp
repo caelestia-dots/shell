@@ -2,12 +2,12 @@
 
 #include <qimage.h>
 #include <qqmlintegration.h>
-#include <qquickpainteditem.h>
+#include <qquickitem.h>
 #include <qrect.h>
 
 namespace caelestia::shell::components {
 
-class ImageLoader : public QQuickPaintedItem {
+class ImageLoader : public QQuickItem {
     Q_OBJECT
     QML_ELEMENT
 
@@ -17,8 +17,6 @@ class ImageLoader : public QQuickPaintedItem {
 
 public:
     explicit ImageLoader(QQuickItem* parent = nullptr);
-
-    void paint(QPainter* painter) override;
 
     [[nodiscard]] QString source() const;
     void setSource(const QString& source);
@@ -33,11 +31,15 @@ signals:
     void imageChanged();
     void sourceRectChanged();
 
+protected:
+    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) override;
+
 private:
     QString m_source;
     QImage m_image;
     QRectF m_sourceRect;
     int m_generation = 0;
+    bool m_textureDirty = false;
 };
 
 } // namespace caelestia::shell::components
