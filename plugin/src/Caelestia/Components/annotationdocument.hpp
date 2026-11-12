@@ -114,6 +114,7 @@ public:
     void renderPreview(QPainter& painter, const QImage& base, const QImage& above, const QPoint& deviceOffset) const;
     [[nodiscard]] bool hasEffects() const;
     [[nodiscard]] std::optional<QRectF> previewBounds() const;
+    [[nodiscard]] bool previewIsEffect() const;
     [[nodiscard]] const annotation::Stroke* previewStroke() const;
     [[nodiscard]] QRectF selectedBounds() const;
 
