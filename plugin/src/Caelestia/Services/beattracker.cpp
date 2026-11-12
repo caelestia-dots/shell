@@ -45,11 +45,11 @@ BeatTracker::BeatTracker(QObject* parent)
     connect(static_cast<BeatProcessor*>(m_processor), &BeatProcessor::beat, this, &BeatTracker::updateBpm);
 }
 
-smpl_t BeatTracker::bpm() const {
+float BeatTracker::bpm() const {
     return m_bpm;
 }
 
-void BeatTracker::updateBpm(smpl_t bpm) {
+void BeatTracker::updateBpm(float bpm) {
     if (!qFuzzyCompare(bpm + 1.0f, m_bpm + 1.0f)) {
         m_bpm = bpm;
         emit bpmChanged();
