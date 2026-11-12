@@ -18,10 +18,30 @@ FloatingWindow {
 
     property color customColour: Colours.palette.outline
     property color customBackgroundColour: Colours.palette.outlineVariant
+
     property bool picking: submenuContent.picking !== null
     readonly property bool submenuOpen: document.tool !== AnnotationDocument.Select
     readonly property real borderTop: toolbar.implicitHeight + toolbar.y * 2
+
     readonly property real initialScale: fitScale(screen.width * 0.8, screen.height * 0.8)
+    readonly property real minZoom: fitScale(viewport.width, viewport.height)
+    readonly property real maxZoom: 8
+
+    readonly property real zoom: Math.exp(logZoom)
+    readonly property real targetZoom: Math.exp(targetLogZoom)
+    readonly property point origin: clampedOrigin(Qt.point(anchorDoc.x - anchorViewX / zoom, anchorDoc.y - anchorViewY / zoom), zoom)
+
+    property real logZoom: targetLogZoom
+    property real targetLogZoom
+
+    property real anchorViewX: targetAnchorViewX
+    property real anchorViewY: targetAnchorViewY
+    property real targetAnchorViewX
+    property real targetAnchorViewY
+
+    property point anchorDoc
+    property bool fitted: true
+    property bool instant
 
     signal saved(path: string)
     signal copied(path: string)
@@ -29,9 +49,54 @@ FloatingWindow {
     signal cancelled
 
     function fitScale(width: real, height: real): real {
-        if (loader.implicitWidth <= 0 || loader.implicitHeight <= 0)
+        if (loader.implicitWidth <= 0 || loader.implicitHeight <= 0 || width <= 0 || height <= 0)
             return 1;
         return Math.min(1, width / loader.implicitWidth, height / loader.implicitHeight);
+    }
+
+    function clampedOrigin(value: point, zoom: real): point {
+        return Qt.point(clampAxis(value.x, loader.implicitWidth, viewport.width / zoom), clampAxis(value.y, loader.implicitHeight, viewport.height / zoom));
+    }
+
+    function clampAxis(value: real, image: real, view: real): real {
+        if (image <= view)
+            return (image - view) / 2;
+        return Math.max(0, Math.min(value, image - view));
+    }
+
+    function setTargetView(x: real, y: real, zoom: real): void {
+        const o = clampedOrigin(Qt.point(anchorDoc.x - x / zoom, anchorDoc.y - y / zoom), zoom);
+        targetAnchorViewX = (anchorDoc.x - o.x) * zoom;
+        targetAnchorViewY = (anchorDoc.y - o.y) * zoom;
+    }
+
+    function anchorAt(pos: point): void {
+        instant = true;
+        anchorDoc = Qt.point(origin.x + pos.x / zoom, origin.y + pos.y / zoom);
+        targetAnchorViewX = pos.x;
+        targetAnchorViewY = pos.y;
+        instant = false;
+    }
+
+    function panBy(dx: real, dy: real): void {
+        setTargetView(targetAnchorViewX - dx, targetAnchorViewY - dy, targetZoom);
+    }
+
+    function setZoom(next: real, pos: point): void {
+        anchorAt(pos);
+        fitted = next === minZoom;
+        targetLogZoom = Math.log(next);
+        setTargetView(targetAnchorViewX, targetAnchorViewY, next);
+    }
+
+    function zoomAt(pos: point, factor: real): void {
+        setZoom(Math.max(minZoom, Math.min(maxZoom, targetZoom * factor)), pos);
+    }
+
+    function refit(animate: bool): void {
+        instant = !animate;
+        setZoom(minZoom, Qt.point(viewport.width / 2, viewport.height / 2));
+        instant = false;
     }
 
     contentItem.Config.screen: screen.name
@@ -50,9 +115,18 @@ FloatingWindow {
         if (!visible)
             cancelled();
     }
+    onMinZoomChanged: {
+        if (fitted || targetZoom <= minZoom)
+            refit(false);
+    }
 
     contentItem.focus: true
     contentItem.Keys.onPressed: event => {
+        if (event.key === Qt.Key_0 && event.modifiers & Qt.ControlModifier) {
+            refit(true);
+            return;
+        }
+
         if (annotation.handleKey(event) || event.key !== Qt.Key_Escape)
             return;
 
@@ -60,6 +134,30 @@ FloatingWindow {
             submenuContent.picking = null;
         else
             visible = false;
+    }
+
+    Behavior on logZoom {
+        enabled: !root.instant
+
+        Anim {
+            type: Anim.FastEffects
+        }
+    }
+
+    Behavior on anchorViewX {
+        enabled: !root.instant && !panArea.pressed
+
+        Anim {
+            type: Anim.FastEffects
+        }
+    }
+
+    Behavior on anchorViewY {
+        enabled: !root.instant && !panArea.pressed
+
+        Anim {
+            type: Anim.FastEffects
+        }
     }
 
     Behavior on picking {
@@ -113,28 +211,56 @@ FloatingWindow {
     Item {
         id: viewport
 
-        readonly property real scale: root.fitScale(width, height)
-
         anchors.fill: parent
         anchors.topMargin: root.borderTop
+        clip: true
 
         ImageLoader {
             id: loader
 
-            anchors.centerIn: parent
-            width: implicitWidth * viewport.scale
-            height: implicitHeight * viewport.scale
+            anchors.fill: parent
             source: root.file
+            sourceRect: Qt.rect(root.origin.x, root.origin.y, width / root.zoom, height / root.zoom)
         }
 
         Annotation {
             id: annotation
 
-            anchors.fill: loader
+            anchors.fill: parent
             active: true
             document: document
             base: loader.image
-            baseRect: Qt.rect(0, 0, loader.width, loader.height)
+            baseRect: Qt.rect(0, 0, loader.implicitWidth, loader.implicitHeight)
+            origin: root.origin
+            zoom: root.zoom
+        }
+
+        MouseArea {
+            id: panArea
+
+            property point pressAnchor
+            property point pressPos
+
+            anchors.fill: parent
+            acceptedButtons: Qt.MiddleButton
+            cursorShape: pressed ? Qt.ClosedHandCursor : annotation.cursorShape
+
+            onPressed: event => {
+                pressAnchor = Qt.point(root.targetAnchorViewX, root.targetAnchorViewY);
+                pressPos = Qt.point(event.x, event.y);
+            }
+            onPositionChanged: event => root.setTargetView(pressAnchor.x + event.x - pressPos.x, pressAnchor.y + event.y - pressPos.y, root.targetZoom)
+            onWheel: event => {
+                if (event.modifiers & Qt.ControlModifier) {
+                    root.zoomAt(Qt.point(event.x, event.y), Math.pow(1.15, event.angleDelta.y / 120));
+                    return;
+                }
+
+                if (event.modifiers & Qt.ShiftModifier)
+                    root.panBy(-event.angleDelta.y, 0);
+                else
+                    root.panBy(-event.angleDelta.x, -event.angleDelta.y);
+            }
         }
 
         MouseArea {
