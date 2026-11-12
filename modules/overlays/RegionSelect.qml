@@ -7,6 +7,7 @@ MouseArea {
     id: root
 
     required property RegionState selection
+    required property Item source
     property alias screen: clients.screen
     property alias freeze: clients.freeze
     property bool selectClients: true
@@ -78,12 +79,13 @@ MouseArea {
         pendingSelect = false;
 
         if (selectClients && hoveredRect) {
+            selection.empty = false;
             selection.start = toGlobal(hoveredRect.x, hoveredRect.y);
             selection.end = toGlobal(hoveredRect.x + hoveredRect.width, hoveredRect.y + hoveredRect.height);
         }
 
         const rect = selection.rect;
-        if (rect.width > 0 && rect.height > 0)
+        if (!selection.empty && rect.width > 0 && rect.height > 0)
             selected(rect);
     }
 
@@ -104,6 +106,7 @@ MouseArea {
 
         if (pendingSelect) {
             selection.selecting = true;
+            selection.empty = false;
             selection.start = pressPos;
             pendingSelect = false;
         }
@@ -129,6 +132,7 @@ MouseArea {
     RegionSelection {
         anchors.fill: parent
         selection: root.selection
+        source: root.source
         origin: Qt.point(root.screen.x, root.screen.y)
         resizeMode: root.resizeMode
     }

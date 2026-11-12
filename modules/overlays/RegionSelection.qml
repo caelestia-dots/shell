@@ -4,12 +4,12 @@ import QtQuick
 import Caelestia.Config
 import Caelestia.Scheme
 import qs.components
-import qs.components.effects
 
 Item {
     id: root
 
     required property RegionState selection
+    required property Item source
     required property point origin
     required property bool resizeMode
 
@@ -23,38 +23,38 @@ Item {
     readonly property real handleSpace: handleLength + handleSize + handlePadding * 4
 
     StyledRect {
-        id: overlay
-
         anchors.fill: parent
         color: Qt.alpha("black", Colours.mode === Colours.Light ? 0.3 : 0.4)
-
-        layer.enabled: true
-        layer.effect: Mask {
-            maskSource: selectionWrapper
-            maskInverted: true
-        }
     }
 
     Item {
-        id: selectionWrapper
+        id: selectionRect
 
-        anchors.fill: parent
-        layer.enabled: true
-        visible: false
+        x: Math.round(root.rect.x)
+        y: Math.round(root.rect.y)
+        implicitWidth: Math.round(root.rect.width)
+        implicitHeight: Math.round(root.rect.height)
 
-        Rectangle {
-            id: selectionRect
+        clip: true
+        opacity: root.empty ? 0 : 1
 
-            x: root.rect.x
-            y: root.rect.y
-            implicitWidth: root.rect.width
-            implicitHeight: root.rect.height
+        Behavior on opacity {
+            Anim {}
+        }
+
+        ShaderEffectSource {
+            x: -selectionRect.x
+            y: -selectionRect.y
+            width: root.width
+            height: root.height
+            sourceItem: root.source
         }
     }
 
     Rectangle {
         id: border
 
+        opacity: selectionRect.opacity
         color: "transparent"
         border.width: root.borderWidth
         border.color: Colours.palette.primary
