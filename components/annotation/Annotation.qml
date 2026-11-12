@@ -15,6 +15,7 @@ Item {
     property alias document: canvas.document
     property alias base: canvas.base
     property alias baseRect: canvas.baseRect
+    property alias zoom: canvas.zoom
     property bool active
 
     property point hoverPos
@@ -193,7 +194,7 @@ Item {
 
     MouseArea {
         function globalPos(event: MouseEvent): point {
-            return Qt.point(event.x + root.origin.x, event.y + root.origin.y);
+            return Qt.point(event.x / root.zoom + root.origin.x, event.y / root.zoom + root.origin.y);
         }
 
         anchors.fill: parent
@@ -229,8 +230,8 @@ Item {
         scale: textEditor.scale
         transformOrigin: Item.TopLeft
 
-        x: textEditor.x - root.document.textPadding
-        y: textEditor.y - root.document.textPadding
+        x: textEditor.x - root.document.textPadding * root.zoom
+        y: textEditor.y - root.document.textPadding * root.zoom
         implicitWidth: textEditor.width + root.document.textPadding * 2
         implicitHeight: textEditor.height + root.document.textPadding * 2
 
@@ -285,7 +286,7 @@ Item {
 
         enabled: editing
         opacity: editing ? 1 : 0
-        scale: editing ? 1 : 0.8
+        scale: (editing ? 1 : 0.8) * root.zoom
         transformOrigin: Item.TopLeft
         wrapMode: TextEdit.NoWrap
         color: root.document.color
@@ -346,7 +347,7 @@ Item {
         }
 
         function onTextEditRequested(index: int, pos: point, text: string): void {
-            const local = Qt.point(pos.x - root.origin.x, pos.y - root.origin.y);
+            const local = Qt.point((pos.x - root.origin.x) * root.zoom, (pos.y - root.origin.y) * root.zoom);
             if (local.x < 0 || local.y < 0 || local.x >= root.width || local.y >= root.height)
                 return;
             textEditor.open(index, local, text);
@@ -361,10 +362,10 @@ Item {
         property rect bounds
         property bool active
 
-        x: bounds.x - root.origin.x
-        y: bounds.y - root.origin.y
-        width: bounds.width
-        height: bounds.height
+        x: (bounds.x - root.origin.x) * root.zoom
+        y: (bounds.y - root.origin.y) * root.zoom
+        width: bounds.width * root.zoom
+        height: bounds.height * root.zoom
         preferredRendererType: Shape.CurveRenderer
         opacity: active && root.document.selected >= 0 ? 1 : 0
 
