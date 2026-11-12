@@ -18,9 +18,11 @@ Item {
     required property ShellScreen screen
     required property real contentOpacity
     property alias session: capture.session
+
     property bool hideToolbar
     property real toolbarOpacity: showToolbar ? 1 : 0
     property real submenuOpacity: showToolbar && cState.annotating && annotation.document.tool !== AnnotationDocument.Select ? 1 : 0
+
     property bool toolbarBottom
     readonly property bool wantsToolbarBottom: {
         if (!cState.annotating)
@@ -38,6 +40,7 @@ Item {
             return false;
         return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, screen.y + toolbar.implicitHeight, submenuContent.implicitHeight + Tokens.padding.small * 2);
     }
+
     readonly property bool regionOnScreen: {
         if (!cState.annotating)
             return true;
@@ -45,6 +48,7 @@ Item {
         const r = cState.region;
         return r.x < screen.x + width && r.x + r.width > screen.x && r.y < screen.y + height && r.y + r.height > screen.y;
     }
+
     readonly property bool showToolbar: cState.open && !hideToolbar && regionOnScreen
     property bool moveModifier
     property bool picking: submenuContent.picking !== null
