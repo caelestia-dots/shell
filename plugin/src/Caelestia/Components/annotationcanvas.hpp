@@ -28,6 +28,7 @@ class AnnotationCanvas : public QQuickPaintedItem {
             documentChanged REQUIRED)
     Q_PROPERTY(QImage base READ base WRITE setBase NOTIFY baseChanged FINAL)
     Q_PROPERTY(QPointF origin READ origin WRITE setOrigin NOTIFY originChanged FINAL)
+    Q_PROPERTY(QRectF baseRect READ baseRect WRITE setBaseRect NOTIFY baseRectChanged FINAL)
 
 public:
     explicit AnnotationCanvas(QQuickItem* parent = nullptr);
@@ -43,6 +44,11 @@ public:
     [[nodiscard]] QPointF origin() const;
     void setOrigin(const QPointF& origin);
 
+    [[nodiscard]] QRectF baseRect() const;
+    void setBaseRect(const QRectF& baseRect);
+
+    Q_INVOKABLE [[nodiscard]] QImage composite() const;
+
     [[nodiscard]] const QImage& layer() const;
     [[nodiscard]] const QImage& previewImage() const;
     [[nodiscard]] const QImage& scaledBase();
@@ -51,12 +57,14 @@ signals:
     void documentChanged();
     void baseChanged();
     void originChanged();
+    void baseRectChanged();
 
 protected:
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private:
     [[nodiscard]] QImage newLayer() const;
+    [[nodiscard]] QRectF effectiveBaseRect() const;
     void invalidateLayer();
     void updatePreview();
     void extendPreview();
@@ -64,6 +72,7 @@ private:
     AnnotationDocument* m_document = nullptr;
     QImage m_base;
     QPointF m_origin;
+    QRectF m_baseRect;
     QImage m_scaledBase;
     QImage m_layer;
     QImage m_previewImage;
