@@ -9,6 +9,9 @@ StyledRect {
     required property var editor
     property bool disableBlink
 
+    readonly property list<real> animCurve: [0.2, 1, 0.21, 1, 1, 1] // Damped variant of fast spatial curve
+    readonly property int animDuration: Tokens.anim.durations.expressiveFastEffects
+
     x: editor.cursorRectangle.x
     y: editor.cursorRectangle.y
     implicitWidth: 1.5
@@ -51,15 +54,17 @@ StyledRect {
 
     Behavior on x {
         Anim {
-            easing.bezierCurve: [0.2, 1, 0.21, 1, 1, 1] // Damped variant of fast spatial curve
-            duration: Tokens.anim.durations.expressiveFastEffects
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: root.animCurve
+            duration: root.animDuration
         }
     }
 
     Behavior on y {
         Anim {
-            easing.bezierCurve: [0.2, 1, 0.21, 1, 1, 1]
-            duration: Tokens.anim.durations.expressiveFastEffects
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: root.animCurve
+            duration: root.animDuration
         }
     }
 
