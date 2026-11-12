@@ -60,6 +60,7 @@ public:
 
     [[nodiscard]] const QImage& layer() const;
     [[nodiscard]] const QImage& previewImage() const;
+    [[nodiscard]] QImage& scratchLayer();
     [[nodiscard]] const QImage& effectBase();
 
 signals:
@@ -89,6 +90,7 @@ private:
     QImage m_scaledBase;
     QImage m_layer;
     QImage m_previewImage;
+    QImage m_scratch;
     bool m_layerDirty = true;
     AnnotationPreview* m_preview;
 };
