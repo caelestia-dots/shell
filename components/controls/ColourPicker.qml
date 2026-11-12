@@ -35,6 +35,8 @@ RowLayout {
     readonly property string oklch: `${lightness.toFixed(2)}, ${chroma.toFixed(2)}, ${Math.round(hue)}°`
 
     readonly property color lchOnColour: onColourFor(lchColour)
+    readonly property font valueLabelFont: Tokens.font.label.builders.medium.letterSpacing(1).build()
+    readonly property real valueLabelWidth: Math.max(rgbLabelMetrics.width, hslLabelMetrics.width, oklchLabelMetrics.width)
     readonly property bool dragging: wheel.pressed
 
     signal interaction(colour: color)
@@ -350,6 +352,34 @@ RowLayout {
         }
     }
 
+    TextMetrics {
+        id: rgbLabelMetrics
+
+        font: root.valueLabelFont
+        text: Tr.tr("RGB")
+    }
+
+    TextMetrics {
+        id: hslLabelMetrics
+
+        font: root.valueLabelFont
+        text: Tr.tr("HSL")
+    }
+
+    TextMetrics {
+        id: oklchLabelMetrics
+
+        font: root.valueLabelFont
+        text: Tr.tr("OKLCH")
+    }
+
+    TextMetrics {
+        id: valueMetrics
+
+        font: Tokens.font.mono.medium
+        text: "360°, 100%, 100%"
+    }
+
     component ValueRow: StyledRect {
         id: valueRow
 
@@ -373,48 +403,18 @@ RowLayout {
             spacing: Tokens.spacing.medium
 
             StyledText {
-                id: valueRowLabel
-
-                Layout.preferredWidth: Math.max(rgbLabelWidth.width, hslLabelWidth.width, oklchLabelWidth.width)
+                Layout.preferredWidth: root.valueLabelWidth
                 text: valueRow.label
                 color: Colours.palette.onSurfaceVariant
-                font: Tokens.font.label.builders.medium.letterSpacing(1).build()
-
-                TextMetrics {
-                    id: rgbLabelWidth
-
-                    font: valueRowLabel.font
-                    text: Tr.tr("RGB")
-                }
-
-                TextMetrics {
-                    id: hslLabelWidth
-
-                    font: valueRowLabel.font
-                    text: Tr.tr("HSL")
-                }
-
-                TextMetrics {
-                    id: oklchLabelWidth
-
-                    font: valueRowLabel.font
-                    text: Tr.tr("OKLCH")
-                }
+                font: root.valueLabelFont
             }
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.preferredWidth: valueWidth.width
+                Layout.preferredWidth: valueMetrics.width
                 text: valueRow.value
                 color: Colours.palette.onSurface
                 font: Tokens.font.mono.medium
-
-                TextMetrics {
-                    id: valueWidth
-
-                    font: Tokens.font.mono.medium
-                    text: "360°, 100%, 100%"
-                }
             }
 
             CopyButton {
