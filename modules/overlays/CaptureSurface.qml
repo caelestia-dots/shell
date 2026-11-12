@@ -77,14 +77,6 @@ Item {
             moveModifier = false;
     }
 
-    Binding {
-        target: root
-        property: "toolbarBottom"
-        value: root.wantsToolbarBottom
-        when: !root.picking
-        restoreMode: Binding.RestoreNone
-    }
-
     Behavior on toolbarOpacity {
         Anim {
             type: Anim.DefaultEffects
@@ -153,6 +145,14 @@ Item {
                 value: false
             }
         }
+    }
+
+    Binding {
+        target: root
+        property: "toolbarBottom"
+        value: root.wantsToolbarBottom
+        when: !root.picking
+        restoreMode: Binding.RestoreNone
     }
 
     Item {
