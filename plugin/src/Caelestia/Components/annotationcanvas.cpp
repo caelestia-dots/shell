@@ -37,14 +37,14 @@ void AnnotationPreview::paint(QPainter* painter) {
         preview.fill(Qt::transparent);
         QPainter previewPainter(&preview);
         m_canvas->applyView(previewPainter);
-        document->renderPreview(previewPainter, m_canvas->scaledBase(), m_canvas->layer(), QPoint());
+        document->renderPreview(previewPainter, m_canvas->effectBase(), m_canvas->layer(), QPoint());
         m_canvas->drawLayer(*painter, preview);
         return;
     }
 
     const auto dpr = m_canvas->layer().devicePixelRatio();
     m_canvas->applyView(*painter);
-    document->renderPreview(*painter, m_canvas->scaledBase(), m_canvas->layer(), (position() * dpr).toPoint());
+    document->renderPreview(*painter, m_canvas->effectBase(), m_canvas->layer(), (position() * dpr).toPoint());
 }
 
 AnnotationCanvas::AnnotationCanvas(QQuickItem* parent)
@@ -67,7 +67,7 @@ void AnnotationCanvas::paint(QPainter* painter) {
         m_layer.fill(Qt::transparent);
         QPainter layerPainter(&m_layer);
         applyView(layerPainter);
-        m_document->render(layerPainter, scaledBase());
+        m_document->render(layerPainter, effectBase());
         m_layerDirty = false;
     }
 
@@ -125,8 +125,8 @@ const QImage& AnnotationCanvas::previewImage() const {
     return m_previewImage;
 }
 
-const QImage& AnnotationCanvas::scaledBase() {
-    if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull()) {
+const QImage& AnnotationCanvas::effectBase() {
+    if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull() && m_document->hasEffects()) {
         m_scaledBase = newLayer();
         m_scaledBase.fill(Qt::transparent);
         QPainter painter(&m_scaledBase);
