@@ -24,22 +24,10 @@ Item {
     property real submenuOpacity: showToolbar && cState.annotating && annotation.document.tool !== AnnotationDocument.Select ? 1 : 0
 
     property bool toolbarBottom
-    readonly property bool wantsToolbarBottom: {
-        if (!cState.annotating)
-            return false;
-
-        const r = cState.region;
-        const overlaps = (w, y, h) => {
-            const x = screen.x + (width - w) / 2;
-            return r.x < x + w && r.x + r.width > x && r.y < y + h && r.y + r.height > y;
-        };
-
-        if (overlaps(toolbar.implicitWidth, screen.y, toolbar.implicitHeight))
-            return true;
-        if (annotation.document.tool === AnnotationDocument.Select)
-            return false;
-        return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, screen.y + toolbar.implicitHeight, submenuContent.implicitHeight + Tokens.padding.small * 2);
-    }
+    readonly property real submenuHeight: submenuContent.implicitHeight + Tokens.padding.small * 2
+    readonly property bool topOccluded: occluded(screen.y, screen.y + toolbar.implicitHeight)
+    readonly property bool bottomOccluded: occluded(screen.y + height - toolbar.implicitHeight, screen.y + height - toolbar.implicitHeight - submenuHeight)
+    readonly property bool wantsToolbarBottom: topOccluded === bottomOccluded ? topOccluded && toolbarBottom : topOccluded
 
     readonly property bool regionOnScreen: {
         if (!cState.annotating)
@@ -58,6 +46,23 @@ Item {
         if (toolbarBottom)
             return open ? height - toolbarBg.height : height + 10;
         return open ? 0 : -toolbarBg.height - 10;
+    }
+
+    function occluded(toolbarY: real, submenuY: real): bool {
+        if (!cState.annotating || height <= 0)
+            return false;
+
+        const r = cState.region;
+        const overlaps = (w, y, h) => {
+            const x = screen.x + (width - w) / 2;
+            return r.x < x + w && r.x + r.width > x && r.y < y + h && r.y + r.height > y;
+        };
+
+        if (overlaps(toolbar.implicitWidth, toolbarY, toolbar.implicitHeight))
+            return true;
+        if (annotation.document.tool === AnnotationDocument.Select)
+            return false;
+        return overlaps(submenuContent.implicitWidth + Tokens.padding.small * 2, submenuY, submenuHeight);
     }
 
     focus: true
