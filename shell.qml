@@ -48,6 +48,7 @@ ShellRoot {
 
     // Daemons
     Shortcuts {}
+    IpcReceiver {}
     BatteryMonitor {}
     BlurController {}
     GameMode {}
