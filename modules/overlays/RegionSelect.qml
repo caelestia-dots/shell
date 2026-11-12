@@ -6,6 +6,7 @@ import qs.services
 MouseArea {
     id: root
 
+    required property RegionState selection
     property alias screen: clients.screen
     property alias freeze: clients.freeze
     property bool selectClients: true
@@ -13,18 +14,18 @@ MouseArea {
     property bool resizeMode
 
     property var hoveredRect // var so it can be null
-    property bool selecting
     property bool pendingSelect
     property bool selectCancelled
     property bool movingRegion
     property point moveStart
     property rect moveBase
-
-    property real ssx
-    property real ssy
+    property point pressPos
 
     signal selected(region: rect)
-    signal resized(region: rect)
+
+    function toGlobal(x: real, y: real): point {
+        return Qt.point(x + screen.x, y + screen.y);
+    }
 
     anchors.fill: parent
     hoverEnabled: !resizeMode
@@ -37,7 +38,7 @@ MouseArea {
         if (resizeMode) {
             if (event.button === Qt.LeftButton && event.modifiers & Qt.ControlModifier) {
                 movingRegion = true;
-                moveStart = Qt.point(event.x, event.y);
+                moveStart = toGlobal(event.x, event.y);
                 moveBase = selection.rect;
                 return;
             }
@@ -47,7 +48,6 @@ MouseArea {
         }
 
         if (event.button === Qt.RightButton) {
-            selecting = false;
             pendingSelect = false;
             selectCancelled = true;
             selection.clear();
@@ -57,8 +57,7 @@ MouseArea {
 
         selectCancelled = false;
         pendingSelect = true;
-        ssx = event.x;
-        ssy = event.y;
+        pressPos = toGlobal(event.x, event.y);
     }
 
     onReleased: event => {
@@ -75,14 +74,12 @@ MouseArea {
         if (selectCancelled || event.button !== Qt.LeftButton)
             return;
 
-        selecting = false;
+        selection.selecting = false;
         pendingSelect = false;
 
         if (selectClients && hoveredRect) {
-            selection.sx = hoveredRect.x;
-            selection.sy = hoveredRect.y;
-            selection.ex = hoveredRect.x + hoveredRect.width;
-            selection.ey = hoveredRect.y + hoveredRect.height;
+            selection.start = toGlobal(hoveredRect.x, hoveredRect.y);
+            selection.end = toGlobal(hoveredRect.x + hoveredRect.width, hoveredRect.y + hoveredRect.height);
         }
 
         const rect = selection.rect;
@@ -92,12 +89,11 @@ MouseArea {
 
     onPositionChanged: event => {
         if (movingRegion) {
-            const dx = Math.max(-moveBase.x, Math.min(width - moveBase.x - moveBase.width, event.x - moveStart.x));
-            const dy = Math.max(-moveBase.y, Math.min(height - moveBase.y - moveBase.height, event.y - moveStart.y));
-            selection.sx = moveBase.x + dx;
-            selection.sy = moveBase.y + dy;
-            selection.ex = moveBase.x + moveBase.width + dx;
-            selection.ey = moveBase.y + moveBase.height + dy;
+            const pos = toGlobal(event.x, event.y);
+            const dx = pos.x - moveStart.x;
+            const dy = pos.y - moveStart.y;
+            selection.start = Qt.point(moveBase.x + dx, moveBase.y + dy);
+            selection.end = Qt.point(moveBase.x + moveBase.width + dx, moveBase.y + moveBase.height + dy);
             return;
         }
 
@@ -106,22 +102,17 @@ MouseArea {
             return;
         }
 
-        const x = event.x;
-        const y = event.y;
-
         if (pendingSelect) {
-            selecting = true;
+            selection.selecting = true;
+            selection.start = pressPos;
             pendingSelect = false;
         }
 
-        if (selecting) {
+        if (selection.selecting) {
             hoveredRect = null;
-            selection.sx = ssx;
-            selection.sy = ssy;
-            selection.ex = x;
-            selection.ey = y;
+            selection.end = toGlobal(event.x, event.y);
         } else {
-            hoveredRect = clients.rectAt(x, y);
+            hoveredRect = clients.rectAt(event.x, event.y);
         }
     }
 
@@ -132,19 +123,14 @@ MouseArea {
 
         anchors.fill: parent
         hoveredRect: root.hoveredRect
-        highlight: root.selectClients && !root.resizeMode && !root.selecting
+        highlight: root.selectClients && !root.resizeMode && !root.selection.selecting
     }
 
     RegionSelection {
-        id: selection
-
         anchors.fill: parent
+        selection: root.selection
+        origin: Qt.point(root.screen.x, root.screen.y)
         resizeMode: root.resizeMode
-
-        onRectChanged: {
-            if (root.resizeMode)
-                root.resized(rect);
-        }
     }
 
     StyledRect {
@@ -153,7 +139,7 @@ MouseArea {
         x: root.mouseX - 1
         color: Colours.palette.secondary
         width: 1
-        opacity: root.showCrosshair && !root.resizeMode && !root.selecting ? 1 : 0
+        opacity: root.showCrosshair && !root.resizeMode && !root.selection.selecting ? 1 : 0
 
         Behavior on opacity {
             Anim {
@@ -168,7 +154,7 @@ MouseArea {
         y: root.mouseY - 1
         color: Colours.palette.secondary
         height: 1
-        opacity: root.showCrosshair && !root.resizeMode && !root.selecting ? 1 : 0
+        opacity: root.showCrosshair && !root.resizeMode && !root.selection.selecting ? 1 : 0
 
         Behavior on opacity {
             Anim {
