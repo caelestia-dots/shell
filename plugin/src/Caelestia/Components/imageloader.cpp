@@ -10,8 +10,11 @@ ImageLoader::ImageLoader(QQuickItem* parent)
     : QQuickPaintedItem(parent) {}
 
 void ImageLoader::paint(QPainter* painter) {
-    if (!m_image.isNull())
-        painter->drawImage(boundingRect(), m_image);
+    if (m_image.isNull())
+        return;
+
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
+    painter->drawImage(boundingRect(), m_image, m_sourceRect.isEmpty() ? QRectF(m_image.rect()) : m_sourceRect);
 }
 
 QString ImageLoader::source() const {
@@ -46,6 +49,19 @@ void ImageLoader::setSource(const QString& source) {
 
 QImage ImageLoader::image() const {
     return m_image;
+}
+
+QRectF ImageLoader::sourceRect() const {
+    return m_sourceRect;
+}
+
+void ImageLoader::setSourceRect(const QRectF& sourceRect) {
+    if (m_sourceRect == sourceRect)
+        return;
+
+    m_sourceRect = sourceRect;
+    update();
+    emit sourceRectChanged();
 }
 
 } // namespace caelestia::shell::components
