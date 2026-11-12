@@ -349,8 +349,7 @@ void RectShape::render(QPainter& painter) const {
 
     painter.save();
     painter.setPen(pen());
-    painter.setBrush(m_style.fill ? QBrush(QColor(m_style.color.red(), m_style.color.green(), m_style.color.blue(), 60))
-                                  : QBrush(Qt::NoBrush));
+    painter.setBrush(m_style.fill ? QBrush(m_style.color) : QBrush(Qt::NoBrush));
     if (m_kind == Kind::Ellipse)
         painter.drawEllipse(r);
     else
