@@ -33,7 +33,7 @@ void AnnotationPreview::paint(QPainter* painter) {
 
     painter->translate(-position());
     if (m_canvas->magnified()) {
-        auto preview = m_canvas->newLayer();
+        auto& preview = m_canvas->scratchLayer();
         preview.fill(Qt::transparent);
         QPainter previewPainter(&preview);
         m_canvas->applyView(previewPainter);
@@ -123,6 +123,12 @@ const QImage& AnnotationCanvas::layer() const {
 
 const QImage& AnnotationCanvas::previewImage() const {
     return m_previewImage;
+}
+
+QImage& AnnotationCanvas::scratchLayer() {
+    if (m_scratch.size() != layerSize())
+        m_scratch = newLayer();
+    return m_scratch;
 }
 
 const QImage& AnnotationCanvas::effectBase() {
