@@ -7,7 +7,6 @@ MouseArea {
     id: root
 
     required property RegionState selection
-    required property Item source
     property alias screen: clients.screen
     property alias freeze: clients.freeze
     property bool selectClients: true
@@ -132,7 +131,6 @@ MouseArea {
     RegionSelection {
         anchors.fill: parent
         selection: root.selection
-        source: root.source
         origin: Qt.point(root.screen.x, root.screen.y)
         resizeMode: root.resizeMode
     }
