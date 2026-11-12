@@ -3,8 +3,8 @@
 #include <qlocalsocket.h>
 #include <qobject.h>
 #include <qpoint.h>
+#include <qpointer.h>
 #include <qqmlintegration.h>
-#include <qsharedpointer.h>
 #include <qvariant.h>
 
 namespace caelestia::shell::services::hypr {
@@ -39,7 +39,7 @@ signals:
     void optionsChanged();
 
 private:
-    using SocketPtr = QSharedPointer<QLocalSocket>;
+    using SocketPtr = QPointer<QLocalSocket>;
 
     QString m_requestSocket;
     QString m_eventSocket;
