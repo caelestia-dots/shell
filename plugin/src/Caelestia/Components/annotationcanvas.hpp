@@ -78,6 +78,7 @@ private:
     [[nodiscard]] QPointF layerOrigin() const;
     [[nodiscard]] QRectF effectiveBaseRect() const;
     [[nodiscard]] QRectF toView(const QRectF& rect) const;
+    [[nodiscard]] QRect effectPreviewRect() const;
     void invalidateLayer();
     void updatePreview();
     void extendPreview();
@@ -91,6 +92,7 @@ private:
     QImage m_layer;
     QImage m_previewImage;
     QImage m_scratch;
+    QRect m_effectClip;
     bool m_layerDirty = true;
     AnnotationPreview* m_preview;
 };

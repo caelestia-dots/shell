@@ -71,6 +71,9 @@ void AnnotationCanvas::paint(QPainter* painter) {
         m_layerDirty = false;
     }
 
+    // The effect preview replaces this region, so leave it to the preview item
+    if (!m_effectClip.isNull())
+        painter->setClipRegion(QRegion(boundingRect().toAlignedRect()) - QRegion(m_effectClip));
     drawLayer(*painter, m_layer);
 }
 
@@ -216,6 +219,17 @@ QRectF AnnotationCanvas::toView(const QRectF& rect) const {
     return { topLeft, rect.size() * m_zoom };
 }
 
+QRect AnnotationCanvas::effectPreviewRect() const {
+    const auto bounds = m_document && m_document->previewIsEffect() ? m_document->previewBounds() : std::nullopt;
+    if (!bounds)
+        return {};
+
+    const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
+    const auto view = toView(*bounds);
+    const auto device = QRectF(view.topLeft() * dpr, view.size() * dpr).toAlignedRect();
+    return QRectF(QPointF(device.topLeft()) / dpr, QSizeF(device.size()) / dpr).toAlignedRect();
+}
+
 QImage AnnotationCanvas::composite() const {
     if (!m_document || m_base.isNull())
         return {};
@@ -223,11 +237,18 @@ QImage AnnotationCanvas::composite() const {
     auto result = m_base.convertToFormat(QImage::Format_ARGB32_Premultiplied);
     result.setDevicePixelRatio(1);
 
+    QImage shapes(result.size(), QImage::Format_ARGB32_Premultiplied);
+    shapes.fill(Qt::transparent);
+
     const auto rect = effectiveBaseRect();
+    QPainter shapePainter(&shapes);
+    shapePainter.scale(result.width() / rect.width(), result.height() / rect.height());
+    shapePainter.translate(-rect.topLeft());
+    m_document->render(shapePainter, result);
+    shapePainter.end();
+
     QPainter painter(&result);
-    painter.scale(result.width() / rect.width(), result.height() / rect.height());
-    painter.translate(-rect.topLeft());
-    m_document->render(painter, result);
+    painter.drawImage(QPoint(), shapes);
     return result;
 }
 
@@ -262,6 +283,11 @@ void AnnotationCanvas::invalidateLayer() {
 }
 
 void AnnotationCanvas::updatePreview() {
+    if (const auto clip = effectPreviewRect(); clip != m_effectClip) {
+        m_effectClip = clip;
+        update();
+    }
+
     const auto bounds = m_document ? m_document->previewBounds() : std::nullopt;
     if (!bounds) {
         m_previewImage = QImage();

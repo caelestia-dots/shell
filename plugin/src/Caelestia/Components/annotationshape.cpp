@@ -429,6 +429,7 @@ void RectShape::renderEffect(
     region.setDevicePixelRatio(dpr);
     painter.save();
     painter.resetTransform();
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
     painter.drawImage(QPointF(dev.topLeft() - deviceOffset) / dpr, region);
     painter.restore();
 }
