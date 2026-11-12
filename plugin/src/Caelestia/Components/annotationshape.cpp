@@ -558,7 +558,7 @@ int Counter::number() const {
 }
 
 qreal Counter::radius() const {
-    return std::max(14.0, m_style.font.pixelSize() * 0.9);
+    return std::max(14.0, QFontMetricsF(m_style.font).height() * 0.9);
 }
 
 } // namespace caelestia::shell::components::annotation
