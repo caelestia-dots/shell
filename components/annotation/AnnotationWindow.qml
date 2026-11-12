@@ -21,18 +21,26 @@ FloatingWindow {
     property bool picking: submenuContent.picking !== null
     readonly property bool submenuOpen: document.tool !== AnnotationDocument.Select
     readonly property real borderTop: toolbar.implicitHeight + toolbar.y * 2
+    readonly property real initialScale: fitScale(screen.width * 0.8, screen.height * 0.8)
 
-    signal saved
-    signal copied
+    signal saved(path: string)
+    signal copied(path: string)
+    signal failed
     signal cancelled
+
+    function fitScale(width: real, height: real): real {
+        if (loader.implicitWidth <= 0 || loader.implicitHeight <= 0)
+            return 1;
+        return Math.min(1, width / loader.implicitWidth, height / loader.implicitHeight);
+    }
 
     contentItem.Config.screen: screen.name
     contentItem.Tokens.screen: screen.name
 
     minimumSize.width: toolbar.implicitWidth + contentItem.Tokens.padding.large * 2
     minimumSize.height: borderTop
-    implicitWidth: Math.max(background.implicitWidth, toolbar.implicitWidth + contentItem.Tokens.padding.large * 2)
-    implicitHeight: background.implicitHeight + borderTop
+    implicitWidth: Math.max(loader.implicitWidth * initialScale, toolbar.implicitWidth + contentItem.Tokens.padding.large * 2)
+    implicitHeight: loader.implicitHeight * initialScale + borderTop
 
     color: Colours.tPalette.surface
     surfaceFormat.opaque: false
@@ -93,34 +101,40 @@ FloatingWindow {
         radius: TokenConfig.appearance.rounding.small
     }
 
+    ImageExporter {
+        id: exporter
+
+        onSaved: path => root.saved(path)
+        onCopied: path => root.copied(path)
+        onSaveFailed: root.failed()
+        onCopyFailed: root.failed()
+    }
+
     Item {
+        id: viewport
+
+        readonly property real scale: root.fitScale(width, height)
+
         anchors.fill: parent
         anchors.topMargin: root.borderTop
 
-        Image {
-            id: background
+        ImageLoader {
+            id: loader
 
-            anchors.fill: parent
-            asynchronous: true
-            fillMode: Image.PreserveAspectFit
+            anchors.centerIn: parent
+            width: implicitWidth * viewport.scale
+            height: implicitHeight * viewport.scale
             source: root.file
-
-            onStatusChanged: {
-                if (status === Image.Ready)
-                    grabToImage(res => annotation.base = res.image);
-            }
-            Component.onCompleted: {
-                if (status === Image.Ready)
-                    grabToImage(res => annotation.base = res.image);
-            }
         }
 
         Annotation {
             id: annotation
 
-            anchors.fill: parent
+            anchors.fill: loader
             active: true
             document: document
+            base: loader.image
+            baseRect: Qt.rect(0, 0, loader.width, loader.height)
         }
 
         MouseArea {
@@ -203,8 +217,8 @@ FloatingWindow {
         y: Tokens.padding.medium
 
         annotation: annotation
-        onSaved: root.saved()
-        onCopied: root.copied()
+        onSaved: exporter.save(annotation.composite())
+        onCopied: exporter.copy(annotation.composite())
         onCancelled: root.visible = false
     }
 
