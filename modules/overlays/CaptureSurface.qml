@@ -155,34 +155,28 @@ Item {
         restoreMode: Binding.RestoreNone
     }
 
-    Item {
-        id: captureContent
+    ScreenCapture {
+        id: capture
 
         anchors.fill: parent
         opacity: root.contentOpacity
+    }
 
-        ScreenCapture {
-            id: capture
+    Annotation {
+        id: annotation
 
-            anchors.fill: parent
-        }
-
-        Annotation {
-            id: annotation
-
-            anchors.fill: parent
-            active: root.cState.annotating
-            document: capture.session.document
-            screen: root.screen
-            base: capture.image
-        }
+        anchors.fill: parent
+        opacity: root.contentOpacity
+        active: root.cState.annotating
+        document: capture.session.document
+        screen: root.screen
+        base: capture.image
     }
 
     RegionSelect {
         anchors.fill: parent
         opacity: root.contentOpacity
         selection: root.cState.selection
-        source: captureContent
         screen: root.screen
         freeze: true
         resizeMode: root.cState.annotating

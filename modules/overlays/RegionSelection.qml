@@ -9,12 +9,11 @@ Item {
     id: root
 
     required property RegionState selection
-    required property Item source
     required property point origin
     required property bool resizeMode
 
     readonly property rect rect: Qt.rect(selection.rect.x - origin.x, selection.rect.y - origin.y, selection.rect.width, selection.rect.height)
-    readonly property bool empty: selection.empty
+    readonly property real dim: Colours.mode === Colours.Light ? 0.3 : 0.4
 
     readonly property int borderWidth: 1
     readonly property real handleSize: Tokens.padding.medium
@@ -23,11 +22,38 @@ Item {
     readonly property real handleSpace: handleLength + handleSize + handlePadding * 4
 
     StyledRect {
-        anchors.fill: parent
-        color: Qt.alpha("black", Colours.mode === Colours.Light ? 0.3 : 0.4)
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: selectionRect.top
+        color: Qt.alpha("black", root.dim)
     }
 
-    Item {
+    StyledRect {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: selectionRect.bottom
+        anchors.bottom: parent.bottom
+        color: Qt.alpha("black", root.dim)
+    }
+
+    StyledRect {
+        anchors.left: parent.left
+        anchors.right: selectionRect.left
+        anchors.top: selectionRect.top
+        anchors.bottom: selectionRect.bottom
+        color: Qt.alpha("black", root.dim)
+    }
+
+    StyledRect {
+        anchors.left: selectionRect.right
+        anchors.right: parent.right
+        anchors.top: selectionRect.top
+        anchors.bottom: selectionRect.bottom
+        color: Qt.alpha("black", root.dim)
+    }
+
+    StyledRect {
         id: selectionRect
 
         x: Math.round(root.rect.x)
@@ -35,26 +61,13 @@ Item {
         implicitWidth: Math.round(root.rect.width)
         implicitHeight: Math.round(root.rect.height)
 
-        clip: true
-        opacity: root.empty ? 0 : 1
-
-        Behavior on opacity {
-            Anim {}
-        }
-
-        ShaderEffectSource {
-            x: -selectionRect.x
-            y: -selectionRect.y
-            width: root.width
-            height: root.height
-            sourceItem: root.source
-        }
+        color: Qt.alpha("black", root.dim * (root.selection.empty ? 1 : 0))
     }
 
     Rectangle {
         id: border
 
-        opacity: selectionRect.opacity
+        opacity: root.selection.empty ? 0 : 1
         color: "transparent"
         border.width: root.borderWidth
         border.color: Colours.palette.primary
@@ -63,6 +76,12 @@ Item {
         y: selectionRect.y - root.borderWidth
         implicitWidth: selectionRect.implicitWidth + root.borderWidth * 2
         implicitHeight: selectionRect.implicitHeight + root.borderWidth * 2
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.SlowEffects
+            }
+        }
 
         Behavior on border.color {
             CAnim {}
@@ -209,7 +228,7 @@ Item {
         property real startY
         property real startRatio
 
-        enabled: root.resizeMode && !root.empty && fits
+        enabled: root.resizeMode && !root.selection.empty && fits
         preventStealing: true
 
         onPressed: event => {
@@ -256,7 +275,7 @@ Item {
         implicitWidth: resizeInner.implicitWidth + root.handlePadding * 2
         implicitHeight: resizeInner.implicitHeight + root.handlePadding * 2
 
-        scale: root.resizeMode && !root.empty && fits ? 1 : 0
+        scale: root.resizeMode && !root.selection.empty && fits ? 1 : 0
 
         Behavior on scale {
             Anim {
