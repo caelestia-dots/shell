@@ -10,8 +10,6 @@
 
 namespace caelestia::shell::components {
 
-using Qt::StringLiterals::operator""_s;
-
 CaptureSession::CaptureSession(QObject* parent)
     : QObject(parent)
     , m_document(new AnnotationDocument(this))
