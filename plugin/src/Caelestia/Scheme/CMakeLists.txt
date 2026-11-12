@@ -8,6 +8,7 @@ qml_module(caelestia-scheme
     QML_SINGLETONS
         Colours.qml
     LIBRARIES
+        Qt::Quick
         caelestia-config
         caelestia-models
         caelestia::caelestia
