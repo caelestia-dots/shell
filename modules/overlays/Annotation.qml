@@ -170,7 +170,6 @@ Item {
         id: canvas
 
         anchors.fill: parent
-        document: root.document
     }
 
     SelectionRect {
