@@ -103,8 +103,10 @@ FloatingWindow {
     contentItem.Config.screen: screen.name
     contentItem.Tokens.screen: screen.name
 
-    minimumSize.width: toolbar.implicitWidth + contentItem.Tokens.padding.large * 2
-    minimumSize.height: borderTop
+    minimumSize: {
+        const w = toolbar.implicitWidth + contentItem.Tokens.padding.large * 2;
+        return Qt.size(w, w / 2);
+    }
     implicitWidth: Math.max(loader.implicitWidth * initialScale, toolbar.implicitWidth + contentItem.Tokens.padding.large * 2)
     implicitHeight: loader.implicitHeight * initialScale + borderTop
 
