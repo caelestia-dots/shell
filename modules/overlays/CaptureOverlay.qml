@@ -78,6 +78,7 @@ LazyLoader {
 
                 screen: modelData
                 name: "capture-overlay"
+                animType: StyledWindow.NoAnim
                 WlrLayershell.exclusionMode: ExclusionMode.Ignore
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None

@@ -9,15 +9,37 @@
 
 #include "hyprdevices.hpp"
 
+using Qt::StringLiterals::operator""_s;
+
 namespace {
 
 Q_LOGGING_CATEGORY(lcHypr, "caelestia.services.hypr", QtInfoMsg)
 
+QString toLua(const QVariant& value) {
+    switch (value.typeId()) {
+    case QMetaType::Bool:
+        return value.toBool() ? u"true"_s : u"false"_s;
+    case QMetaType::Int:
+    case QMetaType::Double:
+        return value.toString();
+    case QMetaType::QVariantMap: {
+        QStringList fields;
+        const auto map = value.toMap();
+        for (auto it = map.constBegin(); it != map.constEnd(); ++it)
+            fields << it.key() + u" = "_s + toLua(it.value());
+        return u"{ "_s + fields.join(u", "_s) + u" }"_s;
+    }
+    default: {
+        auto str = value.toString();
+        str.replace(u'\\', u"\\\\"_s).replace(u'"', u"\\\""_s);
+        return u'"' + str + u'"';
+    }
+    }
+}
+
 } // namespace
 
 namespace caelestia::shell::services::hypr {
-
-using Qt::StringLiterals::operator""_s;
 
 HyprExtras::HyprExtras(QObject* parent)
     : QObject(parent)
@@ -135,6 +157,25 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
     });
 }
 
+void HyprExtras::registerLayerRule(const QVariantMap& rule) {
+    if (rule.isEmpty())
+        return;
+
+    const auto lua = u"hl.layer_rule("_s + toLua(rule) + u')';
+    if (m_layerRules.contains(lua))
+        return;
+
+    m_layerRules << lua;
+    message(u"eval "_s + lua);
+}
+
+void HyprExtras::applyLayerRules() {
+    if (m_layerRules.isEmpty())
+        return;
+
+    message(u"eval "_s + m_layerRules.join(u'\n'));
+}
+
 void HyprExtras::refreshOptions() {
     if (!m_optionsRefresh.isNull()) {
         m_optionsRefresh->deleteLater();
@@ -221,6 +262,7 @@ void HyprExtras::readEvent() {
 
 void HyprExtras::handleEvent(const QString& event) {
     if (event == u"configreloaded") {
+        applyLayerRules();
         refreshOptions();
     } else if (event == u"activelayout") {
         refreshDevices();
