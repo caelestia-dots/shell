@@ -304,6 +304,22 @@ Item {
                 type: Anim.DefaultEffects
             }
         }
+
+        Behavior on implicitWidth {
+            Anim {
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: textEditor.cursor.animCurve
+                duration: textEditor.cursor.animDuration
+            }
+        }
+
+        Behavior on implicitHeight {
+            Anim {
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: textEditor.cursor.animCurve
+                duration: textEditor.cursor.animDuration
+            }
+        }
     }
 
     Connections {
