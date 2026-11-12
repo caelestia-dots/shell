@@ -2,12 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
-import QtQuick.Layouts
 import Quickshell
 import Caelestia.Blobs
 import Caelestia.Components
 import Caelestia.Config
-import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
 import qs.components.controls
@@ -187,8 +185,6 @@ Item {
                 return Qt.SizeAllCursor;
             return annotation.cursorShape;
         }
-        selectClients: root.cState.selectClients
-        showCrosshair: root.cState.showCrosshair
 
         onSelected: region => {
             if (root.cState.annotate)
@@ -433,48 +429,8 @@ Item {
     Component {
         id: regionToolbar
 
-        RowLayout {
-            spacing: Tokens.spacing.medium
-
-            MaterialIcon {
-                id: topIcon
-
-                Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: Tokens.padding.medium
-                text: "screenshot_region"
-                color: Colours.palette.onSecondaryContainer
-                fontStyle: Tokens.font.icon.medium
-            }
-
-            StyledText {
-                Layout.alignment: Qt.AlignVCenter
-                text: Tr.tr("Drag to select a region")
-                color: Colours.palette.onSecondaryContainer
-                font: Tokens.font.body.medium
-            }
-
-            ButtonRow {
-                spacing: Tokens.spacing.extraSmall
-
-                ToolbarButton {
-                    isToggle: true
-                    checked: root.cState.showCrosshair
-                    icon: "my_location"
-                    onClicked: root.cState.showCrosshair = !root.cState.showCrosshair
-                }
-
-                ToolbarButton {
-                    isToggle: true
-                    checked: root.cState.selectClients
-                    icon: "select_window_2"
-                    onClicked: root.cState.selectClients = !root.cState.selectClients
-                }
-
-                ToolbarButton {
-                    icon: "close"
-                    onClicked: root.cState.cancelled()
-                }
-            }
+        RegionToolbar {
+            rState: root.cState.selection
         }
     }
 
