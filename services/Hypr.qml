@@ -14,15 +14,14 @@ Singleton {
     readonly property var toplevels: Hyprland.toplevels
     readonly property var workspaces: Hyprland.workspaces
     readonly property var monitors: Hyprland.monitors
-    readonly property bool usingLua: Hyprland.usingLua
 
-    readonly property HyprlandToplevel activeToplevel: {
-        const t = Hyprland.activeToplevel;
-        return t?.workspace?.name.startsWith("special:") || Hyprland.focusedWorkspace?.toplevels.values.length > 0 ? t : null;
-    }
     readonly property HyprlandWorkspace focusedWorkspace: Hyprland.focusedWorkspace
     readonly property HyprlandMonitor focusedMonitor: Hyprland.focusedMonitor
-    readonly property int activeWsId: focusedWorkspace?.id ?? 1
+    readonly property int activeWsNumber: Math.max(0, Number(focusedWorkspace?.address) || 0)
+    readonly property HyprlandToplevel activeToplevel: {
+        const t = Hyprland.activeToplevel;
+        return isSpecialWorkspace(t?.workspace ?? null) || focusedWorkspace?.toplevels.values.length > 0 ? t : null;
+    }
 
     readonly property HyprKeyboard keyboard: extras.devices.keyboards.find(kb => kb.main) ?? null
     readonly property bool capsLock: keyboard?.capsLock ?? false
@@ -36,7 +35,7 @@ Singleton {
     readonly property alias options: extras.options
     readonly property alias devices: extras.devices
 
-    property string lastSpecialWorkspace: ""
+    property HyprlandWorkspace lastSpecialWorkspace
 
     signal configReloaded
 
@@ -44,35 +43,46 @@ Singleton {
         Hyprland.dispatch(request);
     }
 
+    function workspaceByAddress(ws: string): HyprlandWorkspace {
+        return ws ? workspaces.values.find(w => w.address === ws) ?? null : null;
+    }
+
+    function isSpecialWorkspace(ws: HyprlandWorkspace): bool {
+        return ws?.type === HyprlandWorkspaceType.Special;
+    }
+
+    // Defensive escaping since Hyprland doesn't perform sanitization
+    function luaString(value: string): string {
+        return '"' + value.replace(/[\x00-\x1f\\"]/g, c => "\\" + c.charCodeAt(0).toString().padStart(3, "0")) + '"';
+    }
+
     function focusWorkspace(ws: var): void {
-        dispatch(usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
+        dispatch(`hl.dsp.focus({ workspace = ${luaString(String(ws))} })`);
     }
 
     function toggleSpecial(name: string): void {
-        dispatch(usingLua ? `hl.dsp.workspace.toggle_special("${name}")` : `togglespecialworkspace ${name}`);
+        dispatch(`hl.dsp.workspace.toggle_special(${luaString(trimWsName(name))})`);
     }
 
     function cycleSpecialWorkspace(direction: string): void {
-        const openSpecials = workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0);
+        const openSpecials = workspaces.values.filter(w => isSpecialWorkspace(w) && w.lastIpcObject.windows > 0);
 
         if (openSpecials.length === 0)
             return;
 
-        const activeSpecial = focusedMonitor.lastIpcObject.specialWorkspace.name ?? "";
+        const activeSpecial = focusedMonitor?.specialWorkspace?.address;
 
         if (!activeSpecial) {
-            if (lastSpecialWorkspace) {
-                const workspace = workspaces.values.find(w => w.name === lastSpecialWorkspace);
-                if (workspace && workspace.lastIpcObject.windows > 0) {
-                    focusWorkspace(lastSpecialWorkspace);
-                    return;
-                }
+            if (lastSpecialWorkspace && lastSpecialWorkspace.lastIpcObject.windows > 0) {
+                focusWorkspace(lastSpecialWorkspace.name);
+                return;
             }
+
             focusWorkspace(openSpecials[0].name);
             return;
         }
 
-        const currentIndex = openSpecials.findIndex(w => w.name === activeSpecial);
+        const currentIndex = openSpecials.findIndex(w => w.address === activeSpecial);
         let nextIndex = 0;
 
         if (currentIndex !== -1) {
@@ -85,10 +95,6 @@ Singleton {
         focusWorkspace(openSpecials[nextIndex].name);
     }
 
-    function monitorNames(): list<string> {
-        return monitors.values.map(e => e.name);
-    }
-
     function monitorFor(screen: ShellScreen): HyprlandMonitor {
         return Hyprland.monitorFor(screen);
     }
@@ -97,8 +103,8 @@ Singleton {
         return name.startsWith("special:") ? name.slice("special:".length) : name;
     }
 
-    function toplevelsForWs(ws: int, ignoredTags = []): list<HyprlandToplevel> {
-        return toplevels.values.filter(t => t.workspace && t.workspace.id === ws && !isToplevelIgnored(t, ignoredTags));
+    function toplevelsForWs(ws: string, ignoredTags = []): list<HyprlandToplevel> {
+        return ws ? toplevels.values.filter(t => t.workspace?.address === ws && !isToplevelIgnored(t, ignoredTags)) : [];
     }
 
     function isToplevelIgnored(toplevel: HyprlandToplevel, ignoredTags = []): bool {
@@ -110,14 +116,9 @@ Singleton {
     }
 
     function reloadDynamicConfs(): void {
-        if (usingLua) {
-            extras.batchMessage(['eval hl.bind("Caps_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })', 'eval hl.bind("Num_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })', 'eval hl.bind("code:66", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })']);
-        } else {
-            extras.batchMessage(["keyword bindlni ,Caps_Lock,global,caelestia:refreshDevices", "keyword bindlni ,Num_Lock,global,caelestia:refreshDevices", "keyword bindlni ,code:66,global,caelestia:refreshDevices"]);
-        }
+        extras.batchMessage(['eval hl.bind("Caps_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })', 'eval hl.bind("Num_Lock", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })', 'eval hl.bind("code:66", hl.dsp.global("caelestia:refreshDevices"), { locked = true, non_consuming = true, ignore_mods = true, release = true })']);
     }
 
-    onUsingLuaChanged: reloadDynamicConfs()
     Component.onCompleted: reloadDynamicConfs()
 
     Connections {
@@ -148,12 +149,10 @@ Singleton {
     }
 
     Connections {
-        function onLastIpcObjectChanged(): void {
-            const specialName = root.focusedMonitor.lastIpcObject.specialWorkspace.name;
-
-            if (specialName && specialName.startsWith("special:")) {
-                root.lastSpecialWorkspace = specialName;
-            }
+        function onSpecialWorkspaceChanged(): void {
+            const ws = root.focusedMonitor?.specialWorkspace;
+            if (ws)
+                root.lastSpecialWorkspace = ws;
         }
 
         target: root.focusedMonitor
@@ -202,7 +201,7 @@ Singleton {
         }
 
         function listSpecialWorkspaces(): string {
-            return root.workspaces.values.filter(w => w.name.startsWith("special:") && w.lastIpcObject.windows > 0).map(w => w.name).join("\n");
+            return root.workspaces.values.filter(w => root.isSpecialWorkspace(w) && w.lastIpcObject.windows > 0).map(w => w.name).join("\n");
         }
 
         target: "hypr"
@@ -219,7 +218,5 @@ Singleton {
 
     HyprExtras {
         id: extras
-
-        usingLua: Hyprland.usingLua
     }
 }
