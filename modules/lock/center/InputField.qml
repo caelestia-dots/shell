@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import M3Shapes
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
@@ -160,11 +159,6 @@ Item {
             }
             PauseAnimation {
                 duration: 180 * Tokens.anim.durations.scale
-            }
-            PropertyAction {
-                target: charShape
-                property: "shape"
-                value: MaterialShape.Circle
             }
             ParallelAnimation {
                 Anim {
