@@ -257,7 +257,7 @@ Item {
         BlobRect {
             id: submenuBg
 
-            group: group
+            group: root.cState.annotating ? group : null
             anchors.horizontalCenter: parent.horizontalCenter
             y: {
                 const h = submenu.implicitHeight;
