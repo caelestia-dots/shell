@@ -264,7 +264,6 @@ void Line::render(QPainter& painter) const {
     painter.drawLine(m_start, shaftEnd());
 
     if (m_arrow) {
-        painter.setPen(Qt::NoPen);
         painter.setBrush(m_style.color);
         painter.drawPath(head());
     }
