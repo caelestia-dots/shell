@@ -2,19 +2,46 @@
 
 #include <qfuture.h>
 #include <qimagereader.h>
-#include <qpainter.h>
+#include <qquickwindow.h>
+#include <qsgsimpletexturenode.h>
+#include <qsgtexturematerial.h>
 
 namespace caelestia::shell::components {
 
 ImageLoader::ImageLoader(QQuickItem* parent)
-    : QQuickPaintedItem(parent) {}
+    : QQuickItem(parent) {
+    setFlag(ItemHasContents);
+}
 
-void ImageLoader::paint(QPainter* painter) {
-    if (m_image.isNull())
-        return;
+QSGNode* ImageLoader::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) {
+    auto* node = static_cast<QSGSimpleTextureNode*>(oldNode);
+    if (m_image.isNull()) {
+        delete node;
+        return nullptr;
+    }
 
-    painter->setRenderHint(QPainter::SmoothPixmapTransform);
-    painter->drawImage(boundingRect(), m_image, m_sourceRect.isEmpty() ? QRectF(m_image.rect()) : m_sourceRect);
+    if (!node) {
+        node = new QSGSimpleTextureNode;
+        node->setOwnsTexture(true);
+        node->setFiltering(QSGTexture::Linear);
+        static_cast<QSGTextureMaterial*>(node->material())->setMipmapFiltering(QSGTexture::Linear);
+        static_cast<QSGOpaqueTextureMaterial*>(node->opaqueMaterial())->setMipmapFiltering(QSGTexture::Linear);
+        m_textureDirty = true;
+    }
+
+    if (m_textureDirty) {
+        node->setTexture(window()->createTextureFromImage(m_image));
+        m_textureDirty = false;
+    }
+
+    const auto source = m_sourceRect.isEmpty() ? QRectF(m_image.rect()) : m_sourceRect;
+    const auto visible = source.intersected(QRectF(m_image.rect()));
+    const auto sx = width() / source.width();
+    const auto sy = height() / source.height();
+    node->setRect(
+        (visible.x() - source.x()) * sx, (visible.y() - source.y()) * sy, visible.width() * sx, visible.height() * sy);
+    node->setSourceRect(visible);
+    return node;
 }
 
 QString ImageLoader::source() const {
@@ -42,6 +69,7 @@ void ImageLoader::setSource(const QString& source) {
                 return;
 
             m_image = image;
+            m_textureDirty = true;
             update();
             emit imageChanged();
         });
