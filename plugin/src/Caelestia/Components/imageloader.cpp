@@ -13,7 +13,9 @@ ImageLoader::ImageLoader(QQuickItem* parent)
     setFlag(ItemHasContents);
 }
 
-QSGNode* ImageLoader::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) {
+QSGNode* ImageLoader::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data) {
+    Q_UNUSED(data);
+
     auto* node = static_cast<QSGSimpleTextureNode*>(oldNode);
     if (m_image.isNull()) {
         delete node;
