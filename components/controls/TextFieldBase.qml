@@ -7,6 +7,8 @@ import qs.components
 TextField {
     id: root
 
+    readonly property alias cursor: cursor
+
     implicitWidth: contentWidth + leftPadding + rightPadding
     implicitHeight: contentHeight + topPadding + bottomPadding
 
@@ -31,6 +33,8 @@ TextField {
     }
 
     TextCursor {
+        id: cursor
+
         editor: root
     }
 }
