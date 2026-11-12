@@ -52,6 +52,9 @@ public:
     void setZoom(qreal zoom);
 
     void applyView(QPainter& painter) const;
+    void drawLayer(QPainter& painter, const QImage& layer) const;
+    [[nodiscard]] QImage newLayer() const;
+    [[nodiscard]] bool magnified() const;
 
     Q_INVOKABLE [[nodiscard]] QImage composite() const;
 
@@ -70,7 +73,8 @@ protected:
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private:
-    [[nodiscard]] QImage newLayer() const;
+    [[nodiscard]] QSize layerSize() const;
+    [[nodiscard]] QPointF layerOrigin() const;
     [[nodiscard]] QRectF effectiveBaseRect() const;
     [[nodiscard]] QRectF toView(const QRectF& rect) const;
     void invalidateLayer();
