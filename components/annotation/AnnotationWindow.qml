@@ -307,7 +307,7 @@ FloatingWindow {
                 const h = submenu.fullHeight;
                 if (root.picking)
                     return Math.max(root.borderTop, (root.height - h) / 2);
-                return root.submenuOpen ? root.borderTop : root.borderTop / 2 - h;
+                return root.submenuOpen ? root.borderTop : root.borderTop - h - 10;
             }
 
             radius: root.picking ? Tokens.rounding.extraLarge : Tokens.rounding.extraExtraLarge
