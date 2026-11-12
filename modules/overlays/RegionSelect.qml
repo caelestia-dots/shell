@@ -9,8 +9,6 @@ MouseArea {
     required property RegionState selection
     property alias screen: clients.screen
     property alias freeze: clients.freeze
-    property bool selectClients: true
-    property bool showCrosshair
     property bool resizeMode
 
     property var hoveredRect // var so it can be null
@@ -77,7 +75,7 @@ MouseArea {
         selection.selecting = false;
         pendingSelect = false;
 
-        if (selectClients && hoveredRect) {
+        if (selection.selectClients && hoveredRect) {
             selection.empty = false;
             selection.start = toGlobal(hoveredRect.x, hoveredRect.y);
             selection.end = toGlobal(hoveredRect.x + hoveredRect.width, hoveredRect.y + hoveredRect.height);
@@ -125,7 +123,7 @@ MouseArea {
 
         anchors.fill: parent
         hoveredRect: root.hoveredRect
-        highlight: root.selectClients && !root.resizeMode && !root.selection.selecting
+        highlight: root.selection.selectClients && !root.resizeMode && !root.selection.selecting
     }
 
     RegionSelection {
@@ -141,7 +139,7 @@ MouseArea {
         x: root.mouseX - 1
         color: Colours.palette.secondary
         width: 1
-        opacity: root.showCrosshair && !root.resizeMode && !root.selection.selecting ? 1 : 0
+        opacity: root.selection.showCrosshair && !root.resizeMode && !root.selection.selecting ? 1 : 0
 
         Behavior on opacity {
             Anim {
@@ -156,7 +154,7 @@ MouseArea {
         y: root.mouseY - 1
         color: Colours.palette.secondary
         height: 1
-        opacity: root.showCrosshair && !root.resizeMode && !root.selection.selecting ? 1 : 0
+        opacity: root.selection.showCrosshair && !root.resizeMode && !root.selection.selecting ? 1 : 0
 
         Behavior on opacity {
             Anim {
