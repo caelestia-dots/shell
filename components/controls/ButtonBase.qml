@@ -45,7 +45,6 @@ StyledRect {
     readonly property color onColour: disabled ? disabledOnColour : internalChecked ? activeOnColour : inactiveOnColour
 
     property real pressedRadius: Tokens.rounding.small
-    property real checkedRadius: Tokens.rounding.medium
     property real defaultRadius: Tokens.rounding.large
 
     signal clicked

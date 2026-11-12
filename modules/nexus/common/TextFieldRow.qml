@@ -16,9 +16,7 @@ ConnectedRect {
     property string value
     property alias placeholderText: input.placeholderText
     property string errorText
-    property alias maximumLength: input.maximumLength
     property alias validate: input.validate
-    property alias validator: input.validator
     property bool smallField
     readonly property alias field: input
 

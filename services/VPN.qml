@@ -78,10 +78,7 @@ Singleton {
         };
     }
 
-    // Kept as thin readouts for the UI.
-    readonly property string providerName: active.name
     readonly property string interfaceName: active.interface
-    readonly property var currentConfig: active
 
     readonly property var adapters: [wireguardAdapter, warpAdapter, netbirdAdapter, tailscaleAdapter]
 

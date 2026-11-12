@@ -21,7 +21,6 @@ MaterialShape {
     property bool animated: true
     property int morphAnimRotation: 60
     property real morphScale: 0.14
-    property alias rotateAnimDuration: rotateAnim.duration
 
     property real stiffness: 180
     property real dampingRatio: 0.6

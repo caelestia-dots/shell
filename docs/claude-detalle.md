@@ -252,7 +252,7 @@ Etapa 3 (rediseño por módulos), hecho hasta ahora:
   `SoulVessel` con texto contorneado y temperatura en píldora; clima con `WeatherIcon` del
   notch; tarjetas con borde; fetch rebautizado `hallownest.sh` (logo del sistema o máscara).
 - Controles base (`components/controls/`, afectan a toda la shell y a Nexus): `StyledSwitch`
-  con rombo, `StyledRadioButton` en rombo, `ButtonBase` en píldora con borde y sin morph de
+  con rombo, `ButtonBase` en píldora con borde y sin morph de
   formas, `StyledSlider` en blanco Alma sobre pista acero.
 - Nexus: títulos de página y `SectionHeader` en Cinzel, `ConnectedRect` = `card`, menú lateral
   con tarjetas con borde y la sección activa resaltada en blanco tenue.
@@ -323,10 +323,10 @@ Etapa 3 (rediseño por módulos), hecho hasta ahora:
 ### Eliminado
 - GIF de `kurukuru` en el menú de sesión (`modules/session/Content.qml`) y `bongocat` del
   dashboard. Los assets `.gif` siguen en `assets/` sin uso.
-- **Dashboard** (`modules/dashboard/`) y **OSD lateral** (`modules/osd/` ya no se instancia):
+- **Dashboard** (`modules/dashboard/`) y **OSD lateral** (`modules/osd/`, borrado en la limpieza de 2026-11-12):
   sustituidos por el notch. Sus restos se quitaron de `modules/drawers/` (`Panels`, `Regions`,
   `Interactions`, `ContentWindow`). `ScreenState.dashboard/osd/dashboardTab/dashboardKeyboard`
-  ya no existen. La entrada "Dashboard" de Nexus sigue pero no hace nada.
+  ya no existen. La entrada "Dashboard" de Nexus (`DashboardPanel`) también se borró.
 - **Barra izquierda** (2026-11-05): desactivada sin tocar código con `bar.excludedScreens: ["^.*$"]`
   en `shell.json` (backup `shell.json.bak-sinbarra`; `testRegexList` solo trata como regex lo que
   va entre `^…$`). Sus funciones están en la página Home del notch. `modules/bar/` sigue: Home

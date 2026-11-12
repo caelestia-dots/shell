@@ -8,7 +8,6 @@ MouseArea {
     id: root
 
     property bool disabled
-    property bool showHoverBackground: true
     property bool manualPressOverride
     property bool manualHoverOverride
     readonly property alias rect: base

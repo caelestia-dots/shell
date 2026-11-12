@@ -64,10 +64,6 @@ if not removed:
         return byDay[dayKey(date)] ?? [];
     }
 
-    function hasEvents(date: date): bool {
-        return (byDay[dayKey(date)]?.length ?? 0) > 0;
-    }
-
     // Loads the visible span of a month grid (6 weeks around the given month)
     function loadMonth(year: int, month: int, key = "calendar"): void {
         const start = new Date(year, month, 1);

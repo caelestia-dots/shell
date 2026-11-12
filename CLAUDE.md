@@ -32,7 +32,7 @@ está en `docs/claude-detalle.md`: búscalo ahí con `grep` cuando toques esa pa
 qs kill -c paleshell; qs -c paleshell -n -d          # reiniciar (no recarga sola de forma fiable)
 qs log -c paleshell | grep -E "WARN|ERROR" | grep -v "notifications\|textinput\|\.face"
 cmake --build build                                  # plugin C++ (~30 s), solo si cambias plugin/
-python3 scripts/qml-lint-conventions.py              # debe dar "No violations found."
+python3 scripts/agent-check.py                       # lint + sintaxis QML/Python + build si cambió plugin/
 qs -c paleshell ipc show                             # targets IPC; p. ej. notch open <página>
 hyprctl dispatch 'hl.dsp.global("paleshell:keybinds")'   # dispatch en Lua
 hyprctl reload && hyprctl configerrors
@@ -46,6 +46,18 @@ hyprctl reload && hyprctl configerrors
   agregas un `IpcHandler`, súmalo a la tabla `COMMANDS` del script.
 - IPC útiles para probar: `notch play <animación>`, `notch mascotMenu`, `season set <grimm|winter|auto>`,
   `weather scene <sun|night|cloud|fog|rain|storm|snow|auto>`, `dock toggle`, `hallownest flavour <f>`, `hallownest style <s>`.
+
+## Agentes (`.claude/`)
+
+- `.claude/settings.json` niega push, sudo y `cmake --install`, y engancha dos hooks:
+  - `scripts/agent-guard.py` (PreToolUse): niega `grim` sin `-g`; pide confirmación para commits,
+    `rm -r`, `pacman/paru -S/-R/-U` y escrituras fuera del repo o del scratchpad. Si cambias
+    "Usuario y reglas", cambia también sus reglas y corre `python3 scripts/test-agent-guard.py`.
+  - `scripts/agent-check.py --hook` (Stop): si quedan cambios que no pasan el lint, la sintaxis o el
+    build, devuelve el error para arreglarlo antes de terminar (bloquea una sola vez por parada).
+- Subagentes: `explorador` (Haiku, solo lectura) para búsquedas amplias en el repo; `revisor-qml`
+  (Sonnet) para revisar el diff contra convenciones y trampas antes de cerrar una tarea.
+- El asistente de escritorio usa Sonnet (`assets/assistant/settings.json`, enlazado por `assistant.sh`).
 
 ## Plugin C++ y `QML_IMPORT_PATH`
 

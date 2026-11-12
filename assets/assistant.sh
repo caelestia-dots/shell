@@ -8,5 +8,8 @@ mkdir -p "$dir"
 for f in CLAUDE.md AGENTS.md GEMINI.md; do
     ln -sfn "$src/CLAUDE.md" "$dir/$f"
 done
+# Claude Code reads .claude/settings.json from the workdir: Sonnet is enough for desktop tasks.
+mkdir -p "$dir/.claude"
+ln -sfn "$src/settings.json" "$dir/.claude/settings.json"
 cd "$dir" || exit 1
 exec "$@"
