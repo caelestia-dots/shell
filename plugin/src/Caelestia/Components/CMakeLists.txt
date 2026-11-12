@@ -22,6 +22,7 @@ qml_module(caelestia-components
     LIBRARIES
         Qt::Gui
         Qt::Quick
+        Qt::QmlModels
         caelestia-core
         caelestia::caelestia
     DEPENDENCIES

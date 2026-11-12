@@ -16,6 +16,7 @@ qml_module(caelestia-models
         caelestia::caelestia
         Qt::Gui
         Qt::Quick
+        Qt::QmlModels
         Qt::Multimedia
         Qt::Concurrent
         Qt::Sql
