@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void batchMessage(const QStringList& messages);
     Q_INVOKABLE void batchRequest(const QStringList& requests, const QJSValue& callback);
     Q_INVOKABLE void applyOptions(const QVariantHash& options);
+    Q_INVOKABLE void registerLayerRule(const QVariantMap& rule);
 
     Q_INVOKABLE void refreshOptions();
     Q_INVOKABLE void refreshDevices();
@@ -48,6 +49,7 @@ private:
     bool m_socketValid;
 
     QVariantHash m_options;
+    QStringList m_layerRules;
     HyprDevices* const m_devices;
 
     SocketPtr m_optionsRefresh;
@@ -57,6 +59,7 @@ private:
     void socketStateChanged(QLocalSocket::LocalSocketState state);
     void readEvent();
     void handleEvent(const QString& event);
+    void applyLayerRules();
 
     SocketPtr makeRequestJson(const QString& request, const std::function<void(bool, QJsonDocument)>& callback);
     SocketPtr makeRequest(const QString& request, const std::function<void(bool, QByteArray)>& callback);
