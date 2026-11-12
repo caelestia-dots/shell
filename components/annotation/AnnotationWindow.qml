@@ -196,7 +196,7 @@ FloatingWindow {
         id: document
 
         font: Tokens.font.body.medium
-        color: Colours.palette.primary
+        color: Colours.palette.error
         backgroundColor: Colours.palette.surface
         textPadding: TokenConfig.appearance.padding.small
         radius: TokenConfig.appearance.rounding.small
