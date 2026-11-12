@@ -7,7 +7,8 @@ QtObject {
     property bool selectClients: true
     property bool showCrosshair
     property bool annotating
-    property rect region
+    readonly property RegionState selection: RegionState {}
+    readonly property rect region: selection.rect
     property color customColour: Colours.palette.outline
     property color customBackgroundColour: Colours.palette.outlineVariant
 

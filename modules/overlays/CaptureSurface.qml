@@ -43,7 +43,7 @@ Item {
     property bool picking: submenuContent.picking !== null
 
     readonly property real toolbarY: {
-        const open = cState.open && !hideToolbar && !regionSelect.selecting;
+        const open = cState.open && !hideToolbar && !cState.selection.selecting;
         if (toolbarBottom)
             return open ? height - toolbarBg.height : height + 10;
         return open ? 0 : -toolbarBg.height - 10;
@@ -166,10 +166,9 @@ Item {
     }
 
     RegionSelect {
-        id: regionSelect
-
         anchors.fill: parent
         opacity: root.contentOpacity
+        selection: root.cState.selection
         screen: root.screen
         freeze: true
         resizeMode: root.cState.annotating
@@ -183,17 +182,12 @@ Item {
         selectClients: root.cState.selectClients
         showCrosshair: root.cState.showCrosshair
 
-        onSelected: r => {
-            const region = Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height);
-            if (root.cState.annotate) {
-                root.cState.region = region;
+        onSelected: region => {
+            if (root.cState.annotate)
                 root.cState.annotating = true;
-            } else {
+            else
                 capture.session.save(region);
-            }
         }
-
-        onResized: r => root.cState.region = Qt.rect(r.x + screen.x, r.y + screen.y, r.width, r.height)
     }
 
     MouseArea {
