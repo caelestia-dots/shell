@@ -411,6 +411,11 @@ std::optional<QRectF> AnnotationDocument::previewBounds() const {
     return m_preview->bounds();
 }
 
+bool AnnotationDocument::previewIsEffect() const {
+    const auto* rect = dynamic_cast<const RectShape*>(m_preview.get());
+    return rect && rect->isEffect();
+}
+
 const annotation::Stroke* AnnotationDocument::previewStroke() const {
     return m_dragging ? nullptr : dynamic_cast<const annotation::Stroke*>(m_preview.get());
 }
