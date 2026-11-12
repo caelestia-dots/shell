@@ -8,7 +8,6 @@ nexus
 notifs
 osd
 overlays
-picker
 toasts
 session
 sidebar

@@ -8,7 +8,6 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.services
-import qs.modules.areapicker
 import qs.modules.background
 import qs.modules.drawers
 import qs.modules.lock
@@ -43,7 +42,6 @@ ShellRoot {
     // Modules
     Background {}
     Drawers {}
-    AreaPicker {}
     Lock {
         id: lock
     }
