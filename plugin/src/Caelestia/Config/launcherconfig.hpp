@@ -25,6 +25,17 @@ class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, wallpapers, false)
 };
 
+class LauncherEmoji : public settings::ObjectNode {
+    CONFIG_NODE(LauncherEmoji, settings::ObjectNode)
+
+    // Hide emojis that the installed fonts can't render (usually ones newer than the font)
+    CONFIG_PROPERTY(bool, hideUnsupported, true)
+    // If not empty, use this instead of pasteShortcut
+    CONFIG_PROPERTY(QStringList, pasteCommand, {})
+    CONFIG_PROPERTY(QStringList, pasteShortcut, DEFAULT_ARG({ u"CTRL"_s, u"V"_s }))
+    CONFIG_PROPERTY(int, pasteDelay, 150)
+};
+
 class LauncherAction : public settings::ObjectNode {
     CONFIG_NODE(LauncherAction, settings::ObjectNode)
 
@@ -52,6 +63,7 @@ class LauncherConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps, {})
     CONFIG_GLOBAL_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
+    CONFIG_GLOBAL_SUBOBJECT(LauncherEmoji, emoji)
     CONFIG_GLOBAL_LIST(LauncherActionList, actions,
         DEFAULT_ARG({
             vmap({
@@ -71,6 +83,12 @@ class LauncherConfig : public settings::ObjectNode {
                 { u"icon"_s, u"image"_s },
                 { u"description"_s, mark(u"Change the current wallpaper"_s) },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"wallpaper"_s } },
+            }),
+            vmap({
+                { u"name"_s, markCtx(u"Emoji"_s, u"launcher action"_s) },
+                { u"icon"_s, u"mood"_s },
+                { u"description"_s, mark(u"Pick an emoji to copy or paste"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"emoji"_s } },
             }),
             vmap({
                 { u"name"_s, markCtx(u"Variant"_s, u"launcher action"_s) },

@@ -20,8 +20,9 @@ Item {
     required property int rounding
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
-    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
-    property string animState: showWallpapers ? "wallpapers" : "apps"
+    readonly property bool showEmoji: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}emoji `)
+    readonly property var currentList: showWallpapers ? wallpaperList.item : showEmoji ? emojiList.item : appList.item // Can be a ListView, PathView or EmojiList, so can't type properly
+    property string animState: showWallpapers ? "wallpapers" : showEmoji ? "emoji" : "apps"
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
@@ -37,6 +38,20 @@ Item {
                 root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
                 appList.active: true
+            }
+
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "emoji"
+
+            PropertyChanges {
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
+                root.implicitHeight: Math.min(root.maxHeight, emojiList.implicitHeight > 0 ? emojiList.implicitHeight : empty.implicitHeight)
+                emojiList.active: true
             }
 
             AnchorChanges {
@@ -84,6 +99,21 @@ Item {
 
         sourceComponent: AppList {
             objectName: "launcherAppList"
+
+            search: root.search
+            screenState: root.screenState
+        }
+    }
+
+    Loader {
+        id: emojiList
+
+        active: false
+
+        anchors.fill: parent
+
+        sourceComponent: EmojiList {
+            objectName: "launcherEmojiList"
 
             search: root.search
             screenState: root.screenState
