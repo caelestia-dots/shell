@@ -116,6 +116,47 @@ PageBase {
             onToggled: GlobalConfig.launcher.enableDangerousActions = checked
         }
 
+        // Clipboard
+        SectionHeader {
+            text: Tr.tr("Clipboard")
+        }
+
+        ToggleRow {
+            first: true
+            text: Tr.trCtx("Enabled", "toggle label")
+            subtext: Tr.tr("Browse clipboard history with the clip action")
+            checked: GlobalConfig.launcher.clipboard.enabled
+            onToggled: GlobalConfig.launcher.clipboard.enabled = checked
+        }
+
+        ToggleRow {
+            text: Tr.tr("Show preview")
+            subtext: Tr.tr("Show a preview of the selected entry")
+            checked: GlobalConfig.launcher.clipboard.showPreview
+            onToggled: GlobalConfig.launcher.clipboard.showPreview = checked
+        }
+
+        StepperRow {
+            label: Tr.tr("Max entries")
+            subtext: Tr.tr("Pinned entries are always shown")
+            value: GlobalConfig.launcher.clipboard.maxEntries
+            from: 10
+            to: 1000
+            stepSize: 10
+            onMoved: v => GlobalConfig.launcher.clipboard.maxEntries = v
+        }
+
+        StepperRow {
+            last: true
+            label: Tr.tr("Paste delay")
+            subtext: Tr.tr("Milliseconds to wait before pasting")
+            value: GlobalConfig.launcher.clipboard.pasteDelay
+            from: 0
+            to: 1000
+            stepSize: 25
+            onMoved: v => GlobalConfig.launcher.clipboard.pasteDelay = v
+        }
+
         // Fuzzy search
         SectionHeader {
             text: Tr.tr("Fuzzy search")
@@ -147,10 +188,16 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
             onToggled: GlobalConfig.launcher.useFuzzy.wallpapers = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Clipboard")
+            checked: GlobalConfig.launcher.useFuzzy.clipboard
+            onToggled: GlobalConfig.launcher.useFuzzy.clipboard = checked
         }
     }
 }

@@ -19,6 +19,39 @@ Item {
     readonly property int padding: Tokens.padding.large
     readonly property int rounding: Tokens.rounding.extraLarge
 
+    function applyPrefill(): void {
+        if (!screenState.launcherPrefill)
+            return;
+
+        search.text = screenState.launcherPrefill;
+        search.cursorPosition = search.text.length;
+        screenState.launcherPrefill = "";
+    }
+
+    // Returns whether the key was handled
+    function handleClipboardKey(event: var): bool {
+        const entry = list.currentList?.currentItem?.modelData;
+        if (!entry)
+            return false;
+
+        const alt = event.modifiers & Qt.AltModifier;
+        const isEnter = event.key === Qt.Key_Return || event.key === Qt.Key_Enter;
+        if (isEnter && alt) {
+            Clipboard.paste(entry);
+            screenState.launcher = false;
+        } else if (event.key === Qt.Key_Delete && alt) {
+            Clipboard.clear();
+        } else if (event.key === Qt.Key_Delete && search.cursorPosition === search.text.length) {
+            list.currentList.removeClip(entry);
+        } else if (event.key === Qt.Key_P && alt) {
+            list.currentList.togglePinClip(entry);
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
 
@@ -69,6 +102,9 @@ Item {
                         Wallpapers.previewColourLock = true;
                     Wallpapers.setWallpaper(currentItem.modelData.path);
                     root.screenState.launcher = false;
+                } else if (list.showClipboard) {
+                    Clipboard.copy(currentItem.modelData);
+                    root.screenState.launcher = false;
                 } else if (text.startsWith(GlobalConfig.launcher.actionPrefix)) {
                     if (text.startsWith(`${GlobalConfig.launcher.actionPrefix}calc `))
                         currentItem.onClicked();
@@ -87,6 +123,11 @@ Item {
         Keys.onEscapePressed: root.screenState.launcher = false
 
         Keys.onPressed: event => {
+            if (list.showClipboard && root.handleClipboardKey(event)) {
+                event.accepted = true;
+                return;
+            }
+
             if (!GlobalConfig.launcher.vimKeybinds)
                 return;
 
@@ -107,12 +148,21 @@ Item {
             }
         }
 
-        Component.onCompleted: forceActiveFocus()
+        onTextChanged: root.screenState.launcherText = text
+
+        Component.onCompleted: {
+            forceActiveFocus();
+            root.applyPrefill();
+        }
 
         Connections {
             function onLauncherChanged(): void {
                 if (!root.screenState.launcher)
                     search.text = "";
+            }
+
+            function onLauncherPrefillChanged(): void {
+                root.applyPrefill();
             }
 
             function onSessionChanged(): void {

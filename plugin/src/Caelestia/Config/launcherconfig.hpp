@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qstandardpaths.h>
 #include <qstring.h>
 #include <qstringlist.h>
 #include <qvariantlist.h>
@@ -23,6 +24,24 @@ class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, schemes, false)
     CONFIG_PROPERTY(bool, variants, false)
     CONFIG_PROPERTY(bool, wallpapers, false)
+    CONFIG_PROPERTY(bool, clipboard, false)
+};
+
+class LauncherClipboard : public settings::ObjectNode {
+    CONFIG_NODE(LauncherClipboard, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(int, maxEntries, 100)
+    CONFIG_PROPERTY(bool, showPreview, true)
+    CONFIG_PROPERTY(int, previewMaxChars, 5000)
+    CONFIG_PROPERTY(int, pasteDelay, 300)
+    CONFIG_PROPERTY(QStringList, pasteShortcut, DEFAULT_ARG({ u"CTRL"_s, u"V"_s }))
+    // If not empty, use this instead of pasteShortcut
+    CONFIG_PROPERTY(QStringList, pasteCommand, {})
+    // Empty means the default cliphist database
+    CONFIG_PROPERTY(QString, dbPath, {})
+    CONFIG_PROPERTY(QString, pinsDbPath,
+        QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + u"/caelestia/clipboard-pins.db"_s)
 };
 
 class LauncherAction : public settings::ObjectNode {
@@ -52,6 +71,7 @@ class LauncherConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps, {})
     CONFIG_GLOBAL_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
+    CONFIG_GLOBAL_SUBOBJECT(LauncherClipboard, clipboard)
     CONFIG_GLOBAL_LIST(LauncherActionList, actions,
         DEFAULT_ARG({
             vmap({
@@ -59,6 +79,12 @@ class LauncherConfig : public settings::ObjectNode {
                 { u"icon"_s, u"calculate"_s },
                 { u"description"_s, mark(u"Do simple maths equations (powered by Qalc)"_s) },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"calc"_s } },
+            }),
+            vmap({
+                { u"name"_s, markCtx(u"Clipboard"_s, u"launcher action"_s) },
+                { u"icon"_s, u"content_paste"_s },
+                { u"description"_s, mark(u"View and search clipboard history"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"clip"_s } },
             }),
             vmap({
                 { u"name"_s, markCtx(u"Scheme"_s, u"launcher action"_s) },

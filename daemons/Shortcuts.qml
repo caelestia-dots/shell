@@ -86,6 +86,26 @@ Scope {
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
+        name: "clipboard"
+        description: "Toggle clipboard history"
+        onPressed: {
+            if (root.hasFullscreen || !Config.launcher.enabled || !GlobalConfig.launcher.clipboard.enabled)
+                return;
+
+            const screenState = ShellState.forActive();
+            const prefix = `${GlobalConfig.launcher.actionPrefix}clip `;
+            if (screenState.launcher && screenState.launcherText.startsWith(prefix)) {
+                screenState.launcher = false;
+            } else {
+                screenState.launcherPrefill = prefix;
+                screenState.launcher = true;
+            }
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
         name: "sidebar"
         description: "Toggle sidebar"
         onPressed: {

@@ -17,6 +17,8 @@ StyledListView {
     required property ScreenState screenState
 
     property string displayText
+    // Clipboard entry to select as the entries reload, as { pinned, preview }, null to reset to the top
+    property var pendingSelect: null
 
     readonly property string requestedState: stateForText(search.text)
     readonly property string displayState: stateForText(displayText)
@@ -29,14 +31,34 @@ StyledListView {
     function stateForText(text: string): string {
         const prefix = GlobalConfig.launcher.actionPrefix;
         if (text.startsWith(prefix)) {
-            for (const action of ["calc", "scheme", "variant"])
-                if (text.startsWith(`${prefix}${action} `))
+            for (const action of ["calc", "scheme", "variant", "clip"])
+                if (text.startsWith(`${prefix}${action} `) && (action !== "clip" || GlobalConfig.launcher.clipboard.enabled))
                     return action;
 
             return "actions";
         }
 
         return "apps";
+    }
+
+    // Selects the entry that was below the removed one, or above it if it was the last
+    function removeClip(entry: var): void {
+        const values = model.values;
+        const next = values[currentIndex + 1] ?? values[currentIndex - 1];
+        pendingSelect = next ? {
+            pinned: next.pinned,
+            preview: next.preview
+        } : null;
+        Clipboard.remove(entry);
+    }
+
+    // Follows the entry to where it ends up, i.e. the pinned section or back in the history
+    function togglePinClip(entry: var): void {
+        pendingSelect = {
+            pinned: !entry.pinned,
+            preview: entry.preview
+        };
+        Clipboard.togglePin(entry);
     }
 
     function resultsForText(text: string): var {
@@ -49,6 +71,8 @@ StyledListView {
             return Schemes.query(text);
         case "variant":
             return M3Variants.query(text);
+        case "clip":
+            return Clipboard.query(text);
         default:
             return Apps.search(text);
         }
@@ -56,7 +80,17 @@ StyledListView {
 
     model: ScriptModel {
         values: root.resultsForText(root.displayText)
-        onValuesChanged: root.currentIndex = 0
+        onValuesChanged: {
+            // An action reloads the entries in parts, so keep looking for the entry until the text changes
+            const pending = root.pendingSelect;
+            if (!pending) {
+                root.currentIndex = 0;
+                return;
+            }
+
+            const index = values.findIndex(e => e.pinned === pending.pinned && e.preview === pending.preview);
+            root.currentIndex = index >= 0 ? index : Math.max(0, Math.min(root.currentIndex, values.length - 1));
+        }
     }
 
     spacing: Tokens.spacing.small
@@ -87,6 +121,11 @@ StyledListView {
     onStateChanged: {
         if (state === "scheme" || state === "variant")
             Schemes.reload();
+        else if (state === "clip") {
+            pendingSelect = null;
+            Clipboard.reload();
+            Clipboard.refreshActive();
+        }
     }
 
     Component.onCompleted: displayText = search.text
@@ -125,6 +164,13 @@ StyledListView {
 
             PropertyChanges {
                 root.delegate: variantItem
+            }
+        },
+        State {
+            name: "clip"
+
+            PropertyChanges {
+                root.delegate: clipItem
             }
         }
     ]
@@ -287,8 +333,17 @@ StyledListView {
         }
     }
 
+    Component {
+        id: clipItem
+
+        ClipItem {
+            list: root
+        }
+    }
+
     Connections {
         function onTextChanged() {
+            root.pendingSelect = null;
             root.syncDisplayText();
         }
 
