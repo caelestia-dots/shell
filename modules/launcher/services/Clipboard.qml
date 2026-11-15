@@ -20,9 +20,9 @@ Searcher {
     property var pinnedEntries: []
     property var queue: []
     property var activeClipboard: ({
-                                       kind: "",
-                                       text: ""
-                                   })
+            kind: "",
+            text: ""
+        })
     property bool confirmingClear
 
     // Previews have their whitespace collapsed, so different texts can share one. These narrow
@@ -39,8 +39,8 @@ Searcher {
         const seen = new Set(pinned.map(e => e.preview));
         const history = historyEntries.filter(e => !seen.has(e.preview));
         return [...pinned, ...history.slice(0, GlobalConfig.launcher.clipboard.maxEntries)].map((e, i) => Object.assign({}, e, {
-                                                                                                                            order: i
-                                                                                                                        }));
+                order: i
+            }));
     }
 
     function parse(output: string, pinned: bool): var {
@@ -56,23 +56,23 @@ Searcher {
 
             if (image) {
                 out.push({
-                             clipId,
-                             pinned,
-                             preview,
-                             image: true,
-                             info: `${image[1]} ${image[2]} ${image[3]}`
-                         });
+                    clipId,
+                    pinned,
+                    preview,
+                    image: true,
+                    info: `${image[1]} ${image[2]} ${image[3]}`
+                });
             } else {
                 // cliphist ends truncated previews with an ellipsis
                 const truncated = preview.endsWith("…");
                 const count = truncated ? preview.length - 1 : preview.length;
                 out.push({
-                             clipId,
-                             pinned,
-                             preview,
-                             image: false,
-                             info: truncated ? Tr.tr("%1+ chars").arg(count) : Tr.trN("%n char", "%n chars", count)
-                         });
+                    clipId,
+                    pinned,
+                    preview,
+                    image: false,
+                    info: truncated ? Tr.tr("%1+ chars").arg(count) : Tr.trN("%n char", "%n chars", count)
+                });
             }
         }
         return out;
@@ -150,9 +150,9 @@ Searcher {
     function onMatched(pinned: bool, output: string): void {
         const ids = output.split("\n").filter(id => id);
         matchedKeys = [...matchedKeys, ...ids.map(clipId => keyOf({
-                                                                      pinned,
-                                                                      clipId
-                                                                  }))];
+                    pinned,
+                    clipId
+                }))];
         if (--pendingMatches <= 0) {
             exactKeys = matchedKeys;
             matching = false;
