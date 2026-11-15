@@ -24,10 +24,12 @@ Scope {
     // from this version onwards are checked against the fonts, as older ones are universally supported
     readonly property real checkFromVersion: 12
     readonly property int maxRecent: 24
+    readonly property bool hideUnsupported: GlobalConfig.launcher.picker?.hideUnsupported ?? true
     readonly property real fuzzyThreshold: 0.3 // Min fuzzysort score (0-1) for a word to count as a match
 
     property bool loaded
-    property var base: [] // From the data file
+    property var unfiltered: [] // Everything in the data file
+    property var base: [] // The data file, without the items that can't be rendered if hideUnsupported is on
     property var localised: ({}) // From the translations file for the current language (key -> keywords)
     // Every keyword of every item, prepared for fuzzysort, built on the first fuzzy search. It's filled in place rather
     // than reassigned, as that happens while evaluating the search bindings, which would make them loop
@@ -71,7 +73,7 @@ Scope {
     // An emoji is renderable if it shows up as a single glyph as wide as a known one. Missing glyphs fall back
     // to a different (narrow) .notdef glyph, and unsupported ZWJ sequences get split into multiple glyphs
     function filterRenderable(all: var): var {
-        if (!checkRenderable || !(GlobalConfig.launcher.picker?.hideUnsupported ?? true))
+        if (!checkRenderable || !hideUnsupported)
             return all;
 
         probe.text = "😀";
@@ -261,6 +263,12 @@ Scope {
 
     onItemsChanged: fuzzyCache = ({})
 
+    // The filtering is too slow for a binding (and changes the probe's text), so it's redone when the option changes
+    onHideUnsupportedChanged: {
+        if (loaded)
+            base = filterRenderable(unfiltered);
+    }
+
     onLocaleCandidatesChanged: {
         localeAttempt = 0;
         localised = ({});
@@ -286,6 +294,7 @@ Scope {
         onLoaded: {
             try {
                 const items = JSON.parse(text()).items ?? [];
+                root.unfiltered = items;
                 root.base = root.filterRenderable(items);
                 root.loaded = true;
                 console.log(`PickerSource(${root.name}): loaded ${root.base.length}/${items.length} items`);
