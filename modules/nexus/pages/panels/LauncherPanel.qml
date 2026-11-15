@@ -95,6 +95,12 @@ PageBase {
             onMoved: v => GlobalConfig.launcher.dragThreshold = v
         }
 
+        ToggleRow {
+            text: Tr.tr("Show clipboard preview")
+            checked: GlobalConfig.launcher.clipboard.showPreview
+            onToggled: GlobalConfig.launcher.clipboard.showPreview = checked
+        }
+
         // Behaviour
         SectionHeader {
             text: Tr.tr("Behaviour")
@@ -114,47 +120,6 @@ PageBase {
             subtext: Tr.tr("Allow actions that shut down or log out")
             checked: GlobalConfig.launcher.enableDangerousActions
             onToggled: GlobalConfig.launcher.enableDangerousActions = checked
-        }
-
-        // Clipboard
-        SectionHeader {
-            text: Tr.tr("Clipboard")
-        }
-
-        ToggleRow {
-            first: true
-            text: Tr.trCtx("Enabled", "toggle label")
-            subtext: Tr.tr("Browse clipboard history with the clip action")
-            checked: GlobalConfig.launcher.clipboard.enabled
-            onToggled: GlobalConfig.launcher.clipboard.enabled = checked
-        }
-
-        ToggleRow {
-            text: Tr.tr("Show preview")
-            subtext: Tr.tr("Show a preview of the selected entry")
-            checked: GlobalConfig.launcher.clipboard.showPreview
-            onToggled: GlobalConfig.launcher.clipboard.showPreview = checked
-        }
-
-        StepperRow {
-            label: Tr.tr("Max entries")
-            subtext: Tr.tr("Pinned entries are always shown")
-            value: GlobalConfig.launcher.clipboard.maxEntries
-            from: 10
-            to: 1000
-            stepSize: 10
-            onMoved: v => GlobalConfig.launcher.clipboard.maxEntries = v
-        }
-
-        StepperRow {
-            last: true
-            label: Tr.tr("Paste delay")
-            subtext: Tr.tr("Milliseconds to wait before pasting")
-            value: GlobalConfig.launcher.clipboard.pasteDelay
-            from: 0
-            to: 1000
-            stepSize: 25
-            onMoved: v => GlobalConfig.launcher.clipboard.pasteDelay = v
         }
 
         // Fuzzy search
