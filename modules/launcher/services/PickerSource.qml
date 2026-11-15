@@ -144,10 +144,10 @@ Scope {
             for (let i = 0; i < items.length; i++) {
                 for (const w of new Set(items[i].s.split(/\s+/).filter(w => w)))
                     words.push({
-                                   i,
-                                   r: w,
-                                   w: Fuzzy.prepare(w)
-                               });
+                        i,
+                        r: w,
+                        w: Fuzzy.prepare(w)
+                    });
             }
             fuzzyCache.words = words;
         }
@@ -161,9 +161,9 @@ Scope {
             };
 
             for (const r of Fuzzy.go(t, fuzzyCache.words, {
-                                         key: "w",
-                                         threshold: fuzzyThreshold
-                                     }))
+                key: "w",
+                threshold: fuzzyThreshold
+            }))
                 put(r.obj.i, r.score);
 
             // fuzzysort only matches letters that are in the keyword in order, so it misses wrong or swapped
@@ -212,12 +212,18 @@ Scope {
 
             for (const t of tokens) {
                 if (s.includes(` ${t} `))
-                    score += 3; // Whole word
-                else if (s.includes(` ${t}`))
-                    score += 2; // Word prefix
-                else if (s.includes(t))
-                    score += 1; // Anywhere
-                else {
+                    score += 3;
+                else
+                // Whole word
+                if (s.includes(` ${t}`))
+                    score += 2;
+                else
+                // Word prefix
+                if (s.includes(t))
+                    score += 1;
+                else
+                // Anywhere
+                {
                     matched = false;
                     break;
                 }

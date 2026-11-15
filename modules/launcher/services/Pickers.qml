@@ -2,6 +2,7 @@ pragma Singleton
 
 import Quickshell
 import Caelestia.Config
+import qs.modules.launcher.services
 
 Singleton {
     readonly property var all: [Emojis.source, Kaomoji.source, Symbols.source]

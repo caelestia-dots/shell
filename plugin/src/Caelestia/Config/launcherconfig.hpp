@@ -30,7 +30,8 @@ class LauncherUseFuzzy : public settings::ObjectNode {
 class LauncherPicker : public settings::ObjectNode {
     CONFIG_NODE(LauncherPicker, settings::ObjectNode)
 
-    // Hide emojis that the installed fonts can't render (usually ones newer than the font). Only applies to the emoji picker
+    // Hide emojis that the installed fonts can't render (usually ones newer than the font)
+    // Only applies to the emoji picker
     CONFIG_PROPERTY(bool, hideUnsupported, true)
     // If not empty, use this instead of pasteShortcut
     CONFIG_PROPERTY(QStringList, pasteCommand, {})
