@@ -92,6 +92,7 @@ Dependencies:
 - `qt6-multimedia`
 - [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 - [`swappy`](https://github.com/jtheoof/swappy)
+- [`wl-clipboard`](https://github.com/bugaevc/wl-clipboard)
 - [`fish`](https://github.com/fish-shell/fish-shell)
 - [`bash`](https://www.gnu.org/software/bash)
 
@@ -170,6 +171,19 @@ To set the wallpaper, you can type `>wallpaper` in the launcher to open the wall
 Alternatively, you can also use `caelestia wallpaper -f <path_to_wallpaper>` to set the wallpaper directly.
 Use `caelestia wallpaper -h` for more info about this command.
 
+### Emoji/Kaomoji/Symbol picker
+
+The launcher has built-in pickers for emojis, kaomoji, and symbols. Open one by typing `>emoji`, `>kaomoji`,
+or `>symbol` in the launcher, or by binding the global shortcuts `emoji`, `kaomoji`, and `symbol`
+(they toggle the picker, same as the other [shortcuts](#shortcutsipc)).
+
+Recently used items are kept per picker. Pasting simulates `Ctrl+V` by default; if that doesn't work for your
+apps (e.g. terminals), change `launcher.picker.pasteShortcut` or set `launcher.picker.pasteCommand` to run your own command.
+Emojis that your installed fonts can't render are hidden by default (`launcher.picker.hideUnsupported`).
+
+The picker data lives in `assets/<picker>/` and can be regenerated with `scripts/fetch-emojis.py [locale ...]`
+(e.g. `scripts/fetch-emojis.py de ja` for extra search languages) and `scripts/gen-symbols.py`.
+
 ## Updating
 
 ### Packaged install (AUR)
@@ -231,7 +245,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
-> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
+> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `picker.*`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
 > - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `triggerHowdyOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
@@ -685,6 +699,12 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "vimKeybinds": false,
         "favouriteApps": [],
         "hiddenApps": [],
+        "picker": {
+            "hideUnsupported": true,
+            "pasteCommand": [],
+            "pasteShortcut": ["CTRL", "V"],
+            "pasteDelay": 150
+        },
         "useFuzzy": {
             "apps": false,
             "actions": false,
@@ -722,6 +742,30 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "icon": "colors",
                 "description": "Change the current scheme variant",
                 "command": ["autocomplete", "variant"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Emoji",
+                "icon": "mood",
+                "description": "Pick an emoji to copy or paste",
+                "command": ["autocomplete", "emoji"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Kaomoji",
+                "icon": "sentiment_satisfied",
+                "description": "Pick a kaomoji to copy or paste",
+                "command": ["autocomplete", "kaomoji"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Symbol",
+                "icon": "emoji_symbols",
+                "description": "Pick a symbol to copy or paste",
+                "command": ["autocomplete", "symbol"],
                 "enabled": true,
                 "dangerous": false
             },
