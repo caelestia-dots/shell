@@ -151,6 +151,12 @@ Item {
                 } else if (event.key === Qt.Key_K || event.key === Qt.Key_P) {
                     root.move("up");
                     event.accepted = true;
+                } else if (list.showPicker && event.key === Qt.Key_H) {
+                    root.move("left");
+                    event.accepted = true;
+                } else if (list.showPicker && event.key === Qt.Key_L) {
+                    root.move("right");
+                    event.accepted = true;
                 }
             } else if (event.key === Qt.Key_Tab) {
                 root.move("down");
