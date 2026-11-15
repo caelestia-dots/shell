@@ -23,6 +23,7 @@ class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, schemes, false)
     CONFIG_PROPERTY(bool, variants, false)
     CONFIG_PROPERTY(bool, wallpapers, false)
+    CONFIG_PROPERTY(bool, pickers, false) // Emoji, kaomoji and symbol pickers
 };
 
 // Shared by all the launcher pickers (emoji, kaomoji, symbol)
