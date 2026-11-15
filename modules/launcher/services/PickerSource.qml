@@ -66,7 +66,7 @@ Scope {
     // An emoji is renderable if it shows up as a single glyph as wide as a known one. Missing glyphs fall back
     // to a different (narrow) .notdef glyph, and unsupported ZWJ sequences get split into multiple glyphs
     function filterRenderable(all: var): var {
-        if (!checkRenderable || !(GlobalConfig.launcher.emoji?.hideUnsupported ?? true))
+        if (!checkRenderable || !(GlobalConfig.launcher.picker?.hideUnsupported ?? true))
             return all;
 
         probe.text = "😀";
@@ -132,14 +132,14 @@ Scope {
 
     // Mimics CTRL + V by default with a hyprland dispatch
     function sendPaste(): void {
-        const cmd = GlobalConfig.launcher.emoji.pasteCommand;
+        const cmd = GlobalConfig.launcher.picker.pasteCommand;
         if (cmd.length > 0) {
             Quickshell.execDetached(cmd);
             return;
         }
 
         // Through Hyprland, as external tools create a virtual keyboard, which makes it toast a layout change
-        const keys = GlobalConfig.launcher.emoji.pasteShortcut;
+        const keys = GlobalConfig.launcher.picker.pasteShortcut;
         const mods = keys.slice(0, -1);
         const key = keys[keys.length - 1];
         Hypr.dispatch(Hypr.usingLua ? `hl.dsp.send_shortcut({ mods = "${mods.join("+")}", key = "${key}" })` : `sendshortcut ${mods.join(" ")}, ${key}, activewindow`);
@@ -155,7 +155,7 @@ Scope {
         id: pasteTimer
 
         // Give the compositor time to hand focus back to the previous window
-        interval: GlobalConfig.launcher.emoji.pasteDelay
+        interval: GlobalConfig.launcher.picker.pasteDelay
         onTriggered: root.sendPaste()
     }
 
