@@ -5,7 +5,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.services
 
-// Data and logic behind a launcher picker (i.e. emojis, kaomoji). The data is read from assets/<name>/<name>.json
+// Data and logic behind a launcher picker (i.e. emojis, kaomoji, symbols). The data is read from assets/<name>/<name>.json
 // and the keywords for other languages from assets/<name>/i18n/<locale>.json
 Scope {
     id: root

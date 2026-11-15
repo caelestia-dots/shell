@@ -4,7 +4,7 @@ import Quickshell
 import Caelestia.Config
 
 Singleton {
-    readonly property var all: [Emojis.source, Kaomoji.source]
+    readonly property var all: [Emojis.source, Kaomoji.source, Symbols.source]
 
     // The picker that's open for the given launcher text, if any
     function forText(text: string): var {

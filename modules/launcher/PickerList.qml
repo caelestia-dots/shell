@@ -12,9 +12,9 @@ import qs.modules.launcher.items
 import qs.modules.launcher.services
 
 // Two independent grids instead of one that gets its rows swapped:
-// - browse: the categories. Built from the data only, so typing never touches it. Its scroll position, selection
-// and layout stay valid while searching, and jumping to a category is always a plain scroll.
-// - results: the search results. Rebuilt on every keystroke, always starts at the top.
+//  - browse:  the categories. Built from the data only, so typing never touches it. Its scroll position, selection
+//             and layout stay valid while searching, and jumping to a category is always a plain scroll.
+//  - results: the search results. Rebuilt on every keystroke, always starts at the top.
 // Only one is shown at a time (the other is faded out and disabled but kept laid out)
 Item {
     id: root
@@ -43,22 +43,22 @@ Item {
         for (const g of source.groups) {
             const items = g.id === "recent" ? recent.map(c => source.byChar[c]).filter(e => e).slice(0, recentShown) : (source.byGroup[g.id] ?? []);
             sections.push({
-                              id: g.id,
-                              title: g.name,
-                              items
-                          });
+                id: g.id,
+                title: g.name,
+                items
+            });
         }
         return layout(sections, columns);
     }
 
     // Search results are a flat list with no sections
     readonly property var resultsBuilt: layout(searching ? [
-                                                               {
-                                                                   id: "results",
-                                                                   title: "",
-                                                                   items: source.search(query)
-                                                               }
-                                                           ] : [], columns)
+        {
+            id: "results",
+            title: "",
+            items: source.search(query)
+        }
+    ] : [], columns)
 
     readonly property var currentGrid: searching ? results : browse
     readonly property int count: source.loaded ? currentGrid.built.flat.length : -1
@@ -92,10 +92,10 @@ Item {
             starts[s.id] = rows.length;
             if (s.title)
                 rows.push({
-                              kind: "header",
-                              group: s.id,
-                              title: s.title
-                          });
+                    kind: "header",
+                    group: s.id,
+                    title: s.title
+                });
 
             for (let i = 0; i < s.items.length; i += columns) {
                 const row = {
@@ -277,18 +277,6 @@ Item {
         property int selected // Index into built.flat
         property string targetGroup // Set by category jumps, cleared as soon as the user scrolls or moves the selection
 
-        clip: true
-
-        // Wheel/touch scrolling takes over from any category scroll animation. The fake flick that
-        // StyledListView does after a rebound also reports as movement, so ignore that one
-        onMovementStarted: {
-            if (doneFakeFlick)
-                return;
-
-            scrollAnim.stop();
-            targetGroup = "";
-        }
-
         function resetView(): void {
             forceLayout();
             positionViewAtBeginning();
@@ -356,6 +344,18 @@ Item {
 
             selected = target;
             ensureVisible(built.rowOf[target], up);
+        }
+
+        clip: true
+
+        // Wheel/touch scrolling takes over from any category scroll animation. The fake flick that
+        // StyledListView does after a rebound also reports as movement, so ignore that one
+        onMovementStarted: {
+            if (doneFakeFlick)
+                return;
+
+            scrollAnim.stop();
+            targetGroup = "";
         }
 
         model: ScriptModel {

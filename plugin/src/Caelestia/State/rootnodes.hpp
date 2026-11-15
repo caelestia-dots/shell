@@ -16,6 +16,7 @@ class PStateRoot : public settings::RootNode {
     STATE_GLOBAL_PROPERTY(bool, doNotDisturb, false)
     STATE_GLOBAL_PROPERTY(QStringList, recentEmojis, {})
     STATE_GLOBAL_PROPERTY(QStringList, recentKaomoji, {})
+    STATE_GLOBAL_PROPERTY(QStringList, recentSymbols, {})
 
 public:
     explicit PStateRoot(const QString& path, PStateRoot* fallback = nullptr, QObject* parent = nullptr);
