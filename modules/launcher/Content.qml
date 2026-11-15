@@ -28,7 +28,7 @@ Item {
     }
 
     function move(direction: string): void {
-        if (list.showEmoji) {
+        if (list.showPicker) {
             list.currentList?.move(direction);
             return;
         }
@@ -82,7 +82,7 @@ Item {
         placeholderText: Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
 
         onAccepted: {
-            if (list.showEmoji) {
+            if (list.showPicker) {
                 list.currentList?.activate(false);
                 return;
             }
@@ -109,15 +109,15 @@ Item {
         Keys.onUpPressed: root.move("up")
         Keys.onDownPressed: root.move("down")
 
-        // Only steal left/right from the text cursor when browsing the emoji grid
+        // Only steal left/right from the text cursor when browsing a picker
         Keys.onLeftPressed: event => {
-            if (list.showEmoji)
+            if (list.showPicker)
                 root.move("left");
             else
                 event.accepted = false;
         }
         Keys.onRightPressed: event => {
-            if (list.showEmoji)
+            if (list.showPicker)
                 root.move("right");
             else
                 event.accepted = false;
@@ -126,15 +126,15 @@ Item {
         Keys.onEscapePressed: root.screenState.launcher = false
 
         Keys.onPressed: event => {
-            // Alt + Enter pastes the emoji into the previously focused window instead of just copying it
-            if (list.showEmoji && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.AltModifier)) {
+            // Alt + Enter pastes into the previously focused window instead of just copying
+            if (list.showPicker && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.AltModifier)) {
                 list.currentList?.activate(true);
                 event.accepted = true;
                 return;
             }
 
-            // Tab / Shift + Tab switch between emoji categories
-            if (list.showEmoji && (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab)) {
+            // Tab / Shift + Tab switch between picker categories
+            if (list.showPicker && (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab)) {
                 const back = event.key === Qt.Key_Backtab || (event.modifiers & Qt.ShiftModifier);
                 list.currentList?.switchCategory(back ? -1 : 1);
                 event.accepted = true;
@@ -166,7 +166,7 @@ Item {
             root.applyPrefill();
         }
 
-        // Lets other things (i.e. the emoji shortcut) tell whether the launcher is in a given mode
+        // Lets other things (i.e. the picker shortcuts) tell whether the launcher is in a given mode
         onTextChanged: root.screenState.launcherText = text
 
         Connections {

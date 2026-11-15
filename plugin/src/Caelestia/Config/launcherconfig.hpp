@@ -91,6 +91,12 @@ class LauncherConfig : public settings::ObjectNode {
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"emoji"_s } },
             }),
             vmap({
+                { u"name"_s, markCtx(u"Kaomoji"_s, u"launcher action"_s) },
+                { u"icon"_s, u"sentiment_satisfied"_s },
+                { u"description"_s, mark(u"Pick a kaomoji to copy or paste"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"kaomoji"_s } },
+            }),
+            vmap({
                 { u"name"_s, markCtx(u"Variant"_s, u"launcher action"_s) },
                 { u"icon"_s, u"colors"_s },
                 { u"description"_s, mark(u"Change the current scheme variant"_s) },

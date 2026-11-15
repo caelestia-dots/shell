@@ -13,6 +13,21 @@ Scope {
     property bool launcherInterrupted
     readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
 
+    // Opens the launcher in the given mode (i.e. "emoji"), or closes it if it's already in that mode
+    function togglePicker(mode: string): void {
+        if (hasFullscreen || !Config.launcher.enabled)
+            return;
+
+        const screenState = ShellState.forActive();
+        const prefix = `${GlobalConfig.launcher.actionPrefix}${mode} `;
+        if (screenState.launcher && screenState.launcherText.startsWith(prefix)) {
+            screenState.launcher = false;
+        } else {
+            screenState.launcherPrefill = prefix;
+            screenState.launcher = true;
+        }
+    }
+
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
@@ -80,19 +95,15 @@ Scope {
         // qmllint enable unresolved-type
         name: "emoji"
         description: "Toggle emoji picker"
-        onPressed: {
-            if (root.hasFullscreen || !Config.launcher.enabled)
-                return;
+        onPressed: root.togglePicker("emoji")
+    }
 
-            const screenState = ShellState.forActive();
-            const prefix = `${GlobalConfig.launcher.actionPrefix}emoji `;
-            if (screenState.launcher && screenState.launcherText.startsWith(prefix)) {
-                screenState.launcher = false;
-            } else {
-                screenState.launcherPrefill = prefix;
-                screenState.launcher = true;
-            }
-        }
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "kaomoji"
+        description: "Toggle kaomoji picker"
+        onPressed: root.togglePicker("kaomoji")
     }
 
     // qmllint disable unresolved-type

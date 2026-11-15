@@ -12,9 +12,9 @@ PersistentProperties {
     property bool utilities
     property bool sidebar
 
-    // Launcher state
-    property string launcherText // Kept in sync with the launcher's search text
-    property string launcherPrefill // Text to fill in the launcher with, applied (and cleared) once it's open
+    // Launcher state: current search text, and text to fill in the next time it opens
+    property string launcherText
+    property string launcherPrefill
 
     // Dashboard state
     property int dashboardTab

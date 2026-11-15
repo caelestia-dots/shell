@@ -87,7 +87,7 @@ def main() -> None:
     for missing in sorted(excluded - used_excludes):
         print(f"warning: exclude entry matched nothing: {missing!r}", file=sys.stderr)
 
-    (OUT / "emojis.json").write_text(json.dumps({"emojis": kept}, ensure_ascii=False, separators=(",", ":")))
+    (OUT / "emojis.json").write_text(json.dumps({"items": kept}, ensure_ascii=False, separators=(",", ":")))
     print(f"en: {len(kept)} emojis")
 
     hexes = {e["h"] for e in kept}
