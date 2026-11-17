@@ -11,16 +11,7 @@ Scope {
     id: root
 
     function applyGameMode(): void {
-        Hypr.extras.applyOptions({
-            "animations:enabled": 0,
-            "decoration:shadow:enabled": 0,
-            "decoration:blur:enabled": 0,
-            "general:gaps_in": 0,
-            "general:gaps_out": 0,
-            "general:border_size": 1,
-            "decoration:rounding": 0,
-            "general:allow_tearing": 1
-        });
+        Hypr.extras.applyOptions(GlobalConfig.utilities.gameMode.options);
     }
 
     function syncState(enableDisable: bool): void {

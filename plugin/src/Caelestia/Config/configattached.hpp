@@ -54,7 +54,7 @@ public:
     [[nodiscard]] const UtilitiesConfig* utilities() const;
     [[nodiscard]] const UserPaths* paths() const;
 
-    [[nodiscard]] Q_INVOKABLE static ConfigRoot* forScreen(const QString& screen);
+    [[nodiscard]] Q_INVOKABLE static caelestia::shell::config::ConfigRoot* forScreen(const QString& screen);
 
     static Config* qmlAttachedProperties(QObject* object);
 

@@ -19,7 +19,7 @@
 #define CONFIG_SUBOBJECT(Type, name) SETTINGS_SUBOBJECT(caelestia::shell::config::Type, name)
 #define CONFIG_GLOBAL_SUBOBJECT(Type, name) SETTINGS_GLOBAL_SUBOBJECT(caelestia::shell::config::Type, name)
 
-#define CONFIG_LIST_TYPE SETTINGS_LIST_TYPE
+#define CONFIG_LIST_TYPE(Type, Name) SETTINGS_LIST_TYPE(caelestia::shell::config::Type, Name)
 #define CONFIG_LIST(Type, name, defaultVal, ...)                                                                       \
     SETTINGS_LIST(caelestia::shell::config::Type, name, DEFAULT_ARG(defaultVal), __VA_ARGS__)
 #define CONFIG_GLOBAL_LIST(Type, name, defaultVal, ...)                                                                \

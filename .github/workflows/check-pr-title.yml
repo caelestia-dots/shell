@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   check-pr-title:
-    if: ${{ github.event.action != 'edited' || github.event.changes.title || github.event.changes.base }}
     concurrency:
       group: check-pr-title-${{ github.event.pull_request.number }}
       cancel-in-progress: true
