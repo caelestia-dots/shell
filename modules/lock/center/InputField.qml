@@ -121,7 +121,7 @@ Item {
     }
 
     component CharItem: Item {
-        id: char
+        id: charItem
 
         required property int index
         property real nonAnimWidthScale: 1
@@ -140,28 +140,28 @@ Item {
 
             ParallelAnimation {
                 Anim {
-                    target: char
+                    target: charItem
                     property: "opacity"
                     from: 0
                     to: 1
                     type: Anim.DefaultEffects
                 }
                 Anim {
-                    target: char
+                    target: charItem
                     property: "scale"
                     from: 0
                     to: 1
                     type: Anim.FastSpatial
                 }
                 Anim {
-                    target: char
+                    target: charItem
                     property: "implicitWidth"
                     from: charList.implicitHeight
                     to: charList.implicitHeight * 1.3
                     type: Anim.DefaultEffects
                 }
                 PropertyAction {
-                    target: char
+                    target: charItem
                     property: "nonAnimWidthScale"
                     value: 1.5
                 }
@@ -182,13 +182,13 @@ Item {
                     type: Anim.FastSpatial
                 }
                 Anim {
-                    target: char
+                    target: charItem
                     property: "implicitWidth"
                     to: charList.implicitHeight
                     type: Anim.DefaultEffects
                 }
                 PropertyAction {
-                    target: char
+                    target: charItem
                     property: "nonAnimWidthScale"
                     value: 1
                 }
@@ -199,25 +199,25 @@ Item {
             id: removeAnim
 
             PropertyAction {
-                target: char
+                target: charItem
                 property: "ListView.delayRemove"
                 value: true
             }
             ParallelAnimation {
                 Anim {
                     type: Anim.DefaultEffects
-                    target: char
+                    target: charItem
                     property: "opacity"
                     to: 0
                 }
                 Anim {
-                    target: char
+                    target: charItem
                     property: "scale"
                     to: 0.5
                 }
             }
             PropertyAction {
-                target: char
+                target: charItem
                 property: "ListView.delayRemove"
                 value: false
             }
@@ -228,7 +228,7 @@ Item {
 
             anchors.centerIn: parent
             implicitSize: charList.implicitHeight * 1.5
-            shape: root.shapeQueue[char.index % root.shapeQueue.length] ?? MaterialShape.Circle
+            shape: root.shapeQueue[charItem.index % root.shapeQueue.length] ?? MaterialShape.Circle
             color: Colours.palette.m3onSurface
 
             opacity: root.showPassword ? 0 : 1
@@ -253,7 +253,7 @@ Item {
             asynchronous: true
 
             sourceComponent: StyledText {
-                text: root.buffer[char.index]
+                text: root.buffer[charItem.index]
             }
 
             Behavior on opacity {
