@@ -52,18 +52,18 @@ Singleton {
             const running = code === 0;
 
             if (running && root.needsStop) {
-                commandProc.exec(["caelestia", "record"]);
+                stopProc.exec(["sh", "-c", "exec caelestia record </dev/null >/dev/null 2>&1"]);
                 props.running = false;
                 props.paused = false;
             } else if (running && root.needsPause) {
                 commandProc.exec(["caelestia", "record", "-p"]);
                 props.paused = !props.paused;
             } else if (!running && root.needsStart) {
-                commandProc.exec(["caelestia", "record", ...root.startArgs]);
+                commandProc.exec(["sh", "-c", 'exec caelestia record "$@" </dev/null >/dev/null 2>&1', "sh", ...root.startArgs]);
                 props.running = true;
                 props.paused = false;
                 props.elapsed = 0;
-            } else if (running !== props.running && !commandProc.running) {
+            } else if (running !== props.running && !commandProc.running && !stopProc.running) {
                 // The recording was started/stopped outside the shell (e.g. via
                 // keybind), or our command finished without reaching the optimistic state
                 props.running = running;
@@ -83,6 +83,12 @@ Singleton {
         // The command owns the transition: `caelestia record` blocks on slurp for
         // region captures, and waits for the recorder to finalise the file when
         // stopping. Reconcile once it has actually finished.
+        onExited: checkProc.running = true
+    }
+
+    Process {
+        id: stopProc
+
         onExited: checkProc.running = true
     }
 
