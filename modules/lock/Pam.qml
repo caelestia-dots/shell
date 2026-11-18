@@ -153,6 +153,8 @@ Scope {
 
     Connections {
         function onResumed(): void {
+            if (fprint.canAttempt && !fprint.active)
+                fprint.start();
             if (face.canAttempt && !face.active && GlobalConfig.lock.triggerFaceAuthOnWake)
                 face.start();
         }
@@ -233,6 +235,7 @@ Scope {
         }
 
         function abort(): void {
+            errorRetry.stop();
             pam.abort();
         }
 
@@ -257,21 +260,22 @@ Scope {
                 root.clearTransientState();
 
                 if (res === PamResult.Error) {
+                    if (ctx.retryOnFail) {
+                        errorRetry.restart();
+                        return;
+                    }
                     ctx.state = Pam.Error;
                     ctx.errorTries++;
-                    if (ctx.errorTries < 5) {
-                        abort();
+                    if (ctx.errorTries < 5)
                         errorRetry.restart();
-                    }
                 } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
                     ctx.tries++;
                     if (ctx.tries < ctx.maxTries) {
                         ctx.state = Pam.Failed;
                         if (ctx.retryOnFail)
-                            start();
+                            errorRetry.restart();
                     } else {
                         ctx.state = Pam.MaxTries;
-                        abort();
                     }
                 }
 
@@ -283,8 +287,11 @@ Scope {
         Timer {
             id: errorRetry
 
-            interval: 800
-            onTriggered: pam.start()
+            interval: 300
+            onTriggered: {
+                if (ctx.canAttempt && !pam.active)
+                    pam.start();
+            }
         }
 
         Timer {
