@@ -45,11 +45,18 @@ PageBase {
 
         ToggleRow {
             first: true
-            last: true
             text: Tr.trCtx("Enabled", "toggle label")
             subtext: Tr.tr("Show the utilities panel")
             checked: Config.utilities.enabled
             onToggled: GlobalConfig.utilities.enabled = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Show on hover")
+            subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
+            checked: Config.utilities.showOnHover
+            onToggled: GlobalConfig.utilities.showOnHover = checked
         }
 
         // Cards
