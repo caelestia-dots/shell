@@ -113,6 +113,8 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "style-display-wallpaper"
+            searchIcon: "wallpaper"
             text: Tr.tr("Display wallpaper")
             checked: Config.background.wallpaperEnabled
             onToggled: GlobalConfig.background.wallpaperEnabled = checked
@@ -121,6 +123,8 @@ PageBase {
         ToggleRow {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
 
+            settingAnchor: "style-transparency"
+            searchIcon: "opacity"
             text: Tr.tr("Transparency")
             // TRANSLATORS: %1/%2 = opacity values from 0 to 1 for the base surface and layered surfaces
             subtext: Tr.tr("Base %1, layers %2").arg(Colours.transparency.base).arg(Colours.transparency.layers)
@@ -132,6 +136,8 @@ PageBase {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
 
             last: true
+            settingAnchor: "style-dark-theme"
+            searchIcon: "dark_mode"
             text: Tr.tr("Dark theme")
             checked: !Colours.light
             onToggled: Colours.setMode(checked ? "dark" : "light")

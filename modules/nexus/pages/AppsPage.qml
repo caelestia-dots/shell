@@ -33,6 +33,7 @@ PageBase {
         DefaultRow {
             first: true
             icon: "terminal"
+            settingAnchor: "apps-default-terminal"
             label: Tr.trCtx("Terminal", "default app category")
             status: GlobalConfig.general.apps.terminal.join(" ")
             onSelected: app => GlobalConfig.general.apps.terminal = app.command
@@ -40,6 +41,7 @@ PageBase {
 
         DefaultRow {
             icon: "volume_up"
+            settingAnchor: "apps-default-audio"
             label: Tr.trCtx("Audio", "default app category")
             status: GlobalConfig.general.apps.audio.join(" ")
             onSelected: app => GlobalConfig.general.apps.audio = app.command
@@ -47,6 +49,7 @@ PageBase {
 
         DefaultRow {
             icon: "play_circle"
+            settingAnchor: "apps-default-playback"
             label: Tr.trCtx("Media playback", "default app category")
             status: GlobalConfig.general.apps.playback.join(" ")
             onSelected: app => GlobalConfig.general.apps.playback = app.command
@@ -55,6 +58,7 @@ PageBase {
         DefaultRow {
             last: true
             icon: "folder"
+            settingAnchor: "apps-default-file-manager"
             label: Tr.trCtx("File manager", "default app category")
             status: GlobalConfig.general.apps.explorer.join(" ")
             onSelected: app => GlobalConfig.general.apps.explorer = app.command
@@ -69,6 +73,7 @@ PageBase {
             first: true
             last: true
             icon: "apps"
+            settingAnchor: "apps-all-apps"
             text: Tr.tr("All apps")
             subtext: Tr.tr("Browse installed apps, set favourites and hidden")
             onClicked: root.nState.openSubPage(1)
