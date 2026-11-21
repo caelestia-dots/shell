@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
@@ -108,7 +107,7 @@ ColumnLayout {
                 onClicked: {
                     root.screenState.utilities = false;
                     root.screenState.sidebar = false;
-                    Quickshell.execDetached([...GlobalConfig.general.apps.playback, recording.modelData.path]);
+                    AppLauncher.exec([...GlobalConfig.general.apps.playback, recording.modelData.path], "");
                 }
             }
 
@@ -118,7 +117,7 @@ ColumnLayout {
                 onClicked: {
                     root.screenState.utilities = false;
                     root.screenState.sidebar = false;
-                    Quickshell.execDetached([...GlobalConfig.general.apps.explorer, recording.modelData.path]);
+                    AppLauncher.exec([...GlobalConfig.general.apps.explorer, recording.modelData.path], "");
                 }
             }
 

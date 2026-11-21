@@ -11,13 +11,11 @@ Searcher {
     function launch(entry: DesktopEntry): void {
         appDb.incrementFrequency(entry.id);
 
-        if (entry.runInTerminal)
-            Quickshell.execDetached({
-                command: [...GlobalConfig.general.apps.terminal, `${Quickshell.shellDir}/assets/wrap_term_launch.sh`, ...entry.command],
-                workingDirectory: entry.workingDirectory
-            });
-        else
-            entry.execute();
+        // Same as DesktopEntry.execute(): run entry.command in entry.workingDirectory.
+        // It goes through AppLauncher instead so general.apps.launchPrefix applies.
+        // https://quickshell.org/docs/v0.2.1/types/Quickshell/DesktopEntry/#execute
+        const command = entry.runInTerminal ? [...GlobalConfig.general.apps.terminal, `${Quickshell.shellDir}/assets/wrap_term_launch.sh`, ...entry.command] : [...entry.command];
+        AppLauncher.exec(command, entry.workingDirectory);
     }
 
     function search(search: string): var {

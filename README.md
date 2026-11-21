@@ -424,7 +424,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "terminal": ["foot"],
             "audio": ["pwvucontrol"],
             "playback": ["mpv"],
-            "explorer": ["thunar"]
+            "explorer": ["thunar"],
+            "launchPrefix": []
         },
         "idle": {
             "lockBeforeSleep": true,
@@ -957,6 +958,33 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 ```
 
 </details>
+
+### Application cgroups
+
+`general.apps.launchPrefix` is an optional command placed in front of applications started by the shell: launcher entries, terminal applications, notification and sidebar links, calculator terminals, and the configured playback and file-manager commands. It defaults to `[]`, so nothing is required on systems without systemd and no launcher is bundled.
+
+A process started directly remains in the cgroup of the shell’s parent unit. That unit may be `caelestia.service` or the compositor unit, such as `wayland-wm@hyprland.desktop.service`. Memory used by the application is then charged to that unit, and stopping the unit can stop the application. A prefix such as `uwsm app` starts it in a separate scope instead.
+
+```json
+{
+    "general": {
+        "apps": {
+            "launchPrefix": ["uwsm", "app", "-s", "a", "-t", "scope", "--"]
+        }
+    }
+}
+```
+
+Include the wrapper’s own separator. For `uwsm app`, that is the final `--`. Leave the unit name unset: UWSM generates a name ending in `.scope`. Passing `-u` with any other suffix makes UWSM reject the launch. The same prefix is used for every wrapped launch; Caelestia does not select per-application limits. A property added before the separator, such as `"-p", "MemoryMax=8G"`, therefore applies to each of those launches. For a limit that should affect only one application, use a desktop-entry override or a small user wrapper selected by this prefix.
+
+After launching an application, check that its scope is outside the shell unit:
+
+```sh
+systemctl --user status 'app-*.scope'
+systemctl --user show 'app-*.scope' -p Slice -p ControlGroup -p MemoryMax
+```
+
+`Slice` should be `app-graphical.slice`. `ControlGroup` should be under that slice, not under `caelestia.service` or `wayland-wm@*.service`.
 
 ### Advanced configuration
 
