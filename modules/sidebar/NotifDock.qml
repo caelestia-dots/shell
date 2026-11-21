@@ -24,7 +24,7 @@ Item {
     anchors.fill: parent
     anchors.margins: Tokens.padding.medium
 
-    Component.onCompleted: Notifs.list.forEach(n => n.dismissPopup())
+    Component.onCompleted: Notifs.store.closePopups()
 
     Item {
         id: title
