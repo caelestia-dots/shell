@@ -14,6 +14,7 @@ LazyLoader {
     id: root
 
     property bool annotate
+    property rect region
     property bool open
     property real contentOpacity: open ? 1 : 0
 
@@ -42,6 +43,10 @@ LazyLoader {
 
         readonly property CaptureState cState: CaptureState {
             annotate: root.annotate
+            annotating: root.region.width > 0 && root.region.height > 0
+            selection.empty: !(root.region.width > 0 && root.region.height > 0)
+            selection.start: Qt.point(root.region.x, root.region.y)
+            selection.end: Qt.point(root.region.x + root.region.width, root.region.y + root.region.height)
             Component.onCompleted: open = Qt.binding(() => root.open)
 
             onCancelled: root.cancelled()
