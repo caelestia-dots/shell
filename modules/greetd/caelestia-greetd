@@ -1,0 +1,110 @@
+#!/bin/bash
+# Caelestia Greetd Launcher with Debug Logging
+# This script launches the quickshell-based greetd interface
+
+# Create log directory
+LOG_DIR="/var/log/caelestia-greetd"
+LOG_FILE="$LOG_DIR/greetd-$(date +%Y%m%d-%H%M%S).log"
+
+# Function to log messages
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE" >&2
+}
+
+# Start logging
+log "Starting caelestia-greetd launcher"
+log "User: $(whoami)"
+log "Groups: $(groups)"
+
+# Set up environment for greetd
+export QML2_IMPORT_PATH="/etc/caelestia/greetd:$QML2_IMPORT_PATH"
+export QT_QUICK_CONTROLS_STYLE=Basic
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+
+# Force Wayland platform
+export QT_QPA_PLATFORM=wayland
+
+# Enable Qt debugging (disabled for now - too verbose)
+# export QT_LOGGING_RULES="*=true"
+# export QML_IMPORT_TRACE=1
+
+# Enable Wayland debugging (disabled for now - too verbose)
+# export WAYLAND_DEBUG=1
+
+# Set runtime directories for greeter user
+export XDG_RUNTIME_DIR="/run/greeter"
+export XDG_CACHE_HOME="/var/cache/caelestia-greetd"
+export XDG_CONFIG_HOME="/etc/caelestia"
+export HOME="/var/lib/caelestia-greetd"
+
+# Try to get the last logged-in user using multiple methods
+# Method 1: Check saved file
+if [ -f "$HOME/last-user" ]; then
+    LAST_USER=$(cat "$HOME/last-user" 2>/dev/null | tr -d '\n')
+fi
+
+# Method 2: Use last command (without -1 to get actual users)
+if [ -z "$LAST_USER" ]; then
+    LAST_USER=$(last -w | grep -v reboot | grep -v "^greeter\|^root\|^gdm" | head -1 | awk '{print $1}' || echo "")
+fi
+
+# Method 3: Check loginctl for current users
+if [ -z "$LAST_USER" ]; then
+    LAST_USER=$(loginctl list-users --no-legend 2>/dev/null | head -1 | awk '{print $2}' || echo "")
+fi
+
+# Method 4: Check greetd logs for last successful login
+if [ -z "$LAST_USER" ]; then
+    LAST_USER=$(journalctl -u greetd -n 50 --no-pager 2>/dev/null | grep "session opened for user" | grep -v "greeter" | tail -1 | sed -n 's/.*session opened for user \([^(]*\).*/\1/p' || echo "")
+fi
+
+export LAST_USER
+log "Last user detected: '$LAST_USER'"
+
+# Log environment
+log "Environment variables:"
+log "QML2_IMPORT_PATH=$QML2_IMPORT_PATH"
+log "QT_QPA_PLATFORM=$QT_QPA_PLATFORM"
+log "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR"
+log "WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+
+# Check runtime directory
+if [ ! -d "$XDG_RUNTIME_DIR" ]; then
+    log "Error: Runtime directory $XDG_RUNTIME_DIR does not exist"
+    exit 1
+fi
+
+# Ensure cache directory exists
+mkdir -p "$XDG_CACHE_HOME" 2>&1 | tee -a "$LOG_FILE"
+mkdir -p "$HOME" 2>&1 | tee -a "$LOG_FILE"
+
+# Check if quickshell exists
+if ! command -v quickshell &> /dev/null; then
+    log "Error: quickshell not found in PATH"
+    log "PATH=$PATH"
+    exit 1
+fi
+
+log "quickshell found at: $(which quickshell)"
+
+# Check if we're running under a Wayland compositor already
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    log "Already in Wayland session (WAYLAND_DISPLAY=$WAYLAND_DISPLAY)"
+    log "Launching quickshell directly..."
+    exec quickshell -p /etc/caelestia/greetd/Greetd.qml "$@" 2>&1 | tee -a "$LOG_FILE"
+else
+    log "No Wayland display found, need to start compositor"
+    
+    if [ "$1" = "--test-hyprland" ]; then
+        log "Starting in Hyprland test mode..."
+        exec Hyprland --config /etc/caelestia/greetd/hyprland-greetd.conf 2>&1 | tee -a "$LOG_FILE"
+    elif command -v cage &> /dev/null; then
+        log "Starting with cage compositor..."
+        log "cage found at: $(which cage)"
+        # Use -m last for single monitor, -s for VT switching
+        exec cage -s -m last -- quickshell -p /etc/caelestia/greetd/Greetd.qml 2>&1 | tee -a "$LOG_FILE"
+    else
+        log "Error: No Wayland compositor found. Install 'cage' for production use."
+        exit 1
+    fi
+fi
