@@ -95,6 +95,12 @@ PageBase {
             onMoved: v => GlobalConfig.launcher.dragThreshold = v
         }
 
+        ToggleRow {
+            text: Tr.tr("Show clipboard preview")
+            checked: GlobalConfig.launcher.clipboard.showPreview
+            onToggled: GlobalConfig.launcher.clipboard.showPreview = checked
+        }
+
         // Behaviour
         SectionHeader {
             text: Tr.tr("Behaviour")
@@ -147,10 +153,16 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
             onToggled: GlobalConfig.launcher.useFuzzy.wallpapers = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Clipboard")
+            checked: GlobalConfig.launcher.useFuzzy.clipboard
+            onToggled: GlobalConfig.launcher.useFuzzy.clipboard = checked
         }
     }
 }

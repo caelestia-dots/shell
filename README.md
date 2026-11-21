@@ -92,6 +92,8 @@ Dependencies:
 - `qt6-multimedia`
 - [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 - [`swappy`](https://github.com/jtheoof/swappy)
+- [`cliphist`](https://github.com/sentriz/cliphist)
+- [`wl-clipboard`](https://github.com/bugaevc/wl-clipboard)
 - [`fish`](https://github.com/fish-shell/fish-shell)
 - [`bash`](https://www.gnu.org/software/bash)
 
@@ -231,7 +233,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
-> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
+> - `launcher`: `actionPrefix`, `actions`, `clipboard.*`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
 > - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `triggerHowdyOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
@@ -685,12 +687,24 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "vimKeybinds": false,
         "favouriteApps": [],
         "hiddenApps": [],
+        "clipboard": {
+            "enabled": true,
+            "maxEntries": 100,
+            "showPreview": true,
+            "previewMaxChars": 5000,
+            "pasteDelay": 300,
+            "pasteShortcut": ["CTRL", "V"],
+            "pasteCommand": [],
+            "dbPath": "",
+            "pinsDbPath": "~/.local/share/caelestia/clipboard-pins.db"
+        },
         "useFuzzy": {
             "apps": false,
             "actions": false,
             "schemes": false,
             "variants": false,
-            "wallpapers": false
+            "wallpapers": false,
+            "clipboard": false
         },
         "actions": [
             {
@@ -698,6 +712,14 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "icon": "calculate",
                 "description": "Do simple math equations (powered by Qalc)",
                 "command": ["autocomplete", "calc"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Clipboard",
+                "icon": "content_paste",
+                "description": "View and search clipboard history",
+                "command": ["autocomplete", "clip"],
                 "enabled": true,
                 "dangerous": false
             },

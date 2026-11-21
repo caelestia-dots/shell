@@ -7,6 +7,7 @@ import qs.components
 import qs.components.controls
 import qs.services
 import qs.utils
+import qs.modules.launcher.services
 
 Item {
     id: root
@@ -20,8 +21,10 @@ Item {
     required property int rounding
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
+    readonly property bool showClipboard: GlobalConfig.launcher.clipboard.enabled && search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}clip `)
+    readonly property bool showPreview: showClipboard && GlobalConfig.launcher.clipboard.showPreview
     readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
-    property string animState: showWallpapers ? "wallpapers" : "apps"
+    property string animState: showWallpapers ? "wallpapers" : showClipboard ? "clipboard" : "apps"
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
@@ -42,6 +45,19 @@ Item {
             AnchorChanges {
                 anchors.left: root.parent.left
                 anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "clipboard"
+
+            PropertyChanges {
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth + (root.showPreview ? root.Tokens.sizes.launcher.clipPreviewWidth : 0)
+                root.implicitHeight: {
+                    const h = appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight;
+                    return Math.min(root.maxHeight, root.showPreview ? Math.max(h, root.Tokens.sizes.launcher.clipMinHeight) : h);
+                }
+                appList.active: true
+                clipPreview.active: root.showPreview
             }
         },
         State {
@@ -80,12 +96,32 @@ Item {
 
         active: false
 
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: clipPreview.left
 
         sourceComponent: AppList {
             objectName: "launcherAppList"
 
             search: root.search
+            screenState: root.screenState
+        }
+    }
+
+    Loader {
+        id: clipPreview
+
+        active: false
+
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: active ? Tokens.sizes.launcher.clipPreviewWidth : 0
+
+        sourceComponent: ClipPreview {
+            entry: root.currentList?.currentItem?.modelData ?? null
+            list: root.currentList
             screenState: root.screenState
         }
     }
@@ -123,7 +159,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         MaterialIcon {
-            text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
+            text: root.state === "wallpapers" ? "wallpaper_slideshow" : root.state === "clipboard" && Clipboard.entries.length === 0 ? "content_paste_off" : "manage_search"
             color: Colours.palette.m3onSurfaceVariant
             fontStyle: Tokens.font.icon.extraLarge
 
@@ -134,13 +170,13 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             StyledText {
-                text: root.state === "wallpapers" ? Tr.tr("No wallpapers found") : Tr.tr("No results")
+                text: root.state === "wallpapers" ? Tr.tr("No wallpapers found") : root.state === "clipboard" && Clipboard.entries.length === 0 ? Tr.tr("Clipboard is empty") : Tr.tr("No results")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.builders.large.weight(Font.Medium).build()
             }
 
             StyledText {
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : Tr.tr("Try searching for something else")
+                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : root.state === "clipboard" && Clipboard.entries.length === 0 ? Tr.tr("Copy something and it will show up here") : Tr.tr("Try searching for something else")
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.medium
             }

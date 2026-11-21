@@ -72,7 +72,7 @@ if("shell" IN_LIST ENABLE_MODULES)
         install(DIRECTORY ${dir} DESTINATION "${INSTALL_QSCONFDIR}")
     endforeach()
 
-    install(PROGRAMS assets/wrap_term_launch.sh DESTINATION "${INSTALL_QSCONFDIR}/assets")
+    install(PROGRAMS assets/wrap_term_launch.sh assets/cliphist-action.sh DESTINATION "${INSTALL_QSCONFDIR}/assets")
 
     file(READ shell.qml SHELL_QML)
     string(REPLACE "settings.watchFiles: true" "settings.watchFiles: false" SHELL_QML "${SHELL_QML}")
