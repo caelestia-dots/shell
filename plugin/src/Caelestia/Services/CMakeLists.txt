@@ -1,6 +1,7 @@
 qml_module(caelestia-services
     URI Caelestia.Services
     SOURCES
+        gamepadactivity.cpp
         service.cpp
         serviceref.cpp
         beattracker.cpp
