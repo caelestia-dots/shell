@@ -11,22 +11,9 @@ import Caelestia.I18n
 import qs.services
 import qs.utils
 
-// Search service over the settings index. The index is built by the shell
-// itself on first use - the page QML sources are parsed at runtime (see
-// utils/scripts/settings-indexer.js) and the result is cached on disk, keyed
-// by the plugin's git revision and a fingerprint of the sources (see cacheKey)
-// so an update or a local edit rebuilds it. No build step, no
-// hand-maintained entries, no user-editable data file.
-//
-// Entries hold marked strings, so they only depend on the sources. The search
-// tokens come from the translated labels, so they're cached with the language
-// they were built in and rebuilt when it differs or changes.
 Singleton {
     id: root
 
-    // indexEntries: forward index (one record per setting), labels marked
-    // inverted: token -> [entry id...]
-    // ranking:  token -> { entry id (string): weight }
     property var indexEntries: []
     property var inverted: ({})
     property var ranking: ({})
@@ -36,21 +23,11 @@ Singleton {
             "tokens": []
         })
     readonly property var foldCache: ({})
-    // fzf finder over the entries' titles, used as a fuzzy fallback
-    // when the exact/prefix index lookup comes up short. fzf is the same matcher
-    // the launcher uses, so typo and mid-word matching behave consistently.
     property var fzfFinder: null
     // Bump when the cached data's shape changes
     readonly property int cacheVersion: 7
-    // Declared here rather than inlined in loadIndex(): qmllint doesn't see
-    // identifiers used inside template literals in a function body, so
-    // referencing Paths only there had it report qs.utils as unused.
+    // Keep as a property: qmllint ignores identifiers in template literals and would flag qs.utils as unused
     readonly property string cachePath: Paths.cache + "/settings-index.json"
-    // What the cache was built from: the plugin's git revision plus a fingerprint
-    // (path, size, mtime) of the page sources and the indexer itself. The
-    // fingerprint catches QML edited or installed without a plugin rebuild, and
-    // keeps the cache usable when the build has no revision (CI passes an empty
-    // one). Set by loadIndex().
     property string cacheKey
     readonly property int maxResults: Math.max(1, GlobalConfig.nexus.maxSearchResults)
 
@@ -59,21 +36,16 @@ Singleton {
         if (tokens.length === 0)
             return [];
 
-        // Accumulate a score per entry id across all query tokens. An entry must
-        // match every query token (AND), and its score is the sum of the ranking
-        // weights of the index tokens it matched, so results stay relevant.
         const scores = ({});
         const hitCounts = ({});
         for (const token of tokens) {
-            const matches = root.lookup(token); // { id: weight }
+            const matches = root.lookup(token);
             for (const id in matches) {
                 scores[id] = (scores[id] ?? 0) + matches[id];
                 hitCounts[id] = (hitCounts[id] ?? 0) + 1;
             }
         }
 
-        // Sort by score, breaking ties by id so the order is stable (otherwise
-        // entries with equal scores can be dropped arbitrarily by the limit).
         const ranked = Object.keys(scores).filter(id => hitCounts[id] === tokens.length).sort((a, b) => scores[b] - scores[a] || (parseInt(a) - parseInt(b)));
 
         const all = entries.instances;
@@ -87,11 +59,6 @@ Singleton {
                 break;
         }
 
-        // The inverted index only does exact/prefix matches. When it finds little
-        // or nothing - a typo ("trasparency") or a mid-word query ("paper") - fall
-        // back to fzf over the same entries. fzf hits that the index already
-        // matched are skipped, and the rest are appended after the (stronger)
-        // index results, so precise matches always lead.
         if (out.length < 5 && root.fzfFinder) {
             const seen = ({});
             for (const id of ranked)
@@ -114,28 +81,18 @@ Singleton {
     }
 
     function isAvailable(anchor: string): bool {
-        // The ethernet section and its detail page need a wired device
         if (anchor.startsWith("ethernet-"))
             return Nmcli.hasAvailableEthernet;
-        // Adding a network can't be opened with Wi-Fi off
         if (anchor === "network-add-network" || anchor.startsWith("add-network-"))
             return Nmcli.wifiEnabled;
-        // The button only shows when there are more networks than the list fits
         if (anchor === "network-all-networks")
             return Nmcli.wifiEnabled && Nmcli.networks.length > GlobalConfig.nexus.maxNetworksShown;
-        // Pairing can't be opened with Bluetooth off
         if (anchor === "bluetooth-pair-device")
             return Bluetooth.defaultAdapter?.enabled ?? false;
         return true;
     }
 
-    // Look up a query token in the inverted index: exact match first, then any
-    // indexed token that starts with it (prefix search, so "wif" finds "wifi").
-    // Returns a map of entry id -> best ranking weight for that id.
     function lookup(token: string): var {
-        // Exact and prefix matches both count, or the results would thin out
-        // whenever the typed text is itself a whole word ("icon" before "icons").
-        // A prefix-only match ranks a little below an exact one.
         const result = ({});
         const keys = root.tokenKeys;
         let lo = 0;
@@ -164,22 +121,17 @@ Singleton {
     function highlight(text: string, search: string, colour: color): string {
         const escape = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-        // Split the search only when it changes; every card reuses the tokens.
         const cache = root.highlightCache;
         if (search !== cache.search) {
             cache.search = search;
             cache.tokens = SettingsIndexer.splitWords(search);
         }
 
-        // Without a match the text is shown as PlainText, which doesn't decode
-        // entities, so it goes back as is. Only highlighted text is escaped.
+        // Unmatched text is returned unescaped on purpose, the caller shows it as PlainText
         const tokens = cache.tokens;
         if (tokens.length === 0)
             return text;
 
-        // Match against the folded text so "gorunum" lights up "Görünüm", then
-        // cut the original at the same offsets. Only word starts match, like
-        // the index's prefix lookup.
         let info = root.foldCache[text];
         if (info === undefined) {
             const folded = SettingsIndexer.foldAligned(text);
@@ -208,8 +160,6 @@ Singleton {
             last = i + len;
         }
 
-        // Most subtexts have no match. The caller checks for a "<font" tag to
-        // decide between StyledText and the cheaper PlainText.
         return last === 0 ? text : out + escape(text.slice(last));
     }
 
@@ -233,13 +183,11 @@ Singleton {
         return data;
     }
 
-    // Tokenises the translated labels, so this runs again on a language change.
     function buildSearch(): void {
         const search = SettingsIndexer.buildSearch(root.indexEntries, text => Tr.trMarked(text));
         root.inverted = search.inverted;
         root.ranking = search.ranking;
-        // An empty index means the sources couldn't be read. Caching it would
-        // keep search empty until the sources change, so it's rebuilt next time.
+        // Never cache an empty index (unreadable sources), it would keep search empty until they change
         if (root.indexEntries.length > 0)
             CUtils.writeTextFile(root.cachePath, JSON.stringify({
                 version: root.cacheVersion,
@@ -252,9 +200,6 @@ Singleton {
         root.buildFinder();
     }
 
-    // One searchable string per entry: the title. fzf provides typo and
-    // mid-word matching over titles as a fallback when the exact/prefix index
-    // lookup comes up short. Cheap, so never cached.
     function buildFinder(): void {
         const docs = root.indexEntries.map((e, i) => ({
                     idx: i,
@@ -266,7 +211,6 @@ Singleton {
         });
     }
 
-    // The fzf finder takes its limit when it's built
     onMaxResultsChanged: {
         if (root.fzfFinder)
             root.buildFinder();
@@ -313,8 +257,6 @@ Singleton {
         readonly property int pageIdx: modelData.pageIdx
         readonly property var subPath: modelData.subPath
         readonly property var crumbIcons: modelData.crumbIcons
-        // Labels are marked in the index, trMarked() re-evaluates these on a
-        // language change.
         readonly property var crumbLabels: modelData.crumbLabels.map(l => Tr.trMarked(l))
         readonly property string title: SettingsIndexer.cleanLabel(Tr.trMarked(modelData.title))
         readonly property string section: Tr.trMarked(modelData.section ?? "")
@@ -322,17 +264,11 @@ Singleton {
         readonly property string anchor: modelData.anchor ?? ""
         readonly property string icon: modelData.icon ?? ""
 
-        // A non-empty togglePath means this is a plain on/off setting that can be
-        // flipped straight from the results (e.g. "background.wallpaperEnabled").
-        // Its value is read by the result row (see NavLocations.configValue()),
-        // from the same place the page's own switch reads it: GlobalConfig for
-        // global-only options, otherwise the config of the screen it's shown on.
         readonly property string togglePath: modelData.togglePath ?? ""
         readonly property bool toggleGlobal: modelData.toggleGlobal ?? false
         readonly property bool isToggle: togglePath.length > 0
 
-        // Write `value` back to the config property the path points at. Global,
-        // like the pages' switches write it.
+        // Always written to GlobalConfig, even for options read per screen, same as the pages' switches
         function setToggle(value: bool): void {
             if (!isToggle)
                 return;
