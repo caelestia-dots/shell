@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qjsvalue.h>
 #include <qlocalsocket.h>
 #include <qobject.h>
 #include <qpoint.h>

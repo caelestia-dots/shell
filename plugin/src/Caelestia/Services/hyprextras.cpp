@@ -4,6 +4,7 @@
 #include <qjsonarray.h>
 #include <qlocalsocket.h>
 #include <qloggingcategory.h>
+#include <qqmlengine.h>
 #include <qsharedpointer.h>
 #include <qvariant.h>
 
