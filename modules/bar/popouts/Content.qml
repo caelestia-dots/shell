@@ -115,6 +115,14 @@ Item {
         }
 
         Popout {
+            name: "microphone"
+            sourceComponent: AudioPopout {
+                popouts: root.popouts
+                mode: "input"
+            }
+        }
+
+        Popout {
             name: "kblayout"
             sourceComponent: KbLayout {}
         }
