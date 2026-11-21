@@ -29,6 +29,7 @@ PageBase {
         ToggleRow {
             first: true
             settingAnchor: "bluetooth-bluetooth"
+            searchIcon: "bluetooth_connected"
             text: Tr.tr("Bluetooth")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -191,6 +192,7 @@ PageBase {
 
             first: true
             settingAnchor: "bluetooth-discoverable"
+            searchIcon: "visibility"
             // TRANSLATORS: adjective: other devices can find this computer
             text: Tr.trCtx("Discoverable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to find this one")
@@ -209,6 +211,7 @@ PageBase {
         ToggleRow {
             last: true
             settingAnchor: "bluetooth-pairable"
+            searchIcon: "add_link"
             // TRANSLATORS: adjective: other devices are allowed to pair with this computer
             text: Tr.trCtx("Pairable", "bluetooth setting")
             subtext: Tr.tr("Allow nearby devices to pair with this one")

@@ -91,6 +91,7 @@ PageBase {
             first: true
             last: true
             settingAnchor: "bar-si-popout-on-hover"
+            searchIcon: "open_in_new"
             text: Tr.tr("Popout on hover")
             subtext: Tr.tr("Show a details popout when hovering the status icons")
             checked: Config.bar.popouts.statusIcons

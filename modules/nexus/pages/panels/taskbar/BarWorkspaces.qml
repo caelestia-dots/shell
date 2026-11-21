@@ -20,6 +20,7 @@ PageBase {
         StepperRow {
             first: true
             settingAnchor: "bar-ws-shown"
+            searchIcon: "format_list_numbered"
             // TRANSLATORS: the number of workspaces shown on the bar
             label: Tr.trCtx("Shown", "bar workspaces")
             subtext: Tr.tr("Number of workspaces displayed")
@@ -32,6 +33,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-active-indicator"
+            searchIcon: "radio_button_checked"
             text: Tr.trCtx("Active indicator", "bar workspaces")
             checked: Config.bar.workspaces.activeIndicator
             onToggled: GlobalConfig.bar.workspaces.activeIndicator = checked
@@ -39,6 +41,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-active-trail"
+            searchIcon: "gesture"
             text: Tr.trCtx("Active trail", "bar workspaces")
             checked: Config.bar.workspaces.activeTrail
             onToggled: GlobalConfig.bar.workspaces.activeTrail = checked
@@ -46,6 +49,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-occupied-background"
+            searchIcon: "layers"
             text: Tr.trCtx("Occupied background", "bar workspaces")
             checked: Config.bar.workspaces.occupiedBg
             onToggled: GlobalConfig.bar.workspaces.occupiedBg = checked
@@ -53,6 +57,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-show-empty"
+            searchIcon: "check_box_outline_blank"
             text: Tr.trCtx("Show unoccupied", "bar workspaces")
             subtext: Tr.tr("Show workspaces that are inactive and empty")
             checked: Config.bar.workspaces.showUnoccupied
@@ -61,6 +66,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-per-monitor"
+            searchIcon: "desktop_windows"
             text: Tr.trCtx("Per monitor", "bar workspaces")
             subtext: Tr.tr("Hide workspaces not on the current monitor")
             checked: Config.bar.workspaces.perMonitor
@@ -69,6 +75,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-show-icon-workspace"
+            searchIcon: "grid_view"
             text: Tr.trCtx("Show windows", "bar workspaces")
             subtext: Tr.tr("Show icons of open windows on each workspace")
             checked: Config.bar.workspaces.showWindows
@@ -77,6 +84,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-ws-windows-on-special-workspaces"
+            searchIcon: "star"
             text: Tr.trCtx("Windows on special workspaces", "bar workspaces")
             checked: Config.bar.workspaces.showWindowsOnSpecialWorkspaces
             onToggled: GlobalConfig.bar.workspaces.showWindowsOnSpecialWorkspaces = checked
@@ -85,6 +93,7 @@ PageBase {
         StepperRow {
             last: true
             settingAnchor: "bar-ws-max-window-icons"
+            searchIcon: "filter_9_plus"
             // TRANSLATORS: maximum number of window icons shown per workspace
             label: Tr.trCtx("Max window icons", "bar workspaces")
             value: Config.bar.workspaces.maxWindowIcons

@@ -77,6 +77,7 @@ PageBase {
             first: true
             last: true
             settingAnchor: "lang-ui-language"
+            searchIcon: "translate"
             label: Tr.tr("UI language")
             subtext: Tr.tr("The language used in the shell UI")
             active: menuItems.find(i => i.modelData === Tr.language) ?? autoLang
@@ -160,6 +161,7 @@ PageBase {
         SelectRow {
             first: true
             settingAnchor: "lang-temperature"
+            searchIcon: "thermostat"
             label: Tr.tr("Temperature")
             subtext: Tr.tr("Units for weather temperatures")
             menuItems: root.tempItems
@@ -169,6 +171,7 @@ PageBase {
 
         SelectRow {
             settingAnchor: "lang-system-temperatures"
+            searchIcon: "device_thermostat"
             label: Tr.tr("System temperatures")
             subtext: Tr.tr("Units for CPU and GPU temperatures")
             menuItems: root.tempItems
@@ -179,6 +182,7 @@ PageBase {
         SelectRow {
             last: true
             settingAnchor: "lang-data-sizes"
+            searchIcon: "data_usage"
             label: Tr.tr("Data sizes")
             subtext: Tr.tr("Units for data sizes and network speeds")
             menuItems: root.dataItems
@@ -195,6 +199,7 @@ PageBase {
             first: true
             last: true
             settingAnchor: "lang-clock-format"
+            searchIcon: "schedule"
             label: Tr.tr("Clock format")
             subtext: Tr.tr("How times are shown across the shell")
             menuOnTop: true

@@ -230,8 +230,6 @@ Singleton {
             console.warn(`SettingsSearcher: no settings found in ${nexusDir}`);
         else
             console.log(`SettingsSearcher: indexed ${data.entries.length} settings (revision ${CUtils.gitRevision || "unknown"})`);
-        for (const warning of data.iconWarnings)
-            console.warn(`SettingsSearcher: ${warning}`);
         return data;
     }
 
@@ -322,7 +320,6 @@ Singleton {
         readonly property string section: Tr.trMarked(modelData.section ?? "")
         readonly property string subtext: Tr.trMarked(modelData.subtext ?? "")
         readonly property string anchor: modelData.anchor ?? ""
-        // The setting's own icon for the result card, baked by the index script.
         readonly property string icon: modelData.icon ?? ""
 
         // A non-empty togglePath means this is a plain on/off setting that can be

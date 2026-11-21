@@ -9,147 +9,6 @@
 // actually reads. buildSearch() then tokenises those translated strings.
 .pragma library
 
-const SETTING_ICONS = {
-    "style-display-wallpaper": "wallpaper",
-    "style-transparency": "opacity",
-    "style-dark-theme": "dark_mode",
-    "network-wi-fi": "network_wifi",
-    "ethernet-status": "link",
-    "ethernet-ip-assignment": "tune",
-    "bluetooth-bluetooth": "bluetooth_connected",
-    "bluetooth-discoverable": "visibility",
-    "bluetooth-pairable": "add_link",
-    "audio-output": "speaker",
-    "audio-input": "mic",
-    "panels-dashboard": "space_dashboard",
-    "panels-taskbar": "toolbar",
-    "panels-launcher": "apps",
-    "panels-sidebar": "view_sidebar",
-    "dash-enabled": "toggle_on",
-    "dash-show-on-hover": "mouse",
-    "dash-dashboard": "tab",
-    "dash-media": "play_circle",
-    "dash-performance": "speed",
-    "dash-weather": "partly_cloudy_day",
-    "dash-battery": "battery_full",
-    "dash-gpu": "developer_board",
-    "dash-cpu": "memory",
-    "dash-memory": "memory_alt",
-    "dash-storage": "hard_drive",
-    "dash-network": "network_check",
-    "dash-clock-seconds": "timer",
-    "dash-drag-threshold": "drag_pan",
-    "taskbar-persistent": "push_pin",
-    "taskbar-show-on-hover": "mouse",
-    "taskbar-drag-threshold": "drag_pan",
-    "taskbar-workspaces": "workspaces",
-    "taskbar-active-window": "select_window",
-    "taskbar-tray": "widgets",
-    "taskbar-status-icons": "instant_mix",
-    "taskbar-clock": "schedule",
-    "taskbar-workspaces-2": "swipe",
-    "taskbar-volume": "volume_up",
-    "taskbar-brightness": "brightness_6",
-    "bar-ws-shown": "format_list_numbered",
-    "bar-ws-active-indicator": "radio_button_checked",
-    "bar-ws-active-trail": "gesture",
-    "bar-ws-occupied-background": "layers",
-    "bar-ws-show-icon-workspace": "grid_view",
-    "bar-ws-per-monitor": "desktop_windows",
-    "bar-ws-windows-on-special-workspaces": "star",
-    "bar-ws-max-window-icons": "filter_9_plus",
-    "bar-ws-show-empty": "check_box_outline_blank",
-    "bar-aw-compact": "compress",
-    "bar-aw-inverted": "invert_colors",
-    "bar-aw-show-on-hover": "mouse",
-    "bar-aw-popout-on-hover": "open_in_new",
-    "bar-tray-background": "format_color_fill",
-    "bar-tray-recolour-icons": "format_paint",
-    "bar-tray-compact": "compress",
-    "bar-tray-popout-on-hover": "open_in_new",
-    "bar-si-popout-on-hover": "open_in_new",
-    "bar-clock-background": "format_color_fill",
-    "bar-clock-show-date": "calendar_month",
-    "bar-clock-show-icon": "visibility",
-    "bar-clock-show-seconds": "timer",
-    "launcher-enabled": "toggle_on",
-    "launcher-show-on-hover": "mouse",
-    "launcher-max-items-shown": "format_list_numbered",
-    "launcher-max-wallpapers": "photo_library",
-    "launcher-drag-threshold": "drag_pan",
-    "launcher-vim-keybinds": "keyboard_command_key",
-    "launcher-enable-dangerous-actions": "warning",
-    "launcher-apps": "grid_view",
-    "launcher-actions": "bolt",
-    "launcher-schemes": "palette",
-    "launcher-variants": "contrast",
-    "launcher-wallpapers": "wallpaper",
-    "sidebar-enabled": "toggle_on",
-    "sidebar-show-on-hover": "mouse",
-    "sidebar-drag-threshold": "drag_pan",
-    "apps-default-terminal": "terminal",
-    "apps-default-audio": "music_note",
-    "apps-default-playback": "play_circle",
-    "apps-default-file-manager": "folder",
-    "apps-all-apps": "view_apps",
-    "services-notifications": "notifications",
-    "services-media-refresh": "autorenew",
-    "services-system-stats-refresh": "monitoring",
-    "services-wi-fi-rescan": "wifi_find",
-    "services-lyrics-backend": "lyrics",
-    "services-default-player": "queue_music",
-    "services-volume-step": "volume_up",
-    "services-brightness-step": "brightness_6",
-    "services-max-volume": "vertical_align_top",
-    "services-visualiser-bars": "graphic_eq",
-    "services-smart-colour-scheme": "auto_awesome",
-    "services-gpu": "developer_board",
-    "notif-show-in-fullscreen": "fullscreen",
-    "notif-expire-automatically": "auto_delete",
-    "notif-open-expanded": "unfold_more",
-    "notif-default-timeout": "timer",
-    "notif-group-preview-count": "stacks",
-    "notif-show-in-fullscreen-2": "fullscreen",
-    "notif-visible-toasts": "filter_9_plus",
-    "notif-charging-changes": "battery_charging_full",
-    "notif-game-mode-changes": "sports_esports",
-    "notif-do-not-disturb-changes": "do_not_disturb_on",
-    "notif-audio-output-changes": "speaker",
-    "notif-audio-input-changes": "mic",
-    "notif-caps-lock-changes": "keyboard_capslock_badge",
-    "notif-num-lock-changes": "looks_one",
-    "notif-keyboard-layout-changes": "keyboard",
-    "notif-vpn-changes": "vpn_key",
-    "notif-now-playing": "play_circle",
-    "lang-temperature": "thermostat",
-    "lang-system-temperatures": "device_thermostat",
-    "lang-ui-language": "translate",
-    "lang-data-sizes": "data_usage",
-    "lang-clock-format": "schedule",
-    "utilities-enabled": "toggle_on",
-    "utilities-keep-awake": "coffee",
-    "utilities-screen-recorder": "screen_record",
-    "utilities-quick-toggles": "tune",
-    "utilities-wi-fi": "wifi",
-    "utilities-bluetooth": "bluetooth",
-    "utilities-microphone": "mic",
-    "utilities-settings": "settings",
-    "utilities-game-mode": "sports_esports",
-    "utilities-do-not-disturb": "do_not_disturb_on",
-    "utilities-vpn": "vpn_key",
-    "panels-utilities": "widgets",
-    "audio-app-volumes": "tune",
-    "bluetooth-pair-device": "bluetooth_searching",
-    "network-all-networks": "wifi_find",
-    "network-saved-networks": "bookmark",
-    "network-add-network": "add_circle",
-    "network-vpn": "vpn_key",
-    "network-add-provider": "vpn_key_alert",
-    "add-network-hidden": "visibility_off",
-    "add-network-security": "lock",
-    "launcher-action-prefix": "keyboard",
-};
-
 const STOPWORDS = ["a", "an", "and", "are", "for", "in", "not", "notification", "of", "on", "or", "out", "the", "to"];
 
 const FIELD_WEIGHT = {
@@ -210,6 +69,7 @@ const ANCHOR_RE = /^\s*settingAnchor:\s*"([^"]+)"/;
 const CHECKED_RE = /^\s*checked:\s*(GlobalConfig|Config)\.([\w.]+)\s*$/;
 const ONTOGGLED_RE = /^\s*onToggled:\s*(?:GlobalConfig|Config)\.([\w.]+)\s*=\s*checked\s*$/;
 const ICON_RE = /^\s*icon:\s*"([^"]+)"/;
+const SEARCH_ICON_RE = /^\s*searchIcon:\s*"([^"]+)"/;
 const SUBTEXT_RE = new RegExp(String.raw`^\s*(?:subtext|status):\s*` + TR_CALL);
 const SECTION_RE = /^\s*SectionHeader\s*\{/;
 
@@ -519,6 +379,8 @@ function extractSettings(files, nav, readLines) {
             let label = null;
             let anchor = null;
             let subtext = null;
+            let icon = null;
+            let searchIcon = null;
             let checkedRoot = null;
             let checkedPath = null;
             let toggledPath = null;
@@ -543,6 +405,16 @@ function extractSettings(files, nav, readLines) {
                     const st = SUBTEXT_RE.exec(lines[j]);
                     if (st)
                         subtext = markedMatch(st, 1);
+                }
+                if (icon === null) {
+                    const ic = ICON_RE.exec(lines[j]);
+                    if (ic)
+                        icon = ic[1];
+                }
+                if (searchIcon === null) {
+                    const si = SEARCH_ICON_RE.exec(lines[j]);
+                    if (si)
+                        searchIcon = si[1];
                 }
                 if (checkedPath === null) {
                     const ch = CHECKED_RE.exec(lines[j]);
@@ -577,7 +449,8 @@ function extractSettings(files, nav, readLines) {
                     subtext: subtext && !/%\d/.test(unmark(subtext)) ? subtext : "",
                     togglePath: togglePath,
                     toggleGlobal: togglePath !== "" && checkedRoot === "GlobalConfig",
-                    icon: SETTING_ICONS[anchor] ?? (meta.crumbIcons.length > 0 ? meta.crumbIcons[meta.crumbIcons.length - 1] : "")
+                    // A row without searchIcon or an icon of its own uses its page's
+                    icon: searchIcon ?? icon ?? (meta.crumbIcons.length > 0 ? meta.crumbIcons[meta.crumbIcons.length - 1] : "")
                 });
             }
         }
@@ -657,20 +530,6 @@ function buildSearch(entries, translate) {
     };
 }
 
-// Anchors whose icon is missing, and icons whose anchor is gone.
-function iconDrift(entries) {
-    const warnings = [];
-    const anchors = entries.map(e => e.anchor);
-    const missing = anchors.filter(a => !(a in SETTING_ICONS));
-    const orphaned = Object.keys(SETTING_ICONS).filter(a => !anchors.includes(a));
-    if (missing.length > 0)
-        warnings.push(`settings without an icon: ${missing.join(", ")}`);
-    if (orphaned.length > 0)
-        warnings.push(`icons without a setting: ${orphaned.join(", ")}`);
-
-    return warnings;
-}
-
 // Builds the language independent part of the index. readFile(path) -> string ("" if unreadable); listFiles(dir, suffix)
 // -> recursive absolute paths.
 function buildIndex(nexusDir, readFile, listFiles) {
@@ -685,9 +544,6 @@ function buildIndex(nexusDir, readFile, listFiles) {
     const entries = extractSettings(files, nav, readLines);
 
     return {
-        entries: entries,
-        // Icons are the one part of an entry that isn't in the page sources, so
-        // they're listed above by hand and drift when settings are renamed.
-        iconWarnings: iconDrift(entries)
+        entries: entries
     };
 }

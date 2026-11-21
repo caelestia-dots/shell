@@ -61,6 +61,7 @@ PageBase {
             Layout.topMargin: Nmcli.hasAvailableEthernet ? Tokens.spacing.large : 0
             first: true
             settingAnchor: "network-wi-fi"
+            searchIcon: "network_wifi"
             text: Tr.tr("Wi-Fi")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased
@@ -123,6 +124,7 @@ PageBase {
             Layout.fillWidth: true
             first: true
             settingAnchor: "network-vpn"
+            searchIcon: "vpn_key"
             text: Tr.tr("VPN")
             font: Tokens.font.body.medium
             horizontalPadding: Tokens.padding.largeIncreased

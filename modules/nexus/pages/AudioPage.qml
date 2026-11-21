@@ -24,6 +24,7 @@ PageBase {
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
             settingAnchor: "audio-output"
+            searchIcon: "speaker"
             label: Tr.trCtx("Output", "audio output")
             valueLabel: Strings.percentOne(value)
             value: Audio.volume
@@ -53,6 +54,7 @@ PageBase {
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
             settingAnchor: "audio-input"
+            searchIcon: "mic"
             label: Tr.trCtx("Input", "audio input")
             valueLabel: Strings.percentOne(value)
             value: Audio.sourceVolume

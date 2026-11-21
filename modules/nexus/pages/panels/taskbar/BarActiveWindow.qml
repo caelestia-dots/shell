@@ -20,6 +20,7 @@ PageBase {
         ToggleRow {
             first: true
             settingAnchor: "bar-aw-compact"
+            searchIcon: "compress"
             text: Tr.trCtx("Compact", "taskbar active window layout")
             checked: Config.bar.activeWindow.compact
             onToggled: GlobalConfig.bar.activeWindow.compact = checked
@@ -27,6 +28,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-aw-inverted"
+            searchIcon: "invert_colors"
             text: Tr.trCtx("Inverted", "taskbar active window: swap the title and class order")
             checked: Config.bar.activeWindow.inverted
             onToggled: GlobalConfig.bar.activeWindow.inverted = checked
@@ -34,6 +36,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "bar-aw-show-on-hover"
+            searchIcon: "mouse"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Only show the active window title while hovering")
             checked: Config.bar.activeWindow.showOnHover
@@ -43,6 +46,7 @@ PageBase {
         ToggleRow {
             last: true
             settingAnchor: "bar-aw-popout-on-hover"
+            searchIcon: "open_in_new"
             text: Tr.tr("Popout on hover")
             subtext: Tr.tr("Show a window details popout when hovering")
             checked: Config.bar.popouts.activeWindow

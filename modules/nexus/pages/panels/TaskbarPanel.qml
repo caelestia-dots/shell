@@ -26,6 +26,7 @@ PageBase {
         ToggleRow {
             first: true
             settingAnchor: "taskbar-persistent"
+            searchIcon: "push_pin"
             text: Tr.tr("Persistent")
             subtext: Tr.tr("Keep the bar visible at all times")
             checked: Config.bar.persistent
@@ -34,6 +35,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "taskbar-show-on-hover"
+            searchIcon: "mouse"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal the bar when the cursor reaches the screen edge")
             checked: Config.bar.showOnHover
@@ -43,6 +45,7 @@ PageBase {
         StepperRow {
             last: true
             settingAnchor: "taskbar-drag-threshold"
+            searchIcon: "drag_pan"
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the bar reveals")
             value: Config.bar.dragThreshold
@@ -107,6 +110,7 @@ PageBase {
         ToggleRow {
             first: true
             settingAnchor: "taskbar-workspaces-2"
+            searchIcon: "swipe"
             text: Tr.tr("Workspaces")
             subtext: Tr.tr("Scroll over the workspace indicator to switch workspaces")
             checked: Config.bar.scrollActions.workspaces
@@ -115,6 +119,7 @@ PageBase {
 
         ToggleRow {
             settingAnchor: "taskbar-volume"
+            searchIcon: "volume_up"
             text: Tr.tr("Volume")
             subtext: Tr.tr("Scroll on the top half of the bar to adjust volume")
             checked: Config.bar.scrollActions.volume
@@ -124,6 +129,7 @@ PageBase {
         ToggleRow {
             last: true
             settingAnchor: "taskbar-brightness"
+            searchIcon: "brightness_6"
             text: Tr.tr("Brightness")
             subtext: Tr.tr("Scroll on the bottom half of the bar to adjust brightness")
             checked: Config.bar.scrollActions.brightness

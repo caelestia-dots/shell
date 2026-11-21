@@ -222,6 +222,7 @@ PageBase {
             first: true
             last: root.ipMethod === "auto"
             settingAnchor: "ethernet-ip-assignment"
+            searchIcon: "tune"
             label: Tr.tr("IP assignment")
             fallbackText: Tr.tr("Automatic (DHCP)")
             fallbackIcon: "lan"

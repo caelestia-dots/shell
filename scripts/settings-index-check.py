@@ -8,10 +8,8 @@ out of search, with nothing to tell anyone. This catches that before merge.
 Errors:
   - a settings row with neither a settingAnchor nor `searchable: false`
   - a settingAnchor used twice, or not in kebab-case
-  - a setting without an icon in the indexer's SETTING_ICONS, or an icon left
-    behind for an anchor that no longer exists
-  - a TRANSLATORS comment pushed away from its call by settingAnchor or
-    searchable, which makes xgettext drop it
+  - a TRANSLATORS comment pushed away from its call by settingAnchor,
+    searchable or searchIcon, which makes xgettext drop it
 Warnings:
   - a row on a page with `searchable: false` that still has a settingAnchor
 
@@ -36,7 +34,6 @@ RESET = "\033[0m"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PAGES_DIR = REPO_ROOT / "modules" / "nexus" / "pages"
-INDEXER = REPO_ROOT / "utils" / "scripts" / "settings-indexer.js"
 
 ERROR = "error"
 WARNING = "warning"
@@ -48,11 +45,9 @@ ROW_RE = re.compile(rf"^\s*({ROW_TYPES})\s*\{{")
 
 ANCHOR_RE = re.compile(r'^\s*settingAnchor:\s*"([^"]*)"')
 SEARCHABLE_RE = re.compile(r"^\s*searchable:\s*false\s*$")
-SECTION_RE = re.compile(r"^\s*SectionHeader\s*\{")
 TRANSLATORS_RE = re.compile(r"^\s*//\s*TRANSLATORS:")
-SEARCH_PROP_RE = re.compile(r"^\s*(settingAnchor|searchable):")
+SEARCH_PROP_RE = re.compile(r"^\s*(settingAnchor|searchable|searchIcon):")
 KEBAB_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-ICON_KEY_RE = re.compile(r'^\s*"([^"]+)":\s*"[^"]*",?\s*$')
 
 
 def disable_colour() -> None:
@@ -91,10 +86,9 @@ class Issue:
 class Row:
     """A settings row as the indexer sees it: its own bindings, not its children's."""
 
-    def __init__(self, kind: str, line: int, section: str):
+    def __init__(self, kind: str, line: int):
         self.kind = kind
         self.line = line
-        self.section = section
         self.anchor: str | None = None
         self.anchor_line = 0
         self.searchable = True
@@ -113,17 +107,14 @@ def braces(text: str) -> int:
 
 def parse_rows(lines: list[str]) -> list[Row]:
     rows = []
-    section = ""
     i = 0
     while i < len(lines):
-        if SECTION_RE.match(lines[i]):
-            section = str(i)
         m = ROW_RE.match(lines[i])
         if not m:
             i += 1
             continue
 
-        row = Row(m.group(1), i + 1, section)
+        row = Row(m.group(1), i + 1)
         depth = braces(lines[i])
         j = i + 1
         while j < len(lines) and depth > 0:
@@ -153,23 +144,6 @@ def page_searchable(lines: list[str]) -> bool:
     return True
 
 
-def icon_keys() -> dict[str, int]:
-    """The anchors listed in the indexer's SETTING_ICONS, with their lines."""
-    keys = {}
-    inside = False
-    for n, text in enumerate(INDEXER.read_text(encoding="utf-8").splitlines(), 1):
-        if text.startswith("const SETTING_ICONS"):
-            inside = True
-            continue
-        if inside:
-            if text.startswith("}"):
-                break
-            m = ICON_KEY_RE.match(text)
-            if m:
-                keys[m.group(1)] = n
-    return keys
-
-
 def rel_path(path: Path) -> str:
     return str(path.relative_to(REPO_ROOT))
 
@@ -177,17 +151,12 @@ def rel_path(path: Path) -> str:
 def check() -> tuple[list[Issue], int]:
     issues: list[Issue] = []
     anchors: dict[str, tuple[str, int]] = {}
-    # Anchors that need an icon. An info section's rows merge into one result,
-    # named after the section and jumping to its first row, so only that row
-    # needs one.
-    needs_icon: dict[str, tuple[str, int]] = {}
     files = sorted(PAGES_DIR.rglob("*.qml"))
 
     for path in files:
         rel = rel_path(path)
         lines = path.read_text(encoding="utf-8").splitlines()
         searchable_page = page_searchable(lines)
-        info_sections: set[str] = set()
 
         for n, text in enumerate(lines):
             if TRANSLATORS_RE.match(text) and n + 1 < len(lines):
@@ -253,23 +222,6 @@ def check() -> tuple[list[Issue], int]:
                 )
             else:
                 anchors[row.anchor] = (rel, row.anchor_line)
-
-            if row.kind == "InfoRow" and row.section:
-                if row.section in info_sections:
-                    continue
-                info_sections.add(row.section)
-            needs_icon[row.anchor] = (rel, row.anchor_line)
-
-    icons = icon_keys()
-    indexer = rel_path(INDEXER)
-    for anchor, (rel, line) in needs_icon.items():
-        if anchor not in icons:
-            issues.append(
-                Issue(rel, line, 1, ERROR, "missing-icon", f'"{anchor}" has no icon in SETTING_ICONS ({indexer})')
-            )
-    for anchor, line in icons.items():
-        if anchor not in needs_icon:
-            issues.append(Issue(indexer, line, 1, ERROR, "orphaned-icon", f'no setting uses the anchor "{anchor}"'))
 
     return issues, len(files)
 

@@ -103,6 +103,7 @@ PageBase {
 
             first: true
             settingAnchor: "add-network-hidden"
+            searchIcon: "visibility_off"
             text: Tr.tr("Hidden network")
             subtext: Tr.tr("Actively probe for a network that doesn't broadcast its name")
             checked: true
@@ -114,6 +115,7 @@ PageBase {
             Layout.topMargin: Tokens.spacing.extraSmall / 2 - parent.spacing
             last: !root.secured
             settingAnchor: "add-network-security"
+            searchIcon: "lock"
             label: Tr.tr("Security")
             // TRANSLATORS: WPA/WPA2/WPA3 are protocol names, leave them untranslated
             fallbackText: Tr.tr("WPA/WPA2/WPA3 Personal")

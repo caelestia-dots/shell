@@ -403,9 +403,6 @@ VerticalFadeFlickable {
                                     anchors.rightMargin: result.modelData.isToggle ? toggle.width + anchors.margins * 2 : anchors.margins
                                     spacing: Tokens.spacing.small
 
-                                    // The setting's own icon, baked into the index per
-                                    // anchor, in a round container like the page list
-                                    // above. The keyboard selection colours it in.
                                     StyledRect {
                                         // Sized off the icon so it follows the user's
                                         // font settings, not a fixed pixel size.
