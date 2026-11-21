@@ -37,8 +37,17 @@ Singleton {
     readonly property alias devices: extras.devices
 
     property string lastSpecialWorkspace: ""
+    property string projectionMode: "extend"
+    property real externalScale: 1
+    property string internalMonitorName: ""
+    property string internalMonitorMode: "preferred"
+    property real internalMonitorScale: 1
+    property double lastMonitorApplyMs: 0
+    property var knownExternalNames: []
 
     signal configReloaded
+    signal monitorAdded(string name)
+    signal monitorRemoved(string name)
 
     function dispatch(request: string): void {
         Hyprland.dispatch(request);
@@ -117,6 +126,92 @@ Singleton {
         }
     }
 
+    function applyMonitorLayout(mode: string, scale: real): void {
+        const allMons = monitors.values;
+        const internal = allMons.find(m => m.name.startsWith("eDP") || m.name.startsWith("LVDS")) ?? allMons[0];
+        if (internal) {
+            internalMonitorName = internal.name;
+            const ipc = internal.lastIpcObject;
+            if (ipc && ipc.width && ipc.height && ipc.refreshRate)
+                internalMonitorMode = `${ipc.width}x${ipc.height}@${Math.round(ipc.refreshRate)}`;
+            if (internal.scale)
+                internalMonitorScale = internal.scale;
+        }
+
+        const intName = internalMonitorName || "eDP-1";
+        const intMode = internalMonitorMode || "preferred";
+        const intScale = internalMonitorScale || 1;
+        const extMons = allMons.map(m => m.name).filter(n => n !== intName);
+        if (extMons.length > 0)
+            knownExternalNames = extMons;
+
+        const targetExts = extMons.length > 0 ? extMons : knownExternalNames;
+        if (mode === "external" && targetExts.length === 0)
+            mode = "extend";
+
+        projectionMode = mode;
+        externalScale = scale;
+        lastMonitorApplyMs = Date.now();
+
+        const cmds = [];
+        const addInt = enabled => {
+            if (usingLua) {
+                if (enabled)
+                    cmds.push(`eval hl.monitor({ output = "${intName}", mode = "${intMode}", position = "0x0", scale = ${intScale}, disabled = false })`);
+                else
+                    cmds.push(`eval hl.monitor({ output = "${intName}", disabled = true })`);
+            } else {
+                if (enabled)
+                    cmds.push(`keyword monitor ${intName},${intMode},0x0,${intScale}`);
+                else
+                    cmds.push(`keyword monitor ${intName},disable`);
+            }
+        };
+
+        const addExt = target => {
+            if (usingLua) {
+                if (mode === "extend")
+                    cmds.push(`eval hl.monitor({ output = "${target}", mode = "preferred", position = "auto-right", scale = ${scale}, disabled = false })`);
+                else if (mode === "extend-up")
+                    cmds.push(`eval hl.monitor({ output = "${target}", mode = "preferred", position = "auto-center-up", scale = ${scale}, disabled = false })`);
+                else if (mode === "extend-left")
+                    cmds.push(`eval hl.monitor({ output = "${target}", mode = "preferred", position = "auto-left", scale = ${scale}, disabled = false })`);
+                else if (mode === "mirror")
+                    cmds.push(`eval hl.monitor({ output = "${target}", mode = "preferred", position = "auto", scale = 1, mirror = "${intName}", disabled = false })`);
+                else if (mode === "external")
+                    cmds.push(`eval hl.monitor({ output = "${target}", mode = "preferred", position = "0x0", scale = ${scale}, disabled = false })`);
+                else if (mode === "internal")
+                    cmds.push(`eval hl.monitor({ output = "${target}", disabled = true })`);
+            } else {
+                if (mode === "extend")
+                    cmds.push(`keyword monitor ${target},preferred,auto-right,${scale}`);
+                else if (mode === "extend-up")
+                    cmds.push(`keyword monitor ${target},preferred,auto-center-up,${scale}`);
+                else if (mode === "extend-left")
+                    cmds.push(`keyword monitor ${target},preferred,auto-left,${scale}`);
+                else if (mode === "mirror")
+                    cmds.push(`keyword monitor ${target},preferred,auto,1,mirror,${intName}`);
+                else if (mode === "external")
+                    cmds.push(`keyword monitor ${target},preferred,0x0,${scale}`);
+                else if (mode === "internal")
+                    cmds.push(`keyword monitor ${target},disable`);
+            }
+        };
+
+        if (mode === "external") {
+            for (const ext of targetExts)
+                addExt(ext);
+            addInt(false);
+        } else {
+            addInt(true);
+            for (const ext of targetExts)
+                addExt(ext);
+        }
+
+        if (cmds.length > 0)
+            extras.batchMessage(cmds);
+    }
+
     onUsingLuaChanged: reloadDynamicConfs()
     Component.onCompleted: reloadDynamicConfs()
 
@@ -137,6 +232,13 @@ Singleton {
                 Hyprland.refreshWorkspaces();
             } else if (n.includes("mon")) {
                 Hyprland.refreshMonitors();
+                if (n === "monitoradded") {
+                    root.monitorAdded(event.data);
+                } else if (n === "monitorremoved") {
+                    root.monitorRemoved(event.data);
+                    if (root.projectionMode === "external")
+                        root.applyMonitorLayout("extend", root.externalScale);
+                }
             } else if (n.includes("workspace")) {
                 Hyprland.refreshWorkspaces();
             } else if (n.includes("window") || n.includes("group") || ["pin", "fullscreen", "changefloatingmode", "minimize"].includes(n)) {

@@ -16,13 +16,6 @@ QtObject {
         },
 
         // Connectivity
-        // TODO
-        // {
-        //     label: Tr.tr("Display"),
-        //     icon: "monitor",
-        //     description: Tr.tr("Output configuration"),
-        //     category: "connectivity"
-        // },
         {
             label: Tr.tr("Network"),
             icon: "wifi",
@@ -40,6 +33,12 @@ QtObject {
             label: Tr.tr("Audio"),
             icon: "volume_up",
             description: Tr.tr("App volumes, sound devices"),
+            category: "connectivity"
+        },
+        {
+            label: Tr.tr("Display"),
+            icon: "monitor",
+            description: Tr.tr("Output configuration"),
             category: "connectivity"
         },
 
