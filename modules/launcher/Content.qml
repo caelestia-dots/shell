@@ -62,14 +62,14 @@ Item {
         placeholderText: Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
 
         onAccepted: {
-            const currentItem = list.currentList?.currentItem;
+            const currentItem = list.showWallpapers ? list.currentList?.currentItem : list.currentList?.selectedItem();
             if (currentItem) {
                 if (list.showWallpapers) {
                     if (Colours.scheme === "dynamic" && currentItem.modelData.path !== Wallpapers.actualCurrent)
                         Wallpapers.previewColourLock = true;
                     Wallpapers.setWallpaper(currentItem.modelData.path);
                     root.screenState.launcher = false;
-                } else if (text.startsWith(GlobalConfig.launcher.actionPrefix)) {
+                } else if (text.startsWith(GlobalConfig.launcher.actionPrefix) || typeof currentItem.modelData?.onClicked === "function") {
                     if (text.startsWith(`${GlobalConfig.launcher.actionPrefix}calc `))
                         currentItem.onClicked();
                     else
