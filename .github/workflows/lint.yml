@@ -21,6 +21,10 @@ jobs:
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
 
+    env:
+      CCACHE_SLOPPINESS: pch_defines,time_macros
+      CCACHE_COMPILERCHECK: "%compiler% --version"
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v7
@@ -37,6 +41,7 @@ jobs:
           # Set version and git rev for CI build so we don't call git
           cmake -B build -G Ninja \
             -DCMAKE_CXX_COMPILER=clazy \
+            "-DCMAKE_CXX_FLAGS=-Xclang -fno-pch-timestamp" \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DVERSION= -DGIT_REVISION=
           cmake --build build
@@ -86,7 +91,7 @@ jobs:
         id: ctcache-context
         shell: bash
         run: |
-          tool_hash="$(pacman -Q clang llvm-libs | sha256sum | cut -d ' ' -f 1)"
+          tool_hash="$({ pacman -Q clang llvm-libs; sha256sum /usr/bin/clang-tidy-cache; } | sha256sum | cut -d ' ' -f 1)"
           echo "tools=$tool_hash" >> "$GITHUB_OUTPUT"
 
       - name: Restore clang-tidy cache
@@ -94,9 +99,9 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ github.workspace }}/.ctcache
-          key: ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/update-image.yml') }}-${{ github.sha }}
+          key: ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy') }}-${{ github.sha }}
           restore-keys: |
-            ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/update-image.yml') }}-
+            ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy') }}-
 
       - name: Configure CMake
         run: |
@@ -113,10 +118,10 @@ jobs:
           CTCACHE_DIR: ${{ github.workspace }}/.ctcache
           CTCACHE_STRIP: ${{ github.workspace }}
         run: |
-          /usr/bin/clang-tidy --version
+          clang-tidy --version
 
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
-            -clang-tidy-binary=/usr/local/bin/clang-tidy \
+            -clang-tidy-binary=/usr/local/bin/clang-tidy-cached \
             -source-filter='^(?!.*/build/).*\.cpp$'
 
       - name: Save clang-tidy cache
