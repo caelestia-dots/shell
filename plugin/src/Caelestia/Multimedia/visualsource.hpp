@@ -9,6 +9,7 @@
 #include <qvideoframe.h>
 
 #include <atomic>
+#include <memory>
 
 namespace caelestia::shell::multimedia {
 
@@ -90,6 +91,8 @@ private:
     void onVideoFrame(const QVideoFrame& frame);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void syncPlayer();
+    QMediaPlayer* player();
+    void attachVideoOutput();
     void unload();
     [[nodiscard]] QString localPath() const;
     [[nodiscard]] QUrl rawUrl() const;
@@ -113,7 +116,8 @@ private:
     std::atomic<quint32> m_generation = 0;
     QMetaObject::Connection m_windowConn;
     QMetaObject::Connection m_sinkConn;
-    QMediaPlayer m_player;
+    // Created by the first video
+    std::unique_ptr<QMediaPlayer> m_player;
 };
 
 } // namespace caelestia::shell::multimedia
