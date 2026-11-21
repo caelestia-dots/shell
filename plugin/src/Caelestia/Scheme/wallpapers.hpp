@@ -1,6 +1,8 @@
 #pragma once
 
 #include <qfilesystemwatcher.h>
+#include <qjsengine.h>
+#include <qqmlengine.h>
 #include <qqmlintegration.h>
 
 #include <caelestia/media/analysis.hpp>
