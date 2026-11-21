@@ -82,6 +82,7 @@ jobs:
         with:
           key: build-cpp-${{ matrix.name }}
           install: no
+          save: ${{ github.event_name == 'push' }}
 
       - name: CMake build
         run: |

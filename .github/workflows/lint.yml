@@ -30,6 +30,7 @@ jobs:
         with:
           key: lint-qml-clazy
           install: no
+          save: ${{ github.event_name == 'push' }}
 
       - name: CMake build
         run: |
@@ -89,7 +90,8 @@ jobs:
           echo "tools=$tool_hash" >> "$GITHUB_OUTPUT"
 
       - name: Restore clang-tidy cache
-        uses: actions/cache@v6
+        id: ctcache-restore
+        uses: actions/cache/restore@v6
         with:
           path: ${{ github.workspace }}/.ctcache
           key: ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/update-image.yml') }}-${{ github.sha }}
@@ -116,6 +118,13 @@ jobs:
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
             -clang-tidy-binary=/usr/local/bin/clang-tidy \
             -source-filter='^(?!.*/build/).*\.cpp$'
+
+      - name: Save clang-tidy cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ github.workspace }}/.ctcache
+          key: ${{ steps.ctcache-restore.outputs.cache-primary-key }}
 
   lint-check:
     if: always()
