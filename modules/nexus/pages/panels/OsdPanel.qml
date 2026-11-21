@@ -41,11 +41,11 @@ PageBase {
         StepperRow {
             last: true
             label: Tr.tr("Hide delay")
-            subtext: Tr.tr("Milliseconds before the OSD fades out")
+            subtext: Tr.tr("Delay (ms) before the OSD slides out")
             value: Config.osd.hideDelay
             from: 500
-            to: 10000
-            stepSize: 500
+            to: 5000
+            stepSize: 100
             onMoved: v => GlobalConfig.osd.hideDelay = v
         }
 
