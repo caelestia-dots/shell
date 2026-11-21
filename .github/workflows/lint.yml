@@ -116,7 +116,7 @@ jobs:
           CTCACHE_DIR: ${{ github.workspace }}/.ctcache
           CTCACHE_STRIP: ${{ github.workspace }}
         run: |
-          clang-tidy --version
+          /usr/bin/clang-tidy --version
 
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
             -clang-tidy-binary=/usr/local/bin/clang-tidy \
