@@ -239,9 +239,12 @@ function isSeparator(c) {
     return SEPARATORS.test(c);
 }
 
-// Folded words of a query, without the index's stopwords or joined forms.
+// Folded words of a query. Stopwords are never indexed, so they're dropped
+// unless the query has nothing else.
 function splitWords(text) {
-    return fold(text).split(SEPARATORS).filter(w => w.length > 0);
+    const words = fold(text).split(SEPARATORS).filter(w => w.length > 0);
+    const kept = words.filter(w => !STOPWORDS.includes(w));
+    return kept.length > 0 ? kept : words;
 }
 
 function tokenize(text) {
