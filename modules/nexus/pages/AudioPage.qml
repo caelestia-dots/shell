@@ -23,10 +23,13 @@ PageBase {
         SliderRow {
             first: true
             icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
+            transitionIcon: "no_sound"
+            iconTapEnabled: !!Audio.sink?.ready && !!Audio.sink?.audio
             label: Tr.trCtx("Output", "audio output")
             valueLabel: Strings.percentOne(value)
             value: Audio.volume
-            enabled: !Audio.muted
+            sliderEnabled: !Audio.muted
+            onIconTapped: Audio.setStreamMuted(Audio.sink, !Audio.muted)
             onMoved: v => Audio.setVolume(v)
         }
 
@@ -50,10 +53,13 @@ PageBase {
             Layout.topMargin: Tokens.spacing.large - parent.spacing
             first: true
             icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
+            transitionIcon: "mic_off"
+            iconTapEnabled: !!Audio.source?.ready && !!Audio.source?.audio
             label: Tr.trCtx("Input", "audio input")
             valueLabel: Strings.percentOne(value)
             value: Audio.sourceVolume
-            enabled: !Audio.sourceMuted
+            sliderEnabled: !Audio.sourceMuted
+            onIconTapped: Audio.setStreamMuted(Audio.source, !Audio.sourceMuted)
             onMoved: v => Audio.setSourceVolume(v)
         }
 

@@ -51,6 +51,37 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.extraSmall / 2
 
+        SectionHeader {
+            first: true
+            text: Tr.tr("Display")
+        }
+
+        SliderRow {
+            first: true
+            icon: `brightness_${(Math.round(value * 6) + 1)}`
+            nightLightActive: NightLight.active
+            iconTapEnabled: NightLight.available
+            label: Tr.tr("Brightness")
+            valueLabel: Math.round(value * 100) + "%"
+            value: Brightness.getMonitor("active")?.brightness ?? 0
+            sliderEnabled: !!Brightness.getMonitor("active")
+            wheelStep: GlobalConfig.services.brightnessIncrement
+            onIconTapped: NightLight.toggle()
+            onMoved: v => Brightness.getMonitor("active")?.setBrightness(v)
+        }
+
+        StepperRow {
+            last: true
+            label: Tr.tr("Night Light temperature")
+            subtext: Tr.tr("Color temperature when Night Light is enabled (K)")
+            value: GlobalConfig.services.nightLightTemperature
+            from: 2500
+            to: 6500
+            stepSize: 100
+            enabled: NightLight.available
+            onMoved: v => GlobalConfig.services.nightLightTemperature = v
+        }
+
         // Detected running players, used as default-player options
         Variants {
             id: playerVariants
