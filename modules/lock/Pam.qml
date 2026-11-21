@@ -24,21 +24,22 @@ Scope {
     readonly property alias fprint: fprint
     readonly property alias face: face
 
+    // Name of both the PAM config in assets/pam.d and the provider's executable
+    readonly property string faceProvider: {
+        switch (GlobalConfig.lock.faceProvider) {
+        case FaceProvider.Visage:
+            return "visage";
+        case FaceProvider.Howdy:
+        default:
+            return "howdy";
+        }
+    }
+
     property string lockMessage
     property int state
     property string buffer
 
     signal flashMsg
-
-    function faceAvailCommand(provider: string): list<string> {
-        switch (provider) {
-        case "visage":
-            return ["sh", "-c", "command -v visage >/dev/null && [ -e /usr/lib/security/pam_visage.so ]"];
-        case "howdy":
-        default:
-            return ["sh", "-c", "command -v howdy >/dev/null"];
-        }
-    }
 
     function handleKey(event: KeyEvent): void {
         if (passwd.active)
@@ -141,12 +142,11 @@ Scope {
         onAvailProcExited: root.restartFprint()
     }
 
-    // Pluggable face PAM: assets/pam.d/<faceProvider> + matching pam_*.so
     ManualPamContext {
         id: face
 
-        config: GlobalConfig.lock.faceProvider
-        availCommand: root.faceAvailCommand(GlobalConfig.lock.faceProvider)
+        config: root.faceProvider
+        availCommand: ["sh", "-c", `command -v ${root.faceProvider}`]
         enabled: GlobalConfig.lock.enableFace
         maxTries: GlobalConfig.lock.maxFaceTries
     }
@@ -209,7 +209,7 @@ Scope {
 
         required property bool enabled
         required property int maxTries
-        property string config
+        property alias config: pam.config
         property alias availCommand: availProc.command
         property bool retryOnFail
 
@@ -245,7 +245,6 @@ Scope {
         PamContext {
             id: pam
 
-            config: ctx.config
             configDirectory: Quickshell.shellPath("assets/pam.d")
 
             onCompleted: res => {

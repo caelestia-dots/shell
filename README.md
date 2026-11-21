@@ -806,7 +806,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "enableFprint": true,
         "maxFprintTries": 3,
         "enableFace": true,
-        "faceProvider": "howdy",
+        "faceProvider": "Howdy",
         "maxFaceTries": 3,
         "triggerFaceOnWake": true,
         "hideNotifs": false,
