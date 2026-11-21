@@ -51,7 +51,7 @@ LazyLoader {
             id: captureSession
 
             document.font: Tokens.font.body.medium
-            document.color: Colours.palette.primary
+            document.color: Colours.palette.error
             document.backgroundColor: Colours.palette.surface
             document.textPadding: TokenConfig.appearance.padding.small
             document.radius: TokenConfig.appearance.rounding.small
@@ -78,6 +78,7 @@ LazyLoader {
 
                 screen: modelData
                 name: "capture-overlay"
+                animType: StyledWindow.NoAnim
                 WlrLayershell.exclusionMode: ExclusionMode.Ignore
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None

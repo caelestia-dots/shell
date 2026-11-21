@@ -2,14 +2,13 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
-import QtQuick.Layouts
 import Quickshell
 import Caelestia.Blobs
 import Caelestia.Components
 import Caelestia.Config
-import Caelestia.I18n
 import Caelestia.Scheme
 import qs.components
+import qs.components.annotation
 import qs.components.controls
 
 Item {
@@ -155,34 +154,28 @@ Item {
         restoreMode: Binding.RestoreNone
     }
 
-    Item {
-        id: captureContent
+    ScreenCapture {
+        id: capture
 
         anchors.fill: parent
         opacity: root.contentOpacity
+    }
 
-        ScreenCapture {
-            id: capture
+    Annotation {
+        id: annotation
 
-            anchors.fill: parent
-        }
-
-        Annotation {
-            id: annotation
-
-            anchors.fill: parent
-            active: root.cState.annotating
-            document: capture.session.document
-            screen: root.screen
-            base: capture.image
-        }
+        anchors.fill: parent
+        opacity: root.contentOpacity
+        active: root.cState.annotating
+        document: capture.session.document
+        origin: Qt.point(root.screen.x, root.screen.y)
+        base: capture.image
     }
 
     RegionSelect {
         anchors.fill: parent
         opacity: root.contentOpacity
         selection: root.cState.selection
-        source: captureContent
         screen: root.screen
         freeze: true
         resizeMode: root.cState.annotating
@@ -193,8 +186,6 @@ Item {
                 return Qt.SizeAllCursor;
             return annotation.cursorShape;
         }
-        selectClients: root.cState.selectClients
-        showCrosshair: root.cState.showCrosshair
 
         onSelected: region => {
             if (root.cState.annotate)
@@ -266,7 +257,7 @@ Item {
             group: root.cState.annotating ? group : null
             anchors.horizontalCenter: parent.horizontalCenter
             y: {
-                const h = submenu.implicitHeight;
+                const h = submenu.fullHeight;
                 if (root.picking)
                     return (root.height - h) / 2;
 
@@ -278,7 +269,7 @@ Item {
 
             radius: root.picking ? Tokens.rounding.extraLarge : Tokens.rounding.extraExtraLarge
             implicitWidth: submenu.implicitWidth
-            implicitHeight: submenu.implicitHeight
+            implicitHeight: submenu.fullHeight
 
             deformScale: 0.00005 * Config.appearance.deformScale
 
@@ -350,15 +341,15 @@ Item {
         readonly property real fullHeight: content.implicitHeight + Tokens.padding.small * 2
         readonly property real toolbarEdge: root.toolbarBottom ? toolbarBg.y : toolbarBg.y + toolbarBg.height
         readonly property real visibleTop: root.toolbarBottom || root.picking ? submenuBg.y : Math.max(submenuBg.y, toolbarEdge)
-        readonly property real visibleBottom: root.toolbarBottom && !root.picking ? Math.min(submenuBg.y + fullHeight, toolbarEdge) : submenuBg.y + fullHeight
-        readonly property real pivotY: submenuBg.y - y + fullHeight / 2
+        readonly property real visibleBottom: root.toolbarBottom && !root.picking ? Math.min(submenuBg.y + submenuBg.height, toolbarEdge) : submenuBg.y + submenuBg.height
+        readonly property real pivotY: submenuBg.y - y + submenuBg.height / 2
 
         x: submenuBg.x
         y: visibleTop
 
         clip: true
         implicitWidth: content.implicitWidth + Tokens.padding.small * 2
-        implicitHeight: fullHeight
+        implicitHeight: submenuBg.height
         height: Math.max(0, visibleBottom - visibleTop)
 
         opacity: root.contentOpacity * root.submenuOpacity
@@ -439,48 +430,8 @@ Item {
     Component {
         id: regionToolbar
 
-        RowLayout {
-            spacing: Tokens.spacing.medium
-
-            MaterialIcon {
-                id: topIcon
-
-                Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: Tokens.padding.medium
-                text: "screenshot_region"
-                color: Colours.palette.onSecondaryContainer
-                fontStyle: Tokens.font.icon.medium
-            }
-
-            StyledText {
-                Layout.alignment: Qt.AlignVCenter
-                text: Tr.tr("Drag to select a region")
-                color: Colours.palette.onSecondaryContainer
-                font: Tokens.font.body.medium
-            }
-
-            ButtonRow {
-                spacing: Tokens.spacing.extraSmall
-
-                ToolbarButton {
-                    isToggle: true
-                    checked: root.cState.showCrosshair
-                    icon: "my_location"
-                    onClicked: root.cState.showCrosshair = !root.cState.showCrosshair
-                }
-
-                ToolbarButton {
-                    isToggle: true
-                    checked: root.cState.selectClients
-                    icon: "select_window_2"
-                    onClicked: root.cState.selectClients = !root.cState.selectClients
-                }
-
-                ToolbarButton {
-                    icon: "close"
-                    onClicked: root.cState.cancelled()
-                }
-            }
+        RegionToolbar {
+            rState: root.cState.selection
         }
     }
 

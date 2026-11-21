@@ -264,7 +264,6 @@ void Line::render(QPainter& painter) const {
     painter.drawLine(m_start, shaftEnd());
 
     if (m_arrow) {
-        painter.setPen(Qt::NoPen);
         painter.setBrush(m_style.color);
         painter.drawPath(head());
     }
@@ -430,6 +429,7 @@ void RectShape::renderEffect(
     region.setDevicePixelRatio(dpr);
     painter.save();
     painter.resetTransform();
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
     painter.drawImage(QPointF(dev.topLeft() - deviceOffset) / dpr, region);
     painter.restore();
 }

@@ -27,6 +27,9 @@ class AnnotationCanvas : public QQuickPaintedItem {
     Q_PROPERTY(caelestia::shell::components::AnnotationDocument* document READ document WRITE setDocument NOTIFY
             documentChanged REQUIRED)
     Q_PROPERTY(QImage base READ base WRITE setBase NOTIFY baseChanged FINAL)
+    Q_PROPERTY(QPointF origin READ origin WRITE setOrigin NOTIFY originChanged FINAL)
+    Q_PROPERTY(QRectF baseRect READ baseRect WRITE setBaseRect NOTIFY baseRectChanged FINAL)
+    Q_PROPERTY(qreal zoom READ zoom WRITE setZoom NOTIFY zoomChanged FINAL)
 
 public:
     explicit AnnotationCanvas(QQuickItem* parent = nullptr);
@@ -39,29 +42,57 @@ public:
     [[nodiscard]] QImage base() const;
     void setBase(const QImage& base);
 
+    [[nodiscard]] QPointF origin() const;
+    void setOrigin(const QPointF& origin);
+
+    [[nodiscard]] QRectF baseRect() const;
+    void setBaseRect(const QRectF& baseRect);
+
+    [[nodiscard]] qreal zoom() const;
+    void setZoom(qreal zoom);
+
+    void applyView(QPainter& painter) const;
+    void drawLayer(QPainter& painter, const QImage& layer) const;
+    [[nodiscard]] QImage newLayer() const;
+    [[nodiscard]] bool magnified() const;
+
+    Q_INVOKABLE [[nodiscard]] QImage composite() const;
+
     [[nodiscard]] const QImage& layer() const;
     [[nodiscard]] const QImage& previewImage() const;
-    [[nodiscard]] const QImage& scaledBase();
-    [[nodiscard]] QPointF origin() const;
+    [[nodiscard]] QImage& scratchLayer();
+    [[nodiscard]] const QImage& effectBase();
 
 signals:
     void documentChanged();
     void baseChanged();
+    void originChanged();
+    void baseRectChanged();
+    void zoomChanged();
 
 protected:
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private:
-    [[nodiscard]] QImage newLayer() const;
+    [[nodiscard]] QSize layerSize() const;
+    [[nodiscard]] QPointF layerOrigin() const;
+    [[nodiscard]] QRectF effectiveBaseRect() const;
+    [[nodiscard]] QRectF toView(const QRectF& rect) const;
+    [[nodiscard]] QRect effectPreviewRect() const;
     void invalidateLayer();
     void updatePreview();
     void extendPreview();
 
     AnnotationDocument* m_document = nullptr;
     QImage m_base;
+    QPointF m_origin;
+    QRectF m_baseRect;
+    qreal m_zoom = 1.0;
     QImage m_scaledBase;
     QImage m_layer;
     QImage m_previewImage;
+    QImage m_scratch;
+    QRect m_effectClip;
     bool m_layerDirty = true;
     AnnotationPreview* m_preview;
 };
