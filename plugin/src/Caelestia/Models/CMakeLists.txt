@@ -4,8 +4,15 @@ qml_module(caelestia-models
     SOURCES
         filesystemmodel.cpp
         appdb.cpp
+        notifdata.cpp
+        notifgroup.cpp
+        notifstore.cpp
     LIBRARIES
+        caelestia-util
+        caelestia-config
+        caelestia::caelestia
         Qt::Gui
+        Qt::Quick
         Qt::Multimedia
         Qt::Concurrent
         Qt::Sql

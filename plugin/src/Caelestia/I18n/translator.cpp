@@ -136,20 +136,20 @@ QString Translator::_trN(const QString& text, const QString& plural, int n, cons
 }
 
 QString Translator::mark(const QString& text, const QStringList& args) {
-    return util::i18n::detail::doMark(text, {}, -1, {}, args);
+    return util::i18n::mark(text, args);
 }
 
 QString Translator::markCtx(const QString& text, const QString& context, const QStringList& args) {
-    return util::i18n::detail::doMark(text, {}, -1, context, args);
+    return util::i18n::markCtx(text, context, args);
 }
 
 QString Translator::markN(const QString& text, const QString& plural, int n, const QStringList& args) {
-    return util::i18n::detail::doMark(text, plural, n, {}, args);
+    return util::i18n::markN(text, plural, n, args);
 }
 
 QString Translator::markCtxN(
     const QString& text, const QString& plural, int n, const QString& context, const QStringList& args) {
-    return util::i18n::detail::doMark(text, plural, n, context, args);
+    return util::i18n::markCtxN(text, plural, n, context, args);
 }
 
 QStringList Translator::findSupportedLangs() {
