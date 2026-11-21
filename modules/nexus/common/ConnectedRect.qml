@@ -10,12 +10,11 @@ StyledRect {
 
     property bool first
     property bool last
-    // Identifier used by the settings search to scroll to this row.
     property string settingAnchor
     property bool searchable: true
+    // Only read by the settings indexer
     property string searchIcon
 
-    // Briefly flash the row, used when the settings search jumps to it.
     function flashHighlight(): void {
         highlight.active = false;
         highlight.active = true;
@@ -27,7 +26,6 @@ StyledRect {
     bottomLeftRadius: last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
     bottomRightRadius: last ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
 
-    // Created only while flashing, so rows don't each carry the animation
     Loader {
         id: highlight
 

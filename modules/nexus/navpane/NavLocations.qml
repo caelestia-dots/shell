@@ -15,19 +15,11 @@ VerticalFadeFlickable {
     id: root
 
     required property NexusState nState
-    // Whether the search field has focus, so the keyboard selection only shows
-    // while the keys that move it actually reach the field.
     property bool keyboardActive
     property string selectedAnchor
-    // Only a key press moves the view along with the selection. When a new
-    // query or filter changes it, the rows haven't been laid out again yet and
-    // still report their old positions.
+    // Only set for key presses, after a new query the rows still report their old positions
     property bool followSelection
 
-    // The config as this screen sees it: the global one with this monitor's
-    // overrides on top. The pages' switches read Config, which resolves to
-    // the same thing, so a result's switch shows what the page would.
-    // Global-only options can't be read from here (see configValue()).
     readonly property var screenConfig: Config.screen ? GlobalConfig.forScreen(Config.screen) : GlobalConfig
 
     readonly property string search: nState.searchText
@@ -37,9 +29,6 @@ VerticalFadeFlickable {
             return [];
         return SettingsSearcher.query(search);
     }
-    // Results grouped by their top-level page, so the list can show one heading
-    // per page with the matching settings joined underneath it (like the
-    // Android settings search). Each group: { pageIdx, page, entries: [...] }.
     readonly property var groups: {
         const out = [];
         const byPage = ({});
@@ -58,26 +47,18 @@ VerticalFadeFlickable {
         return out;
     }
     readonly property int resultCount: groups.reduce((n, g) => n + g.entries.length, 0)
-    // The group delegates are keyed by page and read their data from here. A
-    // ScriptModel given the group objects themselves moves a reordered group's
-    // row without replacing its value, so it would keep showing the previous
-    // query's results.
+    // Delegates are keyed by page and read from here, a ScriptModel of the groups themselves
+    // keeps a reordered group's old value and shows the previous query's results
     readonly property var groupsByPage: {
         const out = {};
         for (const g of groups)
             out[g.pageIdx] = g;
         return out;
     }
-    // What the arrow keys move through, in the order they're shown.
     readonly property var navigable: groups.reduce((all, g) => all.concat(g.entries), [])
-    // The selection falls back to the top result, which the query ranks best.
     readonly property string currentAnchor: navigable.some(e => e.anchor === selectedAnchor) ? selectedAnchor : navigable[0]?.anchor ?? ""
 
-    // Value of the config property at `path` (e.g. "bar.clock.showSeconds")
-    // for this screen. Global-only options have no per-screen value, and
-    // reading them from a screen's layer logs a warning, so those are read
-    // from GlobalConfig, as their pages do. Called from a binding, so it
-    // updates with the property.
+    // Global-only options must be read from GlobalConfig, reading them from a screen's layer logs a warning
     function configValue(path: string, global: bool): bool {
         let obj = global ? GlobalConfig : screenConfig;
         for (const part of path.split(".")) {
@@ -89,9 +70,7 @@ VerticalFadeFlickable {
     }
 
     function openEntry(entry: var): void {
-        // Ethernet detail settings need a selected interface to show the right
-        // device; a search deep-link has none, so point it at the connected (or
-        // first) one.
+        // The ethernet detail page shows the selected interface, which a deep link doesn't set
         if (entry.anchor.startsWith("ethernet-")) {
             const active = Nmcli.activeEthernet ?? Nmcli.ethernetDevices[0] ?? null;
             if (active)
@@ -116,13 +95,11 @@ VerticalFadeFlickable {
             openEntry(entry);
     }
 
-    // A different set of results starts from the top, like the launcher.
     function scrollToTop(): void {
         scrollAnim.stop();
         contentY = -topMargin;
     }
 
-    // Scrolls just far enough to bring a result out of the edge fades.
     function ensureVisible(item: Item): void {
         const y = item.mapToItem(contentItem, 0, 0).y;
         const margin = height * fadeAmount / 2;
@@ -142,7 +119,6 @@ VerticalFadeFlickable {
     bottomMargin: Tokens.padding.large
     contentHeight: content.implicitHeight
 
-    // A new query starts from its top result
     onSearchChanged: {
         selectedAnchor = "";
         scrollToTop();
@@ -174,9 +150,6 @@ VerticalFadeFlickable {
         Repeater {
             id: list
 
-            // The page list stays alive while searching and is only hidden, so the first
-            // keystroke doesn't destroy every row and clearing the search doesn't rebuild
-            // them. Hidden items are skipped by the ColumnLayout.
             model: PageRegistry.pages
 
             StyledRect {
@@ -292,8 +265,7 @@ VerticalFadeFlickable {
                     properties: "x,y"
                 }
 
-                // A move may interrupt an in-flight add; drive opacity back to 1
-                // so the interrupted fade doesn't leave the group half-visible.
+                // A move can interrupt an add's fade, which would leave the group half visible
                 Anim {
                     type: Anim.DefaultEffects
                     property: "opacity"
@@ -309,11 +281,10 @@ VerticalFadeFlickable {
                 ColumnLayout {
                     id: group
 
-                    // The page index
                     required property int modelData
                     required property int index
 
-                    // Empty while the group is on its way out
+                    // Gone from groupsByPage while the group is being removed
                     readonly property var info: root.groupsByPage[modelData] ?? ({
                             "page": "",
                             "entries": []
@@ -322,7 +293,6 @@ VerticalFadeFlickable {
                     width: resultList.width
                     spacing: Tokens.spacing.small
 
-                    // The page the results underneath belong to
                     StyledText {
                         Layout.fillWidth: true
                         Layout.leftMargin: Tokens.padding.medium
@@ -336,7 +306,6 @@ VerticalFadeFlickable {
                         id: cardList
 
                         Layout.fillWidth: true
-                        // Same gap the rows inside the pages use
                         spacing: Tokens.spacing.extraSmall / 2
 
                         add: Transition {
@@ -381,8 +350,6 @@ VerticalFadeFlickable {
                                     const h = resultLayout.implicitHeight + resultLayout.anchors.margins * 2;
                                     return h % 2 === 0 ? h : h + 1;
                                 }
-                                // Joined like the rows inside the pages: round ends,
-                                // barely rounded where they meet.
                                 topLeftRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
                                 topRightRadius: isFirst ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
                                 bottomLeftRadius: isLast ? Tokens.rounding.extraLarge : Tokens.rounding.extraSmall
@@ -399,13 +366,10 @@ VerticalFadeFlickable {
 
                                     anchors.fill: parent
                                     anchors.margins: Tokens.padding.medium
-                                    // Leave room on the right for the toggle switch.
                                     anchors.rightMargin: result.modelData.isToggle ? toggle.width + anchors.margins * 2 : anchors.margins
                                     spacing: Tokens.spacing.small
 
                                     StyledRect {
-                                        // Sized off the icon so it follows the user's
-                                        // font settings, not a fixed pixel size.
                                         implicitWidth: implicitHeight
                                         implicitHeight: resultIcon.implicitHeight + Tokens.padding.small * 2
                                         radius: Tokens.rounding.full
@@ -432,7 +396,6 @@ VerticalFadeFlickable {
                                         Layout.fillWidth: true
                                         spacing: 0
 
-                                        // Location line: "Section > sub", faint.
                                         StyledText {
                                             Layout.fillWidth: true
                                             text: {
@@ -447,25 +410,21 @@ VerticalFadeFlickable {
                                             elide: Text.ElideRight
                                         }
 
-                                        // The setting itself, most prominent.
                                         StyledText {
                                             Layout.fillWidth: true
                                             text: SettingsSearcher.highlight(result.modelData.title, root.search, Colours.palette.m3primary)
-                                            // Only pay for rich-text parsing when the
-                                            // string actually carries a highlight tag.
+                                            // Must stay PlainText without a highlight, unhighlighted text isn't escaped
                                             textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
                                             color: result.isCurrent ? Colours.palette.m3primary : Colours.palette.m3onSurface
                                             font: Tokens.font.body.medium
                                             elide: Text.ElideRight
                                         }
 
-                                        // Optional description, faintest and smallest.
                                         StyledText {
                                             Layout.fillWidth: true
                                             visible: result.modelData.subtext.length > 0
                                             text: SettingsSearcher.highlight(result.modelData.subtext, root.search, Colours.palette.m3primary)
-                                            // Most subtexts have no match, so skip the
-                                            // rich-text parse unless there's a highlight.
+                                            // Must stay PlainText without a highlight, unhighlighted text isn't escaped
                                             textFormat: text.includes("<font") ? Text.StyledText : Text.PlainText
                                             color: Colours.palette.m3outline
                                             font: Tokens.font.label.small
@@ -474,11 +433,7 @@ VerticalFadeFlickable {
                                     }
                                 }
 
-                                // Hover/press feedback and clicks. A StateLayer is ~22 objects
-                                // (the ripple shape, its gradient and path, animations), so a
-                                // row only creates one once the pointer first moves over it,
-                                // then keeps it. A tap that arrives without hover (touch)
-                                // still opens the entry through the TapHandler.
+                                // The StateLayer is heavy, so it's only created on first hover. Taps before that go to the TapHandler
                                 HoverHandler {
                                     cursorShape: Qt.PointingHandCursor
                                     onHoveredChanged: {
@@ -500,8 +455,6 @@ VerticalFadeFlickable {
                                     active: false
 
                                     sourceComponent: StateLayer {
-                                        // The loader is the parent here, so the row's
-                                        // corners have to be passed on explicitly.
                                         topLeftRadius: result.topLeftRadius
                                         topRightRadius: result.topRightRadius
                                         bottomLeftRadius: result.bottomLeftRadius
@@ -511,9 +464,6 @@ VerticalFadeFlickable {
                                     }
                                 }
 
-                                // Only toggle rows get a switch. A StyledSwitch is ~22 objects
-                                // (behaviors, shapes, a state layer), and creating one hidden
-                                // in every result row was a large share of each keystroke.
                                 Loader {
                                     id: toggle
 
@@ -527,8 +477,6 @@ VerticalFadeFlickable {
                                     sourceComponent: StyledSwitch {
                                         checked: root.configValue(result.modelData.togglePath, result.modelData.toggleGlobal)
                                         cLayer: 3
-                                        // A touch smaller than the in-page switches since
-                                        // the result rows are denser.
                                         scale: 0.85
                                         transformOrigin: Item.Right
 

@@ -165,9 +165,6 @@ bool CUtils::writeTextFile(const QString& path, const QString& text) {
         return false;
     }
 
-    // Written to a temporary file next to the target and renamed over it on
-    // commit, so a reader only ever sees the old or the new content - never a
-    // half-written file if the shell dies or the disk fills up mid-write
     QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qCWarning(lcCUtils) << "Failed to open" << path << "for writing";
@@ -190,7 +187,7 @@ QStringList CUtils::listFiles(const QString& dir, const QString& suffix) {
 }
 
 QString CUtils::fileFingerprint(const QStringList& paths) {
-    // Sorted so the result doesn't depend on directory listing order
+    // Listing order isn't stable
     auto sorted = paths;
     sorted.sort();
 

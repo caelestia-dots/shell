@@ -37,38 +37,24 @@ QtObject {
         subPageIdxStack.pop();
     }
 
-    // Jump straight to a setting from search: open the page, then any sub-pages
-    // along subPath, then let the page scroll to the anchor. subPageIdxStack is
-    // filled directly so a freshly loaded StackPage opens the whole chain at
-    // once (see StackPage.Component.onCompleted), which avoids the half-open
-    // state that firing openSubPage signals one by one would cause.
     function jumpToSetting(pageIdx: int, subPath: var, anchor: string): void {
         const samePage = currentPageIdx === pageIdx;
         const sameSub = subPageIdxStack.length === subPath.length && subPath.every((v, i) => subPageIdxStack[i] === v);
         if (samePage && sameSub && anchor === lastAnchor) {
-            // Re-clicking the exact same setting: flash it again, scrolling only
-            // if it has been scrolled out of view since.
             highlightSetting(anchor);
             return;
         }
         lastAnchor = anchor;
         if (samePage && sameSub) {
-            // Same page, different setting: just scroll to it.
             searchAnchor = "";
             searchAnchor = anchor;
             return;
         }
-        // Different page, or same page but different sub-page: point at the
-        // target sub-page chain and load the destination page, which scrolls to
-        // the anchor once it's ready.
         searchAnchor = anchor;
         if (!samePage) {
             pendingSubPath = subPath.slice();
             currentPageIdx = pageIdx;
         } else {
-            // Same page: keep the sub-pages both chains share open, so going
-            // back up (Workspaces -> Taskbar) reveals the page already there
-            // instead of closing and rebuilding it. Then open the rest.
             let shared = 0;
             while (shared < subPath.length && shared < subPageIdxStack.length && subPageIdxStack[shared] === subPath[shared])
                 shared++;
@@ -79,6 +65,7 @@ QtObject {
         }
     }
 
+    // Set before the new page is created, so its StackPage opens the whole chain at once
     onCurrentPageIdxChanged: {
         subPageIdxStack = pendingSubPath;
         pendingSubPath = [];

@@ -19,12 +19,10 @@ ColumnLayout {
     property bool searchable: true
     readonly property int cappedWidth: Math.min(Tokens.sizes.nexus.maxContentWidth, width)
     readonly property alias flickable: flickable
-    // Where this page is in its sub-page stack; a page outside one counts as shown
     readonly property int stackStatus: StackView.view ? StackView.status : StackView.Active
 
     default property Item contentChild
 
-    // When the settings search jumps to this page, scroll to the matching row.
     function scrollToAnchor(anchor: string): bool {
         if (!anchor || !contentChild)
             return false;
@@ -38,9 +36,6 @@ ColumnLayout {
         return true;
     }
 
-    // Where a jump to `row` scrolls to: the row lands below the top fade so it
-    // isn't dimmed by the edge effect, clamped to the flickable's real scroll
-    // range (which includes margins).
     function scrollTarget(row: Item): real {
         const pos = row.mapToItem(flickable.contentItem, 0, 0);
         const inset = flickable.height * flickable.fadeAmount + Tokens.padding.large;
@@ -74,8 +69,6 @@ ColumnLayout {
         scrollRetry.restart();
     }
 
-    // Flash a row when re-selecting the current setting, scrolling only if it
-    // has been scrolled out of view since.
     function highlightAnchor(anchor: string): void {
         const row = findAnchor(contentChild, anchor);
         if (!row)
@@ -90,13 +83,11 @@ ColumnLayout {
     spacing: Tokens.spacing.extraLargeIncreased
 
     Component.onCompleted: applySearchAnchor()
-    // A page uncovered by closing the ones above it picks up a pending jump
     StackView.onActivated: {
         if (!scrollRetry.running)
             applySearchAnchor();
     }
 
-    // Only search jumps animate, normal flicking stays direct
     Anim {
         id: scrollAnim
 
@@ -112,10 +103,8 @@ ColumnLayout {
         property real lastHeight: -1
         property int stableFrames: 0
         property int settledFrames: 0
-        // The target row, looked up once it exists rather than on every tick
         property Item row
 
-        // Flashes the row if it's laid out and already in place. True if it did.
         function flashIfInPlace(): bool {
             if (!row)
                 row = root.findAnchor(root.contentChild, root.nState.searchAnchor);
@@ -131,36 +120,27 @@ ColumnLayout {
         interval: 16
         repeat: true
         onTriggered: {
-            // A popped page lives on until its exit transition ends, so a jump
-            // that reopens the same sub-page briefly has two copies of it. The
-            // outgoing one must leave the anchor to the incoming one.
+            // A popped page lives until its exit transition ends, leave the anchor to the incoming copy
             if (root.stackStatus === StackView.Deactivating) {
                 stop();
                 return;
             }
 
-            // Pages like the ethernet detail load their content asynchronously
-            // (device info, IP config), so the layout keeps growing for a while.
-            // Wait until contentHeight has held steady for a few frames (or we've
-            // waited long enough) before scrolling, so the target doesn't drift.
+            // Async content (e.g. ethernet details) keeps growing the layout, wait for it to hold steady
             const h = flickable.contentHeight;
             const unchanged = h === lastHeight && h > 0;
             stableFrames = unchanged && h > flickable.height ? stableFrames + 1 : 0;
             settledFrames = unchanged ? settledFrames + 1 : 0;
             lastHeight = h;
 
-            // The wait above needs content taller than the view, which a page
-            // that fits on screen never has, so those sat out the whole timeout
-            // before the flash. When the layout has settled and the row already
-            // sits where a scroll would put it, there's nothing to wait for.
+            // A page shorter than the view never counts as stable above, so flash it once settled
             if (settledFrames >= 3 && root.stackStatus === StackView.Active && flashIfInPlace()) {
                 root.nState.searchAnchor = "";
                 stop();
                 return;
             }
 
-            // Only the page on show takes the anchor. One still coming in keeps
-            // waiting, one covered by another page gives up.
+            // A page still being pushed keeps waiting, one covered by another page gives up
             const ready = stableFrames >= 3 || tries >= 30;
             if (ready && root.stackStatus === StackView.Active) {
                 if (root.scrollToAnchor(root.nState.searchAnchor))

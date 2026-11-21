@@ -18,10 +18,7 @@ ColumnLayout {
     SearchBar {
         id: searchField
 
-        // The list below is pulled up under this by a negative margin so its
-        // fade starts behind the field. That overlap is interactive - a
-        // scrolled result sitting in it would swallow clicks meant for the
-        // field - so keep the field on top.
+        // The results are pulled up under the field by a negative margin, so it has to stay on top for clicks
         z: 1
 
         Layout.fillWidth: true
@@ -38,8 +35,6 @@ ColumnLayout {
 
         onAccepted: locations.openSelection()
 
-        // The results are navigated from here, so the keys only work while the
-        // field has focus. Ctrl+J/K too, like the launcher's vim keybinds.
         Keys.onUpPressed: locations.moveSelection(-1)
         Keys.onDownPressed: locations.moveSelection(1)
         Keys.onPressed: event => {
@@ -91,7 +86,6 @@ ColumnLayout {
 
         text: {
             const parts = [Tr.trN("%n result found", "%n results found", locations.resultCount)];
-            // The key hints only apply while the field has focus
             if (searchField.activeFocus) {
                 // TRANSLATORS: ↑↓ are the up and down arrow keys
                 parts.push(Tr.tr("Use ↑↓ to navigate"), Tr.tr("Press Enter to select"));

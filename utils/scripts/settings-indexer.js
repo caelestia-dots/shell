@@ -1,12 +1,5 @@
-// Builds the settings search index by parsing the nexus page QML sources at
-// runtime. The index is created on first use and cached, instead of being
-// baked into the plugin at build time. IO and translation are injected so the
-// module stays a pure library - testable outside the shell.
-//
-// Labels are stored as marked strings (see plugin/include/util/i18n.hpp) built
-// from the Tr.tr()/Tr.trCtx() literals in the source, so the entries are
-// language independent and Tr.trMarked() resolves them to whatever the user
-// actually reads. buildSearch() then tokenises those translated strings.
+// Builds the settings search index by reading the nexus page sources line by line. Labels are kept
+// as marked strings (see plugin/include/util/i18n.hpp), so the entries don't depend on the language.
 .pragma library
 
 const STOPWORDS = ["a", "an", "and", "are", "for", "in", "not", "notification", "of", "on", "or", "out", "the", "to"];
@@ -17,8 +10,7 @@ const FIELD_WEIGHT = {
     source: 0.3
 };
 
-// Same layout as util::i18n::doMark for a string with only a context. Only
-// the context form is needed, the indexer never marks plurals or args.
+// Must match util::i18n::doMark without args or plurals
 const MARK = "\x01";
 const CONTEXT_SEP = "\x04";
 
@@ -26,7 +18,6 @@ function mark(text, context) {
     return MARK + (context ? context + CONTEXT_SEP : "") + text;
 }
 
-// The untranslated source text of a marked string.
 function unmark(text) {
     if (!text.startsWith(MARK))
         return text;
@@ -34,24 +25,19 @@ function unmark(text) {
     return body.slice(body.indexOf(CONTEXT_SEP) + 1);
 }
 
-// A double quoted QML literal, escapes included.
 const STR = String.raw`"((?:\\.|[^"\\])*)"`;
-// Tr.tr("text") or Tr.trCtx("text", "context") as a property's value.
 const TR_CALL = String.raw`Tr\.(?:tr\(\s*${STR}\s*\)|trCtx\(\s*${STR}\s*,\s*${STR}\s*\))`;
 
 function unescape(text) {
     return text.replace(/\\(.)/g, "$1");
 }
 
-// The marked label of a TR_CALL match, whichever of the two helpers it was.
 function markedMatch(m, first) {
     if (m[first] !== undefined)
         return mark(unescape(m[first]), "");
     return mark(unescape(m[first + 1]), unescape(m[first + 2]));
 }
 
-// Strips the argument placeholders some labels carry ("Show all networks
-// (%1)"), which have nothing to substitute into them here.
 function cleanLabel(text) {
     return String(text ?? "").replace(/\s*\(?%\d+\)?/g, "").trim();
 }
@@ -59,13 +45,6 @@ function cleanLabel(text) {
 const ROW_RE = /^\s*(ToggleRow|SliderRow|SelectRow|StepperRow|NavRow|RowButton|InfoRow|PopupRow|DefaultRow|TextFieldRow)\s*\{/;
 const LABEL_RE = new RegExp(String.raw`^\s*(?:label|text):\s*` + TR_CALL);
 const ANCHOR_RE = /^\s*settingAnchor:\s*"([^"]+)"/;
-// A ToggleRow whose value is a plain config property can be flipped straight
-// from the search results. We capture the property path from `checked:` and
-// require `onToggled:` to write the same path back (a symmetric binding), so
-// reading and writing go through one path. Toggles bound to functions or
-// multi-line handlers are left without a path and just deep-link as usual.
-// Which root `checked:` reads from is kept too: global-only options are read
-// from GlobalConfig, everything else from the screen's Config.
 const CHECKED_RE = /^\s*checked:\s*(GlobalConfig|Config)\.([\w.]+)\s*$/;
 const ONTOGGLED_RE = /^\s*onToggled:\s*(?:GlobalConfig|Config)\.([\w.]+)\s*=\s*checked\s*$/;
 const ICON_RE = /^\s*icon:\s*"([^"]+)"/;
@@ -73,19 +52,15 @@ const SEARCH_ICON_RE = /^\s*searchIcon:\s*"([^"]+)"/;
 const SUBTEXT_RE = new RegExp(String.raw`^\s*(?:subtext|status):\s*` + TR_CALL);
 const SECTION_RE = /^\s*SectionHeader\s*\{/;
 
-// Qt's JS engine has no Unicode property escapes (\p{L}), so words are split on
-// an explicit set of spaces and punctuation instead: ASCII, Latin-1, general
-// and CJK punctuation. Everything else - any script's letters - is a word.
+// Qt's JS engine has no \p{L}, so words are split on explicit space and punctuation ranges
 const SEPARATORS = /[\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e\u00a0-\u00bf\u00d7\u00f7\u2000-\u206f\u3000-\u303f]+/;
 
-// Case and accent insensitive form for matching, so "gorunum" finds "Görünüm".
-// Dotless i has no decomposition, so it is folded by hand.
+// Dotless i has no decomposition, so it's folded by hand
 function fold(text) {
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\u0131/g, "i");
 }
 
-// fold() applied per character, keeping the length so positions map back onto
-// the original text (for highlighting).
+// Keeps the length, so highlight positions map back onto the original text
 function foldAligned(text) {
     let out = "";
     for (const c of text) {
@@ -99,8 +74,7 @@ function isSeparator(c) {
     return SEPARATORS.test(c);
 }
 
-// Folded words of a query. Stopwords are never indexed, so they're dropped
-// unless the query has nothing else.
+// Stopwords are never indexed, so they're dropped unless the query has nothing else
 function splitWords(text) {
     const words = fold(text).split(SEPARATORS).filter(w => w.length > 0);
     const kept = words.filter(w => !STOPWORDS.includes(w));
@@ -109,8 +83,6 @@ function splitWords(text) {
 
 function tokenize(text) {
     const toks = [];
-    // Process word by word (split on whitespace) so we only collapse separators
-    // inside a single word like "Wi-Fi" -> "wifi", not across a whole phrase.
     for (const word of fold(text).split(/\s+/)) {
         if (!word)
             continue;
@@ -128,7 +100,6 @@ function tokenize(text) {
     return toks;
 }
 
-// component name -> file path, discovered by walking pages/.
 function discoverFiles(nexusDir, listFiles) {
     const files = {};
     for (const p of listFiles(`${nexusDir}/pages`, ".qml")) {
@@ -138,8 +109,6 @@ function discoverFiles(nexusDir, listFiles) {
     return files;
 }
 
-// Ordered [icon, label] for each *active* page entry in PageRegistry.
-// Commented-out entries are ignored, matching pageComps ordering.
 function parsePageRegistry(nexusDir, readLines) {
     const lines = readLines(`${nexusDir}/PageRegistry.qml`);
     const out = [];
@@ -180,7 +149,6 @@ function parsePageRegistry(nexusDir, readLines) {
     return out;
 }
 
-// Per top-level pageComps entry, ordered component names inside it.
 function parsePageComps(nexusDir, readFile) {
     const text = readFile(`${nexusDir}/PageCompRegistry.qml`);
     const body = text.slice(text.indexOf("pageComps:"));
@@ -198,9 +166,6 @@ function parsePageComps(nexusDir, readFile) {
     return comps;
 }
 
-// Drop consecutive duplicate labels (e.g. a section header that repeats the
-// page name), keeping icons aligned. Compared by source text, since the same
-// text under different contexts still reads the same in the source language.
 function dedupCrumbs(labels, icons) {
     const outLabels = [];
     const outIcons = [];
@@ -217,8 +182,6 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
     const comps = parsePageComps(nexusDir, readFile);
     const registry = parsePageRegistry(nexusDir, readLines);
 
-    // parentName -> {childPos: [icon, label, section]} from openSubPage() +
-    // nearby NavRow, remembering the section header the NavRow sits under.
     const navChildren = {};
     for (const names of comps) {
         for (const name of names) {
@@ -227,8 +190,8 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
                 continue;
             let pendingIcon = null;
             let pendingLabel = null;
-            let section = ""; // text of the most recent SectionHeader
-            let expectSection = false; // next label line is that header's text
+            let section = "";
+            let expectSection = false;
             for (const ln of readLines(pf)) {
                 if (SECTION_RE.test(ln)) {
                     expectSection = true;
@@ -273,10 +236,7 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
             crumbLabels: [mainLabel]
         };
         const children = Object.assign({}, navChildren[main] ?? {});
-        // Components that some other page opens via openSubPage. Those are
-        // reached through that page (e.g. the bar pages are opened from inside
-        // Taskbar's "Components" section), so they must not be linked directly
-        // here, which would give them a wrong, shorter breadcrumb and path.
+        // Pages opened from another page are linked through it, linking them directly gives a wrong path
         const openedViaSubpage = [];
         for (const owner in navChildren) {
             const ownerGroup = comps.find(ns => ns.includes(owner));
@@ -288,11 +248,7 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
                     openedViaSubpage.push(ownerGroup[k]);
             }
         }
-        // Fallback: a StackPage may list sub-pages (pos > 0) whose openSubPage()
-        // call lives in a separate component file we don't scan (e.g. the
-        // Ethernet detail page is opened from EthernetSection.qml). Link any
-        // such sub-page by its position, deriving a label from its component
-        // name - but skip ones already reached through another page.
+        // Sub-pages opened from a file that isn't scanned (e.g. EthernetSection.qml) are linked by position
         for (let pos = 1; pos < names.length; pos++) {
             if (!(pos in children) && !openedViaSubpage.includes(names[pos])) {
                 let label = names[pos].replace(/(Detail)?Page$/, "");
@@ -306,8 +262,6 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
                 continue;
             const [icon, label, section] = children[posKey];
             const child = names[pos];
-            // Insert the section header (e.g. "Components") as a breadcrumb
-            // step between the parent page and the sub-page, when present.
             let labels = [mainLabel].concat(section ? [section] : []).concat([label]);
             let icons = [mainIcon].concat(section ? [icon] : []).concat([icon]);
             [labels, icons] = dedupCrumbs(labels, icons);
@@ -338,8 +292,6 @@ function buildNavMap(nexusDir, files, readFile, readLines) {
     return nav;
 }
 
-// How a line changes the brace depth, leaving out braces in strings and in a
-// trailing comment.
 function braceDelta(line) {
     const code = line.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '""').replace(/\/\/.*$/, "");
     let delta = 0;
@@ -360,9 +312,8 @@ function extractSettings(files, nav, readLines) {
         if (!pf)
             continue;
         const lines = readLines(pf);
-        let section = ""; // text of the most recent SectionHeader
+        let section = "";
         for (let i = 0; i < lines.length; i++) {
-            // Track the current section header so its words are searchable too.
             if (SECTION_RE.test(lines[i])) {
                 for (let j = i + 1; j < Math.min(i + 4, lines.length); j++) {
                     const m = LABEL_RE.exec(lines[j]);
@@ -384,9 +335,7 @@ function extractSettings(files, nav, readLines) {
             let checkedRoot = null;
             let checkedPath = null;
             let toggledPath = null;
-            // Only the row's own bindings: the scan stops at its closing brace
-            // and skips nested objects, so a row never takes a property from
-            // the row after it or from one of its children.
+            // Only the row's own bindings, nested objects are skipped
             let depth = braceDelta(lines[i]);
             for (let j = i + 1; j < lines.length && depth > 0; depth += braceDelta(lines[j]), j++) {
                 if (depth > 1)
@@ -429,8 +378,7 @@ function extractSettings(files, nav, readLines) {
                         toggledPath = tg[1];
                 }
             }
-            // Only expose a toggle path when read and write target the same
-            // property (symmetric), so flipping from search is safe.
+            // Only flippable from search when checked and onToggled use the same property
             const togglePath = rowType === "ToggleRow" && checkedPath && checkedPath === toggledPath ? checkedPath : "";
             if (label && anchor) {
                 entries.push({
@@ -443,13 +391,9 @@ function extractSettings(files, nav, readLines) {
                     title: label,
                     anchor: anchor,
                     section: section,
-                    // Subtexts with argument placeholders ("Base %1, layers
-                    // %2") have nothing to substitute here, so they'd show
-                    // the raw markers - leave them out entirely.
                     subtext: subtext && !/%\d/.test(unmark(subtext)) ? subtext : "",
                     togglePath: togglePath,
                     toggleGlobal: togglePath !== "" && checkedRoot === "GlobalConfig",
-                    // A row without searchIcon or an icon of its own uses its page's
                     icon: searchIcon ?? icon ?? (meta.crumbIcons.length > 0 ? meta.crumbIcons[meta.crumbIcons.length - 1] : "")
                 });
             }
@@ -458,14 +402,8 @@ function extractSettings(files, nav, readLines) {
     return mergeInfoRows(entries);
 }
 
-// InfoRow sections are read-only readouts - an ethernet connection's status,
-// interface, address and so on. Listing each as its own result buries actual
-// settings under rows nothing can be done to, so a section's info rows collapse
-// into one entry named after the section, keeping every label as a keyword so
-// searching "gateway" or "mac address" still finds it. Applies to any info
-// section, including ones added later. Only rows with a settingAnchor are
-// indexed, so each row whose label should be a keyword needs one; the merged
-// entry jumps to the first row's anchor.
+// A section's InfoRows become one entry named after the section, their labels kept as keywords.
+// Each row still needs a settingAnchor to be indexed, the entry jumps to the first one.
 function mergeInfoRows(entries) {
     const out = [];
     const merged = {};
@@ -493,22 +431,17 @@ function mergeInfoRows(entries) {
     return out;
 }
 
-// Classic inverted index + precomputed per-token ranking weights, built from
-// the translated labels. translate(marked) -> the string the user reads.
 function buildSearch(entries, translate) {
     const inverted = {};
     const ranking = {};
     for (let idx = 0; idx < entries.length; idx++) {
         const e = entries[idx];
         const title = cleanLabel(translate(e.title));
-        // e.keywords carries the labels of an info section merged into one
-        // entry, so searching any of them still reaches it.
         const extra = e.crumbLabels.concat(e.section, e.subtext, e.keywords ?? []).filter(l => l).map(translate);
         const fields = {
             title: title,
             keywords: title + " " + extra.join(" "),
-            // The source text too, so the English names in docs and issues keep
-            // working under any language. Only adds anything when translated.
+            // So the English names keep working under any language
             source: cleanLabel(unmark(e.title))
         };
         for (const field in fields) {
@@ -530,8 +463,7 @@ function buildSearch(entries, translate) {
     };
 }
 
-// Builds the language independent part of the index. readFile(path) -> string ("" if unreadable); listFiles(dir, suffix)
-// -> recursive absolute paths.
+// readFile(path) -> string ("" if unreadable), listFiles(dir, suffix) -> recursive absolute paths
 function buildIndex(nexusDir, readFile, listFiles) {
     const lineCache = {};
     const readLines = path => {

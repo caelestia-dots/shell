@@ -15,8 +15,7 @@ qml_module(caelestia-core
 )
 target_link_libraries(caelestia-core PUBLIC caelestia-util)
 
-# Bake the shell version and git revision in so CUtils can expose them without
-# spawning a process; the revision also invalidates the settings index cache.
+# Bake the shell version and git revision in so CUtils can expose them without spawning a process
 target_compile_definitions(caelestia-core PRIVATE
     CAELESTIA_VERSION="${VERSION}"
     GIT_REVISION="${GIT_REVISION}"

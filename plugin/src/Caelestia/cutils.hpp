@@ -15,7 +15,6 @@ class CUtils : public QObject {
 
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString qtVersion READ qtVersion CONSTANT)
-    // The settings search index cache is invalidated when this changes
     Q_PROPERTY(QString gitRevision READ gitRevision CONSTANT)
 
 public:
@@ -38,7 +37,6 @@ public:
     Q_INVOKABLE static QString readTextFile(const QString& path);
     Q_INVOKABLE static bool writeTextFile(const QString& path, const QString& text);
     Q_INVOKABLE static QStringList listFiles(const QString& dir, const QString& suffix);
-    // Hash of each file's path, size and modification time; changes when any of them is edited
     Q_INVOKABLE static QString fileFingerprint(const QStringList& paths);
 
     Q_INVOKABLE static QQuickItem* findChild(QQuickItem* root, const QString& name);

@@ -119,7 +119,6 @@ def parse_rows(lines: list[str]) -> list[Row]:
         j = i + 1
         while j < len(lines) and depth > 0:
             text = lines[j]
-            # Only the row's own bindings, one level in
             if depth == 1:
                 a = ANCHOR_RE.match(text)
                 if a and row.anchor is None:
