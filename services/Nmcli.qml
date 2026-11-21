@@ -1695,6 +1695,11 @@ Singleton {
         id: rescanProc
 
         command: ["nmcli", "dev", root.nmcliCommandWifi, "list", "--rescan", "yes"]
+        environment: ({
+                LANG: "C.UTF-8",
+                LC_ALL: "C.UTF-8",
+                LANGUAGE: "C"
+            })
         onExited: root.getNetworks()
     }
 
@@ -1705,7 +1710,8 @@ Singleton {
         command: ["nmcli", "monitor"]
         environment: ({
                 LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
+                LC_ALL: "C.UTF-8",
+                LANGUAGE: "C"
             })
         stdout: SplitParser {
             onRead: root.refreshOnConnectionChange()
@@ -1741,7 +1747,8 @@ Singleton {
 
         environment: ({
                 LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
+                LC_ALL: "C.UTF-8",
+                LANGUAGE: "C"
             })
 
         stdout: StdioCollector {
