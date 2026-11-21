@@ -241,9 +241,8 @@ CustomMouseArea {
             utilitiesShortcutActive = false;
         }
 
-        const popoutThreshold = (popouts.hasCurrent &&
-        withinPanelHeight(panels.popoutsWrapper, x, y)) ? (bar.implicitWidth - 22) :
-        bar.implicitWidth;
+        // Show popouts on hover
+        const popoutThreshold = (popouts.hasCurrent && withinPanelHeight(panels.popoutsWrapper, x, y)) ? (bar.implicitWidth - 16) : bar.implicitWidth;
 
         if (x < popoutThreshold) {
             bar.checkPopout(y);
