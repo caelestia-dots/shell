@@ -46,7 +46,6 @@ QtObject {
         }
         lastAnchor = anchor;
         if (samePage && sameSub) {
-            searchAnchor = "";
             searchAnchor = anchor;
             return;
         }

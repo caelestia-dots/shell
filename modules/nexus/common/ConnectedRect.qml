@@ -11,6 +11,7 @@ StyledRect {
     property bool first
     property bool last
     property string settingAnchor
+    // Only read by scripts/settings-index-check.py
     property bool searchable: true
     // Only read by the settings indexer
     property string searchIcon
