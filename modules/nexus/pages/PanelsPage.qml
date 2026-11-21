@@ -55,7 +55,7 @@ PageBase {
             icon: "tune"
             text: Tr.tr("OSD")
             subtext: Config.osd.enabled ? Tr.trCtx("Enabled", "panel status") : Tr.trCtx("Disabled", "panel status")
-            onClicked: root.nState.openSubPage(11)
+            onClicked: root.nState.openSubPage(6)
         }
     }
 }
