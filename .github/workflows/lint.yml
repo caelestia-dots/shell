@@ -85,12 +85,7 @@ jobs:
         id: ctcache-context
         shell: bash
         run: |
-          tool_hash="$(
-            {
-              pacman -Q clang llvm-libs
-              sha256sum /usr/bin/clang-tidy /usr/bin/clang-tidy-cache /usr/local/bin/clang-tidy
-            } | sha256sum | cut -d ' ' -f 1
-          )"
+          tool_hash="$(pacman -Q clang llvm-libs | sha256sum | cut -d ' ' -f 1)"
           echo "tools=$tool_hash" >> "$GITHUB_OUTPUT"
 
       - name: Restore clang-tidy cache
