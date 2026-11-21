@@ -7,7 +7,7 @@ lock
 nexus
 notifs
 osd
-picker
+overlays
 toasts
 session
 sidebar

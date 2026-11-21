@@ -74,6 +74,21 @@ private:
 
 #undef TRANSITION
 
+#define SHADER(name)                                                                                                   \
+    Q_PROPERTY(QUrl name READ name CONSTANT)                                                                           \
+                                                                                                                       \
+public:                                                                                                                \
+    [[nodiscard]] static QUrl name() {                                                                                 \
+        return { QStringLiteral("qrc:/shaders/" #name ".frag.qsb") };                                                  \
+    }                                                                                                                  \
+                                                                                                                       \
+private:
+
+    SHADER(superellipse)
+    SHADER(occluder)
+
+#undef SHADER
+
 public:
     explicit Shaders(QObject* parent = nullptr)
         : QObject(parent) {};

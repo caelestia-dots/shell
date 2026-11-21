@@ -4,6 +4,8 @@
 #include <qjsonarray.h>
 #include <qlocalsocket.h>
 #include <qloggingcategory.h>
+#include <qqmlengine.h>
+#include <qsharedpointer.h>
 #include <qvariant.h>
 
 #include "hyprdevices.hpp"
@@ -86,6 +88,31 @@ void HyprExtras::batchMessage(const QStringList& messages) {
     });
 }
 
+void HyprExtras::batchRequest(const QStringList& requests, const QJSValue& callback) {
+    if (requests.isEmpty())
+        return;
+
+    makeRequest(u"[[BATCH]]"_s + requests.join(u';'), [callback, this](bool success, const QByteArray& res) {
+        if (!success) {
+            qCWarning(lcHypr) << "batchRequest: request error:" << QString::fromUtf8(res);
+            return;
+        }
+
+        auto* const engine = qmlEngine(this);
+        if (!engine)
+            return;
+
+        QJSValueList args;
+        const auto replies = QString::fromUtf8(res.trimmed()).split(u"\n\n\n"_s);
+        for (const auto& reply : replies) {
+            const auto doc = QJsonDocument::fromJson(reply.toUtf8());
+            args << (doc.isNull() ? engine->toScriptValue(reply) : engine->toScriptValue(doc.toVariant()));
+        }
+
+        callback.call(args);
+    });
+}
+
 void HyprExtras::applyOptions(const QVariantHash& options) {
     if (options.isEmpty()) {
         return;
@@ -111,11 +138,11 @@ void HyprExtras::applyOptions(const QVariantHash& options) {
 
 void HyprExtras::refreshOptions() {
     if (!m_optionsRefresh.isNull()) {
-        m_optionsRefresh->close();
+        m_optionsRefresh->deleteLater();
     }
 
     m_optionsRefresh = makeRequestJson(u"descriptions"_s, [this](bool success, const QJsonDocument& response) {
-        m_optionsRefresh.reset();
+        m_optionsRefresh.clear();
         if (!success) {
             return;
         }
@@ -141,14 +168,23 @@ void HyprExtras::refreshOptions() {
 
 void HyprExtras::refreshDevices() {
     if (!m_devicesRefresh.isNull()) {
-        m_devicesRefresh->close();
+        m_devicesRefresh->deleteLater();
     }
 
     m_devicesRefresh = makeRequestJson(u"devices"_s, [this](bool success, const QJsonDocument& response) {
-        m_devicesRefresh.reset();
+        m_devicesRefresh.clear();
         if (success) {
             m_devices->updateLastIpcObject(response.object());
         }
+    });
+}
+
+void HyprExtras::cursorPosition(const QJSValue& callback) {
+    makeRequestJson(u"cursorpos"_s, [callback, this](bool success, const QJsonDocument& response) {
+        if (!success)
+            return;
+        if (auto* const engine = qmlEngine(this))
+            callback.call({ engine->toScriptValue(response.object()) });
     });
 }
 
@@ -207,23 +243,28 @@ HyprExtras::SocketPtr HyprExtras::makeRequest(
         return {};
     }
 
-    auto socket = SocketPtr::create(this);
+    auto* const socket = new QLocalSocket(this);
+    const auto buffer = QSharedPointer<QByteArray>::create();
 
-    QObject::connect(socket.data(), &QLocalSocket::connected, this, [=, this] {
-        QObject::connect(socket.data(), &QLocalSocket::readyRead, this, [socket, callback] {
-            auto response = socket->readAll();
-            callback(true, std::move(response));
-            socket->close();
-        });
-
+    QObject::connect(socket, &QLocalSocket::connected, this, [socket, request] {
         socket->write(request.toUtf8());
         socket->flush();
     });
 
-    QObject::connect(socket.data(), &QLocalSocket::errorOccurred, this, [=](QLocalSocket::LocalSocketError err) {
-        qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
-        callback(false, {});
-        socket->close();
+    QObject::connect(socket, &QLocalSocket::readyRead, this, [socket, buffer] {
+        buffer->append(socket->readAll());
+    });
+
+    // Hyprland closes the socket once the full response is written
+    QObject::connect(socket, &QLocalSocket::errorOccurred, this, [=](QLocalSocket::LocalSocketError err) {
+        if (err == QLocalSocket::PeerClosedError) {
+            buffer->append(socket->readAll());
+            callback(true, std::move(*buffer));
+        } else {
+            qCWarning(lcHypr) << "makeRequest: error making request:" << err << "| request:" << request;
+            callback(false, {});
+        }
+        socket->deleteLater();
     });
 
     socket->connectToServer(m_requestSocket);

@@ -17,6 +17,7 @@ Slider {
     property int waveDuration: 1000
     property int radius: Tokens.rounding.medium
     property bool interactionOnMove: true
+    property real handleHeight
     readonly property bool dragging: mouse.pressed
 
     property color fgColour: enabled ? Colours.palette.primary : Qt.alpha(Colours.palette.onSurface, 0.38)
@@ -27,7 +28,14 @@ Slider {
 
     signal interaction(v: real)
 
-    Component.onCompleted: filledWidth = Qt.binding(() => (width - handle.implicitWidth - handle.anchors.leftMargin) * pos)
+    function snapPos(p: real): real {
+        if (stepSize <= 0)
+            return p;
+        const steps = (to - from) / stepSize;
+        return Math.round(p * steps) / steps;
+    }
+
+    Component.onCompleted: filledWidth = Qt.binding(() => (width - handle.implicitWidth - handle.anchors.leftMargin * 2) * pos)
 
     implicitWidth: 200
     implicitHeight: 12
@@ -60,6 +68,7 @@ Slider {
             implicitWidth: implicitHeight
             implicitHeight: 4 * remaining.opacity
             opacity: remaining.opacity
+            visible: root.stepSize <= 0
 
             radius: Tokens.rounding.full
             color: root.fgColour
@@ -74,6 +83,9 @@ Slider {
 
             implicitWidth: 4
             implicitHeight: {
+                if (root.handleHeight > 0)
+                    return parent.height * root.handleHeight;
+
                 const t = CUtils.clamp((parent.height - 12) / 16, 0, 1);
                 const lerp = (a, b) => a + (b - a) * t;
                 return parent.height * (mouse.pressed ? lerp(3.5, 1.5) : lerp(3, 1.2));
@@ -99,6 +111,34 @@ Slider {
             sourceComponent: root.wavy ? waveComp : lineComp
         }
 
+        Repeater {
+            model: root.stepSize > 0 ? Math.round((root.to - root.from) / root.stepSize) + 1 : 0
+
+            StyledRect {
+                required property int index
+
+                readonly property int count: Math.round((root.to - root.from) / root.stepSize) + 1
+                readonly property real stepPos: index / (count - 1)
+                readonly property real trackLength: root.width - handle.implicitWidth - handle.anchors.leftMargin * 2
+                readonly property bool nearHandle: Math.abs(stepPos - root.pos) * trackLength < handle.implicitWidth + Tokens.spacing.extraSmall * 2
+                readonly property bool onFilled: stepPos <= root.pos
+
+                x: trackLength * stepPos + handle.anchors.leftMargin + (handle.implicitWidth - implicitWidth) / 2
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: 4
+                implicitHeight: 4
+                radius: Tokens.rounding.full
+                color: onFilled ? root.bgColour : root.fgColour
+                opacity: nearHandle || (root.wavy && onFilled) ? 0 : 1
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
+            }
+        }
+
         Component {
             id: lineComp
 
@@ -120,7 +160,7 @@ Slider {
                 lineWidth: root.height * 0.7
                 frequency: root.waveFrequency
                 startX: x
-                fullLength: root.width - handle.implicitWidth - handle.anchors.leftMargin
+                fullLength: root.width - handle.implicitWidth - handle.anchors.leftMargin * 2
                 color: root.fgColour
 
                 implicitWidth: root.filledWidth
@@ -148,7 +188,7 @@ Slider {
 
         target: root
         property: "pos"
-        value: CUtils.clamp(mouse.pressStartPos + mouse.dragMovement, 0, 1)
+        value: root.snapPos(CUtils.clamp(mouse.pressStartPos + mouse.dragMovement, 0, 1))
         when: mouse.pressed
     }
 
@@ -167,7 +207,7 @@ Slider {
         implicitHeight: handle.implicitHeight
 
         onPressed: e => {
-            widthBehavior.enabled = false;
+            widthBehavior.enabled = root.stepSize > 0;
             pressStartX = e.x;
             pressStartPos = root.visualPosition;
         }
@@ -178,7 +218,7 @@ Slider {
         }
         onReleased: e => {
             const clickPos = e.x / width;
-            const finalPos = mouse.dragMovement !== 0 ? posBinding.value : CUtils.clamp(clickPos, 0, 1);
+            const finalPos = mouse.dragMovement !== 0 ? posBinding.value : root.snapPos(CUtils.clamp(clickPos, 0, 1));
             root.interaction(finalPos);
             widthBehavior.enabled = true;
             dragMovement = 0;
