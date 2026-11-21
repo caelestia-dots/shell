@@ -959,11 +959,11 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 
 </details>
 
-### Application cgroups
+### Application launch prefix
 
-`general.apps.launchPrefix` is an optional command placed in front of applications started by the shell: launcher entries, terminal applications, notification and sidebar links, calculator terminals, and the configured playback and file-manager commands. It defaults to `[]`, so nothing is required on systems without systemd and no launcher is bundled.
+`general.apps.launchPrefix` optionally prepends a command to applications launched by the shell, including launcher entries, terminal applications, notification links, and configured playback and file-manager commands. It defaults to `[]` (disabled).
 
-A process started directly remains in the cgroup of the shell’s parent unit. That unit may be `caelestia.service` or the compositor unit, such as `wayland-wm@hyprland.desktop.service`. Memory used by the application is then charged to that unit, and stopping the unit can stop the application. A prefix such as `uwsm app` starts it in a separate scope instead.
+Applications launched directly by the shell inherit its cgroup. In systemd-managed sessions, this can place applications in the shell's or compositor's service cgroup, causing their resource usage to be attributed to that unit and potentially terminating them when it stops. Using a launch prefix such as `uwsm app` starts applications in separate scopes instead:
 
 ```json
 {
@@ -975,16 +975,17 @@ A process started directly remains in the cgroup of the shell’s parent unit. T
 }
 ```
 
-Include the wrapper’s own separator. For `uwsm app`, that is the final `--`. Leave the unit name unset: UWSM generates a name ending in `.scope`. Passing `-u` with any other suffix makes UWSM reject the launch. The same prefix is used for every wrapped launch; Caelestia does not select per-application limits. A property added before the separator, such as `"-p", "MemoryMax=8G"`, therefore applies to each of those launches. For a limit that should affect only one application, use a desktop-entry override or a small user wrapper selected by this prefix.
+The trailing `--` separates the wrapper's options from the application command. UWSM creates a separate scope in `app-graphical.slice` for each launch.
 
-After launching an application, check that its scope is outside the shell unit:
+The prefix applies to all supported application launches. For example, adding `"-p", "MemoryMax=8G"` before `--` sets an 8GiB memory limit on each scope. For per-application limits, use a wrapper that selects options based on the executable.
+
+To verify that applications are launched outside the shell's cgroup, run:
 
 ```sh
-systemctl --user status 'app-*.scope'
 systemctl --user show 'app-*.scope' -p Slice -p ControlGroup -p MemoryMax
 ```
 
-`Slice` should be `app-graphical.slice`. `ControlGroup` should be under that slice, not under `caelestia.service` or `wayland-wm@*.service`.
+The application's `ControlGroup` should be under `app-graphical.slice`, rather than the shell's service.
 
 ### Advanced configuration
 

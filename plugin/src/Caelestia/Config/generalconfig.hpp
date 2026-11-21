@@ -21,8 +21,6 @@ class GeneralApps : public settings::ObjectNode {
     CONFIG_PROPERTY(QStringList, audio, { u"pwvucontrol"_s })
     CONFIG_PROPERTY(QStringList, playback, { u"mpv"_s })
     CONFIG_PROPERTY(QStringList, explorer, { u"thunar"_s })
-
-    // Argv placed before user-facing app launches. Include "--" when the wrapper requires a separator.
     CONFIG_PROPERTY(QStringList, launchPrefix, {})
 };
 

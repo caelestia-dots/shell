@@ -80,7 +80,7 @@ Item {
                 id: stateLayer
 
                 onClicked: {
-                    AppLauncher.exec([...GlobalConfig.general.apps.terminal, "fish", "-C", `exec qalc -i '${root.math}'`], "");
+                    AppLauncher.exec([...GlobalConfig.general.apps.terminal, "fish", "-C", `exec qalc -i '${root.math}'`]);
                     root.list.screenState.launcher = false;
                 }
 

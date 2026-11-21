@@ -11,9 +11,7 @@ Searcher {
     function launch(entry: DesktopEntry): void {
         appDb.incrementFrequency(entry.id);
 
-        // Same as DesktopEntry.execute(): run entry.command in entry.workingDirectory.
-        // It goes through AppLauncher instead so general.apps.launchPrefix applies.
-        // https://quickshell.org/docs/v0.2.1/types/Quickshell/DesktopEntry/#execute
+        // Route desktop entries through AppLauncher to apply the launch prefix.
         const command = entry.runInTerminal ? [...GlobalConfig.general.apps.terminal, `${Quickshell.shellDir}/assets/wrap_term_launch.sh`, ...entry.command] : [...entry.command];
         AppLauncher.exec(command, entry.workingDirectory);
     }

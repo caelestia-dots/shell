@@ -51,7 +51,7 @@ Searcher {
             } else {
                 list.screenState.launcher = false;
                 if (!SessionManager.exec(command))
-                    AppLauncher.exec(command, "");
+                    AppLauncher.exec(command);
             }
         }
     }

@@ -107,7 +107,7 @@ ColumnLayout {
                 onClicked: {
                     root.screenState.utilities = false;
                     root.screenState.sidebar = false;
-                    AppLauncher.exec([...GlobalConfig.general.apps.playback, recording.modelData.path], "");
+                    AppLauncher.exec([...GlobalConfig.general.apps.playback, recording.modelData.path]);
                 }
             }
 
@@ -117,7 +117,7 @@ ColumnLayout {
                 onClicked: {
                     root.screenState.utilities = false;
                     root.screenState.sidebar = false;
-                    AppLauncher.exec([...GlobalConfig.general.apps.explorer, recording.modelData.path], "");
+                    AppLauncher.exec([...GlobalConfig.general.apps.explorer, recording.modelData.path]);
                 }
             }
 
