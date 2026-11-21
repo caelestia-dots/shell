@@ -227,6 +227,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > <details><summary>Ignored options</summary>
 >
 > - `appearance`: `anim.*`, `transparency.*`
+> - `background`: `workspaceWallpapers.*`
 > - `bar.tray`: `hiddenIcons`, `iconSubs`
 > - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
@@ -499,6 +500,9 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "blur": false,
             "rounding": 1,
             "spacing": 1
+        },
+        "workspaceWallpapers": {
+            "enabled": false
         }
     },
     "bar": {
