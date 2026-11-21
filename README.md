@@ -170,6 +170,8 @@ To set the wallpaper, you can type `>wallpaper` in the launcher to open the wall
 Alternatively, you can also use `caelestia wallpaper -f <path_to_wallpaper>` to set the wallpaper directly.
 Use `caelestia wallpaper -h` for more info about this command.
 
+While browsing wallpapers with the dynamic scheme, the current preview is also published as JSON at `$XDG_STATE_HOME/caelestia/wallpaper/preview-scheme.json` (defaulting to `~/.local/state/caelestia/wallpaper/preview-scheme.json`). The file has the same scheme format as `scheme.json` and is removed when the preview closes. Applications can watch it to preview colours without changing the saved wallpaper or scheme.
+
 ## Updating
 
 ### Packaged install (AUR)
