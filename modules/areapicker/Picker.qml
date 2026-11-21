@@ -9,6 +9,7 @@ import Caelestia.I18n
 import qs.components
 import qs.components.effects
 import qs.services
+import qs.utils
 
 MouseArea {
     id: root
@@ -87,7 +88,7 @@ MouseArea {
                 Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
                 Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, Tr.tr("Screenshot taken"), Tr.tr("Screenshot copied to clipboard")]);
             } else {
-                Quickshell.execDetached(["swappy", "-f", path]);
+                AppLauncher.exec(["swappy", "-f", path]);
             }
             closeAnim.start();
         });

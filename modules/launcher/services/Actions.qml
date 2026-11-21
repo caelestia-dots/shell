@@ -51,7 +51,7 @@ Searcher {
             } else {
                 list.screenState.launcher = false;
                 if (!SessionManager.exec(command))
-                    Quickshell.execDetached(command);
+                    AppLauncher.exec(command);
             }
         }
     }
