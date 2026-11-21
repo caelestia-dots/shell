@@ -17,6 +17,13 @@ Item {
     property real horizontalStretch
     property matrix4x4 deformMatrix
 
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Tokens.sizes.utilities.width * (1 - sidebarLerp)
+
     readonly property PersistentProperties props: PersistentProperties {
         property bool recordingListExpanded: false
         property string recordingConfirmDelete
@@ -30,10 +37,10 @@ Item {
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarLerp
 
-    visible: offsetScale < 1
-    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale
+    visible: offsetScale < 1 && !layoutHidden
+    anchors.bottomMargin: (-implicitHeight - 5) * offsetScale - layoutShiftY
     implicitHeight: content.implicitHeight + totalPadding
-    implicitWidth: sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch * sidebarLerp + Tokens.sizes.utilities.width * (1 - sidebarLerp)
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     opacity: 1 - offsetScale
 
     states: State {

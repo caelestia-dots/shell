@@ -14,9 +14,16 @@ Item {
     readonly property bool shouldBeActive: screenState.sidebar && Config.sidebar.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
 
-    visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5) * offsetScale
-    implicitWidth: Tokens.sizes.sidebar.width
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: Tokens.sizes.sidebar.width
+
+    visible: offsetScale < 1 && !layoutHidden
+    anchors.rightMargin: (-implicitWidth - 5) * offsetScale - layoutShiftX
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {
@@ -36,7 +43,7 @@ Item {
         active: root.shouldBeActive || root.visible
 
         sourceComponent: Content {
-            implicitWidth: Tokens.sizes.sidebar.width - content.anchors.leftMargin - content.anchors.margins
+            implicitWidth: root.implicitWidth - content.anchors.leftMargin - content.anchors.margins
             props: root.props
             screenState: root.screenState
         }

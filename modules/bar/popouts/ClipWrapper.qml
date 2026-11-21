@@ -14,10 +14,17 @@ Item {
     readonly property alias content: content
     property real offsetScale: x > 0 || content.hasCurrent ? 0 : 1
 
-    visible: width > 0 && height > 0
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: content.naturalWidth * (1 - offsetScale)
+
+    visible: width > 0 && height > 0 && !layoutHidden
     clip: true
 
-    implicitWidth: content.implicitWidth * (1 - offsetScale)
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     implicitHeight: content.implicitHeight
 
     x: content.isDetached ? (parent.width - content.nonAnimWidth) / 2 : 0
@@ -57,9 +64,10 @@ Item {
 
         screen: root.screen
         offsetScale: root.offsetScale
+        layoutMaxWidth: root.layoutMaxWidth
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
-        anchors.leftMargin: (-implicitWidth - 5) * root.offsetScale
+        anchors.leftMargin: (-implicitWidth - 5) * root.offsetScale + content.layoutShiftX
     }
 }

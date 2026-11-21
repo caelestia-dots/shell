@@ -16,6 +16,12 @@ Item {
     required property ShellScreen screen
     required property real offsetScale
 
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    readonly property real naturalWidth: nonAnimWidth
+
     readonly property alias content: content
     readonly property alias winfo: winfo
     readonly property alias nexus: nexus
@@ -61,7 +67,7 @@ Item {
         detachedMode = "";
     }
 
-    implicitWidth: nonAnimWidth
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     implicitHeight: nonAnimHeight
 
     focus: hasCurrent

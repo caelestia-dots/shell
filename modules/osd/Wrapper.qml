@@ -19,6 +19,13 @@ Item {
     property real offsetScale: shouldBeActive ? 0 : 1
     property real sidebarOffset: sidebarOrSessionVisible ? 12 : 0
 
+    // Width cap applied by the LayoutManager
+    property real layoutMaxWidth: 0
+    property real layoutShiftX: 0
+    property real layoutShiftY: 0
+    property bool layoutHidden: false
+    readonly property real naturalWidth: content.implicitWidth
+
     property real volume
     property bool muted
     property real sourceVolume
@@ -38,9 +45,9 @@ Item {
         brightness = root.monitor?.brightness ?? 0;
     }
 
-    visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
-    implicitWidth: content.implicitWidth
+    visible: offsetScale < 1 && !layoutHidden
+    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale - layoutShiftX
+    implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
     implicitHeight: content.implicitHeight
     opacity: 1 - offsetScale
 
