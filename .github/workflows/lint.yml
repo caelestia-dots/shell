@@ -92,9 +92,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.ctcache
-          key: ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/lint.yml', '.github/workflows/update-image.yml') }}-${{ github.sha }}
+          key: ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/update-image.yml') }}-${{ github.sha }}
           restore-keys: |
-            ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/lint.yml', '.github/workflows/update-image.yml') }}-
+            ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy', '.github/workflows/update-image.yml') }}-
 
       - name: Configure CMake
         run: |
