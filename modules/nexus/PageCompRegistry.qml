@@ -123,6 +123,9 @@ QtObject {
                 Component {
                     UtilitiesPanel {}
                 }
+                Component {
+                    OsdPanel {}
+                }
 
                 // Taskbar component sub-pages
                 Component {
@@ -139,9 +142,6 @@ QtObject {
                 }
                 Component {
                     BarClock {}
-                }
-                Component {
-                    OsdPanel {}
                 }
             }
         },
