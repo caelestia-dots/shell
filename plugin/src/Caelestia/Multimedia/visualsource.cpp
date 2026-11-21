@@ -5,6 +5,7 @@
 #include <qvideosink.h>
 
 #include "imagecache.hpp"
+#include "remotecache.hpp"
 
 namespace caelestia::shell::multimedia {
 
@@ -14,6 +15,10 @@ VisualSource::VisualSource(QObject* parent)
     : QObject(parent) {
     m_player.setLoops(QMediaPlayer::Infinite);
     QObject::connect(&m_player, &QMediaPlayer::mediaStatusChanged, this, &VisualSource::onMediaStatusChanged);
+    QObject::connect(RemoteCache::instance(), &RemoteCache::updated, this, [this](const QUrl& url, const QUrl& file) {
+        if (QUrl(m_source) == url)
+            setLocalPath(file.toLocalFile());
+    });
 }
 
 VisualSource::Type VisualSource::type() const {
@@ -43,9 +48,32 @@ void VisualSource::setSource(const QString& source) {
     m_source = source;
     emit sourceChanged();
 
-    const auto path = localPath();
+    const QUrl url(m_source);
+    if (RemoteCache::isRemote(url)) {
+        m_localPath.clear();
+        load();
+        RemoteCache::instance()->fetch(url).then(this, [this, url](const QUrl& file) {
+            if (QUrl(m_source) == url)
+                setLocalPath(file.toLocalFile());
+        });
+    } else {
+        m_localPath = url.isLocalFile() ? url.toLocalFile() : m_source;
+        load();
+    }
+}
+
+void VisualSource::setLocalPath(const QString& path) {
+    if (m_localPath == path)
+        return;
+
+    m_localPath = path;
+    load();
+}
+
+void VisualSource::load() {
     const auto provider = QUrl(m_source).scheme() == u"image"_s;
-    const auto mime = path.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(path).name();
+    const auto mime =
+        m_localPath.isEmpty() || provider ? QString() : QMimeDatabase().mimeTypeForFile(m_localPath).name();
     // We don't use the mime type for svg checking because Qt doesn't.
     // See QQuickPixmap::isScalableImageFormat.
     const auto prettyPath = QUrl(m_source).path(QUrl::PrettyDecoded);
@@ -189,7 +217,7 @@ void VisualSource::watchWindow(QQuickWindow* window) {
 }
 
 void VisualSource::refresh() {
-    const auto path = localPath();
+    const auto& path = m_localPath;
     if (path.isEmpty()) {
         setImagePath({});
         return;
@@ -220,21 +248,24 @@ void VisualSource::refresh() {
     m_key = key;
     m_bucket = bucket;
     setSourceSize(bucket);
-    const auto cached = cache->lookup(key);
+    cache->lookup(key).then(this, [this, cache, key, path, bucket](const QUrl& cached) {
+        if (key != m_key)
+            return;
 
-    if (m_type == Type::Live) {
-        m_preview = cached;
-        setImagePath(m_videoReady ? QUrl() : cached);
-        syncPlayer();
-        return;
-    }
+        if (m_type == Type::Live) {
+            m_preview = cached;
+            setImagePath(m_videoReady ? QUrl() : cached);
+            syncPlayer();
+            return;
+        }
 
-    if (cached.isEmpty()) {
-        cache->store(key, path, bucket, aspectMode());
-        setImagePath(QUrl::fromLocalFile(path));
-    } else {
-        setImagePath(cached);
-    }
+        if (cached.isEmpty()) {
+            cache->store(key, path, bucket, aspectMode());
+            setImagePath(QUrl::fromLocalFile(path));
+        } else {
+            setImagePath(cached);
+        }
+    });
 }
 
 void VisualSource::onVideoFrame(const QVideoFrame& frame) {
@@ -244,8 +275,7 @@ void VisualSource::onVideoFrame(const QVideoFrame& frame) {
     setVideoReady(true);
     setImagePath({});
 
-    if (!m_key.isEmpty() && ImageCache::instance()->lookup(m_key).isEmpty())
-        ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
+    ImageCache::instance()->store(m_key, frame.toImage(), m_bucket, aspectMode());
 
     if (!m_playing)
         unload();
@@ -267,7 +297,7 @@ void VisualSource::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 }
 
 void VisualSource::syncPlayer() {
-    const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
+    const auto url = m_type == Type::Live ? QUrl::fromLocalFile(m_localPath) : QUrl();
     if (!m_player.source().isEmpty() && m_player.source() != url)
         unload();
 
@@ -303,13 +333,10 @@ void VisualSource::unload() {
     m_player.setSource({});
 }
 
-QString VisualSource::localPath() const {
-    const QUrl url(m_source);
-    return url.isLocalFile() ? url.toLocalFile() : m_source;
-}
-
 QUrl VisualSource::rawUrl() const {
     const QUrl url(m_source);
+    if (RemoteCache::isRemote(url))
+        return QUrl::fromLocalFile(m_localPath);
     return url.isLocalFile() || !url.scheme().isEmpty() ? url : QUrl::fromLocalFile(m_source);
 }
 
