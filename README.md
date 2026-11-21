@@ -828,10 +828,10 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "osd": {
         "enabled": true,
+        "showOnHover": true
         "hideDelay": 2000,
         "enableBrightness": true,
-        "enableMicrophone": false,
-        "showOnHover": true
+        "enableMicrophone": false
     },
     "services": {
         "weatherLocation": "",
