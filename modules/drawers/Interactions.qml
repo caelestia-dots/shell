@@ -120,7 +120,7 @@ CustomMouseArea {
 
         if (panels.sidebar.offsetScale === 1) {
             // Show osd on hover
-            const showOsd = inRightPanel(panels.osdWrapper, x, y);
+            const showOsd = Config.osd.showOnHover && inRightPanel(panels.osdWrapper, x, y);
 
             // Always update visibility based on hover if not in shortcut mode
             if (!osdShortcutActive) {
@@ -159,7 +159,7 @@ CustomMouseArea {
         } else {
             const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
             // Show osd on hover
-            const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
+            const showOsd = Config.osd.showOnHover && outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
 
             // Always update visibility based on hover if not in shortcut mode
             if (!osdShortcutActive) {
@@ -231,7 +231,7 @@ CustomMouseArea {
         }
 
         // Show utilities on hover
-        const showUtilities = inBottomPanel(panels.utilities, x, y, true);
+        const showUtilities = Config.utilities.showOnHover && inBottomPanel(panels.utilities, x, y, true);
 
         // Always update visibility based on hover if not in shortcut mode
         if (!utilitiesShortcutActive) {
@@ -303,7 +303,9 @@ CustomMouseArea {
         function onUtilitiesChanged() {
             if (root.screenState.utilities) {
                 // Utilities became visible, immediately check if this should be shortcut mode
-                const inUtilitiesArea = root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY);
+                // Use static geometry (ignores offsetScale) to avoid false positive during open animation
+                const panelY = root.borderThickness + root.panels.utilities.y;
+                const inUtilitiesArea = root.mouseY >= panelY - Config.border.rounding && root.mouseY <= panelY + root.panels.utilities.height + Config.border.rounding && root.mouseX > Math.min(root.width - Config.border.minThickness, root.bar.implicitWidth + root.panels.utilities.x);
                 if (!inUtilitiesArea) {
                     root.utilitiesShortcutActive = true;
                 }
