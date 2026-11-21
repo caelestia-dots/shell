@@ -10,12 +10,15 @@ Scope {
     id: root
 
     readonly property list<var> warnLevels: [...GlobalConfig.general.battery.warnLevels.values].sort((a, b) => a.level - b.level)
+    readonly property list<string> criticalAction: GlobalConfig.general.battery.criticalAction
+    readonly property bool criticalActionIsHibernate: criticalAction.length > 0 && criticalAction[criticalAction.length - 1].replace(/[-_]/g, "").toLowerCase() === "hibernate"
     property real lastPercentage: 100
 
     function handleBatteryWarnings(): void {
         const p = UPower.displayDevice.percentage * 100;
 
         if (!UPower.onBattery) {
+            criticalTimer.stop();
             root.lastPercentage = p;
             return;
         }
@@ -29,9 +32,12 @@ Scope {
             }
         }
 
-        if (!hibernateTimer.running && p <= GlobalConfig.general.battery.criticalLevel) {
-            Toaster.toast(Tr.tr("Hibernating in 5 seconds"), Tr.tr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
-            hibernateTimer.start();
+        if (!criticalTimer.running && root.criticalAction.length > 0 && p <= GlobalConfig.general.battery.criticalLevel) {
+            if (root.criticalActionIsHibernate)
+                Toaster.toast(Tr.tr("Hibernating in 5 seconds"), Tr.tr("Hibernating to prevent data loss"), "battery_android_alert", Toast.Error);
+            else
+                Toaster.toast(Tr.tr("Critical battery level"), Tr.tr("Running the critical battery action in 5 seconds"), "battery_android_alert", Toast.Error);
+            criticalTimer.start();
         }
 
         root.lastPercentage = p;
@@ -47,6 +53,7 @@ Scope {
                     Toaster.toast(Tr.tr("Charger unplugged"), Tr.tr("Battery is discharging"), "power_off");
                 root.handleBatteryWarnings();
             } else {
+                criticalTimer.stop();
                 if (GlobalConfig.utilities.toasts.chargingChanged)
                     Toaster.toast(Tr.tr("Charger plugged in"), Tr.tr("Battery is charging"), "power");
                 root.lastPercentage = 100;
@@ -77,9 +84,17 @@ Scope {
     }
 
     Timer {
-        id: hibernateTimer
+        id: criticalTimer
 
         interval: 5000
-        onTriggered: SessionManager.hibernate()
+        onTriggered: {
+            // Charger may have been plugged in during the countdown
+            if (!UPower.onBattery)
+                return;
+
+            const action = root.criticalAction;
+            if (action.length > 0 && !SessionManager.exec(action))
+                Quickshell.execDetached(action);
+        }
     }
 }
