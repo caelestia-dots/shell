@@ -21,6 +21,44 @@
         "type": "github"
       }
     },
+    "caelestia-lib": {
+      "inputs": {
+        "m3colours": "m3colours",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795233872,
+        "narHash": "sha256-zOtKdRqhx9zE+QtQvigZVfQF3S4XJkEM2OVgTtbKR9U=",
+        "owner": "caelestia-dots",
+        "repo": "lib",
+        "rev": "0be3967eedf7c01991364071e486b9c594079b43",
+        "type": "github"
+      },
+      "original": {
+        "owner": "caelestia-dots",
+        "repo": "lib",
+        "type": "github"
+      }
+    },
+    "m3colours": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792825273,
+        "narHash": "sha256-17Y5ECDDttTAk4skRxuk3T97J48yzRZ43K+zg5lEwLw=",
+        "owner": "soramanew",
+        "repo": "m3colours",
+        "rev": "f38b9185357d22bd1b63e7dd14c0c044c268c4cd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "soramanew",
+        "repo": "m3colours",
+        "rev": "f38b9185357d22bd1b63e7dd14c0c044c268c4cd",
+        "type": "github"
+      }
+    },
     "m3shapes": {
       "inputs": {
         "nixpkgs": [
@@ -81,6 +119,7 @@
     "root": {
       "inputs": {
         "caelestia-cli": "caelestia-cli",
+        "caelestia-lib": "caelestia-lib",
         "m3shapes": "m3shapes",
         "nixpkgs": "nixpkgs",
         "quickshell": "quickshell"
