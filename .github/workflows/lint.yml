@@ -25,10 +25,19 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v7
 
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: lint-qml-clazy
+          install: no
+
       - name: CMake build
         run: |
           # Set version and git rev for CI build so we don't call git
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clazy -DVERSION= -DGIT_REVISION=
+          cmake -B build -G Ninja
+            -DCMAKE_CXX_COMPILER=clazy \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DVERSION= -DGIT_REVISION=
           cmake --build build
 
       - name: Lint QML
@@ -72,15 +81,40 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v7
 
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: lint-cpp-clang
+          install: no
+
+      - name: Restore clang-tidy cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/.ctcache
+          key: ctcache-lint-cpp-clang-${{ hashFiles('.clang-tidy', '.github/workflows/lint.yml', '.github/workflows/update-image.yml') }}
+          restore-keys: |
+            ctcache-lint-cpp-clang-
+
       - name: CMake build
         run: |
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON -DVERSION= -DGIT_REVISION=
+          cmake -B build -G Ninja \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON \
+            -DVERSION= -DGIT_REVISION=
 
       - name: Lint C++
+        env:
+          CTCACHE_SAVE_OUTPUT: "1"
+          CTCACHE_LOCAL: "1"
+          CTCACHE_DIR: ${{ github.workspace }}/.ctcache
+          CTCACHE_STRIP: ${{ github.workspace }}
         run: |
           clang-tidy --version
+
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
+            -clang-tidy-binary=/usr/local/bin/clang-tidy \
             -source-filter='^(?!.*/build/).*\.cpp$'
 
   lint-check:
