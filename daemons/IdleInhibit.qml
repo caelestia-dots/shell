@@ -2,6 +2,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Caelestia.Config
+import Caelestia.Services
 import Caelestia.State
 
 Scope {
@@ -14,6 +16,13 @@ Scope {
         }
 
         target: RuntimeState
+    }
+
+    // Stops the lid from suspending (or whatever logind is set to do) while keep awake is on
+    Binding {
+        target: SessionManager
+        property: "inhibitLidSwitch"
+        value: RuntimeState.inhibitIdle && GlobalConfig.general.idle.inhibitWhenLidClosed
     }
 
     IdleInhibitor {

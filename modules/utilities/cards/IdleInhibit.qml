@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Services
 import Caelestia.State
 import qs.components
 import qs.components.controls
@@ -57,7 +58,13 @@ StyledRect {
 
             StyledText {
                 Layout.fillWidth: true
-                text: RuntimeState.inhibitIdle ? Tr.trCtx("Preventing sleep mode", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor")
+                text: {
+                    if (SessionManager.lidSwitchInhibited)
+                        return Tr.trCtx("Preventing sleep, even with the lid closed", "idle inhibitor");
+                    if (RuntimeState.inhibitIdle)
+                        return Tr.trCtx("Preventing sleep mode", "idle inhibitor");
+                    return Tr.trCtx("Normal power management", "idle inhibitor");
+                }
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 elide: Text.ElideRight

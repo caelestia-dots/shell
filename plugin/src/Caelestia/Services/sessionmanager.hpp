@@ -1,6 +1,7 @@
 #pragma once
 
 #include <qdbusconnection.h>
+#include <qdbusunixfiledescriptor.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qstring.h>
@@ -16,8 +17,17 @@ class SessionManager : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
+    // Whether a lid switch inhibitor is requested, lidSwitchInhibited is whether one is actually held
+    Q_PROPERTY(bool inhibitLidSwitch READ inhibitLidSwitch WRITE setInhibitLidSwitch NOTIFY inhibitLidSwitchChanged)
+    Q_PROPERTY(bool lidSwitchInhibited READ lidSwitchInhibited NOTIFY lidSwitchInhibitedChanged)
+
 public:
     explicit SessionManager(QObject* parent = nullptr);
+
+    [[nodiscard]] bool inhibitLidSwitch() const;
+    void setInhibitLidSwitch(bool inhibit);
+
+    [[nodiscard]] bool lidSwitchInhibited() const;
 
     Q_INVOKABLE void logout();
     Q_INVOKABLE void suspend();
@@ -29,6 +39,8 @@ public:
     Q_INVOKABLE bool exec(const QStringList& command);
 
 signals:
+    void inhibitLidSwitchChanged();
+    void lidSwitchInhibitedChanged();
     void aboutToSleep();
     void resumed();
     void lockRequested();
@@ -45,8 +57,14 @@ private:
     void call(const QString& path, const QString& iface, const QString& method, const QVariantList& args = {});
     void callManager(const QString& method);
     void callSession(const QString& method);
+    void acquireLidSwitchLock();
+    void setLidSwitchLock(const QDBusUnixFileDescriptor& lock);
 
     QString m_sessionPath;
+
+    bool m_inhibitLidSwitch = false;
+    quint64 m_lidSwitchRequest = 0;
+    QDBusUnixFileDescriptor m_lidSwitchLock;
 };
 
 } // namespace caelestia::shell::services
