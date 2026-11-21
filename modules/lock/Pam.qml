@@ -25,6 +25,7 @@ Scope {
     readonly property alias howdy: howdy
 
     property string lockMessage
+    property string passwordErrorMessage: ""
     property int state
     property string buffer
 
@@ -46,6 +47,7 @@ Scope {
             howdy.abort();
 
         if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+            lockMessage = "";
             passwd.start();
         } else if ((event.key === Qt.Key_Backspace || event.key === Qt.Key_U) && (event.modifiers & Qt.ControlModifier)) {
             buffer = "";
@@ -77,11 +79,10 @@ Scope {
         config: "passwd"
         configDirectory: Quickshell.shellPath("assets/pam.d")
 
-        onMessageChanged: {
-            if (message.startsWith("The account is locked"))
-                root.lockMessage = message;
-            else if (root.lockMessage && message.endsWith(" left to unlock)"))
-                root.lockMessage += "\n" + message;
+        // Non-prompt messages, e.g. pam_faillock's lockout notice. They are localised, so don't match on the text
+        onPamMessage: {
+            if (!responseRequired && message)
+                root.lockMessage = root.lockMessage ? `${root.lockMessage}\n${message}` : message;
         }
 
         onResponseRequiredChanged: {
@@ -107,6 +108,15 @@ Scope {
 
             root.flashMsg();
             pwdStateReset.restart();
+        }
+
+        onActiveChanged: {
+            if (active)
+                root.passwordErrorMessage = "";
+        }
+
+        onError: error => {
+            root.passwordErrorMessage = PamError.toString(error);
         }
     }
 
@@ -200,7 +210,8 @@ Scope {
         readonly property bool canAttempt: available && enabled && root.lock.secure && tries < maxTries
 
         readonly property alias active: pam.active
-        readonly property alias message: pam.message
+        property string message: ""
+        property string errorMessage: ""
 
         signal availProcExited(code: int)
 
@@ -257,6 +268,22 @@ Scope {
 
                 root.flashMsg();
                 stateReset.restart();
+            }
+
+            onActiveChanged: {
+                if (active) {
+                    ctx.message = "";
+                    ctx.errorMessage = "";
+                }
+            }
+
+            onPamMessage: {
+                if (!responseRequired && message)
+                    ctx.message = ctx.message ? `${ctx.message}\n${message}` : message;
+            }
+
+            onError: error => {
+                ctx.errorMessage = PamError.toString(error);
             }
         }
 
