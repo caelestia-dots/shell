@@ -305,9 +305,7 @@ CustomMouseArea {
                 // Utilities became visible, immediately check if this should be shortcut mode
                 // Use static geometry (ignores offsetScale) to avoid false positive during open animation
                 const panelY = root.borderThickness + panels.utilities.y;
-                const inUtilitiesArea = root.mouseY >= panelY - Config.border.rounding
-                    && root.mouseY <= panelY + panels.utilities.height + Config.border.rounding
-                    && root.mouseX > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.utilities.x);
+                const inUtilitiesArea = root.mouseY >= panelY - Config.border.rounding && root.mouseY <= panelY + panels.utilities.height + Config.border.rounding && root.mouseX > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.utilities.x);
                 if (!inUtilitiesArea) {
                     root.utilitiesShortcutActive = true;
                 }
