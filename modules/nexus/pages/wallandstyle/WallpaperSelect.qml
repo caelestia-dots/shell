@@ -7,10 +7,10 @@ import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Models
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.components.filedialog
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -64,7 +64,7 @@ PageBase {
                 verticalPadding: Tokens.padding.medium
                 type: IconTextButton.Tonal
                 onClicked: {
-                    Wallpapers.setRandom();
+                    Wallpapers.setRandom(); // TODO: add random
                     root.nState.closeSubPage();
                 }
             }
@@ -73,11 +73,11 @@ PageBase {
         WallItem {
             imgHeight: Math.round(width * 0.3)
             radius: Tokens.rounding.extraLarge
-            source: Quickshell.shellPath("assets/wallpaper.webp")
+            source: Wallpapers.defaultWallpaper()
             text: Tr.tr("Featured wallpaper")
             fillLabel: false
             onClicked: {
-                Wallpapers.setWallpaper(Quickshell.shellPath("assets/wallpaper.webp"));
+                Wallpapers.setWallpaper(Wallpapers.defaultWallpaper());
                 root.nState.closeSubPage();
             }
         }
@@ -100,13 +100,13 @@ PageBase {
                 id: localWalls
 
                 model: {
-                    const walls = Wallpapers.list;
+                    const walls = Wallpapers.model.entries;
                     const baseDir = Paths.wallsdir;
                     const categories = {};
                     const list = [];
                     for (const w of walls) {
                         if (w.parentDir !== baseDir) {
-                            const category = Wallpapers.getCategoryFor(w);
+                            const category = Wallpapers.categoryFor(w);
                             if (category && (!(category in categories) || categories[category].name.localeCompare(w.name) > 0))
                                 categories[category] = w;
                         } else {
@@ -133,14 +133,14 @@ PageBase {
                             return "";
 
                         if (modelData.parentDir !== Paths.wallsdir) {
-                            const category = Wallpapers.getCategoryFor(modelData);
+                            const category = Wallpapers.categoryFor(modelData);
                             return category.slice(0, 1).toUpperCase() + category.slice(1);
                         }
                         return modelData.name;
                     }
                     onClicked: {
                         if (modelData.parentDir !== Paths.wallsdir) {
-                            root.nState.selectedWallpaperCategory = Wallpapers.getCategoryFor(modelData);
+                            root.nState.selectedWallpaperCategory = Wallpapers.categoryFor(modelData);
                             root.nState.openSubPage(2); // Category page
                         } else {
                             Wallpapers.setWallpaper(modelData.path);
@@ -159,7 +159,7 @@ PageBase {
             visible: active
 
             sourceComponent: StyledRect {
-                color: Colours.tPalette.m3surfaceContainer
+                color: Colours.tPalette.surfaceContainer
                 radius: Tokens.rounding.extraLarge
                 implicitHeight: noWallsLayout.implicitHeight + Tokens.padding.extraExtraLarge * 2
 
@@ -172,14 +172,14 @@ PageBase {
                     MaterialIcon {
                         Layout.alignment: Qt.AlignHCenter
                         text: "hide_image"
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
                         fontStyle: Tokens.font.icon.extraLarge
                     }
 
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
                         text: Tr.tr("No local wallpapers found")
-                        color: Colours.palette.m3outline
+                        color: Colours.palette.outline
                         font: Tokens.font.title.small
                     }
                 }

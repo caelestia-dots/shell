@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 
 Item {
@@ -124,7 +124,7 @@ Item {
 
         MaterialIcon {
             text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             fontStyle: Tokens.font.icon.extraLarge
 
             anchors.verticalCenter: parent.verticalCenter
@@ -135,13 +135,13 @@ Item {
 
             StyledText {
                 text: root.state === "wallpapers" ? Tr.tr("No wallpapers found") : Tr.tr("No results")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.body.builders.large.weight(Font.Medium).build()
             }
 
             StyledText {
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : Tr.tr("Try searching for something else")
-                color: Colours.palette.m3onSurfaceVariant
+                text: root.state === "wallpapers" && Wallpapers.model.entries.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : Tr.tr("Try searching for something else")
+                color: Colours.palette.onSurfaceVariant
                 font: Tokens.font.body.medium
             }
         }

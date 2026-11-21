@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 LazyLoader {
     id: loader
@@ -53,7 +53,7 @@ LazyLoader {
         implicitHeight: 600
         minimumSize.width: 400
         minimumSize.height: 300
-        color: Colours.tPalette.m3surface
+        color: Colours.tPalette.surface
         surfaceFormat.opaque: false
         title: loader.title
 

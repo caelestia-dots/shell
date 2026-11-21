@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
 import qs.services
@@ -50,7 +51,7 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: root.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+    color: root.urgency === "critical" ? Colours.palette.secondaryContainer : Colours.layer(Colours.palette.surfaceContainerHigh, 2)
 
     RowLayout {
         id: content
@@ -90,7 +91,7 @@ StyledRect {
                 ColouredIcon {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
                     source: Quickshell.iconPath(root.appIcon)
-                    colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    colour: root.urgency === "critical" ? Colours.palette.onError : root.urgency === "low" ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
                     layer.enabled: root.appIcon.endsWith("symbolic")
                 }
             }
@@ -100,14 +101,14 @@ StyledRect {
 
                 MaterialIcon {
                     text: Icons.getNotifIcon(root.notifs[0]?.summary, root.urgency)
-                    color: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    color: root.urgency === "critical" ? Colours.palette.onError : root.urgency === "low" ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
                     fontStyle: Tokens.font.icon.large
                 }
             }
 
             ClipRect {
                 anchors.fill: parent
-                color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 3) : Colours.palette.m3secondaryContainer
+                color: root.urgency === "critical" ? Colours.palette.error : root.urgency === "low" ? Colours.layer(Colours.palette.surfaceContainerHighest, 3) : Colours.palette.secondaryContainer
                 radius: Tokens.rounding.full
 
                 Loader {
@@ -127,14 +128,14 @@ StyledRect {
                     implicitWidth: Tokens.sizes.notifs.badge
                     implicitHeight: Tokens.sizes.notifs.badge
 
-                    color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3secondaryContainer
+                    color: root.urgency === "critical" ? Colours.palette.error : root.urgency === "low" ? Colours.palette.surfaceContainerHighest : Colours.palette.secondaryContainer
                     radius: Tokens.rounding.full
 
                     ColouredIcon {
                         anchors.centerIn: parent
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
                         source: Quickshell.iconPath(root.appIcon)
-                        colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        colour: root.urgency === "critical" ? Colours.palette.onError : root.urgency === "low" ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer
                         layer.enabled: root.appIcon.endsWith("symbolic")
                     }
                 }
@@ -155,7 +156,7 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
@@ -163,7 +164,7 @@ StyledRect {
                 StyledText {
                     animate: true
                     text: root.notifs[0]?.timeStr ?? ""
-                    color: Colours.palette.m3outline
+                    color: Colours.palette.outline
                     font: Tokens.font.body.small
                 }
 
@@ -171,14 +172,14 @@ StyledRect {
                     implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
                     implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
-                    color: root.urgency === "critical" ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+                    color: root.urgency === "critical" ? Colours.palette.error : Colours.layer(Colours.palette.surfaceContainerHighest, 2)
                     radius: Tokens.rounding.full
 
                     opacity: root.notifs.length > Config.notifs.groupPreviewNum ? 1 : 0
                     Layout.preferredWidth: root.notifs.length > Config.notifs.groupPreviewNum ? implicitWidth : 0
 
                     StateLayer {
-                        color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                        color: root.urgency === "critical" ? Colours.palette.onError : Colours.palette.onSurface
                         onClicked: root.expanded = !root.expanded
                     }
 
@@ -194,7 +195,7 @@ StyledRect {
                             Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.notifs.length
-                            color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                            color: root.urgency === "critical" ? Colours.palette.onError : Colours.palette.onSurface
                             font: Tokens.font.body.small
                         }
 
@@ -202,7 +203,7 @@ StyledRect {
                             Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.expanded ? "expand_less" : "expand_more"
-                            color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                            color: root.urgency === "critical" ? Colours.palette.onError : Colours.palette.onSurface
                         }
                     }
 
@@ -315,7 +316,7 @@ StyledRect {
         text: {
             const summary = modelData.summary.replace(/\n/g, " ");
             const body = modelData.body.replace(/\n/g, " ");
-            const colour = root.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline;
+            const colour = root.urgency === "critical" ? Colours.palette.secondary : Colours.palette.outline;
 
             if (metrics.text === metrics.elidedText)
                 return `${summary} <span style='color:${colour}'>${body}</span>`;
@@ -326,7 +327,7 @@ StyledRect {
 
             return `${summary} <span style='color:${colour}'>${body.slice(0, t - summary.length)}...</span>`;
         }
-        color: root.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        color: root.urgency === "critical" ? Colours.palette.onSecondaryContainer : Colours.palette.onSurface
 
         Component.onCompleted: modelData.lock(this)
         Component.onDestruction: modelData.unlock(this)

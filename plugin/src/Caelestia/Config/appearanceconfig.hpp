@@ -222,7 +222,7 @@ class AppearanceFont : public settings::ObjectNode {
 class AnimDurations : public settings::ObjectNode {
     CONFIG_NODE(AnimDurations, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(qreal, scale, 1)
+    CONFIG_PROPERTY(qreal, scale, 1)
 
     Q_PROPERTY(int small READ small NOTIFY valuesChanged)
     Q_PROPERTY(int normal READ normal NOTIFY valuesChanged)
@@ -265,9 +265,10 @@ class AppearanceAnim : public settings::ObjectNode {
 class AppearanceTransparency : public settings::ObjectNode {
     CONFIG_NODE(AppearanceTransparency, settings::ObjectNode)
 
-    CONFIG_GLOBAL_PROPERTY(bool, enabled, false)
-    CONFIG_GLOBAL_PROPERTY(qreal, base, 0.85)
-    CONFIG_GLOBAL_PROPERTY(qreal, layers, 0.4)
+    CONFIG_PROPERTY(bool, enabled, false)
+    CONFIG_PROPERTY(qreal, base, 0.85)
+    CONFIG_PROPERTY(qreal, layers, 0.4)
+    CONFIG_PROPERTY(bool, blurEnabled, true)
 };
 
 class AppearanceConfig : public settings::ObjectNode {
@@ -278,8 +279,8 @@ class AppearanceConfig : public settings::ObjectNode {
     CONFIG_SUBOBJECT(AppearanceSpacing, spacing)
     CONFIG_SUBOBJECT(AppearancePadding, padding)
     CONFIG_SUBOBJECT(AppearanceFont, font)
-    CONFIG_SUBOBJECT(AppearanceAnim, anim)
-    CONFIG_SUBOBJECT(AppearanceTransparency, transparency)
+    CONFIG_GLOBAL_SUBOBJECT(AppearanceAnim, anim)
+    CONFIG_GLOBAL_SUBOBJECT(AppearanceTransparency, transparency)
 };
 
 } // namespace caelestia::shell::config

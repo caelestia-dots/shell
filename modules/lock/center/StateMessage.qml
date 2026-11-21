@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 import qs.modules.lock
@@ -148,7 +149,7 @@ Item {
 
         scale: root.stateMsgShouldBeVisible && !root.msg ? 1 : 0.7
         opacity: root.stateMsgShouldBeVisible && !root.msg ? 1 : 0
-        color: Colours.palette.m3onSurfaceVariant
+        color: Colours.palette.onSurfaceVariant
 
         font: Tokens.font.body.small
         horizontalAlignment: Qt.AlignHCenter
@@ -174,7 +175,7 @@ Item {
 
         scale: 0.7
         opacity: 0
-        color: Colours.palette.m3error
+        color: Colours.palette.error
 
         font: Tokens.font.body.small
         horizontalAlignment: Qt.AlignHCenter

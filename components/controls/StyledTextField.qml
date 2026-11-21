@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 TextFieldBase {
     id: root
@@ -99,7 +99,7 @@ TextFieldBase {
             renderType: Text.QtRendering
 
             text: root.placeholderText
-            color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : root.text ? Colours.palette.m3outline : root.placeholderTextColor)
+            color: root.isError ? Colours.palette.error : (root.activeFocus ? Colours.palette.primary : root.text ? Colours.palette.outline : root.placeholderTextColor)
 
             states: [
                 State {
@@ -153,7 +153,7 @@ TextFieldBase {
 
             sourceComponent: MaterialIcon {
                 text: root.leadingIcon
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
             }
         }
@@ -168,7 +168,7 @@ TextFieldBase {
 
             sourceComponent: MaterialIcon {
                 text: root.trailingIcon
-                color: Colours.palette.m3onSurfaceVariant
+                color: Colours.palette.onSurfaceVariant
                 fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
             }
         }
@@ -184,7 +184,7 @@ TextFieldBase {
 
         sourceComponent: StyledText {
             text: root.effectiveSupportingText
-            color: root.isError ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+            color: root.isError ? Colours.palette.error : Colours.palette.onSurfaceVariant
             font: Tokens.font.label.small
         }
     }
@@ -210,7 +210,7 @@ TextFieldBase {
                 readonly property real inset: strokeWidth / 2
 
                 strokeWidth: root.activeFocus ? 2 : 1
-                strokeColor: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                strokeColor: root.isError ? Colours.palette.error : (root.activeFocus ? Colours.palette.primary : Colours.palette.outline)
                 fillColor: "transparent"
                 capStyle: ShapePath.RoundCap
 
@@ -282,14 +282,14 @@ TextFieldBase {
         StyledRect {
             topLeftRadius: root.clampedRadius
             topRightRadius: root.clampedRadius
-            color: root.activeFocus ? Colours.tPalette.m3surfaceContainerHighest : Colours.tPalette.m3surfaceContainerHigh
+            color: root.activeFocus ? Colours.tPalette.surfaceContainerHighest : Colours.tPalette.surfaceContainerHigh
 
             StyledRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 implicitHeight: root.activeFocus ? 2 : 1
-                color: root.isError ? Colours.palette.m3error : (root.activeFocus ? Colours.palette.m3primary : Colours.palette.m3outline)
+                color: root.isError ? Colours.palette.error : (root.activeFocus ? Colours.palette.primary : Colours.palette.outline)
 
                 Behavior on implicitHeight {
                     Anim {}

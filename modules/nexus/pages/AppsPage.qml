@@ -7,9 +7,9 @@ import Quickshell.Widgets
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
-import qs.services
 import qs.utils
 import qs.modules.nexus.common
 
@@ -154,7 +154,7 @@ PageBase {
                                 Layout.fillWidth: true
                                 visible: text
                                 text: (appItem.modelData.comment || appItem.modelData.genericName) ?? ""
-                                color: Colours.palette.m3outline
+                                color: Colours.palette.outline
                                 font: Tokens.font.label.small
                                 elide: Text.ElideRight
                             }
@@ -164,7 +164,7 @@ PageBase {
                             visible: Strings.testRegexList(GlobalConfig.launcher.favouriteApps, appItem.modelData.id)
                             text: "favorite"
                             fill: 1
-                            color: Colours.palette.m3primary
+                            color: Colours.palette.primary
                             fontStyle: Tokens.font.icon.small
                         }
                     }

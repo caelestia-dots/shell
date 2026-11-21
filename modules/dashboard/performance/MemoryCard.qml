@@ -2,18 +2,18 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import Caelestia.Services
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.utils
 
 StyledRect {
     id: root
 
-    readonly property color accent: Colours.palette.m3tertiary
+    readonly property color accent: Colours.palette.tertiary
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.tPalette.surfaceContainer
     radius: Tokens.rounding.medium
 
     implicitWidth: layout.implicitWidth + Tokens.padding.extraLargeIncreased * 2
@@ -78,7 +78,7 @@ StyledRect {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.trCtx("Used", "memory used")
                     font: Tokens.font.body.small
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Colours.palette.onSurfaceVariant
                 }
             }
         }

@@ -1,8 +1,8 @@
 import QtQuick
 import Quickshell
 import M3Shapes
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 MaterialShape {
     id: root
@@ -53,7 +53,7 @@ MaterialShape {
     }
 
     implicitSize: 38
-    color: Colours.palette.m3primary
+    color: Colours.palette.primary
     toShape: shapes[0]
 
     ElapsedTimer {

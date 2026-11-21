@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.services
 
@@ -24,14 +25,14 @@ Item {
             Layout.bottomMargin: -(font.pointSize * 0.4)
             Layout.alignment: Qt.AlignHCenter
             text: Time.hourStr
-            color: Colours.palette.m3secondary
+            color: Colours.palette.secondary
             font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
         }
 
         StyledText {
             Layout.alignment: Qt.AlignHCenter
             text: "•••"
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
             font: Tokens.font.clock.size(28 * 0.9).build()
         }
 
@@ -39,7 +40,7 @@ Item {
             Layout.topMargin: -(font.pointSize * 0.4)
             Layout.alignment: Qt.AlignHCenter
             text: Time.minuteStr
-            color: Colours.palette.m3secondary
+            color: Colours.palette.secondary
             font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
         }
 
@@ -52,7 +53,7 @@ Item {
 
             sourceComponent: StyledText {
                 text: "•••"
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
                 font: Tokens.font.clock.size(28 * 0.9).build()
             }
         }
@@ -65,7 +66,7 @@ Item {
 
             sourceComponent: StyledText {
                 text: Time.format("ss")
-                color: Colours.palette.m3secondary
+                color: Colours.palette.secondary
                 font: Tokens.font.clock.size(28).weight(Font.DemiBold).build()
             }
         }
@@ -79,7 +80,7 @@ Item {
 
             sourceComponent: StyledText {
                 text: Time.amPmStr
-                color: Colours.palette.m3primary
+                color: Colours.palette.primary
                 font: Tokens.font.clock.size(18).weight(Font.DemiBold).build()
             }
         }
