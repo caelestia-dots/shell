@@ -26,6 +26,7 @@ ENUM(NotifsFullscreen, On, Off)
 ENUM(TemperatureUnit, Auto, Celsius, Fahrenheit, Kelvin)
 ENUM(DataUnit, Binary, Decimal)
 ENUM(ClockFormat, Auto, TwelveHour, TwentyFourHour)
+ENUM(FaceAuthProvider, Howdy, Visage)
 ENUM(WallpaperTransition,
     // clang-format off
     ChromaticBloom,
