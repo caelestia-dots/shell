@@ -25,11 +25,11 @@ Scope {
     readonly property alias face: face
 
     // Name of both the PAM config in assets/pam.d and the provider's executable
-    readonly property string faceProvider: {
-        switch (GlobalConfig.lock.faceProvider) {
-        case FaceProvider.Visage:
+    readonly property string faceAuthProvider: {
+        switch (GlobalConfig.lock.faceAuthProvider) {
+        case FaceAuthProvider.Visage:
             return "visage";
-        case FaceProvider.Howdy:
+        case FaceAuthProvider.Howdy:
         default:
             return "howdy";
         }
@@ -145,15 +145,15 @@ Scope {
     ManualPamContext {
         id: face
 
-        config: root.faceProvider
-        availCommand: ["sh", "-c", `command -v ${root.faceProvider}`]
-        enabled: GlobalConfig.lock.enableFace
-        maxTries: GlobalConfig.lock.maxFaceTries
+        config: root.faceAuthProvider
+        availCommand: ["sh", "-c", `command -v ${root.faceAuthProvider}`]
+        enabled: GlobalConfig.lock.enableFaceAuth
+        maxTries: GlobalConfig.lock.maxFaceAuthTries
     }
 
     Connections {
         function onResumed(): void {
-            if (face.canAttempt && !face.active && GlobalConfig.lock.triggerFaceOnWake)
+            if (face.canAttempt && !face.active && GlobalConfig.lock.triggerFaceAuthOnWake)
                 face.start();
         }
 
@@ -187,14 +187,14 @@ Scope {
             root.restartFprint();
         }
 
-        function onEnableFaceChanged(): void {
-            if (!GlobalConfig.lock.enableFace && face.active)
+        function onEnableFaceAuthChanged(): void {
+            if (!GlobalConfig.lock.enableFaceAuth && face.active)
                 face.abort();
             else if (root.lock.secure)
                 face.checkAvailable();
         }
 
-        function onFaceProviderChanged(): void {
+        function onFaceAuthProviderChanged(): void {
             if (face.active)
                 face.abort();
             if (root.lock.secure)
