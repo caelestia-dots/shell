@@ -830,7 +830,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "enabled": true,
         "hideDelay": 2000,
         "enableBrightness": true,
-        "enableMicrophone": false
+        "enableMicrophone": false,
+        "showOnHover": true
     },
     "services": {
         "weatherLocation": "",
@@ -875,6 +876,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "utilities": {
         "enabled": true,
+        "showOnHover": true,
         "maxToasts": 4,
         "toasts": {
             "fullscreen": "off",
