@@ -87,6 +87,9 @@ CustomMouseArea {
             if (Config.bar.showOnHover)
                 bar.isHovered = false;
 
+            if (!Config.bar.persistent)
+                screenState.bar = false;
+
             if (Config.sidebar.showOnHover && !sidebarShortcutActive)
                 screenState.sidebar = false;
         }
