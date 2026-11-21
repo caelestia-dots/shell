@@ -53,7 +53,7 @@ StyledWindow {
             return 0;
 
         const thresholds = [];
-        for (const panel of ["dashboard", "launcher", "session", "sidebar"])
+        for (const panel of ["dashboard", "launcher", "session", "sidebar", "overview"])
             if (contentItem.Config[panel].enabled)
                 thresholds.push(contentItem.Config[panel].dragThreshold);
         return Math.max(...thresholds);
@@ -63,6 +63,8 @@ StyledWindow {
         screenState.launcher = false;
         screenState.session = false;
         screenState.dashboard = false;
+        screenState.overview = false;
+
         panels.popouts.close();
     }
 
@@ -130,6 +132,7 @@ StyledWindow {
             root.screenState.session = false;
             root.screenState.sidebar = false;
             root.screenState.dashboard = false;
+            root.screenState.overview = false;
             panels.popouts.hasCurrent = false;
             bar.closeTray();
         }
@@ -179,6 +182,13 @@ StyledWindow {
             id: dashBg
 
             panel: panels.dashboard
+            deformAmount: 0.1
+        }
+
+        PanelBg {
+            id: overviewBg
+
+            panel: panels.overview
             deformAmount: 0.1
         }
 
@@ -276,6 +286,9 @@ StyledWindow {
             }
             launcher.transform: Matrix4x4 {
                 matrix: launcherBg.deformMatrix
+            }
+            overview.transform: Matrix4x4 {
+                matrix: overviewBg.deformMatrix
             }
             session.transform: Matrix4x4 {
                 matrix: sessionBg.deformMatrix
