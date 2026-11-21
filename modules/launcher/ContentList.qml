@@ -7,6 +7,7 @@ import qs.components
 import qs.components.controls
 import qs.services
 import qs.utils
+import qs.modules.launcher.services
 
 Item {
     id: root
@@ -20,14 +21,24 @@ Item {
     required property int rounding
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
-    readonly property var currentList: showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
-    property string animState: showWallpapers ? "wallpapers" : "apps"
+    readonly property var picker: Pickers.forText(search.text) // The open picker (i.e. emoji), if any
+    readonly property bool showPicker: picker !== null
+    readonly property var currentList: showWallpapers ? wallpaperList.item : showPicker ? pickerList.item : appList.item // Can be a ListView, PathView or PickerList, so can't type properly
+    property string animState: showWallpapers ? "wallpapers" : showPicker ? "picker" : "apps"
+
+    // Kept so the picker doesn't lose its source while fading out
+    property var lastPicker
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
 
     clip: true
     state: animState
+
+    onPickerChanged: {
+        if (picker)
+            lastPicker = picker;
+    }
 
     states: [
         State {
@@ -37,6 +48,20 @@ Item {
                 root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
                 appList.active: true
+            }
+
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "picker"
+
+            PropertyChanges {
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
+                root.implicitHeight: Math.min(root.maxHeight, pickerList.implicitHeight > 0 ? pickerList.implicitHeight : empty.implicitHeight)
+                pickerList.active: true
             }
 
             AnchorChanges {
@@ -87,6 +112,22 @@ Item {
 
             search: root.search
             screenState: root.screenState
+        }
+    }
+
+    Loader {
+        id: pickerList
+
+        active: false
+
+        anchors.fill: parent
+
+        sourceComponent: PickerList {
+            objectName: "launcherPickerList"
+
+            search: root.search
+            screenState: root.screenState
+            source: root.picker ?? root.lastPicker
         }
     }
 

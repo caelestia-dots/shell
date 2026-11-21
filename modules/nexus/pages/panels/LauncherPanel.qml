@@ -85,7 +85,6 @@ PageBase {
         }
 
         StepperRow {
-            last: true
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the launcher opens")
             value: Config.launcher.dragThreshold
@@ -93,6 +92,14 @@ PageBase {
             to: 200
             stepSize: 5
             onMoved: v => GlobalConfig.launcher.dragThreshold = v
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Hide unsupported emojis")
+            subtext: Tr.tr("Hide emojis that your fonts can't render")
+            checked: GlobalConfig.launcher.picker.hideUnsupported
+            onToggled: GlobalConfig.launcher.picker.hideUnsupported = checked
         }
 
         // Behaviour
@@ -147,10 +154,17 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
             onToggled: GlobalConfig.launcher.useFuzzy.wallpapers = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Pickers")
+            subtext: Tr.tr("Emoji, kaomoji and symbols")
+            checked: GlobalConfig.launcher.useFuzzy.pickers
+            onToggled: GlobalConfig.launcher.useFuzzy.pickers = checked
         }
     }
 }

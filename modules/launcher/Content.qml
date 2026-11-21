@@ -19,6 +19,26 @@ Item {
     readonly property int padding: Tokens.padding.large
     readonly property int rounding: Tokens.rounding.extraLarge
 
+    function applyPrefill(): void {
+        if (!screenState.launcher || !screenState.launcherPrefill)
+            return;
+
+        search.text = screenState.launcherPrefill;
+        screenState.launcherPrefill = "";
+    }
+
+    function move(direction: string): void {
+        if (list.showPicker) {
+            list.currentList?.move(direction);
+            return;
+        }
+
+        if (direction === "up")
+            list.currentList?.decrementCurrentIndex();
+        else if (direction === "down")
+            list.currentList?.incrementCurrentIndex();
+    }
+
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
 
@@ -62,6 +82,11 @@ Item {
         placeholderText: Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix)
 
         onAccepted: {
+            if (list.showPicker) {
+                list.currentList?.activate(false);
+                return;
+            }
+
             const currentItem = list.currentList?.currentItem;
             if (currentItem) {
                 if (list.showWallpapers) {
@@ -81,38 +106,85 @@ Item {
             }
         }
 
-        Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
-        Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
+        Keys.onUpPressed: root.move("up")
+        Keys.onDownPressed: root.move("down")
+
+        // Only steal left/right from the text cursor when browsing a picker
+        Keys.onLeftPressed: event => {
+            if (list.showPicker)
+                root.move("left");
+            else
+                event.accepted = false;
+        }
+        Keys.onRightPressed: event => {
+            if (list.showPicker)
+                root.move("right");
+            else
+                event.accepted = false;
+        }
 
         Keys.onEscapePressed: root.screenState.launcher = false
 
         Keys.onPressed: event => {
+            // Alt + Enter pastes into the previously focused window instead of just copying
+            if (list.showPicker && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (event.modifiers & Qt.AltModifier)) {
+                list.currentList?.activate(true);
+                event.accepted = true;
+                return;
+            }
+
+            // Tab / Shift + Tab switch between picker categories
+            if (list.showPicker && (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab)) {
+                const back = event.key === Qt.Key_Backtab || (event.modifiers & Qt.ShiftModifier);
+                list.currentList?.switchCategory(back ? -1 : 1);
+                event.accepted = true;
+                return;
+            }
+
             if (!GlobalConfig.launcher.vimKeybinds)
                 return;
 
             if (event.modifiers & Qt.ControlModifier) {
                 if (event.key === Qt.Key_J || event.key === Qt.Key_N) {
-                    list.currentList?.incrementCurrentIndex();
+                    root.move("down");
                     event.accepted = true;
                 } else if (event.key === Qt.Key_K || event.key === Qt.Key_P) {
-                    list.currentList?.decrementCurrentIndex();
+                    root.move("up");
+                    event.accepted = true;
+                } else if (list.showPicker && event.key === Qt.Key_H) {
+                    root.move("left");
+                    event.accepted = true;
+                } else if (list.showPicker && event.key === Qt.Key_L) {
+                    root.move("right");
                     event.accepted = true;
                 }
             } else if (event.key === Qt.Key_Tab) {
-                list.currentList?.incrementCurrentIndex();
+                root.move("down");
                 event.accepted = true;
             } else if (event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier))) {
-                list.currentList?.decrementCurrentIndex();
+                root.move("up");
                 event.accepted = true;
             }
         }
 
-        Component.onCompleted: forceActiveFocus()
+        Component.onCompleted: {
+            forceActiveFocus();
+            root.applyPrefill();
+        }
+
+        // Lets other things (i.e. the picker shortcuts) tell whether the launcher is in a given mode
+        onTextChanged: root.screenState.launcherText = text
 
         Connections {
             function onLauncherChanged(): void {
                 if (!root.screenState.launcher)
                     search.text = "";
+                else
+                    root.applyPrefill();
+            }
+
+            function onLauncherPrefillChanged(): void {
+                root.applyPrefill();
             }
 
             function onSessionChanged(): void {
