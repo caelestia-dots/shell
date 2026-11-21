@@ -28,6 +28,7 @@ private slots:
 
 private:
     void relayout();
+    void connectOptionalSignal(const QQuickItem* child, const char* signature);
     static qreal getMorphExpansion(const QQuickItem* item);
 
     bool m_dirty;
