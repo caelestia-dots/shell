@@ -39,6 +39,8 @@ Singleton {
     property string lastSpecialWorkspace: ""
 
     signal configReloaded
+    signal monitorAdded(string name)
+    signal monitorRemoved(string name)
 
     function dispatch(request: string): void {
         Hyprland.dispatch(request);
@@ -137,6 +139,10 @@ Singleton {
                 Hyprland.refreshWorkspaces();
             } else if (n.includes("mon")) {
                 Hyprland.refreshMonitors();
+                if (n === "monitoradded")
+                    root.monitorAdded(event.data);
+                else if (n === "monitorremoved")
+                    root.monitorRemoved(event.data);
             } else if (n.includes("workspace")) {
                 Hyprland.refreshWorkspaces();
             } else if (n.includes("window") || n.includes("group") || ["pin", "fullscreen", "changefloatingmode", "minimize"].includes(n)) {
