@@ -21,10 +21,6 @@ Singleton {
     readonly property list<Monitor> monitors: variants.instances
     property bool appleDisplayPresent: false
 
-    function getMonitorForScreen(screen: ShellScreen): var {
-        return monitors.find(m => m.modelData === screen);
-    }
-
     function getMonitor(query: string): var {
         if (query === "active") {
             return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused);

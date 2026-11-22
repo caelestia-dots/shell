@@ -7,7 +7,6 @@ Item {
     required property ScreenState screenState
     required property Item sidebarPanel
     property alias sessionPanel: content.sessionPanel
-    property alias utilitiesPanel: content.utilitiesPanel
 
     visible: height > 0
     anchors.topMargin: -5

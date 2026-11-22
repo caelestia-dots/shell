@@ -14,10 +14,7 @@ trim_trailing_whitespace = true
 indent_style = tab
 indent_size = 4
 
-[*.{json,jsonc,yaml,yml,nix}]
-indent_size = 2
-
-[flake.lock]
+[*.{json,jsonc,yaml,yml}]
 indent_size = 2
 
 [{.clang-format,.clang-tidy}]

@@ -35,14 +35,6 @@ Singleton {
         return null;
     }
 
-    function componentsForActive(): Components {
-        const mon = Hypr.focusedMonitor;
-        for (const c of components.instances)
-            if (Hypr.monitorFor(c.modelData) === mon)
-                return c;
-        return null;
-    }
-
     Variants {
         id: states
 
@@ -65,19 +57,10 @@ Singleton {
         property var background
         property var rootWindow
         property var interactionWrapper
-        property var bar
         property var panels
 
         function find(name: string, rootItem: Item): var {
             return CUtils.findChild(rootItem ?? rootWindow?.contentItem, name);
-        }
-
-        function findAll(name: string, rootItem: Item): var {
-            return CUtils.findChildren(rootItem ?? rootWindow?.contentItem, name);
-        }
-
-        function findMatching(pattern: string, rootItem: Item): var {
-            return CUtils.findChildrenMatching(rootItem ?? rootWindow?.contentItem, pattern);
         }
     }
 

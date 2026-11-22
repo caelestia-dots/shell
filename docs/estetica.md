@@ -112,10 +112,10 @@ Tamaños habituales: título de ventana `HkTitle` 12 pt (más grande en cabecera
 - **Radios**: tarjetas 14 (`HkCard`), popups 12, botones con texto y campos 9 (`HkButton`, `HkField`,
   botones solo-icono circulares), barra de búsqueda 12 (`SearchBar`), switches en píldora (`height / 2`),
   notch expandido 26, colapsado ≤ 14. Tokens `Tokens.rounding.*`: 4, 8, 12, 16, 20, 28, 32, 48.
-- **Filas agrupadas** (`HkRow`): esquinas 14 en la primera y última del grupo, 4 en las intermedias,
+- **Filas agrupadas** (`ToggleRow`, `StepperRow`, `SelectRow` de `modules/nexus/common`): esquinas 14 en la primera y última del grupo, 4 en las intermedias,
   separadas por 2–4 px; parecen una sola tarjeta segmentada. Alto mínimo 44.
 - **Bordes**: 1 px en `border` en todo (botones, tarjetas, campos). Sin bordes gruesos.
-- **Alturas de control**: botón y campo 30, botón pequeño 24, switch 38×20, toggle de icono 48×44.
+- **Alturas de control**: botón y campo 30, botón pequeño 24, switch 38×20.
 - **Espaciado** (`Tokens.spacing/padding`): 4, 8, 12, 16, 20, 28, 32, 48 (`extraSmall` …
   `extraExtraLarge`; no existe `normal`). Padding de botón con texto: 12 a cada lado.
 - **Rombos**: los indicadores (radio, pulgar del switch, puntos de página, marca activa de toggle)
@@ -173,7 +173,6 @@ Curvas propias en `tokens.hpp`, sin sobrepaso:
 | Componente | Qué es |
 |---|---|
 | `HkButton` | Píldora; `filled` (acento sólido), `tinted` (fondo alfa del acento) o neutro; `icon`, `iconAfter` |
-| `HkToggle` | Botón de icono cuadrado 48×44 con rombo debajo cuando está encendido |
 | `HkSwitch` | Interruptor píldora con pulgar en rombo; encendido en `lifeblood` |
 | `HkCheck` / `HkRadio` | Casilla circular / opción con rombo |
 | `HkField` | Campo de texto píldora sobre `card`, `leadingIcon`, borde de foco en `soul` |
@@ -182,7 +181,6 @@ Curvas propias en `tokens.hpp`, sin sobrepaso:
 | `HkStepper` | − valor (mono) + |
 | `HkCard` | Tarjeta `card`, radio 14, luz cenital superior; `ornate` añade grano (`HkGrain`), doble marco interior y filigrana |
 | `HkGrain` | Textura sutil de grano mineral/papel (`assets/hallownest/grain.png`) para superficies principales |
-| `HkRow` | Fila de ajustes con icono, texto, subtexto y control al final |
 | `HkTitle` / `HkSection` | Título Cinzel en `soul` / encabezado de sección Cinzel en `steel` |
 | `HkDivider` | Separador horizontal con líneas degradadas y rombo central |
 | `HkSelection` | Resaltado de elemento seleccionado con punteros pulsantes |
@@ -202,8 +200,8 @@ FloatingWindow {
 
         HkTitle { text: Tr.tr("Title"); size: 14 }
         HkSection { first: true; text: Tr.tr("Section") }
-        HkRow { first: true; text: Tr.tr("Option"); icon: "tune"; HkSwitch { checked: true } }
-        HkRow { last: true; text: Tr.tr("Value"); HkStepper { value: 3 } }
+        ToggleRow { first: true; text: Tr.tr("Option"); checked: true }   // qs.modules.nexus.common
+        StepperRow { label: Tr.tr("Value"); value: 3 }
         HkButton { filled: true; text: Tr.tr("Apply"); icon: "check" }
     }
 }

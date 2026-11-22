@@ -19,17 +19,6 @@ PageBase {
     readonly property bool connected: device?.state === BluetoothDeviceState.Connected
     readonly property bool loading: device?.state === BluetoothDeviceState.Connecting || device?.state === BluetoothDeviceState.Disconnecting
 
-    readonly property string statusText: {
-        if (!device)
-            return "";
-        if (connected && device.batteryAvailable)
-            // TRANSLATORS: %1 = battery level, already formatted as a percentage
-            return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.battery));
-        if (connected)
-            return Tr.trCtx("Connected", "bluetooth device state");
-        return device.bonded ? Tr.trCtx("Paired", "bluetooth device state") : Tr.trCtx("Not paired", "bluetooth device state");
-    }
-
     onDeviceChanged: {
         // Auto close when device lost
         if (!device)

@@ -5,17 +5,14 @@ import Quickshell
 import Caelestia.Config
 import qs.components.containers
 import qs.services
-import qs.modules.bar as Bar
 
 Scope {
     id: root
 
     required property ShellScreen screen
-    required property Bar.BarWrapper bar
 
     ExclusionZone {
         anchors.left: true
-        exclusiveZone: root.bar.exclusiveZone
     }
 
     // Windows stay clear of whichever island is in use: the notch's resting pill (34 px, not its

@@ -34,12 +34,12 @@ Scope {
     CustomShortcut {
         // qmllint enable unresolved-type
         name: "showall"
-        description: "Toggle launcher and utilities"
+        description: "Toggle launcher"
         onPressed: {
             if (root.hasFullscreen)
                 return;
             const v = ShellState.forActive();
-            v.launcher = v.utilities = !(v.launcher || v.utilities);
+            v.launcher = !v.launcher;
         }
     }
 
@@ -104,19 +104,6 @@ Scope {
                 return;
             const screenState = ShellState.forActive();
             screenState.sidebar = !screenState.sidebar;
-        }
-    }
-
-    // qmllint disable unresolved-type
-    CustomShortcut {
-        // qmllint enable unresolved-type
-        name: "utilities"
-        description: "Toggle utilities"
-        onPressed: {
-            if (root.hasFullscreen)
-                return;
-            const screenState = ShellState.forActive();
-            screenState.utilities = !screenState.utilities;
         }
     }
 

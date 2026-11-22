@@ -36,11 +36,6 @@ Singleton {
         checkProc.running = true;
     }
 
-    function togglePause(): void {
-        needsPause = true;
-        checkProc.running = true;
-    }
-
     PersistentProperties {
         id: props
 

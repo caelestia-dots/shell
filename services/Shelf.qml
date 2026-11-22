@@ -189,12 +189,12 @@ Singleton {
 
     // PaleSense (phone remote): qs -c paleshell ipc call shelf addFile /abs/path
     IpcHandler {
-        target: "shelf"
-
         function addFile(path: string): void {
             root.addUrls(["file://" + path.split("/").map(encodeURIComponent).join("/")]);
             Toaster.toast(Tr.tr("Received from phone"), path.slice(path.lastIndexOf("/") + 1), "smartphone");
         }
+
+        target: "shelf"
     }
 
     // Files sent from the phone with KDE Connect land on the shelf too

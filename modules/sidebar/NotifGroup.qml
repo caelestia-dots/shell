@@ -213,14 +213,14 @@ StyledRect {
                             Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.notifCount
-                            color: root.urgency === NotificationUrgency.Critical ? Hallownest.void_ : Hallownest.soulVariant
+                            color: root.urgency === NotificationUrgency.Critical ? Hallownest.void_ : Hallownest.subtext
                             font: Tokens.font.body.small
                         }
 
                         MaterialIcon {
                             Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             text: "expand_more"
-                            color: root.urgency === NotificationUrgency.Critical ? Hallownest.void_ : Hallownest.soulVariant
+                            color: root.urgency === NotificationUrgency.Critical ? Hallownest.void_ : Hallownest.subtext
                             rotation: root.expanded ? 180 : 0
                             Layout.topMargin: root.expanded ? -Math.floor(Tokens.padding.extraSmall) : 0
 

@@ -136,12 +136,11 @@ QML (Quickshell) + plugin C++ propio (módulos QML `Caelestia.*`).
 shell.qml            Punto de entrada: ShellRoot que instancia módulos y daemons
 modules/             Funcionalidades visibles (cada carpeta = módulo qs.modules.<nombre>)
   drawers/           Ventana principal por pantalla que aloja los paneles deslizables
-  bar/               Barra (componentes + popouts)
   notch/             [fork] Isla superior (reemplaza al dashboard y al OSD): ver sección Notch
   calendar/          [fork] Ventana flotante de eventos del día + importador .ics
   keybinds/          [fork] Menú de atajos de teclado (Super + F3)
-  launcher/ sidebar/ utilities/ notifications/ session/ lock/ background/
-  areapicker/ windowinfo/ nexus/ (ajustes)
+  launcher/ (Content del menú del dock) sidebar/ utilities/toasts/ notifications/ session/
+  lock/ background/ areapicker/ nexus/ (ajustes)
 services/            Singletons de datos (qs.services): Audio, Colours, Weather, Players...
   Events.qml         [fork] Eventos de calendario vía khal
 components/          Componentes reutilizables (qs.components, .controls, .containers...)
@@ -205,14 +204,12 @@ al rediseñar módulos.
 | `HkCheck` | Círculo de color que se rellena con check |
 | `HkSelect` | Desplegable (`options` strings u objetos `{text}`, `currentIndex`, `activated`) |
 | `HkCard` | Tarjeta oscura con borde; `ornate` añade filigrana |
-| `HkRow` | Fila de ajustes (`text`, `subtext`, `icon`, `first`/`last` redondean el grupo; hijos a la derecha) |
 | `HkSection` / `HkTitle` | Cabecera de sección / título en Cinzel |
 | `Filigree` | Ornamento de esquinas inferiores (`radius`, `inset`) |
 | `CharmNotches` | Muescas de amuleto con flechas (`notches`, `current`, `selected`, `stepped`) |
 | `IslandShape` | Forma pegada al borde superior con fillets (`w`, `h`, `radius`, `leftFillet`, `rightFillet`) |
 | `SoulVessel` / `SoulParticles` | Orbe con líquido / partículas de Alma |
 | `HkSelection` | Resaltado de lista con punteros ornamentados (`radius`, `inset`, `colour`) |
-| `HkToggle` | Botón de icono con estado (`icon`, `checked`, `isToggle`, `accent`) |
 | `HkRadio` | Opción con rombo que se rellena (`checked`, `text`, `accent`, señal `clicked`) |
 | `HealthMask` | Máscara de vida: dibujo del usuario (`assets/hallownest/health-mask.svg`, recortado de `~/Pictures/InkScape/healthMask.svg`: PNG incrustado + calco vectorial); `filled`, `colour` (tinte), `glow` |
 | `Mask` | Máscara de vida (silueta del Caballero con ojos): `filled`, `colour`, `glow`, `size` |
@@ -232,8 +229,6 @@ Etapa 3 (rediseño por módulos), hecho hasta ahora:
   en blanco Alma, descripción gris, favoritas = rombo dorado. `SearchBar` (compartida con Nexus
   y el menú de atajos): fondo `card`, borde acero que pasa a Alma con foco. Estado vacío con
   título en Cinzel.
-- Utilidades: toggles rápidos con `HkToggle` (tarjeta con icono y rombo bajo el icono cuando
-  está activo), "Keep awake" con `HkSwitch`, tarjetas con borde acero, cabecera en Cinzel.
 - Toasts de la shell (`utilities/toasts/ToastItem.qml`): fondo Vacío, icono en rombo y borde del
   color del tipo (info Alma, éxito Unn, aviso Oro, error Grimm), título en Cinzel.
 - Dock de notificaciones del sidebar: cabecera y contador en Cinzel, grupos como tarjetas con
@@ -327,10 +322,11 @@ Etapa 3 (rediseño por módulos), hecho hasta ahora:
   sustituidos por el notch. Sus restos se quitaron de `modules/drawers/` (`Panels`, `Regions`,
   `Interactions`, `ContentWindow`). `ScreenState.dashboard/osd/dashboardTab/dashboardKeyboard`
   ya no existen. La entrada "Dashboard" de Nexus (`DashboardPanel`) también se borró.
-- **Barra izquierda** (2026-11-05): desactivada sin tocar código con `bar.excludedScreens: ["^.*$"]`
-  en `shell.json` (backup `shell.json.bak-sinbarra`; `testRegexList` solo trata como regex lo que
-  va entre `^…$`). Sus funciones están en la página Home del notch. `modules/bar/` sigue: Home
-  reutiliza sus popouts y `TrayItem`. Para volver a la barra, quitar esa clave.
+- **Barra izquierda, panel de utilidades, launcher de `drawers` y `windowinfo`** (2026-11-22):
+  borrados. Estaban apagados por `shell.json` y Home ya tenía sus propias tarjetas. También se
+  quitaron Nix (`flake.nix`, `nix/`, `.envrc`), `.github` de upstream, el binario `extras/version`
+  y la instalación de CMake en `/etc/xdg/quickshell/caelestia`. Se mantienen el plugin
+  `Caelestia.*` y la CLI `caelestia` (emojis, esquemas, grabación, fondos).
 - Página Water del notch: se descartó por decisión del usuario. No reintroducir sin que lo pida.
 - Sincronización con Google Calendar (vdirsyncer): se implementó y se quitó por decisión del
   usuario. No reintroducir sin que lo pida.

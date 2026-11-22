@@ -799,11 +799,6 @@ Singleton {
         });
     }
 
-    function toggleWifi(callback: var): void {
-        const newState = !root.wifiEnabled;
-        enableWifi(newState, callback);
-    }
-
     function getWifiStatus(callback: var): void {
         executeCommand([root.nmcliCommandRadio, root.nmcliCommandWifi], result => {
             if (result.success) {

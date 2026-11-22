@@ -88,7 +88,7 @@ hyprctl reload && hyprctl configerrors
 shell.qml       ShellRoot que instancia módulos y daemons
 modules/        notch/ (isla superior: páginas, mascota, menú de animaciones), dock/ (dock + menú de
                 apps con el launcher), launcher/, lock/, notifications/, overview/, emoji/, keybinds/,
-                calendar/, session/, nexus/ (ajustes), bar/ (apagada; Home reutiliza sus popouts)…
+                calendar/, session/, nexus/ (ajustes), drawers/ (sidebar, sesión, notificaciones)…
 services/       Singletons (qs.services): Audio, Hallownest, NotchSettings, Season, Weather, Shelf…
 components/     Reutilizables; components/hallownest/ = librería visual propia
 daemons/        Shortcuts, IdleMonitors, BatteryMonitor…
@@ -136,8 +136,8 @@ docs/           claude-detalle.md (detalle histórico)
   el acento es oscuro. Hover con `Hallownest.raise(c, k)`, nunca `Qt.lighter`. `void` es blanco y negro
   (`"mono": true`: la terminal conserva los colores de hallownest).
 - Librería `components/hallownest/` (úsala en vez de los controles M3): `HkButton`, `HkField`,
-  `HkSwitch`, `HkStepper`, `HkSlider`, `HkCheck`, `HkSelect`, `HkCard` (`ornate`), `HkRow`,
-  `HkSection`/`HkTitle`, `HkSelection`, `HkToggle`, `HkRadio`, `Filigree`, `CharmNotches`,
+  `HkSwitch`, `HkStepper`, `HkSlider`, `HkCheck`, `HkSelect`, `HkCard` (`ornate`),
+  `HkSection`/`HkTitle`, `HkSelection`, `HkRadio`, `Filigree`, `CharmNotches`,
   `IslandShape`, `SoulVessel`, `SoulParticles`, `HealthMask`, `Mask`.
 - Animaciones sin rebote (curvas `expressive*` en `tokens.hpp`): `Anim { type: Anim.DefaultSpatial }`.
 - Los dibujos del usuario (Inkscape) se pegan como `PathSvg` en coordenadas del SVG: mascota
@@ -157,7 +157,7 @@ docs/           claude-detalle.md (detalle histórico)
   Nightmare King, gestos `bow`, `teleport`. `mascot/Hornet.qml` (`hornet.svg`): `boss` = máscara de
   forma final, gesto `dash` (izquierda y derecha); se va con un dash.
 - **Notificaciones en el notch** (`NotifView.qml`): diálogo de NPC con tipeo por `Timer`.
-- **Home**: centro de control con popouts de la barra en el sitio y mezclador por app
+- **Home**: centro de control con tarjetas propias (`pages/home/`) y mezclador por app
   (`pages/home/Mixer.qml`, streams `PwNodeType.AudioOutStream`).
 - **Weather**: escena animada por clima (`pages/weather/WeatherScene.qml`).
 - **Temporadas** (`services/Season.qml`): brasas Grimm en octubre, nieve en diciembre.
@@ -171,7 +171,7 @@ docs/           claude-detalle.md (detalle histórico)
   animaciones en Animations (`mascot`, `animBench`, `animWeather`, `animSeasons`, `animTyping`, `animGoo`).
   Los controles de `components/controls` usan `Hallownest.*`, no `Colours.palette`.
 - **Dock** (`modules/dock/`): `Dock.mode` manual (`Super + F1`), asomar por los bordes, menú de apps =
-  launcher (el panel de `drawers` está apagado), animación de gotas (`GooWindow`). Espacio reservado
+  `Launcher.Content` (el panel del launcher en `drawers` se borró), animación de gotas (`GooWindow`). Espacio reservado
   para notch/dock en `drawers/Exclusions.qml` (constantes fijas).
 - **Launcher**: calculadora directa, web/`@sitio`, `/archivos` (fd), `>tr` (translate-shell), apps ya
   abiertas se enfocan, OCR (`assets/ocr.sh`, `Super + F9`).
@@ -238,7 +238,7 @@ docs/           claude-detalle.md (detalle histórico)
 | `~/.config/hypr/hyprland/execs.lua` | Autoarranque (`qs -c paleshell -n -d`, `kdeconnectd`) |
 | `~/.config/hypr/hyprland/keybinds.lua` | Atajos con descripción. Fila F (sin / con Super): F1 notch / isla↔dock, F2 overview / espacio especial, F3 portapapeles / menú de atajos, F4 pantalla completa / maximizar, F5 lupa / color picker, F6 atrás / adelante, F8 emojis / menú de la mascota, F9 captura de región / OCR, F10 play / siguiente, F11 silenciar / mic, F12 e Insert volumen / brillo |
 | `~/.config/hypr/variables.lua` | Apps y teclas por defecto, `cursorTheme` |
-| `~/.config/paleshell/shell.json` | Config (barra apagada con `bar.excludedScreens`, `launcher.enabled: false`) |
+| `~/.config/paleshell/shell.json` | Config (las claves `bar`, `launcher.enabled` y `utilities.enabled` ya no tienen efecto: esos paneles se borraron) |
 | `~/.config/caelestia/cli.json` | Tema de iconos (`YAMIS-Hallownest`) que aplica la CLI |
 | `/usr/lib/python3.14/site-packages/caelestia/data/schemes/hollowknight` | Symlink a `assets/schemes/hollowknight` (rehacer si cambia Python) |
 

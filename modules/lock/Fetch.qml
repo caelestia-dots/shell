@@ -70,7 +70,7 @@ StyledRect {
                 Layout.preferredHeight: 0
                 active: !iconLoader.active
 
-                sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+                sourceComponent: SysInfo.isDefaultLogo ? maskLogo : distroIcon
             }
         }
 
@@ -85,7 +85,7 @@ StyledRect {
                 Layout.fillHeight: true
                 active: root.width > Tokens.sizes.lock.largeLogoWidth
 
-                sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+                sourceComponent: SysInfo.isDefaultLogo ? maskLogo : distroIcon
             }
 
             ColumnLayout {
@@ -187,7 +187,7 @@ StyledRect {
     }
 
     Component {
-        id: caelestiaLogo
+        id: maskLogo
 
         HealthMask {
             size: height

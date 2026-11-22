@@ -9,7 +9,6 @@ Item {
 
     required property ScreenState screenState
     required property bool sidebarVisible
-    readonly property real nonAnimWidth: content.implicitWidth
 
     readonly property bool shouldBeActive: screenState.session && Config.session.enabled
     property real offsetScale: shouldBeActive ? 0 : 1
