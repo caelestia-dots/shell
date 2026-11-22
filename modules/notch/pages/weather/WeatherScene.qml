@@ -422,30 +422,41 @@ ClippingRectangle {
     }
 
     // Greenpath: volumetric sunbeams slanting from cavern openings
-    Repeater {
-        model: root.scene === "greenpath" ? 5 : 0
+    Item {
+        anchors.fill: parent
+        visible: root.scene === "greenpath"
+        layer.enabled: visible
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blur: 0.75
+            blurMax: 24
+        }
 
-        Rectangle {
-            required property int index
+        Repeater {
+            model: root.scene === "greenpath" ? 5 : 0
 
-            x: root.width * (0.12 + index * 0.18)
-            y: -root.height * 0.35
-            width: 22 + (index % 3) * 10
-            height: root.height * 1.75
-            rotation: 22
-            opacity: 0.07 + 0.05 * Math.sin((root.t * 18 + index * 0.31) * Math.PI * 2)
-            gradient: Gradient {
-                GradientStop {
-                    position: 0
-                    color: root.accent
-                }
-                GradientStop {
-                    position: 0.75
-                    color: Qt.alpha(root.secondary, 0.25)
-                }
-                GradientStop {
-                    position: 1
-                    color: "transparent"
+            Rectangle {
+                required property int index
+
+                x: root.width * (0.12 + index * 0.18)
+                y: -root.height * 0.35
+                width: 24 + (index % 3) * 10
+                height: root.height * 1.75
+                rotation: 22
+                opacity: 0.08 + 0.05 * Math.sin((root.t * 18 + index * 0.31) * Math.PI * 2)
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: root.accent
+                    }
+                    GradientStop {
+                        position: 0.75
+                        color: Qt.alpha(root.secondary, 0.25)
+                    }
+                    GradientStop {
+                        position: 1
+                        color: "transparent"
+                    }
                 }
             }
         }
@@ -691,7 +702,7 @@ ClippingRectangle {
 
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: Hallownest.isMono || Hallownest.light ? Qt.alpha(root.secondary, index % 2 === 0 ? 0.65 : 0.48) : (index % 2 === 0 ? "#2d6640" : "#1f4a2e")
+                strokeColor: Hallownest.isMono || Hallownest.light ? Qt.alpha(root.secondary, index % 2 === 0 ? 0.65 : 0.48) : Qt.tint(root.farColour, Qt.alpha(root.secondary, index % 2 === 0 ? 0.4 : 0.24))
                 strokeWidth: 1.5
                 capStyle: ShapePath.RoundCap
 
@@ -788,7 +799,7 @@ ClippingRectangle {
 
             // Glowing orange-pink inner nucleus
             ShapePath {
-                fillColor: Qt.alpha(ooma.large ? (Hallownest.isMono || Hallownest.light ? root.accent : "#ffb8e6") : root.secondary, 0.8)
+                fillColor: Qt.alpha(ooma.large ? (Hallownest.isMono || Hallownest.light ? root.accent : Qt.tint(root.accent, Qt.alpha(Hallownest.soul, 0.3))) : root.secondary, 0.8)
                 strokeWidth: -1
 
                 PathSvg {

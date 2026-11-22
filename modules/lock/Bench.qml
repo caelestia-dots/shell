@@ -1,7 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
+import qs.services
 
 // The Knight resting on a bench (the user's drawing, split by scripts/hallownest-bench.py).
 // Coordinates are those of the 320x220 SVG canvas; `canvasScale` sizes it.
@@ -224,6 +226,16 @@ Item {
 
                 BenchLayer {
                     name: "ojos"
+                    layer.enabled: root.raise > 0.05
+                    layer.effect: MultiEffect {
+                        shadowEnabled: true
+                        shadowColor: Hallownest.soul
+                        shadowOpacity: root.raise * 0.65
+                        shadowBlur: 0.8
+                        shadowHorizontalOffset: 0
+                        shadowVerticalOffset: 0
+                        blurMax: 14
+                    }
                     transform: [
                         Scale {
                             origin.y: 99

@@ -2,12 +2,12 @@ import QtQuick
 import Caelestia.Config
 import qs.components
 import qs.services
-import qs.modules.launcher.services
 
 Item {
     id: root
 
-    required property Schemes.Scheme modelData
+    // Schemes.Scheme or Flavours.Flavour: title, subtitle, current, colours, onClicked
+    required property var modelData
     required property var list
 
     implicitHeight: Tokens.sizes.launcher.itemHeight
@@ -68,12 +68,12 @@ Item {
             spacing: 0
 
             StyledText {
-                text: root.modelData?.flavour ?? ""
+                text: root.modelData?.title ?? ""
                 font: Tokens.font.body.medium
             }
 
             StyledText {
-                text: root.modelData?.name ?? ""
+                text: root.modelData?.subtitle ?? ""
                 font: Tokens.font.body.small
                 color: Colours.palette.m3outline
 
@@ -90,7 +90,7 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 
-            active: `${root.modelData?.name} ${root.modelData?.flavour}` === Schemes.currentScheme
+            active: root.modelData?.current ?? false
 
             sourceComponent: MaterialIcon {
                 text: "check"

@@ -9,6 +9,8 @@ Shape {
     property real radius: 26
     property real inset: 7
     property color colour: Hallownest.steel
+    // 0-1: how much of the stroke is traced; the gems fade in at the end
+    property real drawn: 1
 
     function corner(mirror: bool): string {
         const d = inset;
@@ -42,6 +44,7 @@ Shape {
         strokeColor: root.colour
         strokeWidth: 1
         capStyle: ShapePath.RoundCap
+        trim.end: root.drawn
 
         PathSvg {
             path: `${root.corner(false)} ${root.corner(true)}`
@@ -49,7 +52,7 @@ Shape {
     }
 
     ShapePath {
-        fillColor: root.colour
+        fillColor: Qt.alpha(root.colour, Math.max(0, (root.drawn - 0.7) / 0.3))
         strokeWidth: -1
 
         PathSvg {

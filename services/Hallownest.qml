@@ -43,13 +43,26 @@ Singleton {
     // Folder in assets/schemes/hollowknight, also the caelestia flavour
     readonly property string schemeFlavour: style === "hallownest" ? flavour : `${style}-${flavour}`
     property bool loaded
+    property var pending: null
+    readonly property bool transitioning: applyDelay.running
 
     readonly property string serif: cinzel.status === FontLoader.Ready ? cinzel.name : "serif"
     readonly property string mono: "JetBrainsMono Nerd Font"
 
-    // Hover/raised tint: lighter on dark styles, slightly darker on light ones
+    // Hover/raised tint: shifts perceptually toward `text` so all dark and light styles stay hue-consistent
     function raise(c: color, k: real): color {
-        return light ? Qt.darker(c, 1 + (k - 1) * 0.16) : Qt.lighter(c, k);
+        const strength = Math.max(0, Math.min(0.24, (k - 1) * (light ? 0.12 : 0.18)));
+        return Qt.tint(c, Qt.alpha(text, strength));
+    }
+
+    // The icon theme is rebuilt by these scripts; Icons rescans it once they finish
+    function runThemeScripts(command: var): void {
+        if (themeScripts.running) {
+            themeScripts.next = command;
+        } else {
+            themeScripts.command = command;
+            themeScripts.running = true;
+        }
     }
 
     function setStyle(name: string): void {
@@ -60,20 +73,65 @@ Singleton {
         setTheme(style, name);
     }
 
+    // Applied after a short delay so StyleTransition can veil the screen in the old colours first
     function setTheme(styleName: string, flavourName: string): void {
-        if (!styles[styleName] || !flavours.includes(flavourName) || (styleName === style && flavourName === flavour))
+        if (!styles[styleName] || !flavours.includes(flavourName))
             return;
-        style = styleName;
-        flavour = flavourName;
+        if (styleName === style && flavourName === flavour) {
+            pending = null;
+            applyDelay.stop();
+            return;
+        }
+        pending = {
+            style: styleName,
+            flavour: flavourName
+        };
+        // Only a new style gets the veil; a flavour change within the same style applies at once
+        if (styleName === style) {
+            applyDelay.stop();
+            applyTheme();
+        } else {
+            applyDelay.restart();
+        }
+    }
+
+    function applyTheme(): void {
+        if (!pending)
+            return;
+        style = pending.style;
+        flavour = pending.flavour;
+        pending = null;
         state.setText(JSON.stringify({
             style,
             flavour
         }));
         // The icons are re-tinted before caelestia reapplies the icon theme; thunar-theme.py must
         // run after caelestia, which rewrites thunar.css
-        Quickshell.execDetached(["sh", "-c", 'python3 "$2" "$0" "$1"; caelestia scheme set -n hollowknight -f "$4" -m "$5"; python3 "$3" "$0" "$1"; command -v spicetify >/dev/null && spicetify -q refresh', style, flavour, Quickshell.shellPath("assets/icon-theme.py"), Quickshell.shellPath("assets/thunar-theme.py"), schemeFlavour, light ? "light" : "dark"]);
+        runThemeScripts(["sh", "-c", 'python3 "$2" "$0" "$1"; caelestia scheme set -n hollowknight -f "$4" -m "$5"; python3 "$3" "$0" "$1"; command -v spicetify >/dev/null && spicetify -q refresh', style, flavour, Quickshell.shellPath("assets/icon-theme.py"), Quickshell.shellPath("assets/thunar-theme.py"), schemeFlavour, light ? "light" : "dark"]);
         for (const app of ["zen", "obsidian", "apps"])
             Quickshell.execDetached(["python3", Quickshell.shellPath(`assets/${app}-theme.py`), style, flavour]);
+    }
+
+    Timer {
+        id: applyDelay
+
+        interval: 300
+        onTriggered: root.applyTheme()
+    }
+
+    Process {
+        id: themeScripts
+
+        property var next: null
+
+        onExited: {
+            Icons.reloadTinted();
+            if (next) {
+                command = next;
+                next = null;
+                running = true;
+            }
+        }
     }
 
     FileView {
@@ -99,7 +157,7 @@ Singleton {
             } catch (e) {}
             root.loaded = true;
             Quickshell.execDetached(["python3", Quickshell.shellPath("assets/thunar-theme.py"), root.style, root.flavour]);
-            Quickshell.execDetached(["python3", Quickshell.shellPath("assets/icon-theme.py"), root.style, root.flavour]);
+            root.runThemeScripts(["python3", Quickshell.shellPath("assets/icon-theme.py"), root.style, root.flavour]);
         }
         onLoadFailed: root.loaded = true
     }

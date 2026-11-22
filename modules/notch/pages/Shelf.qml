@@ -9,6 +9,7 @@ import qs.components
 import qs.components.controls
 import qs.components.hallownest
 import qs.services
+import qs.utils
 import qs.modules.notch
 
 NotchPage {
@@ -114,6 +115,17 @@ NotchPage {
             }
 
             HkButton {
+                readonly property var targets: Shelf.items.filter(i => root.selected.includes(i.id) && Shelf.canConvert(i))
+
+                Layout.alignment: Qt.AlignHCenter
+                visible: targets.length > 0
+                icon: Shelf.converting ? "hourglass_top" : "markdown"
+                text: Tr.tr("To Markdown")
+                disabled: Shelf.converting
+                onClicked: Shelf.toMarkdown(targets)
+            }
+
+            HkButton {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: root.selected.length ? 0 : Tokens.spacing.small
                 icon: "clear_all"
@@ -141,11 +153,11 @@ NotchPage {
             visible: Shelf.items.length === 0
             spacing: Tokens.spacing.small
 
-            MaterialIcon {
+            Mask {
                 Layout.alignment: Qt.AlignHCenter
-                text: "folder_open"
-                color: Hallownest.steel
-                fontStyle: Tokens.font.icon.extraLarge
+                size: 48
+                filled: false
+                colour: Hallownest.steel
             }
 
             StyledText {
@@ -274,8 +286,8 @@ NotchPage {
                                 source: {
                                     const mime = card.modelData.mime ?? "";
                                     if (mime === "inode/directory")
-                                        return Quickshell.iconPath("folder", "inode-directory");
-                                    return Quickshell.iconPath(mime.replace("/", "-"), "text-x-generic");
+                                        return Icons.iconPath("folder", "inode-directory");
+                                    return Icons.iconPath(mime.replace("/", "-"), "text-x-generic");
                                 }
                             }
                         }

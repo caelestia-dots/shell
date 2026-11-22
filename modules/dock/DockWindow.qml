@@ -39,7 +39,7 @@ StyledWindow {
 
     // The app menu is the launcher: it follows the launcher state, so the shortcut and every
     // launcher item that closes it keep working
-    readonly property bool drawerOpen: screenState.launcher && !hasFullscreen
+    readonly property bool drawerOpen: screenState.launcher
     // In island mode the dock peeks up while the cursor is at the bottom edge
     readonly property bool canPeek: !Dock.mode && progress === 0 && !hasFullscreen
     property bool peeking
@@ -81,7 +81,7 @@ StyledWindow {
     readonly property real drawerHeight: 440
 
     function iconFor(group: var): string {
-        return group.entry ? Quickshell.iconPath(group.entry.icon, "image-missing") : Icons.getAppIcon(group.id, "image-missing");
+        return group.entry ? Icons.iconPath(group.entry.icon, "image-missing") : Icons.getAppIcon(group.id, "image-missing");
     }
 
     function startDrag(from: Item, id: string, source: string): void {
@@ -114,7 +114,8 @@ StyledWindow {
 
     name: "dock"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: WlrLayer.Top
+    // Overlay so the app menu (double Super) shows above a fullscreen window
+    WlrLayershell.layer: hasFullscreen ? WlrLayer.Overlay : WlrLayer.Top
     WlrLayershell.keyboardFocus: drawerOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     mask: Region {
         item: root.bodyShown ? body : null
@@ -144,7 +145,7 @@ StyledWindow {
         peeking = false;
         progressAnim.stop();
         progressAnim.to = wanted ? 1 : 0;
-        progressAnim.duration = NotchSettings.values.animGoo ? Math.abs(progressAnim.to - progress) * 2200 : 0;
+        progressAnim.duration = NotchSettings.values.animGoo ? Math.abs(progressAnim.to - progress) * 2000 : 0;
         progressAnim.start();
         // Covers the run plus a beat while the notch or dock fades in under the drops
         settle.interval = progressAnim.duration + 250;
@@ -244,7 +245,7 @@ StyledWindow {
 
         // Only the island-mode menu slides; in dock mode the drops hand over
         Behavior on anchors.bottomMargin {
-            enabled: !Dock.mode
+            enabled: !Dock.mode || root.hasFullscreen
 
             Anim {
                 type: Anim.DefaultSpatial
@@ -371,8 +372,23 @@ StyledWindow {
                             anchors.margins: 3
                             radius: 12
                             color: app.selected ? Qt.alpha(Hallownest.soul, 0.08) : "transparent"
-                            border.width: app.GridView.isCurrentItem ? 1 : 0
-                            border.color: Qt.alpha(Hallownest.soul, 0.35)
+                            border.width: app.selected ? 1 : 0
+                            border.color: Qt.alpha(Hallownest.soul, app.GridView.isCurrentItem ? 0.5 : 0.22)
+
+                            Behavior on color {
+                                CAnim {}
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 5
+                            width: 4
+                            height: 4
+                            rotation: 45
+                            color: Hallownest.soul
+                            visible: app.GridView.isCurrentItem
                         }
 
                         IconImage {
@@ -382,7 +398,7 @@ StyledWindow {
                             anchors.top: parent.top
                             anchors.topMargin: 8
                             implicitSize: 48
-                            source: Quickshell.iconPath(app.modelData.icon, "image-missing")
+                            source: Icons.iconPath(app.modelData.icon, "image-missing")
                         }
 
                         StyledText {
@@ -669,36 +685,63 @@ StyledWindow {
             }
         }
 
-        Rectangle {
+        Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 6
-            width: item.focused ? 14 : 6
-            height: 3
-            radius: 1.5
-            color: item.focused ? Hallownest.soul : Hallownest.steel
+            anchors.bottomMargin: 3
+            width: 14
+            height: 14
             visible: item.group.windows.length > 0
+            layer.enabled: item.focused
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: Hallownest.soul
+                shadowBlur: 0.7
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 0
+                blurMax: 10
+            }
 
-            Behavior on width {
-                Anim {
-                    type: Anim.FastSpatial
+            Rectangle {
+                anchors.centerIn: parent
+                width: item.focused ? 6.5 : 5
+                height: width
+                rotation: 45
+                radius: 1
+                color: item.focused ? Hallownest.soul : "transparent"
+                border.width: 1
+                border.color: item.focused ? Hallownest.soul : Qt.alpha(Hallownest.steel, 0.7)
+
+                Behavior on width {
+                    Anim {
+                        type: Anim.FastSpatial
+                    }
+                }
+
+                Behavior on color {
+                    CAnim {}
                 }
             }
         }
 
         Rectangle {
             x: icon.x + icon.width - width + 4
-            y: icon.y - 4
-            width: 16
-            height: 16
-            radius: 8
+            y: icon.y - 3
+            width: 15
+            height: 15
+            rotation: 45
+            radius: 3
             color: Hallownest.lifeblood
+            border.width: 1
+            border.color: Hallownest.void_
             visible: item.group.windows.length > 1
 
             StyledText {
                 anchors.centerIn: parent
+                rotation: -45
                 text: item.group.windows.length
                 color: Hallownest.void_
+                font.family: Hallownest.mono
                 font.pointSize: 7
                 font.weight: Font.Bold
             }

@@ -6,6 +6,7 @@ import Caelestia.Config
 import qs.components
 import qs.components.containers
 import qs.components.controls
+import qs.components.hallownest
 import qs.services
 import qs.modules.nexus
 
@@ -24,39 +25,56 @@ ColumnLayout {
 
     MouseArea { // Prevent clicks from reaching flickable
         z: 1
-        implicitWidth: header.implicitWidth
-        implicitHeight: header.implicitHeight - Layout.bottomMargin
+        Layout.fillWidth: true
+        implicitWidth: headerCol.implicitWidth
+        implicitHeight: headerCol.implicitHeight - Layout.bottomMargin
         Layout.bottomMargin: -flickable.topMargin // Extra height to block clicks on flickable top margin
         onClicked: focus = true
 
-        RowLayout {
-            id: header
+        ColumnLayout {
+            id: headerCol
 
-            spacing: Tokens.spacing.largeIncreased
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: Tokens.spacing.small
 
-            Loader {
-                visible: active
-                active: root.isSubPage
-                asynchronous: true
-                sourceComponent: IconButton {
-                    icon: "arrow_back"
-                    font: Tokens.font.icon.medium
-                    type: IconButton.Tonal
-                    isRound: true
-                    inactiveColour: Hallownest.button
-                    inactiveOnColour: Hallownest.subtext
-                    onClicked: root.nState.closeSubPage()
+            RowLayout {
+                id: header
+
+                Layout.fillWidth: true
+                spacing: Tokens.spacing.largeIncreased
+
+                Loader {
+                    visible: active
+                    active: root.isSubPage
+                    asynchronous: true
+                    sourceComponent: IconButton {
+                        icon: "arrow_back"
+                        font: Tokens.font.icon.medium
+                        type: IconButton.Tonal
+                        isRound: true
+                        inactiveColour: Hallownest.button
+                        inactiveOnColour: Hallownest.subtext
+                        onClicked: root.nState.closeSubPage()
+                    }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: root.title
+                    color: Hallownest.soul
+                    font.family: Hallownest.serif
+                    font.pointSize: Tokens.font.title.large.pointSize + 2
+                    font.weight: Font.Bold
+                    elide: Text.ElideRight
                 }
             }
 
-            StyledText {
+            HkDivider {
                 Layout.fillWidth: true
-                text: root.title
-                color: Hallownest.soul
-                font.family: Hallownest.serif
-                font.pointSize: Tokens.font.title.large.pointSize + 2
-                font.weight: Font.Bold
-                elide: Text.ElideRight
+                Layout.maximumWidth: root.cappedWidth
+                Layout.alignment: Qt.AlignHCenter
+                lineRatio: 0.46
             }
         }
     }

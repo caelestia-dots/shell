@@ -105,7 +105,7 @@ ColumnLayout {
         StyledText {
             Layout.fillWidth: true
             text: root.label
-            color: Colours.palette.m3outlineVariant
+            color: Hallownest.faint
             font: Tokens.font.mono.builders.medium.weight(Font.Medium).build()
             elide: Text.ElideRight
         }
@@ -122,10 +122,12 @@ ColumnLayout {
                 implicitWidth: implicitHeight
                 implicitHeight: icon.implicitHeight + Tokens.padding.small * 2
                 radius: selected ? Tokens.rounding.medium : Tokens.rounding.full
-                color: selected ? Colours.palette.m3secondaryContainer : "transparent"
+                color: selected ? Qt.alpha(Hallownest.soul, 0.14) : "transparent"
+                border.width: selected ? 1 : 0
+                border.color: Qt.alpha(Hallownest.soul, 0.45)
 
                 StateLayer {
-                    color: chip.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                    color: Hallownest.soul
                     onClicked: root.select(chip.modelData.id)
                 }
 
@@ -134,7 +136,7 @@ ColumnLayout {
 
                     anchors.centerIn: parent
                     text: chip.modelData.icon
-                    color: chip.selected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3outline
+                    color: chip.selected ? Hallownest.soul : Hallownest.subtext
                     fill: chip.selected ? 1 : 0
                 }
 

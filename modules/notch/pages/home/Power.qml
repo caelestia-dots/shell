@@ -59,23 +59,21 @@ RowLayout {
                 level: root.dev.isLaptopBattery ? root.level : 0
                 colour: root.accent
                 running: root.charging
-
-                StyledText {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -parent.height * 0.18
-                    text: root.dev.isLaptopBattery ? `${Math.round(root.level * 100)}%` : "—"
-                    color: Hallownest.soul
-                    style: Text.Outline
-                    styleColor: Hallownest.void_
-                    font.family: Hallownest.serif
-                    font.pointSize: 15
-                    font.weight: Font.Bold
-                }
             }
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.topMargin: 6
+                Layout.topMargin: 4
+                horizontalAlignment: Text.AlignHCenter
+                text: root.dev.isLaptopBattery ? `${Math.round(root.level * 100)}%` : "—"
+                color: root.accent
+                font.family: Hallownest.mono
+                font.pointSize: 13
+                font.weight: Font.Bold
+            }
+
+            StyledText {
+                Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
                 text: root.charging ? Tr.tr("Soul Restoring") : root.low ? Tr.tr("Soul Fading") : Tr.tr("Soul Vessel")
                 color: root.charging ? Hallownest.lifeblood : root.low ? Hallownest.grimm : Hallownest.soul

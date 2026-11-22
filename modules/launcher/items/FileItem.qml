@@ -47,7 +47,7 @@ Item {
         IconImage {
             Layout.alignment: Qt.AlignVCenter
             asynchronous: true
-            source: Quickshell.iconPath(FileSearch.iconFor(root.modelData), "text-x-generic")
+            source: Icons.iconPath(FileSearch.iconFor(root.modelData), "text-x-generic")
             implicitSize: Tokens.sizes.launcher.itemHeight * 0.6
         }
 

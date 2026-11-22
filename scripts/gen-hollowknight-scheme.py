@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generates the Hollow Knight colour schemes for caelestia-cli from assets/styles.json.
 
-Every style (hallownest, pale, beezone, void, grimm) has the four flavours. Surfaces, text and
+Every style (hallownest, pale, beezone, void, grimm, cityoftears, kingdomsedge, queensgardens) has
+the four flavours. Surfaces, text and
 terminal greys come from the style's base; primary/secondary/tertiary/error/success from the flavour.
 "light" styles get light.txt with dark accents on light surfaces; "mono" styles keep the hallownest
 terminal hues so diffs and prompts stay readable.

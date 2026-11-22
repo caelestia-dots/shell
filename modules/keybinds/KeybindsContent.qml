@@ -8,6 +8,7 @@ import Caelestia.I18n
 import qs.components
 import qs.components.containers
 import qs.components.controls
+import qs.components.hallownest
 import qs.services
 
 Item {
@@ -190,9 +191,9 @@ Item {
     }
 
     // Backdrop, click to close
-    StyledRect {
+    Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Colours.palette.m3scrim, 0.5)
+        color: Qt.alpha("black", 0.45)
 
         MouseArea {
             anchors.fill: parent
@@ -200,15 +201,13 @@ Item {
         }
     }
 
-    StyledRect {
+    HkCard {
         id: card
 
         anchors.centerIn: parent
         width: Math.min(parent.width - Tokens.padding.extraLarge * 4, 1200)
         height: Math.min(parent.height - Tokens.padding.extraLarge * 4, 860)
-
-        radius: Tokens.rounding.extraLarge
-        color: Colours.palette.m3surfaceContainer
+        ornate: true
 
         // Swallow clicks so they don't reach the backdrop
         MouseArea {
@@ -226,15 +225,14 @@ Item {
 
                 MaterialIcon {
                     text: "keyboard"
-                    color: Colours.palette.m3primary
+                    color: Hallownest.soul
                     fontStyle: Tokens.font.icon.builders.large.build()
                 }
 
-                StyledText {
+                HkTitle {
                     Layout.fillWidth: true
                     text: Tr.tr("Keyboard shortcuts")
-                    color: Colours.palette.m3onSurface
-                    font: Tokens.font.headline.medium
+                    size: 16
                 }
 
                 SearchBar {
@@ -254,12 +252,14 @@ Item {
                     }
                 }
 
-                IconButton {
-                    isRound: true
-                    type: IconButton.Text
+                HkButton {
                     icon: "close"
                     onClicked: root.close()
                 }
+            }
+
+            HkDivider {
+                Layout.fillWidth: true
             }
 
             StyledFlickable {
@@ -325,7 +325,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 visible: root.filtered.length === 0
                 text: root.sections.length ? Tr.tr("No shortcuts match \"%1\"").arg(search.text) : Tr.tr("No shortcuts with a description found")
-                color: Colours.palette.m3outline
+                color: Hallownest.faint
                 font: Tokens.font.body.medium
             }
         }
@@ -339,11 +339,11 @@ Item {
         Layout.fillWidth: true
         spacing: Tokens.spacing.small
 
-        StyledText {
+        HkSection {
+            Layout.topMargin: 0
+            Layout.leftMargin: 0
             Layout.bottomMargin: Tokens.spacing.extraSmall
             text: section.modelData.name
-            color: Colours.palette.m3primary
-            font: Tokens.font.title.small
         }
 
         Repeater {
@@ -362,7 +362,7 @@ Item {
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: 2
                     text: bindRow.modelData.description
-                    color: Colours.palette.m3onSurface
+                    color: Hallownest.text
                     font: Tokens.font.body.small
                     wrapMode: Text.WordWrap
                 }
@@ -383,15 +383,19 @@ Item {
                             implicitWidth: keyText.implicitWidth + Tokens.padding.medium * 2
                             implicitHeight: keyText.implicitHeight + Tokens.padding.extraSmall * 2
                             radius: Tokens.rounding.small
-                            color: Colours.palette.m3surfaceContainerHighest
+                            color: Hallownest.button
+                            border.width: 1
+                            border.color: Hallownest.border
 
                             StyledText {
                                 id: keyText
 
                                 anchors.centerIn: parent
                                 text: keycap.modelData
-                                color: Colours.palette.m3onSurfaceVariant
-                                font: Tokens.font.label.builders.small.weight(Font.Medium).build()
+                                color: Hallownest.soul
+                                font.family: Hallownest.mono
+                                font.pointSize: 8.5
+                                font.weight: Font.DemiBold
                             }
                         }
                     }

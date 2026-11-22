@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 import qs.components.hallownest
 import qs.services
@@ -13,7 +14,24 @@ Item {
     property real progress // darkness and rays, 0..1
     property real rays: progress
     property real flash // Soul burst from the bench, 0..1
+    property real breath
     readonly property real benchY: height * 0.93
+
+    SequentialAnimation on breath {
+        running: root.visible && root.rays > 0
+        loops: Animation.Infinite
+
+        NumberAnimation {
+            to: 1
+            duration: 3600
+            easing.type: Easing.InOutSine
+        }
+        NumberAnimation {
+            to: 0
+            duration: 3600
+            easing.type: Easing.InOutSine
+        }
+    }
 
     Shape {
         anchors.fill: parent
@@ -57,32 +75,42 @@ Item {
         opacity: root.rays
         visible: opacity > 0
 
-        Repeater {
-            model: 5
+        Item {
+            anchors.fill: parent
+            layer.enabled: root.visible && root.rays > 0
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blur: 0.75
+                blurMax: 32
+            }
 
-            Rectangle {
-                required property int index
-                readonly property real spread: (index - 2) * 9
+            Repeater {
+                model: 5
 
-                x: root.width / 2 - width / 2 + (index - 2) * root.width * 0.02
-                y: -root.height * 0.15
-                width: root.width * (0.04 + (index % 2) * 0.02)
-                height: root.benchY + root.height * 0.25
-                rotation: -spread
-                transformOrigin: Item.Top
-                opacity: 0.1 + (index === 2 ? 0.06 : 0)
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: "transparent"
-                    }
-                    GradientStop {
-                        position: 0.7
-                        color: Hallownest.soul
-                    }
-                    GradientStop {
-                        position: 1
-                        color: "transparent"
+                Rectangle {
+                    required property int index
+                    readonly property real spread: (index - 2) * 9
+
+                    x: root.width / 2 - width / 2 + (index - 2) * root.width * 0.02
+                    y: -root.height * 0.15
+                    width: root.width * (0.04 + (index % 2) * 0.02)
+                    height: root.benchY + root.height * 0.25
+                    rotation: -spread
+                    transformOrigin: Item.Top
+                    opacity: 0.09 + (index === 2 ? 0.05 : 0) + (index % 2 === 0 ? root.breath : 1 - root.breath) * 0.035
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0
+                            color: "transparent"
+                        }
+                        GradientStop {
+                            position: 0.7
+                            color: Hallownest.soul
+                        }
+                        GradientStop {
+                            position: 1
+                            color: "transparent"
+                        }
                     }
                 }
             }

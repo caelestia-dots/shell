@@ -10,6 +10,8 @@ Scope {
     id: root
 
     property bool launcherInterrupted
+    // Over a fullscreen window a single Super tap is ignored (games, video); a double tap opens
+    property real lastSuperTap
     readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
 
     // qmllint disable unresolved-type
@@ -72,9 +74,13 @@ Scope {
         description: "Toggle launcher"
         onPressed: root.launcherInterrupted = false
         onReleased: {
-            if (!root.launcherInterrupted && !root.hasFullscreen) {
-                const screenState = ShellState.forActive();
+            const screenState = ShellState.forActive();
+            const now = Date.now();
+            if (!root.launcherInterrupted && (!root.hasFullscreen || screenState.launcher || now - root.lastSuperTap < 400)) {
                 screenState.launcher = !screenState.launcher;
+                root.lastSuperTap = 0;
+            } else {
+                root.lastSuperTap = root.launcherInterrupted ? 0 : now;
             }
             root.launcherInterrupted = false;
         }

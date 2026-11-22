@@ -162,8 +162,8 @@ StyledRect {
         Layout.fillWidth: true
         Layout.preferredHeight: width
 
-        inactiveColour: activeFocus ? Colours.palette.m3secondaryContainer : Colours.tPalette.m3surfaceContainerHigh
-        inactiveOnColour: activeFocus ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        inactiveColour: activeFocus ? Qt.alpha(Hallownest.soul, 0.16) : Hallownest.button
+        inactiveOnColour: activeFocus ? Hallownest.soul : Hallownest.text
         radius: pressed ? Tokens.rounding.medium : activeFocus ? Tokens.rounding.extraLarge : Tokens.rounding.largeIncreased
         font: Tokens.font.icon.builders.large.scale(root.fontScale * 1.3).build()
         onClicked: exec()
@@ -209,8 +209,8 @@ StyledRect {
                 color: Hallownest.soul
                 style: Text.Outline
                 styleColor: Hallownest.void_
-                font.family: Hallownest.serif
-                font.pointSize: Tokens.font.headline.large.pointSize * root.fontScale * 0.85
+                font.family: Hallownest.mono
+                font.pointSize: Tokens.font.headline.large.pointSize * root.fontScale * 0.72
                 font.weight: Font.Bold
             }
         }

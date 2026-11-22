@@ -20,7 +20,7 @@ CLI `paleshell <comando>` (`paleshell <comando> -h` para detalles):
 
 | Pedido | Comando |
 |---|---|
-| Estilo (base) | `paleshell style <hallownest\|pale\|beezone\|void\|grimm>` (`pale` es claro) |
+| Estilo (base) | `paleshell style <hallownest\|pale\|beezone\|void\|grimm\|cityoftears\|kingdomsedge\|queensgardens>` (`pale`, `kingdomsedge` y `queensgardens` son claros) |
 | Acento | `paleshell flavour <vessel\|lifeblood\|infection\|greenpath>` |
 | Fondo | `paleshell wallpaper [ruta]` |
 | Mascota | `paleshell mascot <animación>`, `mascot use <knight\|grimm\|hornet>`, `mascot list` |

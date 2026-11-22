@@ -264,7 +264,7 @@ Item {
                 y: 15 + index * 22 % 50
                 rows: Sprites.cloud
                 pixelSize: root.cell
-                color: Colours.palette.m3outlineVariant
+                color: Hallownest.faint
             }
         }
 
@@ -272,7 +272,7 @@ Item {
             y: root.groundY
             width: parent.width
             height: 1.5
-            color: Colours.palette.m3outlineVariant
+            color: Hallownest.border
         }
 
         Repeater {
@@ -287,7 +287,7 @@ Item {
                 y: root.groundY + 3 + index % 3 * 2
                 width: index % 4 === 0 ? 4 : 2
                 height: 1.5
-                color: Colours.palette.m3outlineVariant
+                color: Hallownest.faint
             }
         }
 
@@ -305,7 +305,7 @@ Item {
             x: root.dinoX
             y: root.groundY + root.cell - height - root.dinoY
             pixelSize: root.cell
-            color: Colours.palette.m3outline
+            color: Hallownest.steel
             rows: {
                 if (root.phase === "over")
                     return Sprites.dead;
@@ -325,7 +325,7 @@ Item {
         x: Math.round(root.width - width - 10 * world.scale)
         y: Math.round(8 * world.scale)
         pixelSize: root.textPixel
-        color: Colours.palette.m3outline
+        color: Hallownest.steel
         rows: Sprites.text((root.highScore > 0 ? `HI ${String(root.highScore).padStart(5, "0")}  ` : "") + String(root.score).padStart(5, "0"))
 
         SequentialAnimation {
@@ -361,7 +361,7 @@ Item {
         PixelArt {
             x: Math.round((parent.width - width) / 2)
             pixelSize: root.textPixel
-            color: Colours.palette.m3outline
+            color: Hallownest.steel
             rows: Sprites.text(root.phase === "over" ? "G A M E   O V E R" : "CLICK OR \u2191 TO PLAY")
         }
 
@@ -369,7 +369,7 @@ Item {
             x: Math.round((parent.width - width) / 2)
             visible: root.phase === "over"
             pixelSize: root.textPixel
-            color: Colours.palette.m3outline
+            color: Hallownest.steel
             rows: Sprites.restart
         }
     }
@@ -382,7 +382,7 @@ Item {
 
         visible: active
         pixelSize: root.cell
-        color: Colours.palette.m3outline
+        color: Hallownest.steel
         rows: {
             if (kind === "bird")
                 return Math.floor(root.animTime / 10) % 2 ? Sprites.bird2 : Sprites.bird1;

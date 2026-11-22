@@ -259,7 +259,7 @@ Item {
             width: root.cell * root.cols
             height: root.cell * root.rows
             radius: Tokens.rounding.small
-            color: Qt.alpha(Colours.palette.m3onSurface, 0.05)
+            color: Qt.alpha(Hallownest.text, 0.05)
 
             Repeater {
                 model: root.cols * root.rows
@@ -288,7 +288,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
                 text: root.phase === "over" ? Tr.tr("GAME OVER") : Tr.tr("Click or press an arrow to play")
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
             }
         }
@@ -354,14 +354,14 @@ Item {
 
         StyledText {
             text: info.label
-            color: Colours.palette.m3outline
+            color: Hallownest.faint
             font: Tokens.font.mono.small
         }
 
         StyledText {
             visible: info.value !== null
             text: info.value ?? ""
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
         }
     }

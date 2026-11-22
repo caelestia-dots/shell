@@ -8,6 +8,7 @@ import Caelestia.I18n
 import Caelestia.Services
 import qs.components
 import qs.components.controls
+import qs.components.hallownest
 import qs.services
 import qs.utils
 import qs.modules.notch
@@ -127,13 +128,18 @@ NotchPage {
             anchors.centerIn: parent
             spacing: Tokens.spacing.small
 
-            CircularProgress {
+            Item {
                 Layout.alignment: Qt.AlignHCenter
-                implicitSize: 84
-                value: gauge.value
-                fgColour: gauge.accent
-                bgColour: Qt.alpha(Hallownest.steel, 0.15)
-                strokeWidth: 8
+                implicitWidth: 82
+                implicitHeight: 82
+
+                SoulVessel {
+                    anchors.fill: parent
+                    level: gauge.value
+                    colour: Qt.alpha(gauge.accent, 0.85)
+                    ornate: false
+                    running: root.visible
+                }
 
                 Column {
                     anchors.centerIn: parent
@@ -141,24 +147,33 @@ NotchPage {
                     MaterialIcon {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: gauge.icon
-                        color: gauge.accent
+                        color: Hallownest.soul
+                        style: Text.Outline
+                        styleColor: Hallownest.void_
                         fontStyle: Tokens.font.icon.small
                     }
 
                     StyledText {
-                        color: Hallownest.text
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: Strings.percentOne(gauge.value)
-                        font: Tokens.font.title.small
+                        color: Hallownest.soul
+                        style: Text.Outline
+                        styleColor: Hallownest.void_
+                        font.family: Hallownest.mono
+                        font.pointSize: 11
+                        font.weight: Font.Bold
                     }
                 }
             }
 
             StyledText {
-                color: Hallownest.text
+                color: Hallownest.steel
                 Layout.alignment: Qt.AlignHCenter
                 text: gauge.label
-                font: Tokens.font.label.large
+                font.family: Hallownest.serif
+                font.pointSize: 10
+                font.weight: Font.Bold
+                font.letterSpacing: 0.6
             }
 
             StyledText {
@@ -166,7 +181,8 @@ NotchPage {
                 Layout.maximumWidth: 130
                 text: gauge.detail
                 color: Hallownest.subtext
-                font: Tokens.font.label.small
+                font.family: Hallownest.mono
+                font.pointSize: 8
                 elide: Text.ElideRight
             }
         }
@@ -181,8 +197,10 @@ NotchPage {
 
         Layout.fillWidth: true
         implicitHeight: chipRow.implicitHeight + Tokens.padding.small * 2
-        radius: Tokens.rounding.full
+        radius: 10
         color: Hallownest.card
+        border.width: 1
+        border.color: Hallownest.border
 
         Row {
             id: chipRow
@@ -201,7 +219,8 @@ NotchPage {
                 color: Hallownest.text
                 anchors.verticalCenter: parent.verticalCenter
                 text: chip.text
-                font: Tokens.font.body.small
+                font.family: Hallownest.mono
+                font.pointSize: 9
             }
         }
     }

@@ -63,8 +63,14 @@ class LauncherConfig : public settings::ObjectNode {
             vmap({
                 { u"name"_s, markCtx(u"Theme"_s, u"launcher action"_s) },
                 { u"icon"_s, u"palette"_s },
-                { u"description"_s, mark(u"Change the Hollow Knight flavour"_s) },
+                { u"description"_s, mark(u"Change the Hollow Knight style"_s) },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"theme"_s } },
+            }),
+            vmap({
+                { u"name"_s, markCtx(u"Color"_s, u"launcher action"_s) },
+                { u"icon"_s, u"format_color_fill"_s },
+                { u"description"_s, mark(u"Change the style's colour (flavour)"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"color"_s } },
             }),
             vmap({
                 { u"name"_s, markCtx(u"Wallpaper"_s, u"launcher action"_s) },

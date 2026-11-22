@@ -37,6 +37,8 @@ StyledWindow {
     readonly property real topK: 1 - ease(progress / ends)
     readonly property real bottomK: ease((progress - 1 + ends) / ends)
     readonly property point drop: pointAt(travel * halfPath)
+    readonly property point trailDrop: pointAt(Math.max(0, travel - 0.055) * halfPath)
+    readonly property bool trailShown: travel > 0.02 && travel < 0.98
 
     // Point at distance s along the right half of the frame, from top centre to bottom centre
     function pointAt(s: real): point {
@@ -136,14 +138,29 @@ StyledWindow {
             Repeater {
                 model: [1, -1]
 
-                Rectangle {
+                Item {
+                    id: dropPair
+
                     required property int modelData
 
-                    x: root.width / 2 + (root.drop.x - root.width / 2) * modelData - root.r
-                    y: root.drop.y - root.r
-                    width: root.r * 2
-                    height: root.r * 2
-                    radius: root.r
+                    Rectangle {
+                        x: root.width / 2 + (root.drop.x - root.width / 2) * dropPair.modelData - root.r
+                        y: root.drop.y - root.r
+                        width: root.r * 2
+                        height: root.r * 2
+                        radius: root.r
+                    }
+
+                    Rectangle {
+                        readonly property real tr: root.r * 0.62
+
+                        visible: root.trailShown
+                        x: root.width / 2 + (root.trailDrop.x - root.width / 2) * dropPair.modelData - tr
+                        y: root.trailDrop.y - tr
+                        width: tr * 2
+                        height: tr * 2
+                        radius: tr
+                    }
                 }
             }
         }
@@ -189,7 +206,7 @@ StyledWindow {
         anchors.fill: parent
         visible: false
         layer.enabled: true
-        color: Hallownest.void_
+        color: Colours.transparency.enabled ? Qt.alpha(Hallownest.void_, Colours.transparency.base) : Hallownest.void_
     }
 
     // Thresholding the blurred shapes gives the metaball (gooey) merge

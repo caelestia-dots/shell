@@ -9,6 +9,7 @@ import qs.components
 import qs.components.containers
 import qs.components.effects
 import qs.services
+import qs.utils
 
 Item {
     id: root
@@ -172,7 +173,7 @@ Item {
 
                         IconImage {
                             asynchronous: true
-                            source: Quickshell.iconPath(action.modelData.identifier)
+                            source: Icons.iconPath(action.modelData.identifier)
                         }
                     }
 

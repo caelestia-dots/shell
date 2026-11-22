@@ -171,7 +171,7 @@ StyledRect {
 
                         sourceComponent: ColouredIcon {
                             anchors.fill: parent
-                            source: Quickshell.iconPath(root.modelData.appIcon)
+                            source: Icons.iconPath(root.modelData.appIcon)
                             colour: root.critical ? Hallownest.void_ : Hallownest.soul
                             layer.enabled: root.modelData.appIcon.endsWith("symbolic")
                         }

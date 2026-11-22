@@ -27,10 +27,12 @@ PageBase {
             text: Tr.tr("Style")
         }
 
-        RowLayout {
+        GridLayout {
             Layout.fillWidth: true
             Layout.bottomMargin: Tokens.spacing.medium
-            spacing: Tokens.spacing.small
+            columns: 4
+            columnSpacing: Tokens.spacing.small
+            rowSpacing: Tokens.spacing.small
 
             Repeater {
                 model: Hallownest.styleNames

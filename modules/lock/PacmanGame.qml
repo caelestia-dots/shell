@@ -409,7 +409,7 @@ Item {
 
         StyledText {
             text: String(root.score).padStart(5, "0")
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.subtext
             font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
         }
 
@@ -433,7 +433,7 @@ Item {
 
         StyledText {
             text: `HI ${String(root.highScore).padStart(5, "0")}`
-            color: Colours.palette.m3outline
+            color: Hallownest.faint
             font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
         }
     }
@@ -450,7 +450,7 @@ Item {
         Canvas {
             id: walls
 
-            readonly property color colour: root.phase === "cleared" && blink.on ? Colours.palette.m3onSurface : Colours.palette.m3primary
+            readonly property color colour: root.phase === "cleared" && blink.on ? Hallownest.text : Hallownest.soul
 
             anchors.fill: parent
             onColourChanged: requestPaint()
@@ -518,7 +518,7 @@ Item {
                 const c = root.cell;
                 const s = Math.max(2, Math.round(c / 4));
                 ctx.reset();
-                ctx.fillStyle = Colours.palette.m3onSurfaceVariant;
+                ctx.fillStyle = Hallownest.subtext;
                 for (let i = 0; i < root.dots.length; i++)
                     if (root.dots[i])
                         ctx.fillRect(i % root.cols * c + (c - s) / 2, Math.floor(i / root.cols) * c + (c - s) / 2, s, s);
@@ -537,7 +537,7 @@ Item {
                 width: root.cell * 0.6
                 height: width
                 radius: width / 2
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.soul
                 visible: root.pelletsLeft[index] && (blink.on || root.phase !== "running")
             }
         }

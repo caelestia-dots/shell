@@ -22,6 +22,19 @@ Singleton {
 
     property bool loaded
 
+    function clear(): void {
+        for (const notif of list.slice())
+            notif.close();
+    }
+
+    // History is only for what was missed: drop notifications older than a day
+    function prune(): void {
+        const cutoff = Date.now() - 24 * 3600 * 1000;
+        for (const notif of list.slice())
+            if (notif.time.getTime() < cutoff)
+                notif.close();
+    }
+
     function hasFullscreen(): bool {
         for (const monitor of Hypr.monitors.values) {
             if (monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1))
@@ -41,6 +54,13 @@ Singleton {
     onListChanged: {
         if (loaded)
             saveTimer.restart();
+    }
+
+    Timer {
+        running: root.loaded
+        repeat: true
+        interval: 600000
+        onTriggered: root.prune()
     }
 
     Connections {
@@ -118,6 +138,7 @@ Singleton {
             }
             root.list.sort((a, b) => b.time - a.time);
             root.loaded = true;
+            root.prune();
         }
         onLoadFailed: err => {
             if (err === FileViewError.FileNotFound) {
@@ -132,16 +153,12 @@ Singleton {
         // qmllint enable unresolved-type
         name: "clearNotifs"
         description: "Clear all notifications"
-        onPressed: {
-            for (const notif of root.list.slice())
-                notif.close();
-        }
+        onPressed: root.clear()
     }
 
     IpcHandler {
         function clear(): void {
-            for (const notif of root.list.slice())
-                notif.close();
+            root.clear();
         }
 
         function isDndEnabled(): bool {

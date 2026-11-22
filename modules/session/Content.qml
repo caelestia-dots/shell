@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Caelestia
 import Caelestia.Config
@@ -161,22 +162,37 @@ Column {
                 anchors.bottomMargin: 9
                 text: button.label
                 color: button.lit ? Hallownest.soul : Hallownest.faint
-                font.family: Hallownest.serif
-                font.pointSize: 7
-                font.weight: Font.Bold
-                font.letterSpacing: 0.5
+                font.pointSize: 8
+                font.weight: Font.DemiBold
+                font.capitalization: Font.AllUppercase
+                font.letterSpacing: 1
             }
         }
 
-        Rectangle {
+        Item {
             anchors.right: parent.left
-            anchors.rightMargin: 5
+            anchors.rightMargin: 2
             anchors.verticalCenter: parent.verticalCenter
-            width: 7
-            height: 7
-            rotation: 45
-            color: button.accent
+            width: 14
+            height: 14
             opacity: button.activeFocus ? 1 : 0
+            layer.enabled: opacity > 0
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: button.accent
+                shadowBlur: 0.7
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 0
+                blurMax: 10
+            }
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: 7
+                height: 7
+                rotation: 45
+                color: button.accent
+            }
 
             Behavior on opacity {
                 Anim {

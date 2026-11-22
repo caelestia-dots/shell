@@ -148,7 +148,7 @@ Item {
 
         scale: root.stateMsgShouldBeVisible && !root.msg ? 1 : 0.7
         opacity: root.stateMsgShouldBeVisible && !root.msg ? 1 : 0
-        color: Colours.palette.m3onSurfaceVariant
+        color: Hallownest.subtext
 
         font: Tokens.font.body.small
         horizontalAlignment: Qt.AlignHCenter
@@ -174,7 +174,7 @@ Item {
 
         scale: 0.7
         opacity: 0
-        color: Colours.palette.m3error
+        color: Hallownest.grimm
 
         font: Tokens.font.body.small
         horizontalAlignment: Qt.AlignHCenter

@@ -155,6 +155,10 @@ Item {
                 }
             }
 
+            HkDivider {
+                Layout.fillWidth: true
+            }
+
             GridView {
                 id: grid
 

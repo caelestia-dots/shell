@@ -117,17 +117,21 @@ docs/           claude-detalle.md (detalle histórico)
 
 ## Estilo Hollow Knight
 
+- Guía completa de la estética (paleta, tipografía, formas, movimiento, componentes, uso fuera de
+  QML) en `docs/estetica.md`. **Si cambias el diseño general** (`assets/styles.json`,
+  `services/Hallownest.qml`, `components/hallownest/`, curvas/duraciones de `tokens.hpp`, fuentes),
+  actualiza ese archivo en el mismo cambio.
 - Paleta `Hallownest` (`services/Hallownest.qml`: `void_`, `card`, `steel`, `soul`, `lifeblood`,
   `infection`, `grimm`, `gold`, `unn`, `crystal`, `serif` = Cinzel, `mono`). La UI propia usa esto, no
   `Colours`. Fuente única de colores: `assets/styles.json` = style (`hallownest`, `pale`, `beezone`,
-  `void`, `grimm`: base, charms) × flavour (`vessel`, `lifeblood`, `infection`, `greenpath`: accent,
-  steel, tertiary, error, success). Ambos viven en `~/.local/state/paleshell/hallownest.json`;
+  `void`, `grimm`, `cityoftears`, `kingdomsedge`, `queensgardens`: base, charms) × flavour (`vessel`,
+  `lifeblood`, `infection`, `greenpath`: accent, steel, tertiary, error, success). Ambos viven en `~/.local/state/paleshell/hallownest.json`;
   `Hallownest.setTheme/setStyle/setFlavour` también aplica `caelestia scheme set -n hollowknight -f
   <schemeFlavour>` y los scripts de tema de `assets/` (`<script> <style> <flavour>`, leen el JSON con
   `assets/hkstyle.py`: iconos YAMIS, Zen, Obsidian, Thunar, zathura/btop). `Colours` carga
   `assets/schemes/hollowknight/<schemeFlavour>/dark.txt` (`<flavour>` en hallownest,
   `<style>-<flavour>` en el resto); tras editar el JSON: `python3 scripts/gen-hollowknight-scheme.py`.
-  `pale` es claro (`"light": true` → `light.txt`, `caelestia -m light`, Obsidian moonstone): cada nivel
+  `pale`, `kingdomsedge` y `queensgardens` son claros (`"light": true` → `light.txt`, `caelestia -m light`, Obsidian moonstone): cada nivel
   `void_` → `shell` → `card` → `button` se aleja del fondo, así que en claro `void_` es el más claro y
   el acento es oscuro. Hover con `Hallownest.raise(c, k)`, nunca `Qt.lighter`. `void` es blanco y negro
   (`"mono": true`: la terminal conserva los colores de hallownest).
@@ -157,6 +161,8 @@ docs/           claude-detalle.md (detalle histórico)
   (`pages/home/Mixer.qml`, streams `PwNodeType.AudioOutStream`).
 - **Weather**: escena animada por clima (`pages/weather/WeatherScene.qml`).
 - **Temporadas** (`services/Season.qml`): brasas Grimm en octubre, nieve en diciembre.
+- **Cambio de estilo** (`modules/styletransition/`): `Hallownest.setTheme` aplica a los 300 ms
+  (`transitioning`) para que el velo cubra la pantalla con los colores viejos; luego filigrana y nombre del estilo.
 - **Ajustes** (`modules/nexus/`, IPC `nexus open` o botón Settings de Home; sin atajo): menú propio.
   Páginas en `PageRegistry` (lista) y `PageCompRegistry` (componentes, mismo orden): Style,
   Animations, Notch, Overlays, AI agents, Apps, Network, Bluetooth, Audio, Services, Language &
@@ -211,6 +217,9 @@ docs/           claude-detalle.md (detalle histórico)
 - `maximumLineCount` con `NaN` tumba quickshell (SIGSEGV). `.arg()` encadenado re-sustituye `%1`.
 - Propiedades FINAL de Item (p. ej. `bottom`) no se pueden redeclarar; `palette` choca con la de Item.
 - `MaterialIcon`: tamaño con `fontStyle`, nunca `font.pointSize` (pierde la fuente de iconos).
+- Iconos de apps con `Icons.iconPath` (misma firma), no `Quickshell.iconPath`: Qt cachea los iconos de
+  tema por nombre y YAMIS-Hallownest se regenera en el sitio al cambiar de estilo; `Icons` lo sirve como
+  `file://…?v=N` y lo reindexa cuando terminan los scripts de `Hallownest.runThemeScripts`.
 - Con `layer.enabled` el efecto solo dibuja dentro del item (extiende el item, `sourceRect` no basta).
   No uses `layer.enabled` en fuentes `visible: false` que se mueven (se congela).
 - Animaciones de Qt avanzan por cuadros: para algo que debe terminar sí o sí (tipeo), `Timer`.

@@ -23,7 +23,7 @@ TextField {
     renderType: Text.NativeRendering
 
     background: Rectangle {
-        radius: root.height / 2
+        radius: 9
         color: Hallownest.card
         border.width: 1
         border.color: root.activeFocus ? Qt.alpha(Hallownest.soul, 0.5) : Hallownest.border

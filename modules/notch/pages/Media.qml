@@ -31,11 +31,11 @@ NotchPage {
         visible: !root.player
         spacing: Tokens.spacing.small
 
-        MaterialIcon {
+        Mask {
             Layout.alignment: Qt.AlignHCenter
-            text: "queue_music"
-            color: Hallownest.steel
-            fontStyle: Tokens.font.icon.extraLarge
+            size: 52
+            filled: false
+            colour: Hallownest.steel
         }
 
         StyledText {

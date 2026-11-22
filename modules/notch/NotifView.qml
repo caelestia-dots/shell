@@ -141,7 +141,7 @@ Item {
                     anchors.centerIn: parent
                     implicitSize: 14
                     visible: !root.hasImage && root.hasAppIcon
-                    source: root.hasAppIcon ? Quickshell.iconPath(root.notif.appIcon) : ""
+                    source: root.hasAppIcon ? Icons.iconPath(root.notif.appIcon) : ""
                 }
 
                 MaterialIcon {

@@ -30,7 +30,7 @@ Item {
 
             anchors.verticalCenter: parent.verticalCenter
             text: root.modelData?.icon ?? ""
-            color: Colours.palette.m3onSurfaceVariant
+            color: Hallownest.steel
             fontStyle: Tokens.font.icon.builders.large.scale(1.3).build()
         }
 
@@ -46,6 +46,7 @@ Item {
                 id: name
 
                 text: root.modelData?.name ?? ""
+                color: Hallownest.soul
                 font: Tokens.font.body.medium
             }
 
@@ -54,7 +55,7 @@ Item {
 
                 text: root.modelData?.desc ?? ""
                 font: Tokens.font.body.small
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
 
                 elide: Text.ElideRight
                 width: root.width - icon.width - Tokens.rounding.extraLargeIncreased

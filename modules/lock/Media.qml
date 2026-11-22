@@ -34,7 +34,7 @@ ClipRect {
 
         StyledRect {
             anchors.fill: parent
-            color: Colours.palette.m3surface
+            color: Hallownest.void_
             opacity: 0.7
         }
 

@@ -141,20 +141,20 @@ Item {
 
             MaterialIcon {
                 text: "nutrition"
-                color: "#ff6b6b"
+                color: Hallownest.grimm
                 fill: 1
             }
 
             StyledText {
                 Layout.fillWidth: true
                 text: String(root.score).padStart(3, "0")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.subtext
                 font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
             }
 
             StyledText {
                 text: Tr.tr("Best %1").arg(root.highScore)
-                color: Colours.palette.m3outline
+                color: Hallownest.faint
                 font: Tokens.font.mono.small
             }
         }
@@ -163,7 +163,7 @@ Item {
             implicitWidth: root.cell * root.cols
             implicitHeight: root.cell * root.rows
             radius: Tokens.rounding.small
-            color: Qt.alpha(Colours.palette.m3onSurface, 0.05)
+            color: Qt.alpha(Hallownest.text, 0.05)
 
             Rectangle {
                 visible: root.food >= 0 && root.phase !== "waiting"
@@ -172,7 +172,7 @@ Item {
                 width: root.cell * 0.6
                 height: width
                 radius: width / 2
-                color: "#ff6b6b"
+                color: Hallownest.grimm
             }
 
             Repeater {
@@ -187,7 +187,7 @@ Item {
                     width: root.cell - 2
                     height: root.cell - 2
                     radius: index === 0 ? root.cell / 3 : 2
-                    color: "#5fd35a"
+                    color: Hallownest.unn
                     opacity: root.phase === "over" ? 0.5 : 1 - Math.min(0.5, index / (root.snake.length * 2))
                 }
             }
@@ -199,7 +199,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
                 text: root.phase === "over" ? Tr.tr("GAME OVER") : Tr.tr("Click or press an arrow to play")
-                color: Colours.palette.m3outline
+                color: Hallownest.subtext
                 font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
             }
         }

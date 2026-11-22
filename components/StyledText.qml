@@ -11,7 +11,7 @@ Text {
 
     renderType: Text.NativeRendering
     textFormat: Text.PlainText
-    color: Colours.palette.m3onSurface
+    color: Hallownest.text
     font: Tokens.font.body.small
 
     Behavior on color {

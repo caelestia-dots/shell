@@ -9,6 +9,7 @@ import Caelestia.I18n
 import qs.components
 import qs.components.hallownest
 import qs.services
+import qs.utils
 
 // Per-app volume: one row per playback stream (recording streams like Cava are left out)
 ColumnLayout {
@@ -68,7 +69,7 @@ ColumnLayout {
 
                 IconImage {
                     implicitSize: 28
-                    source: Quickshell.iconPath(row.modelData.properties["application.icon-name"] || row.modelData.properties["application.process.binary"] || "", "audio-x-generic")
+                    source: Icons.iconPath(row.modelData.properties["application.icon-name"] || row.modelData.properties["application.process.binary"] || "", "audio-x-generic")
                 }
 
                 ColumnLayout {

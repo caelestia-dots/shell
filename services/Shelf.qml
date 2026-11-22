@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia
 import Caelestia.I18n
 
 Singleton {
@@ -11,6 +12,7 @@ Singleton {
     property var items: []
     property bool dragging
     property var pendingMime: []
+    readonly property bool converting: convertProc.running
 
     function nextId(): string {
         return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -110,6 +112,20 @@ Singleton {
             Quickshell.execDetached(["xdg-open", item.uri]);
     }
 
+    function canConvert(item: var): bool {
+        return item.type === "file" && /\.(docx?|pptx?|pdf)$/i.test(pathOf(item.uri));
+    }
+
+    // Converted with mdmaker next to the original; the .md files are added to the shelf
+    function toMarkdown(targets: var): void {
+        const paths = targets.filter(i => canConvert(i)).map(i => pathOf(i.uri));
+        if (!paths.length || convertProc.running)
+            return;
+        convertProc.total = paths.length;
+        convertProc.command = ["sh", "-c", 'for f; do m="${f%.*}.md"; mdmaker -- "$f" >/dev/null 2>&1 && [ -f "$m" ] && printf "%s\\n" "$m"; done', "sh"].concat(paths);
+        convertProc.running = true;
+    }
+
     function detectMime(): void {
         if (mimeProc.running || !pendingMime.length)
             return;
@@ -152,6 +168,23 @@ Singleton {
         }
 
         onExited: root.detectMime()
+    }
+
+    Process {
+        id: convertProc
+
+        property int total
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const done = text.split("\n").filter(l => l);
+                root.addUrls(done.map(p => "file://" + p.split("/").map(encodeURIComponent).join("/")));
+                if (done.length === convertProc.total)
+                    Toaster.toast(Tr.tr("Converted to Markdown"), done.length === 1 ? done[0].slice(done[0].lastIndexOf("/") + 1) : Tr.tr("%1 files").arg(done.length), "markdown");
+                else
+                    Toaster.toast(Tr.tr("Markdown conversion failed"), Tr.tr("%1 of %2 files converted").arg(done.length).arg(convertProc.total), "error");
+            }
+        }
     }
 
     // Files sent from the phone with KDE Connect land on the shelf too

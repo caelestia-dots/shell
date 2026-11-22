@@ -67,6 +67,8 @@ StyledListView {
                     return action;
             if (text.startsWith(`${prefix}theme `))
                 return "scheme";
+            if (text.startsWith(`${prefix}color `))
+                return "flavour";
 
             return "actions";
         }
@@ -93,6 +95,8 @@ StyledListView {
             return [0];
         case "scheme":
             return Schemes.query(text);
+        case "flavour":
+            return Flavours.query(text);
         case "files":
             return FileSearch.results;
         default:
@@ -181,6 +185,13 @@ StyledListView {
         },
         State {
             name: "scheme"
+
+            PropertyChanges {
+                root.delegate: schemeItem
+            }
+        },
+        State {
+            name: "flavour"
 
             PropertyChanges {
                 root.delegate: schemeItem

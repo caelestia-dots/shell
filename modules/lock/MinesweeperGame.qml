@@ -167,14 +167,14 @@ Item {
 
             MaterialIcon {
                 text: "flag"
-                color: "#ff6b6b"
+                color: Hallownest.grimm
                 fill: 1
             }
 
             StyledText {
                 Layout.fillWidth: true
                 text: String(root.mineCount - root.flags).padStart(3, "0")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.subtext
                 font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
             }
 
@@ -182,10 +182,12 @@ Item {
                 implicitWidth: implicitHeight
                 implicitHeight: face.implicitHeight + Tokens.padding.extraSmall * 2
                 radius: Tokens.rounding.full
-                color: Colours.palette.m3secondaryContainer
+                color: Hallownest.button
+                border.width: 1
+                border.color: Hallownest.border
 
                 StateLayer {
-                    color: Colours.palette.m3onSecondaryContainer
+                    color: Hallownest.soul
                     onClicked: root.reset()
                 }
 
@@ -200,7 +202,7 @@ Item {
                             return "sentiment_very_satisfied";
                         return "sentiment_satisfied";
                     }
-                    color: Colours.palette.m3onSecondaryContainer
+                    color: Hallownest.soul
                 }
             }
 
@@ -208,13 +210,13 @@ Item {
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignRight
                 text: (root.bestTime ? `${root.bestTime}s · ` : "") + String(root.elapsed).padStart(3, "0")
-                color: Colours.palette.m3onSurfaceVariant
+                color: Hallownest.subtext
                 font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
             }
 
             MaterialIcon {
                 text: "timer"
-                color: Colours.palette.m3outline
+                color: Hallownest.faint
             }
         }
 
@@ -242,10 +244,10 @@ Item {
                         radius: Tokens.rounding.small / 2
                         color: {
                             if (root.exploded === tile.index)
-                                return Colours.palette.m3error;
+                                return Hallownest.grimm;
                             if (tile.open)
                                 return "transparent";
-                            return Colours.palette.m3outlineVariant;
+                            return Hallownest.button;
                         }
 
                         StateLayer {
@@ -279,8 +281,8 @@ Item {
                             }
                             color: {
                                 if (root.exploded === tile.index)
-                                    return Colours.palette.m3onError;
-                                return tile.flag ? "#ff6b6b" : Colours.palette.m3onSurfaceVariant;
+                                    return Hallownest.void_;
+                                return tile.flag ? Hallownest.grimm : Hallownest.subtext;
                             }
                             fill: 1
                         }

@@ -17,6 +17,7 @@ import qs.modules.keybinds
 import qs.modules.lock
 import qs.modules.notch
 import qs.modules.overview
+import qs.modules.styletransition
 import qs.daemons
 
 ShellRoot {
@@ -52,6 +53,7 @@ ShellRoot {
     Keybinds {}
     Emoji {}
     Overview {}
+    StyleTransition {}
     Notch {}
     Dock {}
     Lock {

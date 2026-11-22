@@ -5,6 +5,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.components.controls
+import qs.components.hallownest
 import qs.services
 import qs.utils
 
@@ -119,10 +120,10 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        MaterialIcon {
-            text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
-            color: Hallownest.steel
-            fontStyle: Tokens.font.icon.extraLarge
+        Mask {
+            size: 42
+            filled: false
+            colour: Hallownest.steel
 
             anchors.verticalCenter: parent.verticalCenter
         }

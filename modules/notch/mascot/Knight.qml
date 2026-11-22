@@ -263,7 +263,7 @@ Item {
     }
 
     SequentialAnimation {
-        running: root.running && root.music && !root.dozing
+        running: root.running && root.music && !root.dozing && !groove.locked
         loops: Animation.Infinite
 
         onRunningChanged: {
@@ -292,6 +292,13 @@ Item {
             duration: 650
             easing.type: Easing.InOutSine
         }
+    }
+
+    Groove {
+        id: groove
+
+        mascot: root
+        active: root.running && root.music && !root.dozing && !root.busy
     }
 
     NumberAnimation {

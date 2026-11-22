@@ -276,7 +276,7 @@ Item {
     }
 
     SequentialAnimation {
-        running: root.running && (root.music || vibeAnim.running) && !root.dozing
+        running: root.running && (root.music && !groove.locked || vibeAnim.running) && !root.dozing
         loops: Animation.Infinite
 
         onRunningChanged: {
@@ -299,6 +299,13 @@ Item {
             to: 0
             duration: 650
         }
+    }
+
+    Groove {
+        id: groove
+
+        mascot: root
+        active: root.running && root.music && !root.dozing && !root.busy
     }
 
     NumberAnimation {

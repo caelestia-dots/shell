@@ -7,7 +7,7 @@
       "card": "#151a26",
       "button": "#1c2230",
       "bright": "#2a3346",
-      "text": "#e8eef5",
+      "text": "#d7e0ec",
       "subtext": "#9aa6b8",
       "faint": "#546073",
       "outline": "#68758a"
@@ -25,7 +25,7 @@
       "crystal": "#a8dadc"
     },
     "flavours": {
-      "vessel": { "accent": "#f0f4f8", "steel": "#9ba4b5", "tertiary": "#6cc9ff", "error": "#ff8a2a", "success": "#74c98a" },
+      "vessel": { "accent": "#f5f9ff", "steel": "#9ba4b5", "tertiary": "#6cc9ff", "error": "#ff8a2a", "success": "#74c98a" },
       "lifeblood": { "accent": "#6cc9ff", "steel": "#8fb3cc", "tertiary": "#e6e4de", "error": "#ff8a2a", "success": "#74c98a" },
       "infection": { "accent": "#ff8a2a", "steel": "#b8a08f", "tertiary": "#6cc9ff", "error": "#ff5c6a", "success": "#74c98a" },
       "greenpath": { "accent": "#74c98a", "steel": "#94b39c", "tertiary": "#6cc9ff", "error": "#ff8a2a", "success": "#a8e08a" }
@@ -90,7 +90,7 @@
       "crystal": "#f5deaa"
     },
     "flavours": {
-      "vessel": { "accent": "#ffc940", "steel": "#c9b48c", "tertiary": "#fff0c2", "error": "#ff6a3d", "success": "#a6c95a" },
+      "vessel": { "accent": "#f6e7c1", "steel": "#c9b48c", "tertiary": "#ffc940", "error": "#ff6a3d", "success": "#a6c95a" },
       "lifeblood": { "accent": "#7fd8f0", "steel": "#b4b8a0", "tertiary": "#ffc940", "error": "#ff6a3d", "success": "#a6c95a" },
       "infection": { "accent": "#ff8f1f", "steel": "#d1a47c", "tertiary": "#ffd86b", "error": "#e0483a", "success": "#a6c95a" },
       "greenpath": { "accent": "#a8cf5c", "steel": "#b8b585", "tertiary": "#ffc940", "error": "#ff7a1a", "success": "#d4e68a" }
@@ -159,6 +159,104 @@
       "lifeblood": { "accent": "#74bfff", "steel": "#a69ca8", "tertiary": "#ff3d52", "error": "#ff8a2a", "success": "#7fcf8a" },
       "infection": { "accent": "#ff7a2a", "steel": "#c09f8e", "tertiary": "#ffd06a", "error": "#ff3d52", "success": "#7fcf8a" },
       "greenpath": { "accent": "#8fd47a", "steel": "#a6a08f", "tertiary": "#ff3d52", "error": "#ff8a2a", "success": "#c8e88a" }
+    }
+  },
+  "cityoftears": {
+    "name": "City of Tears",
+    "base": {
+      "void": "#070b14",
+      "shell": "#0c1220",
+      "card": "#121a2c",
+      "button": "#18223a",
+      "bright": "#263452",
+      "text": "#e4ecf8",
+      "subtext": "#93a3c0",
+      "faint": "#4e5c78",
+      "outline": "#66779a"
+    },
+    "charms": {
+      "lifeblood": "#4fb8f5",
+      "lifebloodDeep": "#1f97d8",
+      "lifebloodSoft": "#7cc9f5",
+      "glowBlue": "#5cc0f0",
+      "hotSpring": "#36c6c0",
+      "infection": "#ff7d3a",
+      "grimm": "#e8475a",
+      "gold": "#e9b866",
+      "unn": "#5cb894",
+      "crystal": "#b4d2ec"
+    },
+    "flavours": {
+      "vessel": { "accent": "#dbe7f7", "steel": "#93a6c4", "tertiary": "#e9b866", "error": "#ff8a3a", "success": "#74c9a0" },
+      "lifeblood": { "accent": "#6cc4ff", "steel": "#8aa9cc", "tertiary": "#dbe7f7", "error": "#ff8a3a", "success": "#74c9a0" },
+      "infection": { "accent": "#ff9147", "steel": "#b4a39a", "tertiary": "#6cc4ff", "error": "#ff5c6a", "success": "#74c9a0" },
+      "greenpath": { "accent": "#79cfa0", "steel": "#92b2ac", "tertiary": "#6cc4ff", "error": "#ff8a3a", "success": "#a8e0a0" }
+    }
+  },
+  "kingdomsedge": {
+    "name": "Kingdom's Edge",
+    "light": true,
+    "base": {
+      "void": "#eeeff0",
+      "shell": "#e2e3e5",
+      "card": "#d5d7da",
+      "button": "#c7c9cd",
+      "bright": "#b3b6bb",
+      "text": "#1a1c20",
+      "subtext": "#474a50",
+      "faint": "#777a80",
+      "outline": "#696c72"
+    },
+    "charms": {
+      "lifeblood": "#0f6a9e",
+      "lifebloodDeep": "#0b557f",
+      "lifebloodSoft": "#1b80b8",
+      "glowBlue": "#12809a",
+      "hotSpring": "#137468",
+      "infection": "#b9480f",
+      "grimm": "#b4233a",
+      "gold": "#8f6416",
+      "unn": "#2f6b4c",
+      "crystal": "#4a7279"
+    },
+    "flavours": {
+      "vessel": { "accent": "#2a2c31", "steel": "#636770", "tertiary": "#8f6416", "error": "#b23c12", "success": "#2c6d45" },
+      "lifeblood": { "accent": "#0f6493", "steel": "#566c7d", "tertiary": "#2a2c31", "error": "#b23c12", "success": "#2c6d45" },
+      "infection": { "accent": "#9c440b", "steel": "#7c6a5f", "tertiary": "#0f6493", "error": "#a51f35", "success": "#2c6d45" },
+      "greenpath": { "accent": "#2c6d45", "steel": "#5e7366", "tertiary": "#0f6493", "error": "#b23c12", "success": "#52701d" }
+    }
+  },
+  "queensgardens": {
+    "name": "Queen's Gardens",
+    "light": true,
+    "base": {
+      "void": "#e6efe3",
+      "shell": "#dce7d8",
+      "card": "#d0decc",
+      "button": "#c2d3bd",
+      "bright": "#aec3a8",
+      "text": "#162614",
+      "subtext": "#395235",
+      "faint": "#647a60",
+      "outline": "#556b52"
+    },
+    "charms": {
+      "lifeblood": "#065074",
+      "lifebloodDeep": "#053c57",
+      "lifebloodSoft": "#0e5e81",
+      "glowBlue": "#085868",
+      "hotSpring": "#0a574a",
+      "infection": "#833407",
+      "grimm": "#8f1433",
+      "gold": "#664605",
+      "unn": "#0d4a17",
+      "crystal": "#224f4b"
+    },
+    "flavours": {
+      "vessel": { "accent": "#16310c", "steel": "#446039", "tertiary": "#8b1848", "error": "#8e2c0b", "success": "#0e4e13" },
+      "lifeblood": { "accent": "#06496b", "steel": "#2d4c53", "tertiary": "#142d0b", "error": "#8e2c0b", "success": "#0e4e13" },
+      "infection": { "accent": "#7c3403", "steel": "#53402d", "tertiary": "#06496b", "error": "#8a0f24", "success": "#0e4e13" },
+      "greenpath": { "accent": "#094e20", "steel": "#2b502e", "tertiary": "#8b1848", "error": "#8e2c0b", "success": "#3f570f" }
     }
   }
 }

@@ -2,12 +2,19 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
 import Caelestia.Config
 
 Singleton {
     id: root
 
+    // Our tinted icon theme, rebuilt in place on every style change. Qt caches theme icons by name, so
+    // its icons are served as file URLs with a revision that changes whenever the theme is rebuilt
+    readonly property string tintedTheme: `${Quickshell.env("HOME")}/.local/share/icons/YAMIS-Hallownest`
+    property var tinted: ({})
+    property int tintedRev
+    property bool rescanQueued
     readonly property var weatherIcons: ({
             "0": "clear_day",
             "1": "clear_day",
@@ -140,11 +147,26 @@ Singleton {
         return "";
     }
 
+    // Drop-in for Quickshell.iconPath that sees the tinted theme change
+    function iconPath(icon: var, fallback: var): string {
+        const path = tinted[icon];
+        if (path)
+            return `file://${path}?v=${tintedRev}`;
+        return fallback === undefined ? Quickshell.iconPath(icon) : Quickshell.iconPath(icon, fallback);
+    }
+
+    function reloadTinted(): void {
+        if (scan.running)
+            rescanQueued = true;
+        else
+            scan.running = true;
+    }
+
     function getAppIcon(name: string, fallback: string): string {
         const icon = DesktopEntries.heuristicLookup(name)?.icon;
         if (fallback !== "undefined")
-            return Quickshell.iconPath(icon, fallback);
-        return Quickshell.iconPath(icon);
+            return iconPath(icon, fallback);
+        return iconPath(icon);
     }
 
     function getAppCategoryIcon(name: string, fallback: string): string {
@@ -228,5 +250,33 @@ Singleton {
         if (charging && (level === 4 || level === 1))
             level--;
         return charging ? `battery_charging_${(level + 3) * 10}` : `battery_${level}_bar`;
+    }
+
+    Process {
+        id: scan
+
+        running: true
+        command: ["find", root.tintedTheme, "-path", "*/scalable/*", "-name", "*.svg"]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const map = {};
+                for (const path of text.split("\n")) {
+                    const name = path.slice(path.lastIndexOf("/") + 1, -4);
+                    // apps/ wins over the other contexts when a name repeats
+                    if (name && (!map[name] || path.includes("/apps/")))
+                        map[name] = path;
+                }
+                root.tinted = map;
+                root.tintedRev++;
+            }
+        }
+
+        onExited: {
+            if (root.rescanQueued) {
+                root.rescanQueued = false;
+                running = true;
+            }
+        }
     }
 }

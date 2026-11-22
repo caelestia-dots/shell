@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
+import qs.components.hallownest
 import qs.services
 
 ColumnLayout {
@@ -33,6 +34,12 @@ ColumnLayout {
         font.pointSize: Tokens.font.title.medium.pointSize
         font.weight: Font.Bold
         font.letterSpacing: 1.5
+    }
+
+    HkDivider {
+        Layout.alignment: Qt.AlignHCenter
+        Layout.preferredWidth: root.centerWidth * 0.6
+        Layout.topMargin: -Tokens.spacing.medium
     }
 
     NextClass {

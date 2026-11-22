@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
@@ -100,10 +101,10 @@ NotchPage {
             Card {
                 Layout.preferredWidth: 430
                 Layout.fillHeight: true
-                implicitHeight: live.implicitHeight + Tokens.padding.large * 2
+                implicitHeight: liveColumn.implicitHeight + Tokens.padding.large * 2
 
                 ColumnLayout {
-                    id: live
+                    id: liveColumn
 
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -320,20 +321,54 @@ NotchPage {
             }
         }
 
-        Rectangle {
+        Item {
             Layout.fillWidth: true
-            implicitHeight: 6
-            radius: 3
-            color: Hallownest.button
+            implicitHeight: 10
 
             Rectangle {
-                width: parent.width * Math.min(1, meter.percent / 100)
-                height: parent.height
-                radius: 3
-                color: meter.tone
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                height: 5
+                radius: 2.5
+                color: Hallownest.button
+            }
 
-                Behavior on width {
-                    Anim {}
+            Item {
+                anchors.fill: parent
+                layer.enabled: meter.visible
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    shadowColor: meter.tone
+                    shadowBlur: 0.55
+                    shadowOpacity: 0.65
+                    shadowHorizontalOffset: 0
+                    shadowVerticalOffset: 0
+                    blurMax: 8
+                }
+
+                Rectangle {
+                    id: meterFill
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width * Math.min(1, meter.percent / 100)
+                    height: 5
+                    radius: 2.5
+                    color: meter.tone
+
+                    Behavior on width {
+                        Anim {}
+                    }
+                }
+
+                Rectangle {
+                    x: meterFill.width - width / 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 6
+                    height: 6
+                    rotation: 45
+                    radius: 1
+                    color: Hallownest.soul
+                    visible: meter.percent > 1
                 }
             }
         }

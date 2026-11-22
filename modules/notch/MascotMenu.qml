@@ -208,7 +208,12 @@ Scope {
                         spacing: Tokens.spacing.medium
 
                         HkTitle {
+                            Layout.alignment: Qt.AlignHCenter
                             text: Tr.tr("Mascot")
+                        }
+
+                        HkDivider {
+                            Layout.fillWidth: true
                         }
 
                         GridView {

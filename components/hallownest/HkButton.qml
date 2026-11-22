@@ -18,7 +18,7 @@ Rectangle {
 
     implicitWidth: text ? content.implicitWidth + 24 : implicitHeight
     implicitHeight: 30
-    radius: height / 2
+    radius: text ? 9 : height / 2
     color: {
         if (filled)
             return accent;

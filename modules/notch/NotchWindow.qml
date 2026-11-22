@@ -94,6 +94,7 @@ StyledWindow {
     property color glowColour: AgentSessions.current ? Qt.alpha(Hallownest.gold, 0.45) : active ? Qt.alpha(Hallownest.lifeblood, 0.4) : Season.current === "grimm" ? Qt.alpha(Hallownest.grimm, 0.4) : Qt.alpha("black", Hallownest.light ? 0.28 : 0.75)
 
     property real wheelAccum
+    property int pageDir: 1
     readonly property Item mascot: NotchSettings.mascotKind === "hornet" ? hornet : NotchSettings.mascotKind === "grimm" ? grimm : knight
     property bool cursorMoving
     property real lastCursorX: -1
@@ -101,12 +102,15 @@ StyledWindow {
     property real lastCursorMove
 
     function goTo(index: int): void {
+        if (index !== pageIndex)
+            pageDir = index > pageIndex ? 1 : -1;
         screenState.notchPage = index;
     }
 
     // Arrows and wheel cycle the pages only; from a tool they go back Home
     function step(delta: int): void {
-        goTo(isTool ? 0 : (pageIndex + delta + pageCount) % pageCount);
+        pageDir = delta >= 0 ? 1 : -1;
+        screenState.notchPage = isTool ? 0 : (pageIndex + delta + pageCount) % pageCount;
     }
 
     function updateLook(x: real, y: real): void {
@@ -794,11 +798,18 @@ StyledWindow {
                     toast: root.popupNotifs.length > 0 ? null : root.activeToast
                     pending: Math.max(0, root.popupNotifs.length - 1)
                     opacity: root.notifShown ? 1 : 0
+                    scale: root.notifShown ? 1 : 0.96
                     visible: opacity > 0
 
                     Behavior on opacity {
                         Anim {
                             type: Anim.DefaultEffects
+                        }
+                    }
+
+                    Behavior on scale {
+                        Anim {
+                            type: Anim.FastSpatial
                         }
                     }
                 }
@@ -812,11 +823,18 @@ StyledWindow {
                     anchors.centerIn: parent
                     spacing: Tokens.spacing.medium
                     opacity: root.osdShown && !root.richOsd ? 1 : 0
+                    scale: root.osdShown && !root.richOsd ? 1 : 0.96
                     visible: opacity > 0
 
                     Behavior on opacity {
                         Anim {
                             type: Anim.DefaultEffects
+                        }
+                    }
+
+                    Behavior on scale {
+                        Anim {
+                            type: Anim.FastSpatial
                         }
                     }
 
@@ -838,24 +856,62 @@ StyledWindow {
                         elide: Text.ElideRight
                     }
 
-                    StyledRect {
+                    Item {
+                        id: osdBar
+
+                        readonly property real frac: Math.max(0, Math.min(1, osdView.value))
+
                         anchors.verticalCenter: parent.verticalCenter
                         visible: osdView.value >= 0
                         implicitWidth: 120
-                        implicitHeight: 4
-                        radius: 2
-                        color: Qt.alpha(Hallownest.steel, 0.18)
+                        implicitHeight: 12
 
                         StyledRect {
-                            implicitWidth: parent.width * Math.max(0, Math.min(1, osdView.value))
-                            implicitHeight: parent.height
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            height: 4
                             radius: 2
-                            color: Hallownest.lifeblood
+                            color: Qt.alpha(Hallownest.steel, 0.18)
+                        }
 
-                            Behavior on implicitWidth {
-                                Anim {
-                                    type: Anim.FastSpatial
+                        Item {
+                            anchors.fill: parent
+                            layer.enabled: osdView.visible
+                            layer.effect: MultiEffect {
+                                shadowEnabled: true
+                                shadowColor: Hallownest.lifeblood
+                                shadowBlur: 0.6
+                                shadowOpacity: 0.7
+                                shadowHorizontalOffset: 0
+                                shadowVerticalOffset: 0
+                                blurMax: 8
+                            }
+
+                            StyledRect {
+                                id: osdFill
+
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width * osdBar.frac
+                                height: 4
+                                radius: 2
+                                color: Hallownest.lifeblood
+
+                                Behavior on width {
+                                    Anim {
+                                        type: Anim.FastSpatial
+                                    }
                                 }
+                            }
+
+                            Rectangle {
+                                x: osdFill.width - width / 2
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 6
+                                height: 6
+                                rotation: 45
+                                radius: 1
+                                color: Hallownest.soul
+                                visible: osdBar.frac > 0.01
                             }
                         }
                     }
@@ -899,13 +955,20 @@ StyledWindow {
                         visible: !richView.charger
                         spacing: Tokens.spacing.medium
 
-                        Rectangle {
+                        Item {
                             implicitWidth: 40
                             implicitHeight: 40
-                            radius: 20
-                            color: Qt.alpha(richView.connected ? Hallownest.lifeblood : Hallownest.steel, 0.18)
-                            border.width: 1
-                            border.color: Qt.alpha(richView.connected ? Hallownest.lifeblood : Hallownest.steel, 0.5)
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 30
+                                height: 30
+                                rotation: 45
+                                radius: 6
+                                color: Qt.alpha(richView.connected ? Hallownest.lifeblood : Hallownest.steel, 0.16)
+                                border.width: 1
+                                border.color: Qt.alpha(richView.connected ? Hallownest.lifeblood : Hallownest.steel, 0.55)
+                            }
 
                             MaterialIcon {
                                 anchors.centerIn: parent
@@ -978,8 +1041,8 @@ StyledWindow {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: `${Math.round(Math.max(0, richView.value) * 100)}%`
                                 color: Hallownest.soul
-                                font.family: Hallownest.serif
-                                font.pointSize: 17
+                                font.family: Hallownest.mono
+                                font.pointSize: 15
                                 font.weight: Font.Bold
                             }
 
@@ -1244,6 +1307,30 @@ StyledWindow {
                         anchors.horizontalCenter: parent.horizontalCenter
                         active: root.expanded || expandedView.visible
                         sourceComponent: root.pageComponents[root.page.id] ?? placeholderPage
+                        onLoaded: pageEnterAnim.restart()
+
+                        transform: Translate {
+                            id: pageSlide
+                        }
+
+                        ParallelAnimation {
+                            id: pageEnterAnim
+
+                            Anim {
+                                target: pageLoader
+                                property: "opacity"
+                                from: 0
+                                to: 1
+                                type: Anim.DefaultEffects
+                            }
+                            Anim {
+                                target: pageSlide
+                                property: "x"
+                                from: root.pageDir * 16
+                                to: 0
+                                type: Anim.FastSpatial
+                            }
+                        }
                     }
 
                     Rectangle {

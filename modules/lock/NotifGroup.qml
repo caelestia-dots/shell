@@ -50,7 +50,9 @@ StyledRect {
 
     clip: true
     radius: Tokens.rounding.large
-    color: root.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
+    color: root.urgency === "critical" ? Qt.tint(Hallownest.card, Qt.alpha(Hallownest.grimm, 0.14)) : Hallownest.button
+    border.width: 1
+    border.color: root.urgency === "critical" ? Qt.alpha(Hallownest.grimm, 0.5) : Hallownest.border
 
     RowLayout {
         id: content
@@ -89,8 +91,8 @@ StyledRect {
 
                 ColouredIcon {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
-                    source: Quickshell.iconPath(root.appIcon)
-                    colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    source: Icons.iconPath(root.appIcon)
+                    colour: root.urgency === "critical" ? Hallownest.void_ : root.urgency === "low" ? Hallownest.subtext : Hallownest.soul
                     layer.enabled: root.appIcon.endsWith("symbolic")
                 }
             }
@@ -100,14 +102,14 @@ StyledRect {
 
                 MaterialIcon {
                     text: Icons.getNotifIcon(root.notifs[0]?.summary, root.urgency)
-                    color: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                    color: root.urgency === "critical" ? Hallownest.void_ : root.urgency === "low" ? Hallownest.subtext : Hallownest.soul
                     fontStyle: Tokens.font.icon.large
                 }
             }
 
             ClipRect {
                 anchors.fill: parent
-                color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 3) : Colours.palette.m3secondaryContainer
+                color: root.urgency === "critical" ? Hallownest.grimm : root.urgency === "low" ? Hallownest.card : Qt.alpha(Hallownest.soul, 0.12)
                 radius: Tokens.rounding.full
 
                 Loader {
@@ -127,14 +129,14 @@ StyledRect {
                     implicitWidth: Tokens.sizes.notifs.badge
                     implicitHeight: Tokens.sizes.notifs.badge
 
-                    color: root.urgency === "critical" ? Colours.palette.m3error : root.urgency === "low" ? Colours.palette.m3surfaceContainerHighest : Colours.palette.m3secondaryContainer
+                    color: root.urgency === "critical" ? Hallownest.grimm : root.urgency === "low" ? Hallownest.card : Qt.alpha(Hallownest.soul, 0.12)
                     radius: Tokens.rounding.full
 
                     ColouredIcon {
                         anchors.centerIn: parent
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
-                        source: Quickshell.iconPath(root.appIcon)
-                        colour: root.urgency === "critical" ? Colours.palette.m3onError : root.urgency === "low" ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                        source: Icons.iconPath(root.appIcon)
+                        colour: root.urgency === "critical" ? Hallownest.void_ : root.urgency === "low" ? Hallownest.subtext : Hallownest.soul
                         layer.enabled: root.appIcon.endsWith("symbolic")
                     }
                 }
@@ -155,7 +157,7 @@ StyledRect {
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData
-                    color: Colours.palette.m3onSurfaceVariant
+                    color: Hallownest.subtext
                     font: Tokens.font.body.small
                     elide: Text.ElideRight
                 }
@@ -163,7 +165,7 @@ StyledRect {
                 StyledText {
                     animate: true
                     text: root.notifs[0]?.timeStr ?? ""
-                    color: Colours.palette.m3outline
+                    color: Hallownest.faint
                     font: Tokens.font.body.small
                 }
 
@@ -171,14 +173,16 @@ StyledRect {
                     implicitWidth: expandBtn.implicitWidth + Tokens.padding.large
                     implicitHeight: groupCount.implicitHeight + Tokens.padding.extraSmall
 
-                    color: root.urgency === "critical" ? Colours.palette.m3error : Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+                    color: root.urgency === "critical" ? Hallownest.grimm : Hallownest.card
+                    border.width: root.urgency === "critical" ? 0 : 1
+                    border.color: Hallownest.border
                     radius: Tokens.rounding.full
 
                     opacity: root.notifs.length > Config.notifs.groupPreviewNum ? 1 : 0
                     Layout.preferredWidth: root.notifs.length > Config.notifs.groupPreviewNum ? implicitWidth : 0
 
                     StateLayer {
-                        color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                        color: root.urgency === "critical" ? Hallownest.void_ : Hallownest.soul
                         onClicked: root.expanded = !root.expanded
                     }
 
@@ -194,7 +198,7 @@ StyledRect {
                             Layout.leftMargin: Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.notifs.length
-                            color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                            color: root.urgency === "critical" ? Hallownest.void_ : Hallownest.text
                             font: Tokens.font.body.small
                         }
 
@@ -202,7 +206,7 @@ StyledRect {
                             Layout.rightMargin: -Tokens.padding.extraSmall / 2
                             animate: true
                             text: root.expanded ? "expand_less" : "expand_more"
-                            color: root.urgency === "critical" ? Colours.palette.m3onError : Colours.palette.m3onSurface
+                            color: root.urgency === "critical" ? Hallownest.void_ : Hallownest.text
                         }
                     }
 
@@ -315,7 +319,7 @@ StyledRect {
         text: {
             const summary = modelData.summary.replace(/\n/g, " ");
             const body = modelData.body.replace(/\n/g, " ");
-            const colour = root.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline;
+            const colour = root.urgency === "critical" ? Hallownest.subtext : Hallownest.faint;
 
             if (metrics.text === metrics.elidedText)
                 return `${summary} <span style='color:${colour}'>${body}</span>`;
@@ -326,7 +330,7 @@ StyledRect {
 
             return `${summary} <span style='color:${colour}'>${body.slice(0, t - summary.length)}...</span>`;
         }
-        color: root.urgency === "critical" ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+        color: root.urgency === "critical" ? Hallownest.soul : Hallownest.text
 
         Component.onCompleted: modelData.lock(this)
         Component.onDestruction: modelData.unlock(this)

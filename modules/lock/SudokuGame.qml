@@ -207,20 +207,20 @@ Item {
 
             MaterialIcon {
                 text: "timer"
-                color: Colours.palette.m3outline
+                color: Hallownest.faint
             }
 
             StyledText {
                 Layout.fillWidth: true
                 text: root.phase === "won" ? Tr.tr("Solved in %1").arg(root.clock(root.elapsed)) : root.clock(root.elapsed)
-                color: root.phase === "won" ? "#5fd35a" : Colours.palette.m3onSurfaceVariant
+                color: root.phase === "won" ? Hallownest.unn : Hallownest.subtext
                 font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
             }
 
             StyledText {
                 visible: root.bestTime > 0
                 text: Tr.tr("Best %1").arg(root.clock(root.bestTime))
-                color: Colours.palette.m3outline
+                color: Hallownest.faint
                 font: Tokens.font.mono.small
             }
 
@@ -228,10 +228,12 @@ Item {
                 implicitWidth: implicitHeight
                 implicitHeight: refresh.implicitHeight + Tokens.padding.extraSmall * 2
                 radius: Tokens.rounding.full
-                color: Colours.palette.m3secondaryContainer
+                color: Hallownest.button
+                border.width: 1
+                border.color: Hallownest.border
 
                 StateLayer {
-                    color: Colours.palette.m3onSecondaryContainer
+                    color: Hallownest.soul
                     onClicked: root.newGame()
                 }
 
@@ -240,7 +242,7 @@ Item {
 
                     anchors.centerIn: parent
                     text: "refresh"
-                    color: Colours.palette.m3onSecondaryContainer
+                    color: Hallownest.soul
                 }
             }
         }
@@ -270,15 +272,15 @@ Item {
                     height: root.cell
                     color: {
                         if (sel === index)
-                            return Qt.alpha(Colours.palette.m3primary, 0.35);
+                            return Qt.alpha(Hallownest.soul, 0.24);
                         if (sameDigit)
-                            return Qt.alpha(Colours.palette.m3primary, 0.18);
+                            return Qt.alpha(Hallownest.soul, 0.14);
                         if (related)
-                            return Qt.alpha(Colours.palette.m3onSurface, 0.07);
-                        return Qt.alpha(Colours.palette.m3onSurface, 0.03);
+                            return Qt.alpha(Hallownest.text, 0.06);
+                        return Qt.alpha(Hallownest.text, 0.02);
                     }
                     border.width: 1
-                    border.color: Qt.alpha(Colours.palette.m3outlineVariant, 0.5)
+                    border.color: Hallownest.border
 
                     MouseArea {
                         anchors.fill: parent
@@ -296,8 +298,8 @@ Item {
                         text: tile.value
                         color: {
                             if (root.conflicts[tile.index])
-                                return "#ff6b6b";
-                            return tile.given ? Colours.palette.m3onSurface : Colours.palette.m3primary;
+                                return Hallownest.grimm;
+                            return tile.given ? Hallownest.text : Hallownest.lifeblood;
                         }
                         font: Tokens.font.mono.builders.small.size(Math.max(7, root.cell * 0.42)).weight(tile.given ? Font.Bold : Font.Medium).build()
                     }
@@ -317,14 +319,14 @@ Item {
                         x: line.index * 3 * root.cell - 1
                         width: 2
                         height: root.cell * 9
-                        color: Colours.palette.m3outline
+                        color: Hallownest.steel
                     }
 
                     Rectangle {
                         y: line.index * 3 * root.cell - 1
                         width: root.cell * 9
                         height: 2
-                        color: Colours.palette.m3outline
+                        color: Hallownest.steel
                     }
                 }
             }
@@ -348,18 +350,20 @@ Item {
                     implicitWidth: root.cell - 2
                     implicitHeight: Math.max(20, root.cell * 0.8)
                     radius: Tokens.rounding.small
-                    color: Qt.alpha(Colours.palette.m3onSurface, 0.07)
+                    color: Hallownest.button
+                    border.width: 1
+                    border.color: Hallownest.border
                     opacity: root.values.filter(v => v === key.digit).length >= 9 ? 0.35 : 1
 
                     StateLayer {
-                        color: Colours.palette.m3onSurface
+                        color: Hallownest.soul
                         onClicked: root.put(key.digit)
                     }
 
                     StyledText {
                         anchors.centerIn: parent
                         text: key.digit
-                        color: Colours.palette.m3onSurfaceVariant
+                        color: Hallownest.text
                         font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
                     }
                 }

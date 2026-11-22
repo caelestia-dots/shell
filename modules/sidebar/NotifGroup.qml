@@ -104,7 +104,7 @@ StyledRect {
 
                 ColouredIcon {
                     implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
-                    source: Quickshell.iconPath(root.appIcon)
+                    source: Icons.iconPath(root.appIcon)
                     colour: root.urgency === NotificationUrgency.Critical ? Hallownest.void_ : Hallownest.soul
                     layer.enabled: root.appIcon.endsWith("symbolic")
                 }
@@ -149,7 +149,7 @@ StyledRect {
                     ColouredIcon {
                         anchors.centerIn: parent
                         implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
-                        source: Quickshell.iconPath(root.appIcon)
+                        source: Icons.iconPath(root.appIcon)
                         colour: root.urgency === NotificationUrgency.Critical ? Hallownest.void_ : Hallownest.soul
                         layer.enabled: root.appIcon.endsWith("symbolic")
                     }
