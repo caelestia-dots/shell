@@ -93,6 +93,8 @@ Scope {
                 return;
             const screenState = ShellState.forActive();
             screenState.sidebar = !screenState.sidebar;
+            if (!screenState.sidebar)
+                screenState.utilities = false;
         }
     }
 
