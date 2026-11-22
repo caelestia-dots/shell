@@ -41,7 +41,7 @@ NotchPage {
             detail = "";
     }
 
-    implicitWidth: 660
+    implicitWidth: 640
     implicitHeight: detail ? detailView.implicitHeight : overview.implicitHeight
 
     ColumnLayout {
@@ -50,11 +50,11 @@ NotchPage {
         anchors.left: parent.left
         anchors.right: parent.right
         visible: !root.detail
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.small + 2
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Tokens.spacing.medium
+            spacing: Tokens.spacing.small + 2
 
             Tile {
                 icon: Nmcli.activeEthernet ? "lan" : Nmcli.wifiEnabled ? "wifi" : "wifi_off"
@@ -83,8 +83,8 @@ NotchPage {
                 icon: root.charging ? "battery_charging_full" : root.battery <= 0.2 ? "battery_alert" : "battery_full"
                 title: UPower.displayDevice.isLaptopBattery ? `${Math.round(root.battery * 100)}%` : Tr.tr("Power")
                 subtitle: root.charging ? Tr.tr("Charging") : PowerProfiles.profile === PowerProfile.PowerSaver ? Tr.tr("Power saver") : PowerProfiles.profile === PowerProfile.Performance ? Tr.tr("Performance") : Tr.tr("Balanced")
-                checked: root.charging
-                accent: root.battery <= 0.2 && !root.charging ? Hallownest.grimm : Hallownest.unn
+                checked: root.charging || root.battery <= 0.2
+                accent: root.battery <= 0.2 && !root.charging ? Hallownest.grimm : root.charging ? Hallownest.unn : Hallownest.soul
                 onToggled: root.detail = "battery"
                 onMore: root.detail = "battery"
             }
@@ -92,12 +92,12 @@ NotchPage {
 
         Panel {
             Layout.fillWidth: true
-            implicitHeight: 44
+            implicitHeight: 42
 
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: Tokens.padding.medium
-                anchors.rightMargin: Tokens.padding.small
+                anchors.rightMargin: Tokens.padding.small + 2
                 spacing: Tokens.spacing.medium
 
                 IconButton {
@@ -112,7 +112,7 @@ NotchPage {
                 HkSlider {
                     Layout.fillWidth: true
                     value: Audio.volume
-                    colour: Hallownest.lifeblood
+                    colour: Audio.muted ? Hallownest.steel : Hallownest.lifeblood
                     onMoved: v => Audio.setVolume(v)
                 }
 
@@ -127,49 +127,22 @@ NotchPage {
 
                 IconButton {
                     icon: "tune"
+                    colour: Hallownest.subtext
                     onClicked: root.detail = "mixer"
                 }
 
                 IconButton {
                     icon: "chevron_right"
+                    colour: Hallownest.subtext
                     onClicked: root.detail = "audio"
-                }
-
-                Rectangle {
-                    implicitWidth: 1
-                    implicitHeight: 20
-                    color: Hallownest.border
-                }
-
-                QuickToggle {
-                    icon: Audio.sourceMuted ? "mic_off" : "mic"
-                    checked: !Audio.sourceMuted
-                    onClicked: {
-                        const audio = Audio.source?.audio;
-                        if (audio)
-                            audio.muted = !audio.muted;
-                    }
-                }
-
-                QuickToggle {
-                    icon: "coffee"
-                    checked: RuntimeState.inhibitIdle
-                    accent: Hallownest.gold
-                    onClicked: RuntimeState.inhibitIdle = !RuntimeState.inhibitIdle
-                }
-
-                QuickToggle {
-                    icon: "notifications_off"
-                    checked: PersistentState.doNotDisturb
-                    accent: Hallownest.grimm
-                    onClicked: PersistentState.doNotDisturb = !PersistentState.doNotDisturb
                 }
             }
         }
 
         Panel {
             Layout.fillWidth: true
-            implicitHeight: 56
+            visible: !!root.player
+            implicitHeight: 52
 
             MouseArea {
                 anchors.fill: parent
@@ -180,14 +153,14 @@ NotchPage {
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: Tokens.padding.small
-                anchors.rightMargin: Tokens.padding.medium
+                anchors.rightMargin: Tokens.padding.small + 2
                 spacing: Tokens.spacing.medium
 
                 ClippingRectangle {
-                    implicitWidth: 40
-                    implicitHeight: 40
+                    implicitWidth: 36
+                    implicitHeight: 36
                     radius: 8
-                    color: Hallownest.card
+                    color: Hallownest.void_
                     border.width: 1
                     border.color: Hallownest.border
 
@@ -203,8 +176,8 @@ NotchPage {
 
                         anchors.fill: parent
                         source: root.player ? Players.getArtUrl(root.player) : ""
-                        sourceSize.width: 80
-                        sourceSize.height: 80
+                        sourceSize.width: 72
+                        sourceSize.height: 72
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                     }
@@ -216,8 +189,8 @@ NotchPage {
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: root.player ? root.player.trackTitle || Tr.tr("Unknown title") : Tr.tr("Nothing playing")
-                        color: root.player ? Hallownest.soul : Hallownest.subtext
+                        text: root.player?.trackTitle || Tr.tr("Unknown title")
+                        color: Hallownest.soul
                         font.pointSize: 10
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
@@ -225,46 +198,61 @@ NotchPage {
 
                     StyledText {
                         Layout.fillWidth: true
-                        visible: !!root.player
+                        visible: (root.player?.trackArtist ?? "") !== ""
                         text: root.player?.trackArtist ?? ""
                         color: Hallownest.subtext
-                        font.pointSize: 9
+                        font.pointSize: 8.5
                         elide: Text.ElideRight
                     }
                 }
 
-                HkButton {
-                    visible: !!root.player
-                    icon: root.player?.isPlaying ? "pause" : "play_arrow"
-                    filled: true
-                    disabled: !(root.player?.canTogglePlaying ?? false)
-                    onClicked: root.player?.togglePlaying()
+                RowLayout {
+                    spacing: Tokens.spacing.extraSmall
+
+                    IconButton {
+                        visible: root.player?.canGoPrevious ?? false
+                        icon: "skip_previous"
+                        colour: Hallownest.subtext
+                        onClicked: root.player?.previous()
+                    }
+
+                    HkButton {
+                        icon: root.player?.isPlaying ? "pause" : "play_arrow"
+                        filled: true
+                        disabled: !(root.player?.canTogglePlaying ?? false)
+                        onClicked: root.player?.togglePlaying()
+                    }
+
+                    IconButton {
+                        visible: root.player?.canGoNext ?? false
+                        icon: "skip_next"
+                        colour: Hallownest.subtext
+                        onClicked: root.player?.next()
+                    }
                 }
             }
         }
 
+        HkDivider {
+            Layout.fillWidth: true
+            Layout.topMargin: 2
+            Layout.bottomMargin: 2
+            opacity: 0.65
+        }
+
         RowLayout {
             Layout.fillWidth: true
-            spacing: Tokens.spacing.small
+            spacing: Tokens.spacing.extraSmall
 
             Repeater {
                 model: NotchPages.tools
 
-                HkButton {
+                GhostAction {
                     required property var modelData
 
                     icon: modelData.icon
                     text: modelData.label
                     onClicked: root.open(modelData.id)
-                }
-            }
-
-            HkButton {
-                icon: "settings"
-                text: Tr.tr("Settings")
-                onClicked: {
-                    root.screenState.notch = false;
-                    WindowFactory.create(null, {});
                 }
             }
 
@@ -277,65 +265,134 @@ NotchPage {
                     values: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
                 }
 
-                MouseArea {
-                    id: trayIcon
+                Rectangle {
+                    id: traySlot
 
                     required property SystemTrayItem modelData
 
-                    implicitWidth: 30
-                    implicitHeight: 30
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: event => {
-                        if (event?.button === Qt.MiddleButton) {
-                            modelData.secondaryActivate();
-                        } else if (modelData.hasMenu && (event?.button === Qt.RightButton || modelData.onlyMenu)) {
-                            root.trayItem = modelData;
-                            root.detail = "tray";
-                        } else {
-                            modelData.activate();
-                        }
+                    implicitWidth: 28
+                    implicitHeight: 28
+                    radius: 14
+                    color: trayArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.5) : "transparent"
+
+                    Behavior on color {
+                        CAnim {}
                     }
 
                     ColouredIcon {
                         anchors.centerIn: parent
-                        implicitSize: 18
-                        source: Icons.getTrayIcon(trayIcon.modelData.id, trayIcon.modelData.icon)
-                        colour: Hallownest.steel
+                        implicitSize: 16
+                        source: Icons.getTrayIcon(traySlot.modelData.id, traySlot.modelData.icon)
+                        colour: trayArea.containsMouse ? Hallownest.soul : Hallownest.steel
                         layer.enabled: Config.bar.tray.recolour
+                    }
+
+                    MouseArea {
+                        id: trayArea
+
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: event => {
+                            if (event?.button === Qt.MiddleButton) {
+                                traySlot.modelData.secondaryActivate();
+                            } else if (traySlot.modelData.hasMenu && (event?.button === Qt.RightButton || traySlot.modelData.onlyMenu)) {
+                                root.trayItem = traySlot.modelData;
+                                root.detail = "tray";
+                            } else {
+                                traySlot.modelData.activate();
+                            }
+                        }
                     }
                 }
             }
 
-            HkButton {
-                visible: !Recorder.running
-                icon: "videocam"
-                onClicked: Recorder.start()
-            }
+            Rectangle {
+                implicitWidth: capsuleRow.implicitWidth + 6
+                implicitHeight: 30
+                radius: 15
+                color: Hallownest.card
+                border.width: 1
+                border.color: Hallownest.border
 
-            HkButton {
-                visible: !Recorder.running
-                icon: "crop_free"
-                onClicked: {
-                    // slurp needs the notch out of the way to pick the region
-                    root.screenState.notch = false;
-                    Recorder.start(["-r"]);
+                RowLayout {
+                    id: capsuleRow
+
+                    anchors.centerIn: parent
+                    spacing: 2
+
+                    CapsuleToggle {
+                        icon: Audio.sourceMuted ? "mic_off" : "mic"
+                        checked: Audio.sourceMuted
+                        accent: Hallownest.grimm
+                        onClicked: {
+                            const audio = Audio.source?.audio;
+                            if (audio)
+                                audio.muted = !audio.muted;
+                        }
+                    }
+
+                    CapsuleToggle {
+                        icon: "coffee"
+                        checked: RuntimeState.inhibitIdle
+                        accent: Hallownest.gold
+                        onClicked: RuntimeState.inhibitIdle = !RuntimeState.inhibitIdle
+                    }
+
+                    CapsuleToggle {
+                        icon: "notifications_off"
+                        checked: PersistentState.doNotDisturb
+                        accent: Hallownest.grimm
+                        onClicked: PersistentState.doNotDisturb = !PersistentState.doNotDisturb
+                    }
+
+                    Rectangle {
+                        Layout.leftMargin: 2
+                        Layout.rightMargin: 2
+                        implicitWidth: 1
+                        implicitHeight: 14
+                        color: Hallownest.border
+                    }
+
+                    CapsuleToggle {
+                        visible: !Recorder.running
+                        icon: "videocam"
+                        onClicked: Recorder.start()
+                    }
+
+                    CapsuleToggle {
+                        visible: !Recorder.running
+                        icon: "crop_free"
+                        onClicked: {
+                            // slurp needs the notch out of the way to pick the region
+                            root.screenState.notch = false;
+                            Recorder.start(["-r"]);
+                        }
+                    }
+
+                    CapsuleToggle {
+                        visible: Recorder.running
+                        icon: "stop_circle"
+                        text: Recorder.elapsedText()
+                        checked: true
+                        accent: Hallownest.grimm
+                        onClicked: Recorder.stop()
+                    }
                 }
             }
 
-            HkButton {
-                visible: Recorder.running
-                icon: "stop_circle"
-                text: Recorder.elapsedText()
-                accent: Hallownest.grimm
-                tinted: true
-                onClicked: Recorder.stop()
+            GhostAction {
+                icon: "settings"
+                onClicked: {
+                    root.screenState.notch = false;
+                    WindowFactory.create(null, {});
+                }
             }
 
-            HkButton {
+            GhostAction {
                 icon: "power_settings_new"
                 accent: Hallownest.grimm
-                tinted: true
                 onClicked: {
                     root.screenState.notch = false;
                     root.screenState.session = true;
@@ -445,16 +502,159 @@ NotchPage {
     }
 
     component Panel: Rectangle {
-        radius: 14
+        id: panel
+
+        radius: 13
         color: Hallownest.card
         border.width: 1
         border.color: Hallownest.border
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: panel.radius
+            anchors.rightMargin: panel.radius
+            height: 1
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+
+                GradientStop {
+                    position: 0
+                    color: "transparent"
+                }
+                GradientStop {
+                    position: 0.5
+                    color: Qt.alpha(Hallownest.soul, Hallownest.light ? 0.14 : 0.08)
+                }
+                GradientStop {
+                    position: 1
+                    color: "transparent"
+                }
+            }
+        }
     }
 
-    component QuickToggle: HkToggle {
-        implicitWidth: 30
-        implicitHeight: 30
-        radius: 15
+    component GhostAction: Rectangle {
+        id: ghost
+
+        property string icon
+        property string text
+        property color accent: Hallownest.soul
+
+        signal clicked
+
+        implicitWidth: text ? ghostRow.implicitWidth + 16 : 28
+        implicitHeight: 28
+        radius: text ? 9 : 14
+        color: ghostArea.containsMouse ? (accent === Hallownest.soul ? Hallownest.raise(Hallownest.card, 1.55) : Qt.alpha(accent, 0.14)) : "transparent"
+        scale: ghostArea.pressed ? 0.94 : 1
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        Behavior on scale {
+            Anim {
+                type: Anim.FastSpatial
+            }
+        }
+
+        Row {
+            id: ghostRow
+
+            anchors.centerIn: parent
+            spacing: Tokens.spacing.extraSmall
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: ghost.icon !== ""
+                text: ghost.icon
+                color: ghostArea.containsMouse ? ghost.accent : (ghost.accent === Hallownest.soul ? Hallownest.steel : Qt.alpha(ghost.accent, 0.72))
+                fontStyle: Tokens.font.icon.small
+                animate: true
+            }
+
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: ghost.text !== ""
+                text: ghost.text
+                color: ghostArea.containsMouse ? Hallownest.soul : Hallownest.subtext
+                font.pointSize: 8.5
+                font.weight: Font.Medium
+            }
+        }
+
+        MouseArea {
+            id: ghostArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: ghost.clicked()
+        }
+    }
+
+    component CapsuleToggle: Rectangle {
+        id: cap
+
+        property string icon
+        property string text
+        property bool checked
+        property color accent: Hallownest.soul
+
+        signal clicked
+
+        implicitWidth: text ? capRow.implicitWidth + 14 : 26
+        implicitHeight: 24
+        radius: 12
+        color: checked ? Qt.alpha(accent, capArea.containsMouse ? 0.24 : 0.16) : capArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.65) : "transparent"
+        scale: capArea.pressed ? 0.93 : 1
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        Behavior on scale {
+            Anim {
+                type: Anim.FastSpatial
+            }
+        }
+
+        Row {
+            id: capRow
+
+            anchors.centerIn: parent
+            spacing: 4
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                text: cap.icon
+                color: cap.checked ? cap.accent : capArea.containsMouse ? Hallownest.soul : Hallownest.steel
+                fill: cap.checked ? 1 : 0
+                fontStyle: Tokens.font.icon.small
+                animate: true
+            }
+
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: cap.text !== ""
+                text: cap.text
+                color: cap.accent
+                font.family: Hallownest.mono
+                font.pointSize: 8.5
+                font.weight: Font.DemiBold
+            }
+        }
+
+        MouseArea {
+            id: capArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: cap.clicked()
+        }
     }
 
     component IconButton: MaterialIcon {
@@ -462,6 +662,7 @@ NotchPage {
 
         property string icon
         property color colour: Hallownest.steel
+        readonly property alias hovered: iconArea.containsMouse
 
         signal clicked
 
@@ -493,14 +694,43 @@ NotchPage {
 
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        implicitHeight: 56
-        radius: 14
-        color: checked ? Qt.alpha(accent, tileArea.containsMouse ? 0.2 : 0.14) : tileArea.containsMouse ? Hallownest.raise(Hallownest.button, 1.6) : Hallownest.button
+        implicitHeight: 54
+        radius: 13
+        color: checked ? Qt.tint(Hallownest.card, Qt.alpha(accent, tileArea.containsMouse ? 0.12 : 0.07)) : tileArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.35) : Hallownest.card
         border.width: 1
-        border.color: checked ? Qt.alpha(accent, 0.55) : Hallownest.border
+        border.color: checked ? Qt.alpha(accent, tileArea.containsMouse ? 0.45 : 0.3) : Hallownest.border
 
         Behavior on color {
             CAnim {}
+        }
+
+        Behavior on border.color {
+            CAnim {}
+        }
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: tile.radius
+            anchors.rightMargin: tile.radius
+            height: 1
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+
+                GradientStop {
+                    position: 0
+                    color: "transparent"
+                }
+                GradientStop {
+                    position: 0.5
+                    color: Qt.alpha(tile.checked ? tile.accent : Hallownest.soul, Hallownest.light ? 0.18 : 0.11)
+                }
+                GradientStop {
+                    position: 1
+                    color: "transparent"
+                }
+            }
         }
 
         MouseArea {
@@ -516,25 +746,51 @@ NotchPage {
             anchors.fill: parent
             anchors.leftMargin: Tokens.padding.medium
             anchors.rightMargin: Tokens.padding.small
-            spacing: Tokens.spacing.small
+            spacing: Tokens.spacing.small + 2
 
             MaterialIcon {
                 text: tile.icon
                 color: tile.checked ? tile.accent : Hallownest.subtext
                 fill: tile.checked ? 1 : 0
+                animate: true
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0
 
-                StyledText {
+                RowLayout {
+                    id: titleRow
+
                     Layout.fillWidth: true
-                    text: tile.title
-                    color: Hallownest.soul
-                    font.pointSize: 10
-                    font.weight: Font.DemiBold
-                    elide: Text.ElideRight
+                    spacing: 5
+
+                    StyledText {
+                        Layout.maximumWidth: Math.max(1, titleRow.width - 12)
+                        text: tile.title
+                        color: Hallownest.soul
+                        font.pointSize: 9.5
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+
+                    Rectangle {
+                        implicitWidth: 4
+                        implicitHeight: 4
+                        rotation: 45
+                        color: tile.accent
+                        opacity: tile.checked ? 0.85 : 0
+
+                        Behavior on opacity {
+                            Anim {
+                                type: Anim.DefaultEffects
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
                 }
 
                 StyledText {
@@ -547,8 +803,18 @@ NotchPage {
             }
 
             IconButton {
+                id: tileMore
+
                 icon: "chevron_right"
+                colour: Hallownest.subtext
+                opacity: tileArea.containsMouse || tileMore.hovered ? 0.9 : 0.32
                 onClicked: tile.more()
+
+                Behavior on opacity {
+                    Anim {
+                        type: Anim.DefaultEffects
+                    }
+                }
             }
         }
     }

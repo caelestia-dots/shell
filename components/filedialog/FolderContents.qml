@@ -11,6 +11,7 @@ import qs.components
 import qs.components.controls
 import qs.components.effects
 import qs.components.filedialog
+import qs.components.hallownest as Hk
 import qs.services
 import qs.utils
 
@@ -22,7 +23,7 @@ Item {
 
     StyledRect {
         anchors.fill: parent
-        color: Colours.tPalette.m3surfaceContainer
+        color: Hallownest.shell
 
         layer.enabled: true
         layer.effect: Mask {
@@ -53,17 +54,22 @@ Item {
         active: opacity > 0
 
         sourceComponent: ColumnLayout {
-            MaterialIcon {
+            spacing: Tokens.spacing.small
+
+            Hk.Mask {
                 Layout.alignment: Qt.AlignHCenter
-                text: "scan_delete"
-                color: Colours.palette.m3outline
-                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.Medium).build()
+                size: 56
+                filled: false
+                colour: Hallownest.steel
             }
 
             StyledText {
+                Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("This folder is empty")
-                color: Colours.palette.m3outline
-                font: Tokens.font.body.builders.large.weight(Font.Medium).build()
+                color: Hallownest.subtext
+                font.family: Hallownest.serif
+                font.pointSize: 12
+                font.weight: Font.Bold
             }
         }
 
@@ -165,8 +171,10 @@ Item {
         implicitWidth: Sizes.itemWidth
         implicitHeight: nonAnimHeight
 
-        radius: Tokens.rounding.large
-        color: Qt.alpha(Colours.tPalette.m3surfaceContainerHighest, GridView.isCurrentItem ? Colours.tPalette.m3surfaceContainerHighest.a : 0)
+        radius: 12
+        color: GridView.isCurrentItem ? Qt.alpha(Hallownest.soul, 0.1) : "transparent"
+        border.width: GridView.isCurrentItem ? 1 : 0
+        border.color: Qt.alpha(Hallownest.soul, 0.45)
         z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
         clip: true
 

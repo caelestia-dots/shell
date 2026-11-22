@@ -41,6 +41,33 @@ Rectangle {
         }
     }
 
+    // Subtle top rim highlight on raised buttons
+    Rectangle {
+        visible: !root.filled
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Math.min(root.radius, root.width / 3)
+        anchors.rightMargin: Math.min(root.radius, root.width / 3)
+        height: 1
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+            GradientStop {
+                position: 0.5
+                color: Qt.alpha(root.tinted ? root.accent : Hallownest.soul, Hallownest.light ? 0.16 : 0.11)
+            }
+            GradientStop {
+                position: 1
+                color: "transparent"
+            }
+        }
+    }
+
     Row {
         id: content
 

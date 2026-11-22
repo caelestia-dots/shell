@@ -278,6 +278,12 @@ WlSessionLockSurface {
                 shadowColor: Qt.alpha("black", Hallownest.light ? 0.3 : 0.7)
             }
 
+            HkGrain {
+                anchors.fill: parent
+                anchors.margins: 1
+                radius: lockBg.radius - 1
+            }
+
             Filigree {
                 anchors.fill: parent
                 radius: lockBg.radius

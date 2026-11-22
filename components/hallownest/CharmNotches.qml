@@ -70,7 +70,7 @@ Item {
                     anchors.centerIn: parent
                     width: slot.active ? 8 : 6
                     height: width
-                    rotation: 45
+                    rotation: slot.active ? 135 : 45
                     color: slot.active ? Hallownest.soul : "transparent"
                     border.width: 1
                     border.color: slot.active ? Hallownest.soul : Qt.alpha(Hallownest.steel, 0.5)
@@ -86,6 +86,12 @@ Item {
                     }
 
                     Behavior on width {
+                        Anim {
+                            type: Anim.FastSpatial
+                        }
+                    }
+
+                    Behavior on rotation {
                         Anim {
                             type: Anim.FastSpatial
                         }

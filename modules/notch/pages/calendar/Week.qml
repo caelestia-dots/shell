@@ -18,6 +18,7 @@ Item {
     property date weekStart: startOfWeek(new Date())
     readonly property list<date> days: [0, 1, 2, 3, 4, 5, 6].map(i => new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i))
     readonly property bool isCurrentWeek: Events.dayKey(weekStart) === Events.dayKey(startOfWeek(Time.date))
+    readonly property string selectedKey: DayView.shown ? Events.dayKey(DayView.date) : ""
 
     // Events per day, split into all-day and timed (with lanes for overlapping events)
     readonly property var weekEvents: days.map(d => {
@@ -95,24 +96,33 @@ Item {
         Events.loadRange("week", weekStart, end);
     }
 
-    implicitWidth: 700
+    implicitWidth: 640
 
     Component.onCompleted: loadWeek()
     onWeekStartChanged: loadWeek()
 
+    Connections {
+        function onDateChanged(): void {
+            if (DayView.shown)
+                root.weekStart = root.startOfWeek(DayView.date);
+        }
+
+        target: DayView
+    }
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Tokens.padding.large
+        anchors.margins: Tokens.padding.medium + 2
         spacing: Tokens.spacing.small
 
-        // Header: week range and navigation
+        // Header: week range and ghost navigation controls
         RowLayout {
             Layout.fillWidth: true
             spacing: Tokens.spacing.extraSmall
 
             StyledText {
                 Layout.fillWidth: true
-                Layout.leftMargin: Tokens.padding.small
+                Layout.leftMargin: 4
                 text: {
                     const first = root.days[0];
                     const last = root.days[6];
@@ -120,36 +130,49 @@ Item {
                         return `${first.getDate()} – ${Qt.locale().toString(last, "d MMMM yyyy")}`;
                     return `${Qt.locale().toString(first, "d MMM")} – ${Qt.locale().toString(last, "d MMM yyyy")}`;
                 }
-                color: Hallownest.lifeblood
-                font: Tokens.font.title.builders.small.capitalisation(Font.Capitalize).build()
+                color: Hallownest.soul
+                font.family: Hallownest.serif
+                font.pointSize: 10.5
+                font.weight: Font.Bold
+                font.capitalization: Font.Capitalize
+                font.letterSpacing: 0.4
                 elide: Text.ElideRight
             }
 
-            HkButton {
-                implicitHeight: 28
+            GhostNav {
                 visible: !root.isCurrentWeek
                 text: Tr.tr("Today")
                 onClicked: root.weekStart = root.startOfWeek(new Date())
             }
 
-            HkButton {
-                implicitHeight: 28
+            GhostNav {
                 icon: "upload_file"
                 disabled: !Events.available
                 onClicked: ScheduleImporter.open()
             }
 
-            HkButton {
-                implicitHeight: 28
+            Rectangle {
+                Layout.leftMargin: 2
+                Layout.rightMargin: 2
+                implicitWidth: 1
+                implicitHeight: 14
+                color: Hallownest.border
+            }
+
+            GhostNav {
                 icon: "chevron_left"
                 onClicked: root.shiftWeek(-1)
             }
 
-            HkButton {
-                implicitHeight: 28
+            GhostNav {
                 icon: "chevron_right"
                 onClicked: root.shiftWeek(1)
             }
+        }
+
+        HkDivider {
+            Layout.fillWidth: true
+            opacity: 0.55
         }
 
         // Day headers
@@ -161,19 +184,32 @@ Item {
             Repeater {
                 model: root.days
 
-                Item {
+                Rectangle {
                     id: dayHeader
 
                     required property date modelData
                     readonly property bool isToday: Events.dayKey(modelData) === Events.dayKey(Time.date)
+                    readonly property bool isWeekend: {
+                        const d = modelData.getDay();
+                        return d === 0 || d === 6;
+                    }
 
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
-                    implicitHeight: headerCol.implicitHeight + Tokens.padding.small * 2
+                    implicitHeight: headerCol.implicitHeight + 6
+                    radius: 9
+                    color: headerArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.45) : "transparent"
 
-                    StateLayer {
-                        color: Hallownest.text
-                        radius: Tokens.rounding.medium
+                    Behavior on color {
+                        CAnim {}
+                    }
+
+                    MouseArea {
+                        id: headerArea
+
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: DayView.open(dayHeader.modelData)
                     }
 
@@ -186,24 +222,27 @@ Item {
                         StyledText {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: Qt.locale().toString(dayHeader.modelData, "ddd")
-                            color: dayHeader.isToday ? Hallownest.lifeblood : Hallownest.subtext
-                            font: Tokens.font.label.builders.small.capitalisation(Font.Capitalize).build()
+                            color: dayHeader.isToday ? Hallownest.lifeblood : dayHeader.isWeekend ? Qt.alpha(Hallownest.gold, 0.85) : Hallownest.subtext
+                            font.pointSize: 7.5
+                            font.weight: Font.DemiBold
+                            font.capitalization: Font.AllUppercase
+                            font.letterSpacing: 0.5
                         }
 
-                        StyledRect {
+                        Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            implicitWidth: Math.max(dayNum.implicitWidth, dayNum.implicitHeight) + Tokens.padding.small
-                            implicitHeight: implicitWidth
-                            radius: Tokens.rounding.full
+                            implicitWidth: 24
+                            implicitHeight: 24
+                            radius: 12
                             color: dayHeader.isToday ? Hallownest.lifeblood : "transparent"
 
                             StyledText {
-                                id: dayNum
-
                                 anchors.centerIn: parent
                                 text: dayHeader.modelData.getDate()
                                 color: dayHeader.isToday ? Hallownest.void_ : Hallownest.text
-                                font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
+                                font.family: Hallownest.mono
+                                font.pointSize: 9
+                                font.weight: dayHeader.isToday ? Font.Bold : Font.Medium
                             }
                         }
                     }
@@ -236,11 +275,13 @@ Item {
                         model: allDayCol.modelData.allDay.slice(0, 2)
 
                         EventChip {
+                            id: allDayChip
+
                             required property var modelData
 
                             Layout.fillWidth: true
-                            Layout.leftMargin: 1
-                            Layout.rightMargin: 1
+                            Layout.leftMargin: 2
+                            Layout.rightMargin: 2
                             implicitHeight: chipText.implicitHeight + 4
                             event: modelData
                             date: root.days[allDayCol.index]
@@ -249,12 +290,13 @@ Item {
                                 id: chipText
 
                                 anchors.fill: parent
-                                anchors.leftMargin: Tokens.padding.small
-                                anchors.rightMargin: Tokens.padding.small
+                                anchors.leftMargin: 6
+                                anchors.rightMargin: 4
                                 verticalAlignment: Text.AlignVCenter
-                                text: parent.event.title
+                                text: allDayChip.event.title
                                 color: Hallownest.soul
-                                font: Tokens.font.label.small
+                                font.pointSize: 7.5
+                                font.weight: Font.Medium
                                 elide: Text.ElideRight
                             }
                         }
@@ -266,7 +308,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         text: Tr.tr("+%1 more").arg(allDayCol.modelData.allDay.length - 2)
                         color: Hallownest.subtext
-                        font: Tokens.font.label.small
+                        font.pointSize: 7.5
                     }
                 }
             }
@@ -277,18 +319,19 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            // Hour labels
+            // Hour labels (every 2 hours to avoid vertical crowding)
             Item {
                 id: hourLabels
 
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                width: hourMetrics.width + Tokens.padding.medium
+                width: hourMetrics.width + Tokens.padding.small + 4
 
                 TextMetrics {
                     id: hourMetrics
 
-                    font: Tokens.font.label.small
+                    font.family: Hallownest.mono
+                    font.pointSize: 7.5
                     text: "00:00"
                 }
 
@@ -297,14 +340,16 @@ Item {
 
                     StyledText {
                         required property int index
+                        readonly property int hour: root.startHour + index
 
                         anchors.right: parent.right
                         anchors.rightMargin: Tokens.padding.small
                         y: index * root.hourHeight - height / 2
-                        visible: index > 0 && index < root.endHour - root.startHour
-                        text: `${String(root.startHour + index).padStart(2, "0")}:00`
+                        visible: index > 0 && index < root.endHour - root.startHour && hour % 2 === 0
+                        text: `${String(hour).padStart(2, "0")}:00`
                         color: Hallownest.faint
-                        font: Tokens.font.label.small
+                        font.family: Hallownest.mono
+                        font.pointSize: 7.5
                     }
                 }
             }
@@ -319,19 +364,20 @@ Item {
                 anchors.left: hourLabels.right
                 anchors.right: parent.right
 
-                // Hour lines
+                // Subtle hour lines (stronger on even hours, faint on odd hours)
                 Repeater {
                     model: root.endHour - root.startHour + 1
 
-                    StyledRect {
+                    Rectangle {
                         required property int index
+                        readonly property bool major: (root.startHour + index) % 2 === 0
 
                         x: 0
                         y: Math.round(index * root.hourHeight)
                         width: grid.width
                         height: 1
                         color: Hallownest.border
-                        opacity: index === 0 || index === root.endHour - root.startHour ? 0 : 0.5
+                        opacity: index === 0 || index === root.endHour - root.startHour ? 0 : major ? 0.38 : 0.14
                     }
                 }
 
@@ -351,18 +397,31 @@ Item {
                         width: grid.dayWidth
                         height: grid.height
 
-                        StyledRect {
+                        Rectangle {
                             anchors.fill: parent
-                            radius: Tokens.rounding.small
-                            color: dayCol.isToday ? Qt.alpha(Hallownest.lifeblood, 0.06) : "transparent"
+                            radius: 6
+                            color: dayCol.isToday ? Qt.alpha(Hallownest.lifeblood, 0.055) : colArea.containsMouse ? Qt.alpha(Hallownest.soul, 0.03) : "transparent"
+
+                            Behavior on color {
+                                CAnim {}
+                            }
                         }
 
-                        StyledRect {
+                        MouseArea {
+                            id: colArea
+
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: DayView.open(dayCol.date)
+                        }
+
+                        Rectangle {
                             visible: dayCol.index > 0
                             width: 1
                             height: parent.height
                             color: Hallownest.border
-                            opacity: 0.5
+                            opacity: 0.24
                         }
 
                         Repeater {
@@ -380,22 +439,23 @@ Item {
                                 x: 2 + modelData.lane * laneWidth
                                 y: (modelData.startMin - root.startHour * 60) / 60 * root.hourHeight + 1
                                 width: laneWidth - 1
-                                height: Math.max((modelData.endMin - modelData.startMin) / 60 * root.hourHeight - 2, 12)
+                                height: Math.max((modelData.endMin - modelData.startMin) / 60 * root.hourHeight - 2, 14)
                                 clip: true
 
                                 Column {
                                     anchors.fill: parent
                                     anchors.margins: 3
-                                    anchors.leftMargin: 5
+                                    anchors.leftMargin: 6
                                     spacing: 0
 
                                     StyledText {
                                         width: parent.width
                                         text: block.modelData.title
                                         color: Hallownest.soul
-                                        font: Tokens.font.label.builders.small.weight(Font.Medium).build()
+                                        font.pointSize: 7.5
+                                        font.weight: Font.DemiBold
                                         wrapMode: Text.Wrap
-                                        maximumLineCount: block.height > 48 ? 3 : block.height > 32 ? 2 : 1
+                                        maximumLineCount: block.height > 48 ? 3 : block.height > 30 ? 2 : 1
                                         elide: Text.ElideRight
                                     }
 
@@ -403,33 +463,33 @@ Item {
                                         id: timeText
 
                                         width: parent.width
-                                        visible: block.height > implicitHeight * 2.5
+                                        visible: block.height > implicitHeight * 2.4
                                         text: `${block.modelData.start}–${block.modelData.end}`
-                                        color: Hallownest.soul
-                                        opacity: 0.8
-                                        font: Tokens.font.label.small
+                                        color: Hallownest.subtext
+                                        font.family: Hallownest.mono
+                                        font.pointSize: 7
                                         elide: Text.ElideRight
                                     }
                                 }
                             }
                         }
 
-                        // Current time indicator
-                        StyledRect {
+                        // Current time indicator: fine crimson line with Hallownest diamond
+                        Rectangle {
                             readonly property int nowMin: Time.hours * 60 + Time.minutes
 
                             visible: dayCol.isToday && nowMin >= root.startHour * 60 && nowMin <= root.endHour * 60
-                            y: (nowMin - root.startHour * 60) / 60 * root.hourHeight - 1
+                            y: (nowMin - root.startHour * 60) / 60 * root.hourHeight - 0.75
                             width: parent.width
-                            height: 2
+                            height: 1.5
                             color: Hallownest.grimm
 
-                            StyledRect {
+                            Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
                                 x: -3
-                                implicitWidth: 6
-                                implicitHeight: 6
-                                radius: 3
+                                width: 6
+                                height: 6
+                                rotation: 45
                                 color: Hallownest.grimm
                             }
                         }
@@ -439,27 +499,99 @@ Item {
         }
     }
 
-    component EventChip: StyledRect {
+    component GhostNav: Rectangle {
+        id: nav
+
+        property string icon
+        property string text
+        property bool disabled
+
+        signal clicked
+
+        implicitWidth: text ? navRow.implicitWidth + 16 : 28
+        implicitHeight: 28
+        radius: text ? 9 : 14
+        color: navArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.55) : "transparent"
+        opacity: disabled ? 0.35 : 1
+        scale: navArea.pressed ? 0.93 : 1
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        Behavior on scale {
+            Anim {
+                type: Anim.FastSpatial
+            }
+        }
+
+        Row {
+            id: navRow
+
+            anchors.centerIn: parent
+            spacing: 4
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: nav.icon !== ""
+                text: nav.icon
+                color: navArea.containsMouse ? Hallownest.soul : Hallownest.steel
+                fontStyle: Tokens.font.icon.small
+            }
+
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: nav.text !== ""
+                text: nav.text
+                color: navArea.containsMouse ? Hallownest.soul : Hallownest.subtext
+                font.pointSize: 8.5
+                font.weight: Font.Medium
+            }
+        }
+
+        MouseArea {
+            id: navArea
+
+            anchors.fill: parent
+            enabled: !nav.disabled
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: nav.clicked()
+        }
+    }
+
+    component EventChip: Rectangle {
         id: chip
 
         required property var event
         required property date date
+        readonly property color accent: event.colour || Hallownest.lifeblood
 
-        radius: Tokens.rounding.extraSmall
-        color: Qt.alpha(Hallownest.lifeblood, 0.18)
+        radius: 6
+        color: Qt.alpha(accent, chipArea.containsMouse ? 0.24 : 0.14)
+        border.width: 1
+        border.color: Qt.alpha(accent, chipArea.containsMouse ? 0.48 : 0.26)
 
-        StyledRect {
+        Behavior on color {
+            CAnim {}
+        }
+
+        Rectangle {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: 3
+            anchors.margins: 1
+            width: 2.5
             radius: 1.5
-            color: chip.event.colour || Hallownest.lifeblood
+            color: chip.accent
         }
 
-        StateLayer {
-            color: Hallownest.soul
-            radius: chip.radius
+        MouseArea {
+            id: chipArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             onClicked: DayView.open(chip.date)
         }
     }

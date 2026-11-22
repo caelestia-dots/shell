@@ -190,10 +190,42 @@ Scope {
                 }
 
                 HkCard {
+                    id: card
+
+                    property real enter
+
                     anchors.centerIn: parent
                     implicitWidth: 3 * 136 + Tokens.padding.extraLarge * 2
                     implicitHeight: layout.implicitHeight + Tokens.padding.extraLarge * 2
                     ornate: true
+                    scale: 0.96 + enter * 0.04
+                    filigreeDrawn: 0
+
+                    transform: Translate {
+                        y: (1 - card.enter) * 10
+                    }
+
+                    Component.onCompleted: enterAnim.start()
+
+                    ParallelAnimation {
+                        id: enterAnim
+
+                        Anim {
+                            target: card
+                            property: "enter"
+                            from: 0
+                            to: 1
+                            type: Anim.FastSpatial
+                        }
+                        NumberAnimation {
+                            target: card
+                            property: "filigreeDrawn"
+                            from: 0
+                            to: 1
+                            duration: 460
+                            easing.type: Easing.InOutQuad
+                        }
+                    }
 
                     // Swallow clicks so they don't reach the backdrop
                     MouseArea {

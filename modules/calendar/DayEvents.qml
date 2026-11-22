@@ -48,20 +48,43 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Tokens.padding.large
+        anchors.margins: Tokens.padding.medium + 2
+        anchors.bottomMargin: 0
         spacing: Tokens.spacing.small
 
-        HkButton {
-            icon: "arrow_back"
-            onClicked: root.close()
+        Rectangle {
+            implicitWidth: 28
+            implicitHeight: 28
+            radius: 14
+            color: backArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.55) : "transparent"
+
+            Behavior on color {
+                CAnim {}
+            }
+
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: "arrow_back"
+                color: backArea.containsMouse ? Hallownest.soul : Hallownest.steel
+                fontStyle: Tokens.font.icon.small
+            }
+
+            MouseArea {
+                id: backArea
+
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.close()
+            }
         }
 
         StyledText {
-            Layout.leftMargin: Tokens.spacing.extraSmall
+            Layout.leftMargin: 2
             text: Qt.locale().toString(root.date, "dddd")
             color: Hallownest.soul
             font.family: Hallownest.serif
-            font.pointSize: 12
+            font.pointSize: 11.5
             font.weight: Font.Bold
             font.capitalization: Font.Capitalize
         }
@@ -70,7 +93,7 @@ Item {
             Layout.fillWidth: true
             text: Qt.locale().toString(root.date, "d MMMM yyyy")
             color: Hallownest.subtext
-            font.pointSize: 10
+            font.pointSize: 9.5
             elide: Text.ElideRight
         }
 
@@ -79,19 +102,33 @@ Item {
             disabled: !Events.available
             icon: "add"
             text: Tr.tr("Add event")
+            tinted: true
+            accent: Hallownest.lifeblood
             onClicked: root.adding = true
         }
+    }
+
+    HkDivider {
+        id: headerDivider
+
+        anchors.top: header.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: Tokens.padding.medium + 2
+        anchors.rightMargin: Tokens.padding.medium + 2
+        anchors.topMargin: Tokens.spacing.small
+        opacity: 0.55
     }
 
     StyledFlickable {
         id: view
 
-        anchors.top: header.bottom
+        anchors.top: headerDivider.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: Tokens.padding.large
-        anchors.topMargin: Tokens.spacing.medium
+        anchors.margins: Tokens.padding.medium + 2
+        anchors.topMargin: Tokens.spacing.small
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -154,15 +191,26 @@ Item {
                 }
             }
 
-            StyledText {
+            Column {
                 Layout.fillWidth: true
-                Layout.topMargin: Tokens.spacing.extraLarge
+                Layout.topMargin: Tokens.spacing.extraLarge * 1.6
                 visible: root.events.length === 0 && !root.adding
-                horizontalAlignment: Text.AlignHCenter
-                text: Tr.tr("No events this day")
-                color: Hallownest.faint
-                font.family: Hallownest.serif
-                font.pointSize: 11
+                spacing: Tokens.spacing.small
+
+                Mask {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    size: 30
+                    filled: false
+                    opacity: 0.45
+                }
+
+                StyledText {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Tr.tr("No events this day")
+                    color: Hallownest.faint
+                    font.family: Hallownest.serif
+                    font.pointSize: 10.5
+                }
             }
         }
     }
@@ -172,44 +220,46 @@ Item {
 
         required property var modelData
         property bool confirmDelete
+        readonly property color accent: modelData.colour || Hallownest.lifeblood
 
         Layout.fillWidth: true
-        implicitHeight: cardLayout.implicitHeight + 24
+        implicitHeight: cardLayout.implicitHeight + 20
 
         RowLayout {
             id: cardLayout
 
             anchors.fill: parent
-            anchors.margins: 12
+            anchors.margins: 10
             spacing: Tokens.spacing.medium
 
             Rectangle {
                 Layout.fillHeight: true
                 implicitWidth: 3
                 radius: 1.5
-                color: card.modelData.colour || Hallownest.lifeblood
+                color: card.accent
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 2
+                spacing: 3
 
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Tokens.spacing.small
 
                     StyledText {
-                        text: card.modelData.allDay ? Tr.tr("All day") : `${card.modelData.start} – ${card.modelData.end}`
-                        color: Hallownest.soul
-                        font.pointSize: 9
+                        text: card.modelData.allDay ? Tr.tr("All day") : `${card.modelData.start}–${card.modelData.end}`
+                        color: card.accent
+                        font.family: Hallownest.mono
+                        font.pointSize: 8.5
                         font.weight: Font.DemiBold
                     }
 
                     StyledText {
                         Layout.fillWidth: true
                         text: card.modelData.title
-                        color: Hallownest.text
-                        font.pointSize: 10
+                        color: Hallownest.soul
+                        font.pointSize: 9.5
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -238,11 +288,34 @@ Item {
                 }
             }
 
-            HkButton {
+            Rectangle {
                 Layout.alignment: Qt.AlignTop
-                icon: "edit"
-                disabled: !!root.editingUid || root.adding
-                onClicked: root.editingUid = card.modelData.uid
+                implicitWidth: 28
+                implicitHeight: 28
+                radius: 14
+                color: editArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.55) : "transparent"
+                opacity: !!root.editingUid || root.adding ? 0.35 : 1
+
+                Behavior on color {
+                    CAnim {}
+                }
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: "edit"
+                    color: editArea.containsMouse ? Hallownest.soul : Hallownest.steel
+                    fontStyle: Tokens.font.icon.small
+                }
+
+                MouseArea {
+                    id: editArea
+
+                    anchors.fill: parent
+                    enabled: !root.editingUid && !root.adding
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.editingUid = card.modelData.uid
+                }
             }
 
             HkButton {
@@ -250,7 +323,7 @@ Item {
                 icon: card.confirmDelete ? "delete_forever" : "delete"
                 text: card.confirmDelete ? Tr.tr("Delete") : ""
                 accent: Hallownest.grimm
-                tinted: true
+                tinted: card.confirmDelete
                 filled: card.confirmDelete
                 onClicked: {
                     if (card.confirmDelete)

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
+import qs.components.hallownest
 import qs.services
 import qs.modules.calendar
 import qs.modules.notch
@@ -10,32 +11,28 @@ import qs.modules.notch.pages.calendar
 NotchPage {
     id: root
 
-    implicitWidth: 960
-    implicitHeight: 400
+    implicitWidth: 920
+    implicitHeight: 416
 
     Component.onDestruction: DayView.close()
 
     RowLayout {
         anchors.fill: parent
-        spacing: Tokens.spacing.medium
+        spacing: Tokens.spacing.small + 2
 
-        StyledRect {
-            Layout.preferredWidth: 280
+        HkCard {
+            Layout.preferredWidth: 268
             Layout.fillHeight: true
-            radius: Tokens.rounding.extraLarge
-            color: Hallownest.card
 
             MonthGrid {
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.fill: parent
                 screenState: root.screenState
             }
         }
 
-        StyledRect {
+        HkCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            radius: Tokens.rounding.extraLarge
-            color: Hallownest.card
             clip: true
 
             Week {
@@ -63,7 +60,7 @@ NotchPage {
 
                 // Unfold from the top: fade in and slide down on load
                 transform: Translate {
-                    y: (dayLoader.opacity - 1) * 24
+                    y: (dayLoader.opacity - 1) * 20
                 }
 
                 onLoaded: {

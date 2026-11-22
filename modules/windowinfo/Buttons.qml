@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.hallownest
 import qs.services
 
 ColumnLayout {
@@ -26,31 +27,14 @@ ColumnLayout {
         StyledText {
             Layout.fillWidth: true
             text: Tr.tr("Move to workspace")
+            color: Hallownest.text
             elide: Text.ElideRight
         }
 
-        StyledRect {
-            color: Colours.palette.m3primary
-            radius: Tokens.rounding.medium
-
-            implicitWidth: moveToWsIcon.implicitWidth + Tokens.padding.small
-            implicitHeight: moveToWsIcon.implicitHeight + Tokens.padding.extraSmall
-
-            StateLayer {
-                color: Colours.palette.m3onPrimary
-                onClicked: root.moveToWsExpanded = !root.moveToWsExpanded
-            }
-
-            MaterialIcon {
-                id: moveToWsIcon
-
-                anchors.centerIn: parent
-
-                animate: true
-                text: root.moveToWsExpanded ? "expand_more" : "keyboard_arrow_right"
-                color: Colours.palette.m3onPrimary
-                fontStyle: Tokens.font.icon.large
-            }
+        HkButton {
+            icon: root.moveToWsExpanded ? "expand_more" : "keyboard_arrow_right"
+            filled: true
+            onClicked: root.moveToWsExpanded = !root.moveToWsExpanded
         }
     }
 
@@ -90,19 +74,18 @@ ColumnLayout {
         Repeater {
             model: 10
 
-            WButton {
+            HkButton {
                 required property int index
                 readonly property int wsId: Math.floor((Hypr.activeWsId - 1) / 10) * 10 + index + 1
                 readonly property bool isCurrent: root.client?.workspace.id === wsId
 
+                Layout.fillWidth: true
+                text: String(wsId)
+                tinted: isCurrent
+                disabled: isCurrent
                 onClicked: {
                     Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.move({ window = "address:0x${root.client?.address}", workspace = "${wsId}", follow = true })` : `movetoworkspace ${wsId},address:0x${root.client?.address}`);
                 }
-
-                color: isCurrent ? Colours.tPalette.m3surfaceContainerHighest : Colours.palette.m3tertiaryContainer
-                textColor: isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onTertiaryContainer
-                text: wsId
-                disabled: isCurrent
             }
         }
     }
@@ -115,9 +98,8 @@ ColumnLayout {
 
         spacing: root.client?.lastIpcObject.floating ? Tokens.spacing.medium : Tokens.spacing.small
 
-        WButton {
-            color: Colours.palette.m3secondaryContainer
-            textColor: Colours.palette.m3onSecondaryContainer
+        HkButton {
+            Layout.fillWidth: true
             text: root.client?.lastIpcObject.floating ? Tr.tr("Tile") : Tr.tr("Float")
             onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.float({ window = "address:0x${root.client?.address}" })` : `togglefloating address:0x${root.client?.address}`)
         }
@@ -129,49 +111,18 @@ ColumnLayout {
             Layout.leftMargin: active ? 0 : -parent.spacing
             Layout.rightMargin: active ? 0 : -parent.spacing
 
-            sourceComponent: WButton {
-                color: Colours.palette.m3secondaryContainer
-                textColor: Colours.palette.m3onSecondaryContainer
+            sourceComponent: HkButton {
                 text: root.client?.lastIpcObject.pinned ? Tr.tr("Unpin") : Tr.tr("Pin")
                 onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.pin({ window = "address:0x${root.client?.address}" })` : `pin address:0x${root.client?.address}`)
             }
         }
 
-        WButton {
-            color: Colours.palette.m3errorContainer
-            textColor: Colours.palette.m3onErrorContainer
+        HkButton {
+            Layout.fillWidth: true
             text: Tr.tr("Kill")
+            accent: Hallownest.grimm
+            tinted: true
             onClicked: Hypr.dispatch(Hypr.usingLua ? `hl.dsp.window.kill({ window = "address:0x${root.client?.address}" })` : `killwindow address:0x${root.client?.address}`)
-        }
-    }
-
-    component WButton: StyledRect {
-        property color textColor: Colours.palette.m3onSurface
-        property alias disabled: stateLayer.disabled
-        property alias text: label.text
-
-        signal clicked
-
-        radius: Tokens.rounding.medium
-
-        Layout.fillWidth: true
-        implicitHeight: label.implicitHeight + Tokens.padding.small
-
-        StateLayer {
-            id: stateLayer
-
-            color: parent.textColor
-            onClicked: parent.clicked()
-        }
-
-        StyledText {
-            id: label
-
-            anchors.centerIn: parent
-
-            animate: true
-            color: parent.textColor
-            font: Tokens.font.body.medium
         }
     }
 }

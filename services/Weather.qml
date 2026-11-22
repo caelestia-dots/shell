@@ -22,8 +22,31 @@ Singleton {
     property bool citiesLoaded: false
     property string pendingCoords
 
-    readonly property string icon: cc ? Icons.getWeatherIcon(cc.weatherCode) : "cloud_alert"
-    // Forces the notch weather scene (sun, night, cloud, fog, rain, storm, snow); "" = real weather, not persisted
+    readonly property bool isNight: {
+        const nowMins = dayNightClock.hours * 60 + dayNightClock.minutes;
+        if (cc) {
+            const sr = parseClockMinutes(cc.sunrise);
+            const ss = parseClockMinutes(cc.sunset);
+            if (sr >= 0 && ss > sr)
+                return nowMins < sr || nowMins >= ss;
+            if (cc.isDay !== undefined)
+                return cc.isDay === 0;
+        }
+        return dayNightClock.hours < 6 || dayNightClock.hours >= 20;
+    }
+    readonly property string icon: {
+        if (!cc)
+            return "cloud_alert";
+        const base = Icons.getWeatherIcon(cc.weatherCode);
+        if (isNight) {
+            if (base === "clear_day")
+                return "clear_night";
+            if (base === "partly_cloudy_day")
+                return "partly_cloudy_night";
+        }
+        return base;
+    }
+    // Forces the notch weather scene (sun, night, cloud, fog, rain, storm, snow, plus *-night); "" = real weather, not persisted
     property string previewScene
     readonly property string description: cc ? getWeatherCondition(cc.weatherCode) : Tr.tr("No weather")
     readonly property string temp: formatTemp(cc?.tempC)
@@ -34,6 +57,13 @@ Singleton {
     readonly property string sunset: cc ? Qt.formatDateTime(new Date(cc.sunset), Units.twelveHourClock ? "h:mm A" : "h:mm") : "--:--"
 
     readonly property var cachedCities: new Map()
+
+    function parseClockMinutes(value: string): int {
+        if (!value)
+            return -1;
+        const m = value.match(/(\d{1,2}):(\d{2})/);
+        return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : -1;
+    }
 
     function formatTemp(temp: var, compact = false): string {
         const unit = GlobalConfig.services.weatherUnits;
@@ -367,6 +397,12 @@ Singleton {
                 root.reload();
             }
         }
+    }
+
+    SystemClock {
+        id: dayNightClock
+
+        precision: SystemClock.Minutes
     }
 
     Timer {

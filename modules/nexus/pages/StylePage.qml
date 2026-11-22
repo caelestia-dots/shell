@@ -80,14 +80,62 @@ PageBase {
                 Repeater {
                     model: Hallownest.flavours
 
-                    HkButton {
-                        required property string modelData
+                    Item {
+                        id: flavourSlot
 
-                        implicitHeight: 28
-                        text: modelData.charAt(0).toUpperCase() + modelData.slice(1)
-                        accent: Hallownest.styleData.flavours[modelData].accent
-                        tinted: Hallownest.flavour === modelData
-                        onClicked: Hallownest.setFlavour(modelData)
+                        required property string modelData
+                        readonly property color toneColour: Hallownest.styleData.flavours[modelData].accent
+
+                        implicitWidth: flavourBtn.implicitWidth
+                        implicitHeight: flavourBtn.implicitHeight
+
+                        Rectangle {
+                            id: flavourRing
+
+                            anchors.centerIn: parent
+                            width: Math.max(parent.width, parent.height)
+                            height: width
+                            radius: width / 2
+                            color: "transparent"
+                            border.width: 1.5
+                            border.color: flavourSlot.toneColour
+                            opacity: 0
+                            scale: 0.7
+
+                            ParallelAnimation {
+                                id: ringAnim
+
+                                NumberAnimation {
+                                    target: flavourRing
+                                    property: "scale"
+                                    from: 0.65
+                                    to: 1.45
+                                    duration: 420
+                                    easing.type: Easing.OutCubic
+                                }
+                                NumberAnimation {
+                                    target: flavourRing
+                                    property: "opacity"
+                                    from: 0.7
+                                    to: 0
+                                    duration: 420
+                                    easing.type: Easing.OutQuad
+                                }
+                            }
+                        }
+
+                        HkButton {
+                            id: flavourBtn
+
+                            implicitHeight: 28
+                            text: flavourSlot.modelData.charAt(0).toUpperCase() + flavourSlot.modelData.slice(1)
+                            accent: flavourSlot.toneColour
+                            tinted: Hallownest.flavour === flavourSlot.modelData
+                            onClicked: {
+                                ringAnim.restart();
+                                Hallownest.setFlavour(flavourSlot.modelData);
+                            }
+                        }
                     }
                 }
             }

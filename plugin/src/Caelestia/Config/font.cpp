@@ -44,6 +44,8 @@ QFont FontStyleBase::buildFont(const settings::ObjectNode* cfg, const QString& f
     font.setVariableAxis("opsz", static_cast<float>(cappedSize));
     font.setWeight(weight);
     font.setVariableAxis("wght", weight);
+    if (font.family().contains(u"Google Sans Flex"_s, Qt::CaseInsensitive))
+        font.setVariableAxis("ROND", 0.0f);
     font.setItalic(italic);
 
     for (auto it = vaxes.constBegin(); it != vaxes.constEnd(); ++it) {

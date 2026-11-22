@@ -7,9 +7,9 @@ import Quickshell.Widgets
 import qs.components.hallownest
 import qs.services
 
-// Animated Hallownest biome banner for the current weather:
-// sun = Greenpath, night = Dirtmouth, cloud = Crossroads / Howling Cliffs,
-// fog = Fog Canyon, rain/storm = City of Tears, snow = Crystal Peak
+// Animated Hallownest biome banner for the current weather (with day & night variants):
+// sun = Greenpath, clear night = Dirtmouth, cloud = Crossroads / Howling Cliffs,
+// fog = Fog Canyon, rain = City of Tears, storm = Kingdom's Edge, snow = Crystal Peak
 ClippingRectangle {
     id: root
 
@@ -18,16 +18,26 @@ ClippingRectangle {
     property bool running: visible
     property real t
 
-    readonly property string shownKind: Weather.previewScene === "night" ? "sun" : Weather.previewScene || kind
-    readonly property bool shownNight: Weather.previewScene ? Weather.previewScene === "night" : night
+    readonly property bool previewIsNight: Weather.previewScene === "night" || Weather.previewScene.endsWith("-night")
+    readonly property string previewBase: Weather.previewScene.endsWith("-night") ? Weather.previewScene.slice(0, -6) : Weather.previewScene
+    readonly property string shownKind: {
+        if (!Weather.previewScene)
+            return kind;
+        if (Weather.previewScene === "night")
+            return "moon";
+        return previewBase;
+    }
+    readonly property bool shownNight: Weather.previewScene ? previewIsNight : night
     readonly property string scene: {
-        if (shownKind === "rain" || shownKind === "storm")
+        if (shownKind === "storm")
+            return "edge";
+        if (shownKind === "rain")
             return "tears";
         if (shownKind === "snow")
             return "crystal";
         if (shownKind === "fog")
             return "fog";
-        if (shownNight)
+        if (shownKind === "moon")
             return "night";
         if (shownKind === "sun" || shownKind === "twilight" || shownKind === "partly")
             return "greenpath";
@@ -35,39 +45,140 @@ ClippingRectangle {
     }
     readonly property var colours: {
         if (Hallownest.isMono) {
-            return ({
+            const monoDay = {
                 greenpath: ["#26282f", "#0f1014", "#e4e5ea", "#b0b2ba", "#17181d", "#1e2026"],
-                night: ["#1e2026", "#0b0c0f", "#f0f1f5", "#a8aab2", "#131418", "#191b20"],
+                night: ["#1a1c22", "#090a0d", "#f2f3f7", "#a8aab4", "#111216", "#181a1f"],
                 cloud: ["#282a32", "#101115", "#d4d6de", "#989aa4", "#18191f", "#202229"],
                 fog: ["#2b2d35", "#0e0f13", "#e6e7ec", "#b8bac2", "#191a20", "#22242b"],
                 tears: ["#22242b", "#0c0d11", "#dcdee6", "#a4a6b0", "#14161b", "#1c1e24"],
+                edge: ["#262830", "#0e0f13", "#e2e4ec", "#b4b6c0", "#17181e", "#1f2128"],
                 crystal: ["#292b33", "#0e0f13", "#ededf2", "#c4c6ce", "#181a20", "#484a54"]
-            })[scene];
+            };
+            const monoNight = {
+                greenpath: ["#191b22", "#090a0d", "#eef0f6", "#9fa2ac", "#111217", "#17191f"],
+                night: ["#1a1c22", "#090a0d", "#f2f3f7", "#a8aab4", "#111216", "#181a1f"],
+                cloud: ["#1a1c22", "#090a0d", "#eceef4", "#8e919c", "#111217", "#181a20"],
+                fog: ["#1b1d24", "#090a0d", "#f0f1f6", "#a8abb4", "#121318", "#191b22"],
+                tears: ["#171920", "#08090c", "#d8dae4", "#f2f3f7", "#0f1015", "#15171d"],
+                edge: ["#191b22", "#08090c", "#eef0f6", "#c6c8d2", "#101217", "#171920"],
+                crystal: ["#1a1c22", "#08090c", "#f2f3f8", "#d0d2da", "#111218", "#343640"]
+            };
+            return (shownNight ? monoNight : monoDay)[scene];
         }
         if (Hallownest.light) {
-            return ({
+            const lightDay = {
                 greenpath: ["#dfe8df", "#ecefe9", "#276e40", "#4d8a5e", "#cddbc9", "#bdd1b8"],
-                night: ["#dce0ea", "#eaecef", "#8a6818", "#4f6280", "#cbd2e0", "#bcc5d6"],
+                night: ["#ced6e6", "#e2e6ef", "#8a6818", "#43587a", "#bec7da", "#aeb9cf"],
                 cloud: ["#e2e4ea", "#eeeef2", "#4a5668", "#6c7a8e", "#d2d6e0", "#c4c9d6"],
                 fog: ["#e8dfec", "#f2ecf5", "#8a2e78", "#226e8c", "#d9cbe0", "#cbbad4"],
                 tears: ["#dbe4ee", "#eaf0f5", "#0c6399", "#2b7fb3", "#c8d6e6", "#b8cade"],
+                edge: ["#dde1e8", "#eceff4", "#465164", "#9e5a1e", "#cbd1dc", "#bcc4d2"],
                 crystal: ["#eae0ee", "#f3ecf5", "#8a2878", "#6e2260", "#dbcbe2", "#9e5c94"]
-            })[scene];
+            };
+            const lightNight = {
+                greenpath: ["#cddce0", "#e2eaec", "#1b6b60", "#3a7a78", "#b9cfd4", "#a8c2c8"],
+                night: ["#ced6e6", "#e2e6ef", "#8a6818", "#43587a", "#bec7da", "#aeb9cf"],
+                cloud: ["#cfd5e2", "#e2e5ee", "#7a5e22", "#4c5f7d", "#bfc6d6", "#aeb7ca"],
+                fog: ["#d5cbe2", "#e6dff0", "#7c2276", "#186484", "#c4b6d6", "#b5a4ca"],
+                tears: ["#c8d4e4", "#dde5f0", "#0a4f82", "#9e6f1e", "#b5c5d8", "#a4b6ce"],
+                edge: ["#c9d0de", "#dfe4ee", "#37435a", "#9c4d14", "#b8c0d2", "#a8b2c6"],
+                crystal: ["#d7cae2", "#e8dff0", "#7c2070", "#581852", "#c5b4d6", "#874882"]
+            };
+            return (shownNight ? lightNight : lightDay)[scene];
         }
-        return ({
+        const darkDay = {
             greenpath: ["#1c4028", "#07120b", "#d2f082", "#62d487", "#0e2417", "#13301e"],
-            night: ["#0d172b", "#05070c", "#e8f58c", "#9ab8db", "#09101f", "#111c30"],
+            night: ["#0b1428", "#04060c", "#f0e888", "#9cbce0", "#080f1e", "#101b2e"],
             cloud: ["#1b2536", "#080a10", "#b8cce0", "#6e849e", "#101724", "#151f2e"],
             fog: ["#341740", "#0b0510", "#f5a6e6", "#9be8ff", "#1e0d28", "#251030"],
             tears: ["#0e253d", "#050911", "#6cc9ff", "#bfe8ff", "#091a2e", "#112944"],
+            edge: ["#2a313d", "#0c0f15", "#d8e0ec", "#e8a868", "#181d26", "#202632"],
             crystal: ["#2d1338", "#09050e", "#f7a8e8", "#ffe6fa", "#1a0a24", "#963b88"]
-        })[scene];
+        };
+        const darkNight = {
+            greenpath: ["#081b20", "#03090b", "#8cf5d4", "#47a896", "#051215", "#091c1e"],
+            night: ["#0b1428", "#04060c", "#f0e888", "#9cbce0", "#080f1e", "#101b2e"],
+            cloud: ["#0a1020", "#03050a", "#e8d88a", "#7892b8", "#070c18", "#0d1424"],
+            fog: ["#140926", "#05020a", "#ff8ee8", "#74e8ff", "#0d061a", "#140924"],
+            tears: ["#061022", "#02040a", "#5cb4f5", "#f5d48a", "#040b18", "#091528"],
+            edge: ["#090d18", "#030408", "#c8d6f0", "#ff9d4a", "#060912", "#0d121f"],
+            crystal: ["#12061e", "#040208", "#ff8ee6", "#ffd8fb", "#0b0414", "#6e2268"]
+        };
+        return (shownNight ? darkNight : darkDay)[scene];
     }
+    readonly property string biomeName: ({
+        greenpath: "Greenpath",
+        night: "Dirtmouth",
+        cloud: "Crossroads",
+        fog: "Fog Canyon",
+        tears: "City of Tears",
+        edge: "Kingdom's Edge",
+        crystal: "Crystal Peak"
+    })[scene] ?? ""
     readonly property color accent: colours[2]
     readonly property color secondary: colours[3]
     readonly property color farColour: colours[4]
     readonly property color midColour: colours[5]
-    readonly property real flash: shownKind === "storm" && ((t * 9) % 1 < 0.028 || ((t * 9) % 1 > 0.055 && (t * 9) % 1 < 0.075)) ? 1 : 0
+    readonly property int boltIndex: Math.floor(t * 9) % 2
+    readonly property real flash: scene === "edge" && ((t * 9) % 1 < 0.028 || ((t * 9) % 1 > 0.055 && (t * 9) % 1 < 0.075)) ? 1 : 0
+    readonly property int starCount: {
+        if (!shownNight)
+            return 0;
+        if (scene === "night")
+            return 18;
+        if (scene === "greenpath" || scene === "cloud" || scene === "crystal")
+            return 12;
+        return 8;
+    }
+    readonly property var glowHalos: {
+        if (scene === "night")
+            return [
+                [282, 37, 26, "accent", 0.45],
+                [452, 50, 18, "accent", 0.32],
+                [176, 24, 22, "secondary", 0.24]
+            ];
+        if (scene === "edge")
+            return shownNight ? [
+                [330, 68, 30, "secondary", 0.46],
+                [266, 64, 15, "secondary", 0.36],
+                [394, 64, 15, "secondary", 0.36]
+            ] : [
+                [330, 70, 22, "secondary", 0.22]
+            ];
+        if (!shownNight)
+            return [];
+        if (scene === "greenpath")
+            return [
+                [306, 48, 22, "accent", 0.36],
+                [204, 53, 14, "accent", 0.24],
+                [442, 24, 20, "secondary", 0.22]
+            ];
+        if (scene === "cloud")
+            return [
+                [239, 78, 18, "accent", 0.34],
+                [404, 49, 22, "accent", 0.42]
+            ];
+        if (scene === "fog")
+            return [
+                [308, 56, 28, "accent", 0.34],
+                [86, 66, 16, "accent", 0.28],
+                [526, 62, 16, "accent", 0.28]
+            ];
+        if (scene === "tears")
+            return [
+                [112, 54, 20, "secondary", 0.28],
+                [254, 58, 18, "secondary", 0.24],
+                [328, 48, 24, "secondary", 0.32],
+                [476, 54, 20, "secondary", 0.28]
+            ];
+        if (scene === "crystal")
+            return [
+                [232, 72, 24, "accent", 0.34],
+                [374, 72, 24, "accent", 0.34],
+                [516, 72, 24, "accent", 0.32]
+            ];
+        return [];
+    }
 
     // Deterministic pseudo-random in [0, 1)
     function rand(i: int): real {
@@ -184,9 +295,13 @@ ClippingRectangle {
     }
 
     function cloudDetails(): string {
-        // Glowing eye sockets on the Ancient Horned Shell
-        return "M 226 74 A 3.5 5 0 1 0 226 84 A 3.5 5 0 1 0 226 74 Z "
+        // Glowing eye sockets on the Ancient Horned Shell (+ hanging signpost Lumafly lantern at night)
+        let d = "M 226 74 A 3.5 5 0 1 0 226 84 A 3.5 5 0 1 0 226 74 Z "
             + "M 252 74 A 3.5 5 0 1 0 252 84 A 3.5 5 0 1 0 252 74 Z";
+        if (shownNight)
+            d += " M 404 44 L 404.8 44 L 404.8 47 L 404 47 Z "
+                + "M 404.4 47 A 2.6 3.5 0 1 0 404.4 54 A 2.6 3.5 0 1 0 404.4 47 Z";
+        return d;
     }
 
     // Fog Canyon (fog): Teacher's Archives ribbed dome, floor-to-ceiling specimen tubes & coral stalks
@@ -294,6 +409,56 @@ ClippingRectangle {
         return d + "M 0 100 L 600 100 L 600 101.5 L 0 101.5 Z";
     }
 
+    // Kingdom's Edge (edge): Wyrm's Cast-Off Shell ribs, Colosseum of Fools horned skull arena & Fool's pikes (600x120)
+    function edgeFar(): string {
+        return "M 0 120 L 0 26 L 24 34 L 40 24 L 54 44 L 78 38 L 96 58 L 130 52 L 156 72 "
+            + "L 192 68 L 222 86 L 258 80 L 292 92 L 336 84 L 378 90 L 418 76 L 452 60 "
+            + "L 478 66 L 506 42 L 534 48 L 562 28 L 584 34 L 600 22 L 600 120 Z "
+            // Curved colossal Wyrm Cast-Off Shell carapace ribs arching from left & right cliffs
+            + "M 12 46 Q 28 14 56 12 Q 36 24 26 52 Z "
+            + "M 52 54 Q 68 24 94 22 Q 76 34 66 58 Z "
+            + "M 498 54 Q 518 22 548 16 Q 528 30 516 58 Z "
+            + "M 540 44 Q 560 14 588 10 Q 570 24 558 48 Z";
+    }
+
+    function edgeMid(): string {
+        return "M 0 120 L 0 82 L 34 86 L 68 78 L 106 88 L 144 82 L 176 92 L 204 86 L 246 94 "
+            // Left Colosseum brazier pillar (x=266)
+            + "L 262 94 L 264 74 L 260 69 L 272 69 L 268 74 L 270 94 "
+            // Colosseum of Fools stepped base & horned beetle-skull dome (x=278..382, cx=330)
+            + "L 278 94 L 282 76 L 288 72 L 290 50 "
+            + "Q 278 36 276 18 Q 282 12 288 16 Q 286 30 300 42 "
+            + "Q 314 34 325 34 L 330 24 L 335 34 Q 346 34 360 42 "
+            + "Q 374 30 372 16 Q 378 12 384 18 Q 382 36 370 50 "
+            + "L 372 72 L 378 76 L 382 94 "
+            // Right Colosseum brazier pillar (x=394)
+            + "L 390 94 L 392 74 L 388 69 L 400 69 L 396 74 L 398 94 "
+            + "L 422 92 L 456 84 L 494 90 L 534 80 L 568 86 L 600 76 L 600 120 Z "
+            // Hanging iron Fool's cage gallows on left chasm ledge (x=218)
+            + "M 216 90 L 217 42 Q 218 35 227 35 L 234 35 L 234 37 L 227 37 Q 220 37 220 43 L 219 90 Z "
+            + "M 232 37 L 233 37 L 233 50 L 232 50 Z "
+            + "M 227 50 L 238 50 L 236 63 L 229 63 Z "
+            // Weathered Fool's battle pikes on right ridge (x=442, x=476)
+            + "M 441 88 L 442 52 L 444 52 L 445 88 Z "
+            + "M 437 60 L 443 56 L 449 60 L 443 58 Z "
+            + "M 475 90 L 476 60 L 478 60 L 479 90 Z "
+            + "M 472 67 L 477 63 L 482 67 L 477 65 Z";
+    }
+
+    function edgeDetails(): string {
+        // Colosseum glowing beetle eye-sockets, grand arched arena entrance & twin brazier flames
+        return "M 304 56 Q 311 49 319 54 Q 316 62 308 62 Q 303 60 304 56 Z "
+            + "M 356 56 Q 349 49 341 54 Q 344 62 352 62 Q 357 60 356 56 Z "
+            + "M 321 90 L 321 72 A 9 11 0 0 1 339 72 L 339 90 Z "
+            + "M 263 68 Q 266 58 269 68 Q 266 71 263 68 Z "
+            + "M 391 68 Q 394 58 397 68 Q 394 71 391 68 Z";
+    }
+
+    function edgeFrame(): string {
+        return "M 0 0 L 600 0 L 600 20 L 552 12 L 496 22 L 434 10 L 372 16 L 306 8 L 242 16 L 184 10 L 122 22 L 62 12 L 0 22 Z "
+            + "M 0 120 L 0 98 L 48 106 L 98 96 L 154 108 L 214 100 L 274 108 L 330 102 L 388 108 L 448 98 L 508 108 L 558 96 L 600 104 L 600 120 Z";
+    }
+
     // Crystal Peak (crystal): multi-layered prism clusters & mining beams (600x120)
     function crystalFar(): string {
         // Distant background crystal spires & mining support beams
@@ -374,7 +539,7 @@ ClippingRectangle {
     }
 
     visible: NotchSettings.values.animWeather
-    radius: 16
+    radius: 14
     color: colours[1]
     border.width: 1
     border.color: Hallownest.border
@@ -412,7 +577,7 @@ ClippingRectangle {
         width: parent.width * 0.55
         height: parent.height * 0.9
         radius: height / 2
-        color: Qt.alpha(root.accent, root.scene === "fog" || root.scene === "crystal" ? 0.16 : 0.1)
+        color: Qt.alpha(root.scene === "edge" && root.shownNight ? root.secondary : root.accent, root.scene === "fog" || root.scene === "crystal" ? 0.16 : root.shownNight ? 0.12 : 0.1)
         layer.enabled: root.visible
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -421,7 +586,7 @@ ClippingRectangle {
         }
     }
 
-    // Greenpath: volumetric sunbeams slanting from cavern openings
+    // Greenpath: volumetric sunbeams (day) or silvery moonbeams (night) slanting from cavern openings
     Item {
         anchors.fill: parent
         visible: root.scene === "greenpath"
@@ -443,15 +608,15 @@ ClippingRectangle {
                 width: 24 + (index % 3) * 10
                 height: root.height * 1.75
                 rotation: 22
-                opacity: 0.08 + 0.05 * Math.sin((root.t * 18 + index * 0.31) * Math.PI * 2)
+                opacity: (root.shownNight ? 0.06 : 0.08) + (root.shownNight ? 0.035 : 0.05) * Math.sin((root.t * 18 + index * 0.31) * Math.PI * 2)
                 gradient: Gradient {
                     GradientStop {
                         position: 0
-                        color: root.accent
+                        color: root.shownNight ? root.secondary : root.accent
                     }
                     GradientStop {
                         position: 0.75
-                        color: Qt.alpha(root.secondary, 0.25)
+                        color: Qt.alpha(root.accent, root.shownNight ? 0.18 : 0.25)
                     }
                     GradientStop {
                         position: 1
@@ -462,23 +627,52 @@ ClippingRectangle {
         }
     }
 
-    // Night: twinkling 4-pointed stars in the upper sky
+    // Crescent moon in clear & moonlit canopy night skies
+    Shape {
+        id: crescentMoon
+
+        readonly property real mx: (root.scene === "night" ? 176 : 442)
+        readonly property real my: 24
+
+        width: 600
+        height: 120
+        visible: root.scene === "night" || (root.scene === "greenpath" && root.shownNight)
+        opacity: root.scene === "night" ? 0.85 : 0.65
+        preferredRendererType: Shape.CurveRenderer
+        transform: Scale {
+            xScale: root.width / 600
+            yScale: root.height / 120
+        }
+
+        ShapePath {
+            fillColor: Hallownest.light ? root.secondary : Hallownest.soul
+            strokeWidth: -1
+
+            PathSvg {
+                path: `M ${crescentMoon.mx + 4} ${crescentMoon.my - 9} A 9.5 9.5 0 1 0 ${crescentMoon.mx + 10} ${crescentMoon.my + 7} A 7.6 7.6 0 1 1 ${crescentMoon.mx + 4} ${crescentMoon.my - 9} Z`
+            }
+        }
+    }
+
+    // Night skies: twinkling 4-pointed stars in the upper cavern / sky
     Repeater {
-        model: root.scene === "night" ? 18 : 0
+        model: root.starCount
 
         Shape {
             id: nightStar
 
             required property int index
             readonly property real sx: root.rand(index + 400) * root.width
-            readonly property real sy: (0.08 + root.rand(index + 430) * 0.45) * root.height
-            readonly property real sr: 2 + root.rand(index + 460) * 2.8
+            readonly property real sy: (0.08 + root.rand(index + 430) * (root.scene === "night" ? 0.45 : 0.34)) * root.height
+            readonly property real sr: (root.scene === "night" ? 2 : 1.5) + root.rand(index + 460) * (root.scene === "night" ? 2.8 : 2)
+            readonly property real baseOpacity: root.scene === "night" ? 0.25 : root.scene === "fog" || root.scene === "tears" || root.scene === "edge" ? 0.12 : 0.18
+            readonly property real pulseOpacity: root.scene === "night" ? 0.7 : root.scene === "fog" || root.scene === "tears" || root.scene === "edge" ? 0.32 : 0.48
 
-            opacity: 0.25 + 0.7 * Math.abs(Math.sin((root.t * (7 + index % 5) + root.rand(index + 490)) * Math.PI * 2))
+            opacity: baseOpacity + pulseOpacity * Math.abs(Math.sin((root.t * (7 + index % 5) + root.rand(index + 490)) * Math.PI * 2))
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: index % 3 === 0 ? root.accent : Hallownest.soul
+                fillColor: index % 3 === 0 ? root.accent : (Hallownest.light ? root.secondary : Hallownest.soul)
                 strokeWidth: -1
 
                 PathSvg {
@@ -500,7 +694,7 @@ ClippingRectangle {
 
         ShapePath {
             fillColor: root.farColour
-            strokeColor: Qt.alpha(root.secondary, 0.18)
+            strokeColor: Qt.alpha(root.scene === "edge" ? root.accent : root.secondary, root.scene === "edge" ? 0.2 + root.flash * 0.38 : 0.18)
             strokeWidth: 0.7
 
             PathSvg {
@@ -516,6 +710,8 @@ ClippingRectangle {
                         return root.fogFar();
                     case "tears":
                         return root.tearsFar();
+                    case "edge":
+                        return root.edgeFar();
                     case "crystal":
                         return root.crystalFar();
                     default:
@@ -526,10 +722,10 @@ ClippingRectangle {
         }
     }
 
-    // Dirtmouth: soft blurred lantern halos rendered in front of nightFar so they glow full circle
+    // Soft blurred biome glow halos (streetlamps, lunar aura, Colosseum braziers, night windows & bioluminescence)
     Item {
         anchors.fill: parent
-        visible: root.scene === "night"
+        visible: root.glowHalos.length > 0
         layer.enabled: visible
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -538,34 +734,49 @@ ClippingRectangle {
         }
 
         Repeater {
-            model: 2
+            model: root.glowHalos
 
             Rectangle {
                 required property int index
-                readonly property real lx: (index === 0 ? 282 : 452) / 600 * root.width
-                readonly property real ly: (index === 0 ? 37 : 50) / 120 * root.height
-                readonly property real r: (index === 0 ? 26 : 18) * (root.height / 120)
+                required property var modelData
+                readonly property real lx: modelData[0] / 600 * root.width
+                readonly property real ly: modelData[1] / 120 * root.height
+                readonly property real r: modelData[2] * (root.height / 120)
+                readonly property color haloColour: modelData[3] === "secondary" ? root.secondary : root.accent
 
                 x: lx - r
                 y: ly - r
                 width: r * 2
                 height: r * 2
                 radius: r
-                color: Qt.alpha(root.accent, (index === 0 ? 0.45 : 0.32) + 0.08 * Math.sin(root.t * Math.PI * 24))
+                color: Qt.alpha(haloColour, modelData[4] + 0.08 * Math.sin((root.t * 24 + index * 0.35) * Math.PI * 2))
             }
         }
     }
 
-    // City of Tears: forked storm lightning bolt in the sky BEHIND midground towers
+    // Kingdom's Edge: forked storm lightning bolts cracking behind the Colosseum of Fools
     Shape {
         width: 600
         height: 120
-        visible: root.scene === "tears" && root.flash > 0
-        opacity: root.flash * 0.9
+        visible: root.scene === "edge" && root.flash > 0
+        opacity: root.flash * 0.92
         preferredRendererType: Shape.CurveRenderer
         transform: Scale {
             xScale: root.width / 600
             yScale: root.height / 120
+        }
+
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: Qt.alpha(root.accent, 0.45)
+            strokeWidth: 4.4
+            capStyle: ShapePath.RoundCap
+
+            PathSvg {
+                path: root.boltIndex === 0
+                    ? "M 244 0 L 232 22 L 242 26 L 224 54 L 234 58 L 218 88 M 232 22 L 254 38 L 248 60"
+                    : "M 418 0 L 408 24 L 420 28 L 404 56 L 414 60 L 398 86 M 408 24 L 432 42 L 426 62"
+            }
         }
 
         ShapePath {
@@ -575,15 +786,17 @@ ClippingRectangle {
             capStyle: ShapePath.RoundCap
 
             PathSvg {
-                path: "M 292 0 L 280 22 L 290 26 L 272 52 L 282 56 L 266 86 M 280 22 L 302 38 L 296 60"
+                path: root.boltIndex === 0
+                    ? "M 244 0 L 232 22 L 242 26 L 224 54 L 234 58 L 218 88 M 232 22 L 254 38 L 248 60"
+                    : "M 418 0 L 408 24 L 420 28 L 404 56 L 414 60 L 398 86 M 408 24 L 432 42 L 426 62"
             }
         }
     }
 
-    // Soft drifting mist bands (cloud, fog, tears)
+    // Soft drifting mist / ash-storm cloud bands (cloud, fog, tears, edge)
     Item {
         anchors.fill: parent
-        visible: root.scene === "cloud" || root.scene === "fog" || root.scene === "tears"
+        visible: root.scene === "cloud" || root.scene === "fog" || root.scene === "tears" || root.scene === "edge"
         layer.enabled: visible
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -596,14 +809,14 @@ ClippingRectangle {
 
             Rectangle {
                 required property int index
-                readonly property real p: root.phase(root.rand(index + 200), 2 + index * 0.8)
+                readonly property real p: root.phase(root.rand(index + 200), (root.scene === "edge" ? 6 : 2) + index * (root.scene === "edge" ? 1.5 : 0.8))
 
                 x: -width + p * (root.width + width * 2)
                 y: root.height * (0.18 + index * 0.15)
                 width: root.width * (0.36 + root.rand(index + 210) * 0.28)
                 height: 16 + root.rand(index + 220) * 16
                 radius: height / 2
-                color: Qt.alpha(root.accent, root.scene === "fog" ? 0.22 : root.scene === "cloud" ? 0.18 : 0.1)
+                color: Qt.alpha(root.accent, root.scene === "fog" ? 0.22 : root.scene === "cloud" ? 0.18 : root.scene === "edge" ? (root.shownNight ? 0.12 : 0.16) : 0.1)
             }
         }
     }
@@ -621,7 +834,7 @@ ClippingRectangle {
         // Main silhouette body
         ShapePath {
             fillColor: root.scene === "crystal" ? Qt.alpha(root.midColour, 0.55) : root.midColour
-            strokeColor: Qt.alpha(root.accent, root.scene === "crystal" ? 0.68 : 0.32 + root.flash * 0.45)
+            strokeColor: Qt.alpha(root.accent, root.scene === "crystal" ? 0.68 : 0.32 + root.flash * 0.48)
             strokeWidth: root.scene === "crystal" ? 1 : 0.8
 
             PathSvg {
@@ -637,6 +850,8 @@ ClippingRectangle {
                         return root.fogMid();
                     case "tears":
                         return root.tearsMid();
+                    case "edge":
+                        return root.edgeMid();
                     case "crystal":
                         return root.crystalBase();
                     default:
@@ -646,24 +861,26 @@ ClippingRectangle {
             }
         }
 
-        // Lit details: Lore Tablet runes, Dirtmouth lamps/windows, Crossroads shell eyes, Fog Canyon bulbs, City of Tears windows, Crystal facets
+        // Lit details: Lore Tablet runes, Dirtmouth lamps/windows, Crossroads shell eyes/lantern, Fog Canyon bulbs, City of Tears windows, Colosseum eyes/braziers, Crystal facets
         ShapePath {
             fillColor: {
                 if (root.scene === "greenpath")
-                    return Qt.alpha(root.accent, 0.62 + 0.25 * Math.sin(root.t * Math.PI * 16));
+                    return Qt.alpha(root.accent, (root.shownNight ? 0.78 : 0.62) + 0.2 * Math.sin(root.t * Math.PI * 16));
                 if (root.scene === "cloud")
-                    return Qt.alpha(root.accent, 0.22);
+                    return Qt.alpha(root.accent, root.shownNight ? 0.72 + 0.2 * Math.sin(root.t * Math.PI * 16) : 0.22);
                 if (root.scene === "fog")
-                    return Qt.alpha(root.accent, 0.38 + 0.18 * Math.sin(root.t * Math.PI * 14));
+                    return Qt.alpha(root.accent, (root.shownNight ? 0.65 : 0.38) + 0.2 * Math.sin(root.t * Math.PI * 14));
                 if (root.scene === "tears")
-                    return Qt.alpha(root.secondary, 0.52 + 0.2 * Math.sin(root.t * Math.PI * 12));
+                    return Qt.alpha(root.secondary, (root.shownNight ? 0.78 : 0.52) + 0.16 * Math.sin(root.t * Math.PI * 12));
+                if (root.scene === "edge")
+                    return Qt.alpha(root.secondary, (root.shownNight ? 0.82 : 0.5) + 0.16 * Math.sin(root.t * Math.PI * 22));
                 if (root.scene === "crystal")
-                    return Qt.alpha(root.secondary, 0.44);
+                    return Qt.alpha(root.secondary, root.shownNight ? 0.56 : 0.44);
                 if (root.scene === "night")
                     return Qt.alpha(root.accent, 0.85);
                 return "transparent";
             }
-            strokeColor: root.scene === "fog" ? Qt.alpha(root.accent, 0.75) : "transparent"
+            strokeColor: root.scene === "fog" ? Qt.alpha(root.accent, root.shownNight ? 0.88 : 0.75) : "transparent"
             strokeWidth: root.scene === "fog" ? 0.9 : -1
 
             PathSvg {
@@ -676,6 +893,8 @@ ClippingRectangle {
                         return root.fogBulbs();
                     if (root.scene === "tears")
                         return root.tearsWindows();
+                    if (root.scene === "edge")
+                        return root.edgeDetails();
                     if (root.scene === "crystal")
                         return root.crystalFacets();
                     if (root.scene === "night")
@@ -858,7 +1077,7 @@ ClippingRectangle {
 
     // Wandering lumaflies / glowing spores (night, greenpath, cloud)
     Repeater {
-        model: root.scene === "night" || root.scene === "greenpath" || root.scene === "cloud" ? 9 : 0
+        model: root.scene === "night" || root.scene === "greenpath" || root.scene === "cloud" ? (root.shownNight ? 12 : 9) : 0
 
         Rectangle {
             required property int index
@@ -870,14 +1089,14 @@ ClippingRectangle {
             height: 3
             radius: 1.5
             color: root.accent
-            opacity: (root.scene === "night" ? 0.55 : 0.35) + 0.4 * Math.sin((root.t * 26 + seed) * Math.PI * 2)
+            opacity: (root.shownNight ? 0.55 : 0.35) + 0.4 * Math.sin((root.t * 26 + seed) * Math.PI * 2)
 
             Rectangle {
                 anchors.centerIn: parent
                 width: 11
                 height: 11
                 radius: 5.5
-                color: Qt.alpha(root.accent, 0.2)
+                color: Qt.alpha(root.accent, root.shownNight ? 0.28 : 0.2)
             }
         }
     }
@@ -896,11 +1115,11 @@ ClippingRectangle {
             x: -20 + p * (root.width + 40) + Math.sin((p * 3 + seed) * Math.PI * 2) * 14
             y: -12 + p * (root.height + 24)
             rotation: p * 540 * (seed > 0.5 ? 1 : -1)
-            opacity: 0.8
+            opacity: root.shownNight ? 0.62 : 0.8
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: Qt.alpha(leaf.seed > 0.6 ? (Hallownest.isMono || Hallownest.light ? root.accent : "#d8e67a") : (Hallownest.isMono || Hallownest.light ? root.secondary : "#6fcf7c"), 0.82)
+                fillColor: Qt.alpha(leaf.seed > 0.6 ? (Hallownest.isMono || Hallownest.light || root.shownNight ? root.accent : "#d8e67a") : (Hallownest.isMono || Hallownest.light || root.shownNight ? root.secondary : "#6fcf7c"), 0.82)
                 strokeWidth: -1
 
                 PathSvg {
@@ -918,13 +1137,14 @@ ClippingRectangle {
             required property int index
             readonly property real seed: root.rand(index + 800)
             readonly property real p: root.phase(seed, 68 + seed * 42)
+            readonly property color rainColour: root.shownNight ? root.accent : root.secondary
 
             x: seed * (root.width + 40) - 20 - p * 20
             y: -16 + p * (root.height + 22)
             width: index % 3 === 0 ? 1.3 : 0.9
             height: 10 + seed * 8
             rotation: 12
-            color: Qt.alpha(index % 4 === 0 ? root.secondary : Hallownest.lifeblood, 0.3 + seed * 0.35)
+            color: Qt.alpha(index % 4 === 0 ? rainColour : Hallownest.lifeblood, 0.3 + seed * 0.35)
         }
     }
 
@@ -935,6 +1155,7 @@ ClippingRectangle {
             required property int index
             readonly property real seed: root.rand(index + 860)
             readonly property real p: root.phase(seed, 18 + seed * 10)
+            readonly property color rippleColour: root.shownNight ? root.accent : root.secondary
 
             x: (0.08 + seed * 0.84) * root.width - width / 2
             y: root.height - 10 - (index % 3) * 2
@@ -943,7 +1164,91 @@ ClippingRectangle {
             radius: height / 2
             color: "transparent"
             border.width: 0.8
-            border.color: Qt.alpha(root.secondary, (1 - p) * 0.55)
+            border.color: Qt.alpha(rippleColour, (1 - p) * 0.55)
+        }
+    }
+
+    // Kingdom's Edge: tattered Fool's pennants whipping on the right ridge pikes
+    Repeater {
+        model: root.scene === "edge" ? 2 : 0
+
+        Shape {
+            id: pennant
+
+            required property int index
+            readonly property real px: (index === 0 ? 444 : 478) * (root.width / 600)
+            readonly property real py: (index === 0 ? 55 : 62) * (root.height / 120)
+            readonly property real whip: Math.sin((root.t * 36 + index * 0.4) * Math.PI * 2) * 3.5
+
+            preferredRendererType: Shape.CurveRenderer
+
+            ShapePath {
+                fillColor: Qt.alpha(root.secondary, root.shownNight ? 0.65 : 0.52)
+                strokeWidth: -1
+
+                PathSvg {
+                    path: `M ${pennant.px} ${pennant.py} Q ${pennant.px + 9} ${pennant.py - 3 + pennant.whip} ${pennant.px + 18} ${pennant.py + 1 - pennant.whip * 0.7} L ${pennant.px + 13} ${pennant.py + 4 + pennant.whip * 0.4} Q ${pennant.px + 6} ${pennant.py + 5} ${pennant.px} ${pennant.py + 5} Z`
+                }
+            }
+        }
+    }
+
+    // Kingdom's Edge: fast wind-gust streaks whipping across the stormy chasm
+    Repeater {
+        model: root.scene === "edge" ? 7 : 0
+
+        Rectangle {
+            required property int index
+            readonly property real seed: root.rand(index + 720)
+            readonly property real p: root.phase(seed, 34 + seed * 18)
+
+            x: -width + p * (root.width + width * 2)
+            y: root.height * (0.14 + seed * 0.68) + Math.sin((p * 2 + seed) * Math.PI * 2) * 4
+            width: 34 + seed * 36
+            height: 1.1
+            radius: 0.55
+            rotation: -7
+            color: Qt.alpha(root.accent, (0.12 + 0.16 * Math.sin(p * Math.PI)) * (root.shownNight ? 0.9 : 1))
+        }
+    }
+
+    // Kingdom's Edge: wind-whipped pale Wyrm ash flakes sweeping diagonally through the storm
+    Repeater {
+        model: root.scene === "edge" ? 36 : 0
+
+        Rectangle {
+            required property int index
+            readonly property real seed: root.rand(index + 760)
+            readonly property real p: root.phase(seed, 16 + seed * 14)
+
+            x: -24 + ((seed + p * 0.72) % 1) * (root.width + 48)
+            y: -10 + p * (root.height + 20) + Math.sin((p * 3 + seed) * Math.PI * 2) * 5
+            width: 1.8 + seed * 2.4
+            height: width * (0.55 + (index % 3) * 0.2)
+            radius: height / 2
+            rotation: p * 360 * (index % 2 === 0 ? 1 : -1)
+            color: index % 5 === 0 ? (Hallownest.light ? root.accent : Hallownest.soul) : root.accent
+            opacity: (0.42 + seed * 0.45) * (0.7 + 0.3 * root.flash)
+        }
+    }
+
+    // Kingdom's Edge: rising amber ember sparks drifting up from the Colosseum & braziers
+    Repeater {
+        model: root.scene === "edge" ? 6 : 0
+
+        Rectangle {
+            required property int index
+            readonly property real seed: root.rand(index + 790)
+            readonly property real p: root.phase(seed, 12 + seed * 8)
+            readonly property real baseX: (index % 3 === 0 ? 266 : index % 3 === 1 ? 330 : 394) / 600 * root.width
+
+            x: baseX + p * 22 + Math.sin((p * 4 + seed) * Math.PI * 2) * 4
+            y: (68 / 120) * root.height - p * (root.height * 0.45)
+            width: 2.2
+            height: 2.2
+            radius: 1.1
+            color: root.secondary
+            opacity: Math.sin(p * Math.PI) * (root.shownNight ? 0.9 : 0.55)
         }
     }
 
@@ -963,7 +1268,7 @@ ClippingRectangle {
             readonly property real gy: pts[index][1] * (root.height / 120)
             readonly property real gr: 3.5 + 2.5 * Math.abs(Math.sin((root.t * (10 + index * 2) + index * 0.3) * Math.PI * 2))
 
-            opacity: 0.35 + 0.65 * Math.abs(Math.sin((root.t * (10 + index * 2) + index * 0.3) * Math.PI * 2))
+            opacity: (root.shownNight ? 0.48 : 0.35) + (root.shownNight ? 0.52 : 0.65) * Math.abs(Math.sin((root.t * (10 + index * 2) + index * 0.3) * Math.PI * 2))
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
@@ -1007,7 +1312,7 @@ ClippingRectangle {
 
         ShapePath {
             fillColor: root.colours[1]
-            strokeColor: Qt.alpha(root.accent, 0.22)
+            strokeColor: Qt.alpha(root.accent, 0.22 + root.flash * 0.25)
             strokeWidth: 0.6
 
             PathSvg {
@@ -1016,13 +1321,15 @@ ClippingRectangle {
                         return root.greenpathFrame();
                     if (root.scene === "tears")
                         return root.tearsStalactites();
+                    if (root.scene === "edge")
+                        return root.edgeFrame();
                     return root.crystalFrame();
                 }
             }
         }
     }
 
-    // Storm sky flash
+    // Kingdom's Edge storm sky flash
     Rectangle {
         anchors.fill: parent
         color: Hallownest.soul

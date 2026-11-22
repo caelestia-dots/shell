@@ -98,8 +98,9 @@ flavours. Valores exactos en `assets/styles.json`.
 
 | Familia | Dónde | Cómo |
 |---|---|---|
-| **Cinzel** (serif romana, `Hallownest.serif`, `assets/fonts/cinzel`) | Títulos, encabezados de sección, nombres de página, diálogos de NPC | Bold, `letterSpacing` 0.6–0.8 |
-| **Google Sans Flex** (por defecto de `StyledText`) | Cuerpo, etiquetas, botones | 9–10 pt; botones DemiBold |
+| **Cinzel** (serif romana, `Hallownest.serif`, `assets/fonts/cinzel`) | Títulos, encabezados de sección, nombres de página, nombres de hablante en diálogos | Bold, `letterSpacing` 0.6–0.8 |
+| **Noto Serif** (`Hallownest.bodySerif`) | Cuerpo de diálogos NPC (`NotifView`) | 9.5 pt |
+| **Google Sans Flex** (por defecto de `StyledText`, con `ROND = 0`) | Cuerpo, etiquetas, botones | 9–10 pt; botones DemiBold |
 | **JetBrainsMono Nerd Font** (`Hallownest.mono`) | Números que cambian (steppers, porcentajes, horas), código | Bold para valores |
 | **Material Symbols Rounded** (`MaterialIcon`) | Iconos | tamaño con `fontStyle: Tokens.font.icon.small/medium`; `fill: 1` cuando está activo |
 
@@ -179,7 +180,8 @@ Curvas propias en `tokens.hpp`, sin sobrepaso:
 | `HkSelect` | Desplegable (botón + popup `HkCard`) |
 | `HkSlider` | Pista de 4 px, relleno con glow, pulgar en rombo |
 | `HkStepper` | − valor (mono) + |
-| `HkCard` | Tarjeta `card`, radio 14, `ornate` añade filigrana |
+| `HkCard` | Tarjeta `card`, radio 14, luz cenital superior; `ornate` añade grano (`HkGrain`), doble marco interior y filigrana |
+| `HkGrain` | Textura sutil de grano mineral/papel (`assets/hallownest/grain.png`) para superficies principales |
 | `HkRow` | Fila de ajustes con icono, texto, subtexto y control al final |
 | `HkTitle` / `HkSection` | Título Cinzel en `soul` / encabezado de sección Cinzel en `steel` |
 | `HkDivider` | Separador horizontal con líneas degradadas y rombo central |

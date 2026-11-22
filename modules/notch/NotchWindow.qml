@@ -619,6 +619,19 @@ StyledWindow {
                     }
                 }
 
+                HkGrain {
+                    anchors.fill: parent
+                    radius: pill.radius
+                    opacity: root.expanded ? 1 : 0
+                    visible: opacity > 0
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+                }
+
                 Filigree {
                     anchors.fill: parent
                     radius: pill.radius
@@ -1525,6 +1538,21 @@ StyledWindow {
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                         animate: true
+                        onTextChanged: lyricSlideAnim.restart()
+
+                        transform: Translate {
+                            id: lyricSlide
+                        }
+
+                        Anim {
+                            id: lyricSlideAnim
+
+                            target: lyricSlide
+                            property: "y"
+                            from: 7
+                            to: 0
+                            type: Anim.FastSpatial
+                        }
                     }
 
                     MouseArea {

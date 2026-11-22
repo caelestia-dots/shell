@@ -114,7 +114,7 @@ Item {
         Shape {
             width: 48
             height: 48
-            visible: root.kind === "sun" || root.kind === "partly"
+            visible: root.kind === "sun" || (root.kind === "partly" && root.icon !== "partly_cloudy_night")
             x: root.kind === "partly" ? 7 : 0
             y: root.kind === "partly" ? -7 : 0
             scale: root.kind === "partly" ? 0.72 : 1
@@ -198,8 +198,12 @@ Item {
         }
 
         Shape {
-            visible: root.kind === "moon"
-            y: root.wave * 0.8
+            width: 48
+            height: 48
+            visible: root.kind === "moon" || root.icon === "partly_cloudy_night"
+            x: root.icon === "partly_cloudy_night" ? 7 : 0
+            y: (root.icon === "partly_cloudy_night" ? -7 : 0) + root.wave * 0.8
+            scale: root.icon === "partly_cloudy_night" ? 0.72 : 1
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {

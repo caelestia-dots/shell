@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.hallownest
 import qs.services
 
 ColumnLayout {
@@ -18,27 +19,28 @@ ColumnLayout {
         Layout.topMargin: Tokens.padding.extraLargeIncreased
 
         text: root.client?.title ?? Tr.tr("No active client")
+        color: Hallownest.soul
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
-        font: Tokens.font.body.builders.large.weight(Font.Medium).build()
+        font.family: Hallownest.serif
+        font.pointSize: 14
+        font.weight: Font.Bold
     }
 
     Label {
         text: root.client?.lastIpcObject.class ?? Tr.tr("No active client")
-        color: Colours.palette.m3tertiary
+        color: Hallownest.lifeblood
 
-        font: Tokens.font.body.large
+        font.family: Hallownest.mono
+        font.pointSize: 10
     }
 
-    StyledRect {
+    HkDivider {
         Layout.fillWidth: true
-        Layout.preferredHeight: 1
         Layout.leftMargin: Tokens.padding.extraLargeIncreased
         Layout.rightMargin: Tokens.padding.extraLargeIncreased
-        Layout.topMargin: Tokens.spacing.medium
-        Layout.bottomMargin: Tokens.spacing.largeIncreased
-
-        color: Colours.palette.m3secondary
+        Layout.topMargin: Tokens.spacing.small
+        Layout.bottomMargin: Tokens.spacing.medium
     }
 
     Detail {
@@ -49,7 +51,7 @@ ColumnLayout {
                 return Tr.trCtx("Address: %1", "window address").arg(`0x${addr}`);
             return Tr.trCtx("Address: unknown", "window address");
         }
-        color: Colours.palette.m3primary
+        color: Hallownest.soul
     }
 
     Detail {
@@ -62,14 +64,14 @@ ColumnLayout {
         icon: "resize"
         // TRANSLATORS: %1/%2 = width and height in pixels; the x is a multiplication sign
         text: Tr.tr("Size: %1 x %2").arg(root.client?.lastIpcObject.size[0] ?? -1).arg(root.client?.lastIpcObject.size[1] ?? -1)
-        color: Colours.palette.m3tertiary
+        color: Hallownest.lifeblood
     }
 
     Detail {
         icon: "workspaces"
         // TRANSLATORS: %1 = workspace name, %2 = workspace id
         text: Tr.tr("Workspace: %1 (%2)").arg(root.client?.workspace.name ?? -1).arg(root.client?.workspace.id ?? -1)
-        color: Colours.palette.m3secondary
+        color: Hallownest.steel
     }
 
     Detail {
@@ -91,7 +93,7 @@ ColumnLayout {
                 return Tr.tr("Initial title: %1").arg(title);
             return Tr.tr("Initial title: unknown");
         }
-        color: Colours.palette.m3tertiary
+        color: Hallownest.crystal
     }
 
     Detail {
@@ -108,13 +110,13 @@ ColumnLayout {
         icon: "account_tree"
         // TRANSLATORS: %1 = process id
         text: Tr.tr("Process id: %1").arg(String(root.client?.lastIpcObject.pid ?? -1))
-        color: Colours.palette.m3primary
+        color: Hallownest.soul
     }
 
     Detail {
         icon: "picture_in_picture_center"
         text: root.client?.lastIpcObject.floating ? Tr.tr("Floating: yes") : Tr.tr("Floating: no")
-        color: Colours.palette.m3secondary
+        color: Hallownest.steel
     }
 
     Detail {
@@ -125,7 +127,7 @@ ColumnLayout {
     Detail {
         icon: "keep"
         text: root.client?.lastIpcObject.pinned ? Tr.tr("Pinned: yes") : Tr.tr("Pinned: no")
-        color: Colours.palette.m3secondary
+        color: Hallownest.steel
     }
 
     Detail {
@@ -140,7 +142,7 @@ ColumnLayout {
                 return Tr.tr("Fullscreen state: on");
             return Tr.tr("Fullscreen state: unknown");
         }
-        color: Colours.palette.m3tertiary
+        color: Hallownest.crystal
     }
 
     Item {

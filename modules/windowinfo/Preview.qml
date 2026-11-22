@@ -8,6 +8,7 @@ import Quickshell.Wayland
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.hallownest
 import qs.services
 
 Item {
@@ -30,8 +31,17 @@ Item {
 
         implicitWidth: view.implicitWidth
 
-        color: Colours.tPalette.m3surfaceContainer
-        radius: Tokens.rounding.medium
+        color: Hallownest.card
+        radius: 14
+
+        Rectangle {
+            anchors.fill: parent
+            z: 2
+            radius: parent.radius
+            color: "transparent"
+            border.width: 1
+            border.color: Hallownest.border
+        }
 
         Loader {
             asynchronous: true
@@ -39,27 +49,29 @@ Item {
             active: !root.client
 
             sourceComponent: ColumnLayout {
-                spacing: 0
+                spacing: Tokens.spacing.small
 
-                MaterialIcon {
+                Mask {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "web_asset_off"
-                    color: Colours.palette.m3outline
-                    fontStyle: Tokens.font.icon.builders.extraLarge.scale(3).build()
+                    size: 72
+                    filled: false
+                    colour: Hallownest.steel
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.tr("No active client")
-                    color: Colours.palette.m3outline
-                    font: Tokens.font.body.builders.large.size(28).weight(Font.Medium).build()
+                    color: Hallownest.soul
+                    font.family: Hallownest.serif
+                    font.pointSize: 16
+                    font.weight: Font.Bold
                 }
 
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.tr("Try switching to a window")
-                    color: Colours.palette.m3outline
-                    font: Tokens.font.body.large
+                    color: Hallownest.subtext
+                    font: Tokens.font.body.medium
                 }
             }
         }

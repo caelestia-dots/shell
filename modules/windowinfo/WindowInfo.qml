@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Caelestia.Config
 import qs.components
+import qs.components.hallownest
 import qs.services
 
 Item {
@@ -34,12 +35,11 @@ Item {
             Layout.preferredWidth: Tokens.sizes.winfo.detailsWidth
             Layout.fillHeight: true
 
-            StyledRect {
+            HkCard {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                color: Colours.tPalette.m3surfaceContainer
-                radius: Tokens.rounding.large
+                ornate: true
                 clip: true
 
                 Details {
@@ -47,12 +47,9 @@ Item {
                 }
             }
 
-            StyledRect {
+            HkCard {
                 Layout.fillWidth: true
                 Layout.preferredHeight: buttons.implicitHeight
-
-                color: Colours.tPalette.m3surfaceContainer
-                radius: Tokens.rounding.large
 
                 Buttons {
                     id: buttons

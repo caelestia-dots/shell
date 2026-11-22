@@ -16,6 +16,7 @@ NotchPage {
     id: root
 
     readonly property list<color> colours: [Hallownest.grimm, Hallownest.gold, Hallownest.unn, Hallownest.crystal, Hallownest.steel]
+    readonly property real doneRatio: Todos.totalToday ? Todos.doneToday / Todos.totalToday : 0
     property int newColour
 
     function pin(focused: bool): void {
@@ -37,9 +38,8 @@ NotchPage {
 
         anchors.left: parent.left
         anchors.top: parent.top
-        implicitWidth: 150
-        implicitHeight: Math.max(summaryContent.implicitHeight + Tokens.padding.extraLarge * 2, layout.implicitHeight)
-        ornate: true
+        implicitWidth: 148
+        implicitHeight: Math.max(summaryContent.implicitHeight + Tokens.padding.large * 2, layout.implicitHeight)
 
         ColumnLayout {
             id: summaryContent
@@ -51,8 +51,8 @@ NotchPage {
                 Layout.alignment: Qt.AlignHCenter
                 text: `${Todos.doneToday}/${Todos.totalToday}`
                 color: Hallownest.soul
-                font.family: Hallownest.serif
-                font.pointSize: 26
+                font.family: Hallownest.mono
+                font.pointSize: 22
                 font.weight: Font.Bold
             }
 
@@ -60,38 +60,56 @@ NotchPage {
                 Layout.alignment: Qt.AlignHCenter
                 text: Tr.tr("Tasks done today")
                 color: Hallownest.subtext
-                font.pointSize: 9
+                font.pointSize: 8.5
             }
 
-            Rectangle {
+            Item {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: Tokens.spacing.extraSmall
-                implicitWidth: 110
-                implicitHeight: 4
-                radius: 2
-                color: Qt.alpha(Hallownest.steel, 0.18)
+                Layout.topMargin: 2
+                implicitWidth: 108
+                implicitHeight: 8
 
                 Rectangle {
-                    implicitWidth: parent.width * (Todos.totalToday ? Todos.doneToday / Todos.totalToday : 0)
-                    implicitHeight: parent.height
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width
+                    height: 3.5
                     radius: 2
-                    color: Hallownest.unn
+                    color: Qt.alpha(Hallownest.steel, 0.16)
 
-                    Behavior on implicitWidth {
-                        Anim {}
+                    Rectangle {
+                        id: doneFill
+
+                        width: parent.width * root.doneRatio
+                        height: parent.height
+                        radius: 2
+                        color: Hallownest.unn
+
+                        Behavior on width {
+                            Anim {}
+                        }
                     }
+                }
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: Math.max(0, doneFill.width - 2.5)
+                    width: 5
+                    height: 5
+                    rotation: 45
+                    color: Hallownest.unn
+                    visible: root.doneRatio > 0
                 }
             }
 
-            HkButton {
+            SummaryAction {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: Tokens.spacing.small
+                Layout.topMargin: Tokens.spacing.extraSmall
                 icon: "add"
                 text: Tr.tr("Add task")
                 onClicked: titleField.forceActiveFocus()
             }
 
-            HkButton {
+            SummaryAction {
                 Layout.alignment: Qt.AlignHCenter
                 icon: "done_all"
                 text: Tr.tr("Clear done")
@@ -105,7 +123,7 @@ NotchPage {
         id: layout
 
         anchors.left: summary.right
-        anchors.leftMargin: Tokens.spacing.large
+        anchors.leftMargin: Tokens.spacing.medium
         anchors.right: parent.right
         spacing: Tokens.spacing.small
 
@@ -130,7 +148,7 @@ NotchPage {
             HkField {
                 id: dueField
 
-                Layout.preferredWidth: 100
+                Layout.preferredWidth: 96
                 placeholderText: Tr.tr("HH:MM")
                 leadingIcon: "schedule"
                 onAccepted: root.submit()
@@ -145,22 +163,34 @@ NotchPage {
             }
         }
 
-        StyledText {
+        Column {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Tokens.spacing.small
-            Layout.bottomMargin: Tokens.spacing.small
+            Layout.topMargin: Tokens.spacing.medium
+            Layout.bottomMargin: Tokens.spacing.medium
             visible: Todos.items.length === 0
-            text: Tr.tr("Nothing to do")
-            color: Hallownest.subtext
-            font.family: Hallownest.serif
-            font.pointSize: 10
+            spacing: Tokens.spacing.extraSmall
+
+            Mask {
+                anchors.horizontalCenter: parent.horizontalCenter
+                size: 26
+                filled: false
+                opacity: 0.4
+            }
+
+            StyledText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: Tr.tr("Nothing to do")
+                color: Hallownest.faint
+                font.family: Hallownest.serif
+                font.pointSize: 10
+            }
         }
 
         StyledListView {
             id: list
 
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(contentHeight, 220)
+            Layout.preferredHeight: Math.min(contentHeight, 210)
             visible: count > 0
             clip: true
             spacing: Tokens.spacing.extraSmall
@@ -170,7 +200,7 @@ NotchPage {
                 objectProp: "id"
             }
 
-            delegate: StyledRect {
+            delegate: Rectangle {
                 id: task
 
                 required property var modelData
@@ -184,11 +214,15 @@ NotchPage {
                 }
 
                 width: list.width
-                implicitHeight: Math.max(30, row.implicitHeight + 4)
-                radius: implicitHeight / 2
-                color: taskHover.hovered ? Hallownest.raise(Hallownest.card, 1.3) : Hallownest.card
+                implicitHeight: Math.max(32, row.implicitHeight + 6)
+                radius: 10
+                color: taskHover.hovered ? Hallownest.raise(Hallownest.card, 1.35) : Hallownest.card
                 border.width: 1
-                border.color: Hallownest.border
+                border.color: task.overdue ? Qt.alpha(Hallownest.grimm, 0.35) : Hallownest.border
+
+                Behavior on color {
+                    CAnim {}
+                }
 
                 HoverHandler {
                     id: taskHover
@@ -198,7 +232,7 @@ NotchPage {
                     id: row
 
                     anchors.fill: parent
-                    anchors.leftMargin: Tokens.padding.small
+                    anchors.leftMargin: Tokens.padding.small + 2
                     anchors.rightMargin: Tokens.padding.small
                     spacing: Tokens.spacing.small
 
@@ -220,7 +254,7 @@ NotchPage {
                         visible: !task.editing
                         text: task.modelData.title
                         color: task.modelData.done ? Hallownest.faint : Hallownest.text
-                        font.pointSize: 10
+                        font.pointSize: 9.5
                         font.strikeout: task.modelData.done
                         elide: Text.ElideRight
                     }
@@ -238,7 +272,7 @@ NotchPage {
                     HkField {
                         id: editDue
 
-                        Layout.preferredWidth: 100
+                        Layout.preferredWidth: 92
                         visible: task.editing
                         text: Todos.dueStr(task.modelData)
                         placeholderText: Tr.tr("HH:MM")
@@ -246,18 +280,18 @@ NotchPage {
                         onActiveFocusChanged: root.pin(activeFocus)
                     }
 
-                    StyledRect {
+                    Rectangle {
                         visible: !task.editing && task.modelData.dueAt > 0
-                        implicitWidth: dueRow.implicitWidth + Tokens.padding.small * 2
-                        implicitHeight: dueRow.implicitHeight + Tokens.padding.extraSmall * 2
-                        radius: Tokens.rounding.full
-                        color: task.overdue ? Qt.alpha(Hallownest.grimm, 0.2) : Hallownest.button
+                        implicitWidth: dueRow.implicitWidth + 12
+                        implicitHeight: 20
+                        radius: 10
+                        color: task.overdue ? Qt.alpha(Hallownest.grimm, 0.16) : Hallownest.void_
 
                         Row {
                             id: dueRow
 
                             anchors.centerIn: parent
-                            spacing: Tokens.spacing.extraSmall
+                            spacing: 4
 
                             MaterialIcon {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -270,13 +304,13 @@ NotchPage {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: Todos.dueStr(task.modelData)
                                 color: task.overdue ? Hallownest.grimm : Hallownest.subtext
-                                font: Tokens.font.label.medium
+                                font.family: Hallownest.mono
+                                font.pointSize: 8
                             }
                         }
                     }
 
-                    HkButton {
-                        implicitHeight: 22
+                    TaskIcon {
                         visible: taskHover.hovered || task.editing
                         icon: task.editing ? "check" : "edit"
                         onClicked: {
@@ -290,10 +324,10 @@ NotchPage {
                         }
                     }
 
-                    HkButton {
-                        implicitHeight: 22
+                    TaskIcon {
                         visible: taskHover.hovered || task.editing
                         icon: task.editing ? "close" : "delete"
+                        accent: task.editing ? Hallownest.soul : Hallownest.grimm
                         onClicked: {
                             if (task.editing)
                                 task.editing = false;
@@ -306,6 +340,92 @@ NotchPage {
         }
     }
 
+    component SummaryAction: Rectangle {
+        id: action
+
+        property string icon
+        property string text
+        property bool disabled
+
+        signal clicked
+
+        implicitWidth: actionRow.implicitWidth + 14
+        implicitHeight: 24
+        radius: 8
+        color: actionArea.containsMouse ? Hallownest.raise(Hallownest.card, 1.55) : "transparent"
+        opacity: disabled ? 0.32 : 1
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        Row {
+            id: actionRow
+
+            anchors.centerIn: parent
+            spacing: 4
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                text: action.icon
+                color: actionArea.containsMouse ? Hallownest.soul : Hallownest.steel
+                fontStyle: Tokens.font.icon.small
+            }
+
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: action.text
+                color: actionArea.containsMouse ? Hallownest.soul : Hallownest.subtext
+                font.pointSize: 8.5
+                font.weight: Font.Medium
+            }
+        }
+
+        MouseArea {
+            id: actionArea
+
+            anchors.fill: parent
+            enabled: !action.disabled
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: action.clicked()
+        }
+    }
+
+    component TaskIcon: Rectangle {
+        id: taskBtn
+
+        property string icon
+        property color accent: Hallownest.soul
+
+        signal clicked
+
+        implicitWidth: 24
+        implicitHeight: 24
+        radius: 12
+        color: taskBtnArea.containsMouse ? (accent === Hallownest.soul ? Hallownest.raise(Hallownest.card, 1.65) : Qt.alpha(accent, 0.16)) : "transparent"
+
+        Behavior on color {
+            CAnim {}
+        }
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            text: taskBtn.icon
+            color: taskBtnArea.containsMouse ? taskBtn.accent : Hallownest.steel
+            fontStyle: Tokens.font.icon.small
+        }
+
+        MouseArea {
+            id: taskBtnArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: taskBtn.clicked()
+        }
+    }
+
     component ColourDot: Item {
         id: dot
 
@@ -313,19 +433,30 @@ NotchPage {
 
         signal cycled
 
-        implicitWidth: 28
-        implicitHeight: 28
+        implicitWidth: 26
+        implicitHeight: 26
 
-        StyledRect {
+        Rectangle {
             anchors.centerIn: parent
-            implicitWidth: 16
-            implicitHeight: 16
-            radius: Tokens.rounding.full
+            width: 10
+            height: 10
+            rotation: 45
             color: root.colours[dot.colourIndex]
+            scale: dotArea.containsMouse ? 1.18 : 1
+
+            Behavior on scale {
+                Anim {
+                    type: Anim.FastSpatial
+                }
+            }
         }
 
-        StateLayer {
-            radius: Tokens.rounding.full
+        MouseArea {
+            id: dotArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             onClicked: dot.cycled()
         }
     }

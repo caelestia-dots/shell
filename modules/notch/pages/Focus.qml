@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components.hallownest
 import qs.modules.notch
 
 NotchPage {
@@ -12,16 +13,21 @@ NotchPage {
     ColumnLayout {
         id: layout
 
-        spacing: Tokens.spacing.large
+        spacing: Tokens.spacing.small + 2
 
         Pomodoro {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             screenState: root.screenState
             page: root.page
         }
 
+        HkDivider {
+            Layout.fillWidth: true
+            opacity: 0.55
+        }
+
         Todo {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             screenState: root.screenState
             page: root.page
         }

@@ -12,7 +12,15 @@ COMMON_ANIMS = ["happy", "vibe", "sad", "cry", "infected", "angry", "shocked", "
 EXTRA_ANIMS = {"knight": [], "grimm": ["bow", "teleport"], "hornet": ["dash"]}
 MASCOTS = list(EXTRA_ANIMS)
 SEASONS = ["grimm", "winter", "auto", "none"]
-SCENES = ["sun", "night", "cloud", "fog", "rain", "storm", "snow", "auto"]
+SCENES = [
+    "sun", "sun-night", "night",
+    "cloud", "cloud-night",
+    "fog", "fog-night",
+    "rain", "rain-night",
+    "storm", "storm-night",
+    "snow", "snow-night",
+    "auto",
+]
 TOAST_KINDS = ["info", "success", "warn", "error"]
 
 
@@ -245,7 +253,7 @@ COMMANDS = {
                     "season none          no season until restart",
                     "season               print the current season"]),
         "weather": (cmd_weather, "weather <" + "|".join(SCENES) + ">", "Preview a weather scene",
-                    ["weather storm", "weather auto         back to the real weather"]),
+                    ["weather storm", "weather storm-night", "weather rain-night", "weather auto         back to the real weather"]),
         "style": (cmd_style, "style [<style>|list]", "Change the Hallownest style",
                   ["style pale", "style                list the styles"]),
         "flavour": (cmd_flavour, "flavour [<flavour>|list]", "Change the style's flavour (accent)",

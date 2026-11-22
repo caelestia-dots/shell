@@ -47,6 +47,7 @@ Singleton {
     readonly property bool transitioning: applyDelay.running
 
     readonly property string serif: cinzel.status === FontLoader.Ready ? cinzel.name : "serif"
+    readonly property string bodySerif: "Noto Serif"
     readonly property string mono: "JetBrainsMono Nerd Font"
 
     // Hover/raised tint: shifts perceptually toward `text` so all dark and light styles stay hue-consistent

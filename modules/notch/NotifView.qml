@@ -177,6 +177,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             text: root.speech.slice(0, root.typed)
             color: root.critical ? Hallownest.grimm : Hallownest.text
+            font.family: Hallownest.bodySerif
             font.pointSize: 9.5
             wrapMode: Text.WordWrap
             maximumLineCount: 2

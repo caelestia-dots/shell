@@ -14,7 +14,7 @@ StyledRect {
     implicitWidth: inner.implicitWidth + Tokens.padding.medium * 2
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Hallownest.shell
 
     RowLayout {
         id: inner
@@ -28,7 +28,7 @@ StyledRect {
             implicitHeight: upIcon.implicitHeight + Tokens.padding.small
 
             StateLayer {
-                radius: Tokens.rounding.medium
+                radius: 8
                 disabled: root.dialog.cwd.length === 1
                 onClicked: root.dialog.cwd.pop()
             }
@@ -38,7 +38,7 @@ StyledRect {
 
                 anchors.centerIn: parent
                 text: "drive_folder_upload"
-                color: root.dialog.cwd.length === 1 ? Colours.palette.m3outline : Colours.palette.m3onSurface
+                color: root.dialog.cwd.length === 1 ? Hallownest.faint : Hallownest.soul
                 grade: 200
             }
         }
@@ -46,8 +46,10 @@ StyledRect {
         StyledRect {
             Layout.fillWidth: true
 
-            radius: Tokens.rounding.medium
-            color: Colours.tPalette.m3surfaceContainerHigh
+            radius: 10
+            color: Hallownest.card
+            border.width: 1
+            border.color: Hallownest.border
 
             implicitHeight: pathComponents.implicitHeight + pathComponents.anchors.margins * 2
 
@@ -77,7 +79,7 @@ StyledRect {
                             active: folder.index > 0
                             sourceComponent: StyledText {
                                 text: "/"
-                                color: Colours.palette.m3onSurfaceVariant
+                                color: Hallownest.faint
                                 font: Tokens.font.body.builders.small.weight(Font.Bold).build()
                             }
                         }
@@ -95,7 +97,7 @@ StyledRect {
                                         root.dialog.cwd = root.dialog.cwd.slice(0, folder.index + 1);
                                     }
 
-                                    radius: Tokens.rounding.medium
+                                    radius: 8
                                 }
                             }
 
@@ -111,7 +113,7 @@ StyledRect {
                                 active: folder.index === 0 && folder.modelData === "Home"
                                 sourceComponent: MaterialIcon {
                                     text: "home"
-                                    color: root.dialog.cwd.length === 1 ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
+                                    color: root.dialog.cwd.length === 1 ? Hallownest.soul : Hallownest.subtext
                                     fill: 1
                                 }
                             }
@@ -124,7 +126,7 @@ StyledRect {
                                 anchors.leftMargin: homeIcon.active ? Tokens.padding.extraSmall : 0
 
                                 text: folder.modelData
-                                color: folder.index < root.dialog.cwd.length - 1 ? Colours.palette.m3onSurfaceVariant : Colours.palette.m3onSurface
+                                color: folder.index < root.dialog.cwd.length - 1 ? Hallownest.subtext : Hallownest.soul
                                 font: Tokens.font.body.builders.small.weight(Font.Bold).build()
                             }
                         }

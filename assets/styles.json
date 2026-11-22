@@ -2,15 +2,15 @@
   "hallownest": {
     "name": "Hallownest",
     "base": {
-      "void": "#07090e",
-      "shell": "#0e121b",
-      "card": "#151a26",
-      "button": "#1c2230",
-      "bright": "#2a3346",
-      "text": "#d7e0ec",
-      "subtext": "#9aa6b8",
-      "faint": "#546073",
-      "outline": "#68758a"
+      "void": "#07080b",
+      "shell": "#0c0d11",
+      "card": "#111217",
+      "button": "#181a20",
+      "bright": "#24272f",
+      "text": "#dde1e8",
+      "subtext": "#989ea8",
+      "faint": "#545963",
+      "outline": "#686e7a"
     },
     "charms": {
       "lifeblood": "#38bdf8",
@@ -25,7 +25,7 @@
       "crystal": "#a8dadc"
     },
     "flavours": {
-      "vessel": { "accent": "#f5f9ff", "steel": "#9ba4b5", "tertiary": "#6cc9ff", "error": "#ff8a2a", "success": "#74c98a" },
+      "vessel": { "accent": "#f5f9ff", "steel": "#9ea4b0", "tertiary": "#6cc9ff", "error": "#ff8a2a", "success": "#74c98a" },
       "lifeblood": { "accent": "#6cc9ff", "steel": "#8fb3cc", "tertiary": "#e6e4de", "error": "#ff8a2a", "success": "#74c98a" },
       "infection": { "accent": "#ff8a2a", "steel": "#b8a08f", "tertiary": "#6cc9ff", "error": "#ff5c6a", "success": "#74c98a" },
       "greenpath": { "accent": "#74c98a", "steel": "#94b39c", "tertiary": "#6cc9ff", "error": "#ff8a2a", "success": "#a8e08a" }

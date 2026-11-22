@@ -2,6 +2,7 @@ import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
+import qs.components.hallownest
 import qs.services
 
 StyledRect {
@@ -12,7 +13,7 @@ StyledRect {
 
     implicitHeight: inner.implicitHeight + Tokens.padding.medium * 2
 
-    color: Colours.tPalette.m3surfaceContainer
+    color: Hallownest.shell
 
     RowLayout {
         id: inner
@@ -24,6 +25,7 @@ StyledRect {
 
         StyledText {
             text: Tr.trCtx("Filter:", "file filter")
+            color: Hallownest.subtext
         }
 
         StyledRect {
@@ -31,12 +33,15 @@ StyledRect {
             Layout.fillHeight: true
             Layout.rightMargin: Tokens.spacing.medium
 
-            color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.medium
+            color: Hallownest.card
+            border.width: 1
+            border.color: Hallownest.border
+            radius: 9
 
             StyledText {
                 anchors.fill: parent
                 anchors.margins: Tokens.padding.medium
+                color: Hallownest.text
 
                 text: {
                     const filters = root.dialog.filters.map(f => `*.${f}`).join(Tr.trCtx(", ", "file filter separator"));
@@ -46,50 +51,16 @@ StyledRect {
             }
         }
 
-        StyledRect {
-            color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.medium
-
-            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
-            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
-
-            StateLayer {
-                disabled: !root.dialog.selectionValid
-                onClicked: root.dialog.accepted(root.folder.currentItem.modelData.path)
-            }
-
-            StyledText {
-                id: selectText
-
-                anchors.centerIn: parent
-                anchors.margins: Tokens.padding.medium
-
-                text: Tr.trCtx("Select", "button")
-                color: root.dialog.selectionValid ? Colours.palette.m3onSurface : Colours.palette.m3outline
-            }
+        HkButton {
+            text: Tr.trCtx("Select", "button")
+            filled: true
+            disabled: !root.dialog.selectionValid
+            onClicked: root.dialog.accepted(root.folder.currentItem.modelData.path)
         }
 
-        StyledRect {
-            color: Colours.tPalette.m3surfaceContainerHigh
-            radius: Tokens.rounding.medium
-
-            implicitWidth: cancelText.implicitWidth + Tokens.padding.medium * 2
-            implicitHeight: cancelText.implicitHeight + Tokens.padding.medium * 2
-
-            StateLayer {
-                onClicked: {
-                    root.dialog.rejected();
-                }
-            }
-
-            StyledText {
-                id: cancelText
-
-                anchors.centerIn: parent
-                anchors.margins: Tokens.padding.medium
-
-                text: Tr.trCtx("Cancel", "button")
-            }
+        HkButton {
+            text: Tr.trCtx("Cancel", "button")
+            onClicked: root.dialog.rejected()
         }
     }
 }
