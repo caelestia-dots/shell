@@ -126,7 +126,7 @@ CustomMouseArea {
             if (!osdShortcutActive) {
                 screenState.osd = showOsd;
                 root.panels.osd.hovered = showOsd;
-            } else if (showOsd) {
+            } else if (inRightPanel(panels.osdWrapper, x, y)) {
                 // If hovering over OSD area while in shortcut mode, transition to hover control
                 osdShortcutActive = false;
                 root.panels.osd.hovered = true;
@@ -165,7 +165,7 @@ CustomMouseArea {
             if (!osdShortcutActive) {
                 screenState.osd = showOsd;
                 root.panels.osd.hovered = showOsd;
-            } else if (showOsd) {
+            } else if (outOfSidebar && inRightPanel(panels.osdWrapper, x, y)) {
                 // If hovering over OSD area while in shortcut mode, transition to hover control
                 osdShortcutActive = false;
                 root.panels.osd.hovered = true;
@@ -290,9 +290,14 @@ CustomMouseArea {
         function onOsdChanged() {
             if (root.screenState.osd) {
                 // OSD became visible, immediately check if this should be shortcut mode
-                const inOsdArea = root.inRightPanel(root.panels.osdWrapper, root.mouseX, root.mouseY);
-                if (!inOsdArea) {
+                // If showOnHover is disabled, the OSD was opened by a non-hover trigger
+                if (!Config.osd.showOnHover) {
                     root.osdShortcutActive = true;
+                } else {
+                    const inOsdArea = root.inRightPanel(root.panels.osdWrapper, root.mouseX, root.mouseY);
+                    if (!inOsdArea) {
+                        root.osdShortcutActive = true;
+                    }
                 }
             } else {
                 // OSD hidden, clear shortcut flag
@@ -303,9 +308,10 @@ CustomMouseArea {
         function onUtilitiesChanged() {
             if (root.screenState.utilities) {
                 // Utilities became visible, immediately check if this should be shortcut mode
-                // Use static geometry (ignores offsetScale) to avoid false positive during open animation
+                // Use unscaled height to avoid false positive during open animation
                 const panelY = root.borderThickness + root.panels.utilities.y;
-                const inUtilitiesArea = root.mouseY >= panelY - Config.border.rounding && root.mouseY <= panelY + root.panels.utilities.height + Config.border.rounding && root.mouseX > Math.min(root.width - Config.border.minThickness, root.bar.implicitWidth + root.panels.utilities.x);
+                const panelX = root.bar.implicitWidth + root.panels.utilities.x;
+                const inUtilitiesArea = root.mouseY >= panelY - Config.border.rounding && root.mouseY <= panelY + root.panels.utilities.height + Config.border.rounding && root.mouseX >= panelX - Config.border.rounding;
                 if (!inUtilitiesArea) {
                     root.utilitiesShortcutActive = true;
                 }
