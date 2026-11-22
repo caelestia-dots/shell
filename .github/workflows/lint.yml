@@ -21,14 +21,29 @@ jobs:
     container:
       image: ghcr.io/${{ github.repository_owner }}/shell-arch-env:latest
 
+    env:
+      CCACHE_SLOPPINESS: pch_defines,time_macros
+      CCACHE_COMPILERCHECK: "%compiler% --version"
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v7
 
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: lint-qml-clazy
+          install: no
+          save: ${{ github.event_name == 'push' }}
+
       - name: CMake build
         run: |
           # Set version and git rev for CI build so we don't call git
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clazy -DVERSION= -DGIT_REVISION=
+          cmake -B build -G Ninja \
+            -DCMAKE_CXX_COMPILER=clazy \
+            "-DCMAKE_CXX_FLAGS=-Xclang -fno-pch-timestamp" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DVERSION= -DGIT_REVISION=
           cmake --build build
 
       - name: Lint QML
@@ -72,16 +87,49 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v7
 
-      - name: CMake build
+      - name: Compute clang-tidy cache context
+        id: ctcache-context
+        shell: bash
         run: |
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON -DVERSION= -DGIT_REVISION=
+          tool_hash="$({ pacman -Q clang llvm-libs; sha256sum /usr/bin/clang-tidy-cache; } | sha256sum | cut -d ' ' -f 1)"
+          echo "tools=$tool_hash" >> "$GITHUB_OUTPUT"
+
+      - name: Restore clang-tidy cache
+        id: ctcache-restore
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ github.workspace }}/.ctcache
+          key: ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy') }}-${{ github.sha }}
+          restore-keys: |
+            ctcache-lint-cpp-clang-${{ steps.ctcache-context.outputs.tools }}-${{ hashFiles('**/.clang-tidy') }}-
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON \
+            -DVERSION= -DGIT_REVISION=
 
       - name: Lint C++
+        env:
+          CTCACHE_SAVE_OUTPUT: "1"
+          CTCACHE_LOCAL: "1"
+          CTCACHE_DIR: ${{ github.workspace }}/.ctcache
+          CTCACHE_STRIP: ${{ github.workspace }}
         run: |
           clang-tidy --version
+
           run-clang-tidy -p build -quiet -j "$(nproc)" -warnings-as-errors='*' \
+            -clang-tidy-binary=/usr/local/bin/clang-tidy-cached \
             -source-filter='^(?!.*/build/).*\.cpp$'
+
+      - name: Save clang-tidy cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ github.workspace }}/.ctcache
+          key: ${{ steps.ctcache-restore.outputs.cache-primary-key }}
 
   lint-check:
     if: always()
