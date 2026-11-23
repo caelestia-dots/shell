@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 
-import "./kblayout"
 import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Caelestia.Config
 import qs.components
 import qs.services
+import qs.modules.bar.popouts.kblayout
 
 Item {
     id: root
@@ -153,7 +153,7 @@ Item {
 
                     TrayMenu {
                         popouts: root.popouts
-                        trayItem: trayMenu.modelData.menu // qmllint disable unresolved-type
+                        trayItem: trayMenu.modelData.menu // qmllint disable incompatible-type
                     }
                 }
             }

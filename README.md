@@ -89,6 +89,7 @@ Dependencies:
 - `qt6-base`
 - `qt6-declarative`
 - `qt6-imageformats`
+- `qt6-multimedia`
 - [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 - [`swappy`](https://github.com/jtheoof/swappy)
 - [`fish`](https://github.com/fish-shell/fish-shell)
@@ -231,12 +232,12 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
 > - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
-> - `lock`: `enableFprint`, `enableHowdy`, `maxFprintTries`, `maxHowdyTries`, `triggerHowdyOnWake`
+> - `lock`: `enableFaceAuth`, `enableFprint`, `faceAuthProvider`, `maxFaceAuthTries`, `maxFprintTries`, `triggerFaceAuthOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
 > - `paths`: `lyricsDir`, `wallpaperDir`
 > - `services`: `audioIncrement`, `brightnessIncrement`, `clockFormat`, `dataUnits`, `defaultPlayer`, `gpuType`, `lyricsBackend`, `maxVolume`, `playerAliases`, `sensorUnits`, `smartScheme`, `visualiserBars`, `weatherLocation`, `weatherUnits`
-> - `utilities`: `toasts.*`, `vpn.*`
+> - `utilities`: `gameMode.*`, `toasts.*`, `vpn.*`
 >
 > </details>
 
@@ -804,9 +805,10 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "recolourLogo": true,
         "enableFprint": true,
         "maxFprintTries": 3,
-        "enableHowdy": true,
-        "maxHowdyTries": 3,
-        "triggerHowdyOnWake": true,
+        "enableFaceAuth": true,
+        "faceAuthProvider": "Howdy",
+        "maxFaceAuthTries": 3,
+        "triggerFaceAuthOnWake": true,
         "hideNotifs": false,
         "enableSessionControls": true
     },
@@ -930,7 +932,19 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "id": "vpn",
                 "enabled": false
             }
-        ]
+        ],
+        "gameMode": {
+            "options": {
+                "animations:enabled": 0,
+                "decoration:blur:enabled": 0,
+                "decoration:shadow:enabled": 0,
+                "decoration:rounding": 0,
+                "general:gaps_in": 0,
+                "general:gaps_out": 0,
+                "general:border_size": 1,
+                "general:allow_tearing": 1
+            }
+        }
     },
     "paths": {
         "wallpaperDir": "~/Pictures/Wallpapers",

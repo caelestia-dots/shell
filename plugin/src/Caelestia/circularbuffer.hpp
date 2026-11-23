@@ -5,7 +5,7 @@
 
 #include "util/ringbuffer.hpp"
 
-namespace caelestia {
+namespace caelestia::shell {
 
 class CircularBuffer : public QObject {
     Q_OBJECT
@@ -41,4 +41,4 @@ private:
     qreal m_max = 0.0;
 };
 
-} // namespace caelestia
+} // namespace caelestia::shell

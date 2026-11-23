@@ -7,7 +7,7 @@
 
 #include "util/i18n.hpp"
 
-namespace caelestia {
+namespace caelestia::shell {
 
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
@@ -141,4 +141,4 @@ void Qalculator::setBusy(bool busy) {
     emit busyChanged();
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

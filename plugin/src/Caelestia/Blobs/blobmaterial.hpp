@@ -4,7 +4,7 @@
 #include <qsgmaterial.h>
 #include <qsgmaterialshader.h>
 
-namespace caelestia::blobs {
+namespace caelestia::shell::blobs {
 
 // Max rects the shader smins over; must match the loop bounds in blob.frag
 inline constexpr int k_maxRects = 16;
@@ -51,4 +51,4 @@ public:
     bool updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial* oldMaterial) override;
 };
 
-} // namespace caelestia::blobs
+} // namespace caelestia::shell::blobs

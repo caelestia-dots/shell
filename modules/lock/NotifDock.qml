@@ -30,7 +30,7 @@ ColumnLayout {
         elide: Text.ElideRight
     }
 
-    ClippingRectangle {
+    ClipRect {
         id: clipRect
 
         Layout.fillWidth: true

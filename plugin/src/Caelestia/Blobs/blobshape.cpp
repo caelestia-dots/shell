@@ -9,7 +9,7 @@
 #include "blobgroup.hpp"
 #include "blobinvertedrect.hpp"
 
-namespace caelestia::blobs {
+namespace caelestia::shell::blobs {
 
 namespace {
 
@@ -496,4 +496,4 @@ QSGNode* BlobShape::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* data)
     return node;
 }
 
-} // namespace caelestia::blobs
+} // namespace caelestia::shell::blobs

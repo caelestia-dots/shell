@@ -4,7 +4,7 @@
 
 #include "blobshape.hpp"
 
-namespace caelestia::blobs {
+namespace caelestia::shell::blobs {
 
 class BlobInvertedRect : public BlobShape {
     Q_OBJECT
@@ -51,4 +51,4 @@ private:
     qreal m_borderBottom = 0;
 };
 
-} // namespace caelestia::blobs
+} // namespace caelestia::shell::blobs

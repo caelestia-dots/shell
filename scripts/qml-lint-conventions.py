@@ -120,26 +120,34 @@ def import_group(module: str) -> tuple[int, int] | None:
     if module.startswith('"'):
         return None
     depth = module.count(".") + 1
-    if module == "QtQuick" or module.startswith("QtQuick."):
+
+    def is_module(m: str) -> bool:
+        return module == m or module.startswith(f"{m}.")
+
+    if is_module("QtQuick"):
         return (1, depth)
     if module.startswith("Qt"):
         return (2, depth)
-    if module == "Quickshell" or module.startswith("Quickshell."):
+    if is_module("Quickshell"):
         return (3, depth)
-    if module == "M3Shapes":
+    if is_module("M3Shapes"):
         return (4, depth)
-    if module == "Caelestia" or module.startswith("Caelestia."):
+    if is_module("Caelestia"):
         return (5, depth)
-    if module == "qs.components" or module.startswith("qs.components."):
+    if is_module("qs.components"):
         return (6, depth)
-    if module == "qs.services":
+    if is_module("qs.services"):
         return (7, depth)
-    if module == "qs.config":
+    if is_module("qs.config"):
         return (8, depth)
-    if module == "qs.utils":
+    if is_module("qs.utils"):
         return (9, depth)
-    if module == "qs.modules" or module.startswith("qs.modules."):
+    if is_module("qs.modules"):
         return (10, depth)
+    if is_module("qs.daemons"):
+        return (11, depth)
+    if is_module("qs"):  # Any unknown qs imports should be sorted last
+        return (12, depth)
     return None
 
 

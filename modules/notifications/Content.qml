@@ -195,7 +195,7 @@ Item {
             }
         }
 
-        ClippingRectangle {
+        ClipRect {
             anchors.top: parent.top
             anchors.topMargin: wrapper.idx === 0 ? 0 : Tokens.spacing.medium
 

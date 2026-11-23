@@ -2,7 +2,7 @@
 
 #include <qobject.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 class ChangeBatcher : public QObject {
     Q_OBJECT
@@ -21,4 +21,4 @@ private:
     void flush();
 };
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

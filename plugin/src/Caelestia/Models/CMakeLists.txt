@@ -5,6 +5,7 @@ qml_module(caelestia-models
         appdb.cpp
     LIBRARIES
         Qt::Gui
+        Qt::Multimedia
         Qt::Concurrent
         Qt::Sql
 )

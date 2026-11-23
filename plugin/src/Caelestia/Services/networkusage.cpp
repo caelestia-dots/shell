@@ -8,7 +8,7 @@
 #include <charconv>
 #include <system_error>
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -127,4 +127,4 @@ void NetworkUsage::tick() {
     emit changed();
 }
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

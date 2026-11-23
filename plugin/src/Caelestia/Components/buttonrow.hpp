@@ -2,7 +2,7 @@
 
 #include <qquickitem.h>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 class ButtonRow : public QQuickItem {
     Q_OBJECT
@@ -34,4 +34,4 @@ private:
     qreal m_spacing;
 };
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

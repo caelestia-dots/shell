@@ -7,7 +7,7 @@ import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.components.controls
-import qs.components.images
+import qs.components.widgets
 import qs.services
 import qs.modules.nexus.common
 
@@ -22,7 +22,7 @@ PageBase {
         width: root.cappedWidth
         spacing: Tokens.spacing.large
 
-        StyledClippingRect {
+        ClipRect {
             id: wallWrapper
 
             Layout.alignment: Qt.AlignHCenter
@@ -69,73 +69,13 @@ PageBase {
                 }
             }
 
-            Item {
+            WallpaperImpl {
                 anchors.fill: parent
                 opacity: Config.background.wallpaperEnabled ? 1 : 0
 
                 Behavior on opacity {
                     Anim {
                         type: Anim.SlowEffects
-                    }
-                }
-
-                Loader {
-                    id: wallIndicatorLoader
-
-                    anchors.centerIn: parent
-
-                    opacity: 0
-                    active: opacity > 0
-
-                    sourceComponent: StyledRect {
-                        implicitWidth: wallLoadingIndicator.implicitSize + Tokens.padding.largeIncreased * 2
-                        implicitHeight: wallLoadingIndicator.implicitSize + Tokens.padding.largeIncreased * 2
-
-                        color: Colours.palette.m3primaryContainer
-                        radius: Tokens.rounding.full
-
-                        LoadingIndicator {
-                            id: wallLoadingIndicator
-
-                            anchors.centerIn: parent
-                            containsIcon: true
-                            implicitSize: Math.min(wallWrapper.implicitWidth, wallWrapper.implicitHeight) * 0.4
-                        }
-                    }
-
-                    Behavior on opacity {
-                        Anim {
-                            type: Anim.DefaultEffects
-                        }
-                    }
-                }
-
-                Timer {
-                    id: wallLoadDebounceTimer
-
-                    interval: 100
-                    onTriggered: {
-                        if (wallImg.status !== Image.Ready)
-                            wallIndicatorLoader.opacity = 1;
-                    }
-                }
-
-                FadeImage {
-                    id: wallImg
-
-                    anchors.fill: parent
-                    source: Wallpapers.current
-                    preventInit: wallIndicatorLoader.opacity > 0
-                    fadeOutAnim: Anim.DefaultEffects
-                    fadeInAnim: Anim.SlowEffects
-
-                    onSourceChanged: wallLoadDebounceTimer.restart()
-
-                    onStatusChanged: {
-                        if (status === Image.Ready) {
-                            wallLoadDebounceTimer.stop();
-                            wallIndicatorLoader.opacity = 0;
-                        }
                     }
                 }
             }

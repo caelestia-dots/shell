@@ -143,25 +143,25 @@ ProgressBar {
 
             Line {
                 bounds: {
-                    const i = manager.activeIndicators[0]; // qmllint disable unresolved-type
+                    const i = manager.activeIndicators[0];
                     return i ? root.toBounds(0, i.startFraction, i.gapSize / 2) : Qt.point(0, 0);
                 }
             }
 
             Line {
                 bounds: {
-                    const i = manager.activeIndicators[manager.activeIndicators.length - 1]; // qmllint disable unresolved-type
+                    const i = manager.activeIndicators[manager.activeIndicators.length - 1];
                     return i ? root.toBounds(i.endFraction, 1, i.gapSize / 2) : Qt.point(0, 0);
                 }
             }
 
             Instantiator {
-                model: Math.max(manager.activeIndicators.length, 1) - 1 // qmllint disable unresolved-type
+                model: Math.max(manager.activeIndicators.length, 1) - 1
 
                 delegate: Line {
                     required property int index
-                    readonly property LinearIndicatorSegment cur: manager.activeIndicators[index] // qmllint disable unresolved-type
-                    readonly property LinearIndicatorSegment next: manager.activeIndicators[index + 1 % manager.activeIndicators.length] // qmllint disable unresolved-type
+                    readonly property LinearIndicatorSegment cur: manager.activeIndicators[index]
+                    readonly property LinearIndicatorSegment next: manager.activeIndicators[index + 1 % manager.activeIndicators.length]
 
                     bounds: root.toBounds(cur.endFraction, next.startFraction, cur.gapSize / 2)
                 }
@@ -175,7 +175,7 @@ ProgressBar {
             }
 
             Instantiator {
-                model: manager.activeIndicators // qmllint disable unresolved-type
+                model: manager.activeIndicators
 
                 delegate: Wave {
                     required property LinearIndicatorSegment modelData

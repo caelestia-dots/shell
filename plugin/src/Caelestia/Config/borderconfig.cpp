@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 int BorderConfig::minThickness() {
     return 2;
@@ -12,4 +12,4 @@ int BorderConfig::clampedThickness() const {
     return std::max(minThickness(), m_thickness);
 }
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

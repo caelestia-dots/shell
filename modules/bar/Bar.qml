@@ -1,14 +1,14 @@
 pragma ComponentBehavior: Bound
 
-import "popouts" as BarPopouts
-import "components"
-import "components/workspaces"
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.services
+import qs.modules.bar.components
+import qs.modules.bar.popouts as BarPopouts
+import qs.modules.bar.components.workspaces
 
 ColumnLayout {
     id: root

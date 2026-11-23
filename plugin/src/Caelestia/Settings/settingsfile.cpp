@@ -19,7 +19,7 @@ Q_LOGGING_CATEGORY(lcSettingsFile, "caelestia.settings.file", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 using Qt::StringLiterals::operator""_s;
 using util::i18n::mark;
@@ -31,15 +31,18 @@ constexpr int k_maxLoadRetries = 3;
 
 } // namespace
 
-SettingsFile::SettingsFile(QString path, QObject* parent)
+SettingsFile::SettingsFile(bool watch, QString path, QObject* parent)
     : QObject(parent)
     , m_path(std::move(path))
-    , m_watcher(new QFileSystemWatcher(this))
+    , m_watcher(watch ? new QFileSystemWatcher(this) : nullptr)
     , m_saveDebounce(new QTimer(this))
-    , m_loadDebounce(new QTimer(this))
+    , m_loadDebounce(watch ? new QTimer(this) : nullptr)
     , m_loadRetries(0) {
     m_saveDebounce->setSingleShot(true);
     m_saveDebounce->setInterval(500); // Save at most once every 500ms
+
+    if (!watch)
+        return;
 
     m_loadDebounce->setSingleShot(true);
     m_loadDebounce->setInterval(50); // Coalesce watcher events within 50ms
@@ -49,6 +52,10 @@ SettingsFile::SettingsFile(QString path, QObject* parent)
     QObject::connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &SettingsFile::onDirChanged);
 
     initWatcher();
+}
+
+SettingsFile::~SettingsFile() {
+    writeNow();
 }
 
 std::optional<QJsonValue> SettingsFile::read() const {
@@ -77,6 +84,9 @@ void SettingsFile::onDirChanged() {
 }
 
 void SettingsFile::initWatcher() {
+    if (!m_watcher)
+        return;
+
     const QFileInfo info(m_path);
     const auto dir = info.absolutePath();
 
@@ -88,8 +98,8 @@ void SettingsFile::initWatcher() {
 }
 
 void SettingsFile::scheduleLoad() {
-    // Ignore if a load is already pending
-    if (m_loadDebounce->isActive())
+    // Ignore if not watching or a load is already pending
+    if (!m_loadDebounce || m_loadDebounce->isActive())
         return;
 
     m_loadRetries = 0;
@@ -175,8 +185,14 @@ void SettingsFile::save() {
 
     // Debounce regardless of whether the save actually succeeded
     m_saveDebounce->start();
+    writeNow();
+}
 
-    const auto json = m_pendingWrite.value();
+void SettingsFile::writeNow() {
+    if (!m_pendingWrite)
+        return;
+
+    const auto json = *m_pendingWrite;
     const auto data = (json.isObject() ? QJsonDocument(json.toObject()) : QJsonDocument(json.toArray())).toJson();
     m_pendingWrite = std::nullopt;
 
@@ -212,4 +228,4 @@ void SettingsFile::save() {
     initWatcher(); // The file may have just been created, or replaced by the rename
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

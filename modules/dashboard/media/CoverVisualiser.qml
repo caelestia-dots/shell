@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Shapes
 import Quickshell
 import M3Shapes
+import Caelestia
 import Caelestia.Config
 import Caelestia.Services
 import qs.components
@@ -45,7 +46,7 @@ Item {
             readonly property real angle: modelData * 2 * Math.PI / GlobalConfig.services.visualiserBars
             readonly property real dist: shapeEdgeDist + value * root.maxMagnitude
             readonly property real shapeEdgeDist: {
-                cover.shape.rotation; // Update when shape rotation changes
+                CUtils.dependency(cover.shape.rotation); // Update when shape rotation changes
                 const sDist = cover.shape.distanceAtAngle(modelData * 360 / GlobalConfig.services.visualiserBars + 90);
                 return sDist + root.spacing + strokeWidth / 2;
             }

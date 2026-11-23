@@ -16,7 +16,7 @@ Q_LOGGING_CATEGORY(lcRequests, "caelestia.requests", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia {
+namespace caelestia::shell {
 
 using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
@@ -88,4 +88,4 @@ void Requests::resetCookies() const {
     m_manager->setCookieJar(new QNetworkCookieJar(m_manager));
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

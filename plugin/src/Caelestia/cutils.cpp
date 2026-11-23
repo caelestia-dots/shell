@@ -18,7 +18,11 @@ Q_LOGGING_CATEGORY(lcCUtils, "caelestia.cutils", QtInfoMsg)
 
 } // namespace
 
-namespace caelestia {
+namespace caelestia::shell {
+
+void CUtils::dependency(const QVariant& value) {
+    Q_UNUSED(value);
+}
 
 void CUtils::saveItem(QQuickItem* target, const QUrl& path, const QJSValue& onSaved, const QJSValue& onFailed) {
     this->saveItem(target, path, QRect(), onSaved, onFailed);
@@ -223,4 +227,4 @@ QString CUtils::qtVersion() {
     return QStringLiteral(QT_VERSION_STR);
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

@@ -7,7 +7,7 @@
 #include "common.hpp"
 #include "enums.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 using Qt::StringLiterals::operator""_s;
 using settings::vmap;
@@ -45,4 +45,4 @@ class ServiceConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_ENUM_PROPERTY(LyricsBackend, lyricsBackend, LyricsBackend::Auto)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

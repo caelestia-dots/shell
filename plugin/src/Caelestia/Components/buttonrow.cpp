@@ -1,6 +1,6 @@
 #include "buttonrow.hpp"
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 ButtonRow::ButtonRow(QQuickItem* parent)
     : QQuickItem(parent)
@@ -129,4 +129,4 @@ qreal ButtonRow::getMorphExpansion(const QQuickItem* item) {
     return item->property("shapeMorphExpansion").toReal();
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

@@ -2,7 +2,7 @@
 
 #include <qjsonobject.h>
 
-namespace caelestia::settings {
+namespace caelestia::shell::settings {
 
 void ObjectQuarantine::insert(const QString& key, const QJsonValue& value) {
     m_quarantine.insert(key, value);
@@ -24,4 +24,4 @@ QJsonValue ObjectQuarantine::apply(const QJsonValue& json) const {
     return result;
 }
 
-} // namespace caelestia::settings
+} // namespace caelestia::shell::settings

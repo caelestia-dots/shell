@@ -4,7 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 class CircularIndicatorManager : public QObject {
     Q_OBJECT
@@ -69,4 +69,4 @@ private:
     void updateRetreat(qreal progress);
 };
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components

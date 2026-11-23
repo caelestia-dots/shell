@@ -24,7 +24,7 @@ Item {
     readonly property real maxViewY: Math.max(0, view.contentHeight - height)
 
     readonly property Workspace activeWs: {
-        view.itemsDirty;
+        CUtils.dependency(view.itemsDirty);
         return view.itemAtIndex(activeIdx) as Workspace;
     }
 

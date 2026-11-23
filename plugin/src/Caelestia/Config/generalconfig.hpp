@@ -8,7 +8,7 @@
 #include "util/i18n.hpp"
 #include "common.hpp"
 
-namespace caelestia::config {
+namespace caelestia::shell::config {
 
 using Qt::StringLiterals::operator""_s;
 using settings::vmap;
@@ -112,4 +112,4 @@ class GeneralConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_SUBOBJECT(GeneralBattery, battery)
 };
 
-} // namespace caelestia::config
+} // namespace caelestia::shell::config

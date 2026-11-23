@@ -5,13 +5,13 @@
 
 #include "service.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class ServiceRef : public QObject {
     Q_OBJECT
     QML_ELEMENT
 
-    Q_PROPERTY(caelestia::services::Service* service READ service WRITE setService NOTIFY serviceChanged)
+    Q_PROPERTY(caelestia::shell::services::Service* service READ service WRITE setService NOTIFY serviceChanged)
 
 public:
     explicit ServiceRef(Service* service = nullptr, QObject* parent = nullptr);
@@ -26,4 +26,4 @@ private:
     QPointer<Service> m_service;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

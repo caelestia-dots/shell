@@ -4,7 +4,7 @@
 
 #include <utility>
 
-namespace caelestia {
+namespace caelestia::shell {
 
 using Qt::StringLiterals::operator""_s;
 
@@ -128,4 +128,4 @@ void Toaster::toast(const QString& title, const QString& message, const QString&
     emit toastsChanged();
 }
 
-} // namespace caelestia
+} // namespace caelestia::shell

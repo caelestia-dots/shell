@@ -5,7 +5,7 @@
 
 #include "service.hpp"
 
-namespace caelestia::services {
+namespace caelestia::shell::services {
 
 class AudioProcessor : public QObject {
     Q_OBJECT
@@ -46,4 +46,4 @@ private:
     void stop() override;
 };
 
-} // namespace caelestia::services
+} // namespace caelestia::shell::services

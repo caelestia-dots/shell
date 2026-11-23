@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace caelestia::components {
+namespace caelestia::shell::components {
 
 VisualiserBars::VisualiserBars(QQuickItem* parent)
     : QQuickPaintedItem(parent) {
@@ -196,4 +196,4 @@ void VisualiserBars::setAnimationDuration(int duration) {
     emit animationDurationChanged();
 }
 
-} // namespace caelestia::components
+} // namespace caelestia::shell::components
