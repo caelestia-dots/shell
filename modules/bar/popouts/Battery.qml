@@ -1,14 +1,27 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Layouts
 import Quickshell.Services.UPower
 import Caelestia.Config
 import Caelestia.I18n
 import qs.components
 import qs.services
+import qs.utils
 
 Column {
     id: root
+
+    // Quickshell's tooling metadata omits the members of the UPower device model.
+    // qmllint disable missing-property
+    readonly property list<UPowerDevice> peripheralBatteries: UPower.devices.values.filter(device => {
+        // qmllint enable missing-property
+        if (!device.isPresent || device.powerSupply || [UPowerDeviceType.Unknown, UPowerDeviceType.LinePower, UPowerDeviceType.Ups].includes(device.type))
+            return false;
+
+        // An unknown state with a zero reading can indicate missing battery data.
+        return device.percentage >= 0 && device.percentage <= 1 && (device.percentage > 0 || device.state !== UPowerDeviceState.Unknown);
+    })
 
     function formatSeconds(s: int): string {
         const day = Math.floor(s / 86400);
@@ -54,7 +67,7 @@ Column {
     width: Tokens.sizes.bar.batteryWidth
 
     StyledText {
-        text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No battery detected")
+        text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining: %1%", "battery remaining").arg(Math.round(UPower.displayDevice.percentage * 100)) : Tr.tr("No system battery detected")
     }
 
     StyledText {
@@ -222,6 +235,44 @@ Column {
 
             profile: PowerProfile.Performance
             icon: "rocket_launch"
+        }
+    }
+
+    Column {
+        visible: root.peripheralBatteries.length > 0
+        width: parent.width
+        spacing: Tokens.spacing.small
+
+        StyledText {
+            text: Tr.tr("Peripheral batteries")
+            font: Tokens.font.title.small
+        }
+
+        Repeater {
+            model: root.peripheralBatteries
+
+            RowLayout {
+                id: peripheral
+
+                required property UPowerDevice modelData
+
+                width: root.width
+                spacing: Tokens.spacing.small
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: peripheral.modelData.model || Tr.tr("Peripheral device")
+                    elide: Text.ElideRight
+                }
+
+                MaterialIcon {
+                    text: Icons.getBatteryIcon(peripheral.modelData.percentage, peripheral.modelData.state === UPowerDeviceState.Charging)
+                }
+
+                StyledText {
+                    text: Tr.trCtx("%1%", "peripheral battery percentage").arg(Math.round(peripheral.modelData.percentage * 100))
+                }
+            }
         }
     }
 
