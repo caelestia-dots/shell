@@ -1705,7 +1705,8 @@ Singleton {
         command: ["nmcli", "monitor"]
         environment: ({
                 LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
+                LC_ALL: "C.UTF-8",
+                LANGUAGE: "C.UTF-8"
             })
         stdout: SplitParser {
             onRead: root.refreshOnConnectionChange()
@@ -1741,7 +1742,8 @@ Singleton {
 
         environment: ({
                 LANG: "C.UTF-8",
-                LC_ALL: "C.UTF-8"
+                LC_ALL: "C.UTF-8",
+                LANGUAGE: "C.UTF-8"
             })
 
         stdout: StdioCollector {
