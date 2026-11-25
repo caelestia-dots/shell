@@ -49,7 +49,7 @@ private:
     void remove(NotifData* notif);
     void sync();
 
-    friend class NotifStore;
+    friend class NotifGroupIndex;
 };
 
 } // namespace caelestia::shell::models
