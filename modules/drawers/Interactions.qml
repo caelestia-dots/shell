@@ -293,7 +293,7 @@ CustomMouseArea {
             if (root.screenState.osd) {
                 // OSD became visible, immediately check if this should be shortcut mode
                 // If showOnHover is disabled, the OSD was opened by a non-hover trigger
-                if (!Config.osd.showOnHover) {
+                if (!root.Config.osd.showOnHover) {
                     root.osdShortcutActive = true;
                 } else {
                     const inOsdArea = root.inRightPanel(root.panels.osdWrapper, root.mouseX, root.mouseY);
@@ -311,7 +311,7 @@ CustomMouseArea {
             if (root.screenState.utilities) {
                 // Utilities became visible, immediately check if this should be shortcut mode
                 const inUtilitiesArea = root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY, true);
-                if (!Config.utilities.showOnHover || !inUtilitiesArea) {
+                if (!root.Config.utilities.showOnHover || !inUtilitiesArea) {
                     root.utilitiesShortcutActive = true;
                 }
             } else {
