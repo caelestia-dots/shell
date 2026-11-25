@@ -127,7 +127,7 @@ CustomMouseArea {
             if (!osdShortcutActive) {
                 screenState.osd = showOsd;
                 root.panels.osd.hovered = showOsd;
-            } else if (inRightPanel(panels.osdWrapper, x, y)) {
+            } else if (inOsdArea) {
                 // If hovering over OSD area while in shortcut mode, transition to hover control
                 osdShortcutActive = false;
                 root.panels.osd.hovered = true;
