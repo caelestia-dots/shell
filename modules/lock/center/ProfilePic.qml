@@ -48,6 +48,7 @@ Item {
 
         anchors.fill: shape
         source: `${Paths.home}/.face`
+        playing: true
 
         layer.enabled: true
         layer.effect: Mask {
