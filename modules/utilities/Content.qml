@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
-import qs.modules.utilities.cards
 import qs.modules.bar.popouts as BarPopouts
+import qs.modules.utilities.cards
 
 Item {
     id: root
