@@ -1,5 +1,6 @@
 #include "ktxencoder.hpp"
 
+#include <qimageiohandler.h>
 #include <qimagereader.h>
 #include <qtconcurrentmap.h>
 
@@ -58,10 +59,31 @@ void gatherBlock(const QImage& image, int bx, int by, quint8* out) {
     }
 }
 
+bool rotates(const QImageReader& reader) {
+    return reader.transformation().testFlag(QImageIOHandler::TransformationRotate90);
+}
+
+// Rounds like QQuickImageProviderWithOptions::loadSize
+QSize coverSize(const QSize& native, const QSize& bucket) {
+    const auto ratio = std::max(
+        static_cast<qreal>(bucket.width()) / native.width(), static_cast<qreal>(bucket.height()) / native.height());
+    return { qRound(native.width() * ratio), qRound(native.height() * ratio) };
+}
+
 } // namespace
 
 Fit fitFor(const QSize& native, const QSize& bucket, Qt::AspectRatioMode mode) {
-    auto scaled = mode == Qt::IgnoreAspectRatio ? bucket.boundedTo(native) : native.scaled(bucket, mode);
+    if (native.isEmpty())
+        return {};
+
+    QSize scaled;
+    if (mode == Qt::IgnoreAspectRatio)
+        scaled = bucket.boundedTo(native);
+    else if (mode == Qt::KeepAspectRatioByExpanding)
+        scaled = coverSize(native, bucket);
+    else
+        scaled = native.scaled(bucket, mode);
+
     if (scaled.width() > native.width() || scaled.height() > native.height())
         scaled = native;
 
@@ -76,6 +98,16 @@ QImage fitted(const QImage& image, const QSize& bucket, Qt::AspectRatioMode mode
     return fit.crop.size() == fit.scaled ? scaled : scaled.copy(fit.crop);
 }
 
+Cover coverFor(const QString& path, const QSize& bucket) {
+    const QImageReader reader(path);
+    const auto native = reader.size();
+    if (native.isEmpty())
+        return {};
+
+    const auto rotated = rotates(reader);
+    return { .size = coverSize(rotated ? native.transposed() : native, bucket), .transposed = rotated };
+}
+
 QImage readFitted(const QString& path, const QSize& bucket, Qt::AspectRatioMode mode) {
     QImageReader reader(path);
     reader.setAutoTransform(true);
@@ -84,8 +116,10 @@ QImage readFitted(const QString& path, const QSize& bucket, Qt::AspectRatioMode 
     if (!native.isValid())
         return fitted(reader.read(), bucket, mode);
 
-    const auto fit = fitFor(native, bucket, mode);
-    reader.setScaledSize(fit.scaled);
+    // The reader scales before it transforms
+    const auto rotated = rotates(reader);
+    const auto fit = fitFor(rotated ? native.transposed() : native, bucket, mode);
+    reader.setScaledSize(rotated ? fit.scaled.transposed() : fit.scaled);
     auto image = reader.read();
     if (image.isNull() || fit.crop.size() == fit.scaled)
         return image;
