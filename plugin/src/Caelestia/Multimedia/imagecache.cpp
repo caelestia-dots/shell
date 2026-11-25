@@ -6,6 +6,7 @@
 #include <qstandardpaths.h>
 
 #include <algorithm>
+#include <bit>
 
 #include "imagecacheworker.hpp"
 
@@ -15,15 +16,19 @@ using Qt::StringLiterals::operator""_s;
 
 namespace {
 
-constexpr int k_bucket = 256;
+constexpr unsigned k_minStep = 4;
+constexpr unsigned k_stepsPerOctave = 16;
 constexpr QStringView k_version = u"1";
 
 QString cacheDir() {
     return QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + u"/caelestia/multimedia/image"_s;
 }
 
+// Steps scale with the value so the excess stays within 1/k_stepsPerOctave of it
 int roundUp(int value) {
-    return std::max(1, (value + k_bucket - 1) / k_bucket) * k_bucket;
+    const auto v = static_cast<unsigned>(std::max(value, 1));
+    const auto step = std::max(k_minStep, std::bit_floor(v / k_stepsPerOctave));
+    return static_cast<int>((v + step - 1) / step * step);
 }
 
 } // namespace
