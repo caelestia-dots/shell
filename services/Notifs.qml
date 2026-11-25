@@ -61,6 +61,7 @@ Singleton {
         bodyMarkupSupported: true
         imageSupported: true
         persistenceSupported: true
+        extraHints: ["x-caelestia-actions"]
 
         onNotification: notif => store.add(notif, root.shouldShowPopup())
     }
