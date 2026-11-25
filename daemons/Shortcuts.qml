@@ -89,9 +89,11 @@ Scope {
         name: "sidebar"
         description: "Toggle sidebar"
         onPressed: {
-            if (root.hasFullscreen || !Config.sidebar.enabled)
+            if (root.hasFullscreen)
                 return;
             const screenState = ShellState.forActive();
+            if (!screenState || !Config.forScreen(screenState.modelData.name).sidebar.enabled)
+                return;
             screenState.sidebar = !screenState.sidebar;
         }
     }
