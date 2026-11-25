@@ -348,7 +348,7 @@ FileSystemModel::ScanFilters FileSystemModel::filtersFor(
             const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
             for (const auto format : formats) {
                 const auto mimeType = QMediaFormat(format).mimeType();
-                if (!mimeType.name().startsWith(u"video/"_s))
+                if (!mimeType.name().startsWith(u"video/"))
                     continue;
                 videoMimeTypes << mimeType.name();
                 filters.nameFilters << mimeType.globPatterns();

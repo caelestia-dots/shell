@@ -984,7 +984,7 @@ LazyListView::PropertyList LazyListView::delegateProperties(int modelIndex) cons
     for (auto it = roleNames.constBegin(); it != roleNames.constEnd(); ++it) {
         const auto name = QString::fromUtf8(it.value());
         props.emplaceBack(name, m_model->data(index, it.key()));
-        if (name == u"modelData"_s)
+        if (name == u"modelData")
             hasModelData = true;
     }
 
