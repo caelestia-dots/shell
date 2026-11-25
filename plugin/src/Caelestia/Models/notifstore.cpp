@@ -29,6 +29,7 @@ namespace {
 
 constexpr qsizetype k_maxPerGroup = 30;
 constexpr qsizetype k_maxTotal = 300;
+constexpr int k_schemaVersion = 1;
 
 constexpr QStringView k_createTable = uR"(
     CREATE TABLE IF NOT EXISTS notifications (
@@ -43,17 +44,18 @@ constexpr QStringView k_createTable = uR"(
         urgency          INTEGER NOT NULL,
         resident         INTEGER NOT NULL DEFAULT 0,
         has_action_icons INTEGER NOT NULL DEFAULT 0,
-        actions          TEXT    NOT NULL DEFAULT '[]'
+        actions          TEXT    NOT NULL DEFAULT '[]',
+        progress         INTEGER NOT NULL DEFAULT -1
     )
 )";
 
 constexpr QStringView k_upsert = uR"(
     INSERT INTO notifications (
         id, time, summary, body, app_icon, app_name, image,
-        expire_timeout, urgency, resident, has_action_icons, actions
+        expire_timeout, urgency, resident, has_action_icons, actions, progress
     ) VALUES (
         :id, :time, :summary, :body, :app_icon, :app_name, :image,
-        :expire_timeout, :urgency, :resident, :has_action_icons, :actions
+        :expire_timeout, :urgency, :resident, :has_action_icons, :actions, :progress
     )
     ON CONFLICT (id) DO UPDATE SET
         summary          = excluded.summary,
@@ -65,12 +67,13 @@ constexpr QStringView k_upsert = uR"(
         urgency          = excluded.urgency,
         resident         = excluded.resident,
         has_action_icons = excluded.has_action_icons,
-        actions          = excluded.actions
+        actions          = excluded.actions,
+        progress         = excluded.progress
 )";
 
 constexpr QStringView k_selectAll = uR"(
     SELECT id, time, summary, body, app_icon, app_name, image,
-           expire_timeout, urgency, resident, has_action_icons, actions
+           expire_timeout, urgency, resident, has_action_icons, actions, progress
     FROM notifications
     ORDER BY time ASC
 )";
@@ -123,6 +126,10 @@ NotifStore::NotifStore(QObject* parent)
     QSqlQuery query(db);
     query.exec(u"PRAGMA journal_mode = WAL"_s);
     query.exec(u"PRAGMA synchronous = NORMAL"_s);
+    if (query.exec(u"PRAGMA user_version"_s) && query.next() && query.value(0).toInt() != k_schemaVersion) {
+        query.exec(u"DROP TABLE IF EXISTS notifications"_s);
+        query.exec(u"PRAGMA user_version = %1"_s.arg(k_schemaVersion));
+    }
     if (!query.exec(k_createTable.toString()))
         qCWarning(lcNotifStore) << "Failed to create table" << query.lastError().text();
 
@@ -145,23 +152,23 @@ QQmlListProperty<NotifData> NotifStore::notifs() {
         } };
 }
 
-QQmlListProperty<NotifData> NotifStore::popups() {
-    return { this, nullptr,
-        [](auto* p) {
-            return static_cast<NotifStore*>(p->object)->m_popups.size();
-        },
-        [](auto* p, qsizetype i) {
-            return static_cast<NotifStore*>(p->object)->m_popups.at(i);
-        } };
-}
-
 QQmlListProperty<NotifGroup> NotifStore::groups() {
     return { this, nullptr,
         [](auto* p) {
-            return static_cast<NotifStore*>(p->object)->m_groups.size();
+            return static_cast<NotifStore*>(p->object)->m_groups.list.size();
         },
         [](auto* p, qsizetype i) {
-            return static_cast<NotifStore*>(p->object)->m_groups.at(i);
+            return static_cast<NotifStore*>(p->object)->m_groups.list.at(i);
+        } };
+}
+
+QQmlListProperty<NotifGroup> NotifStore::popupGroups() {
+    return { this, nullptr,
+        [](auto* p) {
+            return static_cast<NotifStore*>(p->object)->m_popupGroups.list.size();
+        },
+        [](auto* p, qsizetype i) {
+            return static_cast<NotifStore*>(p->object)->m_popupGroups.list.at(i);
         } };
 }
 
@@ -174,19 +181,20 @@ NotifData* NotifStore::add(QObject* backer, bool popup) {
     auto* const notif = new NotifData(backer, this);
     m_notifs.prepend(notif);
     track(notif);
-    addToGroup(notif);
+    addToGroup(m_groups, notif->m_group, notif);
+    emit groupsChanged();
     markDirty(notif);
 
     emit notifsChanged();
     if (popup) {
         notif->m_popup = true;
-        m_popups.prepend(notif);
+        addToGroup(m_popupGroups, notif->m_popupGroup, notif);
+        emit popupGroupsChanged();
         QObject::connect(notif, &NotifData::popupClosed, this, [this, notif] {
-            m_popups.removeOne(notif);
-            emit popupsChanged();
+            if (removeFromGroup(m_popupGroups, notif->m_popupGroup, notif))
+                emit popupGroupsChanged();
         });
         notif->startPopupTimer();
-        emit popupsChanged();
     }
 
     enforceLimits({ notif->m_appName });
@@ -238,17 +246,8 @@ void NotifStore::track(NotifData* notif) {
         remove(notif);
     });
     QObject::connect(notif, &NotifData::appNameChanged, this, [this, notif] {
-        removeFromGroup(notif);
-        addToGroup(notif);
+        regroup(notif);
     });
-
-    const auto syncGroup = [notif] {
-        if (notif->m_group)
-            notif->m_group->sync();
-    };
-    QObject::connect(notif, &NotifData::imageChanged, this, syncGroup);
-    QObject::connect(notif, &NotifData::appIconChanged, this, syncGroup);
-    QObject::connect(notif, &NotifData::urgencyChanged, this, syncGroup);
 
     notif->refreshTimeStr();
     const auto interval = notif->timeStrInterval();
@@ -268,38 +267,66 @@ void NotifStore::refreshTimeStrs() {
     m_timeStrTimer.start(interval);
 }
 
-void NotifStore::addToGroup(NotifData* notif) {
-    auto*& group = m_groupsByName[notif->m_appName];
+void NotifStore::addToGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif) {
+    auto*& group = index.byName[notif->m_appName];
     if (!group) {
         group = new NotifGroup(notif->m_appName, this);
-        m_groups.prepend(group);
-    } else if (const auto index = m_groups.indexOf(group); index > 0) {
-        m_groups.move(index, 0);
+        index.list.prepend(group);
     }
 
-    notif->m_group = group;
-    group->m_notifs.prepend(notif);
-    group->sync();
-    emit group->notifsChanged();
-    emit groupsChanged();
+    slot = group;
+    group->add(notif);
+    repositionGroup(index, group, true);
 }
 
-void NotifStore::removeFromGroup(NotifData* notif) {
-    auto* const group = std::exchange(notif->m_group, nullptr);
+bool NotifStore::removeFromGroup(GroupIndex& index, NotifGroup*& slot, NotifData* notif) {
+    auto* const group = std::exchange(slot, nullptr);
     if (!group)
-        return;
+        return false;
 
-    group->m_notifs.removeOne(notif);
-    if (!group->m_notifs.isEmpty()) {
-        group->sync();
-        emit group->notifsChanged();
-        return;
-    }
+    group->remove(notif);
+    if (!group->m_notifs.isEmpty())
+        return repositionGroup(index, group, false);
 
-    m_groups.removeOne(group);
-    m_groupsByName.remove(group->m_appName);
-    emit groupsChanged();
+    index.list.removeOne(group);
+    index.byName.remove(group->m_appName);
     group->release();
+    return true;
+}
+
+bool NotifStore::repositionGroup(GroupIndex& index, NotifGroup* group, bool tiesFirst) {
+    const auto from = index.list.indexOf(group);
+    const auto newest = group->m_notifs.first()->m_createdAt;
+
+    qsizetype to = 0;
+    for (; to < index.list.size(); ++to) {
+        auto* const other = index.list.at(to);
+        if (other == group)
+            continue;
+        const auto otherNewest = other->m_notifs.first()->m_createdAt;
+        if (otherNewest < newest || (tiesFirst && otherNewest == newest))
+            break;
+    }
+    if (to > from)
+        --to;
+
+    if (to == from)
+        return false;
+    index.list.move(from, to);
+    return true;
+}
+
+void NotifStore::regroup(NotifData* notif) {
+    removeFromGroup(m_groups, notif->m_group, notif);
+    addToGroup(m_groups, notif->m_group, notif);
+    emit groupsChanged();
+
+    if (!notif->m_popup)
+        return;
+
+    removeFromGroup(m_popupGroups, notif->m_popupGroup, notif);
+    addToGroup(m_popupGroups, notif->m_popupGroup, notif);
+    emit popupGroupsChanged();
 }
 
 void NotifStore::markDirty(NotifData* notif) {
@@ -339,6 +366,7 @@ void NotifStore::save(const NotifData* notif) {
     query.bindValue(u":resident"_s, notif->m_resident);
     query.bindValue(u":has_action_icons"_s, notif->m_hasActionIcons);
     query.bindValue(u":actions"_s, serialiseActions(notif->m_actions));
+    query.bindValue(u":progress"_s, notif->m_progress);
 
     if (!query.exec())
         qCWarning(lcNotifStore) << "Failed to save" << notif->m_id << query.lastError().text();
@@ -354,9 +382,10 @@ void NotifStore::remove(NotifData* notif) {
 
     if (m_notifs.removeOne(notif))
         emit notifsChanged();
-    if (m_popups.removeOne(notif))
-        emit popupsChanged();
-    removeFromGroup(notif);
+    if (removeFromGroup(m_groups, notif->m_group, notif))
+        emit groupsChanged();
+    if (removeFromGroup(m_popupGroups, notif->m_popupGroup, notif))
+        emit popupGroupsChanged();
 }
 
 void NotifStore::loadNotifs() {
@@ -384,13 +413,14 @@ void NotifStore::loadNotifs() {
         notif->m_resident = query.value(9).toBool();
         notif->m_hasActionIcons = query.value(10).toBool();
         notif->m_actions = deserialiseActions(notif, query.value(11).toString());
+        notif->m_progress = query.value(12).toInt();
         m_notifs.prepend(notif);
         track(notif);
-        addToGroup(notif);
+        addToGroup(m_groups, notif->m_group, notif);
     }
 
     emit notifsChanged();
-    emit popupsChanged();
+    emit groupsChanged();
 
     QSet<QString> groups;
     for (const auto* notif : std::as_const(m_notifs))
