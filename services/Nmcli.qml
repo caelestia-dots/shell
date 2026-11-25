@@ -199,7 +199,6 @@ Singleton {
             if (index >= 0) {
                 activeProcesses.splice(index, 1);
             }
-            proc.destroy();
         });
 
         Qt.callLater(() => {
@@ -1767,41 +1766,35 @@ Singleton {
             exitCode = code;
 
             Qt.callLater(() => {
-                if (callbackCalled) {
-                    processFinished();
+                processFinished();
+                proc.destroy();
+
+                if (callbackCalled || !proc.callback)
                     return;
+
+                const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
+                const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
+                const success = exitCode === 0;
+                const cmdIsConnection = isConnectionCommand(proc.cmdArgs);
+
+                if (root.handlePasswordRequired(proc, error, output, exitCode))
+                    return;
+
+                const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
+
+                if (!success && cmdIsConnection && root.pendingConnection) {
+                    const failedSsid = root.pendingConnection.ssid;
+                    root.connectionFailed(failedSsid);
                 }
 
-                if (proc.callback) {
-                    const output = (stdoutCollector && stdoutCollector.text) ? stdoutCollector.text : "";
-                    const error = (stderrCollector && stderrCollector.text) ? stderrCollector.text : "";
-                    const success = exitCode === 0;
-                    const cmdIsConnection = isConnectionCommand(proc.cmdArgs);
-
-                    if (root.handlePasswordRequired(proc, error, output, exitCode)) {
-                        processFinished();
-                        return;
-                    }
-
-                    const needsPassword = cmdIsConnection && root.detectPasswordRequired(error);
-
-                    if (!success && cmdIsConnection && root.pendingConnection) {
-                        const failedSsid = root.pendingConnection.ssid;
-                        root.connectionFailed(failedSsid);
-                    }
-
-                    callbackCalled = true;
-                    callback({
-                        success: success,
-                        output: output,
-                        error: error,
-                        exitCode: proc.exitCode,
-                        needsPassword: needsPassword || false
-                    });
-                    processFinished();
-                } else {
-                    processFinished();
-                }
+                callbackCalled = true;
+                callback({
+                    success: success,
+                    output: output,
+                    error: error,
+                    exitCode: proc.exitCode,
+                    needsPassword: needsPassword || false
+                });
             });
         }
     }
