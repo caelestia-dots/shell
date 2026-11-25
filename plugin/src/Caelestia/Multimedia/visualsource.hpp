@@ -2,6 +2,7 @@
 
 #include <qmediaplayer.h>
 #include <qobject.h>
+#include <qpointer.h>
 #include <qqmlintegration.h>
 #include <qquickitem.h>
 #include <qrect.h>
@@ -73,6 +74,8 @@ public:
     [[nodiscard]] QQuickItem* sizeSource() const;
     void setSizeSource(QQuickItem* sizeSource);
 
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 signals:
     void typeChanged();
     void videoReadyChanged();
@@ -120,6 +123,7 @@ private:
     qint64 m_position = 0;
     bool m_loading = false;
     std::atomic<quint32> m_generation = 0;
+    QPointer<QQuickWindow> m_window;
     QMetaObject::Connection m_windowConn;
     QMetaObject::Connection m_sinkConn;
     QMediaPlayer m_player;

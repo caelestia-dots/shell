@@ -1,5 +1,6 @@
 #include "visualsource.hpp"
 
+#include <qcoreevent.h>
 #include <qmimedatabase.h>
 #include <qquickwindow.h>
 #include <qscopeguard.h>
@@ -142,7 +143,6 @@ void VisualSource::setSizeSource(QQuickItem* sizeSource) {
 
     if (m_sizeSource)
         QObject::disconnect(m_sizeSource, nullptr, this, nullptr);
-    QObject::disconnect(m_windowConn);
 
     m_sizeSource = sizeSource;
     emit sizeSourceChanged();
@@ -151,9 +151,14 @@ void VisualSource::setSizeSource(QQuickItem* sizeSource) {
         QObject::connect(m_sizeSource, &QQuickItem::widthChanged, this, &VisualSource::refresh);
         QObject::connect(m_sizeSource, &QQuickItem::heightChanged, this, &VisualSource::refresh);
         QObject::connect(m_sizeSource, &QQuickItem::windowChanged, this, &VisualSource::watchWindow);
-        watchWindow(m_sizeSource->window());
     }
-    refresh();
+    watchWindow(m_sizeSource ? m_sizeSource->window() : nullptr);
+}
+
+bool VisualSource::eventFilter(QObject* watched, QEvent* event) {
+    if (event->type() == QEvent::DevicePixelRatioChange)
+        refresh();
+    return QObject::eventFilter(watched, event);
 }
 
 void VisualSource::setType(Type type) {
@@ -216,8 +221,14 @@ void VisualSource::setImagePath(const QUrl& imagePath) {
 
 void VisualSource::watchWindow(QQuickWindow* window) {
     QObject::disconnect(m_windowConn);
-    if (window)
+    if (m_window)
+        m_window->removeEventFilter(this);
+
+    m_window = window;
+    if (window) {
         m_windowConn = QObject::connect(window, &QWindow::screenChanged, this, &VisualSource::refresh);
+        window->installEventFilter(this);
+    }
     refresh();
 }
 
