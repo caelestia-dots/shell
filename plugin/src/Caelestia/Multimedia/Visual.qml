@@ -49,6 +49,7 @@ Item {
         source: vis.imagePath
         sourceSize: vis.sourceSize
         asynchronous: true
+        autoTransform: true
         fillMode: vis.fillMode
     }
 }

@@ -1,5 +1,6 @@
 #include "ktxencoder.hpp"
 
+#include <qimageiohandler.h>
 #include <qimagereader.h>
 #include <qtconcurrentmap.h>
 
@@ -58,6 +59,10 @@ void gatherBlock(const QImage& image, int bx, int by, quint8* out) {
     }
 }
 
+bool rotates(const QImageReader& reader) {
+    return reader.transformation().testFlag(QImageIOHandler::TransformationRotate90);
+}
+
 } // namespace
 
 Fit fitFor(const QSize& native, const QSize& bucket, Qt::AspectRatioMode mode) {
@@ -84,8 +89,10 @@ QImage readFitted(const QString& path, const QSize& bucket, Qt::AspectRatioMode 
     if (!native.isValid())
         return fitted(reader.read(), bucket, mode);
 
-    const auto fit = fitFor(native, bucket, mode);
-    reader.setScaledSize(fit.scaled);
+    // The reader scales before it transforms
+    const auto rotated = rotates(reader);
+    const auto fit = fitFor(rotated ? native.transposed() : native, bucket, mode);
+    reader.setScaledSize(rotated ? fit.scaled.transposed() : fit.scaled);
     auto image = reader.read();
     if (image.isNull() || fit.crop.size() == fit.scaled)
         return image;
