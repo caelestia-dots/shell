@@ -80,6 +80,10 @@ LazyListView {
             onRequestExpand: expand => root.requestExpand(expand)
             onSwiped: root.swiped(modelData)
             onDismissed: modelData.dismiss()
+            onClicked: event => {
+                if (GlobalConfig.notifs.actionOnClick && event.button === Qt.LeftButton && !dragged)
+                    modelData.invokeDefaultAction();
+            }
 
             Connections {
                 function onClosed(): void {
