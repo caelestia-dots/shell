@@ -310,11 +310,8 @@ CustomMouseArea {
         function onUtilitiesChanged() {
             if (root.screenState.utilities) {
                 // Utilities became visible, immediately check if this should be shortcut mode
-                // Use unscaled height to avoid false positive during open animation
-                const panelY = root.borderThickness + root.panels.utilities.y;
-                const panelX = root.bar.implicitWidth + root.panels.utilities.x;
-                const inUtilitiesArea = root.mouseY >= panelY - Config.border.rounding && root.mouseY <= panelY + root.panels.utilities.height + Config.border.rounding && root.mouseX >= panelX - Config.border.rounding;
-                if (!inUtilitiesArea) {
+                const inUtilitiesArea = root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY, true);
+                if (!Config.utilities.showOnHover || !inUtilitiesArea) {
                     root.utilitiesShortcutActive = true;
                 }
             } else {
