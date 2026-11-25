@@ -158,6 +158,7 @@ Item {
                 y: rect.y
                 implicitWidth: rect.width
                 implicitHeight: rect.height
+                vertexShader: Shaders.passthrough
                 fragmentShader: Shaders.occluder
             }
         }
@@ -228,6 +229,7 @@ Item {
             y: rect.y - thick
             implicitWidth: rect.width + thick * 2
             implicitHeight: rect.height + thick * 2
+            vertexShader: Shaders.passthrough
             fragmentShader: Shaders.superellipse
 
             opacity: root.highlight ? 1 : 0
