@@ -25,13 +25,13 @@ Scope {
     CustomShortcut {
         // qmllint enable unresolved-type
         name: "showall"
-        description: "Toggle all panels"
+        description: "Toggle launcher, dashboard, utilities and sidebar"
         onPressed: {
             if (root.hasFullscreen)
                 return;
             const v = ShellState.forActive();
-            const anyOpen = v.launcher || v.dashboard || v.osd || v.utilities || v.sidebar;
-            v.launcher = v.dashboard = v.osd = v.utilities = v.sidebar = !anyOpen;
+            const anyOpen = v.launcher || v.dashboard || v.utilities || v.sidebar;
+            v.launcher = v.dashboard = v.utilities = v.sidebar = !anyOpen;
             if (!Config.bar.persistent)
                 v.bar = !anyOpen;
         }
