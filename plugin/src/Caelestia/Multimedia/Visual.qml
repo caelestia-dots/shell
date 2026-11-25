@@ -16,6 +16,7 @@ Item {
     readonly property bool ready: vis.videoReady || image.status === Image.Ready
 
     opacity: !animate || ready ? 1 : 0
+    clip: true
 
     Behavior on opacity {
         NumberAnimation {
@@ -34,7 +35,11 @@ Item {
     Loader {
         id: videoOut
 
-        anchors.fill: parent
+        x: vis.imageRect.x
+        y: vis.imageRect.y
+        width: vis.imageRect.width
+        height: vis.imageRect.height
+
         active: vis.type === VisualSource.Live
         sourceComponent: VideoOutput {
             fillMode: vis.fillMode
@@ -45,7 +50,11 @@ Item {
     Image {
         id: image
 
-        anchors.fill: parent
+        x: vis.imageRect.x
+        y: vis.imageRect.y
+        width: vis.imageRect.width
+        height: vis.imageRect.height
+
         source: vis.imagePath
         sourceSize: vis.sourceSize
         asynchronous: true

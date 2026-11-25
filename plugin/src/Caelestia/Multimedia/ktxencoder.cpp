@@ -63,10 +63,27 @@ bool rotates(const QImageReader& reader) {
     return reader.transformation().testFlag(QImageIOHandler::TransformationRotate90);
 }
 
+// Rounds like QQuickImageProviderWithOptions::loadSize
+QSize coverSize(const QSize& native, const QSize& bucket) {
+    const auto ratio = std::max(
+        static_cast<qreal>(bucket.width()) / native.width(), static_cast<qreal>(bucket.height()) / native.height());
+    return { qRound(native.width() * ratio), qRound(native.height() * ratio) };
+}
+
 } // namespace
 
 Fit fitFor(const QSize& native, const QSize& bucket, Qt::AspectRatioMode mode) {
-    auto scaled = mode == Qt::IgnoreAspectRatio ? bucket.boundedTo(native) : native.scaled(bucket, mode);
+    if (native.isEmpty())
+        return {};
+
+    QSize scaled;
+    if (mode == Qt::IgnoreAspectRatio)
+        scaled = bucket.boundedTo(native);
+    else if (mode == Qt::KeepAspectRatioByExpanding)
+        scaled = coverSize(native, bucket);
+    else
+        scaled = native.scaled(bucket, mode);
+
     if (scaled.width() > native.width() || scaled.height() > native.height())
         scaled = native;
 
@@ -79,6 +96,16 @@ QImage fitted(const QImage& image, const QSize& bucket, Qt::AspectRatioMode mode
     const auto fit = fitFor(image.size(), bucket, mode);
     const auto scaled = image.scaled(fit.scaled, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     return fit.crop.size() == fit.scaled ? scaled : scaled.copy(fit.crop);
+}
+
+Cover coverFor(const QString& path, const QSize& bucket) {
+    const QImageReader reader(path);
+    const auto native = reader.size();
+    if (native.isEmpty())
+        return {};
+
+    const auto rotated = rotates(reader);
+    return { .size = coverSize(rotated ? native.transposed() : native, bucket), .transposed = rotated };
 }
 
 QImage readFitted(const QString& path, const QSize& bucket, Qt::AspectRatioMode mode) {

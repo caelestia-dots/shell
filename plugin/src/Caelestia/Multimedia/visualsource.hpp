@@ -4,6 +4,7 @@
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qquickitem.h>
+#include <qrect.h>
 #include <qsize.h>
 #include <qurl.h>
 #include <qvideoframe.h>
@@ -20,6 +21,8 @@ class VisualSource : public QObject {
     Q_PROPERTY(bool videoReady READ videoReady NOTIFY videoReadyChanged)
     // The decode size for imagePath, in logical pixels for scalable sources and device pixels otherwise
     Q_PROPERTY(QSize sourceSize READ sourceSize NOTIFY sourceSizeChanged)
+    // Where to draw the image or video in sizeSource, may overflow it so the texture maps 1:1 to device pixels
+    Q_PROPERTY(QRectF imageRect READ imageRect NOTIFY imageRectChanged)
     // The path to the image (source or a cached file when type is Still), or preview if type is Live.
     // The preview is cleared when the video is ready.
     Q_PROPERTY(QUrl imagePath READ imagePath NOTIFY imagePathChanged)
@@ -52,6 +55,7 @@ public:
     [[nodiscard]] Type type() const;
     [[nodiscard]] bool videoReady() const;
     [[nodiscard]] QSize sourceSize() const;
+    [[nodiscard]] QRectF imageRect() const;
     [[nodiscard]] QUrl imagePath() const;
 
     [[nodiscard]] QString source() const;
@@ -73,6 +77,7 @@ signals:
     void typeChanged();
     void videoReadyChanged();
     void sourceSizeChanged();
+    void imageRectChanged();
     void imagePathChanged();
     void sourceChanged();
     void playingChanged();
@@ -84,8 +89,10 @@ private:
     void setType(Type type);
     void setVideoReady(bool videoReady);
     void setSourceSize(const QSize& sourceSize);
+    void updateImageRect();
     void setImagePath(const QUrl& imagePath);
     void refresh();
+    void loadBucket(const QSize& bucket);
     void watchWindow(QQuickWindow* window);
     void onVideoFrame(const QVideoFrame& frame);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
@@ -98,6 +105,7 @@ private:
     Type m_type = Type::Unknown;
     bool m_videoReady = false;
     QSize m_sourceSize;
+    QRectF m_imageRect;
     bool m_scalable = false;
     QUrl m_imagePath;
     QString m_source;
@@ -107,6 +115,7 @@ private:
     QQuickItem* m_sizeSource = nullptr;
     QString m_key;
     QSize m_bucket;
+    QSize m_textureSize;
     QUrl m_preview;
     qint64 m_position = 0;
     bool m_loading = false;
