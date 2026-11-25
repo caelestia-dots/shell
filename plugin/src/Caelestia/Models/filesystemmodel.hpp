@@ -5,15 +5,17 @@
 #include <qdiriterator.h>
 #include <qfilesystemwatcher.h>
 #include <qfuture.h>
-#include <qimagereader.h>
 #include <qmimedatabase.h>
+#include <qmimetype.h>
 #include <qobject.h>
 #include <qqmlintegration.h>
 #include <qqmllist.h>
 
+#include "util/refgated.hpp"
+
 namespace caelestia::shell::models {
 
-class FileSystemEntry : public QObject {
+class FileSystemEntry : public util::RefGated {
     Q_OBJECT
     QML_ELEMENT
     QML_UNCREATABLE("FileSystemEntry instances can only be retrieved from a FileSystemModel")
@@ -28,6 +30,7 @@ class FileSystemEntry : public QObject {
     Q_PROPERTY(bool isDir READ isDir CONSTANT)
     Q_PROPERTY(bool isImage READ isImage CONSTANT)
     Q_PROPERTY(QString mimeType READ mimeType CONSTANT)
+    Q_PROPERTY(QString mimeComment READ mimeComment CONSTANT)
 
 public:
     explicit FileSystemEntry(const QString& path, QString relativePath, QObject* parent = nullptr);
@@ -42,6 +45,7 @@ public:
     [[nodiscard]] bool isDir() const;
     [[nodiscard]] bool isImage() const;
     [[nodiscard]] QString mimeType() const;
+    [[nodiscard]] QString mimeComment() const;
 
     void updateRelativePath(const QDir& dir);
 
@@ -57,8 +61,12 @@ private:
     mutable bool m_isImage;
     mutable bool m_isImageInitialised;
 
-    mutable QString m_mimeType;
-    mutable bool m_mimeTypeInitialised;
+    mutable QMimeType m_mime;
+    mutable bool m_mimeInitialised;
+
+    [[nodiscard]] const QMimeType& mime() const;
+
+    friend class FileSystemModel;
 };
 
 class FileSystemModel : public QAbstractListModel {
@@ -135,7 +143,7 @@ private:
     struct ScanFilters {
         QStringList nameFilters;
         QDir::Filters filters;
-        std::function<bool(const QString&)> filterFn = nullptr;
+        std::function<bool(const QFileInfo&)> filterFn = nullptr;
     };
 
     QDir m_dir;

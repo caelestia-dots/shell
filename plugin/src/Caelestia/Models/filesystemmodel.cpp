@@ -1,25 +1,25 @@
 #include "filesystemmodel.hpp"
 
 #include <qdiriterator.h>
-#include <qmediaformat.h>
 #include <qtconcurrentrun.h>
 
 #include <algorithm>
 #include <optional>
 #include <utility>
 
+#include "util/mediatypes.hpp"
+
 namespace caelestia::shell::models {
 
-using Qt::StringLiterals::operator""_s;
 using Qt::StringLiterals::operator""_ba;
 
 FileSystemEntry::FileSystemEntry(const QString& path, QString relativePath, QObject* parent)
-    : QObject(parent)
+    : util::RefGated(parent)
     , m_fileInfo(path)
     , m_path(path)
     , m_relativePath(std::move(relativePath))
     , m_isImageInitialised(false)
-    , m_mimeTypeInitialised(false) {}
+    , m_mimeInitialised(false) {}
 
 QString FileSystemEntry::path() const {
     return m_path;
@@ -55,20 +55,30 @@ bool FileSystemEntry::isDir() const {
 
 bool FileSystemEntry::isImage() const {
     if (!m_isImageInitialised) {
-        const QImageReader reader(m_path);
-        m_isImage = reader.canRead();
+        m_isImage = util::media::isImage(m_path);
         m_isImageInitialised = true;
     }
     return m_isImage;
 }
 
 QString FileSystemEntry::mimeType() const {
-    if (!m_mimeTypeInitialised) {
+    return mime().name();
+}
+
+QString FileSystemEntry::mimeComment() const {
+    auto comment = mime().comment();
+    if (!comment.isEmpty())
+        comment.front() = comment.front().toUpper();
+    return comment;
+}
+
+const QMimeType& FileSystemEntry::mime() const {
+    if (!m_mimeInitialised) {
         static const QMimeDatabase k_db;
-        m_mimeType = k_db.mimeTypeForFile(m_path).name();
-        m_mimeTypeInitialised = true;
+        m_mime = k_db.mimeTypeForFile(m_path);
+        m_mimeInitialised = true;
     }
-    return m_mimeType;
+    return m_mime;
 }
 
 void FileSystemEntry::updateRelativePath(const QDir& dir) {
@@ -270,7 +280,8 @@ void FileSystemModel::updateEntries() {
     if (m_path.isEmpty()) {
         if (!m_entries.isEmpty()) {
             beginResetModel();
-            qDeleteAll(m_entries);
+            for (auto* const entry : std::as_const(m_entries))
+                entry->release();
             m_entries.clear();
             endResetModel();
             emit entriesChanged();
@@ -337,37 +348,26 @@ FileSystemModel::ScanFilters FileSystemModel::filtersFor(
     const bool dirs = filter.testFlag(Filter::Dirs);
 
     if (!allFiles && (images || videos)) {
-        if (images) {
-            const auto formats = QImageReader::supportedImageFormats();
-            for (const auto& format : formats)
-                filters.nameFilters << u"*."_s + QString::fromUtf8(format);
+        if (filters.nameFilters.isEmpty()) {
+            if (images)
+                filters.nameFilters << util::media::imageGlobs();
+            if (videos)
+                filters.nameFilters << util::media::videoGlobs();
         }
 
-        QSet<QString> videoMimeTypes;
-        if (videos) {
-            const auto formats = QMediaFormat().supportedFileFormats(QMediaFormat::Decode);
-            for (const auto format : formats) {
-                const auto mimeType = QMediaFormat(format).mimeType();
-                if (!mimeType.name().startsWith(u"video/"))
-                    continue;
-                videoMimeTypes << mimeType.name();
-                filters.nameFilters << mimeType.globPatterns();
-            }
-        }
-
-        filters.filterFn = [images, videoMimeTypes](const QString& path) {
-            return (images && QImageReader(path).canRead()) ||
-                   videoMimeTypes.contains(QMimeDatabase().mimeTypeForFile(path).name());
+        filters.filterFn = [images, videos](const QFileInfo& info) {
+            return info.isDir() || (images && util::media::isImage(info.filePath())) ||
+                   (videos && util::media::isVideo(info.filePath()));
         };
     }
 
     const bool files = allFiles || images || videos;
     if (!files && !dirs)
-        filters.filters = QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot;
+        filters.filters = QDir::Files | QDir::Dirs | QDir::AllDirs | QDir::NoDotAndDotDot;
     if (files)
         filters.filters |= QDir::Files;
     if (dirs)
-        filters.filters |= QDir::Dirs | QDir::NoDotAndDotDot;
+        filters.filters |= QDir::Dirs | QDir::AllDirs | QDir::NoDotAndDotDot;
 
     if (showHidden)
         filters.filters |= QDir::Hidden;
@@ -389,7 +389,7 @@ std::optional<QSet<QString>> FileSystemModel::scanDir(const QString& dir, const 
             return std::nullopt;
 
         const QString path = iter->next();
-        if (filters.filterFn && !filters.filterFn(path))
+        if (filters.filterFn && !filters.filterFn(iter->fileInfo()))
             continue;
 
         paths.insert(path);
@@ -422,7 +422,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
         } else {
             beginRemoveRows(QModelIndex(), end, start);
             for (int i = start; i >= end; --i) {
-                m_entries.takeAt(i)->deleteLater();
+                m_entries.takeAt(i)->release();
             }
             endRemoveRows();
 
@@ -433,7 +433,7 @@ void FileSystemModel::applyChanges(const QSet<QString>& removedPaths, const QSet
     if (start != -1) {
         beginRemoveRows(QModelIndex(), end, start);
         for (int i = start; i >= end; --i) {
-            m_entries.takeAt(i)->deleteLater();
+            m_entries.takeAt(i)->release();
         }
         endRemoveRows();
     }

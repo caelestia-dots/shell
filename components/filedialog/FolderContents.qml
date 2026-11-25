@@ -2,68 +2,221 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtCore
 import Quickshell
+import M3Shapes
+import Caelestia.Components
 import Caelestia.Config
 import Caelestia.I18n
 import Caelestia.Models
 import Caelestia.Multimedia
 import Caelestia.Scheme
 import qs.components
+import qs.components.containers
 import qs.components.controls
-import qs.components.effects
-import qs.components.filedialog
 import qs.utils
 
 Item {
     id: root
 
-    required property var dialog
-    readonly property FileEntry currentItem: view.currentItem as FileEntry
+    required property DialogState dState
 
-    StyledRect {
-        anchors.fill: parent
-        color: Colours.tPalette.surfaceContainer
+    property string currentDir: dState.cwd.join("/") || "/"
 
-        layer.enabled: true
-        layer.effect: Mask {
-            maskSource: mask
-            maskInverted: true
-        }
+    readonly property var locToIcon: {
+        return {
+            [Paths.location(StandardPaths.HomeLocation)]: "home",
+            [Paths.location(StandardPaths.DesktopLocation)]: "desktop",
+            [Paths.location(StandardPaths.DocumentsLocation)]: "documents",
+            [Paths.location(StandardPaths.DownloadLocation)]: "downloads",
+            [Paths.location(StandardPaths.MusicLocation)]: "music",
+            [Paths.location(StandardPaths.PicturesLocation)]: "pictures",
+            [Paths.location(StandardPaths.PublicShareLocation)]: "public",
+            [Paths.location(StandardPaths.TemplatesLocation)]: "templates",
+            [Paths.location(StandardPaths.MoviesLocation)]: "videos",
+            [Paths.location(StandardPaths.HomeLocation) + "/Games"]: "games",
+            [Paths.location(StandardPaths.HomeLocation) + "/.steam"]: "steam",
+            [Paths.location(StandardPaths.GenericDataLocation) + "/Steam"]: "steam",
+            [Paths.location(StandardPaths.HomeLocation) + "/.wine"]: "wine",
+            [Paths.location(StandardPaths.HomeLocation) + "/VirtualBox VMs"]: "vbox",
+            [Paths.location(StandardPaths.HomeLocation) + "/vmware"]: "vmware",
+            [Paths.location(StandardPaths.HomeLocation) + "/Dropbox"]: "dropbox",
+            [Paths.location(StandardPaths.HomeLocation) + "/Nextcloud"]: "nextcloud",
+            [Paths.location(StandardPaths.HomeLocation) + "/OneDrive"]: "onedrive",
+            [Paths.location(StandardPaths.HomeLocation) + "/MEGA"]: "mega",
+            [Paths.location(StandardPaths.HomeLocation) + "/Sync"]: "syncthing"
+        };
     }
 
-    Item {
-        id: mask
+    function getSource(file: FileSystemEntry): string {
+        if (!file.isDir) {
+            if (MediaUtils.isSupported(file.path))
+                return file.path;
+            return Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
+        }
 
-        anchors.fill: parent
-        layer.enabled: true
-        visible: false
+        if (locToIcon[file.path])
+            return Quickshell.iconPath("folder-" + locToIcon[file.path], "inode-directory");
 
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: Tokens.padding.extraSmall
-            radius: Tokens.rounding.medium
+        if (file.name === ".git")
+            return Quickshell.iconPath("folder-git", "inode-directory");
+        if (file.name === ".github")
+            return Quickshell.iconPath("folder-github", "inode-directory");
+
+        return Quickshell.iconPath("inode-directory");
+    }
+
+    function navBy(delta: int): void {
+        if (grid.count === 0)
+            return;
+
+        const cur = filtered.indexOf(dState.selectedPath);
+        const next = Math.max(0, Math.min(grid.count - 1, cur + delta));
+        dState.select(filtered.entryAt(next));
+    }
+
+    function navLeft(): void {
+        navBy(-1);
+    }
+
+    function navRight(): void {
+        navBy(1);
+    }
+
+    function navUp(): void {
+        navBy(-grid.resolvedColumns);
+    }
+
+    function navDown(): void {
+        navBy(grid.resolvedColumns);
+    }
+
+    Component.onCompleted: model.path = currentDir
+    onCurrentDirChanged: {
+        model.path = "";
+        model.path = currentDir;
+        dState.select(null);
+    }
+
+    Behavior on currentDir {
+        SequentialAnimation {
+            Anim {
+                target: view
+                property: "opacity"
+                to: 0
+                type: Anim.FastEffects
+            }
+            PropertyAction {}
+            Anim {
+                target: view
+                property: "opacity"
+                to: 1
+                type: Anim.DefaultEffects
+            }
         }
     }
 
     Loader {
         asynchronous: true
-        anchors.centerIn: parent
+        anchors.fill: parent
 
-        opacity: view.count === 0 ? 1 : 0
+        opacity: grid.count === 0 ? 1 : 0
         active: opacity > 0
+        z: active ? 1 : 0
 
-        sourceComponent: ColumnLayout {
-            MaterialIcon {
-                Layout.alignment: Qt.AlignHCenter
-                text: "scan_delete"
-                color: Colours.palette.outline
-                fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).weight(Font.Medium).build()
+        sourceComponent: MouseArea {
+            id: noFiles
+
+            property int clicks
+            property int exitTrigger
+
+            onPressed: clicks++
+            opacity: clicks > 10 && clicks < 15 ? 0 : 1
+
+            Behavior on opacity {
+                Anim {
+                    type: Anim.SlowEffects
+                }
             }
 
-            StyledText {
-                text: Tr.tr("This folder is empty")
-                color: Colours.palette.outline
-                font: Tokens.font.body.builders.large.weight(Font.Medium).build()
+            Timer {
+                running: noFiles.clicks >= 16
+                interval: Tokens.anim.durations.expressiveFastEffects + Tokens.anim.durations.expressiveDefaultEffects
+                onTriggered: {
+                    if (noFiles.exitTrigger === 0) {
+                        interval = 300;
+                        running = true;
+                    } else if (noFiles.exitTrigger === 1) {
+                        noFiles.opacity = 0;
+                        interval = Tokens.anim.durations.expressiveSlowEffects;
+                        running = true;
+                    } else {
+                        root.dState.rejected();
+                    }
+                    noFiles.exitTrigger++;
+                }
+            }
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: Tokens.spacing.extraSmall
+
+                MaterialShape {
+                    Layout.alignment: Qt.AlignHCenter
+                    color: Colours.tPalette.surfaceContainerHigh
+                    shape: MaterialShape.Ghostish
+                    implicitSize: noFilesIcon.implicitHeight + Tokens.padding.large * 2
+
+                    MaterialIcon {
+                        id: noFilesIcon
+
+                        anchors.centerIn: parent
+                        text: "folder_open"
+                        color: Colours.palette.onSurfaceVariant
+                        fontStyle: Tokens.font.icon.extraLarge
+                    }
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+                }
+
+                StyledText {
+                    Layout.topMargin: Tokens.spacing.small
+                    Layout.alignment: Qt.AlignHCenter
+                    text: {
+                        if (noFiles.clicks >= 12)
+                            return Tr.tr("This folder is done with you");
+                        if (noFiles.clicks >= 6)
+                            return Tr.tr("This folder is annoyed");
+                        return Tr.tr("This folder is empty");
+                    }
+                    color: Colours.palette.onSurfaceVariant
+                    font: Tokens.font.title.medium
+                    animate: true
+                }
+
+                StyledText {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: {
+                        if (noFiles.clicks >= 16)
+                            return Tr.tr("You win. I'm out.");
+                        if (noFiles.clicks >= 12)
+                            return Tr.tr("Why are you still here?? Go touch some grass.");
+                        if (noFiles.clicks >= 8)
+                            return Tr.tr("I really will leave...");
+                        if (noFiles.clicks >= 6)
+                            return Tr.tr("That's it, I'm leaving.");
+                        if (noFiles.clicks >= 3)
+                            return Tr.tr("Stop clicking me. Can't a folder be empty in peace?");
+                        if (noFiles.clicks >= 1)
+                            return Tr.tr("Hey. There really is nothing here...");
+                        return Tr.tr("Nothing to see here... I mean it, really.");
+                    }
+                    color: Colours.palette.outline
+                    font: Tokens.font.body.medium
+                    animate: true
+                }
             }
         }
 
@@ -74,109 +227,91 @@ Item {
         }
     }
 
-    GridView {
+    VerticalFadeFlickable {
         id: view
 
         anchors.fill: parent
-        anchors.margins: Tokens.padding.extraSmall + Tokens.padding.medium
+        anchors.margins: Tokens.padding.medium
+        anchors.rightMargin: Tokens.padding.small + Tokens.padding.medium
 
-        cellWidth: Sizes.itemWidth + Tokens.spacing.small
-        cellHeight: Sizes.itemWidth + Tokens.spacing.large + Tokens.padding.medium * 2 + 1
+        contentWidth: width
+        contentHeight: grid.implicitHeight
 
         clip: true
-        focus: true
-        currentIndex: -1
-        Keys.onEscapePressed: currentIndex = -1
-
-        Keys.onReturnPressed: {
-            if (root.dialog.selectionValid)
-                root.dialog.accepted((currentItem as FileEntry).modelData.path);
-        }
-        Keys.onEnterPressed: {
-            if (root.dialog.selectionValid)
-                root.dialog.accepted((currentItem as FileEntry).modelData.path);
-        }
 
         StyledScrollBar.vertical: StyledScrollBar {
             flickable: view
         }
 
-        model: FileSystemModel {
-            path: {
-                if (root.dialog.cwd[0] === "Home")
-                    return Paths.home + `/${root.dialog.cwd.slice(1).join("/")}`;
-                else
-                    return root.dialog.cwd.join("/");
-            }
-            onPathChanged: view.currentIndex = -1
-        }
+        LazyGridView {
+            id: grid
 
-        delegate: FileEntry {}
+            anchors.left: parent.left
+            anchors.right: parent.right
+            implicitHeight: contentHeight
 
-        add: Transition {
-            Anim {
-                properties: "opacity,scale"
-                from: 0
-                to: 1
-            }
-        }
+            cellWidth: Tokens.sizes.fileDialog.itemWidth
+            columnSpacing: Tokens.spacing.extraSmall
+            rowSpacing: Tokens.spacing.extraSmall
+            removeDuration: Tokens.anim.durations.expressiveDefaultEffects
 
-        remove: Transition {
-            Anim {
-                type: Anim.DefaultEffects
-                property: "opacity"
-                to: 0
-            }
-            Anim {
-                property: "scale"
-                to: 0.5
-            }
-        }
+            useCustomViewport: true
+            viewport: Qt.rect(0, view.contentY, width, view.height)
 
-        displaced: Transition {
-            Anim {
-                type: Anim.DefaultEffects
-                properties: "opacity,scale"
-                to: 1
-                easing: Tokens.anim.standardDecel
+            model: FilterModel {
+                id: filtered
+
+                filter: root.dState.save ? "" : root.dState.search
+                propertyName: "name"
+                sourceModel: FileSystemModel {
+                    id: model
+
+                    showHidden: root.dState.showHidden
+                }
             }
-            Anim {
-                properties: "x,y"
+
+            delegate: FileEntry {}
+
+            FrameAnimation {
+                running: grid.animating
+                onTriggered: grid.step(frameTime)
             }
         }
     }
 
-    CurrentItem {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Tokens.padding.extraSmall
-
-        currentItem: view.currentItem
-    }
-
-    component FileEntry: StyledRect {
+    component FileEntry: Item {
         id: item
 
-        required property int index
         required property FileSystemEntry modelData
 
-        readonly property real nonAnimHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
+        readonly property bool isCurrentItem: modelData && root.dState.selectedPath === modelData
+        readonly property int radius: Tokens.rounding.largeIncreased
 
-        implicitWidth: Sizes.itemWidth
-        implicitHeight: nonAnimHeight
+        implicitWidth: Tokens.sizes.fileDialog.itemWidth
+        implicitHeight: icon.implicitHeight + name.anchors.topMargin + name.implicitHeight + Tokens.padding.medium * 2
 
-        radius: Tokens.rounding.large
-        color: GridView.isCurrentItem ? Colours.tPalette.surfaceContainerHighest : Qt.alpha(Colours.tPalette.surfaceContainerHighest, 0)
-        z: GridView.isCurrentItem || implicitHeight !== nonAnimHeight ? 1 : 0
-        clip: true
+        opacity: LazyGridView.adding || LazyGridView.removing ? 0 : 1
+
+        StyledRect {
+            anchors.fill: parent
+            anchors.margins: item.isCurrentItem ? 0 : Tokens.padding.medium
+            radius: item.radius
+            color: Qt.alpha(Colours.palette.primaryContainer, item.isCurrentItem ? 1 : 0)
+
+            Behavior on anchors.margins {
+                Anim {
+                    type: Anim.DefaultEffects
+                }
+            }
+        }
 
         StateLayer {
-            onClicked: view.currentIndex = item.index
+            onClicked: root.dState.select(item.modelData)
             onDoubleClicked: {
                 if (item.modelData.isDir)
-                    root.dialog.cwd.push(item.modelData.name);
-                else if (root.dialog.selectionValid)
-                    root.dialog.accepted(item.modelData.path);
+                    root.dState.cdInto(item.modelData.name);
+                else if (root.dState.selectionValid)
+                    root.dState.accepted(item.modelData.path);
             }
         }
 
@@ -187,21 +322,12 @@ Item {
             anchors.top: parent.top
             anchors.topMargin: Tokens.padding.medium
 
-            implicitWidth: Sizes.itemWidth - Tokens.padding.medium * 2
+            implicitWidth: Tokens.sizes.fileDialog.itemWidth - Tokens.padding.extraLarge * 2
             implicitHeight: implicitWidth
             fillMode: VisualSource.PreserveAspectFit
+            opacity: !ready ? 0 : item.modelData?.name.startsWith(".") ? 0.5 : 1
 
-            Component.onCompleted: {
-                const file = item.modelData;
-                if (file.isImage)
-                    source = Qt.resolvedUrl(file.path);
-                else if (!file.isDir)
-                    source = Quickshell.iconPath(file.mimeType.replace("/", "-"), "application-x-zerosize");
-                else if (root.dialog.cwd.length === 1 && ["Desktop", "Documents", "Downloads", "Music", "Pictures", "Public", "Templates", "Videos"].includes(file.name))
-                    source = Quickshell.iconPath(`folder-${file.name.toLowerCase()}`);
-                else
-                    source = Quickshell.iconPath("inode-directory");
-            }
+            Component.onCompleted: source = root.getSource(item.modelData)
         }
 
         StyledText {
@@ -210,18 +336,27 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: icon.bottom
-            anchors.topMargin: Tokens.spacing.small
-            anchors.margins: Tokens.padding.medium
+            anchors.topMargin: Tokens.spacing.extraSmall
+            anchors.margins: Tokens.padding.small
 
+            color: item.isCurrentItem ? Colours.palette.onPrimaryContainer : Colours.palette.onSurface
+            font: Tokens.font.body.small
             horizontalAlignment: Text.AlignHCenter
-            elide: item.GridView.isCurrentItem ? Text.ElideNone : Text.ElideRight
-            wrapMode: item.GridView.isCurrentItem ? Text.WrapAtWordBoundaryOrAnywhere : Text.NoWrap
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 
             Component.onCompleted: text = item.modelData.name
         }
 
         Behavior on implicitHeight {
+            enabled: item.LazyGridView.ready
+
             Anim {}
+        }
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
         }
     }
 }

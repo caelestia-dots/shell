@@ -2,7 +2,9 @@ qml_module(caelestia-components
     URI Caelestia.Components
     SOURCES
         animatedrepeater.cpp
+        lazyviewbase.cpp
         lazylistview.cpp
+        lazygridview.cpp
         wavyline.cpp
         buttonrow.cpp
         circularindicatormanager.cpp
