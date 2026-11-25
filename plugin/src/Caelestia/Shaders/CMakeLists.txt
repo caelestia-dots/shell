@@ -12,6 +12,7 @@ qt_add_shaders(caelestia-shaders "shaders"
     GLSL "300es,330"
     PREFIX "/shaders"
     FILES
+        passthrough.vert
         crossfade.frag
         chromatic-bloom.frag
         colour-distance.frag
