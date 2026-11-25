@@ -160,7 +160,8 @@ CustomMouseArea {
         } else {
             const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
             // Show osd on hover
-            const showOsd = Config.osd.showOnHover && outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
+            const inOsdArea = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
+            const showOsd = inOsdArea && (Config.osd.showOnHover || screenState.osd);
 
             // Always update visibility based on hover if not in shortcut mode
             if (!osdShortcutActive) {
