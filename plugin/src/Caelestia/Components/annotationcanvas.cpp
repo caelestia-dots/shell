@@ -2,7 +2,8 @@
 
 #include <qpainter.h>
 #include <qquickwindow.h>
-#include <qscreen.h>
+
+#include <cmath>
 
 namespace caelestia::shell::components {
 
@@ -26,13 +27,24 @@ void AnnotationPreview::paint(QPainter* painter) {
     const auto& image = m_canvas->previewImage();
     if (!image.isNull()) {
         painter->setCompositionMode(QPainter::CompositionMode_Source);
-        painter->drawImage(QPointF(0, 0), image);
+        m_canvas->drawLayer(*painter, image);
+        return;
+    }
+
+    painter->translate(-position());
+    if (m_canvas->magnified()) {
+        auto& preview = m_canvas->scratchLayer();
+        preview.fill(Qt::transparent);
+        QPainter previewPainter(&preview);
+        m_canvas->applyView(previewPainter);
+        document->renderPreview(previewPainter, m_canvas->effectBase(), m_canvas->layer(), QPoint());
+        m_canvas->drawLayer(*painter, preview);
         return;
     }
 
     const auto dpr = m_canvas->layer().devicePixelRatio();
-    painter->translate(-(position() + m_canvas->origin()));
-    document->renderPreview(*painter, m_canvas->scaledBase(), m_canvas->layer(), (position() * dpr).toPoint());
+    m_canvas->applyView(*painter);
+    document->renderPreview(*painter, m_canvas->effectBase(), m_canvas->layer(), (position() * dpr).toPoint());
 }
 
 AnnotationCanvas::AnnotationCanvas(QQuickItem* parent)
@@ -45,8 +57,7 @@ void AnnotationCanvas::paint(QPainter* painter) {
     if (!m_document)
         return;
 
-    const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
-    if (m_layer.size() != (size() * dpr).toSize()) {
+    if (m_layer.size() != layerSize()) {
         m_layer = newLayer();
         m_scaledBase = QImage();
         m_layerDirty = true;
@@ -55,12 +66,15 @@ void AnnotationCanvas::paint(QPainter* painter) {
     if (m_layerDirty) {
         m_layer.fill(Qt::transparent);
         QPainter layerPainter(&m_layer);
-        layerPainter.translate(-origin());
-        m_document->render(layerPainter, scaledBase());
+        applyView(layerPainter);
+        m_document->render(layerPainter, effectBase());
         m_layerDirty = false;
     }
 
-    painter->drawImage(QPointF(0, 0), m_layer);
+    // The effect preview replaces this region, so leave it to the preview item
+    if (!m_effectClip.isNull())
+        painter->setClipRegion(QRegion(boundingRect().toAlignedRect()) - QRegion(m_effectClip));
+    drawLayer(*painter, m_layer);
 }
 
 AnnotationDocument* AnnotationCanvas::document() const {
@@ -101,6 +115,7 @@ void AnnotationCanvas::setBase(const QImage& base) {
 
     m_base = base;
     m_scaledBase = QImage();
+    setImplicitSize(m_base.deviceIndependentSize().width(), m_base.deviceIndependentSize().height());
     invalidateLayer();
     emit baseChanged();
 }
@@ -113,17 +128,128 @@ const QImage& AnnotationCanvas::previewImage() const {
     return m_previewImage;
 }
 
-const QImage& AnnotationCanvas::scaledBase() {
-    if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull()) {
-        m_scaledBase = m_base.scaled(m_layer.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        m_scaledBase.setDevicePixelRatio(m_layer.devicePixelRatio());
+QImage& AnnotationCanvas::scratchLayer() {
+    if (m_scratch.size() != layerSize())
+        m_scratch = newLayer();
+    return m_scratch;
+}
+
+const QImage& AnnotationCanvas::effectBase() {
+    if (m_scaledBase.isNull() && !m_base.isNull() && !m_layer.isNull() && m_document->hasEffects()) {
+        m_scaledBase = newLayer();
+        m_scaledBase.fill(Qt::transparent);
+        QPainter painter(&m_scaledBase);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        applyView(painter);
+        painter.drawImage(effectiveBaseRect(), m_base);
     }
     return m_scaledBase;
 }
 
 QPointF AnnotationCanvas::origin() const {
-    const auto* w = window();
-    return w && w->screen() ? QPointF(w->screen()->geometry().topLeft()) : QPointF();
+    return m_origin;
+}
+
+void AnnotationCanvas::setOrigin(const QPointF& origin) {
+    if (m_origin == origin)
+        return;
+
+    m_origin = origin;
+    m_scaledBase = QImage();
+    invalidateLayer();
+    updatePreview();
+    emit originChanged();
+}
+
+QRectF AnnotationCanvas::baseRect() const {
+    return m_baseRect;
+}
+
+void AnnotationCanvas::setBaseRect(const QRectF& baseRect) {
+    if (m_baseRect == baseRect)
+        return;
+
+    m_baseRect = baseRect;
+    m_scaledBase = QImage();
+    invalidateLayer();
+    emit baseRectChanged();
+}
+
+qreal AnnotationCanvas::zoom() const {
+    return m_zoom;
+}
+
+void AnnotationCanvas::setZoom(qreal zoom) {
+    if (qFuzzyCompare(m_zoom, zoom))
+        return;
+
+    m_zoom = zoom;
+    m_scaledBase = QImage();
+    invalidateLayer();
+    updatePreview();
+    emit zoomChanged();
+}
+
+void AnnotationCanvas::applyView(QPainter& painter) const {
+    if (!magnified())
+        painter.scale(m_zoom, m_zoom);
+    painter.translate(-layerOrigin());
+}
+
+void AnnotationCanvas::drawLayer(QPainter& painter, const QImage& layer) const {
+    if (!magnified()) {
+        painter.drawImage(QPointF(0, 0), layer);
+        return;
+    }
+
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, false);
+    painter.drawImage(QRectF((layerOrigin() - m_origin) * m_zoom, layer.size() * m_zoom), layer);
+}
+
+bool AnnotationCanvas::magnified() const {
+    return m_zoom > 1.0;
+}
+
+QRectF AnnotationCanvas::effectiveBaseRect() const {
+    return m_baseRect.isEmpty() ? QRectF(m_origin, size() / m_zoom) : m_baseRect;
+}
+
+QRectF AnnotationCanvas::toView(const QRectF& rect) const {
+    const auto topLeft = (rect.topLeft() - m_origin) * m_zoom;
+    return { topLeft, rect.size() * m_zoom };
+}
+
+QRect AnnotationCanvas::effectPreviewRect() const {
+    const auto bounds = m_document && m_document->previewIsEffect() ? m_document->previewBounds() : std::nullopt;
+    if (!bounds)
+        return {};
+
+    const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
+    const auto view = toView(*bounds);
+    const auto device = QRectF(view.topLeft() * dpr, view.size() * dpr).toAlignedRect();
+    return QRectF(QPointF(device.topLeft()) / dpr, QSizeF(device.size()) / dpr).toAlignedRect();
+}
+
+QImage AnnotationCanvas::composite() const {
+    if (!m_document || m_base.isNull())
+        return {};
+
+    auto result = m_base.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    result.setDevicePixelRatio(1);
+
+    QImage shapes(result.size(), QImage::Format_ARGB32_Premultiplied);
+    shapes.fill(Qt::transparent);
+
+    const auto rect = effectiveBaseRect();
+    QPainter shapePainter(&shapes);
+    shapePainter.scale(result.width() / rect.width(), result.height() / rect.height());
+    shapePainter.translate(-rect.topLeft());
+    m_document->render(shapePainter, result);
+    shapePainter.end();
+
+    QPainter painter(&result);
+    painter.drawImage(QPoint(), shapes);
+    return result;
 }
 
 void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) {
@@ -132,10 +258,23 @@ void AnnotationCanvas::geometryChange(const QRectF& newGeometry, const QRectF& o
 }
 
 QImage AnnotationCanvas::newLayer() const {
-    const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
-    QImage layer((size() * dpr).toSize(), QImage::Format_ARGB32_Premultiplied);
-    layer.setDevicePixelRatio(dpr);
+    QImage layer(layerSize(), QImage::Format_ARGB32_Premultiplied);
+    if (!magnified() && window())
+        layer.setDevicePixelRatio(window()->devicePixelRatio());
     return layer;
+}
+
+QSize AnnotationCanvas::layerSize() const {
+    if (magnified())
+        return { static_cast<int>(std::ceil(width() / m_zoom)) + 1,
+            static_cast<int>(std::ceil(height() / m_zoom)) + 1 };
+
+    const auto dpr = window() ? window()->devicePixelRatio() : 1.0;
+    return (size() * dpr).toSize();
+}
+
+QPointF AnnotationCanvas::layerOrigin() const {
+    return magnified() ? QPointF(std::floor(m_origin.x()), std::floor(m_origin.y())) : m_origin;
 }
 
 void AnnotationCanvas::invalidateLayer() {
@@ -144,6 +283,11 @@ void AnnotationCanvas::invalidateLayer() {
 }
 
 void AnnotationCanvas::updatePreview() {
+    if (const auto clip = effectPreviewRect(); clip != m_effectClip) {
+        m_effectClip = clip;
+        update();
+    }
+
     const auto bounds = m_document ? m_document->previewBounds() : std::nullopt;
     if (!bounds) {
         m_previewImage = QImage();
@@ -156,7 +300,7 @@ void AnnotationCanvas::updatePreview() {
         m_previewImage.fill(Qt::transparent);
         QPainter painter(&m_previewImage);
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.translate(-origin());
+        applyView(painter);
         stroke->renderOpaque(painter);
 
         m_preview->setPosition(QPointF(0, 0));
@@ -168,9 +312,8 @@ void AnnotationCanvas::updatePreview() {
     }
 
     m_previewImage = QImage();
-    const auto rect = bounds->translated(-origin())
-                          .adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin)
-                          .toAlignedRect();
+    const auto rect =
+        toView(*bounds).adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin).toAlignedRect();
     m_preview->setPosition(rect.topLeft());
     m_preview->setSize(rect.size());
     m_preview->setOpacity(1.0);
@@ -191,14 +334,13 @@ void AnnotationCanvas::extendPreview() {
 
     QPainter painter(&m_previewImage);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.translate(-origin());
+    applyView(painter);
     const auto rect = stroke->renderSegment(painter);
     if (rect.isNull())
         return;
 
-    m_preview->update(rect.translated(-origin())
-            .adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin)
-            .toAlignedRect());
+    m_preview->update(
+        toView(rect).adjusted(-k_previewMargin, -k_previewMargin, k_previewMargin, k_previewMargin).toAlignedRect());
 }
 
 } // namespace caelestia::shell::components

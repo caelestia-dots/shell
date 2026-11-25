@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Shapes
-import Quickshell
 import Caelestia.Components
 import Caelestia.Config
 import Caelestia.Scheme
@@ -12,9 +11,11 @@ import qs.components.controls
 Item {
     id: root
 
-    required property ShellScreen screen
+    property alias origin: canvas.origin
     property alias document: canvas.document
     property alias base: canvas.base
+    property alias baseRect: canvas.baseRect
+    property alias zoom: canvas.zoom
     property bool active
 
     property point hoverPos
@@ -157,6 +158,10 @@ Item {
         return true;
     }
 
+    function composite(): var {
+        return canvas.composite();
+    }
+
     function padded(b: rect): rect {
         const pad = Tokens.padding.medium;
         return Qt.rect(b.x - pad, b.y - pad, b.width + pad * 2, b.height + pad * 2);
@@ -165,6 +170,9 @@ Item {
     function updateHover(): void {
         hoverIndex = active ? document.shapeAt(hoverPos) : -1;
     }
+
+    implicitWidth: canvas.implicitWidth
+    implicitHeight: canvas.implicitHeight
 
     AnnotationCanvas {
         id: canvas
@@ -186,7 +194,7 @@ Item {
 
     MouseArea {
         function globalPos(event: MouseEvent): point {
-            return Qt.point(event.x + root.screen.x, event.y + root.screen.y);
+            return Qt.point(event.x / root.zoom + root.origin.x, event.y / root.zoom + root.origin.y);
         }
 
         anchors.fill: parent
@@ -222,8 +230,8 @@ Item {
         scale: textEditor.scale
         transformOrigin: Item.TopLeft
 
-        x: textEditor.x - root.document.textPadding
-        y: textEditor.y - root.document.textPadding
+        x: textEditor.x - root.document.textPadding * root.zoom
+        y: textEditor.y - root.document.textPadding * root.zoom
         implicitWidth: textEditor.width + root.document.textPadding * 2
         implicitHeight: textEditor.height + root.document.textPadding * 2
 
@@ -278,7 +286,7 @@ Item {
 
         enabled: editing
         opacity: editing ? 1 : 0
-        scale: editing ? 1 : 0.8
+        scale: (editing ? 1 : 0.8) * root.zoom
         transformOrigin: Item.TopLeft
         wrapMode: TextEdit.NoWrap
         color: root.document.color
@@ -339,7 +347,7 @@ Item {
         }
 
         function onTextEditRequested(index: int, pos: point, text: string): void {
-            const local = Qt.point(pos.x - root.screen.x, pos.y - root.screen.y);
+            const local = Qt.point((pos.x - root.origin.x) * root.zoom, (pos.y - root.origin.y) * root.zoom);
             if (local.x < 0 || local.y < 0 || local.x >= root.width || local.y >= root.height)
                 return;
             textEditor.open(index, local, text);
@@ -354,10 +362,10 @@ Item {
         property rect bounds
         property bool active
 
-        x: bounds.x - root.screen.x
-        y: bounds.y - root.screen.y
-        width: bounds.width
-        height: bounds.height
+        x: (bounds.x - root.origin.x) * root.zoom
+        y: (bounds.y - root.origin.y) * root.zoom
+        width: bounds.width * root.zoom
+        height: bounds.height * root.zoom
         preferredRendererType: Shape.CurveRenderer
         opacity: active && root.document.selected >= 0 ? 1 : 0
 
