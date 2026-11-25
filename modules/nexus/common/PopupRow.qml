@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 import qs.modules.drawers
 import qs.modules.nexus.common
 
@@ -40,7 +40,7 @@ ConnectedRect {
         MaterialIcon {
             id: icon
 
-            color: Colours.palette.m3onSurfaceVariant
+            color: Colours.palette.onSurfaceVariant
             fontStyle: Tokens.font.icon.medium
         }
 
@@ -61,7 +61,7 @@ ConnectedRect {
 
                 Layout.fillWidth: true
                 visible: text
-                color: Colours.palette.m3outline
+                color: Colours.palette.outline
                 font: Tokens.font.label.small
                 elide: Text.ElideRight
                 animate: true
@@ -115,7 +115,7 @@ ConnectedRect {
                     content: root.content
                     pressOverride: stateLayer.pressed
                     hoverOverride: stateLayer.containsMouse
-                    color: open || hovered || stateLayer.containsMouse ? Colours.palette.m3secondaryContainer : Colours.palette.m3surfaceContainerHighest
+                    color: open || hovered || stateLayer.containsMouse ? Colours.palette.secondaryContainer : Colours.palette.surfaceContainerHighest
                 }
             }
         }

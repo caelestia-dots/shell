@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ButtonBase {
     id: root
@@ -17,23 +17,23 @@ ButtonBase {
     horizontalPadding: Tokens.padding.medium
     verticalPadding: Tokens.padding.small
 
-    activeColour: type === TextButton.Filled ? Colours.palette.m3primary : Colours.palette.m3secondary
+    activeColour: type === TextButton.Filled ? Colours.palette.primary : Colours.palette.secondary
     inactiveColour: {
         if (!isToggle && type === TextButton.Filled)
-            return Colours.palette.m3primary;
-        return type === TextButton.Filled ? Colours.tPalette.m3surfaceContainer : Colours.palette.m3secondaryContainer;
+            return Colours.palette.primary;
+        return type === TextButton.Filled ? Colours.tPalette.surfaceContainer : Colours.palette.secondaryContainer;
     }
     activeOnColour: {
         if (type === TextButton.Text)
-            return Colours.palette.m3primary;
-        return type === TextButton.Filled ? Colours.palette.m3onPrimary : Colours.palette.m3onSecondary;
+            return Colours.palette.primary;
+        return type === TextButton.Filled ? Colours.palette.onPrimary : Colours.palette.onSecondary;
     }
     inactiveOnColour: {
         if (!isToggle && type === TextButton.Filled)
-            return Colours.palette.m3onPrimary;
+            return Colours.palette.onPrimary;
         if (type === TextButton.Text)
-            return Colours.palette.m3primary;
-        return type === TextButton.Filled ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer;
+            return Colours.palette.primary;
+        return type === TextButton.Filled ? Colours.palette.onSurface : Colours.palette.onSecondaryContainer;
     }
 
     implicitWidth: row.implicitWidth + horizontalPadding * 2

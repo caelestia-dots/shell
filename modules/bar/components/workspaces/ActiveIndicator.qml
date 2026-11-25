@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Components
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
-import qs.services
 
 StyledRect {
     id: root
@@ -43,7 +43,7 @@ StyledRect {
     y: start + mask.y
     implicitHeight: end - start
     radius: Tokens.rounding.full
-    color: Colours.palette.m3primary
+    color: Colours.palette.primary
 
     Anim on start {
         id: startAnim
@@ -69,8 +69,8 @@ StyledRect {
         id: colouriser
 
         source: root.mask
-        sourceColor: Colours.palette.m3onSurface
-        colorizationColor: Colours.palette.m3onPrimary
+        sourceColor: Colours.palette.onSurface
+        colorizationColor: Colours.palette.onPrimary
 
         x: 0
         y: -parent.start

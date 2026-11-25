@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Caelestia.Blobs
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
-import qs.services
 import qs.modules.nexus
 
 Item {
@@ -16,7 +16,7 @@ Item {
 
         onClose: root.close()
     }
-    property color blobColour: Colours.tPalette.m3surfaceContainerLow
+    property color blobColour: Colours.tPalette.surfaceContainerLow
 
     signal close
 
@@ -72,7 +72,7 @@ Item {
         icon: nState.isWindow ? "close" : "pip"
         type: IconButton.Text
         label.fill: 0
-        inactiveOnColour: hovered ? nState.isWindow ? Colours.palette.m3error : Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+        inactiveOnColour: hovered ? nState.isWindow ? Colours.palette.error : Colours.palette.primary : Colours.palette.onSurfaceVariant
         stateLayer.opacity: 0
         onClicked: {
             if (!nState.isWindow)

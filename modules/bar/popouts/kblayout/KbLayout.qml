@@ -5,8 +5,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
-import qs.services
 
 ColumnLayout {
     id: root
@@ -131,7 +131,7 @@ ColumnLayout {
         Layout.topMargin: Tokens.spacing.small
 
         implicitHeight: 1
-        color: Colours.palette.m3onSurfaceVariant
+        color: Colours.palette.onSurfaceVariant
         opacity: 0.35
     }
 
@@ -149,7 +149,7 @@ ColumnLayout {
 
         MaterialIcon {
             text: "keyboard"
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
         }
 
         StyledText {
@@ -157,7 +157,7 @@ ColumnLayout {
             text: kb.activeLabel
             elide: Text.ElideRight
             font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
-            color: Colours.palette.m3primary
+            color: Colours.palette.primary
         }
 
         Connections {

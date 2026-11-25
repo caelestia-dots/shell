@@ -3,9 +3,9 @@ import QtQuick.Layouts
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
-import qs.services
 
 StyledRect {
     id: root
@@ -19,23 +19,23 @@ StyledRect {
     radius: Tokens.rounding.large
     color: {
         if (root.modelData.type === Toast.Success)
-            return Colours.palette.m3successContainer;
+            return Colours.palette.successContainer;
         if (root.modelData.type === Toast.Warning)
-            return Colours.palette.m3secondary;
+            return Colours.palette.secondary;
         if (root.modelData.type === Toast.Error)
-            return Colours.palette.m3errorContainer;
-        return Colours.palette.m3surface;
+            return Colours.palette.errorContainer;
+        return Colours.palette.surface;
     }
 
     border.width: 1
     border.color: {
-        let colour = Colours.palette.m3outlineVariant;
+        let colour = Colours.palette.outlineVariant;
         if (root.modelData.type === Toast.Success)
-            colour = Colours.palette.m3success;
+            colour = Colours.palette.success;
         if (root.modelData.type === Toast.Warning)
-            colour = Colours.palette.m3secondaryContainer;
+            colour = Colours.palette.secondaryContainer;
         if (root.modelData.type === Toast.Error)
-            colour = Colours.palette.m3error;
+            colour = Colours.palette.error;
         return Qt.alpha(colour, 0.3);
     }
 
@@ -60,12 +60,12 @@ StyledRect {
             radius: Tokens.rounding.large
             color: {
                 if (root.modelData.type === Toast.Success)
-                    return Colours.palette.m3success;
+                    return Colours.palette.success;
                 if (root.modelData.type === Toast.Warning)
-                    return Colours.palette.m3secondaryContainer;
+                    return Colours.palette.secondaryContainer;
                 if (root.modelData.type === Toast.Error)
-                    return Colours.palette.m3error;
-                return Colours.palette.m3surfaceContainerHigh;
+                    return Colours.palette.error;
+                return Colours.palette.surfaceContainerHigh;
             }
 
             implicitWidth: implicitHeight
@@ -78,12 +78,12 @@ StyledRect {
                 text: root.modelData.icon
                 color: {
                     if (root.modelData.type === Toast.Success)
-                        return Colours.palette.m3onSuccess;
+                        return Colours.palette.onSuccess;
                     if (root.modelData.type === Toast.Warning)
-                        return Colours.palette.m3onSecondaryContainer;
+                        return Colours.palette.onSecondaryContainer;
                     if (root.modelData.type === Toast.Error)
-                        return Colours.palette.m3onError;
-                    return Colours.palette.m3onSurfaceVariant;
+                        return Colours.palette.onError;
+                    return Colours.palette.onSurfaceVariant;
                 }
                 fontStyle: Tokens.font.icon.builders.large.scale(1.2).build()
             }
@@ -100,12 +100,12 @@ StyledRect {
                 text: Tr.trMarked(root.modelData.title)
                 color: {
                     if (root.modelData.type === Toast.Success)
-                        return Colours.palette.m3onSuccessContainer;
+                        return Colours.palette.onSuccessContainer;
                     if (root.modelData.type === Toast.Warning)
-                        return Colours.palette.m3onSecondary;
+                        return Colours.palette.onSecondary;
                     if (root.modelData.type === Toast.Error)
-                        return Colours.palette.m3onErrorContainer;
-                    return Colours.palette.m3onSurface;
+                        return Colours.palette.onErrorContainer;
+                    return Colours.palette.onSurface;
                 }
                 font: Tokens.font.title.small
                 elide: Text.ElideRight
@@ -117,12 +117,12 @@ StyledRect {
                 text: Tr.trMarked(root.modelData.message)
                 color: {
                     if (root.modelData.type === Toast.Success)
-                        return Colours.palette.m3onSuccessContainer;
+                        return Colours.palette.onSuccessContainer;
                     if (root.modelData.type === Toast.Warning)
-                        return Colours.palette.m3onSecondary;
+                        return Colours.palette.onSecondary;
                     if (root.modelData.type === Toast.Error)
-                        return Colours.palette.m3onErrorContainer;
-                    return Colours.palette.m3onSurface;
+                        return Colours.palette.onErrorContainer;
+                    return Colours.palette.onSurface;
                 }
                 opacity: 0.8
                 elide: Text.ElideRight

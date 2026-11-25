@@ -1,5 +1,6 @@
 import QtQuick
 import Caelestia.Config
+import Caelestia.Scheme
 import qs.components
 import qs.components.effects
 import qs.services
@@ -41,7 +42,7 @@ Item {
         ColouredIcon {
             source: SysInfo.osLogo
             implicitSize: Math.round(Tokens.font.body.large.pointSize * 1.2)
-            colour: Colours.palette.m3tertiary
+            colour: Colours.palette.tertiary
         }
     }
 }

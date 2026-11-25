@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.containers
 import qs.components.effects
@@ -25,7 +26,7 @@ ColumnLayout {
     StyledText {
         Layout.fillWidth: true
         text: Notifs.list.length > 0 ? Tr.trN("%n notification", "%n notifications", Notifs.list.length) : Tr.tr("Notifications")
-        color: Colours.palette.m3outline
+        color: Colours.palette.outline
         font: Tokens.font.mono.builders.small.weight(Font.Medium).build()
         elide: Text.ElideRight
     }
@@ -56,7 +57,7 @@ ColumnLayout {
 
                     layer.enabled: true
                     layer.effect: Colouriser {
-                        colorizationColor: Colours.palette.m3outlineVariant
+                        colorizationColor: Colours.palette.outlineVariant
                         brightness: 1
                     }
                 }
@@ -64,7 +65,7 @@ ColumnLayout {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Config.lock.hideNotifs ? Tr.tr("Unlock for notifications") : Tr.tr("No notifications")
-                    color: Colours.palette.m3outlineVariant
+                    color: Colours.palette.outlineVariant
                     font: Tokens.font.mono.builders.large.weight(Font.Medium).build()
                 }
             }

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
 import Caelestia.I18n
+import Caelestia.Scheme
 import qs.components
 import qs.components.controls
 import qs.services
@@ -163,7 +164,7 @@ PageBase {
         spacing: Tokens.spacing.extraSmall
 
         icon: ["check_indeterminate_small", "check", "close"][filterState]
-        inactiveColour: [Colours.palette.m3secondaryContainer, Colours.palette.m3secondary, Colours.palette.m3tertiary][filterState]
-        inactiveOnColour: [Colours.palette.m3onSecondaryContainer, Colours.palette.m3onSecondary, Colours.palette.m3onTertiary][filterState]
+        inactiveColour: [Colours.palette.secondaryContainer, Colours.palette.secondary, Colours.palette.tertiary][filterState]
+        inactiveOnColour: [Colours.palette.onSecondaryContainer, Colours.palette.onSecondary, Colours.palette.onTertiary][filterState]
     }
 }
