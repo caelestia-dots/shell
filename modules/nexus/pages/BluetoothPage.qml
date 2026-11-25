@@ -46,7 +46,7 @@ PageBase {
             placeholderText: root.btEnabled ? Tr.tr("No saved devices") : Tr.tr("Bluetooth disabled")
 
             model: ScriptModel {
-                values: Bluetooth.devices.values.filter(d => d.bonded || d.paired || d.connected).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name))
+                values: Bluetooth.devices.values.filter(d => d.paired || (d.connected && !d.pairing)).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name) || a.address.localeCompare(b.address))
             }
 
             delegate: StyledRect {
@@ -124,11 +124,18 @@ PageBase {
                         StyledText {
                             Layout.fillWidth: true
                             text: {
+                                const m = device.modelData;
+                                if (!m)
+                                    return "";
+                                if (m.state === BluetoothDeviceState.Connecting)
+                                    return Tr.trCtx("Connecting...", "bluetooth device state");
+                                if (m.state === BluetoothDeviceState.Disconnecting)
+                                    return Tr.trCtx("Disconnecting...", "bluetooth device state");
                                 if (!device.connected)
                                     return Tr.trCtx("Saved", "bluetooth device state");
-                                if (device.modelData?.batteryAvailable)
+                                if (m.batteryAvailable)
                                     // TRANSLATORS: %1 = battery level, already formatted as a percentage
-                                    return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(device.modelData.battery));
+                                    return Tr.trCtx("Connected • %1", "bluetooth device state with battery").arg(Strings.percentOne(m.battery));
                                 return Tr.trCtx("Connected", "bluetooth device state");
                             }
                             color: Colours.palette.m3outline

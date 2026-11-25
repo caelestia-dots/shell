@@ -16,6 +16,7 @@ PageBase {
     id: root
 
     readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
+    property BluetoothDevice pairingDevice
 
     function setScan(on: bool): void {
         if (adapter?.enabled)
@@ -42,6 +43,15 @@ PageBase {
             }
 
             target: root.adapter
+        }
+
+        Connections {
+            function onPairedChanged(): void {
+                if (root.pairingDevice.paired)
+                    root.nState.closeSubPage();
+            }
+
+            target: root.pairingDevice
         }
 
         ConnectedRect {
@@ -75,7 +85,7 @@ PageBase {
             list.anchors.top: scanIndicator.bottom
 
             model: ScriptModel {
-                values: Bluetooth.devices.values.filter(d => !d.bonded && !d.paired && !d.connected).sort((a, b) => (b.pairing - a.pairing) || (!a.deviceName - !b.deviceName) || a.name.localeCompare(b.name))
+                values: Bluetooth.devices.values.filter(d => !d.paired).sort((a, b) => (b.pairing - a.pairing) || (!a.deviceName - !b.deviceName) || a.name.localeCompare(b.name) || a.address.localeCompare(b.address))
             }
 
             delegate: Item {
@@ -84,7 +94,6 @@ PageBase {
                 required property BluetoothDevice modelData
                 required property int index
                 property real textOpacity: modelData?.pairing ? 0.5 : 1
-                property bool wasPairing
 
                 anchors.left: deviceList.list.contentItem.left
                 anchors.right: deviceList.list.contentItem.right
@@ -96,15 +105,6 @@ PageBase {
                     }
                 }
 
-                Connections {
-                    function onPairedChanged(): void {
-                        if (newDevice.wasPairing && newDevice.modelData?.paired)
-                            root.nState.closeSubPage();
-                    }
-
-                    target: newDevice.modelData
-                }
-
                 StateLayer {
                     radius: Tokens.rounding.extraSmall
                     bottomLeftRadius: newDevice.index === deviceList?.list.count - 1 ? Tokens.rounding.extraLarge : radius
@@ -112,8 +112,8 @@ PageBase {
                     disabled: newDevice.modelData?.pairing ?? false
 
                     onClicked: {
+                        root.pairingDevice = newDevice.modelData;
                         newDevice.modelData?.pair();
-                        newDevice.wasPairing = true;
                     }
                 }
 
