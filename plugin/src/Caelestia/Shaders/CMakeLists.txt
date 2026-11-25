@@ -40,4 +40,6 @@ qt_add_shaders(caelestia-shaders "shaders"
         soft-warp-fade.frag
         voronoi-shatter.frag
         zoom-blur-pull.frag
+        superellipse.frag
+        occluder.frag
 )

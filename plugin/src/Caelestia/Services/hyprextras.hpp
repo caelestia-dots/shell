@@ -1,9 +1,11 @@
 #pragma once
 
+#include <qjsvalue.h>
 #include <qlocalsocket.h>
 #include <qobject.h>
+#include <qpoint.h>
+#include <qpointer.h>
 #include <qqmlintegration.h>
-#include <qsharedpointer.h>
 #include <qvariant.h>
 
 namespace caelestia::shell::services::hypr {
@@ -26,16 +28,19 @@ public:
 
     Q_INVOKABLE void message(const QString& message);
     Q_INVOKABLE void batchMessage(const QStringList& messages);
+    Q_INVOKABLE void batchRequest(const QStringList& requests, const QJSValue& callback);
     Q_INVOKABLE void applyOptions(const QVariantHash& options);
 
     Q_INVOKABLE void refreshOptions();
     Q_INVOKABLE void refreshDevices();
 
+    Q_INVOKABLE void cursorPosition(const QJSValue& callback);
+
 signals:
     void optionsChanged();
 
 private:
-    using SocketPtr = QSharedPointer<QLocalSocket>;
+    using SocketPtr = QPointer<QLocalSocket>;
 
     QString m_requestSocket;
     QString m_eventSocket;
