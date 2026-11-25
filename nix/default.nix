@@ -28,6 +28,7 @@
   ninja,
   pkg-config,
   caelestia-cli,
+  caelestia-lib,
   m3shapes,
   debug ? false,
   withCli ? false,
@@ -35,7 +36,7 @@
 }: let
   version = "1.0.0";
 
-  qs = quickshell.withModules [qt6.qtimageformats qt6.qtmultimedia m3shapes];
+  qs = quickshell.withModules [qt6.qtimageformats qt6.qtmultimedia caelestia-lib m3shapes];
 
   runtimeDeps =
     [
@@ -95,7 +96,7 @@
     };
 
     nativeBuildInputs = [cmake ninja pkg-config];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative qt6.qtmultimedia qt6.qtshadertools libqalculate pipewire aubio libcava fftw lm_sensors];
+    buildInputs = [caelestia-lib qt6.qtbase qt6.qtdeclarative qt6.qtmultimedia qt6.qtshadertools libqalculate pipewire aubio libcava fftw lm_sensors];
 
     dontWrapQtApps = true;
     cmakeFlags =

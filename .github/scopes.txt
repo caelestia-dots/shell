@@ -19,7 +19,6 @@ components
 config
 core
 daemons
-images
 models
 multimedia
 plugins

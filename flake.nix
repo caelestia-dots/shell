@@ -15,6 +15,11 @@
       inputs.caelestia-shell.follows = "";
     };
 
+    caelestia-lib = {
+      url = "github:caelestia-dots/lib";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     m3shapes = {
       url = "github:soramanew/m3shapes/32ad9ce328bb77ed349b40a3be10ee9ea610b8ab";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +50,7 @@
           withI3 = false;
         };
         caelestia-cli = inputs.caelestia-cli.packages.${system}.default;
+        caelestia-lib = inputs.caelestia-lib.packages.${system}.default;
         m3shapes = inputs.m3shapes.packages.${system}.default;
       };
       with-cli = caelestia-shell.override {withCli = true;};
