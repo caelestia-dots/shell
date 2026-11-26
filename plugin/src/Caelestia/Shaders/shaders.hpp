@@ -29,6 +29,8 @@ class Shaders : public QObject {
     QML_ELEMENT
     QML_SINGLETON
 
+    Q_PROPERTY(QUrl passthrough READ passthrough CONSTANT)
+
 #define TRANSITION(name, file, durationName, easingCurve)                                                              \
     Q_PROPERTY(caelestia::shell::shaders::TransitionShader name READ name CONSTANT)                                    \
                                                                                                                        \
@@ -77,6 +79,8 @@ private:
 public:
     explicit Shaders(QObject* parent = nullptr)
         : QObject(parent) {};
+
+    [[nodiscard]] static QUrl passthrough() { return QStringLiteral("qrc:/shaders/passthrough.vert.qsb"); }
 };
 
 } // namespace caelestia::shell::shaders

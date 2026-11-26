@@ -154,7 +154,7 @@ ColumnLayout {
             Loader {
                 visible: status === Loader.Ready
                 asynchronous: true
-                active: device.modelData.bonded
+                active: device.modelData.paired
                 sourceComponent: Item {
                     implicitWidth: connectBtn.implicitWidth
                     implicitHeight: connectBtn.implicitHeight

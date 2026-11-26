@@ -1,10 +1,13 @@
 #include "visualsource.hpp"
 
+#include <qcoreevent.h>
 #include <qmimedatabase.h>
 #include <qquickwindow.h>
+#include <qscopeguard.h>
 #include <qvideosink.h>
 
 #include "imagecache.hpp"
+#include "ktxencoder.hpp"
 
 namespace caelestia::shell::multimedia {
 
@@ -26,6 +29,10 @@ bool VisualSource::videoReady() const {
 
 QSize VisualSource::sourceSize() const {
     return m_sourceSize;
+}
+
+QRectF VisualSource::imageRect() const {
+    return m_imageRect;
 }
 
 QUrl VisualSource::imagePath() const {
@@ -62,6 +69,7 @@ void VisualSource::setSource(const QString& source) {
     ++m_generation;
     setVideoReady(false);
     m_key.clear();
+    m_textureSize = {};
     m_preview.clear();
     m_position = 0;
     refresh();
@@ -135,7 +143,6 @@ void VisualSource::setSizeSource(QQuickItem* sizeSource) {
 
     if (m_sizeSource)
         QObject::disconnect(m_sizeSource, nullptr, this, nullptr);
-    QObject::disconnect(m_windowConn);
 
     m_sizeSource = sizeSource;
     emit sizeSourceChanged();
@@ -144,9 +151,14 @@ void VisualSource::setSizeSource(QQuickItem* sizeSource) {
         QObject::connect(m_sizeSource, &QQuickItem::widthChanged, this, &VisualSource::refresh);
         QObject::connect(m_sizeSource, &QQuickItem::heightChanged, this, &VisualSource::refresh);
         QObject::connect(m_sizeSource, &QQuickItem::windowChanged, this, &VisualSource::watchWindow);
-        watchWindow(m_sizeSource->window());
     }
-    refresh();
+    watchWindow(m_sizeSource ? m_sizeSource->window() : nullptr);
+}
+
+bool VisualSource::eventFilter(QObject* watched, QEvent* event) {
+    if (event->type() == QEvent::DevicePixelRatioChange)
+        refresh();
+    return QObject::eventFilter(watched, event);
 }
 
 void VisualSource::setType(Type type) {
@@ -173,6 +185,32 @@ void VisualSource::setSourceSize(const QSize& sourceSize) {
     emit sourceSizeChanged();
 }
 
+// Covers the item unless a crop can map the texture 1:1 onto device pixels
+void VisualSource::updateImageRect() {
+    QRectF rect;
+    if (m_sizeSource) {
+        const auto size = m_sizeSource->size();
+        const auto* window = m_sizeSource->window();
+        rect.setSize(size);
+
+        if (window && !m_textureSize.isEmpty() && m_fillMode == FillMode::PreserveAspectCrop) {
+            const auto dpr = window->devicePixelRatio();
+            // Truncate the overflow like the cached crop does
+            const QPoint origin(
+                qRound((size.width() * dpr - m_bucket.width()) / 2) - (m_textureSize.width() - m_bucket.width()) / 2,
+                qRound((size.height() * dpr - m_bucket.height()) / 2) -
+                    (m_textureSize.height() - m_bucket.height()) / 2);
+            rect = QRectF(QPointF(origin) / dpr, QSizeF(m_textureSize) / dpr);
+        }
+    }
+
+    if (m_imageRect == rect)
+        return;
+
+    m_imageRect = rect;
+    emit imageRectChanged();
+}
+
 void VisualSource::setImagePath(const QUrl& imagePath) {
     if (m_imagePath == imagePath)
         return;
@@ -183,12 +221,22 @@ void VisualSource::setImagePath(const QUrl& imagePath) {
 
 void VisualSource::watchWindow(QQuickWindow* window) {
     QObject::disconnect(m_windowConn);
-    if (window)
+    if (m_window)
+        m_window->removeEventFilter(this);
+
+    m_window = window;
+    if (window) {
         m_windowConn = QObject::connect(window, &QWindow::screenChanged, this, &VisualSource::refresh);
+        window->installEventFilter(this);
+    }
     refresh();
 }
 
 void VisualSource::refresh() {
+    const auto updateRect = qScopeGuard([this] {
+        updateImageRect();
+    });
+
     const auto path = localPath();
     if (path.isEmpty()) {
         setImagePath({});
@@ -211,18 +259,24 @@ void VisualSource::refresh() {
         return;
     }
 
-    auto* const cache = ImageCache::instance();
     const auto bucket = ImageCache::bucketFor((m_sizeSource->size() * window->devicePixelRatio()).toSize());
     const auto key = ImageCache::keyFor(path, bucket, aspectMode());
-    if (key == m_key)
-        return;
+    if (key != m_key) {
+        m_key = key;
+        m_bucket = bucket;
+        loadBucket(bucket);
+    }
+}
 
-    m_key = key;
-    m_bucket = bucket;
-    setSourceSize(bucket);
-    const auto cached = cache->lookup(key);
+void VisualSource::loadBucket(const QSize& bucket) {
+    auto* const cache = ImageCache::instance();
+    const auto path = localPath();
+    const auto cached = cache->lookup(m_key);
+
+    m_textureSize = bucket;
 
     if (m_type == Type::Live) {
+        setSourceSize(bucket);
         m_preview = cached;
         setImagePath(m_videoReady ? QUrl() : cached);
         syncPlayer();
@@ -230,9 +284,15 @@ void VisualSource::refresh() {
     }
 
     if (cached.isEmpty()) {
-        cache->store(key, path, bucket, aspectMode());
+        cache->store(m_key, path, bucket, aspectMode());
+        // Qt decodes the whole image, and scales before it transforms
+        const auto cover = ktx::coverFor(path, bucket);
+        if (m_fillMode == FillMode::PreserveAspectCrop && cover.size.isValid())
+            m_textureSize = cover.size;
+        setSourceSize(cover.transposed ? bucket.transposed() : bucket);
         setImagePath(QUrl::fromLocalFile(path));
     } else {
+        setSourceSize(bucket);
         setImagePath(cached);
     }
 }
