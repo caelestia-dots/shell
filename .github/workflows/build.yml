@@ -92,12 +92,12 @@ jobs:
 
       - name: CMake build
         run: |
-          # Set version and git rev for CI build so we don't call git
+          # Omit the version and use the workflow SHA so we don't call Git
           cmake -B build -G Ninja \
             -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} \
             "-DCMAKE_CXX_FLAGS=${{ matrix.flags }}" \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DVERSION= -DGIT_REVISION=
+            -DVERSION= -DGIT_REVISION="$GITHUB_SHA"
           cmake --build build
 
   build-check:
