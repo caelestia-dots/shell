@@ -70,17 +70,33 @@ jobs:
         include:
           - name: gcc
             compiler: g++
+            flags: -Werror
           - name: clazy
             compiler: clazy
+            flags: -Werror -Xclang -fno-pch-timestamp
+
+    env:
+      CCACHE_SLOPPINESS: pch_defines,time_macros
+      CCACHE_COMPILERCHECK: "%compiler% --version"
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v7
 
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: build-cpp-${{ matrix.name }}
+          install: no
+          save: ${{ github.event_name == 'push' }}
+
       - name: CMake build
         run: |
           # Set version and git rev for CI build so we don't call git
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_FLAGS=-Werror \
+          cmake -B build -G Ninja \
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} \
+            "-DCMAKE_CXX_FLAGS=${{ matrix.flags }}" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DVERSION= -DGIT_REVISION=
           cmake --build build
 

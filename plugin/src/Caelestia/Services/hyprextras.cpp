@@ -199,7 +199,9 @@ void HyprExtras::handleEvent(const QString& event) {
 HyprExtras::SocketPtr HyprExtras::makeRequestJson(
     const QString& request, const std::function<void(bool, QJsonDocument)>& callback) {
     return makeRequest(u"j/"_s + request, [callback](bool success, const QByteArray& response) {
-        callback(success, QJsonDocument::fromJson(response));
+        QJsonParseError err{};
+        const auto doc = QJsonDocument::fromJson(response, &err);
+        callback(success && err.error == QJsonParseError::NoError, doc);
     });
 }
 

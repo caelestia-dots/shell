@@ -29,16 +29,22 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write Dockerfile
+        env:
+          CTCACHE_REV: e70da77cb867d74ccadce3f3c5862fc9cf4d22a7
         run: |
           cat > /tmp/Dockerfile <<EOF
           FROM archlinux:latest
-          RUN pacman -Syu --needed --noconfirm sudo base-devel cmake ninja fish git clazy qt6-declarative qt6-multimedia qt6-shadertools python libpipewire aubio libqalculate && \
+          RUN pacman -Syu --needed --noconfirm sudo base-devel cmake ninja fish git curl ccache clazy qt6-declarative qt6-multimedia qt6-shadertools python libpipewire aubio libqalculate && \
+              curl --fail --location "https://raw.githubusercontent.com/matus-chochlik/ctcache/$CTCACHE_REV/clang-tidy-cache" --output /usr/bin/clang-tidy-cache && \
+              chmod +x /usr/bin/clang-tidy-cache && \
+              printf '%s\n' '#!/bin/bash' 'exec /usr/bin/clang-tidy-cache /usr/bin/clang-tidy "\$@"' > /usr/local/bin/clang-tidy-cached && \
+              chmod +x /usr/local/bin/clang-tidy-cached && \
               useradd -m builder && \
               echo 'builder ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
               sudo -u builder git clone https://aur.archlinux.org/yay-bin.git /home/builder/yay-bin && \
               cd /home/builder/yay-bin && \
               sudo -u builder makepkg -si --noconfirm && \
-              sudo -u builder yay -S --noconfirm quickshell-git libcava qt6-m3shapes-git && \
+              sudo -u builder yay -S --noconfirm quickshell-git libcava qt6-m3shapes-git caelestia-lib && \
               sudo -u builder yay -Yc --noconfirm && \
               pacman -Rns --noconfirm yay-bin && \
               sed -i '/builder ALL=(ALL) NOPASSWD:ALL/d' /etc/sudoers && \

@@ -31,16 +31,24 @@ Item {
 
         reloadableId: "utilities"
     }
-    readonly property bool shouldBeActive: screenState.sidebar || (screenState.utilities && Config.utilities.enabled && !(screenState.session && Config.session.enabled))
+    readonly property bool showUtils: screenState.utilities && Config.utilities.enabled && !(screenState.session && Config.session.enabled)
+    readonly property bool shouldBeActive: screenState.sidebar || showUtils
     readonly property real totalPadding: content.anchors.margins + CUtils.clamp(content.anchors.margins - Config.border.thickness, 0, content.anchors.margins)
     readonly property real nonAnimHeight: ((content.item as Content)?.nonAnimHeight ?? 0) + totalPadding
     property real offsetScale: shouldBeActive ? 0 : 1
+    property real utilLerp: showUtils ? 0 : 1
     property real sidebarLerp
 
     visible: offsetScale < 1 && !layoutHidden
     anchors.bottomMargin: (-implicitHeight - 5) * offsetScale - layoutShiftY
     implicitHeight: content.implicitHeight + totalPadding
     implicitWidth: layoutMaxWidth > 0 ? Math.min(naturalWidth, layoutMaxWidth) : naturalWidth
+    implicitWidth: {
+        const a = sidebar.width * (1 - sidebar.offsetScale) * horizontalStretch;
+        const b = Tokens.sizes.utilities.width;
+        const t = Math.min(sidebarLerp, Math.max(0, utilLerp));
+        return a * t + b * (1 - t);
+    }
     opacity: 1 - offsetScale
 
     states: State {
@@ -74,6 +82,10 @@ Item {
     ]
 
     Behavior on offsetScale {
+        Anim {}
+    }
+
+    Behavior on utilLerp {
         Anim {}
     }
 
