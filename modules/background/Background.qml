@@ -161,5 +161,16 @@ Variants {
                 absY: clockLoader.y
             }
         }
+
+        Loader {
+            asynchronous: true
+            active: Config.background.splash.enabled
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Math.max(Tokens.padding.extraLargeIncreased, win.modelData.height * 0.02)
+
+            sourceComponent: Splash {}
+        }
     }
 }
