@@ -189,7 +189,7 @@ WlSessionLockSurface {
         id: wallpaperBackground
 
         Visual {
-            source: Wallpapers.current
+            source: Wallpapers.forScreen(root.screen)
             playing: PersistentState.wallpaperPlaying
         }
     }
