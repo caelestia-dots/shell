@@ -8,7 +8,7 @@ if(NOT DEFINED VERSION)
     )
 
     if("${VERSION}" STREQUAL "")
-        message(FATAL_ERROR "VERSION is not set and failed to get from git")
+        message(FATAL_ERROR "Failed to determine VERSION from Git; supply it explicitly")
     endif()
 endif()
 
@@ -20,13 +20,17 @@ if(NOT DEFINED GIT_REVISION)
     )
 
     if("${GIT_REVISION}" STREQUAL "")
-        message(FATAL_ERROR "GIT_REVISION is not set and failed to get from git")
+        message(FATAL_ERROR "Failed to determine GIT_REVISION from Git; supply it explicitly")
     endif()
 endif()
 
 string(REGEX REPLACE "^v" "" VERSION "${VERSION}")
 
-project(caelestia-shell VERSION ${VERSION} LANGUAGES CXX)
+if("${VERSION}" STREQUAL "")
+    project(caelestia-shell LANGUAGES CXX)
+else()
+    project(caelestia-shell VERSION "${VERSION}" LANGUAGES CXX)
+endif()
 
 include(GNUInstallDirs)
 
