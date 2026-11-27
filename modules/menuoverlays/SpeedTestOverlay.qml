@@ -1,29 +1,27 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Wayland
-import Caelestia.Config
-import Caelestia.I18n
-import qs.components
 import qs.services
 
-// Gauge overlay card for live network and disk speed measurements.
-// Adapted from Omarchy's SpeedTestOverlay (MIT License) and themed to Caelestia.
+// Ported from omarchy's Ui_SpeedTestOverlay: gauges sit on a dark translucent
+// card, and the card packs toward the vertical center when other overlay cards
+// are open at the same time. Esc, the card's surroundings, or the corner
+// dismiss close it; the needles sweep to full scale and back on open, then
+// track the live readings.
 // qmllint disable uncreatable-type
 PanelWindow {
-    // qmllint enable uncreatable-type
     id: root
 
     required property bool running
     required property string leftLabel
     required property string rightLabel
+
     property string unit: "Mbps"
     property string title: ""
     property string layerNamespace: "caelestia-menu-speed-test"
-    property string runAgainTooltip: Tr.tr("Measure again")
+    property string runAgainTooltip: "Measure again"
     property real leftValue: 0
     property real rightValue: 0
     property bool leftLive: false
@@ -31,28 +29,36 @@ PanelWindow {
     property string error: ""
     property bool open: false
 
+    // Stacking: how many overlays are open in total and this card's vertical
+    // rank (0 = top). The coordinator in MenuOverlays supplies these, and also
+    // a ready-made vertical-center fraction that keeps the cards apart.
     property int stackCount: 1
     property int stackRank: 0
     property real stackCenter: 0.5
 
+    // Full-scale latch points for the dials, smallest first.
     property var scaleStops: [100, 250, 500, 1000, 2500, 5000, 10000]
     property real fullScale: scaleStops[0]
+
+    // Card entrance: 0 -> 1 on open, so each card fades and pops into its
+    // slot rather than sliding in from off-screen.
     property real pop: 0
 
     readonly property bool failed: error !== ""
-    readonly property color onCard: Colours.palette.m3onSurface
-    readonly property color onCardDim: Colours.palette.m3onSurfaceVariant
-    readonly property color onCardUrgent: Colours.palette.m3error
+    readonly property color onScrim: "white"
+    readonly property color onScrimDim: Qt.rgba(1, 1, 1, 0.55)
+    readonly property color onScrimUrgent: "#ff6b6b"
     readonly property color accent: Colours.palette.m3primary
+    readonly property string fontFamily: "JetBrainsMono Nerd Font"
 
     signal closeRequested
     signal runAgainRequested
 
-    function resetScale(): void {
+    function resetScale() {
         fullScale = scaleStops[0];
     }
 
-    function expandScale(value: real): void {
+    function expandScale(value) {
         for (let i = 0; i < scaleStops.length; i++) {
             if (value <= scaleStops[i] * 0.92) {
                 if (scaleStops[i] > fullScale)
@@ -64,11 +70,6 @@ PanelWindow {
     }
 
     visible: open
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: root.layerNamespace
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
     anchors {
         top: true
@@ -77,16 +78,21 @@ PanelWindow {
         right: true
     }
 
-    onRunningChanged: {
-        if (running)
-            resetScale();
-    }
+    color: "transparent"
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.namespace: root.layerNamespace
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+    onRunningChanged: if (running)
+        resetScale()
     onLeftValueChanged: expandScale(leftValue)
     onRightValueChanged: expandScale(rightValue)
+
     onOpenChanged: {
         if (open) {
             pop = 0;
-            Qt.callLater(() => {
+            Qt.callLater(function () {
                 if (!root.open)
                     return;
                 pop = 1;
@@ -115,30 +121,29 @@ PanelWindow {
             if (event.key === Qt.Key_Q)
                 root.closeRequested();
         }
-        Keys.onReturnPressed: {
-            if (!root.running)
-                root.runAgainRequested();
-        }
-        Keys.onEnterPressed: {
-            if (!root.running)
-                root.runAgainRequested();
-        }
+        Keys.onReturnPressed: if (!root.running)
+            root.runAgainRequested()
+        Keys.onEnterPressed: if (!root.running)
+            root.runAgainRequested()
 
         MouseArea {
             anchors.fill: parent
             onClicked: root.closeRequested()
         }
 
-        StyledRect {
+        Rectangle {
             id: card
 
-            radius: Tokens.rounding.extraLarge
-            color: Colours.tPalette.m3surfaceContainer
-            border.color: Colours.palette.m3outlineVariant
+            radius: 20
+            color: Qt.rgba(0.045, 0.05, 0.075, 0.82)
+            border.color: Qt.rgba(1, 1, 1, 0.08)
             border.width: 1
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
+            // Pack the card toward the top/bottom of the center as more
+            // overlays open; the offset eases so repositioning settles into
+            // its slot instead of snapping around.
             anchors.verticalCenterOffset: (root.stackCenter - 0.5) * parent.height
 
             opacity: root.pop
@@ -148,8 +153,9 @@ PanelWindow {
             height: content.implicitHeight + 40
 
             Behavior on opacity {
-                Anim {
-                    type: Anim.DefaultEffects
+                NumberAnimation {
+                    duration: 160
+                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -161,7 +167,10 @@ PanelWindow {
             }
 
             Behavior on anchors.verticalCenterOffset {
-                Anim {}
+                NumberAnimation {
+                    duration: 220
+                    easing.type: Easing.OutCubic
+                }
             }
 
             MouseArea {
@@ -172,7 +181,7 @@ PanelWindow {
             ColumnLayout {
                 id: content
 
-                spacing: Tokens.spacing.large
+                spacing: 16
 
                 anchors {
                     fill: parent
@@ -182,11 +191,14 @@ PanelWindow {
                     rightMargin: 24
                 }
 
-                StyledText {
+                Text {
                     visible: root.title !== ""
                     text: root.title.toUpperCase()
-                    color: root.onCardDim
-                    font: Tokens.font.mono.builders.small.weight(Font.Bold).letterSpacing(2).build()
+                    color: root.onScrimDim
+                    font.family: root.fontFamily
+                    font.pixelSize: 12
+                    font.bold: true
+                    font.letterSpacing: 2
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                 }
@@ -212,11 +224,12 @@ PanelWindow {
                     }
                 }
 
-                StyledText {
+                Text {
                     visible: root.failed
                     text: root.error
-                    color: root.onCardUrgent
-                    font: Tokens.font.body.small
+                    color: root.onScrimUrgent
+                    font.family: root.fontFamily
+                    font.pixelSize: 13
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                     Layout.maximumWidth: 440
@@ -239,9 +252,9 @@ PanelWindow {
         readonly property int tickCount: 46
         readonly property real arcWidth: 4
         readonly property real arcRadius: diameter / 2 - arcWidth
-        readonly property color trackColor: Qt.alpha(Colours.palette.m3onSurface, 0.14)
-        readonly property color minorTickColor: Qt.alpha(Colours.palette.m3onSurface, 0.12)
-        readonly property color majorTickColor: Qt.alpha(Colours.palette.m3onSurface, 0.3)
+        readonly property color trackColor: Qt.rgba(1, 1, 1, 0.14)
+        readonly property color minorTickColor: Qt.rgba(1, 1, 1, 0.12)
+        readonly property color majorTickColor: Qt.rgba(1, 1, 1, 0.3)
         readonly property bool engaged: live || value > 0
 
         property real shown: 0
@@ -250,7 +263,7 @@ PanelWindow {
         readonly property real fraction: fullScale > 0 ? Math.max(0, Math.min(1, shown / fullScale)) : 0
         readonly property bool arcVisible: fraction > 0.004
 
-        function ignite(): void {
+        function ignite() {
             ignition.restart();
         }
 
@@ -279,28 +292,6 @@ PanelWindow {
             }
         }
 
-        SequentialAnimation {
-            id: ignition
-
-            onFinished: dial.shown = dial.value
-
-            NumberAnimation {
-                target: dial
-                property: "shown"
-                to: dial.fullScale
-                duration: 550
-                easing.type: Easing.InOutCubic
-            }
-
-            NumberAnimation {
-                target: dial
-                property: "shown"
-                to: 0
-                duration: 650
-                easing.type: Easing.OutCubic
-            }
-        }
-
         Shape {
             anchors.fill: parent
             preferredRendererType: Shape.CurveRenderer
@@ -323,7 +314,7 @@ PanelWindow {
 
             ShapePath {
                 strokeWidth: dial.arcWidth * 3
-                strokeColor: dial.arcVisible ? Qt.alpha(root.accent, 0.18) : "transparent"
+                strokeColor: dial.arcVisible ? Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.18) : "transparent"
                 fillColor: "transparent"
                 capStyle: ShapePath.RoundCap
 
@@ -414,27 +405,59 @@ PanelWindow {
             anchors.topMargin: 14
             spacing: 0
 
-            StyledText {
+            Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: dial.reading < 10 ? dial.reading.toLocaleString(Qt.locale(), 'f', 1) : Math.round(dial.reading).toLocaleString(Qt.locale(), 'f', 0)
-                color: root.onCard
-                font: Tokens.font.mono.builders.large.scale(2.2).weight(Font.Bold).build()
+                color: root.onScrim
+                font.family: root.fontFamily
+                font.pixelSize: 32
+                font.bold: true
             }
 
-            StyledText {
+            Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.unit
-                color: root.onCardDim
-                font: Tokens.font.mono.small
+                color: root.onScrimDim
+                font.family: root.fontFamily
+                font.pixelSize: 12
             }
         }
 
-        StyledText {
+        Text {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             text: dial.label
-            color: (dial.value > 0 && !dial.live) ? root.accent : root.onCardDim
-            font: Tokens.font.mono.builders.small.weight(Font.Bold).letterSpacing(1.5).build()
+            // Accent when this dial's phase has finished (a reading landed and
+            // it is no longer the live phase), dim while it is measuring or
+            // has not run yet. Each dial is independent.
+            color: (dial.value > 0 && !dial.live) ? root.accent : root.onScrimDim
+            font.family: root.fontFamily
+            font.pixelSize: 12
+            font.bold: true
+            font.letterSpacing: 1.5
+        }
+
+        SequentialAnimation {
+            id: ignition
+
+            onFinished: dial.shown = dial.value
+
+            NumberAnimation {
+                target: dial
+                property: "shown"
+                to: dial.fullScale
+                duration: 550
+                easing.type: Easing.InOutCubic
+            }
+
+            NumberAnimation {
+                target: dial
+                property: "shown"
+                to: 0
+                duration: 650
+                easing.type: Easing.OutCubic
+            }
         }
     }
 }
+// qmllint enable uncreatable-type

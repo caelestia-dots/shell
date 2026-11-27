@@ -5,24 +5,28 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Caelestia.Config
-import Caelestia.I18n
-import qs.components
 import qs.services
 import qs.modules.launcher.services
 import "Model.js" as Model
 
-// Wi-Fi QR share card overlay.
-// Adapted from Omarchy's wifiqr panel (MIT License) and themed to Caelestia.
-Scope {
+// Ported from omarchy's wifiqr_Panel.qml: the Wi-Fi QR code floats on its own
+// dark translucent card, packed toward the vertical center when other overlay
+// cards are open. Each summon regenerates the code via menu-network-qr --meta.
+Item {
     id: root
 
     property bool opened: false
     property string iface: ""
     property string ssid: ""
     property bool secured: false
+
+    // Card entrance: 0 -> 1 on open, so each card fades and pops into its
+    // slot rather than sliding in from off-screen.
     property real pop: 0
 
+    // Stacking: how many overlays are open in total and this card's vertical
+    // rank (0 = top). The coordinator in MenuOverlays supplies these, and also
+    // a ready-made vertical-center fraction that keeps the cards apart.
     property int stackCount: 1
     property int stackRank: 0
     property real stackCenter: 0.5
@@ -40,25 +44,31 @@ Scope {
     property bool pwExpectedStop: false
 
     readonly property bool showingQr: qrSize > 0 && !loading && error === ""
+    readonly property color onScrim: "white"
+    readonly property color onScrimDim: Qt.rgba(1, 1, 1, 0.55)
+    readonly property color onScrimUrgent: "#ff6b6b"
+    readonly property string fontFamily: "JetBrainsMono Nerd Font"
     readonly property string binPath: `${MenuService.userBinDir}:${MenuService.bundledBinDir}`
-    readonly property color onCard: Colours.palette.m3onSurface
-    readonly property color onCardDim: Colours.palette.m3onSurfaceVariant
-    readonly property color onCardUrgent: Colours.palette.m3error
 
+    // Emitted when the user dismisses this overlay; the coordinator in
+    // MenuOverlays closes every open overlay so one Esc exits them all.
     signal closeRequested
+
+    // Emitted on Enter so the coordinator can restart any open speed test,
+    // even when this card (with the keyboard focus) is on top.
     signal runAgainRequested
 
-    function open(): void {
+    function open() {
         root.ssid = "";
         generate("");
         root.opened = true;
-        Qt.callLater(() => {
+        Qt.callLater(function () {
             if (root.opened)
                 keyCatcher.forceActiveFocus();
         });
     }
 
-    function close(): void {
+    function close() {
         root.opened = false;
         root.pendingShow = false;
         if (qrProc.running) {
@@ -79,7 +89,7 @@ Scope {
         root.passwordError = "";
     }
 
-    function generate(requestedIface: string): void {
+    function generate(requestedIface) {
         if (qrProc.running) {
             pendingShow = true;
             pendingIface = requestedIface;
@@ -103,12 +113,11 @@ Scope {
             pwExpectedStop = true;
             pwProc.running = false;
         }
-        const pathExport = `export PATH="${root.binPath}:$PATH"`;
-        qrProc.command = requestedIface !== "" ? ["bash", "-c", `${pathExport}; exec menu-network-qr --meta "$1"`, "menu-network-qr", requestedIface] : ["bash", "-c", `${pathExport}; exec menu-network-qr --meta`];
+        qrProc.command = requestedIface !== "" ? ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-qr --meta "$1"`, "menu-network-qr", requestedIface] : ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-qr --meta`];
         qrProc.running = true;
     }
 
-    function updateQr(raw: string): void {
+    function updateQr(raw) {
         const parsed = Model.parseQrOutput(raw);
         qrRows = parsed.matrix.rows;
         qrSize = parsed.matrix.size;
@@ -121,7 +130,7 @@ Scope {
             error = "";
     }
 
-    function togglePassword(): void {
+    function togglePassword() {
         if (passwordVisible) {
             passwordVisible = false;
             return;
@@ -134,15 +143,14 @@ Scope {
             return;
         passwordError = "";
         pwExpectedStop = false;
-        const pathExport = `export PATH="${root.binPath}:$PATH"`;
-        pwProc.command = ["bash", "-c", `${pathExport}; exec menu-network-password "$1"`, "menu-network-password", iface];
+        pwProc.command = ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-password "$1"`, "menu-network-password", iface];
         pwProc.running = true;
     }
 
     onOpenedChanged: {
         if (opened) {
             pop = 0;
-            Qt.callLater(() => {
+            Qt.callLater(function () {
                 if (!root.opened)
                     return;
                 pop = 1;
@@ -155,25 +163,23 @@ Scope {
 
         stdout: StdioCollector {
             waitForEnd: true
-            onStreamFinished: {
-                if (!root.expectedStop)
-                    root.updateQr(text);
-            }
+            onStreamFinished: if (!root.expectedStop)
+                root.updateQr(text)
         }
 
         stderr: StdioCollector {
             waitForEnd: true
-            onStreamFinished: {
-                if (!root.expectedStop)
-                    root.error = String(text || "").trim();
-            }
+            onStreamFinished: if (!root.expectedStop)
+                root.error = String(text || "").trim()
         }
 
         onExited: (exitCode, exitStatus) => {
             root.loading = false;
             if (root.pendingShow) {
                 root.pendingShow = false;
-                Qt.callLater(() => root.generate(root.pendingIface));
+                Qt.callLater(function () {
+                    root.generate(root.pendingIface);
+                });
                 return;
             }
             if (root.expectedStop)
@@ -182,7 +188,7 @@ Scope {
                 root.qrSize = 0;
                 root.qrRows = [];
                 if (root.error === "")
-                    root.error = Tr.tr("Could not generate the Wi-Fi QR code");
+                    root.error = "Could not generate the Wi-Fi QR code";
             }
         }
     }
@@ -192,19 +198,19 @@ Scope {
 
         stdout: StdioCollector {
             waitForEnd: true
-            onStreamFinished: {
-                if (root.opened && !root.pwExpectedStop)
-                    root.password = String(text || "").trim();
-            }
+            onStreamFinished: if (root.opened && !root.pwExpectedStop)
+                root.password = String(text || "").trim()
         }
 
         onExited: (exitCode, exitStatus) => {
-            if (root.pwExpectedStop || !root.opened)
+            if (root.pwExpectedStop)
+                return;
+            if (!root.opened)
                 return;
             if (exitCode === 0 && root.password !== "")
                 root.passwordVisible = true;
             else
-                root.passwordError = Tr.tr("Could not read the Wi-Fi password");
+                root.passwordError = "Could not read the Wi-Fi password";
         }
     }
 
@@ -212,11 +218,6 @@ Scope {
     PanelWindow {
         // qmllint enable uncreatable-type
         visible: root.opened
-        color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.namespace: "caelestia-menu-network-qr"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
         anchors {
             top: true
@@ -224,6 +225,12 @@ Scope {
             left: true
             right: true
         }
+
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.namespace: "caelestia-menu-network-qr"
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
         Item {
             id: keyCatcher
@@ -244,16 +251,19 @@ Scope {
                 onClicked: root.closeRequested()
             }
 
-            StyledRect {
+            Rectangle {
                 id: card
 
-                radius: Tokens.rounding.extraLarge
-                color: Colours.tPalette.m3surfaceContainer
-                border.color: Colours.palette.m3outlineVariant
+                radius: 20
+                color: Qt.rgba(0.045, 0.05, 0.075, 0.82)
+                border.color: Qt.rgba(1, 1, 1, 0.08)
                 border.width: 1
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
+                // Pack the card toward the top/bottom of the center as more
+                // overlays open; the offset eases so repositioning settles
+                // into its slot instead of snapping around.
                 anchors.verticalCenterOffset: (root.stackCenter - 0.5) * parent.height
 
                 opacity: root.pop
@@ -263,8 +273,9 @@ Scope {
                 height: content.implicitHeight + 40
 
                 Behavior on opacity {
-                    Anim {
-                        type: Anim.DefaultEffects
+                    NumberAnimation {
+                        duration: 160
+                        easing.type: Easing.OutCubic
                     }
                 }
 
@@ -276,7 +287,10 @@ Scope {
                 }
 
                 Behavior on anchors.verticalCenterOffset {
-                    Anim {}
+                    NumberAnimation {
+                        duration: 220
+                        easing.type: Easing.OutCubic
+                    }
                 }
 
                 MouseArea {
@@ -287,7 +301,7 @@ Scope {
                 ColumnLayout {
                     id: content
 
-                    spacing: Tokens.spacing.large
+                    spacing: 16
 
                     anchors {
                         fill: parent
@@ -297,10 +311,13 @@ Scope {
                         rightMargin: 24
                     }
 
-                    StyledText {
-                        text: (root.ssid || Tr.tr("Wi-Fi")).toUpperCase()
-                        color: root.onCardDim
-                        font: Tokens.font.mono.builders.small.weight(Font.Bold).letterSpacing(2).build()
+                    Text {
+                        text: (root.ssid || "Wi-Fi").toUpperCase()
+                        color: root.onScrimDim
+                        font.family: root.fontFamily
+                        font.pixelSize: 12
+                        font.bold: true
+                        font.letterSpacing: 2
                         elide: Text.ElideRight
                         Layout.maximumWidth: 320
                         Layout.alignment: Qt.AlignHCenter
@@ -313,10 +330,10 @@ Scope {
                         readonly property int moduleSize: root.qrSize > 0 ? Math.max(4, Math.floor(240 / root.qrSize)) : 0
 
                         visible: root.showingQr
-                        Layout.preferredWidth: root.qrSize * moduleSize
-                        Layout.preferredHeight: root.qrSize * moduleSize
+                        width: root.qrSize * moduleSize
+                        height: width
                         color: "white"
-                        radius: Tokens.rounding.medium
+                        radius: 12
                         Layout.alignment: Qt.AlignHCenter
 
                         Grid {
@@ -340,41 +357,45 @@ Scope {
                         }
                     }
 
-                    StyledText {
+                    Text {
                         visible: root.loading
-                        text: Tr.tr("Generating QR code…")
-                        color: root.onCardDim
-                        font: Tokens.font.body.small
+                        text: "Generating QR code…"
+                        color: root.onScrimDim
+                        font.family: root.fontFamily
+                        font.pixelSize: 13
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
                     }
 
-                    StyledText {
+                    Text {
                         visible: root.error !== ""
                         text: root.error
-                        color: root.onCardUrgent
-                        font: Tokens.font.body.small
+                        color: root.onScrimUrgent
+                        font.family: root.fontFamily
+                        font.pixelSize: 13
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                         Layout.maximumWidth: 320
                         horizontalAlignment: Text.AlignHCenter
                     }
 
-                    StyledText {
+                    Text {
                         visible: root.showingQr
-                        text: Tr.tr("Scan to join this network")
-                        color: root.onCardDim
-                        font: Tokens.font.body.small
+                        text: "Scan to join this network"
+                        color: root.onScrimDim
+                        font.family: root.fontFamily
+                        font.pixelSize: 13
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
                     }
 
-                    StyledText {
+                    Text {
                         visible: root.showingQr && root.secured
-                        text: root.passwordError !== "" ? root.passwordError : root.passwordVisible ? root.password : Tr.tr("Click to show password")
-                        color: root.passwordError !== "" ? root.onCardUrgent : root.onCard
-                        opacity: root.passwordVisible || root.passwordError !== "" ? 1 : 0.65
-                        font: Tokens.font.mono.medium
+                        text: root.passwordError !== "" ? root.passwordError : root.passwordVisible ? root.password : "Click to show password"
+                        color: root.passwordError !== "" ? root.onScrimUrgent : root.onScrim
+                        opacity: root.passwordVisible || root.passwordError !== "" ? 1 : 0.6
+                        font.family: root.fontFamily
+                        font.pixelSize: 13
                         wrapMode: Text.WrapAnywhere
                         Layout.fillWidth: true
                         Layout.maximumWidth: 320

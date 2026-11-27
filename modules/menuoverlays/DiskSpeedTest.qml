@@ -1,12 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Caelestia.I18n
 import qs.modules.launcher.services
 
-// Read and write disk speed test overlay.
-// Adapted from Omarchy's disk speedtest panel (MIT License).
-Scope {
+// Ported from omarchy's disk-speedtest_Panel.qml: read and write dials in
+// MB/s, titled with the model of the disk under test.
+Item {
     id: root
 
     property bool opened: false
@@ -20,19 +19,23 @@ Scope {
     property string error: ""
     property string stderrText: ""
 
+    // Stacking info supplied by the menu-overlay coordinator (MenuOverlays):
+    // how many overlays are open and this one's vertical position.
     property int stackCount: 1
     property int stackRank: 0
     property real stackCenter: 0.5
 
+    // The underlying overlay, exposed so the coordinator in MenuOverlays can
+    // observe its close/run-again requests and act on every overlay at once.
     readonly property alias overlay: overlayInstance
     readonly property string binPath: `${MenuService.userBinDir}:${MenuService.bundledBinDir}`
 
-    function open(): void {
+    function open() {
         opened = true;
         runTest();
     }
 
-    function close(): void {
+    function close() {
         opened = false;
         pendingRun = false;
         phase = "";
@@ -43,7 +46,7 @@ Scope {
         }
     }
 
-    function runTest(): void {
+    function runTest() {
         if (proc.running) {
             if (expectedStop)
                 pendingRun = true;
@@ -56,16 +59,15 @@ Scope {
         stderrText = "";
         phase = "read";
         running = true;
-        proc.command = ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-disk-speedtest`];
         proc.running = true;
     }
 
-    function toRate(raw: string): real {
+    function toRate(raw) {
         const value = parseFloat(raw);
         return isFinite(value) && value > 0 ? value : 0;
     }
 
-    function updateLine(line: string): void {
+    function updateLine(line) {
         const parts = String(line).trim().split(/\s+/);
         if (parts.length < 2)
             return;
@@ -87,6 +89,8 @@ Scope {
 
     Process {
         id: proc
+
+        command: ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-disk-speedtest`]
 
         stdout: SplitParser {
             onRead: line => root.updateLine(line)
@@ -111,7 +115,7 @@ Scope {
             }
 
             if (!root.expectedStop && exitCode !== 0) {
-                root.error = root.stderrText || Tr.tr("Disk speed test failed");
+                root.error = root.stderrText || "Disk speed test failed";
                 root.phase = "";
                 root.running = false;
                 return;
@@ -128,8 +132,8 @@ Scope {
 
         layerNamespace: "caelestia-menu-disk-speedtest"
         title: root.diskName
-        leftLabel: Tr.tr("READ")
-        rightLabel: Tr.tr("WRITE")
+        leftLabel: "READ"
+        rightLabel: "WRITE"
         unit: "MB/s"
         stackCount: root.stackCount
         stackRank: root.stackRank

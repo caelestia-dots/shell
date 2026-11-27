@@ -1,23 +1,22 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import Caelestia.I18n
 import qs.modules.launcher.services
 
-// Download and upload speed test overlay.
-// Adapted from Omarchy's network speedtest panel (MIT License).
-Scope {
+// Ported from omarchy's speedtest_Panel.qml: download and upload dials in
+// Mbps, titled with the connection under test. Summoning starts a fresh run,
+// dismissing stops the traffic.
+Item {
     id: root
 
     property bool opened: false
     property string connectionName: ""
 
+    // Stacking info supplied by the menu-overlay coordinator (MenuOverlays):
+    // how many overlays are open and this one's vertical position.
     property int stackCount: 1
     property int stackRank: 0
     property real stackCenter: 0.5
-
-    readonly property alias overlay: overlayInstance
-    readonly property string binPath: `${MenuService.userBinDir}:${MenuService.bundledBinDir}`
 
     property bool running: false
     property bool expectedStop: false
@@ -28,21 +27,26 @@ Scope {
     property string uploadMbps: ""
     property string error: ""
 
+    // The underlying overlay, exposed so the coordinator in MenuOverlays can
+    // observe its close/run-again requests and act on every overlay at once.
+    readonly property alias overlay: overlayInstance
+    readonly property string binPath: `${MenuService.userBinDir}:${MenuService.bundledBinDir}`
+
     readonly property real downloadValue: toMbps(downloadMbps)
     readonly property real uploadValue: toMbps(uploadMbps)
 
-    function toMbps(raw: string): real {
+    function toMbps(raw) {
         const value = parseFloat(raw);
         return isFinite(value) && value > 0 ? value : 0;
     }
 
-    function open(): void {
+    function open() {
         refreshConnectionName();
         root.opened = true;
         runSpeedTest();
     }
 
-    function close(): void {
+    function close() {
         root.opened = false;
         root.pendingRun = false;
         phaseTimer.stop();
@@ -54,14 +58,13 @@ Scope {
         }
     }
 
-    function refreshConnectionName(): void {
+    function refreshConnectionName() {
         root.connectionName = "";
         statusProc.running = false;
-        statusProc.command = ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-status`];
         statusProc.running = true;
     }
 
-    function updateSpeedTestLine(line: string): void {
+    function updateSpeedTestLine(line) {
         const value = parseFloat(line);
         if (!isFinite(value) || value < 0)
             return;
@@ -72,7 +75,7 @@ Scope {
             uploadMbps = String(value);
     }
 
-    function runSpeedTest(): void {
+    function runSpeedTest() {
         if (speedTestProc.running) {
             if (expectedStop)
                 pendingRun = true;
@@ -85,7 +88,7 @@ Scope {
         startPhase("down");
     }
 
-    function startPhase(nextPhase: string): void {
+    function startPhase(nextPhase) {
         expectedStop = false;
         phase = nextPhase;
         stderrText = "";
@@ -94,7 +97,7 @@ Scope {
         phaseTimer.restart();
     }
 
-    function stopPhase(): void {
+    function stopPhase() {
         phaseTimer.stop();
         if (speedTestProc.running) {
             expectedStop = true;
@@ -104,7 +107,7 @@ Scope {
         finishPhase();
     }
 
-    function finishPhase(): void {
+    function finishPhase() {
         if (phase === "down") {
             startPhase("up");
             return;
@@ -143,7 +146,7 @@ Scope {
             }
 
             if (!root.expectedStop && exitCode !== 0) {
-                root.error = root.stderrText || Tr.tr("Speed test failed");
+                root.error = root.stderrText || "Speed test failed";
                 root.phase = "";
                 root.running = false;
                 return;
@@ -157,6 +160,8 @@ Scope {
     Timer {
         id: phaseTimer
 
+        // Match the disk speed test's 8s per phase so the two open side by
+        // side finish at roughly the same time.
         interval: 8000
         repeat: false
         onTriggered: root.stopPhase()
@@ -165,14 +170,16 @@ Scope {
     Process {
         id: statusProc
 
+        command: ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-status`]
+
         stdout: StdioCollector {
             waitForEnd: true
             onStreamFinished: {
                 const fields = String(text || "").trim().split("\t");
                 if (fields[0] === "wifi")
-                    root.connectionName = fields[1] || Tr.tr("Wi-Fi");
+                    root.connectionName = fields[1] || "Wi-Fi";
                 else if (fields[0] === "ethernet")
-                    root.connectionName = Tr.tr("Ethernet");
+                    root.connectionName = "Ethernet";
             }
         }
     }
@@ -182,12 +189,12 @@ Scope {
 
         layerNamespace: "caelestia-menu-network-speedtest"
         title: root.connectionName
-        leftLabel: Tr.tr("DOWNLOAD")
-        rightLabel: Tr.tr("UPLOAD")
+        leftLabel: "DOWNLOAD"
+        rightLabel: "UPLOAD"
         stackCount: root.stackCount
         stackRank: root.stackRank
         stackCenter: root.stackCenter
-        runAgainTooltip: Tr.tr("Measure again via fast.com")
+        runAgainTooltip: "Measure again via fast.com"
         running: root.running
         leftValue: root.downloadValue
         rightValue: root.uploadValue
