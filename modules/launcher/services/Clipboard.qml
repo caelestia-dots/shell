@@ -4,9 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Caelestia
-import Caelestia.Config
 import Caelestia.I18n
-import Caelestia.Services
 
 // Ported from Caelestia PR #1298's services/Clipboard.qml. The pinned list
 // lives in a small JSON side-file instead of LauncherConfig, which is
