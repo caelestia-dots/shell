@@ -41,6 +41,8 @@
   // Trigger
   "trigger.reminder": { "icon": "alarm", "label": "Reminder", "aliases": ["reminder", "timer"] },
   "trigger.emoji": { "icon": "sentiment_satisfied", "label": "Emoji", "aliases": ["emoji-picker", "emote", "smiley"], "internal": "emoji" },
+  "trigger.kaomoji": { "icon": "emoticon", "label": "Kaomoji", "aliases": ["kaomoji", "emoticon"], "internal": "kaomoji" },
+  "trigger.symbol": { "icon": "star", "label": "Symbols", "aliases": ["symbol", "symbols", "special-characters"], "internal": "symbol" },
   "trigger.clipboard": { "icon": "content_paste", "label": "Clipboard History", "aliases": ["clipboard", "cliphist"], "when": "command -v cliphist", "internal": "clipboard" },
   "trigger.reminder.set": { "icon": "add_alarm", "label": "Set reminder…", "aliases": ["reminder-set", "remind"] },
   "trigger.reminder.show": { "icon": "notifications_active", "label": "Show all", "action": "menu-reminder show" },

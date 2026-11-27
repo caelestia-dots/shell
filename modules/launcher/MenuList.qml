@@ -46,8 +46,9 @@ StyledListView {
             return;
         }
 
-        // Emoji & Clipboard hand off to the >emoji / >clipboard views.
-        if (row.type === "internal" && (row.internal === "clipboard" || row.internal === "emoji")) {
+        // Emoji, kaomoji, symbols & clipboard hand off to the >emoji /
+        // >kaomoji / >symbol / >clipboard views.
+        if (row.type === "internal" && ["clipboard", "emoji", "kaomoji", "symbol"].includes(row.internal)) {
             root.search.text = `${GlobalConfig.launcher.actionPrefix}${row.internal} `;
             return;
         }
