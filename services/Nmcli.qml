@@ -64,7 +64,6 @@ Singleton {
     readonly property string connectionParamConName: "con-name"
     readonly property string connectionParamIfname: "ifname"
     readonly property string connectionParamSsid: "ssid"
-    readonly property string connectionParamPassword: "password"
     readonly property string connectionParamBssid: "802-11-wireless.bssid"
     readonly property string connectionParamHidden: "802-11-wireless.hidden"
 
@@ -187,10 +186,13 @@ Singleton {
         return iface ? iface.connection : "";
     }
 
-    function executeCommand(args: list<string>, callback: var): void {
+    // stdinData is written to nmcli's stdin instead of being passed as an argument, so secrets
+    // don't end up in the process list (/proc/<pid>/cmdline is readable by every local user)
+    function executeCommand(args: list<string>, callback: var, stdinData: var): void {
         const proc = commandProc.createObject(root);
         proc.cmdArgs = ["nmcli", ...args];
         proc.callback = callback;
+        proc.stdinData = stdinData ?? "";
 
         activeProcesses.push(proc);
 
@@ -446,16 +448,14 @@ Singleton {
             immediateCheckTimer.start();
         }
 
-        if (password && password.length > 0 && hasBssid) {
-            const bssidUpper = bssid.toUpperCase();
-            createConnectionWithPassword(ssid, bssidUpper, password, callback);
+        // `nmcli device wifi connect` only takes the password as an argument, so always go
+        // through a profile and hand the password over on stdin
+        if (password && password.length > 0) {
+            createConnectionWithPassword(ssid, hasBssid ? bssid.toUpperCase() : "", password, callback);
             return;
         }
 
-        let cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
-        if (password && password.length > 0) {
-            cmd.push(root.connectionParamPassword, password);
-        }
+        const cmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid];
         executeCommand(cmd, result => {
             if (result.needsPassword && callback) {
                 if (callback)
@@ -477,25 +477,28 @@ Singleton {
 
     function createConnectionWithPassword(ssid: string, bssidUpper: string, password: string, callback: var): void {
         checkAndDeleteConnection(ssid, () => {
-            const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamBssid, bssidUpper, root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password];
+            // The PSK is left out here and given to `connection up` on stdin, NetworkManager then
+            // saves it to the profile
+            const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid];
+            if (bssidUpper)
+                cmd.push(root.connectionParamBssid, bssidUpper);
+            cmd.push(root.securityKeyMgmt, root.keyMgmtWpaPsk);
 
             executeCommand(cmd, result => {
                 if (result.success) {
                     loadSavedConnections(() => {});
-                    activateConnection(ssid, callback);
+                    activateConnectionWithPassword(ssid, password, callback);
                 } else {
                     const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
 
                     if (hasDuplicateWarning || (result.exitCode > 0 && result.exitCode < 10)) {
                         loadSavedConnections(() => {});
-                        activateConnection(ssid, callback);
-                    } else {
-                        console.warn(lc, "Connection profile creation failed, trying fallback...");
-                        let fallbackCmd = [root.nmcliCommandDevice, root.nmcliCommandWifi, "connect", ssid, root.connectionParamPassword, password];
-                        executeCommand(fallbackCmd, fallbackResult => {
-                            if (callback)
-                                callback(fallbackResult);
-                        });
+                        activateConnectionWithPassword(ssid, password, callback);
+                    } else if (bssidUpper) {
+                        console.warn(lc, "Connection profile creation failed, trying again without the BSSID...");
+                        createConnectionWithPassword(ssid, "", password, callback);
+                    } else if (callback) {
+                        callback(result);
                     }
                 }
             });
@@ -523,6 +526,15 @@ Singleton {
             if (callback)
                 callback(result);
         });
+    }
+
+    // Same as activateConnection, but answers NetworkManager's secrets request with the given
+    // password through a passwd-file read from stdin
+    function activateConnectionWithPassword(connectionName: string, password: string, callback: var): void {
+        executeCommand([root.nmcliCommandConnection, "up", connectionName, "passwd-file", "/dev/stdin"], result => {
+            if (callback)
+                callback(result);
+        }, `${root.securityPsk}:${password}\n`);
     }
 
     function loadSavedConnections(callback: var): void {
@@ -698,19 +710,26 @@ Singleton {
             let cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, root.connectionParamHidden, hidden ? "yes" : "no"];
 
             if (isSecure) {
-                cmd.push(root.securityKeyMgmt, root.keyMgmtWpaPsk, root.securityPsk, password);
+                cmd.push(root.securityKeyMgmt, root.keyMgmtWpaPsk);
             }
+
+            const activate = () => {
+                if (isSecure)
+                    activateConnectionWithPassword(ssid, password, callback);
+                else
+                    activateConnection(ssid, callback);
+            };
 
             executeCommand(cmd, result => {
                 if (result.success) {
                     loadSavedConnections(() => {});
-                    activateConnection(ssid, callback);
+                    activate();
                 } else {
                     const hasDuplicateWarning = result.error && (result.error.includes("another connection with the name") || result.error.includes("Reference the connection by its uuid"));
 
                     if (hasDuplicateWarning) {
                         loadSavedConnections(() => {});
-                        activateConnection(ssid, callback);
+                        activate();
                     } else if (callback) {
                         callback(result);
                     }
@@ -1735,10 +1754,21 @@ Singleton {
 
         property var callback: null
         property list<string> cmdArgs: []
+        property string stdinData: ""
         property bool callbackCalled: false
         property int exitCode: 0
 
         signal processFinished
+
+        stdinEnabled: stdinData.length > 0
+
+        onStarted: {
+            if (stdinData.length > 0) {
+                write(stdinData);
+                stdinData = "";
+                stdinEnabled = false; // Closes stdin so nmcli sees EOF
+            }
+        }
 
         environment: ({
                 LANG: "C.UTF-8",
