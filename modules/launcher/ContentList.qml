@@ -21,11 +21,15 @@ Item {
     required property int rounding
 
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
+    readonly property var picker: Pickers.forText(search.text) // The open picker (i.e. emoji), if any
+    readonly property bool showPicker: picker !== null
     readonly property bool showMenu: {
-        if (!GlobalConfig.launcher.menu.enabled || showWallpapers)
+        if (!GlobalConfig.launcher.menu.enabled || showWallpapers || showPicker)
             return false;
         const menuPrefix = GlobalConfig.launcher.menu.prefix;
-        if (menuPrefix !== "" && search.text.startsWith(menuPrefix))
+        if (menuPrefix === "" || menuPrefix === GlobalConfig.launcher.actionPrefix)
+            return false;
+        if (search.text.startsWith(menuPrefix))
             return true;
         return GlobalConfig.launcher.menu.defaultView && !search.text.startsWith(GlobalConfig.launcher.actionPrefix);
     }
@@ -36,14 +40,22 @@ Item {
             return Tr.tr("Type \"%1\" for commands or \"%2\" for menu").arg(GlobalConfig.launcher.actionPrefix).arg(GlobalConfig.launcher.menu.prefix);
         return Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix);
     }
-    readonly property var currentList: showMenu ? menuList.item : showWallpapers ? wallpaperList.item : appList.item // Can be either ListView or PathView, so can't type properly
-    property string animState: showMenu ? "menu" : showWallpapers ? "wallpapers" : "apps"
+    readonly property var currentList: showMenu ? menuList.item : showWallpapers ? wallpaperList.item : showPicker ? pickerList.item : appList.item // Can be a ListView, PathView or PickerList, so can't type properly
+    property string animState: showMenu ? "menu" : showWallpapers ? "wallpapers" : showPicker ? "picker" : "apps"
+
+    // Kept so the picker doesn't lose its source while fading out
+    property var lastPicker
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottom: parent.bottom
 
     clip: true
     state: animState
+
+    onPickerChanged: {
+        if (picker)
+            lastPicker = picker;
+    }
 
     states: [
         State {
@@ -67,6 +79,20 @@ Item {
                 root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, appList.implicitHeight > 0 ? appList.implicitHeight : empty.implicitHeight)
                 appList.active: true
+            }
+
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "picker"
+
+            PropertyChanges {
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
+                root.implicitHeight: Math.min(root.maxHeight, pickerList.implicitHeight > 0 ? pickerList.implicitHeight : empty.implicitHeight)
+                pickerList.active: true
             }
 
             AnchorChanges {
@@ -132,6 +158,22 @@ Item {
 
             search: root.search
             screenState: root.screenState
+        }
+    }
+
+    Loader {
+        id: pickerList
+
+        active: false
+
+        anchors.fill: parent
+
+        sourceComponent: PickerList {
+            objectName: "launcherPickerList"
+
+            search: root.search
+            screenState: root.screenState
+            source: root.picker ?? root.lastPicker
         }
     }
 
