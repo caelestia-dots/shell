@@ -67,32 +67,20 @@ QtObject {
         }
 
         if (network.isSecure) {
-            const hasSavedProfile = Nmcli.hasSavedProfile(network.ssid);
-
-            if (hasSavedProfile) {
-                Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
-            } else {
-                // Use password check with callback
-                Nmcli.connectToNetworkWithPasswordCheck(network.ssid, network.isSecure, result => {
-                    if (result.needsPassword) {
-                        // Clear pending connection if exists
-                        if (Nmcli.pendingConnection) {
-                            Nmcli.connectionCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.stop();
-                            Nmcli.immediateCheckTimer.checkCount = 0;
-                            Nmcli.pendingConnection = null;
-                        }
-
-                        // Handle password dialog - use session if available, otherwise use callback
-                        if (session && session.network) {
-                            session.network.showPasswordDialog = true;
-                            session.network.pendingNetwork = network;
-                        } else if (onPasswordNeeded) {
-                            onPasswordNeeded(network);
-                        }
+            const target = {
+                ssid: network.ssid
+            };
+            Nmcli.connectToSecuredNetwork(target.ssid, "", result => {
+                if (result.needsPassword) {
+                    // Handle password dialog - use session if available, otherwise use callback
+                    if (session && session.network) {
+                        session.network.showPasswordDialog = true;
+                        session.network.pendingNetwork = target;
+                    } else if (onPasswordNeeded) {
+                        onPasswordNeeded(target);
                     }
-                }, network.bssid);
-            }
+                }
+            });
         } else {
             Nmcli.connectToNetwork(network.ssid, "", network.bssid, null);
         }
@@ -102,7 +90,7 @@ QtObject {
      * Connect to a wireless network with a provided password.
      * Used by password dialogs when the user has already entered a password.
      *
-     * @param network The network object to connect to (must have ssid, bssid properties)
+     * @param network The network object to connect to (must have an ssid property)
      * @param password The password to use for connection
      * @param onResult Optional callback function(result) called with connection result
      */
@@ -111,6 +99,6 @@ QtObject {
             return;
         }
 
-        Nmcli.connectToNetwork(network.ssid, password || "", network.bssid || "", onResult || null);
+        Nmcli.connectToSecuredNetwork(network.ssid, password || "", onResult || null);
     }
 }
