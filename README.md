@@ -208,15 +208,16 @@ catcher never gets blurred. Add these layer rules to your Hyprland config:
 
 ```sh
 layerrule blur, caelestia-menu-network-speedtest-card
-layerrule ignorealpha 0.7, caelestia-menu-network-speedtest-card
+layerrule ignorealpha 0.4, caelestia-menu-network-speedtest-card
 layerrule blur, caelestia-menu-disk-speedtest-card
-layerrule ignorealpha 0.7, caelestia-menu-disk-speedtest-card
+layerrule ignorealpha 0.4, caelestia-menu-disk-speedtest-card
 layerrule blur, caelestia-menu-network-qr-card
-layerrule ignorealpha 0.7, caelestia-menu-network-qr-card
+layerrule ignorealpha 0.4, caelestia-menu-network-qr-card
 ```
 
 The `ignorealpha` threshold keeps the blur out of the rounded corners; without it the blur
-fills them in and the card reads as squared.
+fills them in and the card reads as squared. Keep the threshold below the card's background
+alpha (0.6), or every card pixel is excluded and no blur renders at all.
 
 ### Clipboard history
 
