@@ -6,11 +6,10 @@ import Quickshell.Io
 import Caelestia
 import Caelestia.Config
 import Caelestia.I18n
-import Caelestia.Services
-import "services"
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.modules.launcher.services
 
 // Ported from Caelestia PR #1298's ClipboardPreview.qml: the selected image
 // entry shown at full size in its own panel beside the launcher, decoded
@@ -308,7 +307,7 @@ Item {
             return (data.hasImageUrl === true || data.needsDecodeForUrl === true) && root.extractedImageUrl !== "" && previewImage.status === Image.Ready;
         }
         onClicked: {
-            previewImage.grabToImage(function(result) {
+            previewImage.grabToImage(function (result) {
                 const tempPath = "/tmp/quickshell-clipboard-grab-" + Date.now() + ".png";
                 if (result.saveToFile(tempPath)) {
                     const cmd = `wl-copy < '${tempPath}' --type image/png && rm '${tempPath}'`;

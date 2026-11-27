@@ -5,12 +5,12 @@ import QtQuick.Layouts
 import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
-import "items"
-import "services"
 import qs.components
 import qs.components.controls
 import qs.components.containers
 import qs.services
+import qs.modules.launcher.items
+import qs.modules.launcher.services
 
 // Ported from Caelestia PR #1298's ClipboardList.qml: category tabs over the
 // history rows, an item counter, a clear-all with a confirm dialog, and
@@ -35,14 +35,6 @@ Item {
     property string previousCategory: "all"
     property var pendingModelUpdate: null
 
-    function incrementCurrentIndex(): void {
-        listView.incrementCurrentIndex();
-    }
-
-    function decrementCurrentIndex(): void {
-        listView.decrementCurrentIndex();
-    }
-
     readonly property var tabs: [
         {
             id: "all",
@@ -60,6 +52,14 @@ Item {
             icon: "description"
         }
     ]
+
+    function incrementCurrentIndex(): void {
+        listView.incrementCurrentIndex();
+    }
+
+    function decrementCurrentIndex(): void {
+        listView.decrementCurrentIndex();
+    }
 
     // Tab / Shift+Tab move through the category bar.
     function cycleTab(delta: int): void {
@@ -137,7 +137,7 @@ Item {
                     property Item activeTab: {
                         for (let i = 0; i < tabsRepeater.count; i++) {
                             const tab = tabsRepeater.itemAt(i);
-                            if (tab && tab.isActive) {
+                            if (tab && tab.isActive) { // qmllint disable missing-property
                                 return tab;
                             }
                         }

@@ -2,13 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import Caelestia.Config
 import Caelestia.I18n
-import "../services"
 import qs.components
 import qs.components.controls
 import qs.services
+import qs.modules.launcher.services
 
 // Ported from Caelestia PR #1298's items/ClipboardItem.qml: a pin slot, the
 // entry on one line dimmed until the row is selected, its size under it, and
@@ -31,8 +30,8 @@ Item {
 
     onIsItemHoveredChanged: {
         if (isItemHovered) {
-            root.ListView.view.hoveredItem = root;
-            root.ListView.view.lastInteraction = "hover";
+            root.ListView.view.hoveredItem = root; // qmllint disable missing-property
+            root.ListView.view.lastInteraction = "hover"; // qmllint disable missing-property
         }
     }
 
@@ -143,7 +142,7 @@ Item {
                     radius: Tokens.rounding.small
                     padding: Tokens.padding.small
                     onClicked: {
-                        root.ListView.view.deletedItemIndex = root.index;
+                        root.ListView.view.deletedItemIndex = root.index; // qmllint disable missing-property
                         Clipboard.deleteItem(root.modelData);
                     }
                 }
