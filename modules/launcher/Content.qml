@@ -169,11 +169,18 @@ Item {
         Keys.onEscapePressed: root.screenState.launcher = false
 
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Backspace && !event.modifiers && GlobalConfig.launcher.menu.enabled && MenuService.route !== "") {
+            if (event.key === Qt.Key_Backspace && !event.modifiers) {
                 const pfx = GlobalConfig.launcher.actionPrefix;
-                if (text === `${pfx}wallpaper ` || text === `${pfx}scheme ` || text === `${pfx}variant `) {
-                    const menuPfx = GlobalConfig.launcher.menu.prefix;
-                    text = GlobalConfig.launcher.menu.defaultView ? "" : menuPfx;
+                // Backspace on a bare prefix view escapes out of it instead of
+                // eating the prefix character by character.
+                const escapedViews = [`${pfx}wallpaper `, `${pfx}scheme `, `${pfx}variant `, `${pfx}emoji `, `${pfx}kaomoji `, `${pfx}symbol `, `${pfx}clipboard `];
+                if (escapedViews.includes(text)) {
+                    if (GlobalConfig.launcher.menu.enabled) {
+                        const menuPfx = GlobalConfig.launcher.menu.prefix;
+                        text = GlobalConfig.launcher.menu.defaultView ? "" : menuPfx;
+                    } else {
+                        clear();
+                    }
                     event.accepted = true;
                     return;
                 }

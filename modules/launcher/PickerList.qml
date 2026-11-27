@@ -63,11 +63,18 @@ Item {
     readonly property var currentGrid: searching ? results : browse
     readonly property int count: source.loaded ? currentGrid.built.flat.length : -1
 
-    // The category shown in the tabs. Sticks to the last clicked tab until the user scrolls by hand
+    // The category shown in the tabs. Keyboard navigation and category jumps
+    // follow the selection so the tab flips the moment the selection lands in
+    // a category; wheel scrolling follows the viewport instead.
     readonly property string activeGroup: {
         const rows = browseBuilt.rows;
         if (searching || rows.length === 0)
             return "";
+
+        if (browse.keyboardNav && browse.built.flat.length > 0) {
+            const i = Math.max(0, Math.min(browse.built.flat.length - 1, browse.selected));
+            return rows[browse.built.rowOf[i]].group;
+        }
 
         if (browse.targetGroup)
             return browse.targetGroup;
@@ -276,6 +283,7 @@ Item {
 
         property int selected // Index into built.flat
         property string targetGroup // Set by category jumps, cleared as soon as the user scrolls or moves the selection
+        property bool keyboardNav // Whether the last interaction was keyboard-driven (arrows or a category jump)
 
         function resetView(): void {
             forceLayout();
@@ -297,8 +305,13 @@ Item {
 
             selected = first?.start ?? 0;
             targetGroup = built.rows[row]?.group ?? id;
+            keyboardNav = true;
 
-            if (animate) {
+            // Long jumps (wrapping from the last category back to the first)
+            // and rapid tabbing snap into place instead of animating across
+            // every section in between.
+            const targetY = originY + Math.max(0, Math.min(row * root.rowHeight, built.rows.length * root.rowHeight - height));
+            if (animate && !scrollAnim.running && Math.abs(targetY - contentY) < height * 3) {
                 scrollTo(row);
             } else {
                 scrollAnim.stop();
@@ -319,6 +332,8 @@ Item {
             const flat = built.flat;
             if (flat.length === 0)
                 return;
+
+            keyboardNav = true;
 
             const rows = built.rows;
             const up = direction === "up" || direction === "left";
@@ -356,6 +371,7 @@ Item {
 
             scrollAnim.stop();
             targetGroup = "";
+            keyboardNav = false;
         }
 
         model: ScriptModel {
@@ -364,6 +380,7 @@ Item {
                 scrollAnim.stop();
                 grid.selected = 0;
                 grid.targetGroup = "";
+                grid.keyboardNav = false;
                 Qt.callLater(grid.resetView);
             }
         }
