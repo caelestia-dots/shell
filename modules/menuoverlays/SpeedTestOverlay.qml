@@ -6,12 +6,11 @@ import Quickshell.Wayland
 import qs.services
 
 // Ported from omarchy's Ui_SpeedTestOverlay: gauges sit on a dark translucent
-// card, and the card packs toward the vertical center when other overlay cards
-// are open at the same time. Esc, the card's surroundings, or the corner
-// dismiss close it; the needles sweep to full scale and back on open, then
-// track the live readings.
-// qmllint disable uncreatable-type
-PanelWindow {
+// card. Two surfaces keep the blur scoped to the card only: a fullscreen
+// catcher takes the keyboard and outside clicks (never blurred), while the
+// card itself is its own layer surface, so the blur rule can only ever apply
+// behind it.
+Item {
     id: root
 
     required property bool running
@@ -69,21 +68,6 @@ PanelWindow {
         fullScale = scaleStops[scaleStops.length - 1];
     }
 
-    visible: open
-
-    anchors {
-        top: true
-        bottom: true
-        left: true
-        right: true
-    }
-
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: root.layerNamespace
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-
     onRunningChanged: if (running)
         resetScale()
     onLeftValueChanged: expandScale(leftValue)
@@ -103,32 +87,91 @@ PanelWindow {
         }
     }
 
-    Behavior on fullScale {
-        NumberAnimation {
-            duration: 400
-            easing.type: Easing.OutCubic
+    // qmllint disable uncreatable-type
+    PanelWindow {
+        // qmllint enable uncreatable-type
+        id: catcher
+
+        visible: root.open
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.namespace: root.layerNamespace
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+        anchors {
+            top: true
+            bottom: true
+            left: true
+            right: true
+        }
+
+        Item {
+            id: keyCatcher
+
+            anchors.fill: parent
+            focus: true
+
+            Keys.onEscapePressed: root.closeRequested()
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Q)
+                    root.closeRequested();
+            }
+            Keys.onReturnPressed: if (!root.running)
+                root.runAgainRequested()
+            Keys.onEnterPressed: if (!root.running)
+                root.runAgainRequested()
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.closeRequested()
+            }
         }
     }
 
-    Item {
-        id: keyCatcher
+    // qmllint disable uncreatable-type
+    PanelWindow {
+        // qmllint enable uncreatable-type
+        id: cardWindow
 
-        anchors.fill: parent
-        focus: true
+        visible: root.open
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.namespace: root.layerNamespace + "-card"
+        WlrLayershell.layer: WlrLayer.Overlay
 
-        Keys.onEscapePressed: root.closeRequested()
-        Keys.onPressed: event => {
-            if (event.key === Qt.Key_Q)
-                root.closeRequested();
+        anchors {
+            top: true
+            bottom: true
+            left: true
+            right: true
         }
-        Keys.onReturnPressed: if (!root.running)
-            root.runAgainRequested()
-        Keys.onEnterPressed: if (!root.running)
-            root.runAgainRequested()
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: root.closeRequested()
+        // The layer-shell protocol centers a surface that is anchored to both
+        // edges while carrying a size; the margins then pack it toward the
+        // top/bottom of the center as other overlay cards open or close.
+        // Quickshell sizes anchored dimensions as screen minus margins, so all
+        // four margins carry the centering math explicitly.
+        implicitWidth: card.width
+        implicitHeight: card.height
+
+        margins.left: Math.max(0, Math.round((screen.width - card.width) / 2))
+        margins.right: Math.max(0, screen.width - card.width - margins.left)
+        margins.top: Math.max(0, Math.round((screen.height - card.height) / 2 + (root.stackCenter - 0.5) * screen.height))
+        margins.bottom: Math.max(0, screen.height - card.height - margins.top)
+
+        Behavior on margins.top {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on margins.bottom {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
         }
 
         Rectangle {
@@ -139,15 +182,8 @@ PanelWindow {
             border.color: Qt.rgba(1, 1, 1, 0.08)
             border.width: 1
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            // Pack the card toward the top/bottom of the center as more
-            // overlays open; the offset eases so repositioning settles into
-            // its slot instead of snapping around.
-            anchors.verticalCenterOffset: (root.stackCenter - 0.5) * parent.height
-
             opacity: root.pop
-            scale: root.pop * Math.min(1, (keyCatcher.width - 32) / Math.max(1, width), (keyCatcher.height - 32) / Math.max(1, height))
+            scale: root.pop
 
             width: content.implicitWidth + 48
             height: content.implicitHeight + 40
@@ -163,13 +199,6 @@ PanelWindow {
                 NumberAnimation {
                     duration: 260
                     easing.type: Easing.OutBack
-                }
-            }
-
-            Behavior on anchors.verticalCenterOffset {
-                NumberAnimation {
-                    duration: 220
-                    easing.type: Easing.OutCubic
                 }
             }
 
@@ -460,4 +489,3 @@ PanelWindow {
         }
     }
 }
-// qmllint enable uncreatable-type

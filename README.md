@@ -202,6 +202,16 @@ toggles, power actions via `SessionManager`).
 
 `Update > Caelestia` runs `caelestia update` in a new terminal window using your configured terminal.
 
+The speed test and Wi-Fi QR overlay cards blur what's behind them when Hyprland is told to blur their
+(card-sized) layer surfaces. Since the cards live on their own layer surfaces, the fullscreen input
+catcher never gets blurred. Add these layer rules to your Hyprland config:
+
+```sh
+layerrule blur, caelestia-menu-network-speedtest-card
+layerrule blur, caelestia-menu-disk-speedtest-card
+layerrule blur, caelestia-menu-network-qr-card
+```
+
 ### Clipboard history
 
 The launcher has a clipboard history view backed by [`cliphist`](https://github.com/sentriz/cliphist).

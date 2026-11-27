@@ -10,8 +10,11 @@ import qs.modules.launcher.services
 import "Model.js" as Model
 
 // Ported from omarchy's wifiqr_Panel.qml: the Wi-Fi QR code floats on its own
-// dark translucent card, packed toward the vertical center when other overlay
-// cards are open. Each summon regenerates the code via menu-network-qr --meta.
+// dark translucent card. Two surfaces keep the blur scoped to the card only:
+// a fullscreen catcher takes the keyboard and outside clicks (never blurred),
+// while the card itself is its own layer surface, so the blur rule can only
+// ever apply behind it. Each summon regenerates the code via
+// menu-network-qr --meta.
 Item {
     id: root
 
@@ -113,7 +116,7 @@ Item {
             pwExpectedStop = true;
             pwProc.running = false;
         }
-        qrProc.command = requestedIface !== "" ? ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-qr --meta "$1"`, "menu-network-qr", requestedIface] : ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-qr --meta`];
+        qrProc.command = requestedIface !== "" ? ["bash", "-c", `export PATH="${binPath}:$PATH"; exec menu-network-qr --meta "$1"`, "menu-network-qr", requestedIface] : ["bash", "-c", `export PATH="${binPath}:$PATH"; exec menu-network-qr --meta`];
         qrProc.running = true;
     }
 
@@ -143,7 +146,7 @@ Item {
             return;
         passwordError = "";
         pwExpectedStop = false;
-        pwProc.command = ["bash", "-c", `export PATH="${root.binPath}:$PATH"; exec menu-network-password "$1"`, "menu-network-password", iface];
+        pwProc.command = ["bash", "-c", `export PATH="${binPath}:$PATH"; exec menu-network-password "$1"`, "menu-network-password", iface];
         pwProc.running = true;
     }
 
@@ -217,7 +220,14 @@ Item {
     // qmllint disable uncreatable-type
     PanelWindow {
         // qmllint enable uncreatable-type
+        id: catcher
+
         visible: root.opened
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.namespace: "caelestia-menu-network-qr"
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
         anchors {
             top: true
@@ -225,12 +235,6 @@ Item {
             left: true
             right: true
         }
-
-        color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.namespace: "caelestia-menu-network-qr"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
         Item {
             id: keyCatcher
@@ -250,162 +254,194 @@ Item {
                 anchors.fill: parent
                 onClicked: root.closeRequested()
             }
+        }
+    }
 
-            Rectangle {
-                id: card
+    // qmllint disable uncreatable-type
+    PanelWindow {
+        // qmllint enable uncreatable-type
+        id: cardWindow
 
-                radius: 20
-                color: Qt.rgba(0.045, 0.05, 0.075, 0.82)
-                border.color: Qt.rgba(1, 1, 1, 0.08)
-                border.width: 1
+        visible: root.opened
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.namespace: "caelestia-menu-network-qr-card"
+        WlrLayershell.layer: WlrLayer.Overlay
 
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                // Pack the card toward the top/bottom of the center as more
-                // overlays open; the offset eases so repositioning settles
-                // into its slot instead of snapping around.
-                anchors.verticalCenterOffset: (root.stackCenter - 0.5) * parent.height
+        anchors {
+            top: true
+            bottom: true
+            left: true
+            right: true
+        }
 
-                opacity: root.pop
-                scale: root.pop * Math.min(1, (keyCatcher.width - 32) / Math.max(1, card.width), (keyCatcher.height - 32) / Math.max(1, card.height))
+        // The layer-shell protocol centers a surface that is anchored to both
+        // edges while carrying a size; the margins then pack it toward the
+        // top/bottom of the center as other overlay cards open or close.
+        // Quickshell sizes anchored dimensions as screen minus margins, so all
+        // four margins carry the centering math explicitly.
+        implicitWidth: card.width
+        implicitHeight: card.height
 
-                width: content.implicitWidth + 48
-                height: content.implicitHeight + 40
+        margins.left: Math.max(0, Math.round((screen.width - card.width) / 2))
+        margins.right: Math.max(0, screen.width - card.width - margins.left)
+        margins.top: Math.max(0, Math.round((screen.height - card.height) / 2 + (root.stackCenter - 0.5) * screen.height))
+        margins.bottom: Math.max(0, screen.height - card.height - margins.top)
 
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 160
-                        easing.type: Easing.OutCubic
-                    }
+        Behavior on margins.top {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on margins.bottom {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            id: card
+
+            radius: 20
+            color: Qt.rgba(0.045, 0.05, 0.075, 0.82)
+            border.color: Qt.rgba(1, 1, 1, 0.08)
+            border.width: 1
+
+            opacity: root.pop
+            scale: root.pop
+
+            width: content.implicitWidth + 48
+            height: content.implicitHeight + 40
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 160
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 260
+                    easing.type: Easing.OutBack
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {}
+            }
+
+            ColumnLayout {
+                id: content
+
+                spacing: 16
+
+                anchors {
+                    fill: parent
+                    topMargin: 20
+                    bottomMargin: 20
+                    leftMargin: 24
+                    rightMargin: 24
                 }
 
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 260
-                        easing.type: Easing.OutBack
-                    }
+                Text {
+                    text: (root.ssid || "Wi-Fi").toUpperCase()
+                    color: root.onScrimDim
+                    font.family: root.fontFamily
+                    font.pixelSize: 12
+                    font.bold: true
+                    font.letterSpacing: 2
+                    elide: Text.ElideRight
+                    Layout.maximumWidth: 320
+                    Layout.alignment: Qt.AlignHCenter
+                    horizontalAlignment: Text.AlignHCenter
                 }
 
-                Behavior on anchors.verticalCenterOffset {
-                    NumberAnimation {
-                        duration: 220
-                        easing.type: Easing.OutCubic
-                    }
-                }
+                Rectangle {
+                    id: qrCanvas
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {}
-                }
+                    readonly property int moduleSize: root.qrSize > 0 ? Math.max(4, Math.floor(240 / root.qrSize)) : 0
 
-                ColumnLayout {
-                    id: content
+                    visible: root.showingQr
+                    width: root.qrSize * moduleSize
+                    height: width
+                    color: "white"
+                    radius: 12
+                    Layout.alignment: Qt.AlignHCenter
 
-                    spacing: 16
+                    Grid {
+                        anchors.fill: parent
+                        columns: root.qrSize
 
-                    anchors {
-                        fill: parent
-                        topMargin: 20
-                        bottomMargin: 20
-                        leftMargin: 24
-                        rightMargin: 24
-                    }
+                        Repeater {
+                            model: root.qrSize * root.qrSize
 
-                    Text {
-                        text: (root.ssid || "Wi-Fi").toUpperCase()
-                        color: root.onScrimDim
-                        font.family: root.fontFamily
-                        font.pixelSize: 12
-                        font.bold: true
-                        font.letterSpacing: 2
-                        elide: Text.ElideRight
-                        Layout.maximumWidth: 320
-                        Layout.alignment: Qt.AlignHCenter
-                        horizontalAlignment: Text.AlignHCenter
-                    }
+                            Rectangle {
+                                required property int index
 
-                    Rectangle {
-                        id: qrCanvas
+                                readonly property int matrixRow: Math.floor(index / root.qrSize)
+                                readonly property int matrixColumn: index % root.qrSize
 
-                        readonly property int moduleSize: root.qrSize > 0 ? Math.max(4, Math.floor(240 / root.qrSize)) : 0
-
-                        visible: root.showingQr
-                        width: root.qrSize * moduleSize
-                        height: width
-                        color: "white"
-                        radius: 12
-                        Layout.alignment: Qt.AlignHCenter
-
-                        Grid {
-                            anchors.fill: parent
-                            columns: root.qrSize
-
-                            Repeater {
-                                model: root.qrSize * root.qrSize
-
-                                Rectangle {
-                                    required property int index
-
-                                    readonly property int matrixRow: Math.floor(index / root.qrSize)
-                                    readonly property int matrixColumn: index % root.qrSize
-
-                                    width: qrCanvas.moduleSize
-                                    height: qrCanvas.moduleSize
-                                    color: root.qrRows[matrixRow].charAt(matrixColumn) === "1" ? "#111111" : "transparent"
-                                }
+                                width: qrCanvas.moduleSize
+                                height: qrCanvas.moduleSize
+                                color: root.qrRows[matrixRow].charAt(matrixColumn) === "1" ? "#111111" : "transparent"
                             }
                         }
                     }
+                }
 
-                    Text {
-                        visible: root.loading
-                        text: "Generating QR code…"
-                        color: root.onScrimDim
-                        font.family: root.fontFamily
-                        font.pixelSize: 13
-                        Layout.fillWidth: true
-                        horizontalAlignment: Text.AlignHCenter
-                    }
+                Text {
+                    visible: root.loading
+                    text: "Generating QR code…"
+                    color: root.onScrimDim
+                    font.family: root.fontFamily
+                    font.pixelSize: 13
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
-                    Text {
-                        visible: root.error !== ""
-                        text: root.error
-                        color: root.onScrimUrgent
-                        font.family: root.fontFamily
-                        font.pixelSize: 13
-                        wrapMode: Text.Wrap
-                        Layout.fillWidth: true
-                        Layout.maximumWidth: 320
-                        horizontalAlignment: Text.AlignHCenter
-                    }
+                Text {
+                    visible: root.error !== ""
+                    text: root.error
+                    color: root.onScrimUrgent
+                    font.family: root.fontFamily
+                    font.pixelSize: 13
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: 320
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
-                    Text {
-                        visible: root.showingQr
-                        text: "Scan to join this network"
-                        color: root.onScrimDim
-                        font.family: root.fontFamily
-                        font.pixelSize: 13
-                        Layout.fillWidth: true
-                        horizontalAlignment: Text.AlignHCenter
-                    }
+                Text {
+                    visible: root.showingQr
+                    text: "Scan to join this network"
+                    color: root.onScrimDim
+                    font.family: root.fontFamily
+                    font.pixelSize: 13
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
-                    Text {
-                        visible: root.showingQr && root.secured
-                        text: root.passwordError !== "" ? root.passwordError : root.passwordVisible ? root.password : "Click to show password"
-                        color: root.passwordError !== "" ? root.onScrimUrgent : root.onScrim
-                        opacity: root.passwordVisible || root.passwordError !== "" ? 1 : 0.6
-                        font.family: root.fontFamily
-                        font.pixelSize: 13
-                        wrapMode: Text.WrapAnywhere
-                        Layout.fillWidth: true
-                        Layout.maximumWidth: 320
-                        horizontalAlignment: Text.AlignHCenter
+                Text {
+                    visible: root.showingQr && root.secured
+                    text: root.passwordError !== "" ? root.passwordError : root.passwordVisible ? root.password : "Click to show password"
+                    color: root.passwordError !== "" ? root.onScrimUrgent : root.onScrim
+                    opacity: root.passwordVisible || root.passwordError !== "" ? 1 : 0.6
+                    font.family: root.fontFamily
+                    font.pixelSize: 13
+                    wrapMode: Text.WrapAnywhere
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: 320
+                    horizontalAlignment: Text.AlignHCenter
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.togglePassword()
-                        }
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.togglePassword()
                     }
                 }
             }
