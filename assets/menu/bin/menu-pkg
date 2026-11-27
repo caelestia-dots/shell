@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# caelestia-menu:summary=Manage Arch packages: add, drop, or test absence
+# caelestia-menu:args=<add|drop|missing> <packages...>
+# caelestia-menu:requires-sudo=true (add/drop)
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: menu-pkg <add|drop|missing> <packages...>"
+  echo "  add      Install named packages if missing (sudo)"
+  echo "  drop     Remove named packages if installed (sudo)"
+  echo "  missing  Exit 0 if any named package is missing, exit 1 if all present"
+}
+
+missing() {
+  local any=1
+  for pkg in "$@"; do
+    if ! pacman -Q "$pkg" &>/dev/null; then
+      any=0
+      break
+    fi
+  done
+  return "$any"
+}
+
+drop() {
+  installed=()
+  declare -A installed_exact=()
+  declare -A selected=()
+
+  while IFS= read -r package_name; do
+    installed_exact[$package_name]=1
+  done < <(pacman -Qq)
+
+  for pkg in "$@"; do
+    if [[ -n ${installed_exact[$pkg]+x} && -z ${selected[$pkg]+x} ]]; then
+      installed+=("$pkg")
+      selected[$pkg]=1
+    fi
+  done
+
+  if (( ${#installed[@]} > 0 )); then
+    if (( EUID == 0 )); then
+      pacman -Rns --noconfirm "${installed[@]}" || exit 1
+    else
+      sudo pacman -Rns --noconfirm "${installed[@]}" || exit 1
+    fi
+  fi
+}
+
+add() {
+  if missing "$@"; then
+    if (( EUID == 0 )); then
+      pacman -S --noconfirm --needed "$@" || exit 1
+    else
+      sudo pacman -S --noconfirm --needed "$@" || exit 1
+    fi
+  fi
+
+  for pkg in "$@"; do
+    if ! pacman -Q "$pkg" &>/dev/null; then
+      echo -e "\033[31mError: Package '$pkg' did not install\033[0m" >&2
+      exit 1
+    fi
+  done
+}
+
+case ${1:-} in
+add)
+  shift || true
+  [[ $# -ge 1 ]] || { usage; exit 1; }
+  add "$@"
+  ;;
+drop)
+  shift || true
+  [[ $# -ge 1 ]] || { usage; exit 1; }
+  drop "$@"
+  ;;
+missing)
+  shift || true
+  [[ $# -ge 1 ]] || { usage; exit 1; }
+  missing "$@"
+  exit $?
+  ;;
+*)
+  usage
+  exit 1
+  ;;
+esac

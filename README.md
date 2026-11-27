@@ -231,7 +231,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
-> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
+> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `menu.*`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
 > - `lock`: `enableFaceAuth`, `enableFprint`, `faceAuthProvider`, `maxFaceAuthTries`, `maxFprintTries`, `triggerFaceAuthOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
@@ -685,6 +685,11 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "vimKeybinds": false,
         "favouriteApps": [],
         "hiddenApps": [],
+        "menu": {
+            "enabled": true,
+            "defaultView": false,
+            "prefix": ":"
+        },
         "useFuzzy": {
             "apps": false,
             "actions": false,
@@ -693,6 +698,14 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "wallpapers": false
         },
         "actions": [
+            {
+                "name": "Menu",
+                "icon": "menu_open",
+                "description": "Open the hierarchical system menu",
+                "command": ["openMenu"],
+                "enabled": true,
+                "dangerous": false
+            },
             {
                 "name": "Calculator",
                 "icon": "calculate",

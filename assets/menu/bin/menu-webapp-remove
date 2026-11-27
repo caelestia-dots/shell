@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# caelestia-menu:summary=Remove a web app desktop launcher
+# caelestia-menu:args=[name]
+
+set -euo pipefail
+
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+OLD_ICON_DIR="$HOME/.local/share/applications/icons"
+DESKTOP_DIR="$HOME/.local/share/applications/"
+
+if (( $# == 0 )); then
+  # Find all web apps
+  WEB_APPS=()
+  while IFS= read -r -d '' file; do
+    if grep -qE '^Exec=.*menu-launch[- ]webapp.*' "$file"; then
+      WEB_APPS+=("$(basename "${file%.desktop}")")
+    fi
+  done < <(find "$DESKTOP_DIR" -name '*.desktop' -print0)
+
+  if ((${#WEB_APPS[@]})); then
+    mapfile -t SORTED_WEB_APPS < <(printf '%s\n' "${WEB_APPS[@]}" | sort)
+    APP_NAME=$(menu-select "Select web app to remove" "${SORTED_WEB_APPS[@]}" -- --width 520 --maxheight 520)
+  else
+    echo "No web apps to remove."
+    exit 1
+  fi
+else
+  APP_NAME="$*"
+fi
+
+if [[ -z $APP_NAME ]]; then
+  echo "You must select a web app to remove."
+  exit 1
+fi
+
+# Show the full banner (logo + fastfetch) once the picker has closed, so it
+# is not instantly covered by fzf.
+menu-show-logo
+
+icon_name=$(printf '%s\n' "$APP_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^[:alnum:]]\+/-/g; s/^-//; s/-$//')
+rm -f "$DESKTOP_DIR/$APP_NAME.desktop"
+rm -f "$ICON_DIR/$icon_name.png" "$ICON_DIR/$APP_NAME.png" "$OLD_ICON_DIR/$APP_NAME.png"
+
+update-desktop-database "$DESKTOP_DIR" &>/dev/null
+
+# Refresh the menu's Remove conditions so the removed app disappears immediately.
+qs -c caelestia ipc call menu refresh &>/dev/null || true

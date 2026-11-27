@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+# Launch a terminal running a menu command wrapped with the banner and
+# press-any-key pause on completion. Uses the configured terminal via
+# menu-term-exec.
+
+if (( $# == 0 )); then
+  echo "Usage: menu-term <command> [args...]" >&2
+  exit 1
+fi
+
+APP_ID="org.caelestia.menu.terminal"
+
+# Preserve original command invocation safely when passed as a single string or
+# as separate arguments.
+if (( $# == 1 )); then
+  cmd="$1"
+else
+  printf -v cmd '%q ' "$@"
+fi
+
+presentation_script="menu-show-logo; $cmd; if (( \$? != 130 )); then menu-show-done; fi"
+
+exec menu-term-exec --class "$APP_ID" --title "Caelestia Menu" -- bash -c "$presentation_script"

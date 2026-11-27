@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# caelestia-menu:summary=Pick one option from a menu
+# caelestia-menu:group=menu
+# caelestia-menu:name=select
+# caelestia-menu:args=prompt [option...] [-- menu args...]
+# caelestia-menu:examples=menu-select Format jpg png|menu-select Resolution 4k 1080p 720p -- --width 400
+
+# An option may lead with an icon, as "<glyph><TAB><label>", and may trail a
+# subtext shown under the label, as "<glyph><TAB><label><TAB><subtext>". The
+# menu shows the glyph but never returns it. A plain option returns the label
+# alone; an option with a subtext returns "<label><TAB><subtext>", so callers
+# with same-named rows get the subtext back as the stable key.
+
+set -euo pipefail
+
+if (( $# < 1 )); then
+  echo "Usage: menu-select <prompt> [option...] [-- menu args...]" >&2
+  exit 1
+fi
+
+prompt="$1"
+shift
+
+options=()
+menu_maxheight=""
+
+while (( $# > 0 )); do
+  if [[ $1 == "--" ]]; then
+    shift
+    while (( $# > 0 )); do
+      case "$1" in
+        --width)
+          shift
+          if (( $# == 0 )); then
+            echo "menu-select: --width requires a value" >&2
+            exit 1
+          fi
+          ;; # Legacy widget option: accepted and ignored by the fzf picker.
+        --height|--maxheight)
+          arg="$1"
+          shift
+          if (( $# == 0 )); then
+            echo "menu-select: $arg requires a value" >&2
+            exit 1
+          fi
+          menu_maxheight="$1"
+          ;;
+      esac
+      shift
+    done
+    break
+  fi
+
+  options+=("$1")
+  shift
+done
+
+if (( ${#options[@]} == 0 )) && [[ ! -t 0 ]]; then
+  mapfile -t options
+fi
+
+if (( ${#options[@]} == 0 )); then
+  echo "Usage: menu-select <prompt> [option...] [-- menu args...]" >&2
+  exit 1
+fi
+
+# Same theme as the terminal's fzf, single source of truth.
+[[ -f $HOME/.config/caelestia/menu/fzf-theme.sh ]] &&
+  source "$HOME/.config/caelestia/menu/fzf-theme.sh"
+
+# Terminal fallback (adapted): fzf picker instead of the shell menu widget.
+# Options may lead with a "<glyph><TAB>" which is shown but not returned.
+display=()
+values=()
+for opt in "${options[@]}"; do
+  values+=("$opt")
+  display+=("${opt//$'\t'/ }")
+done
+
+choice=$(printf '%s\n' "${display[@]}" | fzf --prompt="$prompt> " ${menu_maxheight:+--height=$menu_maxheight} --no-multi) || exit 1
+
+for i in "${!display[@]}"; do
+  if [[ ${display[i]} == "$choice" ]]; then
+    selected="${values[i]}"
+    # Strip a leading "<glyph><TAB>" column while preserving "<label><TAB><subtext>".
+    if [[ $selected == *$'\t'* ]]; then
+      selected="${selected#*$'\t'}"
+    fi
+    printf '%s\n' "$selected"
+    exit 0
+  fi
+done
+exit 1

@@ -1,0 +1,107 @@
+{
+  // Caelestia default menu tree.
+  // Users can override, extend, or disable entries (set "enabled": false) in
+  // ~/.config/caelestia/menu/menu.jsonc without copying this file.
+  //
+  // Dotted keys define hierarchy (e.g. "trigger.capture.screenshot" sits under
+  // "trigger.capture"). Entry kind is inferred:
+  //   action   -> shell command (runs via bash -c with menu bin/ on PATH)
+  //   provider -> dynamic submenu ("apps", "schemes", "wallpapers")
+  //   internal -> built-in shell action or overlay
+  //   (none)   -> submenu
+  //
+  // Optional fields:
+  //   aliases   extra names matched by search
+  //   title     breadcrumb title when open (defaults to label)
+  //   when      shell guard; hides the row when it exits non-zero
+  //   checked   shell guard; marks the row checked when it exits 0
+  //   disabled  shell guard; dims the row and prevents activation
+  //   toggle    renders a checkbox instead of a checkmark
+  //   enabled   set false to hide a row (useful in user overrides)
+
+  // Root
+  "apps": { "icon": "apps", "label": "Apps", "aliases": ["app", "applications"], "provider": "apps" },
+  "learn": { "icon": "school", "label": "Learn" },
+  "trigger": { "icon": "bolt", "label": "Trigger" },
+  "style": { "icon": "palette", "label": "Style" },
+  "setup": { "icon": "tune", "label": "Setup", "aliases": ["settings"] },
+  "install": { "icon": "download", "label": "Install" },
+  "remove": { "icon": "delete", "label": "Remove", "aliases": ["uninstall"] },
+  "update": { "icon": "update", "label": "Update", "aliases": ["upgrade", "refresh"] },
+  "about": { "icon": "info", "label": "About", "internal": "about" },
+  "system": { "icon": "power_settings_new", "label": "System", "aliases": ["power", "power-menu"] },
+
+  // Learn
+  "learn.keybindings": { "icon": "keyboard", "label": "Keybindings", "when": "command -v hyprctl", "internal": "keybindings" },
+  "learn.hyprland": { "icon": "window", "label": "Hyprland", "action": "xdg-open 'https://wiki.hypr.land/'" },
+  "learn.arch": { "icon": "menu_book", "label": "Arch Wiki", "action": "xdg-open 'https://wiki.archlinux.org/title/Main_page'" },
+  "learn.neovim": { "icon": "code", "label": "Neovim", "action": "xdg-open 'https://www.lazyvim.org/keymaps'" },
+  "learn.bash": { "icon": "terminal", "label": "Bash", "action": "xdg-open 'https://devhints.io/bash'" },
+
+  // Trigger
+  "trigger.reminder": { "icon": "alarm", "label": "Reminder", "aliases": ["reminder", "timer"] },
+  "trigger.reminder.set": { "icon": "add_alarm", "label": "Set reminder…", "aliases": ["reminder-set", "remind"] },
+  "trigger.reminder.show": { "icon": "notifications_active", "label": "Show all", "action": "menu-reminder show" },
+  "trigger.reminder.clear": { "icon": "alarm_off", "label": "Clear all", "action": "menu-reminder clear" },
+
+  "trigger.capture": { "icon": "photo_camera", "label": "Capture", "aliases": ["screenshot", "screenrecord", "recording"] },
+  "trigger.capture.screenshot": { "icon": "screenshot_region", "label": "Screenshot", "when": "command -v caelestia", "action": "caelestia screenshot -r" },
+  "trigger.capture.screenrecord.stop": { "icon": "stop_circle", "label": "Stop Screenrecording", "when": "pgrep -f '^gpu-screen-recorder'", "action": "pkill -INT -f gpu-screen-recorder" },
+  "trigger.capture.screenrecord": { "icon": "videocam", "label": "Screenrecord", "when": "command -v caelestia" },
+  "trigger.capture.screenrecord.fullscreen": { "icon": "fullscreen", "label": "Record fullscreen", "action": "caelestia record" },
+  "trigger.capture.screenrecord.region": { "icon": "crop", "label": "Record region", "action": "caelestia record -r" },
+  "trigger.capture.screenrecord.fullscreen-sound": { "icon": "mic", "label": "Record fullscreen with sound", "action": "caelestia record -s" },
+  "trigger.capture.screenrecord.region-sound": { "icon": "settings_voice", "label": "Record region with sound", "action": "caelestia record -r -s" },
+  "trigger.capture.text": { "icon": "document_scanner", "label": "Text (OCR)", "when": "command -v grim && command -v slurp && command -v tesseract && command -v wl-copy", "action": "menu-capture-text" },
+  "trigger.capture.color": { "icon": "colorize", "label": "Color picker", "when": "command -v hyprpicker", "action": "pkill hyprpicker || hyprpicker -a" },
+
+  "trigger.toggle": { "icon": "toggle_on", "label": "Toggle", "aliases": ["toggles"] },
+  "trigger.toggle.idle-lock": { "icon": "coffee", "label": "Stay Awake", "aliases": ["idle", "caffeine"], "toggle": true, "internal": "toggle-idle" },
+  "trigger.toggle.notifications": { "icon": "notifications", "label": "Notifications", "aliases": ["dnd", "do-not-disturb"], "toggle": true, "internal": "toggle-dnd" },
+
+  "trigger.tests": { "icon": "speed", "label": "Speed Test" },
+  "trigger.tests.network-speedtest": { "icon": "network_check", "label": "Network Speed Test", "when": "command -v curl && command -v jq", "internal": "speedtest-network" },
+  "trigger.tests.disk-speedtest": { "icon": "hard_drive", "label": "Disk Speed Test", "internal": "speedtest-disk" },
+
+  // Style
+  "style.theme": { "icon": "palette", "label": "Theme", "aliases": ["scheme", "schemes", "themes"], "provider": "schemes" },
+  "style.background": { "icon": "image", "label": "Background", "aliases": ["wallpaper", "wallpapers"], "provider": "wallpapers" },
+  "style.variant": { "icon": "colors", "label": "Scheme Variant", "aliases": ["variant"], "internal": "variant" },
+  "style.random": { "icon": "casino", "label": "Random Wallpaper", "when": "command -v caelestia", "internal": "wallpaper-random" },
+  "style.light": { "icon": "light_mode", "label": "Light Mode", "internal": "mode-light" },
+  "style.dark": { "icon": "dark_mode", "label": "Dark Mode", "internal": "mode-dark" },
+  "style.hyprland": { "icon": "edit_note", "label": "Hyprland Config", "when": "[[ -f $HOME/.config/hypr/hyprland.conf || -f $HOME/.config/hypr/hyprland.lua ]]", "action": "if [[ -f $HOME/.config/hypr/hyprland.lua ]]; then exec menu-edit \"$HOME/.config/hypr/hyprland.lua\"; else exec menu-edit \"$HOME/.config/hypr/hyprland.conf\"; fi" },
+
+  // Setup
+  "setup.settings": { "icon": "settings", "label": "Shell Settings", "aliases": ["nexus"], "internal": "settings" },
+  "setup.network": { "icon": "wifi", "label": "Network", "aliases": ["wifi"] },
+  "setup.network.qr": { "icon": "qr_code_2", "label": "Wi-Fi QR Code", "aliases": ["wifi-qr"], "when": "command -v qrencode && nmcli -t -f TYPE,STATE device status 2>/dev/null | grep -q '^wifi:connected'", "internal": "wifiqr" },
+  "setup.security": { "icon": "security", "label": "Security" },
+  "setup.security.fingerprint": { "icon": "fingerprint", "label": "Fingerprint", "when": "command -v pacman && lsusb 2>/dev/null | grep -qiE 'fingerprint|validity|authentec|elan|upek'", "action": "menu-term menu-security-fingerprint-setup" },
+  "setup.security.passwordless-sudo": { "icon": "admin_panel_settings", "label": "Passwordless Sudo", "when": "command -v sudo && command -v gum", "action": "menu-term menu-sudo-passwordless" },
+  "setup.direct-boot": { "icon": "developer_board", "label": "Direct Boot", "when": "[[ -d /sys/firmware/efi ]] && command -v efibootmgr && command -v gum", "action": "menu-term menu-direct-boot" },
+
+  // Install
+  "install.package": { "icon": "inventory_2", "label": "Package", "when": "command -v pacman && command -v fzf", "action": "menu-term menu-pkg-install" },
+  "install.aur": { "icon": "deployed_code", "label": "AUR", "when": "(command -v paru || command -v yay) && command -v fzf", "action": "menu-term menu-pkg-aur-install" },
+  "install.webapp": { "icon": "public", "label": "Web App", "when": "command -v gum", "action": "menu-term menu-webapp-install" },
+  "install.tui": { "icon": "terminal", "label": "TUI", "when": "command -v gum", "action": "menu-term menu-tui-install" },
+
+  // Remove
+  "remove.package": { "icon": "inventory_2", "label": "Package", "when": "command -v pacman && command -v fzf", "action": "menu-term menu-pkg-remove" },
+  "remove.webapp": { "icon": "public", "label": "Web App", "when": "grep -qsE '^Exec=.*menu-launch[- ]webapp' \"$HOME\"/.local/share/applications/*.desktop", "action": "menu-term menu-webapp-remove" },
+  "remove.tui": { "icon": "terminal", "label": "TUI", "when": "grep -qsE '^Exec=.*(menu-launch tui|--class=TUI\\.|--app-id=TUI\\.)' \"$HOME\"/.local/share/applications/*.desktop", "action": "menu-term menu-tui-remove" },
+  "remove.security": { "icon": "security", "label": "Security", "when": "command -v pacman && pacman -Qq fprintd" },
+  "remove.security.fingerprint": { "icon": "fingerprint", "label": "Fingerprint", "when": "command -v pacman && pacman -Qq fprintd", "action": "menu-term menu-security-fingerprint-remove" },
+
+  // Update
+  "update.caelestia": { "icon": "system_update_alt", "label": "Caelestia", "when": "command -v caelestia", "action": "menu-term caelestia update" },
+
+  // System
+  "system.lock": { "icon": "lock", "label": "Lock", "internal": "lock" },
+  "system.suspend": { "icon": "bedtime", "label": "Suspend", "when": "[[ $(systemctl is-enabled systemd-suspend.service 2>/dev/null) != masked ]]", "internal": "suspend" },
+  "system.hibernate": { "icon": "ac_unit", "label": "Hibernate", "when": "swapon --show --noheadings 2>/dev/null | grep -q .", "internal": "hibernate" },
+  "system.logout": { "icon": "logout", "label": "Logout", "internal": "logout" },
+  "system.reboot": { "icon": "restart_alt", "label": "Reboot", "internal": "reboot" },
+  "system.shutdown": { "icon": "power_settings_new", "label": "Shutdown", "internal": "shutdown" }
+}

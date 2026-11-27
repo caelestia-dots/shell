@@ -6,6 +6,7 @@ import Caelestia.Config
 import qs.components.misc
 import qs.services
 import qs.modules.nexus
+import qs.modules.launcher.services
 
 Scope {
     id: root
@@ -81,6 +82,25 @@ Scope {
         name: "launcherInterrupt"
         description: "Interrupt launcher keybind"
         onPressed: root.launcherInterrupted = true
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "menu"
+        description: "Toggle launcher menu"
+        onPressed: {
+            if (root.hasFullscreen || !GlobalConfig.launcher.menu.enabled)
+                return;
+            const screenState = ShellState.forActive();
+            if (screenState.launcher) {
+                screenState.launcher = false;
+            } else {
+                MenuService.openRoute("");
+                MenuService.pendingOpen = true;
+                screenState.launcher = true;
+            }
+        }
     }
 
     // qmllint disable unresolved-type

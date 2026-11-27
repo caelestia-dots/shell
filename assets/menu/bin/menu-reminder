@@ -1,0 +1,281 @@
+#!/bin/bash
+
+# caelestia-menu:summary=Set and show lightweight desktop notification reminders
+# caelestia-menu:args=<minutes> [message] | show [-j|--json] | clear
+# caelestia-menu:examples=caelestia-menu-reminder 5 | caelestia-menu-reminder 30 "Check the oven" | caelestia-menu-reminder 1.5 | caelestia-menu-reminder show | caelestia-menu-reminder show --json | caelestia-menu-reminder clear
+
+set -euo pipefail
+
+reminder_dir="${XDG_RUNTIME_DIR:-/tmp}/caelestia-menu-reminders"
+
+format_remaining() {
+  local seconds=$1
+  local minutes=$((seconds / 60))
+  local remainder=$((seconds % 60))
+
+  if ((minutes > 0 && remainder > 0)); then
+    echo "${minutes}m ${remainder}s"
+  elif ((minutes > 0)); then
+    echo "${minutes}m"
+  else
+    echo "${remainder}s"
+  fi
+}
+
+# Live reminders are plain state files, one per reminder: <id>.meta (fire
+# epoch, seconds, fire time) from the setter and <id>.message with the text.
+# Firing goes through a transient systemd user timer named after the id, so
+# the deadline is wall-clock (a suspend across it catches up on resume) and
+# pending reminders are listable with `systemctl --user list-timers`. Where
+# no user manager is reachable, the setter falls back to a detached `sleep`
+# and records its pid in <id>.pid. A fired or cleared reminder leaves no
+# trace, so only ones still to come are ever listed.
+active_reminders() {
+  local now=${1:-$(date +%s)}
+  local file id fire minutes at_time
+
+  [[ -d $reminder_dir ]] || return 0
+
+  for file in "$reminder_dir"/*.meta; do
+    [[ -e $file ]] || continue
+    id=${file%.meta}
+    id=${id##*/}
+    read -r fire minutes at_time <"$file" 2>/dev/null || continue
+    ((fire <= now)) && continue
+    printf "%s\t%s\t%s\t%s\n" "$id" "$fire" "$minutes" "$at_time"
+  done
+}
+
+refresh_indicator() {
+  :
+}
+
+show_reminders() {
+  local id fire seconds at_time remaining reminder_seconds reminder_message body=""
+  local now=$(date +%s)
+
+  while IFS=$'\t' read -r id fire seconds at_time; do
+    [[ -z $id || -z $fire ]] && continue
+    remaining=$((fire - now))
+    reminder_seconds=$seconds
+    reminder_message=""
+    [[ -f $reminder_dir/$id.message ]] && reminder_message=$(<"$reminder_dir/$id.message")
+
+    if [[ -n $reminder_message ]]; then
+      body+="$reminder_message in $(format_remaining $remaining) ($at_time)"$'\n'
+    else
+      body+="$(format_remaining $reminder_seconds) reminder in $(format_remaining $remaining) ($at_time)"$'\n'
+    fi
+  done < <(active_reminders "$now")
+
+  if [[ -z $body ]]; then
+    notify-send "Upcoming reminders" "No outstanding reminders"
+  else
+    notify-send "Upcoming reminders" "${body%$'\n'}"
+  fi
+}
+
+show_json() {
+  local id fire seconds at_time remaining reminder_seconds unit reminder_message label item_json reminders_json="[]"
+  local now=$(date +%s)
+  local count=0
+  local tooltip="Set Reminder"
+
+  while IFS=$'\t' read -r id fire seconds at_time; do
+    [[ -z $id || -z $fire ]] && continue
+    count=$((count + 1))
+
+    unit=$id
+    reminder_seconds=$seconds
+    [[ ! $reminder_seconds =~ ^[0-9]+$ ]] && reminder_seconds=0
+    remaining=$((fire - now))
+    reminder_message=""
+    [[ -f $reminder_dir/$id.message ]] && reminder_message=$(<"$reminder_dir/$id.message")
+
+    if [[ -n $reminder_message ]]; then
+      label=$reminder_message
+    else
+      label="$(format_remaining $reminder_seconds) reminder"
+    fi
+
+    item_json=$(jq -cn \
+      --arg unit "$unit" \
+      --arg timer "$unit.timer" \
+      --arg label "$label" \
+      --arg message "$reminder_message" \
+      --arg remaining "$(format_remaining "$remaining")" \
+      --arg atTime "$at_time" \
+      --argjson minutes "$(awk -v s="$reminder_seconds" 'BEGIN{printf "%.4g", s / 60}')" \
+      --argjson seconds "$reminder_seconds" \
+      --argjson at "$fire" \
+      --argjson remainingSeconds "$remaining" \
+      '{unit:$unit,timer:$timer,minutes:$minutes,seconds:$seconds,message:$message,label:$label,remaining:$remaining,remainingSeconds:$remainingSeconds,at:$at,atTime:$atTime}')
+    reminders_json=$(jq -cn --argjson reminders "$reminders_json" --argjson item "$item_json" '$reminders + [$item]')
+  done < <(active_reminders "$now")
+
+  if ((count == 1)); then
+    tooltip="1 reminder"
+  elif ((count > 1)); then
+    tooltip="$count reminders"
+  fi
+
+  jq -cn --argjson count "$count" --arg tooltip "$tooltip" --argjson reminders "$reminders_json" '{count:$count,active:($count > 0),tooltip:$tooltip,reminders:$reminders}'
+}
+
+clear_reminders() {
+  local id fire seconds at_time reminder_seconds reminder_message unit at pid
+  local units="" body="" count=0
+
+  while IFS=$'\t' read -r id fire seconds at_time; do
+    [[ -z $id || -z $fire ]] && continue
+    units+="$id "
+
+    reminder_seconds=$seconds
+    [[ ! $reminder_seconds =~ ^[0-9]+$ ]] && reminder_seconds=0
+    reminder_message=""
+    [[ -f $reminder_dir/$id.message ]] && reminder_message=$(<"$reminder_dir/$id.message")
+    at=$at_time
+
+    if [[ -n $reminder_message ]]; then
+      body+="• $reminder_message ($at)"$'\n'
+    else
+      body+="• $(format_remaining $reminder_seconds) reminder ($at)"$'\n'
+    fi
+    count=$((count + 1))
+  done < <(active_reminders "$(date +%s)")
+
+  for id in $units; do
+    # Stop the transient timer; the pid file only exists for reminders that
+    # fell back to a detached sleeper because no user manager was reachable.
+    systemctl --user stop "$id.timer" 2>/dev/null || true
+    if [[ -f $reminder_dir/$id.pid ]]; then
+      pid=$(<"$reminder_dir/$id.pid")
+      [[ $pid =~ ^[0-9]+$ ]] && kill -- "$pid" 2>/dev/null || true
+    fi
+    rm -f "$reminder_dir/$id.meta" "$reminder_dir/$id.message" "$reminder_dir/$id.pid" 2>/dev/null || true
+  done
+
+  refresh_indicator
+
+  if ((count == 0)); then
+    notify-send "Reminders" "No reminders to clear"
+  else
+    notify-send "Cleared $count reminder$([ $count -eq 1 ] && echo "" || echo "s")" "${body%$'\n'}"
+  fi
+}
+
+usage() {
+  echo "Usage: caelestia-menu-reminder <minutes> [message]   (minutes may be X.X; the fraction is seconds)"
+  echo "       caelestia-menu-reminder show [-j|--json]"
+  echo "       caelestia-menu-reminder clear"
+}
+
+case ${1:-} in
+show | list)
+  case ${2:-} in
+  -j | --json)
+    show_json
+    ;;
+  "")
+    show_reminders
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+  exit 0
+  ;;
+clear)
+  clear_reminders
+  exit 0
+  ;;
+esac
+
+duration=${1:-}
+shift || true
+message="$*"
+custom_message="$message"
+
+# The fractional part is seconds, read literally: 1.5 is 1m 05s, 0.30 is
+# 30s, 1.05 is 1m 05s. It cannot reach 60 — that would just be another
+# minute, so write 2.05 instead of 1.65.
+if [[ -z $duration ]] || [[ ! $duration =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  usage
+  exit 1
+fi
+
+if [[ $duration == *.* ]]; then
+  dur_minutes=${duration%%.*}
+  dur_seconds=${duration#*.}
+else
+  dur_minutes=$duration
+  dur_seconds=0
+fi
+dur_seconds=$((10#$dur_seconds))
+
+if ((dur_seconds > 59)); then
+  echo "menu-reminder: the .SS part is seconds and must be 0-59 (write $((dur_minutes + 1)).$((dur_seconds - 60)) instead of $duration)" >&2
+  exit 1
+fi
+
+seconds=$((dur_minutes * 60 + dur_seconds))
+if ((seconds == 0)); then
+  usage
+  exit 1
+fi
+
+if [[ -z $message ]]; then
+  if [[ $duration =~ ^[0-9]+$ ]]; then
+    message="Your ${duration} minutes are up"
+  else
+    message="Your reminder is due"
+  fi
+fi
+
+label=$(format_remaining "$seconds")
+set_at=$(date +%s)
+fire=$((set_at + seconds))
+remind_at=$(date -d "@$fire" +%H:%M)
+id="caelestia-menu-reminder-${seconds}s-$set_at"
+message_file="$reminder_dir/$id.message"
+pid_file="$reminder_dir/$id.pid"
+meta_file="$reminder_dir/$id.meta"
+delay=$((fire - $(date +%s)))
+((delay < 0)) && delay=0
+confirmation="You'll be reminded at $remind_at"
+confirmation_title="Reminder set for $label"
+
+mkdir -p "$reminder_dir"
+
+if [[ -n $custom_message ]]; then
+  printf "%s" "$custom_message" >"$message_file"
+  confirmation_title="$custom_message in $label"
+fi
+
+printf "%s\t%s\t%s\n" "$fire" "$seconds" "$remind_at" >"$meta_file"
+
+# Fire at a wall-clock time through a transient user timer: on fire the unit
+# notifies, cleans up its own state files, and stops its timer. Cleared
+# reminders are stopped first, so they never reach this point. Where no user
+# manager is reachable (no session bus), fall back to a detached sleeper.
+calendar_time=$(date -d "@$fire" '+%Y-%m-%d %H:%M:%S')
+if systemd-run --user --quiet --unit="$id" \
+     --on-calendar="$calendar_time" \
+     --timer-property=AccuracySec=1s \
+     bash -c 'notify-send "Reminder" "$1"; rm -f "$2" "$3"; systemctl --user stop "$4.timer" 2>/dev/null' \
+     _ "$message" "$meta_file" "$message_file" "$id" 2>/dev/null; then
+  :
+else
+  nohup bash -c '
+    sleep "$1"
+    if [[ -f "$2" ]]; then
+      notify-send "Reminder" "$3"
+      rm -f "$2" "$4" "$5"
+    fi
+  ' _ "$delay" "$meta_file" "$message" "$message_file" "$pid_file" >/dev/null 2>&1 &
+  echo $! >"$pid_file"
+fi
+
+refresh_indicator
+notify-send "$confirmation_title" "$confirmation"

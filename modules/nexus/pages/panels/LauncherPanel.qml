@@ -116,6 +116,47 @@ PageBase {
             onToggled: GlobalConfig.launcher.enableDangerousActions = checked
         }
 
+        // Menu
+        SectionHeader {
+            text: Tr.tr("Menu")
+        }
+
+        ToggleRow {
+            first: true
+            text: Tr.trCtx("Enabled", "toggle label")
+            subtext: Tr.tr("Enable the hierarchical system menu in the launcher")
+            checked: GlobalConfig.launcher.menu.enabled
+            onToggled: GlobalConfig.launcher.menu.enabled = checked
+        }
+
+        ToggleRow {
+            text: Tr.tr("Default view")
+            subtext: Tr.tr("Open the menu instead of the app list by default")
+            checked: GlobalConfig.launcher.menu.defaultView
+            onToggled: GlobalConfig.launcher.menu.defaultView = checked
+        }
+
+        TextFieldRow {
+            id: menuPrefixRow
+
+            last: true
+            label: Tr.tr("Menu prefix")
+            subtext: Tr.tr("Prefix used to open the menu when apps are the default view")
+            errorText: Tr.tr("Prefix must not be alphanumeric")
+            value: GlobalConfig.launcher.menu.prefix === ":" ? "" : GlobalConfig.launcher.menu.prefix
+            placeholderText: ":"
+            maximumLength: 1
+            smallField: true
+            validate: /^[^a-zA-Z0-9\s]$/
+            onEditingFinished: value => {
+                if (!field.valid)
+                    return;
+                GlobalConfig.launcher.menu.prefix = value || ":";
+                if (GlobalConfig.launcher.menu.prefix === ":")
+                    clear();
+            }
+        }
+
         // Fuzzy search
         SectionHeader {
             text: Tr.tr("Fuzzy search")

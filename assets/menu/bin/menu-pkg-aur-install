@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# caelestia-menu:summary=Browse and install AUR packages (yay native, or cached list via paru).
+# caelestia-menu:requires-sudo=true
+
+# Omarchy's original flow needs yay's local AUR list. On paru-only systems we
+# fall back to a daily-refreshed name cache from aur.archlinux.org with live
+# RPC previews — same UX, no local AUR database required.
+set -euo pipefail
+
+[[ -f $HOME/.config/caelestia/menu/fzf-theme.sh ]] &&
+  source "$HOME/.config/caelestia/menu/fzf-theme.sh"
+
+BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="${XDG_CONFIG_HOME:-$HOME/.config}/caelestia/menu/bin:$BIN_DIR:$PATH"
+SELF="$(readlink -f "$0")"
+
+AUR=""
+for h in yay paru; do
+  if command -v "$h" >/dev/null 2>&1; then
+    AUR="$h"
+    break
+  fi
+done
+if [[ -z $AUR ]]; then
+  echo "No AUR helper found (install paru or yay)." >&2
+  read -n 1 -s
+  exit 1
+fi
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/caelestia-menu"
+LIST="$CACHE_DIR/aur-names.txt"
+
+refresh_list() {
+  curl -sf --max-time 90 https://aur.archlinux.org/packages.gz |
+    zcat >"$CACHE_DIR/aur-names.tmp" 2>/dev/null &&
+    mv "$CACHE_DIR/aur-names.tmp" "$LIST"
+}
+
+rpc_info() {
+  curl -s --max-time 15 "https://aur.archlinux.org/rpc/?v=5&type=info&arg=$1" |
+    jq -r '.results[0] as $r |
+      if $r == null then
+        "Package not found in AUR."
+      else
+        "Name:        \($r.Name)",
+        "Version:     \($r.Version)",
+        "Votes:       \($r.NumVotes)",
+        "Popularity:  \($r.Popularity)",
+        "Maintainer:  \($r.Maintainer // "orphaned")",
+        "Out of date: \(if $r.OutOfDate then "yes" else "no" end)",
+        "Last mod.:   \(($r.LastModified // 0) | tonumber | strftime("%Y-%m-%d"))",
+        "",
+        "\($r.Description)"
+      end'
+}
+
+case ${1:-} in
+--info)
+  rpc_info "${2:-}"
+  exit 0
+  ;;
+esac
+
+install_selections() {
+  source menu-sudo-keepalive
+  $AUR -S --needed --noconfirm $*
+}
+
+if [[ $AUR == yay ]]; then
+  # --- Omarchy original: full local list, local previews, PKGBUILD view ---
+  fzf_args=(
+    --multi
+    --preview 'yay -Siia {1}'
+    --preview-label='alt-p: toggle description, alt-b/B: toggle PKGBUILD, alt-j/k: scroll, tab: multi-select'
+    --preview-label-pos='bottom'
+    --preview-window 'down:65%:wrap'
+    --bind 'alt-p:toggle-preview'
+    --bind 'alt-b:change-preview:yay -Gpa {1} | tail -n +5'
+    --bind 'alt-B:change-preview:yay -Siia {1}'
+    --bind 'tab:toggle'
+  )
+  pkg_names=$(yay -Slqa | fzf "${fzf_args[@]}")
+  [[ -z $pkg_names ]] && exit 0
+  pkgs=$(echo "$pkg_names" | sed 's/^/aur\//' | tr '\n' ' ')
+  install_selections $pkgs
+  exit 0
+fi
+
+# --- paru fallback: cached names, live RPC preview ---------------------------
+mkdir -p "$CACHE_DIR"
+if [[ ! -s $LIST ]]; then
+  echo "Fetching AUR package list..."
+  if ! refresh_list; then
+    echo "Could not download the AUR package list (offline?)" >&2
+    read -n 1 -s
+    exit 1
+  fi
+elif [[ -n $(find "$LIST" -mtime +1 2>/dev/null) ]]; then
+  refresh_list &
+fi
+
+pkg_names=$(
+  fzf --multi \
+    --preview "$SELF --info {1}" \
+    --preview-label='alt-p: toggle description, tab: multi-select' \
+    --preview-label-pos='bottom' \
+    --preview-window 'down:65%:wrap' \
+    --bind 'alt-p:toggle-preview' \
+    --bind 'tab:toggle' \
+    <"$LIST"
+)
+
+[[ -z $pkg_names ]] && exit 0
+pkgs=$(tr '\n' ' ' <<<"$pkg_names")
+install_selections $pkgs

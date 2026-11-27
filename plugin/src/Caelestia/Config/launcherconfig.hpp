@@ -25,6 +25,14 @@ class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, wallpapers, false)
 };
 
+class LauncherMenu : public settings::ObjectNode {
+    CONFIG_NODE(LauncherMenu, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(bool, defaultView, false)
+    CONFIG_PROPERTY(QString, prefix, u":"_s)
+};
+
 class LauncherAction : public settings::ObjectNode {
     CONFIG_NODE(LauncherAction, settings::ObjectNode)
 
@@ -51,9 +59,16 @@ class LauncherConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(bool, vimKeybinds, false)
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps, {})
+    CONFIG_GLOBAL_SUBOBJECT(LauncherMenu, menu)
     CONFIG_GLOBAL_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
     CONFIG_GLOBAL_LIST(LauncherActionList, actions,
         DEFAULT_ARG({
+            vmap({
+                { u"name"_s, markCtx(u"Menu"_s, u"launcher action"_s) },
+                { u"icon"_s, u"menu_open"_s },
+                { u"description"_s, mark(u"Open the hierarchical system menu"_s) },
+                { u"command"_s, QStringList{ u"openMenu"_s } },
+            }),
             vmap({
                 { u"name"_s, markCtx(u"Calculator"_s, u"launcher action"_s) },
                 { u"icon"_s, u"calculate"_s },

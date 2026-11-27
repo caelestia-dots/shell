@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# caelestia-menu:summary=Launch an app, TUI, or web app, optionally focusing an existing window
+# caelestia-menu:args=<tui|webapp|or-focus|tui-or-focus|webapp-or-focus> [args...]
+# Adapted from Omarchy (MIT License).
+
+set -euo pipefail
+
+BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$BIN_DIR:$PATH"
+
+usage() {
+  echo "Usage: menu-launch <command> [args...]"
+  echo "  tui [--app-id=<id>] <cmd> [args...]     Launch a TUI in the configured terminal"
+  echo "  webapp <url> [flags...]                 Launch a URL as a web app in the browser"
+  echo "  or-focus <pattern> [cmd...]             Focus a window matching pattern, else launch cmd"
+  echo "  tui-or-focus [--app-id=<id>] <cmd>...   Launch a TUI or focus its existing window"
+  echo "  webapp-or-focus <pattern> <url>...      Launch a web app or focus its existing window"
+}
+
+launch_tui() {
+  if (( $# == 0 )); then
+    echo "menu-launch tui: missing command" >&2
+    return 1
+  fi
+
+  if [[ ${1:-} == --app-id=* ]]; then
+    APP_ID="${1#--app-id=}"
+    shift
+  else
+    APP_ID="TUI.$(basename "$1")"
+  fi
+
+  exec menu-term-exec --class "$APP_ID" -- "$1" "${@:2}"
+}
+
+launch_webapp() {
+  if (( $# == 0 )); then
+    echo "menu-launch webapp: missing url" >&2
+    return 1
+  fi
+
+  browser=$(xdg-settings get default-web-browser 2>/dev/null || true)
+
+  case $browser in
+  google-chrome* | brave* | microsoft-edge* | opera* | vivaldi* | helium* | chromium*)
+    app_mode="chrome" ;;
+  zen* | firefox* | librewolf* | waterfox*)
+    app_mode="firefox" ;;
+  *)
+    browser="chromium.desktop"
+    app_mode="chrome" ;;
+  esac
+
+  browser_bin=$({ sed -n 's/^Exec=\([^ ]*\).*/\1/p' \
+      {~/.local,~/.nix-profile,/usr}/share/applications/$browser 2>/dev/null || true; } | head -1)
+  if [[ -z $browser_bin ]]; then
+    echo "menu-launch webapp: could not resolve a browser binary from $browser" >&2
+    return 1
+  fi
+
+  if [[ $app_mode == firefox ]]; then
+    exec setsid "$browser_bin" --new-window "$1" "${@:2}"
+  fi
+
+  exec setsid "$browser_bin" --app="$1" "${@:2}"
+}
+
+or_focus() {
+  if (( $# == 0 )); then
+    echo "menu-launch or-focus: missing window pattern" >&2
+    return 1
+  fi
+
+  WINDOW_PATTERN="$1"
+  shift
+  WINDOW_ADDRESS=$(hyprctl clients -j | jq -r --arg p "$WINDOW_PATTERN" '.[]|select((.class|test("\\b" + $p + "\\b";"i")) or (.title|test("\\b" + $p + "\\b";"i")))|.address' | head -n1)
+
+  if [[ -n $WINDOW_ADDRESS ]]; then
+    hyprctl dispatch "hl.dsp.focus({ window = \"address:$WINDOW_ADDRESS\" })" >/dev/null 2>&1 || hyprctl dispatch focuswindow "address:$WINDOW_ADDRESS"
+  else
+    if (( $# > 0 )); then
+      exec setsid "$@"
+    else
+      exec setsid "$WINDOW_PATTERN"
+    fi
+  fi
+}
+
+case ${1:-} in
+tui)
+  shift || true
+  launch_tui "$@"
+  ;;
+webapp)
+  shift || true
+  launch_webapp "$@"
+  ;;
+or-focus)
+  shift || true
+  or_focus "$@"
+  ;;
+tui-or-focus)
+  shift || true
+  if [[ ${1:-} == --app-id=* ]]; then
+    APP_ID="${1#--app-id=}"
+  else
+    APP_ID="TUI.$(basename "$1")"
+  fi
+  or_focus "$APP_ID" menu-launch tui "$@"
+  ;;
+webapp-or-focus)
+  shift || true
+  if (( $# == 0 )); then
+    echo "menu-launch webapp-or-focus: missing window pattern" >&2
+    exit 1
+  fi
+  WINDOW_PATTERN="$1"
+  shift
+  or_focus "$WINDOW_PATTERN" menu-launch webapp "$@"
+  ;;
+*)
+  usage
+  exit 1
+  ;;
+esac
