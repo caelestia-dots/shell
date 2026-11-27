@@ -54,6 +54,14 @@ if (( ${#term_cmd[@]} == 0 )); then
   exit 1
 fi
 
+# The exec flag is appended below, so drop one the caller configured (e.g.
+# general.apps.terminal = ["ghostty", "-e"]) or it would swallow the flags.
+case "${term_cmd[${#term_cmd[@]} - 1]}" in
+  -e|--command|--execute)
+    unset 'term_cmd[${#term_cmd[@]} - 1]'
+    ;;
+esac
+
 bin_name=$(basename "${term_cmd[0]}")
 extra_args=("${term_cmd[@]:1}")
 
