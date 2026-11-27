@@ -280,6 +280,10 @@ Item {
         implicitWidth: card.width
         implicitHeight: card.height
 
+        // qmllint disable unresolved-type unqualified missing-property
+        // Window's grouped `margins` value type sometimes fails to resolve
+        // after Quickshell's opaque Margins type has been loaded by another
+        // file; the properties exist and work at runtime.
         margins.left: Math.max(0, Math.round((screen.width - card.width) / 2))
         margins.top: Math.max(0, Math.round((screen.height - card.height) / 2 + (root.stackCenter - 0.5) * screen.height))
 
@@ -289,6 +293,7 @@ Item {
                 easing.type: Easing.OutCubic
             }
         }
+        // qmllint enable unresolved-type unqualified missing-property
 
         Rectangle {
             id: card
