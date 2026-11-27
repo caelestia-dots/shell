@@ -23,8 +23,10 @@ Item {
     readonly property bool showWallpapers: search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}wallpaper `)
     readonly property var picker: Pickers.forText(search.text) // The open picker (i.e. emoji), if any
     readonly property bool showPicker: picker !== null
+    readonly property bool showClipboard: GlobalConfig.launcher.clipboard.enabled && search.text.startsWith(`${GlobalConfig.launcher.actionPrefix}clipboard `)
+    readonly property bool showPreview: showClipboard && GlobalConfig.launcher.clipboard.showPreview
     readonly property bool showMenu: {
-        if (!GlobalConfig.launcher.menu.enabled || showWallpapers || showPicker)
+        if (!GlobalConfig.launcher.menu.enabled || showWallpapers || showPicker || showClipboard)
             return false;
         const menuPrefix = GlobalConfig.launcher.menu.prefix;
         if (menuPrefix === "" || menuPrefix === GlobalConfig.launcher.actionPrefix)
@@ -40,8 +42,8 @@ Item {
             return Tr.tr("Type \"%1\" for commands or \"%2\" for menu").arg(GlobalConfig.launcher.actionPrefix).arg(GlobalConfig.launcher.menu.prefix);
         return Tr.tr("Type \"%1\" for commands").arg(GlobalConfig.launcher.actionPrefix);
     }
-    readonly property var currentList: showMenu ? menuList.item : showWallpapers ? wallpaperList.item : showPicker ? pickerList.item : appList.item // Can be a ListView, PathView or PickerList, so can't type properly
-    property string animState: showMenu ? "menu" : showWallpapers ? "wallpapers" : showPicker ? "picker" : "apps"
+    readonly property var currentList: showMenu ? menuList.item : showWallpapers ? wallpaperList.item : showPicker ? pickerList.item : showClipboard ? clipboardList.item : appList.item // Can be a ListView, PathView or PickerList, so can't type properly
+    property string animState: showMenu ? "menu" : showWallpapers ? "wallpapers" : showPicker ? "picker" : showClipboard ? "clipboard" : "apps"
 
     // Kept so the picker doesn't lose its source while fading out
     property var lastPicker
@@ -93,6 +95,20 @@ Item {
                 root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, pickerList.implicitHeight > 0 ? pickerList.implicitHeight : empty.implicitHeight)
                 pickerList.active: true
+            }
+
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "clipboard"
+
+            PropertyChanges {
+                root.implicitWidth: root.Tokens.sizes.launcher.itemWidth
+                root.implicitHeight: Math.min(root.maxHeight, clipboardList.implicitHeight > 0 ? clipboardList.implicitHeight : empty.implicitHeight)
+                clipboardList.active: true
             }
 
             AnchorChanges {
@@ -178,6 +194,21 @@ Item {
     }
 
     Loader {
+        id: clipboardList
+
+        active: false
+
+        anchors.fill: parent
+
+        sourceComponent: ClipboardList {
+            objectName: "launcherClipboardList"
+
+            search: root.search
+            screenState: root.screenState
+        }
+    }
+
+    Loader {
         id: wallpaperList
 
         asynchronous: true
@@ -200,9 +231,9 @@ Item {
     Row {
         id: empty
 
-        readonly property string emptyIcon: root.state === "wallpapers" ? "wallpaper_slideshow" : root.state === "menu" && MenuService.error !== "" ? "error" : root.state === "menu" ? "menu_open" : "manage_search"
-        readonly property string emptyTitle: root.state === "wallpapers" ? Tr.tr("No wallpapers found") : root.state === "menu" && MenuService.error !== "" ? Tr.tr("Menu definition error") : root.state === "menu" ? Tr.tr("No matching entries") : Tr.tr("No results")
-        readonly property string emptySubtitle: root.state === "menu" && MenuService.error !== "" ? MenuService.error : root.state === "wallpapers" && Wallpapers.list.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : Tr.tr("Try searching for something else")
+        readonly property string emptyIcon: root.state === "wallpapers" ? "wallpaper_slideshow" : root.state === "menu" && MenuService.error !== "" ? "error" : root.state === "menu" ? "menu_open" : root.state === "clipboard" && Clipboard.history.length === 0 ? "content_paste_off" : "manage_search"
+        readonly property string emptyTitle: root.state === "wallpapers" ? Tr.tr("No wallpapers found") : root.state === "menu" && MenuService.error !== "" ? Tr.tr("Menu definition error") : root.state === "menu" ? Tr.tr("No matching entries") : root.state === "clipboard" && Clipboard.history.length === 0 ? Tr.tr("Clipboard is empty") : Tr.tr("No results")
+        readonly property string emptySubtitle: root.state === "menu" && MenuService.error !== "" ? MenuService.error : root.state === "wallpapers" && Wallpapers.list.length === 0 ? Tr.tr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : root.state === "clipboard" && Clipboard.history.length === 0 ? Tr.tr("Copy something and it will show up here") : Tr.tr("Try searching for something else")
 
         opacity: root.currentList?.count === 0 ? 1 : 0
         scale: root.currentList?.count === 0 ? 1 : 0.5

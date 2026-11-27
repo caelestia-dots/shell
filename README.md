@@ -92,6 +92,7 @@ Dependencies:
 - `qt6-multimedia`
 - [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 - [`swappy`](https://github.com/jtheoof/swappy)
+- [`cliphist`](https://github.com/sentriz/cliphist)
 - [`wl-clipboard`](https://github.com/bugaevc/wl-clipboard)
 - [`fish`](https://github.com/fish-shell/fish-shell)
 - [`bash`](https://www.gnu.org/software/bash)
@@ -184,6 +185,43 @@ Emojis that your installed fonts can't render are hidden by default (`launcher.p
 The picker data lives in `assets/<picker>/` and can be regenerated with `scripts/fetch-emojis.py [locale ...]`
 (e.g. `scripts/fetch-emojis.py de ja` for extra search languages) and `scripts/gen-symbols.py`.
 
+### System menu
+
+The launcher has a hierarchical system menu, inspired by Omarchy's. Open it by typing `:` (configurable
+via `launcher.menu.prefix`), by running the `Menu` launcher action under `>`, by binding the global
+shortcut `menu`, or via IPC (`qs -c caelestia ipc call menu toggle`, or `menu open "<route>"` to jump
+straight to a route). Set `launcher.menu.defaultView` to make the menu the default launcher view;
+typing `>` still switches to launcher actions from there.
+
+The bundled menu tree lives in `assets/menu/menu.jsonc`. A file at `~/.config/caelestia/menu/menu.jsonc`
+is watched live and merged over it, so you can override fields, add entries, or hide default ones with
+`"enabled": false` without copying the whole file. Helper scripts live in `assets/menu/bin` (and
+`~/.config/caelestia/menu/bin` overrides them); menu rows can declare `when`/`checked`/`disabled` shell
+guards, `toggle` checkboxes, `aliases`, and built-in `internal` actions (pickers, clipboard, shell
+toggles, power actions via `SessionManager`).
+
+`Update > Caelestia` runs `caelestia update` in a new terminal window using your configured terminal.
+
+### Clipboard history
+
+The launcher has a clipboard history view backed by [`cliphist`](https://github.com/sentriz/cliphist).
+Open it by typing `>clipboard` in the launcher, by binding the global shortcut `clipboard`, or through
+the menu (`Trigger > Clipboard History`). Requires the `cliphist store` watcher to be running (e.g.
+`wl-paste --watch cliphist store`); entries persist across restarts.
+
+| Key | Action |
+| --- | --- |
+| `Enter` / click | Paste into the previously focused window |
+| `Shift+Enter` | Copy to clipboard only |
+| `Alt+Enter` | Open the entry (images in the image viewer, URLs in the browser) |
+| `Delete` | Delete entry |
+| `Shift+Delete` | Clear the current category (with confirmation, pinned entries preserved) |
+| `Alt+P` | Pin / unpin entry |
+| `Tab` / `Shift+Tab` | Switch between All / Images / Misc categories |
+
+Selecting an image entry shows it at full size in a preview panel beside the launcher; disable that
+with `launcher.clipboard.showPreview`, or the whole view with `launcher.clipboard.enabled`.
+
 ## Updating
 
 ### Packaged install (AUR)
@@ -245,7 +283,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
-> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `menu.*`, `picker.*`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
+> - `launcher`: `actionPrefix`, `actions`, `clipboard.*`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `menu.*`, `picker.*`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
 > - `lock`: `enableFaceAuth`, `enableFprint`, `faceAuthProvider`, `maxFaceAuthTries`, `maxFprintTries`, `triggerFaceAuthOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
@@ -709,6 +747,10 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "pasteCommand": [],
             "pasteShortcut": ["CTRL", "V"],
             "pasteDelay": 150
+        },
+        "clipboard": {
+            "enabled": true,
+            "showPreview": true
         },
         },
         "useFuzzy": {

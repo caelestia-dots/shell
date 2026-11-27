@@ -40,6 +40,8 @@
 
   // Trigger
   "trigger.reminder": { "icon": "alarm", "label": "Reminder", "aliases": ["reminder", "timer"] },
+  "trigger.emoji": { "icon": "sentiment_satisfied", "label": "Emoji", "aliases": ["emoji-picker", "emote", "smiley"], "internal": "emoji" },
+  "trigger.clipboard": { "icon": "content_paste", "label": "Clipboard History", "aliases": ["clipboard", "cliphist"], "when": "command -v cliphist", "internal": "clipboard" },
   "trigger.reminder.set": { "icon": "add_alarm", "label": "Set reminder…", "aliases": ["reminder-set", "remind"] },
   "trigger.reminder.show": { "icon": "notifications_active", "label": "Show all", "action": "menu-reminder show" },
   "trigger.reminder.clear": { "icon": "alarm_off", "label": "Clear all", "action": "menu-reminder clear" },

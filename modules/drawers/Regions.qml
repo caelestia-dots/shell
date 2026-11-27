@@ -34,6 +34,11 @@ Region {
     }
 
     R {
+        panel: root.panels.clipboardPreview
+        y: root.win.height - height
+    }
+
+    R {
         id: sessionRegion
 
         panel: root.panels.sessionWrapper

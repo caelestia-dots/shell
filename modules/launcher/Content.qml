@@ -131,6 +131,12 @@ Item {
                         Wallpapers.previewColourLock = true;
                     Wallpapers.setWallpaper(currentItem.modelData.path);
                     root.screenState.launcher = false;
+                } else if (list.showClipboard) {
+                    // Plain Enter pastes into the window below (handled in
+                    // Keys.onPressed, which sees the modifiers); reaching
+                    // here means Shift+Enter: copy only.
+                    Clipboard.copyToClipboard(currentItem.modelData);
+                    root.screenState.launcher = false;
                 } else if (text.startsWith(GlobalConfig.launcher.actionPrefix)) {
                     if (text.startsWith(`${GlobalConfig.launcher.actionPrefix}calc `))
                         currentItem.onClicked();
@@ -189,6 +195,52 @@ Item {
                     const currentItem = list.currentList?.currentItem;
                     if (currentItem)
                         list.currentList.enterRow(currentItem.modelData);
+                    event.accepted = true;
+                    return;
+                }
+            }
+
+            // Clipboard view keys: Enter pastes into the window below,
+            // Shift+Enter copies, Alt+Enter opens, Delete removes, Shift+Delete
+            // asks before wiping, PageUp/Down page through, Tab cycles tabs.
+            if (list.showClipboard) {
+                if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                    const currentItem = list.currentList?.currentItem;
+                    if (currentItem) {
+                        if (event.modifiers & Qt.AltModifier)
+                            Clipboard.openItem(currentItem.modelData);
+                        else if (event.modifiers & Qt.ShiftModifier)
+                            Clipboard.copyToClipboard(currentItem.modelData);
+                        else
+                            Clipboard.pasteIntoWindow(currentItem.modelData);
+                        root.screenState.launcher = false;
+                    }
+                    event.accepted = true;
+                    return;
+                }
+                if (event.key === Qt.Key_Delete && !event.modifiers) {
+                    const currentItem = list.currentList?.currentItem;
+                    if (currentItem) {
+                        list.currentList.deletedItemIndex = list.currentList.currentIndex;
+                        Clipboard.deleteItem(currentItem.modelData);
+                    }
+                    event.accepted = true;
+                    return;
+                }
+                if (event.key === Qt.Key_Delete && (event.modifiers & Qt.ShiftModifier)) {
+                    list.currentList.showClearConfirmation = true;
+                    event.accepted = true;
+                    return;
+                }
+                if (event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp) {
+                    const clipList = list.currentList;
+                    clipList.currentIndex = Math.max(0, Math.min(clipList.count - 1, clipList.currentIndex + (event.key === Qt.Key_PageDown ? 5 : -5)));
+                    event.accepted = true;
+                    return;
+                }
+                if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
+                    const delta = event.key === Qt.Key_Backtab || (event.modifiers & Qt.ShiftModifier) ? -1 : 1;
+                    list.currentList?.cycleTab(delta);
                     event.accepted = true;
                     return;
                 }

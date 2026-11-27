@@ -47,6 +47,13 @@ class LauncherMenu : public settings::ObjectNode {
     CONFIG_PROPERTY(QString, prefix, u":"_s)
 };
 
+class LauncherClipboard : public settings::ObjectNode {
+    CONFIG_NODE(LauncherClipboard, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(bool, showPreview, true)
+};
+
 class LauncherAction : public settings::ObjectNode {
     CONFIG_NODE(LauncherAction, settings::ObjectNode)
 
@@ -74,6 +81,7 @@ class LauncherConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps, {})
     CONFIG_GLOBAL_SUBOBJECT(LauncherMenu, menu)
+    CONFIG_GLOBAL_SUBOBJECT(LauncherClipboard, clipboard)
     CONFIG_GLOBAL_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
     CONFIG_GLOBAL_SUBOBJECT(LauncherPicker, picker)
     CONFIG_GLOBAL_LIST(LauncherActionList, actions,

@@ -46,6 +46,12 @@ StyledListView {
             return;
         }
 
+        // Emoji & Clipboard hand off to the >emoji / >clipboard views.
+        if (row.type === "internal" && (row.internal === "clipboard" || row.internal === "emoji")) {
+            root.search.text = `${GlobalConfig.launcher.actionPrefix}${row.internal} `;
+            return;
+        }
+
         if (row.id === "trigger.reminder.set") {
             const prefix = !GlobalConfig.launcher.menu.defaultView ? GlobalConfig.launcher.menu.prefix : "";
             root.search.text = `${prefix}@remind `;

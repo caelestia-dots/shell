@@ -15,6 +15,22 @@ Item {
 
     readonly property bool shouldBeActive: screenState.launcher && Config.launcher.enabled
 
+    // Exposed for the drawers layer: the clipboard preview panel beside the
+    // launcher reads the active view and the selected row through these.
+    // Hovering a row drives the preview too: the list records whether the
+    // last interaction was the pointer or the keys. The hop through
+    // currentList matters: the interaction state lives on the active list,
+    // not on the ContentList itself.
+    readonly property var currentClipboardItem: {
+        const l = content.item?.list?.currentList; // qmllint disable missing-property
+        if (!l)
+            return null;
+        if (l.lastInteraction === "hover" && l.hoveredItem)
+            return l.hoveredItem;
+        return l.currentItem;
+    }
+    readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false // qmllint disable missing-property
+
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 + Tokens.padding.extraLarge;
         if (screenState.dashboard)

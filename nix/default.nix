@@ -10,6 +10,7 @@
   networkmanager,
   lm_sensors,
   swappy,
+  cliphist,
   wl-clipboard,
   libqalculate,
   bash,
