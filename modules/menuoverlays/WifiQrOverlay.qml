@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import qs.services
 import qs.modules.launcher.services
 import "Model.js" as Model
 
@@ -268,34 +267,23 @@ Item {
         WlrLayershell.namespace: "caelestia-menu-network-qr-card"
         WlrLayershell.layer: WlrLayer.Overlay
 
+        // Anchoring only the top and left edges keeps the surface at the
+        // requested card size (anchoring opposite edges would stretch it to
+        // fill the screen minus margins). The margins then place the card and
+        // pack it toward the top/bottom of the center as other overlay cards
+        // open or close.
         anchors {
             top: true
-            bottom: true
             left: true
-            right: true
         }
 
-        // The layer-shell protocol centers a surface that is anchored to both
-        // edges while carrying a size; the margins then pack it toward the
-        // top/bottom of the center as other overlay cards open or close.
-        // Quickshell sizes anchored dimensions as screen minus margins, so all
-        // four margins carry the centering math explicitly.
         implicitWidth: card.width
         implicitHeight: card.height
 
         margins.left: Math.max(0, Math.round((screen.width - card.width) / 2))
-        margins.right: Math.max(0, screen.width - card.width - margins.left)
         margins.top: Math.max(0, Math.round((screen.height - card.height) / 2 + (root.stackCenter - 0.5) * screen.height))
-        margins.bottom: Math.max(0, screen.height - card.height - margins.top)
 
         Behavior on margins.top {
-            NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        Behavior on margins.bottom {
             NumberAnimation {
                 duration: 220
                 easing.type: Easing.OutCubic
@@ -365,10 +353,13 @@ Item {
                     id: qrCanvas
 
                     readonly property int moduleSize: root.qrSize > 0 ? Math.max(4, Math.floor(240 / root.qrSize)) : 0
+                    readonly property int side: root.qrSize * moduleSize
 
                     visible: root.showingQr
-                    width: root.qrSize * moduleSize
-                    height: width
+                    implicitWidth: side
+                    implicitHeight: side
+                    Layout.preferredWidth: side
+                    Layout.preferredHeight: side
                     color: "white"
                     radius: 12
                     Layout.alignment: Qt.AlignHCenter
