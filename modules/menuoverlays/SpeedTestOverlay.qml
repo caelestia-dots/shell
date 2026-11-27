@@ -178,7 +178,7 @@ Item {
             id: card
 
             radius: 20
-            color: Qt.rgba(0.045, 0.05, 0.075, 0.82)
+            color: Qt.rgba(0.15, 0.15, 0.17, 0.6)
             border.color: Qt.rgba(1, 1, 1, 0.08)
             border.width: 1
 
