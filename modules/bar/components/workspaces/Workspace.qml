@@ -41,7 +41,7 @@ Item {
         return !!(mon && mon !== monitor);
     }
     readonly property color fgColour: {
-        if (onOtherMonitor)
+        if (onOtherMonitor && !focused)
             return offMonitorColour;
         if (focused || isOccupied || Config.bar.workspaces.occupiedBg)
             return Colours.palette.m3onSurface;

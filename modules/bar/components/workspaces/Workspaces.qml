@@ -18,7 +18,7 @@ ClipRect {
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     readonly property bool onSpecial: monitor?.lastIpcObject.specialWorkspace?.name !== ""
-    readonly property int activeWsId: monitor.activeWorkspace?.id ?? 1
+    readonly property int activeWsId: (Config.bar.workspaces.perMonitor ? monitor.activeWorkspace?.id : Hypr.activeWsId) ?? 1
     readonly property int activeWsIdx: workspaceIndex(activeWsId)
     readonly property int shown: Math.max(1, Config.bar.workspaces.shown)
 
