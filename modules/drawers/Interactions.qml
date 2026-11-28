@@ -242,7 +242,9 @@ CustomMouseArea {
         }
 
         // Show popouts on hover
-        if (x < bar.implicitWidth) {
+        const popoutThreshold = (popouts.hasCurrent && withinPanelHeight(panels.popoutsWrapper, x, y)) ? (bar.implicitWidth - 16) : bar.implicitWidth;
+
+        if (x < popoutThreshold) {
             bar.checkPopout(y);
         } else if ((!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inLeftPanel(panels.popoutsWrapper, x, y)) {
             popouts.hasCurrent = false;
