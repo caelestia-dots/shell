@@ -14,11 +14,12 @@ WlSessionLockSurface {
 
     required property WlSessionLock lock
     required property Pam pam
+    required property QtObject captureScreen
 
     readonly property alias unlocking: unlockAnim.running
 
-    contentItem.Config.screen: screen.name
-    contentItem.Tokens.screen: screen.name
+    contentItem.Config.screen: screen ? screen.name : ""
+    contentItem.Tokens.screen: screen ? screen.name : ""
 
     color: "transparent"
 
@@ -173,7 +174,19 @@ WlSessionLockSurface {
 
         Loader {
             anchors.fill: parent
-            sourceComponent: Config.lock.useWallpaper ? wallpaperBackground : screencopyBackground
+            active: !screencopy.hasContent
+            sourceComponent: wallpaperBackground
+        }
+
+        Loader {
+            id: screencopy
+
+            readonly property bool hasContent: (item as ScreencopyView)?.hasContent ?? false
+
+            anchors.fill: parent
+            active: root.captureScreen !== null
+            visible: hasContent
+            sourceComponent: screencopyBackground
         }
     }
 
@@ -181,16 +194,21 @@ WlSessionLockSurface {
         id: screencopyBackground
 
         ScreencopyView {
-            captureSource: root.screen
+            captureSource: root.captureScreen
         }
     }
 
     Component {
         id: wallpaperBackground
 
-        Visual {
-            source: Wallpapers.current
-            playing: PersistentState.wallpaperPlaying
+        Rectangle {
+            color: Colours.palette.m3surface
+
+            Visual {
+                anchors.fill: parent
+                source: Wallpapers.current
+                playing: PersistentState.wallpaperPlaying
+            }
         }
     }
 
