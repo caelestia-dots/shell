@@ -39,7 +39,7 @@ Item {
     }
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    anchors.rightMargin: Math.round((-implicitWidth - 5 - sidebarOffset) * offsetScale)
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
     opacity: 1 - offsetScale

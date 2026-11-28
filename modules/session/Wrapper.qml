@@ -16,7 +16,7 @@ Item {
     property real sidebarOffset: sidebarVisible ? 14 : 0
 
     visible: offsetScale < 1
-    anchors.rightMargin: (-implicitWidth - 5 - sidebarOffset) * offsetScale
+    anchors.rightMargin: Math.round((-implicitWidth - 5 - sidebarOffset) * offsetScale)
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight || 510 // Hard coded fallback for first open
     opacity: 1 - offsetScale
