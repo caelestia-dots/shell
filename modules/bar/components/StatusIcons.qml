@@ -94,7 +94,6 @@ StyledRect {
                     roleValue: "microphone"
                     delegate: EntryWrapper {
                         margin: Tokens.spacing.extraSmall / 2
-                        name: "audio" // Mic opens audio popout
 
                         MaterialIcon {
                             animate: true

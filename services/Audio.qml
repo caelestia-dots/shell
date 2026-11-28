@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 pragma Singleton
 
 import QtQuick
@@ -18,6 +19,9 @@ Singleton {
     property list<PwNode> sinks: []
     property list<PwNode> sources: []
     property list<PwNode> streams: []
+    // Apps currently playing sound (Stream/Output/Audio) and apps recording (Stream/Input/Audio)
+    property list<PwNode> outputStreams: []
+    property list<PwNode> inputStreams: []
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
@@ -110,6 +114,8 @@ Singleton {
         const newSinks = [];
         const newSources = [];
         const newStreams = [];
+        const newOutputStreams = [];
+        const newInputStreams = [];
 
         for (const node of Pipewire.nodes.values) {
             if (!node.isStream) {
@@ -118,13 +124,27 @@ Singleton {
                 else if (node.audio)
                     newSources.push(node);
             } else if (node.audio) {
+                // Always keep it in `streams` so the PwObjectTracker below binds it
                 newStreams.push(node);
+
+                // node.properties is only filled once the node is bound (ready). Classifying earlier
+                // would put every stream under output, so wait and re-run when ready flips.
+                if (!node.ready)
+                    continue;
+
+                // "Stream/Input/Audio" = app is capturing (mic), "Stream/Output/Audio" = app is playing
+                if (String(node.properties["media.class"] ?? "").includes("Input"))
+                    newInputStreams.push(node);
+                else
+                    newOutputStreams.push(node);
             }
         }
 
         root.sinks = newSinks;
         root.sources = newSources;
         root.streams = newStreams;
+        root.outputStreams = newOutputStreams;
+        root.inputStreams = newInputStreams;
     }
 
     onSinkChanged: {
@@ -171,6 +191,21 @@ Singleton {
     // momentarily lag behind the default node.
     PwObjectTracker {
         objects: [root.sink, root.source, ...root.sinks, ...root.sources, ...root.streams].filter(n => n)
+    }
+
+    // Re-classify streams once they become ready (properties are only available after binding)
+    Instantiator {
+        model: root.streams
+
+        delegate: Connections {
+            required property PwNode modelData
+
+            function onReadyChanged(): void {
+                root.refreshNodes();
+            }
+
+            target: modelData
+        }
     }
 
     CavaProvider {
