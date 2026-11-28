@@ -120,13 +120,14 @@ CustomMouseArea {
 
         if (panels.sidebar.offsetScale === 1) {
             // Show osd on hover
-            const showOsd = inRightPanel(panels.osdWrapper, x, y);
+            const inOsdArea = inRightPanel(panels.osdWrapper, x, y);
+            const showOsd = inOsdArea && (Config.osd.showOnHover || screenState.osd);
 
             // Always update visibility based on hover if not in shortcut mode
             if (!osdShortcutActive) {
                 screenState.osd = showOsd;
                 root.panels.osd.hovered = showOsd;
-            } else if (showOsd) {
+            } else if (inOsdArea) {
                 // If hovering over OSD area while in shortcut mode, transition to hover control
                 osdShortcutActive = false;
                 root.panels.osd.hovered = true;
@@ -159,13 +160,14 @@ CustomMouseArea {
         } else {
             const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
             // Show osd on hover
-            const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
+            const inOsdArea = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
+            const showOsd = inOsdArea && (Config.osd.showOnHover || screenState.osd);
 
             // Always update visibility based on hover if not in shortcut mode
             if (!osdShortcutActive) {
                 screenState.osd = showOsd;
                 root.panels.osd.hovered = showOsd;
-            } else if (showOsd) {
+            } else if (inOsdArea) {
                 // If hovering over OSD area while in shortcut mode, transition to hover control
                 osdShortcutActive = false;
                 root.panels.osd.hovered = true;
@@ -231,7 +233,7 @@ CustomMouseArea {
         }
 
         // Show utilities on hover
-        const showUtilities = inBottomPanel(panels.utilities, x, y, true);
+        const showUtilities = Config.utilities.showOnHover && inBottomPanel(panels.utilities, x, y, true);
 
         // Always update visibility based on hover if not in shortcut mode
         if (!utilitiesShortcutActive) {
@@ -290,9 +292,14 @@ CustomMouseArea {
         function onOsdChanged() {
             if (root.screenState.osd) {
                 // OSD became visible, immediately check if this should be shortcut mode
-                const inOsdArea = root.inRightPanel(root.panels.osdWrapper, root.mouseX, root.mouseY);
-                if (!inOsdArea) {
+                // If showOnHover is disabled, the OSD was opened by a non-hover trigger
+                if (!root.Config.osd.showOnHover) {
                     root.osdShortcutActive = true;
+                } else {
+                    const inOsdArea = root.inRightPanel(root.panels.osdWrapper, root.mouseX, root.mouseY);
+                    if (!inOsdArea) {
+                        root.osdShortcutActive = true;
+                    }
                 }
             } else {
                 // OSD hidden, clear shortcut flag
@@ -303,8 +310,8 @@ CustomMouseArea {
         function onUtilitiesChanged() {
             if (root.screenState.utilities) {
                 // Utilities became visible, immediately check if this should be shortcut mode
-                const inUtilitiesArea = root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY);
-                if (!inUtilitiesArea) {
+                const inUtilitiesArea = root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY, true);
+                if (!root.Config.utilities.showOnHover || !inUtilitiesArea) {
                     root.utilitiesShortcutActive = true;
                 }
             } else {

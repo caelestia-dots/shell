@@ -830,6 +830,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "osd": {
         "enabled": true,
+        "showOnHover": true,
         "hideDelay": 2000,
         "enableBrightness": true,
         "enableMicrophone": false
@@ -877,6 +878,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
     },
     "utilities": {
         "enabled": true,
+        "showOnHover": true,
         "maxToasts": 4,
         "toasts": {
             "fullscreen": "off",
