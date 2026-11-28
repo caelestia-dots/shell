@@ -45,6 +45,7 @@ class BackgroundVisualiser : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, blur, false)
     CONFIG_PROPERTY(qreal, rounding, 1)
     CONFIG_PROPERTY(qreal, spacing, 1)
+    CONFIG_PROPERTY(qreal, centerGap, 0.2)
 };
 
 class BackgroundConfig : public settings::ObjectNode {

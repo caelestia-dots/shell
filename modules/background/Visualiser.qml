@@ -67,6 +67,7 @@ Item {
                     secondaryColor: Qt.alpha(Colours.palette.m3inversePrimary, 0.7)
                     rounding: Tokens.rounding.medium * Config.background.visualiser.rounding
                     spacing: Tokens.spacing.extraSmall * Config.background.visualiser.spacing
+                    centerGap: Config.background.visualiser.centerGap
                     animationDuration: Tokens.anim.durations.normal
 
                     Behavior on anchors.leftMargin {

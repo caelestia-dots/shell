@@ -17,6 +17,7 @@ class VisualiserBars : public QQuickPaintedItem {
     Q_PROPERTY(QColor secondaryColor READ secondaryColor WRITE setSecondaryColor NOTIFY secondaryColorChanged)
     Q_PROPERTY(qreal rounding READ rounding WRITE setRounding NOTIFY roundingChanged)
     Q_PROPERTY(qreal spacing READ spacing WRITE setSpacing NOTIFY spacingChanged)
+    Q_PROPERTY(qreal centerGap READ centerGap WRITE setCenterGap NOTIFY centerGapChanged)
     Q_PROPERTY(int animationDuration READ animationDuration WRITE setAnimationDuration NOTIFY animationDurationChanged)
     Q_PROPERTY(bool settled READ settled NOTIFY settledChanged)
 
@@ -42,6 +43,9 @@ public:
     [[nodiscard]] qreal spacing() const;
     void setSpacing(qreal spacing);
 
+    [[nodiscard]] qreal centerGap() const;
+    void setCenterGap(qreal centerGap);
+
     [[nodiscard]] int animationDuration() const;
     void setAnimationDuration(int duration);
 
@@ -53,6 +57,7 @@ signals:
     void secondaryColorChanged();
     void roundingChanged();
     void spacingChanged();
+    void centerGapChanged();
     void animationDurationChanged();
     void settledChanged();
 
@@ -65,6 +70,7 @@ private:
     QColor m_secondaryColor;
     qreal m_rounding = 0.0;
     qreal m_spacing = 0.0;
+    qreal m_centerGap = 0.2;
     int m_animationDuration = 200;
     bool m_settled = true;
 };

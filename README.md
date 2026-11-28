@@ -498,7 +498,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "autoHide": true,
             "blur": false,
             "rounding": 1,
-            "spacing": 1
+            "spacing": 1,
+            "centerGap": 0.2
         }
     },
     "bar": {
