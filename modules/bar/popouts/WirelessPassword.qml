@@ -18,6 +18,7 @@ ColumnLayout {
     property bool isClosing: false
 
     readonly property bool shouldBeVisible: root.popouts.currentName === "wirelesspassword"
+    readonly property bool isEnterprise: Boolean(root.network && root.network.security && (root.network.security.includes("802.1X") || root.network.security.includes("EAP")))
 
     function checkConnectionStatus(): void {
         if (!root.shouldBeVisible || !connectButton.connecting) {
@@ -35,7 +36,7 @@ ColumnLayout {
         }
 
         // Check for connection failures - if pending connection was cleared but we're not connected
-        if (Nmcli.pendingConnection === null && connectButton.connecting) {
+        if (!root.isEnterprise && Nmcli.pendingConnection === null && connectButton.connecting) {
             // Wait a bit more before giving up (allow time for connection to establish)
             if (connectionMonitor.repeatCount > 10) {
                 connectionMonitor.stop();
@@ -58,6 +59,7 @@ ColumnLayout {
         }
 
         isClosing = true;
+        identityContainer.identityBuffer = "";
         passwordContainer.passwordBuffer = "";
         connectButton.connecting = false;
         connectButton.hasError = false;
@@ -122,7 +124,11 @@ ColumnLayout {
         interval: 150
         onTriggered: {
             root.forceActiveFocus();
-            passwordContainer.forceActiveFocus();
+            if (root.isEnterprise && identityContainer.identityBuffer.length === 0) {
+                identityContainer.forceActiveFocus();
+            } else {
+                passwordContainer.forceActiveFocus();
+            }
         }
     }
 
@@ -180,13 +186,13 @@ ColumnLayout {
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
-                text: "lock"
+                text: root.isEnterprise ? "badge" : "lock"
                 fontStyle: Tokens.font.icon.builders.extraLarge.scale(2).build()
             }
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: Tr.tr("Enter password")
+                text: root.isEnterprise ? Tr.tr("Enter credentials") : Tr.tr("Enter password")
                 font: Tokens.font.body.builders.large.weight(Font.Medium).build()
             }
 
@@ -245,7 +251,7 @@ ColumnLayout {
                 visible: connectButton.connecting || connectButton.hasError
                 text: {
                     if (connectButton.hasError) {
-                        return Tr.tr("Connection failed. Please check your password and try again.");
+                        return root.isEnterprise ? Tr.tr("Authentication failed. Please check your credentials and try again.") : Tr.tr("Connection failed. Please check your password and try again.");
                     }
                     if (connectButton.connecting) {
                         return Tr.tr("Connecting...");
@@ -259,19 +265,120 @@ ColumnLayout {
             }
 
             FocusScope {
+                id: identityContainer
+
+                property string identityBuffer: ""
+
+                objectName: "identityContainer"
+                visible: root.isEnterprise
+                Layout.topMargin: Tokens.spacing.medium
+                Layout.fillWidth: true
+                implicitHeight: 48
+                focus: root.isEnterprise
+                activeFocusOnTab: true
+
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        event.accepted = false;
+                        root.closeDialog();
+                        return;
+                    }
+
+                    if (connectButton.hasError && event.text && event.text.length > 0) {
+                        connectButton.hasError = false;
+                    }
+
+                    if (event.key === Qt.Key_Tab || event.key === Qt.Key_Down || event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+                        passwordContainer.forceActiveFocus();
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Backspace) {
+                        if (event.modifiers & Qt.ControlModifier) {
+                            identityBuffer = "";
+                        } else {
+                            identityBuffer = identityBuffer.slice(0, -1);
+                        }
+                        event.accepted = true;
+                    } else if (event.text && event.text.length > 0) {
+                        identityBuffer += event.text;
+                        event.accepted = true;
+                    }
+                }
+
+                StyledRect {
+                    anchors.fill: parent
+                    radius: Tokens.rounding.large
+                    color: identityContainer.activeFocus ? Qt.lighter(Colours.tPalette.m3surfaceContainer, 1.05) : Colours.tPalette.m3surfaceContainer
+                    border.width: identityContainer.activeFocus || connectButton.hasError ? 4 : (root.shouldBeVisible ? 1 : 0)
+                    border.color: {
+                        if (connectButton.hasError) {
+                            return Colours.palette.m3error;
+                        }
+                        if (identityContainer.activeFocus) {
+                            return Colours.palette.m3primary;
+                        }
+                        return root.shouldBeVisible ? Colours.palette.m3outline : "transparent";
+                    }
+
+                    Behavior on border.color {
+                        CAnim {}
+                    }
+
+                    Behavior on border.width {
+                        CAnim {}
+                    }
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+                }
+
+                StateLayer {
+                    hoverEnabled: false
+                    cursorShape: Qt.IBeamCursor
+                    radius: Tokens.rounding.large
+                    onClicked: identityContainer.forceActiveFocus()
+                }
+
+                StyledText {
+                    anchors.centerIn: parent
+                    text: Tr.tr("Username / Identity")
+                    color: Colours.palette.m3outline
+                    font: Tokens.font.mono.medium
+                    opacity: identityContainer.identityBuffer ? 0 : 1
+
+                    Behavior on opacity {
+                        Anim {
+                            type: Anim.DefaultEffects
+                        }
+                    }
+                }
+
+                StyledText {
+                    anchors.centerIn: parent
+                    width: parent.width - Tokens.padding.large * 2
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideMiddle
+                    text: identityContainer.identityBuffer
+                    color: Colours.palette.m3onSurface
+                    font: Tokens.font.mono.medium
+                    visible: identityContainer.identityBuffer.length > 0
+                }
+            }
+
+            FocusScope {
                 id: passwordContainer
 
                 property string passwordBuffer: ""
 
                 objectName: "passwordContainer"
-                Layout.topMargin: Tokens.spacing.largeIncreased
+                Layout.topMargin: root.isEnterprise ? Tokens.spacing.small : Tokens.spacing.largeIncreased
                 Layout.fillWidth: true
                 implicitHeight: Math.max(48, charList.implicitHeight + Tokens.padding.medium * 2)
-                focus: true
+                focus: !root.isEnterprise
                 activeFocusOnTab: true
 
                 Component.onCompleted: {
-                    if (root.shouldBeVisible) {
+                    if (root.shouldBeVisible && !root.isEnterprise) {
                         // Use Timer for actual delay to ensure focus works correctly
                         passwordFocusTimer.start();
                     }
@@ -285,7 +392,14 @@ ColumnLayout {
 
                     if (event.key === Qt.Key_Escape) {
                         event.accepted = false;
-                        closeDialog();
+                        root.closeDialog();
+                        return;
+                    }
+
+                    if (root.isEnterprise && (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab || (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier)))) {
+                        identityContainer.forceActiveFocus();
+                        event.accepted = true;
+                        return;
                     }
 
                     // Clear error when user starts typing
@@ -307,7 +421,12 @@ ColumnLayout {
                         event.accepted = true;
                     } else if (event.text && event.text.length > 0) {
                         if (event.key === Qt.Key_Tab) {
-                            event.accepted = false;
+                            if (root.isEnterprise) {
+                                identityContainer.forceActiveFocus();
+                                event.accepted = true;
+                            } else {
+                                event.accepted = false;
+                            }
                             return;
                         }
                         passwordBuffer += event.text;
@@ -320,6 +439,7 @@ ColumnLayout {
                         if (root.shouldBeVisible) {
                             // Use Timer for actual delay to ensure focus works correctly
                             passwordFocusTimer.start();
+                            identityContainer.identityBuffer = "";
                             passwordContainer.passwordBuffer = "";
                             connectButton.hasError = false;
                         }
@@ -333,7 +453,11 @@ ColumnLayout {
 
                     interval: 50
                     onTriggered: {
-                        passwordContainer.forceActiveFocus();
+                        if (root.isEnterprise) {
+                            identityContainer.forceActiveFocus();
+                        } else {
+                            passwordContainer.forceActiveFocus();
+                        }
                     }
                 }
 
@@ -497,7 +621,7 @@ ColumnLayout {
                     inactiveColour: Colours.palette.m3primary
                     inactiveOnColour: Colours.palette.m3onPrimary
                     text: Tr.tr("Connect")
-                    enabled: passwordContainer.passwordBuffer.length > 0 && !connecting
+                    enabled: passwordContainer.passwordBuffer.length > 0 && (!root.isEnterprise || identityContainer.identityBuffer.trim().length > 0) && !connecting
 
                     onClicked: {
                         if (!root.network || connecting) {
@@ -516,6 +640,29 @@ ColumnLayout {
                         connecting = true;
                         enabled = false;
                         text = Tr.tr("Connecting...");
+
+                        if (root.isEnterprise) {
+                            const identity = identityContainer.identityBuffer.trim();
+                            NetworkConnection.connectEnterprise(root.network, identity, password, result => {
+                                if (result && result.success) {
+                                    connectionMonitor.stop();
+                                    connecting = false;
+                                    hasError = false;
+                                    text = Tr.tr("Connect");
+                                    Nmcli.getNetworks(() => {});
+                                    root.closeDialog();
+                                } else {
+                                    connectionMonitor.stop();
+                                    connecting = false;
+                                    hasError = true;
+                                    enabled = true;
+                                    text = Tr.tr("Connect");
+                                    passwordContainer.passwordBuffer = "";
+                                }
+                            });
+                            connectionMonitor.start();
+                            return;
+                        }
 
                         // Connect to network
                         NetworkConnection.connectWithPassword(root.network, password, result => {
@@ -607,7 +754,7 @@ ColumnLayout {
         }
 
         function onConnectionFailed(ssid: string) {
-            if (root.shouldBeVisible && root.network && root.network.ssid === ssid && connectButton.connecting) {
+            if (!root.isEnterprise && root.shouldBeVisible && root.network && root.network.ssid === ssid && connectButton.connecting) {
                 connectionMonitor.stop();
                 connectButton.connecting = false;
                 connectButton.hasError = true;

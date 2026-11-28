@@ -502,6 +502,29 @@ Singleton {
         });
     }
 
+    function connectEnterprise(ssid: string, identity: string, password: string, callback: var): void {
+        checkAndDeleteConnection(ssid, () => {
+            const cmd = [root.nmcliCommandConnection, "add", root.connectionParamType, root.deviceTypeWifi, root.connectionParamConName, ssid, root.connectionParamIfname, "*", root.connectionParamSsid, ssid, "connection.autoconnect", "no", root.securityKeyMgmt, "wpa-eap", "802-1x.eap", "peap", "802-1x.phase2-auth", "mschapv2", "802-1x.identity", identity, "802-1x.password", password, "802-1x.password-flags", "0", "802-1x.system-ca-certs", "no"];
+
+            executeCommand(cmd, result => {
+                if (result.success) {
+                    executeCommand([root.nmcliCommandConnection, "modify", ssid, "connection.autoconnect", "yes"], () => {
+                        loadSavedConnections(() => {});
+                        activateConnection(ssid, actResult => {
+                            if (!actResult.success) {
+                                forgetNetwork(ssid);
+                            }
+                            if (callback)
+                                callback(actResult);
+                        });
+                    });
+                } else if (callback) {
+                    callback(result);
+                }
+            });
+        });
+    }
+
     function checkAndDeleteConnection(ssid: string, callback: var): void {
         executeCommand([root.nmcliCommandConnection, "show", ssid], result => {
             if (result.success) {
