@@ -15,6 +15,7 @@
 #include "nexusconfig.hpp"
 #include "notifsconfig.hpp"
 #include "osdconfig.hpp"
+#include "overviewconfig.hpp"
 #include "serviceconfig.hpp"
 #include "sessionconfig.hpp"
 #include "sidebarconfig.hpp"
@@ -37,6 +38,7 @@ class ConfigRoot : public settings::RootNode {
     CONFIG_SUBOBJECT(DashboardConfig, dashboard)
     CONFIG_SUBOBJECT(LauncherConfig, launcher)
     CONFIG_SUBOBJECT(LockConfig, lock)
+    CONFIG_SUBOBJECT(OverviewConfig, overview)
     CONFIG_SUBOBJECT(NexusConfig, nexus)
     CONFIG_SUBOBJECT(NotifsConfig, notifs)
     CONFIG_SUBOBJECT(OsdConfig, osd)

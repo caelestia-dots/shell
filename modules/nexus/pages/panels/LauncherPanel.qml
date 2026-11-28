@@ -32,6 +32,12 @@ PageBase {
         }
 
         ToggleRow {
+            text: Tr.trCtx("Enable workspace preview", "toggle label")
+            checked: Config.overview.enabled
+            onToggled: GlobalConfig.overview.enabled = checked
+        }
+
+        ToggleRow {
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
             checked: Config.launcher.showOnHover
