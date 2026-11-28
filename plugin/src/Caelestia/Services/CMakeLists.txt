@@ -10,6 +10,7 @@ qml_module(caelestia-services
         tickingservice.cpp
         sensorslib.cpp
         cpu.cpp
+        gpudevice.cpp
         gpu.cpp
         memory.cpp
         diskinfo.cpp
