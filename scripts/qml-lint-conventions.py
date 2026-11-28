@@ -378,9 +378,9 @@ def fix_section_separators(lines: list[str]) -> list[str]:
     func_skip_depth = 0
     prev_blank: dict[str, bool] = {}
 
-    for i, line in enumerate(lines):
+    for i, line in enumerate(mask_template_literals(lines)):
         stripped = line.strip()
-        indent = get_indent(line)
+        indent = get_indent(lines[i])
 
         if in_block_comment:
             if BLOCK_COMMENT_END.search(stripped):
@@ -496,6 +496,76 @@ BEHAVIOR_ON_RE = re.compile(r"^[A-Z]\w+\s+on\s+\w[\w.]*\s*\{")
 # Attached signal handler: Component.onCompleted:, Drag.onDragStarted:, etc.
 ATTACHED_HANDLER_RE = re.compile(r"^[A-Z]\w+\.on[A-Z]\w*\s*:")
 
+SCRIPT_TOKEN_RE = re.compile(
+    r"""//[^\n]*|/\*[\s\S]*?(?:\*/|\Z)|"(?:\\[\s\S]|[^"\\\n])*"|'(?:\\[\s\S]|[^'\\\n])*'|"""
+    r"[\w$]+|=>|\+\+|--|\S"
+)
+TEMPLATE_TOKEN_RE = re.compile(r"\\[\s\S]|\$\{|`")
+REGEX_LITERAL_RE = re.compile(r"/(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^/\\\[\n])+/[a-zA-Z]*")
+REGEX_PREFIXES = frozenset(
+    ("", "=>", "return", "throw", "case", "typeof", "void", "delete", "yield", "await", "in", "instanceof")
+) | frozenset("([{=,:;?!~&|+-*/%^<>")
+
+
+def mask_template_literals(lines: list[str]) -> list[str]:
+    """Replace each template with a marker on each line it occupies."""
+    source = "\n".join(lines)
+    if "`" not in source:
+        return lines
+
+    masked: list[str] = []
+    template_depths: list[int] = []  # zero in template text, brace depth inside interpolation
+    template_start = cursor = copied_until = 0
+    previous_token = ""
+    while cursor < len(source):
+        in_template_text = bool(template_depths) and template_depths[-1] == 0
+        tokens = TEMPLATE_TOKEN_RE if in_template_text else SCRIPT_TOKEN_RE
+        match = tokens.search(source, cursor)
+        if match is None:
+            break
+        cursor = match.end()
+        token = match.group()
+
+        if in_template_text:
+            if token == "${":
+                template_depths[-1] = 1
+                previous_token = "{"
+            elif token == "`":
+                template_depths.pop()
+                previous_token = token
+                if not template_depths:
+                    masked.append(source[copied_until:template_start])
+                    masked.append("`" + "\n`" * source.count("\n", template_start, cursor))
+                    copied_until = cursor
+            continue
+
+        if token.startswith(("//", "/*")):
+            continue
+        if token == "/" and previous_token in REGEX_PREFIXES:
+            # If we're in the context of an expression start, a slash can open a regex literal.
+            regex = REGEX_LITERAL_RE.match(source, match.start())
+            if regex is not None:
+                cursor = regex.end()
+                previous_token = "regex"
+                continue
+        if token == "`":
+            if not template_depths:
+                template_start = match.start()
+            template_depths.append(0)
+        elif template_depths:
+            if token == "{":
+                template_depths[-1] += 1
+            elif token == "}":
+                template_depths[-1] -= 1
+        previous_token = token
+
+    if template_depths:
+        masked.append(source[copied_until:template_start])
+        masked.append("`" + "\n`" * source.count("\n", template_start))
+    else:
+        masked.append(source[copied_until:])
+    return "".join(masked).split("\n")
+
 
 class ScopeTracker:
     """Tracks the current section and last-seen state for one indent level."""
@@ -578,10 +648,11 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
     func_skip_depth = 0  # brace depth for skipping function bodies only
     prev_blank: dict[str, bool] = {}  # indent -> was previous relevant line a blank?
 
-    for i, line in enumerate(lines):
+    masked_lines = mask_template_literals(lines)
+    for i, line in enumerate(masked_lines):
         lineno = i + 1
         stripped = line.strip()
-        indent = get_indent(line)
+        indent = get_indent(lines[i])
 
         # Handle block comments
         if in_block_comment:
@@ -595,7 +666,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
         # Track blank lines per indent
         if not stripped:
             # Check: blank line right after opening brace of a QML object
-            if i > 0 and func_skip_depth == 0 and not in_block_comment and lines[i - 1].strip().endswith("{"):
+            if i > 0 and func_skip_depth == 0 and not in_block_comment and masked_lines[i - 1].strip().endswith("{"):
                 violations.append(
                     Violation(
                         rel,
@@ -622,7 +693,7 @@ def check_lines(lines: list[str], rel: str) -> list[Violation]:
         # (the scope at this indent belongs to the parent object and must persist)
         if stripped == "}":
             # Check: blank line right before closing brace
-            if i > 0 and not lines[i - 1].strip():
+            if i > 0 and not masked_lines[i - 1].strip():
                 violations.append(
                     Violation(
                         rel,
