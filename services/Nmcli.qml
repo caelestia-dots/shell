@@ -1387,6 +1387,7 @@ Singleton {
     }
 
     function refreshOnConnectionChange(): void {
+
         getNetworks(networks => {
             const newActive = root.active;
 
@@ -1720,6 +1721,17 @@ Singleton {
         interval: 2000
         onTriggered: {
             monitorProc.running = true;
+        }
+    }
+
+    Timer {
+        id: signalRefreshTimer
+        interval: 5000
+        repeat: true
+        running: root.wifiEnabled
+
+        onTriggered: {
+            root.getNetworks(() => {});
         }
     }
 
