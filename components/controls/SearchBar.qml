@@ -10,7 +10,12 @@ TextFieldBase {
     readonly property alias searchIcon: searchIcon
     readonly property alias clearIcon: clearIcon
 
-    leftPadding: searchIcon.width + searchIcon.anchors.leftMargin + Tokens.spacing.medium
+    property string crumbText: ""
+    readonly property int crumbPad: crumb.visible ? crumb.width + Tokens.spacing.medium : 0
+
+    signal crumbClicked
+
+    leftPadding: searchIcon.width + searchIcon.anchors.leftMargin + Tokens.spacing.medium + root.crumbPad
     rightPadding: clearIcon.width + clearIcon.anchors.rightMargin + Tokens.spacing.medium
     topPadding: Tokens.padding.large
     bottomPadding: Tokens.padding.large
@@ -67,6 +72,38 @@ TextFieldBase {
         text: "search"
         color: Colours.palette.m3onSurfaceVariant
         fontStyle: Tokens.font.icon.builders.medium.scale(0.9).build()
+    }
+
+    StyledRect {
+        id: crumb
+
+        visible: root.crumbText !== ""
+        anchors.left: searchIcon.right
+        anchors.leftMargin: Tokens.spacing.medium
+        anchors.verticalCenter: parent.verticalCenter
+        implicitWidth: Math.min(crumbLabel.implicitWidth + Tokens.padding.medium * 2, parent.width * 0.5)
+        implicitHeight: crumbLabel.implicitHeight + Tokens.padding.small
+        radius: Tokens.rounding.full
+        color: Colours.palette.m3secondaryContainer
+
+        StyledText {
+            id: crumbLabel
+
+            anchors.centerIn: parent
+            width: Math.min(implicitWidth, parent.width - Tokens.padding.medium * 2)
+            elide: Text.ElideRight
+
+            text: root.crumbText
+            color: Colours.palette.m3onSecondaryContainer
+            font: Tokens.font.body.small
+        }
+
+        StateLayer {
+            radius: Tokens.rounding.full
+            color: Colours.palette.m3onSecondaryContainer
+
+            onClicked: root.crumbClicked()
+        }
     }
 
     IconButton {

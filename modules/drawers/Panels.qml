@@ -27,6 +27,7 @@ Item {
     readonly property alias session: session
     readonly property alias sessionWrapper: sessionWrapper
     readonly property alias launcher: launcher
+    readonly property alias clipboardPreview: clipboardPreview
     readonly property alias dashboard: dashboard
     readonly property alias popouts: popoutsWrapper.content
     readonly property alias popoutsWrapper: popoutsWrapper
@@ -105,6 +106,19 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+    }
+
+    // The clipboard preview: selected image entries at full size in their own
+    // panel beside the launcher, as PR #1298 places it.
+    Launcher.ClipboardPreview {
+        id: clipboardPreview
+
+        currentItem: launcher.currentClipboardItem
+        shouldShow: root.screenState.launcher && launcher.showingClipboard && !root.screenState.utilities && !root.screenState.sidebar && clipboardPreview.hasImage
+
+        anchors.left: launcher.right
+        anchors.leftMargin: Tokens.spacing.large + 4
+        anchors.bottom: launcher.bottom
     }
 
     Dashboard.Wrapper {

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+
+# Display system information in the configured terminal.
+
+exec menu-term-exec --class "org.caelestia.about" --title "About" -- \
+  bash -c 'clear; if command -v fastfetch >/dev/null 2>&1; then fastfetch; else uname -a; fi; echo; menu-show-done'

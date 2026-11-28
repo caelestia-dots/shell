@@ -92,6 +92,8 @@ Dependencies:
 - `qt6-multimedia`
 - [`qt6-m3shapes-git`](https://github.com/soramanew/m3shapes)
 - [`swappy`](https://github.com/jtheoof/swappy)
+- [`cliphist`](https://github.com/sentriz/cliphist)
+- [`wl-clipboard`](https://github.com/bugaevc/wl-clipboard)
 - [`fish`](https://github.com/fish-shell/fish-shell)
 - [`bash`](https://www.gnu.org/software/bash)
 
@@ -170,6 +172,73 @@ To set the wallpaper, you can type `>wallpaper` in the launcher to open the wall
 Alternatively, you can also use `caelestia wallpaper -f <path_to_wallpaper>` to set the wallpaper directly.
 Use `caelestia wallpaper -h` for more info about this command.
 
+### Emoji/Kaomoji/Symbol picker
+
+The launcher has built-in pickers for emojis, kaomoji, and symbols. Open one by typing `>emoji`, `>kaomoji`,
+or `>symbol` in the launcher, or by binding the global shortcuts `emoji`, `kaomoji`, and `symbol`
+(they toggle the picker, same as the other [shortcuts](#shortcutsipc)).
+
+Recently used items are kept per picker. Pasting simulates `Ctrl+V` by default; if that doesn't work for your
+apps (e.g. terminals), change `launcher.picker.pasteShortcut` or set `launcher.picker.pasteCommand` to run your own command.
+Emojis that your installed fonts can't render are hidden by default (`launcher.picker.hideUnsupported`).
+
+The picker data lives in `assets/<picker>/` and can be regenerated with `scripts/fetch-emojis.py [locale ...]`
+(e.g. `scripts/fetch-emojis.py de ja` for extra search languages) and `scripts/gen-symbols.py`.
+
+### System menu
+
+The launcher has a hierarchical system menu, inspired by Omarchy's. Open it by typing `:` (configurable
+via `launcher.menu.prefix`), by running the `Menu` launcher action under `>`, by binding the global
+shortcut `menu`, or via IPC (`qs -c caelestia ipc call menu toggle`, or `menu open "<route>"` to jump
+straight to a route). Set `launcher.menu.defaultView` to make the menu the default launcher view;
+typing `>` still switches to launcher actions from there.
+
+The bundled menu tree lives in `assets/menu/menu.jsonc`. A file at `~/.config/caelestia/menu/menu.jsonc`
+is watched live and merged over it, so you can override fields, add entries, or hide default ones with
+`"enabled": false` without copying the whole file. Helper scripts live in `assets/menu/bin` (and
+`~/.config/caelestia/menu/bin` overrides them); menu rows can declare `when`/`checked`/`disabled` shell
+guards, `toggle` checkboxes, `aliases`, and built-in `internal` actions (pickers, clipboard, shell
+toggles, power actions via `SessionManager`).
+
+`Update > Caelestia` runs `caelestia update` in a new terminal window using your configured terminal.
+
+The speed test and Wi-Fi QR overlay cards blur what's behind them when Hyprland is told to blur their
+(card-sized) layer surfaces. Since the cards live on their own layer surfaces, the fullscreen input
+catcher never gets blurred. Add these layer rules to your Hyprland config:
+
+```sh
+layerrule blur, caelestia-menu-network-speedtest-card
+layerrule ignorealpha 0.4, caelestia-menu-network-speedtest-card
+layerrule blur, caelestia-menu-disk-speedtest-card
+layerrule ignorealpha 0.4, caelestia-menu-disk-speedtest-card
+layerrule blur, caelestia-menu-network-qr-card
+layerrule ignorealpha 0.4, caelestia-menu-network-qr-card
+```
+
+The `ignorealpha` threshold keeps the blur out of the rounded corners; without it the blur
+fills them in and the card reads as squared. Keep the threshold below the card's background
+alpha (0.6), or every card pixel is excluded and no blur renders at all.
+
+### Clipboard history
+
+The launcher has a clipboard history view backed by [`cliphist`](https://github.com/sentriz/cliphist).
+Open it by typing `>clipboard` in the launcher, by binding the global shortcut `clipboard`, or through
+the menu (`Trigger > Clipboard History`). Requires the `cliphist store` watcher to be running (e.g.
+`wl-paste --watch cliphist store`); entries persist across restarts.
+
+| Key | Action |
+| --- | --- |
+| `Enter` / click | Paste into the previously focused window |
+| `Shift+Enter` | Copy to clipboard only |
+| `Alt+Enter` | Open the entry (images in the image viewer, URLs in the browser) |
+| `Delete` | Delete entry |
+| `Shift+Delete` | Clear the current category (with confirmation, pinned entries preserved) |
+| `Alt+P` | Pin / unpin entry |
+| `Tab` / `Shift+Tab` | Switch between All / Images / Misc categories |
+
+Selecting an image entry shows it at full size in a preview panel beside the launcher; disable that
+with `launcher.clipboard.showPreview`, or the whole view with `launcher.clipboard.enabled`.
+
 ## Updating
 
 ### Packaged install (AUR)
@@ -231,7 +300,7 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 > - `bar.workspaces`: `ignoredTags`, `specialWorkspaceIcons`, `windowIcons`, `workspaceIcons`
 > - `dashboard`: `mediaUpdateInterval`, `resourceUpdateInterval`
 > - `general`: `apps.*`, `battery.*`, `idle.*`, `logo`
-> - `launcher`: `actionPrefix`, `actions`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
+> - `launcher`: `actionPrefix`, `actions`, `clipboard.*`, `enableDangerousActions`, `favouriteApps`, `hiddenApps`, `menu.*`, `picker.*`, `specialPrefix`, `useFuzzy.*`, `vimKeybinds`
 > - `lock`: `enableFaceAuth`, `enableFprint`, `faceAuthProvider`, `maxFaceAuthTries`, `maxFprintTries`, `triggerFaceAuthOnWake`
 > - `nexus`: `networkRescanInterval`
 > - `notifs`: `actionOnClick`, `defaultExpireTimeout`, `expire`, `fullscreen`, `fullscreenExpireTimeout`
@@ -686,14 +755,39 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
         "vimKeybinds": false,
         "favouriteApps": [],
         "hiddenApps": [],
+        "menu": {
+            "enabled": true,
+            "defaultView": false,
+            "prefix": ":"
+        },
+        "picker": {
+            "hideUnsupported": true,
+            "pasteCommand": [],
+            "pasteShortcut": ["CTRL", "V"],
+            "pasteDelay": 150
+        },
+        "clipboard": {
+            "enabled": true,
+            "showPreview": true
+        },
+        },
         "useFuzzy": {
             "apps": false,
             "actions": false,
             "schemes": false,
             "variants": false,
-            "wallpapers": false
+            "wallpapers": false,
+            "pickers": false
         },
         "actions": [
+            {
+                "name": "Menu",
+                "icon": "menu_open",
+                "description": "Open the hierarchical system menu",
+                "command": ["openMenu"],
+                "enabled": true,
+                "dangerous": false
+            },
             {
                 "name": "Calculator",
                 "icon": "calculate",
@@ -723,6 +817,30 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
                 "icon": "colors",
                 "description": "Change the current scheme variant",
                 "command": ["autocomplete", "variant"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Emoji",
+                "icon": "mood",
+                "description": "Pick an emoji to copy or paste",
+                "command": ["autocomplete", "emoji"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Kaomoji",
+                "icon": "sentiment_satisfied",
+                "description": "Pick a kaomoji to copy or paste",
+                "command": ["autocomplete", "kaomoji"],
+                "enabled": true,
+                "dangerous": false
+            },
+            {
+                "name": "Symbol",
+                "icon": "emoji_symbols",
+                "description": "Pick a symbol to copy or paste",
+                "command": ["autocomplete", "symbol"],
                 "enabled": true,
                 "dangerous": false
             },

@@ -1,0 +1,101 @@
+#!/bin/bash
+set -euo pipefail
+
+# Launch a command in the user's configured terminal emulator with optional
+# app-id and title flags. Resolves terminal in order:
+#   $CAELESTIA_TERMINAL (from general.apps.terminal) -> $TERMINAL -> common terminals.
+#
+# Usage: menu-term-exec [--class <id>] [--title <title>] -- <cmd> [args...]
+
+app_id=""
+title=""
+
+while (( $# > 0 )); do
+  case "$1" in
+    --class)
+      app_id="${2:-}"
+      shift 2
+      ;;
+    --title)
+      title="${2:-}"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if (( $# == 0 )); then
+  echo "Usage: menu-term-exec [--class <id>] [--title <title>] -- <cmd> [args...]" >&2
+  exit 1
+fi
+
+term_cmd=()
+if [[ -n ${CAELESTIA_TERMINAL:-} ]]; then
+  read -ra term_cmd <<<"$CAELESTIA_TERMINAL"
+elif [[ -n ${TERMINAL:-} ]]; then
+  read -ra term_cmd <<<"$TERMINAL"
+else
+  for candidate in foot ghostty kitty alacritty wezterm; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      term_cmd=("$candidate")
+      break
+    fi
+  done
+fi
+
+if (( ${#term_cmd[@]} == 0 )); then
+  echo "menu-term-exec: no terminal emulator found" >&2
+  exit 1
+fi
+
+# The exec flag is appended below, so drop one the caller configured (e.g.
+# general.apps.terminal = ["ghostty", "-e"]) or it would swallow the flags.
+case "${term_cmd[${#term_cmd[@]} - 1]}" in
+  -e|--command|--execute)
+    unset 'term_cmd[${#term_cmd[@]} - 1]'
+    ;;
+esac
+
+bin_name=$(basename "${term_cmd[0]}")
+extra_args=("${term_cmd[@]:1}")
+
+case "$bin_name" in
+  foot|footclient)
+    args=("${term_cmd[0]}" "${extra_args[@]}")
+    [[ -n $app_id ]] && args+=(--app-id="$app_id")
+    [[ -n $title ]] && args+=(--title="$title")
+    exec setsid "${args[@]}" -- "$@"
+    ;;
+  ghostty)
+    args=("${term_cmd[0]}" "${extra_args[@]}")
+    [[ -n $app_id ]] && args+=(--class="$app_id")
+    [[ -n $title ]] && args+=(--title="$title")
+    exec setsid "${args[@]}" -e "$@"
+    ;;
+  kitty)
+    args=("${term_cmd[0]}" "${extra_args[@]}")
+    [[ -n $app_id ]] && args+=(--class "$app_id")
+    [[ -n $title ]] && args+=(--title "$title")
+    exec setsid "${args[@]}" -- "$@"
+    ;;
+  alacritty)
+    args=("${term_cmd[0]}" "${extra_args[@]}")
+    [[ -n $app_id ]] && args+=(--class "$app_id")
+    [[ -n $title ]] && args+=(--title "$title")
+    exec setsid "${args[@]}" -e "$@"
+    ;;
+  wezterm)
+    args=("${term_cmd[0]}" "${extra_args[@]}" start)
+    [[ -n $app_id ]] && args+=(--class "$app_id")
+    exec setsid "${args[@]}" -- "$@"
+    ;;
+  *)
+    exec setsid "${term_cmd[@]}" -e "$@"
+    ;;
+esac

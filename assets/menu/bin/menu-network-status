@@ -1,0 +1,33 @@
+#!/bin/bash
+set -euo pipefail
+
+# Print "<kind>\t<name>" for the connection on the default-route device: wifi
+# SSID or ethernet device. Kind is empty when there is no connection. Keyed
+# off the same "ip route get" interface the menu's speed test actually
+# measures, so the two always agree.
+
+iface=$(ip route get 1.1.1.1 2>/dev/null | awk '{ for (i = 1; i <= NF; i++) if ($i == "dev") { print $(i + 1); exit } }')
+[[ -n $iface ]] || exit 0
+
+type=$(LC_ALL=C nmcli -t -f DEVICE,TYPE,STATE device status 2>/dev/null |
+  awk -F: -v d="$iface" '$1 == d { print $2; exit }')
+
+case "$type" in
+  wifi)
+    ssid=$(nmcli -t -f ACTIVE,SSID dev wifi list 2>/dev/null | awk -F: '$1 == "yes" { print $2; exit }')
+    if [[ -z $ssid ]]; then
+      # dev wifi list is not always populated; fall back to the profile name.
+      ssid=$(LC_ALL=C nmcli -t --get-values GENERAL.CONNECTION device show "$iface" 2>/dev/null | head -n 1)
+    fi
+    printf 'wifi\t%s\n' "${ssid:-$iface}"
+    ;;
+  ethernet)
+    printf 'ethernet\t%s\n' "$iface"
+    ;;
+  *)
+    # Unknown or not tracked by NetworkManager; degrade to the device name.
+    printf '%s\t%s\n' "${type:-link}" "$iface"
+    ;;
+esac
+
+exit 0

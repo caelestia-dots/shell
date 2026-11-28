@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+# Open a menu route directly, e.g.: open style.scheme
+# Requires the shell running with its menu module (IpcHandler target "menu").
+
+if (( $# != 1 )); then
+  echo "Usage: open <route>   (e.g. open style.scheme)" >&2
+  exit 1
+fi
+
+exec qs -c caelestia ipc call menu open "$1"

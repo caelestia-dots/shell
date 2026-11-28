@@ -23,6 +23,35 @@ class LauncherUseFuzzy : public settings::ObjectNode {
     CONFIG_PROPERTY(bool, schemes, false)
     CONFIG_PROPERTY(bool, variants, false)
     CONFIG_PROPERTY(bool, wallpapers, false)
+    CONFIG_PROPERTY(bool, pickers, false) // Emoji, kaomoji and symbol pickers
+};
+
+// Shared by all the launcher pickers (emoji, kaomoji, symbol)
+class LauncherPicker : public settings::ObjectNode {
+    CONFIG_NODE(LauncherPicker, settings::ObjectNode)
+
+    // Hide emojis that the installed fonts can't render (usually ones newer than the font)
+    // Only applies to the emoji picker
+    CONFIG_PROPERTY(bool, hideUnsupported, true)
+    // If not empty, use this instead of pasteShortcut
+    CONFIG_PROPERTY(QStringList, pasteCommand, {})
+    CONFIG_PROPERTY(QStringList, pasteShortcut, DEFAULT_ARG({ u"CTRL"_s, u"V"_s }))
+    CONFIG_PROPERTY(int, pasteDelay, 150)
+};
+
+class LauncherMenu : public settings::ObjectNode {
+    CONFIG_NODE(LauncherMenu, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(bool, defaultView, false)
+    CONFIG_PROPERTY(QString, prefix, u":"_s)
+};
+
+class LauncherClipboard : public settings::ObjectNode {
+    CONFIG_NODE(LauncherClipboard, settings::ObjectNode)
+
+    CONFIG_PROPERTY(bool, enabled, true)
+    CONFIG_PROPERTY(bool, showPreview, true)
 };
 
 class LauncherAction : public settings::ObjectNode {
@@ -51,9 +80,18 @@ class LauncherConfig : public settings::ObjectNode {
     CONFIG_GLOBAL_PROPERTY(bool, vimKeybinds, false)
     CONFIG_GLOBAL_PROPERTY(QStringList, favouriteApps, {})
     CONFIG_GLOBAL_PROPERTY(QStringList, hiddenApps, {})
+    CONFIG_GLOBAL_SUBOBJECT(LauncherMenu, menu)
+    CONFIG_GLOBAL_SUBOBJECT(LauncherClipboard, clipboard)
     CONFIG_GLOBAL_SUBOBJECT(LauncherUseFuzzy, useFuzzy)
+    CONFIG_GLOBAL_SUBOBJECT(LauncherPicker, picker)
     CONFIG_GLOBAL_LIST(LauncherActionList, actions,
         DEFAULT_ARG({
+            vmap({
+                { u"name"_s, markCtx(u"Menu"_s, u"launcher action"_s) },
+                { u"icon"_s, u"menu_open"_s },
+                { u"description"_s, mark(u"Open the hierarchical system menu"_s) },
+                { u"command"_s, QStringList{ u"openMenu"_s } },
+            }),
             vmap({
                 { u"name"_s, markCtx(u"Calculator"_s, u"launcher action"_s) },
                 { u"icon"_s, u"calculate"_s },
@@ -71,6 +109,24 @@ class LauncherConfig : public settings::ObjectNode {
                 { u"icon"_s, u"image"_s },
                 { u"description"_s, mark(u"Change the current wallpaper"_s) },
                 { u"command"_s, QStringList{ u"autocomplete"_s, u"wallpaper"_s } },
+            }),
+            vmap({
+                { u"name"_s, markCtx(u"Emoji"_s, u"launcher action"_s) },
+                { u"icon"_s, u"mood"_s },
+                { u"description"_s, mark(u"Pick an emoji to copy or paste"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"emoji"_s } },
+            }),
+            vmap({
+                { u"name"_s, markCtx(u"Kaomoji"_s, u"launcher action"_s) },
+                { u"icon"_s, u"sentiment_satisfied"_s },
+                { u"description"_s, mark(u"Pick a kaomoji to copy or paste"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"kaomoji"_s } },
+            }),
+            vmap({
+                { u"name"_s, markCtx(u"Symbol"_s, u"launcher action"_s) },
+                { u"icon"_s, u"emoji_symbols"_s },
+                { u"description"_s, mark(u"Pick a symbol to copy or paste"_s) },
+                { u"command"_s, QStringList{ u"autocomplete"_s, u"symbol"_s } },
             }),
             vmap({
                 { u"name"_s, markCtx(u"Variant"_s, u"launcher action"_s) },

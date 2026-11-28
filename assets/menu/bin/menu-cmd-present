@@ -1,0 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
+# Adapted from omarchy-cmd-present: true when a command exists.
+
+command -v "${1:?Usage: menu-cmd-present <command>}" >/dev/null 2>&1

@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+# Display a "Done!" prompt and wait for the user to press a key.
+# Uses gum spin when available, falling back to plain read otherwise.
+
+echo
+
+if ! command -v gum >/dev/null 2>&1; then
+  read -r -n 1 -s -p "Done! Press any key to close..." || true
+  printf '\n'
+  exit 0
+fi
+
+tty_state=$(stty -g 2>/dev/null || true)
+gum spin --spinner "globe" --title "Done! Press any key to close..." -- sleep infinity &
+spin_pid=$!
+stty -echo -icanon 2>/dev/null || true
+while :; do
+  key=""
+  IFS= read -r -s -n 1 key && [[ -n $key ]] || break
+  if [[ $key != $'\x1b' ]]; then
+    break
+  fi
+  while IFS= read -r -s -t 0.05 -n 1 _ 2>/dev/null; do :; done
+done
+kill "$spin_pid" 2>/dev/null || true
+pkill -P "$spin_pid" 2>/dev/null || true
+stty flushi 2>/dev/null || true
+[[ -n $tty_state ]] && stty "$tty_state" 2>/dev/null || true
+printf '\033[2K\n'

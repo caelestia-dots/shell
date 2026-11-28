@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# Adapted from Omarchy's show-logo (MIT License): prints a banner before menu commands.
+
+clear
+printf '\x1b[38;5;16m'
+echo '     ______           __          __  _       '
+echo '    / ____/___ ____  / /__  _____/ /_(_)___ _ '
+echo '   / /   / __ `/ _ \/ / _ \/ ___/ __/ / __ `/ '
+echo '  / /___/ /_/ /  __/ /  __(__  ) /_/ / /_/ /  '
+echo '  \____/\__,_/\___/_/\___/____/\__/_/\__,_/   '
+printf '\x1b[0m\n'
+
+user_ff="${XDG_CONFIG_HOME:-$HOME/.config}/caelestia/menu/cael-ff.jsonc"
+bundled_ff="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/cael-ff.jsonc"
+
+if command -v fastfetch >/dev/null 2>&1; then
+  if [[ -f $user_ff ]]; then
+    fastfetch --config "$user_ff"
+  elif [[ -f $bundled_ff ]]; then
+    fastfetch --config "$bundled_ff"
+  fi
+fi

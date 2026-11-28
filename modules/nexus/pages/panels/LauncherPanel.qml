@@ -85,7 +85,6 @@ PageBase {
         }
 
         StepperRow {
-            last: true
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the launcher opens")
             value: Config.launcher.dragThreshold
@@ -93,6 +92,14 @@ PageBase {
             to: 200
             stepSize: 5
             onMoved: v => GlobalConfig.launcher.dragThreshold = v
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Hide unsupported emojis")
+            subtext: Tr.tr("Hide emojis that your fonts can't render")
+            checked: GlobalConfig.launcher.picker.hideUnsupported
+            onToggled: GlobalConfig.launcher.picker.hideUnsupported = checked
         }
 
         // Behaviour
@@ -114,6 +121,47 @@ PageBase {
             subtext: Tr.tr("Allow actions that shut down or log out")
             checked: GlobalConfig.launcher.enableDangerousActions
             onToggled: GlobalConfig.launcher.enableDangerousActions = checked
+        }
+
+        // Menu
+        SectionHeader {
+            text: Tr.tr("Menu")
+        }
+
+        ToggleRow {
+            first: true
+            text: Tr.trCtx("Enabled", "toggle label")
+            subtext: Tr.tr("Enable the hierarchical system menu in the launcher")
+            checked: GlobalConfig.launcher.menu.enabled
+            onToggled: GlobalConfig.launcher.menu.enabled = checked
+        }
+
+        ToggleRow {
+            text: Tr.tr("Default view")
+            subtext: Tr.tr("Open the menu instead of the app list by default")
+            checked: GlobalConfig.launcher.menu.defaultView
+            onToggled: GlobalConfig.launcher.menu.defaultView = checked
+        }
+
+        TextFieldRow {
+            id: menuPrefixRow
+
+            last: true
+            label: Tr.tr("Menu prefix")
+            subtext: Tr.tr("Prefix used to open the menu when apps are the default view")
+            errorText: Tr.tr("Prefix must not be alphanumeric")
+            value: GlobalConfig.launcher.menu.prefix === ":" ? "" : GlobalConfig.launcher.menu.prefix
+            placeholderText: ":"
+            maximumLength: 1
+            smallField: true
+            validate: /^[^a-zA-Z0-9\s]$/
+            onEditingFinished: value => {
+                if (!field.valid)
+                    return;
+                GlobalConfig.launcher.menu.prefix = value || ":";
+                if (GlobalConfig.launcher.menu.prefix === ":")
+                    clear();
+            }
         }
 
         // Fuzzy search
@@ -147,10 +195,17 @@ PageBase {
         }
 
         ToggleRow {
-            last: true
             text: Tr.tr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
             onToggled: GlobalConfig.launcher.useFuzzy.wallpapers = checked
+        }
+
+        ToggleRow {
+            last: true
+            text: Tr.tr("Pickers")
+            subtext: Tr.tr("Emoji, kaomoji and symbols")
+            checked: GlobalConfig.launcher.useFuzzy.pickers
+            onToggled: GlobalConfig.launcher.useFuzzy.pickers = checked
         }
     }
 }

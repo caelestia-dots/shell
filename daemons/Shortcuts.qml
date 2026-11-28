@@ -6,12 +6,28 @@ import Caelestia.Config
 import qs.components.misc
 import qs.services
 import qs.modules.nexus
+import qs.modules.launcher.services
 
 Scope {
     id: root
 
     property bool launcherInterrupted
     readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
+
+    // Opens the launcher in the given mode (i.e. "emoji"), or closes it if it's already in that mode
+    function togglePicker(mode: string): void {
+        if (hasFullscreen || !Config.launcher.enabled)
+            return;
+
+        const screenState = ShellState.forActive();
+        const prefix = `${GlobalConfig.launcher.actionPrefix}${mode} `;
+        if (screenState.launcher && screenState.launcherText.startsWith(prefix)) {
+            screenState.launcher = false;
+        } else {
+            screenState.launcherPrefill = prefix;
+            screenState.launcher = true;
+        }
+    }
 
     // qmllint disable unresolved-type
     CustomShortcut {
@@ -78,9 +94,72 @@ Scope {
     // qmllint disable unresolved-type
     CustomShortcut {
         // qmllint enable unresolved-type
+        name: "emoji"
+        description: "Toggle emoji picker"
+        onPressed: root.togglePicker("emoji")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "kaomoji"
+        description: "Toggle kaomoji picker"
+        onPressed: root.togglePicker("kaomoji")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "symbol"
+        description: "Toggle symbol picker"
+        onPressed: root.togglePicker("symbol")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
         name: "launcherInterrupt"
         description: "Interrupt launcher keybind"
         onPressed: root.launcherInterrupted = true
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "menu"
+        description: "Toggle launcher menu"
+        onPressed: {
+            if (root.hasFullscreen || !GlobalConfig.launcher.menu.enabled)
+                return;
+            const screenState = ShellState.forActive();
+            if (screenState.launcher) {
+                screenState.launcher = false;
+            } else {
+                MenuService.openRoute("");
+                MenuService.pendingOpen = true;
+                screenState.launcher = true;
+            }
+        }
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "clipboard"
+        description: "Toggle clipboard history"
+        onPressed: {
+            if (root.hasFullscreen || !Config.launcher.enabled || !GlobalConfig.launcher.clipboard.enabled)
+                return;
+
+            const screenState = ShellState.forActive();
+            const prefix = `${GlobalConfig.launcher.actionPrefix}clipboard `;
+            if (screenState.launcher && screenState.launcherText.startsWith(prefix)) {
+                screenState.launcher = false;
+            } else {
+                screenState.launcherPrefill = prefix;
+                screenState.launcher = true;
+            }
+        }
     }
 
     // qmllint disable unresolved-type

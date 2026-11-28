@@ -1,0 +1,75 @@
+#!/bin/bash
+set -euo pipefail
+
+[[ -f $HOME/.config/caelestia/menu/fzf-theme.sh ]] &&
+  source "$HOME/.config/caelestia/menu/fzf-theme.sh"
+
+# caelestia-menu:summary=Pick installed packages (repo + AUR) to remove.
+# caelestia-menu:requires-sudo=true
+
+# Detect an AUR helper for the foreign-package half; removal of repo
+# packages always goes through pacman itself.
+AUR_HELPER=""
+for h in paru yay; do
+  if command -v "$h" >/dev/null 2>&1; then
+    AUR_HELPER="$h"
+    break
+  fi
+done
+
+preview="if [[ \"{2}\" == *aur* ]]$([[ -n $AUR_HELPER ]] && echo "" || echo " && false"); then $AUR_HELPER -Qi {1} 2>/dev/null || pacman -Qi {1}; else pacman -Qi {1}; fi"
+
+pkg_lines=$(
+  {
+    pacman -Qn | awk -v OFS="\t" '{print $1, "repo", $2}'
+    if [[ -n $AUR_HELPER ]]; then
+      "$AUR_HELPER" -Qqm 2>/dev/null || pacman -Qm
+    else
+      pacman -Qm
+    fi | awk -v OFS="\t" '{print $1, "aur", $2}'
+  } | sort -u |
+    fzf --multi \
+      --delimiter='\t' \
+      --with-nth=1,3 \
+      --preview "$preview" \
+      --preview-label='alt-p: toggle description, tab: multi-select' \
+      --preview-label-pos='bottom' \
+      --preview-window 'down:65%:wrap' \
+      --bind 'alt-p:toggle-preview' \
+      --bind 'tab:toggle'
+)
+
+if [[ -z $pkg_lines ]]; then
+  exit 0
+fi
+
+repo_pkgs=()
+aur_pkgs=()
+while IFS=$'\t' read -r name origin _ver; do
+  [[ -z $name ]] && continue
+  if [[ $origin == aur ]]; then
+    aur_pkgs+=("$name")
+  else
+    repo_pkgs+=("$name")
+  fi
+done <<<"$pkg_lines"
+
+removed_any=false
+
+if ((${#repo_pkgs[@]})); then
+  source menu-sudo-keepalive
+  sudo pacman -Rns --noconfirm "${repo_pkgs[@]}" && removed_any=true
+fi
+
+if ((${#aur_pkgs[@]})) && [[ -n $AUR_HELPER ]]; then
+  "$AUR_HELPER" -Rns --noconfirm "${aur_pkgs[@]}" && removed_any=true
+elif ((${#aur_pkgs[@]})); then
+  # No AUR helper available: foreign packages are still plain pacman targets.
+  source menu-sudo-keepalive
+  sudo pacman -Rns --noconfirm "${aur_pkgs[@]}" && removed_any=true
+fi
+
+if [[ $removed_any != true ]]; then
+  echo "Nothing was removed."
+  read -n 1 -s
+fi
