@@ -26,12 +26,16 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "launcher-enabled"
+            searchIcon: "toggle_on"
             text: Tr.trCtx("Enabled", "toggle label")
             checked: Config.launcher.enabled
             onToggled: GlobalConfig.launcher.enabled = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-show-on-hover"
+            searchIcon: "mouse"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
             checked: Config.launcher.showOnHover
@@ -42,6 +46,8 @@ PageBase {
             id: prefixRow
 
             last: true
+            settingAnchor: "launcher-action-prefix"
+            searchIcon: "keyboard"
             label: Tr.tr("Action prefix")
             subtext: Tr.tr("Prefix used to run actions in the launcher")
             errorText: Tr.tr("Prefix must not be alphanumeric")
@@ -67,6 +73,8 @@ PageBase {
 
         StepperRow {
             first: true
+            settingAnchor: "launcher-max-items-shown"
+            searchIcon: "format_list_numbered"
             label: Tr.tr("Max items shown")
             value: Config.launcher.maxShown
             from: 1
@@ -76,6 +84,8 @@ PageBase {
         }
 
         StepperRow {
+            settingAnchor: "launcher-max-wallpapers"
+            searchIcon: "photo_library"
             label: Tr.tr("Max wallpapers")
             value: Config.launcher.maxWallpapers
             from: 1
@@ -86,6 +96,8 @@ PageBase {
 
         StepperRow {
             last: true
+            settingAnchor: "launcher-drag-threshold"
+            searchIcon: "drag_pan"
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the launcher opens")
             value: Config.launcher.dragThreshold
@@ -102,6 +114,8 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "launcher-vim-keybinds"
+            searchIcon: "keyboard_command_key"
             text: Tr.tr("Vim keybinds")
             subtext: Tr.tr("Navigate results with Ctrl+hjkl")
             checked: GlobalConfig.launcher.vimKeybinds
@@ -110,6 +124,8 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "launcher-enable-dangerous-actions"
+            searchIcon: "warning"
             text: Tr.tr("Enable dangerous actions")
             subtext: Tr.tr("Allow actions that shut down or log out")
             checked: GlobalConfig.launcher.enableDangerousActions
@@ -123,24 +139,32 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "launcher-apps"
+            searchIcon: "grid_view"
             text: Tr.tr("Apps")
             checked: GlobalConfig.launcher.useFuzzy.apps
             onToggled: GlobalConfig.launcher.useFuzzy.apps = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-actions"
+            searchIcon: "bolt"
             text: Tr.tr("Actions")
             checked: GlobalConfig.launcher.useFuzzy.actions
             onToggled: GlobalConfig.launcher.useFuzzy.actions = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-schemes"
+            searchIcon: "palette"
             text: Tr.tr("Schemes")
             checked: GlobalConfig.launcher.useFuzzy.schemes
             onToggled: GlobalConfig.launcher.useFuzzy.schemes = checked
         }
 
         ToggleRow {
+            settingAnchor: "launcher-variants"
+            searchIcon: "contrast"
             text: Tr.tr("Variants")
             checked: GlobalConfig.launcher.useFuzzy.variants
             onToggled: GlobalConfig.launcher.useFuzzy.variants = checked
@@ -148,6 +172,8 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "launcher-wallpapers"
+            searchIcon: "wallpaper"
             text: Tr.tr("Wallpapers")
             checked: GlobalConfig.launcher.useFuzzy.wallpapers
             onToggled: GlobalConfig.launcher.useFuzzy.wallpapers = checked

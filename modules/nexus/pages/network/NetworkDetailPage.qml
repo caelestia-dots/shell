@@ -91,6 +91,7 @@ PageBase {
 
     title: root.ssid || Tr.tr("Network")
     isSubPage: true
+    searchable: false
 
     Component.onCompleted: {
         Nmcli.getWirelessDeviceDetails("", () => {});

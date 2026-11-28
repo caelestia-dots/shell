@@ -26,12 +26,16 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "dash-enabled"
+            searchIcon: "toggle_on"
             text: Tr.trCtx("Enabled", "toggle label")
             checked: Config.dashboard.enabled
             onToggled: GlobalConfig.dashboard.enabled = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-show-on-hover"
+            searchIcon: "mouse"
             text: Tr.tr("Show on hover")
             subtext: Tr.tr("Reveal when the cursor reaches the screen edge")
             checked: Config.dashboard.showOnHover
@@ -40,6 +44,8 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "dash-clock-seconds"
+            searchIcon: "timer"
             text: Tr.tr("Show clock seconds")
             subtext: Tr.tr("Display seconds for the clock in the main panel")
             checked: Config.dashboard.showClockSeconds
@@ -53,18 +59,24 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "dash-dashboard"
+            searchIcon: "tab"
             text: Tr.tr("Dashboard")
             checked: Config.dashboard.showDashboard
             onToggled: GlobalConfig.dashboard.showDashboard = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-media"
+            searchIcon: "play_circle"
             text: Tr.tr("Media")
             checked: Config.dashboard.showMedia
             onToggled: GlobalConfig.dashboard.showMedia = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-performance"
+            searchIcon: "speed"
             text: Tr.tr("Performance")
             checked: Config.dashboard.showPerformance
             onToggled: GlobalConfig.dashboard.showPerformance = checked
@@ -72,6 +84,8 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "dash-weather"
+            searchIcon: "partly_cloudy_day"
             text: Tr.tr("Weather")
             checked: Config.dashboard.showWeather
             onToggled: GlobalConfig.dashboard.showWeather = checked
@@ -84,30 +98,40 @@ PageBase {
 
         ToggleRow {
             first: true
+            settingAnchor: "dash-battery"
+            searchIcon: "battery_full"
             text: Tr.tr("Battery")
             checked: Config.dashboard.performance.showBattery
             onToggled: GlobalConfig.dashboard.performance.showBattery = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-gpu"
+            searchIcon: "developer_board"
             text: Tr.tr("GPU")
             checked: Config.dashboard.performance.showGpu
             onToggled: GlobalConfig.dashboard.performance.showGpu = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-cpu"
+            searchIcon: "memory"
             text: Tr.tr("CPU")
             checked: Config.dashboard.performance.showCpu
             onToggled: GlobalConfig.dashboard.performance.showCpu = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-memory"
+            searchIcon: "memory_alt"
             text: Tr.tr("Memory")
             checked: Config.dashboard.performance.showMemory
             onToggled: GlobalConfig.dashboard.performance.showMemory = checked
         }
 
         ToggleRow {
+            settingAnchor: "dash-storage"
+            searchIcon: "hard_drive"
             text: Tr.tr("Storage")
             checked: Config.dashboard.performance.showStorage
             onToggled: GlobalConfig.dashboard.performance.showStorage = checked
@@ -115,6 +139,8 @@ PageBase {
 
         ToggleRow {
             last: true
+            settingAnchor: "dash-network"
+            searchIcon: "network_check"
             text: Tr.tr("Network")
             checked: Config.dashboard.performance.showNetwork
             onToggled: GlobalConfig.dashboard.performance.showNetwork = checked
@@ -128,6 +154,8 @@ PageBase {
         StepperRow {
             first: true
             last: true
+            settingAnchor: "dash-drag-threshold"
+            searchIcon: "drag_pan"
             label: Tr.tr("Drag threshold")
             subtext: Tr.tr("Pixels dragged before the dashboard opens")
             value: Config.dashboard.dragThreshold

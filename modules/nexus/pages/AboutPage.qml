@@ -19,6 +19,7 @@ PageBase {
     property string cliVersion
 
     title: Tr.tr("About")
+    searchable: false
 
     ColumnLayout {
         anchors.horizontalCenter: parent.horizontalCenter

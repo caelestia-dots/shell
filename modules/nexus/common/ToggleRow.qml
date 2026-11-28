@@ -11,7 +11,16 @@ StyledSwitch {
     property string subtext
     property alias first: bg.first
     property alias last: bg.last
+    property string settingAnchor
+    // Only read by scripts/settings-index-check.py
+    property bool searchable: true
+    // Only read by the settings indexer
+    property string searchIcon
     readonly property alias bg: bg
+
+    function flashHighlight(): void {
+        root.bg.flashHighlight();
+    }
 
     Layout.fillWidth: true
 
