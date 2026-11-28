@@ -14,10 +14,7 @@ namespace caelestia::shell::multimedia {
 using Qt::StringLiterals::operator""_s;
 
 VisualSource::VisualSource(QObject* parent)
-    : QObject(parent) {
-    m_player.setLoops(QMediaPlayer::Infinite);
-    QObject::connect(&m_player, &QMediaPlayer::mediaStatusChanged, this, &VisualSource::onMediaStatusChanged);
-}
+    : QObject(parent) {}
 
 VisualSource::Type VisualSource::type() const {
     return m_type;
@@ -110,12 +107,17 @@ void VisualSource::setVideoOutput(QObject* videoOutput) {
     if (m_videoOutput == videoOutput)
         return;
 
-    QObject::disconnect(m_sinkConn);
     m_videoOutput = videoOutput;
     emit videoOutputChanged();
 
-    m_player.setVideoOutput(m_videoOutput);
-    if (const auto* sink = m_player.videoSink())
+    if (m_player)
+        attachVideoOutput();
+}
+
+void VisualSource::attachVideoOutput() {
+    QObject::disconnect(m_sinkConn);
+    m_player->setVideoOutput(m_videoOutput);
+    if (const auto* sink = m_player->videoSink())
         m_sinkConn = QObject::connect(
             sink, &QVideoSink::videoFrameChanged, this,
             [this](const QVideoFrame& frame) {
@@ -318,30 +320,30 @@ void VisualSource::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
     m_loading = false;
     if (m_position > 0)
-        m_player.setPosition(m_position);
+        m_player->setPosition(m_position);
 
     if (m_playing)
-        m_player.play();
+        m_player->play();
     else
-        m_player.pause();
+        m_player->pause();
 }
 
 void VisualSource::syncPlayer() {
     const auto url = m_type == Type::Live ? QUrl::fromLocalFile(localPath()) : QUrl();
-    if (!m_player.source().isEmpty() && m_player.source() != url)
+    if (m_player && !m_player->source().isEmpty() && m_player->source() != url)
         unload();
 
     if (url.isEmpty())
         return;
 
-    if (m_player.source() == url) {
+    if (m_player && m_player->source() == url) {
         if (m_loading)
             return;
 
         if (m_playing) {
-            m_player.play();
+            m_player->play();
         } else if (m_videoReady) {
-            m_position = m_player.position();
+            m_position = m_player->position();
             unload();
         }
 
@@ -351,16 +353,28 @@ void VisualSource::syncPlayer() {
     const auto previewPending = m_sizeSource && m_key.isEmpty();
     if (m_playing || (!previewPending && m_preview.isEmpty())) {
         m_loading = true;
-        m_player.setSource(url);
+        player()->setSource(url);
     }
 }
 
+QMediaPlayer* VisualSource::player() {
+    if (m_player)
+        return m_player.get();
+
+    m_player = std::make_unique<QMediaPlayer>();
+    m_player->setLoops(QMediaPlayer::Infinite);
+    QObject::connect(m_player.get(), &QMediaPlayer::mediaStatusChanged, this, &VisualSource::onMediaStatusChanged);
+    if (m_videoOutput)
+        attachVideoOutput();
+    return m_player.get();
+}
+
 void VisualSource::unload() {
-    if (m_player.source().isEmpty())
+    if (!m_player || m_player->source().isEmpty())
         return;
 
     ++m_generation;
-    m_player.setSource({});
+    m_player->setSource({});
 }
 
 QString VisualSource::localPath() const {
