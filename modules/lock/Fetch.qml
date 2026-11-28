@@ -91,7 +91,7 @@ StyledRect {
                 Repeater {
                     model: {
                         const items = [];
-                        const hasBatt = UPower.displayDevice.isLaptopBattery;
+                        const hasBatt = UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups;
                         const rHeight = root.rootHeight;
 
                         if (!hasBatt && rHeight > Tokens.sizes.lock.fetch4LinesHeight)

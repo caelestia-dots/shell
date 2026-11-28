@@ -9,7 +9,7 @@ MaterialIcon {
 
     animate: true
     text: {
-        if (!UPower.displayDevice.isLaptopBattery) {
+        if (!(UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups)) {
             if (PowerProfiles.profile === PowerProfile.PowerSaver)
                 return "energy_savings_leaf";
             if (PowerProfiles.profile === PowerProfile.Performance)
