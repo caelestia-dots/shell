@@ -97,6 +97,7 @@ class GeneralBattery : public settings::ObjectNode {
             }),
         }))
     CONFIG_PROPERTY(int, criticalLevel, 3)
+    CONFIG_PROPERTY(QStringList, criticalAction, { u"hibernate"_s })
 };
 
 class GeneralConfig : public settings::ObjectNode {
