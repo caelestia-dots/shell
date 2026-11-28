@@ -18,7 +18,7 @@ namespace {
 
 constexpr unsigned k_minStep = 4;
 constexpr unsigned k_stepsPerOctave = 16;
-constexpr QStringView k_version = u"2";
+constexpr QStringView k_version = u"3";
 
 QString cacheDir() {
     return QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + u"/caelestia/multimedia/image"_s;

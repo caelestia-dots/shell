@@ -129,7 +129,8 @@ QImage readFitted(const QString& path, const QSize& bucket, Qt::AspectRatioMode 
 QByteArray encodeBc3(const QImage& source) {
     initRgbcx();
 
-    const auto image = source.convertToFormat(QImage::Format_RGBA8888);
+    // Qt Quick expects premultiplied alpha in compressed textures
+    const auto image = source.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
     const int blocksW = (image.width() + 3) / 4;
     const int blocksH = (image.height() + 3) / 4;
     const auto imageSize = static_cast<quint32>(static_cast<qsizetype>(blocksW) * blocksH * 16);
