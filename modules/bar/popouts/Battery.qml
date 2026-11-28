@@ -58,6 +58,9 @@ Column {
     }
 
     StyledText {
+        width: parent.width
+        wrapMode: Text.WordWrap
+
         text: {
             const dev = UPower.displayDevice;
             if (!dev.isLaptopBattery)
