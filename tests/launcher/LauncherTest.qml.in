@@ -1,0 +1,463 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Window
+import Quickshell
+import Caelestia.Config
+import qs.services
+import qs.modules.launcher
+import qs.modules.launcher.services
+
+ShellRoot {
+    id: root
+
+    property var app
+    property var input
+    property var condition
+    property var continuation
+    property string waitingFor
+    property real deadline
+    property int assertions: 0
+    property int regressionCases: 0
+    property bool finished: false
+    property bool watchSwap: false
+    property bool observedSwap: false
+    property bool watchNewRow: false
+    property bool observedNewRow: false
+    property string swapQuery
+    property var expectedUrls: []
+    readonly property var providers: [["google théorie de la relativité", "Google", "https://www.google.com/search?q=th%C3%A9orie%20de%20la%20relativit%C3%A9"], ["  YouTube   lofi\t hip hop  ", "YouTube", "https://www.youtube.com/results?search_query=lofi%20hip%20hop"], ["wiki Alan Turing", "Wikipedia", "https://fr.wikipedia.org/wiki/Special:Search?search=Alan%20Turing"], ["gh caelestia", "GitHub", "https://github.com/search?q=caelestia"], ["github C++ \"hello world\"", "GitHub", "https://github.com/search?q=C%2B%2B%20%22hello%20world%22"], ["reddit linux gaming", "Reddit", "https://www.reddit.com/search/?q=linux%20gaming"], ["maps café / 🐧", "Google Maps", "https://www.google.com/maps/search/caf%C3%A9%20%2F%20%F0%9F%90%A7"], ["google a&b=#?%/", "Google", "https://www.google.com/search?q=a%26b%3D%23%3F%25%2F"], ["google $(touch SHOULD_NOT_EXIST); `id`", "Google", "https://www.google.com/search?q=%24(touch%20SHOULD_NOT_EXIST)%3B%20%60id%60"], ["GOOGLE å\n日", "Google", "https://www.google.com/search?q=%C3%A5%20%E6%97%A5"]]
+    readonly property var routing: [["", "apps", "", 0], ["firefox", "apps", "AppItem", 1], ["google linux", "web", "ActionItem", 1], ["youtube cats", "web", "ActionItem", 1], [">calc 1+1", "calc", "CalcItem", 1], [">scheme dark", "scheme", "SchemeItem", 1], [">variant tonal", "variant", "VariantItem", 1], [">google linux", "actions", "ActionItem", 1], ["no app matches", "web", "ActionItem", 1], ["@c Network", "apps", "AppItem", 1], ["firefox", "apps", "AppItem", 1]]
+    readonly property var routes: [["reddit old", "firefox", "firefox", ""], ["firefox", "reddit new", "", "https://www.reddit.com/search/?q=new"], ["reddit old", "google new", "", "https://www.google.com/search?q=new"], ["unmatched old", "unmatched new", "", "https://www.google.com/search?q=unmatched%20new"], ["google old", "youtube new", "", "https://www.youtube.com/results?search_query=new"], [">old", ">new", ">new", ""], ["reddit old", ">new", ">new", ""], [">old", "firefox", "firefox", ""], [">calc 1+1", ">calc 2+2", ">calc 2+2", ""], ["reddit old", ">calc 2+2", ">calc 2+2", ""], [">scheme old", ">scheme new", ">scheme new", ""], [">variant old", ">variant new", ">variant new", ""], [">scheme old", ">variant new", ">variant new", ""], ["firefox", "@c Network", "settings", ""], ["firefox", "firefox", "firefox", "", "roundtrip"], ["google old", "reddit interrupted", "", "https://www.reddit.com/search/?q=interrupted"]]
+
+    function find(item: var, name: string): var {
+        if (item.objectName === name)
+            return item;
+        for (const child of item.children ?? []) {
+            const result = find(child, name);
+            if (result)
+                return result;
+        }
+        return null;
+    }
+
+    function check(ok: bool, message: string): void {
+        assertions++;
+        if (!ok)
+            throw new Error(message);
+    }
+
+    function done(error: string): void {
+        if (finished)
+            return;
+        finished = true;
+        poll.stop();
+        if (error)
+            console.error("TEST_FAIL " + error);
+        console.log("TEST_RESULT " + JSON.stringify({
+            assertions,
+            regressionCases,
+            failures: error ? 1 : 0,
+            failure: error,
+            expectedUrls
+        }));
+        Qt.quit();
+    }
+
+    function run(next: var): void {
+        try {
+            next();
+        } catch (error) {
+            done(error.message);
+        }
+    }
+
+    function until(predicate: var, next: var, message: string): void {
+        condition = predicate;
+        continuation = next;
+        waitingFor = message;
+        deadline = Date.now() + 5000;
+        poll.start();
+    }
+
+    function settled(): bool {
+        return app.displayText === input.text && !app.transitions[0].running && app.count === app.model.values.length && (app.count === 0 ? app.currentItem === null : app.currentItem?.modelData === app.model.values[app.currentIndex]);
+    }
+
+    function query(text: string, next: var): void {
+        session.launcher = true;
+        input.text = text;
+        until(() => settled(), next, "settled query: " + text);
+    }
+
+    function witness(): void {
+        query("reddit final", () => {
+            check(app.currentItem?.modelData?.url === "https://www.reddit.com/search/?q=final", "witness starts on Reddit");
+            Apps.launched = "";
+            input.text = "firefox";
+            check(app.currentItem?.modelData?.url === "https://www.reddit.com/search/?q=final", "old Reddit row retained during fade-out");
+            input.accepted();
+            check(session.launcher, "stale Reddit result activated for firefox");
+            check(Apps.launched === "", "old row never dispatched to Apps.launch");
+            check(!Quickshell.env("WEBSEARCH_NEGATIVE_CONTROL"), "negative control requires vulnerable sources");
+            until(() => settled(), () => {
+                input.accepted();
+                check(Apps.launched === "firefox", "current Firefox launches after transition");
+                check(!session.launcher, "Firefox closes launcher");
+                parserTests();
+                routingCase(0);
+            }, "Firefox after witness");
+        });
+    }
+
+    function parserTests(): void {
+        const keys = ["google", "youtube", "wiki", "gh", "github", "reddit", "maps"];
+        check(Object.keys(WebSearch.providers).join(",") === keys.join(","), "provider order");
+        for (const [text, provider, url] of providers) {
+            const result = WebSearch.parse(text);
+            check(result?.desc === provider, "provider " + text);
+            check(result?.url === url, "encoded URL " + text);
+            check(result?.name.startsWith('Search for "'), "translatable label");
+            check(app.stateForText(text) === "web", "explicit provider state");
+        }
+        for (const text of ["", "   ", "google", "google  ", "yt lofi", "__proto__ test", "constructor test"])
+            check(WebSearch.parse(text) === null, "no explicit provider " + text);
+        check(WebSearch.fallback(" \n ") === null, "no blank fallback");
+        check(WebSearch.fallback("  a   b ").url === "https://www.google.com/search?q=a%20b", "fallback normalization");
+        check(WebSearch.parse("google café%20").url.endsWith("caf%C3%A9%2520"), "literal percent encoded once");
+        check(app.stateForText("firefox") === "apps", "application before fallback");
+        check(app.stateForText("@c Network") === "apps", "special application query");
+        check(Apps.lastQuery === "@c Network", "application query unchanged");
+        check(app.stateForText("   ") === "apps", "blank application query");
+        check(app.stateForText("no match") === "web", "Google fallback");
+        Apps.matches = {
+            firefox: [
+                {
+                    id: "firefox"
+                }
+            ],
+            "google overlap": [
+                {
+                    id: "overlap"
+                }
+            ]
+        };
+        check(app.stateForText("google overlap") === "web", "explicit provider before matching app");
+        for (const text of [">google test", ">unknown", ">wallpaper test"])
+            check(app.stateForText(text) === "actions", "command priority " + text);
+        check(app.stateForText(">calc 1+1") === "calc", "calculator priority");
+        check(app.stateForText(">scheme dark") === "scheme", "scheme priority");
+        check(app.stateForText(">variant tonal") === "variant", "variant priority");
+        check(app.resultsForText(">calc 1+1")[0] === 0, "calculator result");
+        check(app.resultsForText(">scheme dark")[0].name === ">scheme dark", "scheme query unchanged");
+        check(app.resultsForText(">variant tonal")[0].name === ">variant tonal", "variant query unchanged");
+        check(app.resultsForText(">google test")[0].name === "command", "native actions result");
+        check(Actions.lastQuery === ">google test", "actions query unchanged");
+        GlobalConfig.launcher = {
+            actionPrefix: ":",
+            specialPrefix: "@"
+        };
+        check(app.stateForText(":google test") === "actions", "custom action prefix");
+        check(app.stateForText(":calc 1+1") === "calc", "custom calculator prefix");
+        GlobalConfig.launcher = {
+            actionPrefix: ">",
+            specialPrefix: "@"
+        };
+        Apps.matches = {
+            firefox: [
+                {
+                    id: "firefox"
+                }
+            ],
+            "@c Network": [
+                {
+                    id: "settings"
+                }
+            ]
+        };
+        if (Quickshell.env("WEBSEARCH_PARITY")) {
+            check(JSON.stringify(WebSearch.providers) === JSON.stringify(LegacyWebSearch.providers), "legacy provider definitions");
+            for (const key of keys) {
+                for (const text of ["linux", " café 🐧 ", "C++ & 100%", "a\tb\nc", "'quoted' /?=#"]) {
+                    const textWithPrefix = key + " " + text;
+                    check(WebSearch.parse(textWithPrefix).url === LegacyWebSearch.parse(textWithPrefix).url, "legacy explicit URL parity");
+                    check(WebSearch.fallback(textWithPrefix).url === LegacyWebSearch.fallback(textWithPrefix).url, "legacy fallback URL parity");
+                }
+                check(WebSearch.parse(key) === LegacyWebSearch.parse(key), "legacy empty query parity");
+            }
+        }
+    }
+
+    function routingCase(index: int): void {
+        if (index === routing.length) {
+            check(app.currentItem.modelData.id === "firefox", "final application modelData");
+            session.launcher = false;
+            input.text = "google hidden";
+            check(app.displayText === "firefox", "closed list retains displayed application");
+            check(app.state === "apps", "closed state preserved");
+            session.launcher = true;
+            until(() => settled(), () => {
+                check(app.displayState === "web", "reopened state transitions to web");
+                check(app.currentItem?.objectName === "ActionItem", "reopened web delegate");
+                check(app.currentItem?.modelData?.url === "https://www.google.com/search?q=hidden", "reopened current URL");
+                for (const text of ["firefox", "youtube first", ">calc 2+2", ">scheme light", "reddit final"])
+                    input.text = text;
+                until(() => settled(), () => {
+                    check(app.displayText === "reddit final", "rapid changes retain final text");
+                    check(app.currentItem?.objectName === "ActionItem", "rapid changes retain correct delegate");
+                    check(app.currentItem?.modelData?.url === "https://www.reddit.com/search/?q=final", "rapid changes retain final URL");
+                    regression(0);
+                }, "rapid state changes");
+            }, "reopening launcher");
+            return;
+        }
+        const [text, state, itemType, count] = routing[index];
+        query(text, () => {
+            check(app.requestedState === state, "requested state " + text);
+            check(app.displayState === state, "display state " + text);
+            check(app.displayText === text, "display text " + text);
+            check(app.count === count, "model count " + text);
+            if (itemType) {
+                check(app.currentItem?.objectName === itemType, "delegate " + text);
+                check(app.currentIndex === 0, "selection reset " + text);
+            }
+            routingCase(index + 1);
+        });
+    }
+
+    function regression(index: int): void {
+        if (index === routes.length) {
+            selectionTests();
+            return;
+        }
+        const [oldText, text, expectedApp, url, extra] = routes[index];
+        query(oldText, () => {
+            check(app.displayText === oldText, "source query settled " + oldText);
+            Apps.launched = "";
+            swapQuery = text;
+            observedSwap = false;
+            observedNewRow = false;
+            watchSwap = app.stateForText(oldText) !== app.stateForText(text);
+            watchNewRow = watchSwap;
+            input.text = text;
+            if (text === "reddit interrupted") {
+                for (const abandoned of ["firefox", ">calc 3+3", text])
+                    input.text = abandoned;
+            }
+            if (extra === "roundtrip") {
+                input.text = "google abandoned";
+                input.text = text;
+                check(app.displayText === text, "roundtrip retains matching text");
+                check(app.selectedItem() === null, "running transition blocks matching text");
+            }
+            const selected = app.selectedItem();
+            check(!selected || selected.modelData === app.model.values[app.currentIndex], "immediate selection belongs to current model " + text);
+            input.accepted();
+            check(Apps.launched === "" || Apps.launched === expectedApp, "immediate dispatch target " + text);
+            if (session.launcher && app.displayText !== text) {
+                check(app.selectedItem() === null, "fade-out selection rejected");
+                input.accepted();
+                check(session.launcher, "fade-out Enter remains deferred");
+            }
+            const complete = () => {
+                check(!session.launcher, "current query closes launcher " + text);
+                check(Apps.launched === expectedApp, "correct dispatch target " + text);
+                if (url)
+                    expectedUrls.push(url);
+                regressionCases++;
+                regression(index + 1);
+            };
+            if (session.launcher) {
+                until(() => settled(), () => {
+                    check(app.displayText === text, "destination query settled " + text);
+                    check(app.selectedItem() === app.currentItem, "settled selection accepted " + text);
+                    if (app.stateForText(oldText) !== app.stateForText(text)) {
+                        check(observedSwap, "model swap observed " + text);
+                        check(observedNewRow, "new row observed during transition " + text);
+                    }
+                    watchSwap = false;
+                    input.accepted();
+                    complete();
+                }, "regression destination " + text);
+            } else {
+                watchSwap = false;
+                complete();
+            }
+        });
+    }
+
+    function selectionTests(): void {
+        Apps.matches = {
+            firefox: [
+                {
+                    id: "first"
+                },
+                {
+                    id: "second"
+                }
+            ]
+        };
+        query("firefox", () => {
+            check(app.currentIndex === 0, "multiple results start at first row");
+            const item = app.currentItem;
+            const currentData = item.modelData;
+            item.modelData = {
+                id: "stale"
+            };
+            Apps.launched = "";
+            check(app.selectedItem() === null, "delegate must belong to current model");
+            input.accepted();
+            check(Apps.launched === "", "stale delegate never dispatches");
+            check(session.launcher, "stale delegate leaves launcher open");
+            item.modelData = currentData;
+            check(app.selectedItem() === item, "restored delegate accepted");
+            app.incrementCurrentIndex();
+            const selected = app.selectedItem();
+            check(!selected || selected.modelData.id === "second", "immediate selection change is safe");
+            until(() => app.selectedItem()?.modelData.id === "second", () => {
+                input.accepted();
+                check(Apps.launched === "second", "selected app launches instead of first row");
+                check(!session.launcher, "selected app closes launcher");
+                Apps.matches = {
+                    firefox: [nativeEntry]
+                };
+                query("firefox", () => {
+                    check(app.currentIndex === 0, "QObject model resets selection");
+                    check(app.currentItem.modelData === nativeEntry, "QObject identity preserved");
+                    check(app.selectedItem() === app.currentItem, "QObject selection accepted");
+                    Apps.matches = {
+                        firefox: [
+                            {
+                                id: "firefox"
+                            }
+                        ]
+                    };
+                    dispatchCase(0);
+                });
+            }, "selected application row");
+        });
+    }
+
+    function dispatchCase(index: int): void {
+        const cases = providers.map(entry => [entry[0], entry[2], ""]).concat([["fallback test", "https://www.google.com/search?q=fallback%20test", ""], ["firefox", "", "firefox"], [">custom hello world", "", ">custom hello world"], [">calc 1+1", "", ">calc 1+1"]]);
+        if (index === cases.length) {
+            query("youtube mouse", () => {
+                WebSearch.parse(input.text).onClicked(app);
+                check(!session.launcher, "mouse callback closes launcher");
+                expectedUrls.push("https://www.youtube.com/results?search_query=mouse");
+                session.launcher = true;
+                input.text = ">wallpaper fixture";
+                Colours.scheme = "dynamic";
+                input.accepted();
+                check(Wallpapers.selected === "/fixture/wallpaper.png", "wallpaper dispatch");
+                check(Wallpapers.previewColourLock, "wallpaper preview lock");
+                session.launcher = true;
+                input.text = ">wallpaper empty";
+                find(host.contentItem, "testContentList").currentList.currentItem = null;
+                input.accepted();
+                check(session.launcher, "empty wallpaper selection never closes launcher");
+                query("", () => {
+                    const launched = Apps.launched;
+                    input.accepted();
+                    check(Apps.launched === launched && session.launcher, "empty selection never launches");
+                    done("");
+                });
+            });
+            return;
+        }
+        const [text, url, expectedApp] = cases[index];
+        query(text, () => {
+            Apps.launched = "";
+            const launches = Apps.launches;
+            input.accepted();
+            check(!session.launcher, "Enter closes launcher " + text);
+            check(Apps.launched === expectedApp, "Enter dispatch target " + text);
+            check(Apps.launches === launches + (expectedApp ? 1 : 0), "Enter dispatches once " + text);
+            if (url)
+                expectedUrls.push(url);
+            dispatchCase(index + 1);
+        });
+    }
+
+    Component.onCompleted: until(() => find(host.contentItem, "launcherSearch") && find(host.contentItem, "testAppList"), () => {
+        app = find(host.contentItem, "testAppList");
+        input = find(host.contentItem, "launcherSearch");
+        witness();
+    }, "launcher components loaded")
+
+    ScreenState {
+        id: session
+    }
+
+    QtObject {
+        id: nativeEntry
+
+        property string name: "native app entry"
+    }
+
+    Window {
+        id: host
+
+        visible: true
+        width: 320
+        height: 300
+
+        Content {
+            width: 320
+            height: 300
+            screenState: session
+            panels: ({})
+            maxHeight: 300
+        }
+    }
+
+    Timer {
+        id: poll
+
+        interval: 5
+        repeat: true
+        onTriggered: root.run(() => {
+            if (root.condition()) {
+                stop();
+                const next = root.continuation;
+                root.condition = null;
+                root.continuation = null;
+                next();
+            } else if (Date.now() >= root.deadline) {
+                throw new Error("timeout waiting for " + root.waitingFor);
+            }
+        })
+    }
+
+    Connections {
+        function onCurrentItemChanged(): void {
+            if (!root.watchNewRow || !root.observedSwap || !root.app.currentItem)
+                return;
+            root.watchNewRow = false;
+            root.observedNewRow = true;
+            root.run(() => {
+                root.check(root.app.transitions[0].running, "new row created during transition");
+                root.check(root.app.currentItem.modelData === root.app.model.values[root.app.currentIndex], "new row belongs to current model");
+                root.check(root.app.selectedItem() === null, "fade-in selection deferred");
+                root.input.accepted();
+                root.check(session.launcher, "fade-in Enter remains deferred");
+            });
+        }
+
+        function onDisplayTextChanged(): void {
+            if (!root.watchSwap || root.app.displayText !== root.swapQuery)
+                return;
+            root.watchSwap = false;
+            root.observedSwap = true;
+            // Observe the model swap synchronously, while the transition is running.
+            root.run(() => {
+                root.check(root.app.transitions[0].running, "model swapped during transition");
+                root.check(root.app.selectedItem() === null, "selection deferred at model swap");
+                root.input.accepted();
+                root.check(session.launcher, "Enter at model swap remains deferred");
+            });
+        }
+
+        target: root.app ?? null
+    }
+}
