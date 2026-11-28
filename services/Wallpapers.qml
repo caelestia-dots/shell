@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Caelestia
 import Caelestia.Config
 import Caelestia.Models
 import qs.services
@@ -11,6 +12,7 @@ import qs.utils
 Searcher {
     id: root
 
+    readonly property url previewSchemePath: Qt.resolvedUrl(`${Paths.state}/wallpaper/preview-scheme.json`)
     readonly property string currentNamePath: `${Paths.state}/wallpaper/path.txt`
     readonly property list<string> smartArg: GlobalConfig.services.smartScheme ? [] : ["--no-smart"]
     readonly property string fallback: Quickshell.shellPath("assets/wallpaper.webp")
@@ -42,12 +44,15 @@ Searcher {
         previewPath = path;
         showPreview = true;
 
-        if (Colours.scheme === "dynamic")
+        if (Colours.scheme === "dynamic" && !getPreviewColoursProc.running) {
+            getPreviewColoursProc.requestedPath = path;
             getPreviewColoursProc.running = true;
+        }
     }
 
     function stopPreview(): void {
         showPreview = false;
+        CUtils.deleteFile(previewSchemePath);
         if (previewColourLock)
             pendingPreviewClear = true;
         else
@@ -58,6 +63,9 @@ Searcher {
         if (!previewColourLock && pendingPreviewClear)
             Colours.showPreview = false;
     }
+
+    Component.onCompleted: CUtils.deleteFile(previewSchemePath)
+    Component.onDestruction: CUtils.deleteFile(previewSchemePath)
 
     list: wallpapers.entries
     key: "relativePath"
@@ -111,14 +119,41 @@ Searcher {
         filter: FileSystemModel.Images | FileSystemModel.Videos
     }
 
+    FileView {
+        id: previewScheme
+
+        path: root.previewSchemePath
+        atomicWrites: true
+        blockWrites: true
+        printErrors: false
+    }
+
     Process {
         id: getPreviewColoursProc
 
-        command: ["caelestia", "wallpaper", "-p", root.previewPath, ...root.smartArg]
+        property string requestedPath
+
+        command: ["caelestia", "wallpaper", "-p", requestedPath, ...root.smartArg]
+        onExited: {
+            if (root.showPreview && requestedPath !== root.previewPath) {
+                requestedPath = root.previewPath;
+                running = true;
+            }
+        }
         stdout: StdioCollector {
             onStreamFinished: {
-                Colours.load(text, true);
-                Colours.showPreview = true;
+                if (!root.showPreview || getPreviewColoursProc.requestedPath !== root.previewPath)
+                    return;
+                try {
+                    const scheme = JSON.parse(text);
+                    if (!scheme.colours || typeof scheme.colours !== "object")
+                        return;
+                    Colours.load(text, true);
+                    Colours.showPreview = true;
+                    previewScheme.setText(text);
+                } catch (e) {
+                    console.warn("Could not load wallpaper preview colours:", e);
+                }
             }
         }
     }
