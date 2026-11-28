@@ -253,9 +253,6 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 
 <details><summary>Example config</summary>
 
-`background.visualiser.centerGap` sets the fraction of visualiser width reserved between the two halves.
-Use a value from `0` to `1`. Set it to `0` for evenly spaced bars across the full width.
-
 ```json
 {
     "enabled": true,
