@@ -424,7 +424,8 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
             "terminal": ["foot"],
             "audio": ["pwvucontrol"],
             "playback": ["mpv"],
-            "explorer": ["thunar"]
+            "explorer": ["thunar"],
+            "launchPrefix": []
         },
         "idle": {
             "lockBeforeSleep": true,
@@ -959,6 +960,34 @@ For example, to automatically hide the bar on the monitor named `DP-1`:
 ```
 
 </details>
+
+### Application launch prefix
+
+`general.apps.launchPrefix` optionally prepends a command to applications launched by the shell, including launcher entries, terminal applications, notification links, and configured playback and file-manager commands. It defaults to `[]` (disabled).
+
+Applications launched directly by the shell inherit its cgroup. In systemd-managed sessions, this can place applications in the shell's or compositor's service cgroup, causing their resource usage to be attributed to that unit and potentially terminating them when it stops. Using a launch prefix such as `uwsm app` starts applications in separate scopes instead:
+
+```json
+{
+    "general": {
+        "apps": {
+            "launchPrefix": ["uwsm", "app", "-s", "a", "-t", "scope", "--"]
+        }
+    }
+}
+```
+
+The trailing `--` separates the wrapper's options from the application command. UWSM creates a separate scope in `app-graphical.slice` for each launch.
+
+The prefix applies to all supported application launches. For example, adding `"-p", "MemoryMax=8G"` before `--` sets an 8GiB memory limit on each scope. For per-application limits, use a wrapper that selects options based on the executable.
+
+To verify that applications are launched outside the shell's cgroup, run:
+
+```sh
+systemctl --user show 'app-*.scope' -p Slice -p ControlGroup -p MemoryMax
+```
+
+The application's `ControlGroup` should be under `app-graphical.slice`, rather than the shell's service.
 
 ### Advanced configuration
 

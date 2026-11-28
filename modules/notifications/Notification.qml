@@ -434,7 +434,7 @@ StyledRect {
                     if (!root.expanded)
                         return;
 
-                    Qt.openUrlExternally(link);
+                    AppLauncher.openUrl(link);
                     root.modelData.popup = false;
                 }
 
