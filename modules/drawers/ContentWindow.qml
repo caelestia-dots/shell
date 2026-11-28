@@ -23,16 +23,11 @@ StyledWindow {
     readonly property ScreenState screenState: ShellState.forScreen(screen)
 
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
-    readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject.specialWorkspace?.name.length ?? 0) > 0
+    readonly property HyprlandWorkspace specialWs: monitor?.specialWorkspace ?? null
     readonly property bool hasFullscreenOnNormalWs: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
     readonly property bool hasFullscreen: {
-        if (hasSpecialWorkspace) {
-            const specialName = monitor?.lastIpcObject.specialWorkspace?.name;
-            if (!specialName)
-                return false;
-            const specialWs = Hypr.workspaces.values.find(ws => ws.name === specialName);
-            return specialWs?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false;
-        }
+        if (specialWs)
+            return specialWs.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1);
         return hasFullscreenOnNormalWs;
     }
 
@@ -49,7 +44,7 @@ StyledWindow {
         if (focusGrab.active || panels.popouts.isDetached)
             return 0;
 
-        if (monitor?.lastIpcObject.specialWorkspace?.name || monitor?.activeWorkspace?.toplevels.values.length > 0)
+        if (specialWs || monitor?.activeWorkspace?.toplevels.values.length > 0)
             return 0;
 
         const thresholds = [];
@@ -68,7 +63,7 @@ StyledWindow {
 
     name: "drawers"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
+    WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (specialWs && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
     WlrLayershell.keyboardFocus: screenState.launcher || screenState.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: hasFullscreen ? emptyRegion : regions
