@@ -5,6 +5,8 @@
 #include <qfile.h>
 #include <qregularexpression.h>
 
+#include <algorithm>
+
 #include "config/rootnodes.hpp"
 #include "config/serviceconfig.hpp"
 #include "sensorslib.hpp"
@@ -33,8 +35,36 @@ QStringList gpuBusyFiles() {
     return files;
 }
 
+// Intel and AMD expose per-client engine busyness in /proc/<pid>/fdinfo. This
+// covers Intel iGPUs (no gpu_busy_percent) and AMD devices whose driver does not
+// publish the busy file.
+bool hasFdinfoGpu() {
+    static const QRegularExpression k_cardRe(u"^card\\d+$"_s);
+
+    QDirIterator it(u"/sys/class/drm"_s, QDir::Dirs | QDir::NoDotAndDotDot);
+    while (it.hasNext()) {
+        const QString path = it.next();
+        if (!k_cardRe.match(it.fileName()).hasMatch()) {
+            continue;
+        }
+
+        QFile vendor(path + u"/device/vendor"_s);
+        if (!vendor.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            continue;
+        }
+
+        const QByteArray id = vendor.readAll().trimmed();
+        if (id == "0x8086" || id == "0x1002") {
+            return true;
+        }
+    }
+    return false;
+}
+
 QString cleanName(QString s) {
-    static const QRegularExpression k_noise(u"\\(R\\)|\\(TM\\)|Graphics"_s, QRegularExpression::CaseInsensitiveOption);
+    // Keep "Graphics": it is part of the product name on Intel and AMD iGPUs
+    // ("UHD Graphics", "Radeon Graphics"), unlike on discrete cards.
+    static const QRegularExpression k_noise(u"\\(R\\)|\\(TM\\)"_s, QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression k_spaces(u"\\s+"_s);
     s.replace(k_noise, {});
     s.replace(k_spaces, u" "_s);
@@ -183,6 +213,9 @@ void Gpu::setType(GpuType value) {
     }
     m_type = value;
     if (m_type == GpuType::None) {
+        m_backend = UsageBackend::None;
+        m_fdinfoTimer.invalidate();
+        m_fdinfoClients.clear();
         resetUsage();
     }
     emit typeChanged();
@@ -205,10 +238,13 @@ void Gpu::setDetecting(bool value) {
 }
 
 void Gpu::tick() {
-    if (m_type == GpuType::Generic) {
+    if (m_backend == UsageBackend::BusyFile) {
         readGenericUsage();
         readGpuTemperature();
-    } else if (m_type == GpuType::Nvidia) {
+    } else if (m_backend == UsageBackend::Fdinfo) {
+        readFdinfoUsage();
+        readGpuTemperature();
+    } else if (m_backend == UsageBackend::Nvidia) {
         startNvidiaUsage();
     } else {
         resetUsage();
@@ -219,8 +255,25 @@ void Gpu::resolveGpu() {
     // Supersede any chain still in flight so its callbacks cannot write stale state
     const int generation = ++m_generation;
 
+    // Start a fresh fdinfo sampling window
+    m_fdinfoTimer.invalidate();
+    m_fdinfoClients.clear();
+
     if (m_userType != GpuType::Auto) {
         setType(m_userType);
+        if (m_userType == GpuType::Nvidia) {
+            m_backend = UsageBackend::Nvidia;
+        } else if (m_userType == GpuType::Generic) {
+            if (!m_busyFiles.isEmpty()) {
+                m_backend = UsageBackend::BusyFile;
+            } else if (hasFdinfoGpu()) {
+                m_backend = UsageBackend::Fdinfo;
+            } else {
+                m_backend = UsageBackend::None;
+            }
+        } else {
+            m_backend = UsageBackend::None;
+        }
     }
 
     if (m_userType == GpuType::None) {
@@ -253,10 +306,19 @@ void Gpu::finishNameSource(int index, int generation, QString name) {
     // Under Auto the NVIDIA name probe doubles as the type probe: a non-empty result
     // means an NVIDIA GPU is present and queryable.
     if (m_userType == GpuType::Auto && index == k_nvidiaSource) {
-        if (!name.isEmpty())
+        if (!name.isEmpty()) {
             setType(GpuType::Nvidia);
-        else
-            setType(m_busyFiles.isEmpty() ? GpuType::None : GpuType::Generic);
+            m_backend = UsageBackend::Nvidia;
+        } else if (!m_busyFiles.isEmpty()) {
+            setType(GpuType::Generic);
+            m_backend = UsageBackend::BusyFile;
+        } else if (hasFdinfoGpu()) {
+            setType(GpuType::Generic);
+            m_backend = UsageBackend::Fdinfo;
+        } else {
+            setType(GpuType::None);
+            m_backend = UsageBackend::None;
+        }
 
         if (m_type == GpuType::None) {
             setName({});
@@ -327,6 +389,115 @@ void Gpu::readGenericUsage() {
         m_percentage = newPerc;
         emit percentageChanged();
     }
+}
+
+void Gpu::readFdinfoUsage() {
+    QHash<qint64, QHash<QString, quint64>> current;
+
+    const QDir proc(u"/proc"_s);
+    const QStringList pids = proc.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QString& pid : pids) {
+        if (!pid.at(0).isDigit()) {
+            continue;
+        }
+
+        const QString fdinfoPath = u"/proc/"_s + pid + u"/fdinfo"_s;
+        const QDir fdinfo(fdinfoPath);
+        const QStringList fds = fdinfo.entryList(QDir::Files | QDir::NoDotAndDotDot);
+        for (const QString& fd : fds) {
+            // Only DRM clients carry engine counters; skip every other descriptor.
+            if (!QFile::symLinkTarget(u"/proc/"_s + pid + u"/fd/"_s + fd).startsWith(u"/dev/dri/"_s)) {
+                continue;
+            }
+
+            QFile file(fdinfo.filePath(fd));
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                continue;
+            }
+
+            const QByteArray data = file.readAll();
+            qint64 clientId = -1;
+            QByteArray driver;
+            QHash<QString, quint64> engines;
+
+            for (const QByteArray& line : data.split('\n')) {
+                if (line.startsWith("drm-driver:")) {
+                    driver = line.mid(11).trimmed();
+                } else if (line.startsWith("drm-client-id:")) {
+                    bool ok = false;
+                    clientId = line.mid(14).trimmed().toLongLong(&ok);
+                    if (!ok) {
+                        clientId = -1;
+                    }
+                } else if (line.startsWith("drm-engine-")) {
+                    const qsizetype colon = line.indexOf(':');
+                    if (colon < 0) {
+                        continue;
+                    }
+                    const QString name = QString::fromLatin1(line.mid(11, colon - 11)).trimmed();
+                    QByteArray value = line.mid(colon + 1).trimmed();
+                    if (value.endsWith(" ns")) {
+                        value.chop(3);
+                    }
+                    bool ok = false;
+                    const quint64 ns = value.toULongLong(&ok);
+                    if (ok) {
+                        engines.insert(name, ns);
+                    }
+                }
+            }
+
+            if (clientId < 0) {
+                continue;
+            }
+            // Only count the drivers that expose fdinfo engine busyness. A hybrid
+            // system may also have NVIDIA clients whose counters differ.
+            if (driver != "i915" && driver != "xe" && driver != "amdgpu" && driver != "radeon") {
+                continue;
+            }
+
+            // Several descriptors can share one DRM client; counters are per
+            // client, so deduplicate by id.
+            current.insert(clientId, std::move(engines));
+        }
+    }
+
+    if (!m_fdinfoTimer.isValid()) {
+        m_fdinfoClients = std::move(current);
+        m_fdinfoTimer.start();
+        return;
+    }
+
+    // Counters are in nanoseconds; restart() reports milliseconds
+    const qreal elapsed = static_cast<qreal>(m_fdinfoTimer.nsecsElapsed());
+    m_fdinfoTimer.restart();
+    QHash<QString, quint64> busy;
+    for (auto it = current.cbegin(); it != current.cend(); ++it) {
+        const auto prev = m_fdinfoClients.constFind(it.key());
+        if (prev == m_fdinfoClients.cend()) {
+            continue;
+        }
+        for (auto e = it->cbegin(); e != it->cend(); ++e) {
+            const auto p = prev->constFind(e.key());
+            if (p != prev->cend() && *e > *p) {
+                busy[e.key()] += *e - *p;
+            }
+        }
+    }
+
+    qreal usage = 0.0;
+    if (elapsed > 0.0) {
+        for (auto it = busy.cbegin(); it != busy.cend(); ++it) {
+            usage = std::max(usage, static_cast<qreal>(*it) / elapsed);
+        }
+    }
+    usage = std::clamp(usage, 0.0, 1.0);
+    if (std::abs(usage - m_percentage) > 0.0001) {
+        m_percentage = usage;
+        emit percentageChanged();
+    }
+
+    m_fdinfoClients = std::move(current);
 }
 
 void Gpu::startNvidiaUsage() {
